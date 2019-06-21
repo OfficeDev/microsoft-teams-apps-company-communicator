@@ -1,0 +1,138 @@
+/**
+ * Style List Control UI Sample Component
+ * 
+ */
+input[type="checkbox"] {
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: 0;
+  background: white;
+  height: 16px;
+  width: 16px;
+  border: 1px solid black;
+  border-radius: 3px;
+  margin-left: 16px;
+  margin-top: 15px;
+}
+
+input[type="checkbox"]:checked {
+  background: #6264a7;
+  border: 1px solid #6264a7;
+}
+
+input[type="checkbox"]:hover {
+  filter: brightness(90%);
+}
+
+input[type="checkbox"]:disabled {
+  background: #e6e6e6;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+input[type="checkbox"]:after {
+  content: '';
+  position: relative;
+  left: 39%;
+  top: 20%;
+  width: 15%;
+  height: 40%;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  display: none;
+}
+
+input[type="checkbox"]:checked:after {
+  display: block;
+}
+
+input[type="checkbox"]:disabled:after {
+  border-color: #7b7b7b;
+}
+
+.ms-DetailsRow-check--isHeader {
+  opacity: 1 !important;
+  margin-top: -12px;
+}
+
+.ms-DetailsRow-check--isHeader input {
+  background-color: rgb(243, 242, 241);
+}
+
+.Away {
+  padding: 10px;
+  position: absolute;
+  top: 5px;
+}
+
+.Away:after {
+  content: "\f017";
+  font-family: "Font Awesome 5 Free";
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  font-size: 14px;
+}
+
+.online {
+  padding: 10px;
+  position: absolute;
+  top: 5px;
+}
+
+.online:after {
+  content: "\2713";
+  font-family: "Font Awesome 5 Free";
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+#More {
+  float: right;
+  padding: 8px 8px 0px 12px;
+  vertical-align: middle;
+}
+
+.content {
+  font-size: 14px;
+  color: #333333;
+  position: absolute;
+  display: block;
+  top: 16.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 97%;
+}
+
+.SortIcon {
+  margin: 12px 3px;
+}
+
+#header1-column1-name {
+  padding-left: 42px;
+}
+
+.isRowHeader {
+  padding: 10px 0px;
+}
+
+.ms-DetailsRow-check {
+  width: 40px;
+}
+
+.moveEmployeeHeader {
+  padding-left: 8px !important;
+}
+
+@media only screen and (max-width: 914px) {
+  #header1-column1-name {
+    padding-left: 8px;
+  }
+}
