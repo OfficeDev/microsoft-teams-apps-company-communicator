@@ -5,7 +5,7 @@
     "id": "148a66bb-e83d-425a-927d-09f4299a9274",
     "packageName": "com.Template.microsoftteams",
     "developer": {
-        "name": "UI Sample",
+        "name": "Company Communicator App",
         "websiteUrl": "https://privacy.microsoft.com/en-us/privacystatement",
         "privacyUrl": "https://privacy.microsoft.com/en-us/privacystatement",
         "termsOfUseUrl": "https://privacy.microsoft.com/en-us/privacystatement"
@@ -15,25 +15,25 @@
         "outline": "outline.png"
     },
     "name": {
-        "short": "Tab UI samples",
-        "full": "testing  tab UI samples"
+        "short": "Company Communicator App",
+        "full": "Company Communicator App"
     },
     "description": {
-        "short": "Create UI Samples",
-        "full": "Create UI Samples"
+        "short": "Company Communicator App",
+        "full": "Company Communicator App"
     },
     "accentColor": "#FFFFFF",
     "staticTabs": [{
-        "entityId": "EmployeeStatus",
-        "name": "Emp Connects Status",
-        "contentUrl": "https://9842365a.ngrok.io/list",
-        "websiteUrl": "https://9842365a.ngrok.io/list",
+        "entityId": "Company_Communicator_App",
+        "name": "Company Communicator Messages",
+        "contentUrl": "https://6e444fb7.ngrok.io/messages",
+        "websiteUrl": "https://6e444fb7.ngrok.io/messages",
         "scopes": [
             "personal"
         ]
     }],
     "configurableTabs": [{
-        "configurationUrl": "https://9842365a.ngrok.io/tabs",
+        "configurationUrl": "https://6e444fb7.ngrok.io/configtab",
         "canUpdateConfiguration": true,
         "scopes": [
             "team",

@@ -1,0 +1,99 @@
+.taskModule {
+    width: 800px;
+
+    .formContainer {
+        overflow-y: auto;
+        position: absolute;
+        top: 0px;
+        bottom: 84px;
+        width: 100%;
+
+        .formContentContainer {
+            width: 55%;
+            float: left;
+            display: inline;
+
+            .inputField {
+                margin: 0px 32px;
+
+                span {
+                    font-size: 12px;
+                    color: #484644;
+                    display: block;
+                    margin: 10px 0px 0px 0px;
+
+                    &:nth-child(2) {
+                        color: #C4314B;
+                    }
+                }
+
+                input {
+                    height: 32px;
+                    padding: 6px 12px;
+                    font-size: 14px;
+                    margin: auto 0;
+
+                    &:focus {
+                        border-bottom: 0.1rem solid #464775;
+                    }
+                }
+
+                i {
+                    bottom: 0.5rem;
+                }
+            }
+
+
+            .textArea {
+                margin: 0px 32px;
+
+                span {
+                    font-size: 12px;
+                    color: #484644;
+                    display: block;
+                    margin: 10px 0px 0px 0px;
+
+                    &:nth-child(2) {
+                        color: #C4314B;
+                    }
+                }
+
+                textarea {
+                    height: 96px;
+                    padding: 6px 12px;
+                    font-size: 14px;
+                    margin: auto 0;
+
+                    &:focus {
+                        border-bottom: 0.1rem solid #464775;
+                    }
+                }
+
+                i {
+                    bottom: 2.5rem;
+                }
+            }
+        }
+
+        .adaptiveCardContainer {
+            width: 45%;
+            display: inline;
+            float: left;
+        }
+    }
+
+    .footerContainer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        padding: 20px 0px 32px 0px;
+        width: 100%;
+
+        .buttonContainer {
+            display: inline;
+            float: right;
+            margin-right: 32px;
+        }
+
+    }
+}

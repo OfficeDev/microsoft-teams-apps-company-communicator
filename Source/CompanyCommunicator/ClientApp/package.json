@@ -10,8 +10,11 @@
     "@types/react": "16.8.19",
     "@types/react-dom": "16.8.4",
     "@types/react-router-dom": "^4.3.3",
+    "adaptivecards": "^1.2.0",
     "faker": "^4.1.0",
     "font-awesome": "^4.7.0",
+    "msteams-ui-components-react": "^0.8.1",
+    "msteams-ui-icons-react": "^0.4.1",
     "node-sass": "^4.12.0",
     "office-ui-fabric-react": "^6.188.1",
     "react": "^16.8.6",
@@ -19,7 +22,8 @@
     "react-highlight-words": "^0.16.0",
     "react-router-dom": "^5.0.0",
     "react-scripts": "3.0.1",
-    "typescript": "3.5.1"
+    "typescript": "3.5.1",
+    "typestyle": "^2.0.2"
   },
   "scripts": {
     "start": "react-scripts start",

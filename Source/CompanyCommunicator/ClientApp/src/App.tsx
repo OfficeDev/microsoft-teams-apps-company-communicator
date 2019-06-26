@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import ListControl from './components/ListControl/listControl';
 import Configuration from './components/config';
-import './App.css';
+import tabContainer from './components/TabContainer/tabContainer';
+import NewMessage from './components/NewMessage/newMessage';
+import './App.scss';
 
 class App extends React.Component {
   render() {
@@ -10,8 +11,9 @@ class App extends React.Component {
       <div>
         <BrowserRouter>
           <Switch>
-            <Route exact path="/tabs" component={Configuration} />
-            <Route exact path="/list" component={ListControl} />
+            <Route exact path="/configtab" component={Configuration} />
+            <Route exact path="/messages" component={tabContainer} />
+            <Route exact path="/newmessage" component={NewMessage} />
           </Switch>
         </BrowserRouter>
       </div>
