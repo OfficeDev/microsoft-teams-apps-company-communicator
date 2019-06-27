@@ -1,22 +1,32 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 namespace CompanyCommunicator
 {
+    using Microsoft.AspNetCore;
+    using Microsoft.AspNetCore.Hosting;
+
+    /// <summary>
+    /// Program class of the company communicator application.
+    /// </summary>
     public class Program
     {
+        /// <summary>
+        /// Main function of the company communicator application.
+        /// It builds a web host, then launches the company communicator in it.
+        /// </summary>
+        /// <param name="args">Arguments passed in to the function.</param>
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
         }
 
+        /// <summary>
+        /// Create the web host builder.
+        /// </summary>
+        /// <param name="args">Arguments passed in to the main function.</param>
+        /// <returns>A web host builder instance.</returns>
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
