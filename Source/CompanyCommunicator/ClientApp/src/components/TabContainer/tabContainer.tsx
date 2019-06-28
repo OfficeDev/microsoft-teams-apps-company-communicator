@@ -2,6 +2,7 @@ import * as React from 'react';
 import Messages from '../Messages/messages';
 import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
+import { configUrl } from '../configVariables';
 
 interface ITaskInfo {
     title?: string;
@@ -13,10 +14,16 @@ interface ITaskInfo {
     completionBotId?: any;
 }
 
-export default class tabContainer extends React.Component {
+export interface ITabContainerState {
+    url: string;
+}
+
+export default class tabContainer extends React.Component<{}, ITabContainerState> {
     constructor(props: {}) {
         super(props);
-
+        this.state = {
+            url: configUrl() + "/newmessage"
+        }
         this.escFunction = this.escFunction.bind(this);
     }
 
@@ -53,16 +60,17 @@ export default class tabContainer extends React.Component {
 
     onNewPost = (event: React.MouseEvent<HTMLButtonElement>) => {
 
-        let taskInfo: ITaskInfo = {}
-        taskInfo.url = "https://e5197b89.ngrok.io/newmessage";
-        taskInfo.title = "New Announcement";
-        taskInfo.height = 530;
-        taskInfo.width = 1000;
-        taskInfo.fallbackUrl = taskInfo.url;
-        taskInfo.completionBotId = null;
+        let taskInfo: ITaskInfo = {
+            url: this.state.url,
+            title: "New Announcement",
+            height: 530,
+            width: 1000,
+            fallbackUrl: this.state.url
+        }
+
         let submitHandler = (err: any, result: any) => {
-            console.log(`Submit handler - err: ${err} ${result}`);
         };
+
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     }
 }

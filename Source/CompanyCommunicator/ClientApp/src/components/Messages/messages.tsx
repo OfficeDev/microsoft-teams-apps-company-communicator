@@ -8,6 +8,7 @@ import './messages.scss';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getDetailsListHeaderStyle, getDetailsListHeaderColumnStyle } from './messages.style';
 import { Icon, Label } from '@stardust-ui/react';
+import { string } from 'prop-types';
 
 
 unregisterIcons([
@@ -17,8 +18,8 @@ unregisterIcons([
 
 registerIcons({
   icons: {
-    'SortDown': <Image className="SortIcon" src="https://image.flaticon.com/icons/svg/25/25243.svg" styles={{ image: { height: 8, width: 8 } }} />,
-    'SortUp': <Image className="SortIcon" src="https://image.flaticon.com/icons/svg/64/64589.svg" styles={{ image: { height: 8, width: 8 } }} />
+    'SortDown': <Image className="sortIcon" src="https://image.flaticon.com/icons/svg/25/25243.svg" styles={{ image: { height: 8, width: 8 } }} />,
+    'SortUp': <Image className="sortIcon" src="https://image.flaticon.com/icons/svg/64/64589.svg" styles={{ image: { height: 8, width: 8 } }} />
   }
 });
 
@@ -95,10 +96,17 @@ export default class Messages extends React.Component<{}, IMessageState> {
         headerClassName: mergeStyles(getDetailsListHeaderColumnStyle()),
 
         onRender: (item) => {
-          let numbers = item.recipients.split(",");
-          let success = numbers[0];
-          let failure = numbers[1];
-          let throttled = numbers[2];
+          let success: string = "0";
+          let failure: string = "0";
+          let throttled: string = "0";
+
+          if (item != null && item.recipients !== "") {
+            let numbers = item.recipients.split(",");
+            success = numbers[0];
+            failure = numbers[1];
+            throttled = numbers[2];
+          }
+
           return (
             <div className="content">
               <Icon name="stardust-checkmark" xSpacing="after" />{success}
@@ -142,12 +150,6 @@ export default class Messages extends React.Component<{}, IMessageState> {
       }
     });
 
-  }
-
-  componentDidMount() {
-  }
-
-  componentWillUnmount() {
   }
 
 

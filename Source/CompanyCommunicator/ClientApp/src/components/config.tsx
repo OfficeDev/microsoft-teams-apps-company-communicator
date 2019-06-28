@@ -1,9 +1,17 @@
 import React from 'react';
 import * as microsoftTeams from "@microsoft/teams-js";
+import { configUrl } from './configVariables';
 
-class Configuration extends React.Component {
+export interface IConfigState {
+    url: string;
+}
+
+class Configuration extends React.Component<{}, IConfigState> {
     constructor(props: {}) {
         super(props);
+        this.state = {
+            url: configUrl() + "/messages"
+        }
     }
 
     componentDidMount() {
@@ -12,9 +20,9 @@ class Configuration extends React.Component {
         microsoftTeams.settings.registerOnSaveHandler((saveEvent) => {
             microsoftTeams.settings.setSettings({
                 entityId: "Company_Communicator_App",
-                contentUrl: "https://e5197b89.ngrok.io/messages",
+                contentUrl: this.state.url,
                 suggestedDisplayName: "Company Communicator Messages",
-                websiteUrl: "https://e5197b89.ngrok.io/messages",
+                websiteUrl: this.state.url,
             });
             saveEvent.notifySuccess();
         });
