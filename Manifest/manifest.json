@@ -40,6 +40,16 @@
             "groupchat"
         ]
     }],
+    "bots": [{
+        "botId": "11b196d8-c277-430e-a073-c9faeeed65dc",
+        "scopes": [
+            "personal",
+            "team",
+            "groupchat"
+        ],
+        "supportsFiles": false,
+        "isNotificationOnly": false
+    }],
     "permissions": [
         "identity",
         "messageTeamMembers"
