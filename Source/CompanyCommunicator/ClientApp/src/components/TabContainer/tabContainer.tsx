@@ -54,7 +54,7 @@ export default class tabContainer extends React.Component {
     onNewPost = (event: React.MouseEvent<HTMLButtonElement>) => {
 
         let taskInfo: ITaskInfo = {}
-        taskInfo.url = "https://6e444fb7.ngrok.io/newmessage";
+        taskInfo.url = "https://e5197b89.ngrok.io/newmessage";
         taskInfo.title = "New Announcement";
         taskInfo.height = 530;
         taskInfo.width = 1000;

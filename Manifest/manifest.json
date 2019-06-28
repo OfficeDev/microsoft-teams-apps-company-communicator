@@ -26,14 +26,14 @@
     "staticTabs": [{
         "entityId": "Company_Communicator_App",
         "name": "Company Communicator Messages",
-        "contentUrl": "https://6e444fb7.ngrok.io/messages",
-        "websiteUrl": "https://6e444fb7.ngrok.io/messages",
+        "contentUrl": "https://e5197b89.ngrok.io/messages",
+        "websiteUrl": "https://e5197b89.ngrok.io/messages",
         "scopes": [
             "personal"
         ]
     }],
     "configurableTabs": [{
-        "configurationUrl": "https://6e444fb7.ngrok.io/configtab",
+        "configurationUrl": "https://e5197b89.ngrok.io/configtab",
         "canUpdateConfiguration": true,
         "scopes": [
             "team",

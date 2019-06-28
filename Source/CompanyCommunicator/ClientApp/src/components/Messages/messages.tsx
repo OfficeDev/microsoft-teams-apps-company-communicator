@@ -7,6 +7,7 @@ import { mergeStyles, unregisterIcons, registerIcons } from 'office-ui-fabric-re
 import './messages.scss';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getDetailsListHeaderStyle, getDetailsListHeaderColumnStyle } from './messages.style';
+import { Icon, Label } from '@stardust-ui/react';
 
 
 unregisterIcons([
@@ -52,11 +53,11 @@ export default class Messages extends React.Component<{}, IMessageState> {
     this._allItems = [];
 
     this._allItems.push(
-      { title: "A Testing Message", date: "12/16/2018", recipients: "Successes: 30 Failures: 0", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
-      { title: "Testing", date: "11/16/2019", recipients: "Successes: 40 Failures: 10", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
-      { title: "Security Advisory Heightened Security During New Year's Eve Celebrations", date: "12/16/2019", recipients: "Successes: 10 Failures: 0", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
-      { title: "Security Advisory Heightened Security During New Year's Eve Celebrations", date: "12/16/2019", recipients: "Successes: 10 Failures: 0", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
-      { title: "Upcoming Holiday", date: "12/16/2019", recipients: "Successes: 19 Failures: 0", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
+      { title: "A Testing Message", date: "12/16/2018", recipients: "30,0,1", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
+      { title: "Testing", date: "11/16/2019", recipients: "40,6,8", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
+      { title: "Security Advisory Heightened Security During New Year's Eve Celebrations", date: "12/16/2019", recipients: "90,6,8", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
+      { title: "Security Advisory Heightened Security During New Year's Eve Celebrations", date: "12/16/2019", recipients: "40,6,8", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
+      { title: "Upcoming Holiday", date: "12/16/2019", recipients: "14,6,8", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
     );
 
     /**
@@ -94,7 +95,17 @@ export default class Messages extends React.Component<{}, IMessageState> {
         headerClassName: mergeStyles(getDetailsListHeaderColumnStyle()),
 
         onRender: (item) => {
-          return <span className="content">{item.recipients}</span>;
+          let numbers = item.recipients.split(",");
+          let success = numbers[0];
+          let failure = numbers[1];
+          let throttled = numbers[2];
+          return (
+            <div className="content">
+              <Icon name="stardust-checkmark" xSpacing="after" />{success}
+              <Icon name="stardust-close" xSpacing="both" />{failure}
+              <Icon name="exclamation-circle" xSpacing="both" />{throttled}
+            </div>
+          );
         },
       },
       {

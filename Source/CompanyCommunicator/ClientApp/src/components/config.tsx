@@ -12,9 +12,9 @@ class Configuration extends React.Component {
         microsoftTeams.settings.registerOnSaveHandler((saveEvent) => {
             microsoftTeams.settings.setSettings({
                 entityId: "Company_Communicator_App",
-                contentUrl: "https://6e444fb7.ngrok.io/messages",
+                contentUrl: "https://e5197b89.ngrok.io/messages",
                 suggestedDisplayName: "Company Communicator Messages",
-                websiteUrl: "https://6e444fb7.ngrok.io/messages",
+                websiteUrl: "https://e5197b89.ngrok.io/messages",
             });
             saveEvent.notifySuccess();
         });

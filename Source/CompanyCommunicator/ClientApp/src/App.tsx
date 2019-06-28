@@ -8,7 +8,7 @@ import './App.scss';
 class App extends React.Component {
   render() {
     return (
-      <div>
+      <div className="appContainer">
         <BrowserRouter>
           <Switch>
             <Route exact path="/configtab" component={Configuration} />
