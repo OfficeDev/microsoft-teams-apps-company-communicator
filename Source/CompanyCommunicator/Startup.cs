@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CompanyCommunicator
+namespace CompanyCommunicator.Bot
 {
     public class Startup
     {
@@ -27,6 +27,9 @@ namespace CompanyCommunicator
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            // Register bot services in DI container
+            services.AddBot();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
