@@ -1,9 +1,10 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+// <copyright file="Startup.cs" company="Microsoft">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace CompanyCommunicator
 {
+    using CompanyCommunicator.Bot;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
@@ -12,7 +13,7 @@ namespace CompanyCommunicator
     using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
-    /// Register services in DI container, and set up middle wares in the pipeline.
+    /// Register services in DI container, and set up middlewares in the pipeline.
     /// </summary>
     public class Startup
     {
@@ -43,6 +44,9 @@ namespace CompanyCommunicator
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            // Register bot services in DI container
+            services.AddBot();
         }
 
         /// <summary>

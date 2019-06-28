@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+// <copyright file="SampleDataController.cs" company="Microsoft">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace CompanyCommunicator.Controllers
 {
@@ -24,7 +24,7 @@ namespace CompanyCommunicator.Controllers
         /// Receive a start date index from user and return the collection of weather forecasts matching the index.
         /// </summary>
         /// <param name="startDateIndex">Start date index.</param>
-        /// <returns>A collection of <see cref="WeatherForecast"/> match the passing in parameter <paramref name="startDateIndex"/>.</returns>
+        /// <returns>A collection of <see cref="WeatherForecast"/> matching the passing in parameter <paramref name="startDateIndex"/>.</returns>
         [HttpGet("[action]")]
         public IEnumerable<WeatherForecast> WeatherForecasts(int startDateIndex)
         {
@@ -38,7 +38,7 @@ namespace CompanyCommunicator.Controllers
         }
 
         /// <summary>
-        /// Weather forcast model class.
+        /// Weather forecast model class.
         /// </summary>
         public class WeatherForecast
         {
