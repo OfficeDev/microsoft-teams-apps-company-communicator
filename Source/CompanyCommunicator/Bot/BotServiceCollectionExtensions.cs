@@ -1,4 +1,4 @@
-﻿// <copyright file="BotServiceCollectionExtensions.cs" company="Microsoft">
+// <copyright file="BotServiceCollectionExtensions.cs" company="Microsoft">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
