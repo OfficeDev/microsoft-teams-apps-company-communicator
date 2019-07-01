@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace CompanyCommunicator.Bot
+namespace CompanyCommunicator
 {
     using CompanyCommunicator.Bot;
     using Microsoft.AspNetCore.Builder;
