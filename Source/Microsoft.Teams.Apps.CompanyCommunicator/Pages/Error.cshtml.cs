@@ -1,8 +1,8 @@
 // <copyright file="Error.cshtml.cs" company="Microsoft">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace CompanyCommunicator.Pages
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Pages
 {
     using System.Diagnostics;
     using Microsoft.AspNetCore.Mvc;

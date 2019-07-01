@@ -1,8 +1,8 @@
 // <copyright file="BotController.cs" company="Microsoft">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace CompanyCommunicator.Controllers
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
@@ -10,7 +10,7 @@ namespace CompanyCommunicator.Controllers
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
 
     /// <summary>
-    /// Bot controller class.
+    /// Message controller for the bot.
     /// </summary>
     [Route("api/messages")]
     [ApiController]

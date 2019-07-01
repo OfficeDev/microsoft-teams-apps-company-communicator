@@ -1,8 +1,8 @@
 // <copyright file="CompanyCommunicatorBot.cs" company="Microsoft">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace CompanyCommunicator.Bot
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
     using System;
     using System.Collections.Generic;

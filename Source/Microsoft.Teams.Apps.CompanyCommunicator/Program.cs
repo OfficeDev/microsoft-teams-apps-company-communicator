@@ -1,8 +1,8 @@
 // <copyright file="Program.cs" company="Microsoft">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace CompanyCommunicator
+namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;

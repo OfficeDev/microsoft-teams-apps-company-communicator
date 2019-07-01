@@ -1,16 +1,16 @@
 // <copyright file="Startup.cs" company="Microsoft">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace CompanyCommunicator
+namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
-    using CompanyCommunicator.Bot;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
 
     /// <summary>
     /// Register services in DI container, and set up middlewares in the pipeline.

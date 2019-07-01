@@ -1,5 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="Rules for CompanyCommunicator" Description="Code analysis rules for CompanyCommunicator.csproj." ToolsVersion="16.0">
-  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
-  </Rules>
-</RuleSet>

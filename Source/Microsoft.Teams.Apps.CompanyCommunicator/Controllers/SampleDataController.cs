@@ -1,8 +1,8 @@
 // <copyright file="SampleDataController.cs" company="Microsoft">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace CompanyCommunicator.Controllers
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
     using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace CompanyCommunicator.Controllers
     [Route("api/[controller]")]
     public class SampleDataController : Controller
     {
-        private static string[] summaries = new[]
+        private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching",
         };
@@ -33,7 +33,7 @@ namespace CompanyCommunicator.Controllers
             {
                 DateFormatted = DateTime.Now.AddDays(index + startDateIndex).ToString("d"),
                 TemperatureC = rng.Next(-20, 55),
-                Summary = summaries[rng.Next(summaries.Length)],
+                Summary = Summaries[rng.Next(Summaries.Length)],
             });
         }
 
