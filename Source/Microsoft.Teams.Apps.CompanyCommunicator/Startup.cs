@@ -53,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
         /// <param name="app">IApplicationBuilder instance, which is a class that provides the mechanisms to configure an application's request pipeline.</param>
-        /// <param name="env">IHostingEnvironment instance, which Provides information about the web hosting environment an application is running in.</param>
+        /// <param name="env">IHostingEnvironment instance, which provides information about the web hosting environment an application is running in.</param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())

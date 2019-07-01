@@ -14,7 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     {
         /// <summary>
         /// Main function of the company communicator application.
-        /// It builds a web host, then launches the company communicator in it.
+        /// It builds a web host, then launches the company communicator into it.
         /// </summary>
         /// <param name="args">Arguments passed in to the function.</param>
         public static void Main(string[] args)
@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         /// <summary>
         /// Create the web host builder.
         /// </summary>
-        /// <param name="args">Arguments passed in to the main function.</param>
+        /// <param name="args">Arguments passed into the main function.</param>
         /// <returns>A web host builder instance.</returns>
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
