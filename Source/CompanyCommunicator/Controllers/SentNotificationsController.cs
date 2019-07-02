@@ -2,11 +2,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
+namespace CompanyCommunicator.Controllers
 {
     using System.Collections.Generic;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Models;
+    using CompanyCommunicator.Models;
 
     /// <summary>
     /// Controller for the message data.
