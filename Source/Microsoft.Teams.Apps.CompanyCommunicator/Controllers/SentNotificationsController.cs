@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
@@ -14,18 +15,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     public class SentNotificationsController
     {
         /// <summary>
-        /// Fetch published messages.
+        /// Create a sent notification.
+        /// </summary>
+        /// <param name="notification">New sent notification instance.</param>
+        [HttpPost("api/sentNotifications")]
+        public void SaveSentNotifications(Notification notification)
+        {
+            Console.WriteLine(notification.Title);
+        }
+
+        /// <summary>
+        /// Fetch sent notifications.
         /// </summary>
         /// <returns>A list of <see cref="Notification"/> instances.</returns>
         [HttpGet("api/sentNotifications")]
-        public IEnumerable<Notification> GetSentMessages()
+        public IEnumerable<Notification> GetSentNotifications()
         {
-            var result = this.GetFakeMessages();
+            var result = this.GetFakeNotifications();
 
             return result;
         }
 
-        private IEnumerable<Notification> GetFakeMessages()
+        private IEnumerable<Notification> GetFakeNotifications()
         {
             var result = new List<Notification>
             {
