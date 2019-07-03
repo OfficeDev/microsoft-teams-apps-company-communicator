@@ -1,6 +1,4 @@
-import React from 'react';
-
 export const configUrl = () => {
-    let baseurl = "https://e5197b89.ngrok.io";
+    let baseurl = "https://d8a550ff.ngrok.io";
     return baseurl;
 }

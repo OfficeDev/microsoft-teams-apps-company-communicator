@@ -1,11 +1,11 @@
 .taskModule {
-    width: 800px;
+    width: 50rem;
 
     .formContainer {
         overflow-y: auto;
         position: absolute;
-        top: 0px;
-        bottom: 84px;
+        top: 0;
+        bottom: 5.25rem;
         width: 100%;
 
         .formContentContainer {
@@ -14,13 +14,13 @@
             display: inline;
 
             .inputField {
-                margin: 0px 32px;
+                margin: 0 2rem;
 
                 span {
-                    font-size: 12px;
+                    font-size: 0.75rem;
                     color: #484644;
                     display: block;
-                    margin: 10px 0px 0px 0px;
+                    margin: 0.625rem 0 0 0;
 
                     &:nth-child(2) {
                         color: #C4314B;
@@ -28,9 +28,9 @@
                 }
 
                 input {
-                    height: 32px;
-                    padding: 6px 12px;
-                    font-size: 14px;
+                    height: 2rem;
+                    padding: 0.375rem 0.75rem;
+                    font-size: 0.875rem;
                     margin: auto 0;
 
                     &:focus {
@@ -45,13 +45,13 @@
 
 
             .textArea {
-                margin: 0px 32px;
+                margin: 0 2rem;
 
                 span {
-                    font-size: 12px;
+                    font-size: 0.75rem;
                     color: #484644;
                     display: block;
-                    margin: 10px 0px 0px 0px;
+                    margin: 0.625rem 0 0 0;
 
                     &:nth-child(2) {
                         color: #C4314B;
@@ -59,9 +59,9 @@
                 }
 
                 textarea {
-                    height: 96px;
-                    padding: 6px 12px;
-                    font-size: 14px;
+                    height: 6rem;
+                    padding: 0.375rem 0.75rem;
+                    font-size: 0.875rem;
                     margin: auto 0;
 
                     &:focus {
@@ -86,13 +86,13 @@
         position: fixed;
         bottom: 0;
         left: 0;
-        padding: 20px 0px 32px 0px;
+        padding: 1.25rem 0 2rem 0;
         width: 100%;
 
         .buttonContainer {
             display: inline;
             float: right;
-            margin-right: 32px;
+            margin-right: 2rem;
         }
 
     }

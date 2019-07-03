@@ -160,7 +160,6 @@ export default class NewMessage extends React.Component<{}, formState> {
                     </div>
                 </div>
 
-
                 <div className="footerContainer">
                     <div className="buttonContainer">
                         <button className="secondaryBtn">Back</button>
@@ -197,11 +196,11 @@ export default class NewMessage extends React.Component<{}, formState> {
     }
 
     onImageLinkChanged = (event: any) => {
-        this.setState({ articleLink: event.target.value });
+        this.setState({ imageLink: event.target.value });
     }
 
     onAttachmentLinkChanged = (event: any) => {
-        this.setState({ articleLink: event.target.value });
+        this.setState({ attachmentLink: event.target.value });
     }
 
     updateCard = () => {

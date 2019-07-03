@@ -191,15 +191,7 @@ export default class Messages extends React.Component<{}, IMessageState> {
     this.setState({
       selectAccount: selectionCount
     });
-
-    switch (selectionCount) {
-      case 0:
-        return 'No items selected';
-      case 1:
-        return '1 item selected: ';
-      default:
-        return `${selectionCount} items selected`;
-    }
+    return `${selectionCount} items selected`;
   }
 
   _onFilter = (ev: any, text: any) => {
@@ -225,12 +217,10 @@ export default class Messages extends React.Component<{}, IMessageState> {
       message: _copyAndSort(message, column.fieldName!, isSortedDescending),
       columns: columns.map(col => {
         col.isSorted = col.key === column.key;
-
         if (col.isSorted) {
           col.isSortedDescending = isSortedDescending;
         }
         return col;
-
       })
     });
   };

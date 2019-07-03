@@ -18,7 +18,7 @@ export interface ITabContainerState {
     url: string;
 }
 
-export default class tabContainer extends React.Component<{}, ITabContainerState> {
+export default class TabContainer extends React.Component<{}, ITabContainerState> {
     constructor(props: {}) {
         super(props);
         this.state = {
@@ -65,7 +65,7 @@ export default class tabContainer extends React.Component<{}, ITabContainerState
             title: "New Announcement",
             height: 530,
             width: 1000,
-            fallbackUrl: this.state.url
+            fallbackUrl: this.state.url,
         }
 
         let submitHandler = (err: any, result: any) => {
