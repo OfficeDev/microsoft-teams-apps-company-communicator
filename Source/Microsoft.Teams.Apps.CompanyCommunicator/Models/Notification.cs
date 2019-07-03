@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace CompanyCommunicator.Models
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
     using System;
 
