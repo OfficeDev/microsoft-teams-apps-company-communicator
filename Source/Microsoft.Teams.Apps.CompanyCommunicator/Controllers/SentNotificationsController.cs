@@ -28,7 +28,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <summary>
         /// Get a sent notification by Id.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="id">Id of the requested sent notification.</param>
+        /// <returns>Required sent notification.</returns>
         [HttpGet("api/sentNotifications/{id}")]
         public Notification GetSentNotificationById(int id)
         {

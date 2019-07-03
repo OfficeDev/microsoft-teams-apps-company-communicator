@@ -28,7 +28,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <summary>
         /// Get a draft notification by Id.
         /// </summary>
-        /// <returns></returns>
+        /// <param name="id">Draft notification Id.</param>
+        /// <returns>Required draft notification.</returns>
         [HttpGet("api/draftNotifications/{id}")]
         public Notification GetDraftNotificationById(int id)
         {
