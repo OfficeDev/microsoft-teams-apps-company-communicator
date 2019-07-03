@@ -18,19 +18,40 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <returns>A list of <see cref="Notification"/> instances.</returns>
         [HttpGet("api/draftNotifications")]
-        public IEnumerable<Notification> GetDraftMessages()
+        public IEnumerable<Notification> GetDraftNotifications()
         {
-            var result = this.GetFakeMessages();
+            var result = this.GetFakeNotifications();
 
             return result;
         }
 
-        private IEnumerable<Notification> GetFakeMessages()
+        /// <summary>
+        /// Get a draft notification by Id.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("api/draftNotifications/{id}")]
+        public Notification GetDraftNotificationById(int id)
+        {
+            return
+                new Notification
+                {
+                    Id = id,
+                    Title = "A Testing Message (Draft from service)",
+                    Date = "12/16/2018",
+                    Recipients = "30,0,1",
+                    Acknowledgements = "acknowledgements",
+                    Reactions = "like 3",
+                    Responses = "view 3",
+                };
+        }
+
+        private IEnumerable<Notification> GetFakeNotifications()
         {
             var result = new List<Notification>
             {
                 new Notification
                 {
+                    Id = 1,
                     Title = "A Testing Message (Draft from service)",
                     Date = "12/16/2018",
                     Recipients = "30,0,1",
@@ -40,6 +61,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 },
                 new Notification
                 {
+                    Id = 2,
                     Title = "Testing",
                     Date = "11/16/2019",
                     Recipients = "40,6,8",
@@ -49,6 +71,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 },
                 new Notification
                 {
+                    Id = 3,
                     Title = "Security Advisory Heightened Security During New Year's Eve Celebrations (Draft from service)",
                     Date = "12/16/2019",
                     Recipients = "90,6,8",
@@ -58,6 +81,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 },
                 new Notification
                 {
+                    Id = 4,
                     Title = "Security Advisory Heightened Security During New Year's Eve Celebrations (Draft from service)",
                     Date = "12/16/2019",
                     Recipients = "40,6,8",
@@ -67,6 +91,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 },
                 new Notification
                 {
+                    Id = 5,
                     Title = "Upcoming Holiday (Draft from service)",
                     Date = "12/16/2019",
                     Recipients = "14,6,8",
