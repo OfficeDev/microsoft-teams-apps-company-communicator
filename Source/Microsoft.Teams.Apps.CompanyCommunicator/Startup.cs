@@ -7,9 +7,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Authorization;
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Auth;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
 
     /// <summary>
@@ -37,7 +39,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         /// <param name="services">IServiceCollection instance.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            // Register auth services in DI container.
+            services.AddAuth(this.Configuration);
+
+            // Add MVC with the MustHaveUpnClaimPolicy.
+            services.AddMvc(options => options.Filters.Add(new AuthorizeFilter(PolicyNames.MustHaveUpnClaimPolicy)))
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -70,6 +77,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
+            app.UseAuthentication();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
