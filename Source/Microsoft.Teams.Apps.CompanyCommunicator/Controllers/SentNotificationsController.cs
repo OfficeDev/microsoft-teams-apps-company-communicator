@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Authorize(PolicyNames.MustHaveUpnClaimPolicy)]
     public class SentNotificationsController
     {
+        /// <summary>
+        /// Create a new sent notification.
+        /// </summary>
+        /// <param name="notification">An instance of <see cref="Notification"/> class.</param>
+        [HttpPost("api/sentNotifications")]
+        public void SaveSentNotification(Notification notification)
+        {
+            Console.WriteLine(notification.Id);
+        }
+
         /// <summary>
         /// Get sent notifications.
         /// </summary>

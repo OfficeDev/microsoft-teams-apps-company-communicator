@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Authorize(PolicyNames.MustHaveUpnClaimPolicy)]
     public class DraftNotificationsController
     {
+        /// <summary>
+        /// Create a new draft notification.
+        /// </summary>
+        /// <param name="notification">An instance of <see cref="Notification"/> class.</param>
+        [HttpPost("api/draftNotifications")]
+        public void SaveDraftNotification(Notification notification)
+        {
+            Console.WriteLine(notification.Id);
+        }
+
         /// <summary>
         /// Get draft notifications.
         /// </summary>
