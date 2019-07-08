@@ -42,9 +42,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             // Register auth services in DI container.
             services.AddAuth(this.Configuration);
 
-            // Add MVC with the MustHaveUpnClaimPolicy.
-            services.AddMvc(options => options.Filters.Add(new AuthorizeFilter(PolicyNames.MustHaveUpnClaimPolicy)))
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
