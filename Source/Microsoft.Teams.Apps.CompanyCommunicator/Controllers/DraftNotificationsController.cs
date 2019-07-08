@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
@@ -13,6 +14,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     /// </summary>
     public class DraftNotificationsController
     {
+        /// <summary>
+        /// Create a new draft notification.
+        /// </summary>
+        /// <param name="notification">An instance of <see cref="Notification"/> class.</param>
+        [HttpPost("api/draftNotifications")]
+        public void SaveDraftNotification(Notification notification)
+        {
+            Console.WriteLine(notification.Id);
+        }
+
         /// <summary>
         /// Get draft notifications.
         /// </summary>
