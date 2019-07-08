@@ -19,7 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <param name="notification">An instance of <see cref="Notification"/> class.</param>
         [HttpPost("api/sentNotifications")]
-        public void SaveSentNotification(Notification notification)
+        public void CreateSentNotification([FromBody]Notification notification)
         {
             Console.WriteLine(notification.Id);
         }
