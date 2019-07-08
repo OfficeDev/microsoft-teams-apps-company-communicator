@@ -9,12 +9,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
 
     /// <summary>
-    /// Controller for the message data.
+    /// Controller for the sent notification data.
     /// </summary>
     public class SentNotificationsController
     {
         /// <summary>
-        /// Fetch published messages.
+        /// Get sent notifications.
         /// </summary>
         /// <returns>A list of <see cref="Notification"/> instances.</returns>
         [HttpGet("api/sentNotifications")]

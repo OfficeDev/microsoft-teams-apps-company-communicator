@@ -9,7 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
 
     /// <summary>
-    /// Controller for the message data.
+    /// Controller for the draft notification data.
     /// </summary>
     public class DraftNotificationsController
     {
