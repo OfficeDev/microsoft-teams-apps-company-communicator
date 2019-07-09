@@ -1,0 +1,121 @@
+/**
+* Gobal Styles for APP
+*/
+.appContainer {
+    background-color: #f3f2f1;
+    width: 100%;
+
+    .primaryBtn {
+        min-width: 9.6rem;
+        height: 3.2rem;
+        margin-left: 0.8rem;
+        background-color: #6264A7;
+        color: rgb(255, 2555, 255);
+        border: none;
+        font-size: 1.4rem;
+        box-shadow: 0 0rem 0.2rem 0;
+        border-radius: 0.3rem;
+        padding: 0rem 2rem;
+        vertical-align: middle;
+
+        &:hover {
+            background-color: #464775;
+        }
+
+        &:focus {
+            outline: none;
+        }
+
+        &:disabled,
+        &[disabled] {
+            background-color: #d3d3d3;
+            color: #a7a7a7;
+        }
+
+    }
+
+    .secondaryBtn {
+        min-width: 9.6rem;
+        height: 3.2rem;
+        margin-left: 0.8rem;
+        background-color: #FFFFFF;
+        font-size: 1.4rem;
+        border: 0.2rem solid #E1DFDD;
+        border-radius: 0.3rem;
+        padding: 0rem 2rem;
+        box-shadow: rgba(0, 0, 0, 0.1) 0 0.2rem 0.4rem 0;
+        vertical-align: middle;
+
+        &:hover {
+            background-color: #EDEBE9;
+            border: 0.125rem solid #C8C6C4;
+        }
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    .radioBtns {
+
+        p {
+            margin: 0.5rem 0rem;
+        }
+
+        [type="radio"]:checked,
+        [type="radio"]:not(:checked) {
+            position: absolute;
+            left: -9999rem;
+        }
+
+        [type="radio"]:checked+label,
+        [type="radio"]:not(:checked)+label {
+            position: relative;
+            padding-left: 2.5rem;
+            cursor: pointer;
+            line-height: 2rem;
+            display: inline-block;
+            color: #484644;
+            font-size: 1.2rem;
+        }
+
+        [type="radio"]:checked+label:before,
+        [type="radio"]:not(:checked)+label:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.4rem;
+            width: 1.2rem;
+            height: 1.2rem;
+            border: 0.1rem solid #484644;
+            border-radius: 100%;
+            background: #fff;
+        }
+
+        [type="radio"]:checked+label:after,
+        [type="radio"]:not(:checked)+label:after {
+            content: '';
+            width: 1.2rem;
+            height: 1.2rem;
+            background: #6264a7;
+            position: absolute;
+            top: 0.5rem;
+            left: 0.1rem;
+            border-radius: 100%;
+            -webkit-transition: all 0.2s ease;
+            transition: all 0.2s ease;
+        }
+
+        [type="radio"]:not(:checked)+label:after {
+            opacity: 0;
+            -webkit-transform: scale(0);
+            transform: scale(0);
+        }
+
+        [type="radio"]:checked+label:after {
+            opacity: 1;
+            -webkit-transform: scale(1);
+            transform: scale(1);
+        }
+    }
+}

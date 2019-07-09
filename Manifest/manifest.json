@@ -5,7 +5,7 @@
   "id": "148a66bb-e83d-425a-927d-09f4299a9274",
   "packageName": "com.Template.microsoftteams",
   "developer": {
-    "name": "UI Sample",
+    "name": "Company Communicator App",
     "websiteUrl": "https://privacy.microsoft.com/en-us/privacystatement",
     "privacyUrl": "https://privacy.microsoft.com/en-us/privacystatement",
     "termsOfUseUrl": "https://privacy.microsoft.com/en-us/privacystatement"
@@ -15,47 +15,46 @@
     "outline": "outline.png"
   },
   "name": {
-    "short": "Tab UI samples",
-    "full": "testing  tab UI samples"
+    "short": "Company Communicator App",
+    "full": "Company Communicator App"
   },
   "description": {
-    "short": "Create UI Samples",
-    "full": "Create UI Samples"
+    "short": "Company Communicator App",
+    "full": "Company Communicator App"
   },
   "accentColor": "#FFFFFF",
   "staticTabs": [{
-      "entityId": "EmployeeStatus",
-      "name": "Emp Connects Status",
-      "contentUrl": "https://833c919f.ngrok.io/list",
-      "websiteUrl": "https://833c919f.ngrok.io/list",
-      "scopes": [
-        "personal"
-      ]
+    "entityId": "Company_Communicator_App",
+    "name": "Company Communicator Messages",
+    "contentUrl": "https://{{domain}}/messages",
+    "websiteUrl": "https://{{domain}}/messages",
+    "scopes": [
+      "personal"
+    ]
   }],
   "configurableTabs": [{
-      "configurationUrl": "https://833c919f.ngrok.io/tabs",
-      "canUpdateConfiguration": true,
-      "scopes": [
-        "team",
-        "groupchat"
-      ]
+    "configurationUrl": "https://{{domain}}/configtab",
+    "canUpdateConfiguration": true,
+    "scopes": [
+      "team",
+      "groupchat"
+    ]
   }],
   "bots": [{
-      "botId": "11b196d8-c277-430e-a073-c9faeeed65dc",
-      "scopes": [
-        "personal",
-        "team",
-        "groupchat"
-      ],
-      "supportsFiles": false,
-      "isNotificationOnly": false
+    "botId": "11b196d8-c277-430e-a073-c9faeeed65dc",
+    "scopes": [
+      "personal",
+      "team",
+      "groupchat"
+    ],
+    "supportsFiles": false,
+    "isNotificationOnly": false
   }],
   "permissions": [
     "identity",
     "messageTeamMembers"
   ],
   "validDomains": [
-    "*.ngrok.io",
-    "*.google.com"
+    "*.ngrok.io"
   ]
 }
