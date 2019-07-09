@@ -29,17 +29,17 @@ export interface IMessageState {
 }
 
 export default class Messages extends React.Component<{}, IMessageState> {
-  private _selection: Selection;
-  private _allItems: IMessage[];
-  private _columns: IColumn[];
+  private selection: Selection;
+  private allItems: IMessage[];
+  private columns: IColumn[];
 
   constructor(props: {}) {
     super(props);
     initializeIcons();
 
-    this._allItems = [];
+    this.allItems = [];
 
-    this._allItems.push(
+    this.allItems.push(
       { title: "A Testing Message", date: "12/16/2018", recipients: "30,0,1", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
       { title: "Testing", date: "11/16/2019", recipients: "40,6,8", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
       { title: "Security Advisory Heightened Security During New Year's Eve Celebrations", date: "12/16/2019", recipients: "90,6,8", acknowledgements: "acknowledgements", reactions: "like 3", responses: "view 3" },
@@ -52,7 +52,7 @@ export default class Messages extends React.Component<{}, IMessageState> {
      * 
      */
 
-    this._columns = [
+    this.columns = [
       {
         key: 'column1',
         name: 'Title',
@@ -121,18 +121,18 @@ export default class Messages extends React.Component<{}, IMessageState> {
 
 
     this.state = {
-      message: this._allItems,
+      message: this.allItems,
       selectionDetails: "",
-      columns: this._columns,
+      columns: this.columns,
       selectAccount: 0,
-      itemsAccount: this._allItems.length,
+      itemsAccount: this.allItems.length,
       width: window.innerWidth,
       height: window.innerHeight,
     };
 
-    this._selection = new Selection({
+    this.selection = new Selection({
       onSelectionChanged: () => {
-        this.setState({ selectionDetails: this.getSelectionDetails(this._allItems.length) });
+        this.setState({ selectionDetails: this.getSelectionDetails(this.allItems.length) });
       }
     });
 
@@ -144,20 +144,20 @@ export default class Messages extends React.Component<{}, IMessageState> {
     return (
       <div>
         <Fabric>
-          <MarqueeSelection selection={this._selection}>
+          <MarqueeSelection selection={this.selection}>
             <DetailsList
               items={message}
               columns={this.state.columns}
               setKey="set"
-              selection={this._selection}
+              selection={this.selection}
               selectionPreservedOnEmptyClick={true}
-              onColumnHeaderClick={this._onColumnClick}
+              onColumnHeaderClick={this.onColumnClick}
               ariaLabelForSelectionColumn="Toggle selection"
               ariaLabelForSelectAllCheckbox="Toggle selection for all items"
               checkboxVisibility={CheckboxVisibility.hidden}
               styles={getDetailsListHeaderStyle()}
               onRenderCheckbox={this.renderCheckbox}
-              onItemInvoked={this._onItemInvoked}
+              onItemInvoked={this.onItemInvoked}
             />
           </MarqueeSelection>
         </Fabric>
@@ -173,24 +173,24 @@ export default class Messages extends React.Component<{}, IMessageState> {
   }
 
   private getSelectionDetails(num: number): string {
-    let selectionCount = this._selection.getSelectedCount();
+    let selectionCount = this.selection.getSelectedCount();
     this.setState({
       selectAccount: selectionCount
     });
     return `${selectionCount} items selected`;
   }
 
-  private _onFilter = (ev: any, text: any) => {
+  private onFilter = (ev: any, text: any) => {
     this.setState({
-      message: text ? this._allItems.filter(i => i.title.toLowerCase().indexOf(text) > -1) : this._allItems
+      message: text ? this.allItems.filter(i => i.title.toLowerCase().indexOf(text) > -1) : this.allItems
     });
   };
 
-  private _onItemInvoked = (item: IMessage): void => {
+  private onItemInvoked = (item: IMessage): void => {
     alert(`Item invoked: ${item.title}`);
   };
 
-  private _onColumnClick = (event: any, column: any): void => {
+  private onColumnClick = (event: any, column: any): void => {
     const { columns } = this.state;
     let { message } = this.state;
     let isSortedDescending = column.isSortedDescending;
@@ -200,7 +200,7 @@ export default class Messages extends React.Component<{}, IMessageState> {
     }
     // Reset the items and columns to match the state.
     this.setState({
-      message: this._copyAndSort(message, column.fieldName!, isSortedDescending),
+      message: this.copyAndSort(message, column.fieldName!, isSortedDescending),
       columns: columns.map(col => {
         col.isSorted = col.key === column.key;
         if (col.isSorted) {
@@ -211,7 +211,7 @@ export default class Messages extends React.Component<{}, IMessageState> {
     });
   };
 
-  private _copyAndSort<T>(items: T[], columnKey: string, isSortedDescending?: boolean): T[] {
+  private copyAndSort<T>(items: T[], columnKey: string, isSortedDescending?: boolean): T[] {
     const key = columnKey as keyof T;
     return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[key] < b[key] : a[key] > b[key]) ? 1 : -1));
   };

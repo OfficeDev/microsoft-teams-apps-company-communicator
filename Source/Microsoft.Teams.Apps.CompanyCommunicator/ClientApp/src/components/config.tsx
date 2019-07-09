@@ -31,7 +31,7 @@ class Configuration extends React.Component<{}, IConfigState> {
 
     }
 
-    public render() {
+    public render(): JSX.Element {
         return (
             <div>
                 <h3>Company Communicator App Configuration Page</h3>
