@@ -72,10 +72,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
+
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-            app.UseAuthentication();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

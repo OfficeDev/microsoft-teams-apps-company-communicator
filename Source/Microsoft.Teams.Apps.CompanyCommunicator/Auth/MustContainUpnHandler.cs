@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Auth
     using System.Security.Claims;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.Extensions.Configuration;
 
     /// <summary>
     /// This class is an authorization handler.
@@ -15,6 +16,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Auth
     /// </summary>
     public class MustContainUpnHandler : AuthorizationHandler<MustContainUpnClaimRequirement>
     {
+        private readonly bool disableAuth;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MustContainUpnHandler"/> class.
+        /// </summary>
+        /// <param name="configuration">ASP.NET Core <see cref="IConfiguration"/> instance.</param>
+        public MustContainUpnHandler(IConfiguration configuration)
+        {
+            this.disableAuth = configuration.GetValue<bool>("DisableAuth", true);
+        }
+
         /// <summary>
         /// This method handles the authorization requirement, MustContainUpnClaimRequirement.
         /// </summary>
@@ -25,8 +37,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Auth
             AuthorizationHandlerContext context,
             MustContainUpnClaimRequirement requirement)
         {
-            var claim = context.User.Claims.FirstOrDefault(p => p.Type == ClaimTypes.Upn);
-            if (claim != null && this.Validate(claim.Value))
+            var claim = context.User?.Claims?.FirstOrDefault(p => p.Type == ClaimTypes.Upn);
+            if (this.disableAuth || (claim != null && this.Validate(claim.Value)))
             {
                 context.Succeed(requirement);
             }
