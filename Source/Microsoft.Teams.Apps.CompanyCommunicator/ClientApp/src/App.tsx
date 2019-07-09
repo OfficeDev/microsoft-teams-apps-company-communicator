@@ -6,7 +6,7 @@ import NewMessage from './components/NewMessage/newMessage';
 import './App.scss';
 
 class App extends React.Component {
-  render() {
+  public render() {
     return (
       <div className="appContainer">
         <BrowserRouter>

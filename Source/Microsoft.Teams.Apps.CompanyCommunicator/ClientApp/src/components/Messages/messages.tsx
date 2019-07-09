@@ -132,7 +132,7 @@ export default class Messages extends React.Component<{}, IMessageState> {
 
     this._selection = new Selection({
       onSelectionChanged: () => {
-        this.setState({ selectionDetails: this._getSelectionDetails(this._allItems.length) });
+        this.setState({ selectionDetails: this.getSelectionDetails(this._allItems.length) });
       }
     });
 
@@ -172,7 +172,7 @@ export default class Messages extends React.Component<{}, IMessageState> {
     )
   }
 
-  private _getSelectionDetails(num: number): string {
+  private getSelectionDetails(num: number): string {
     let selectionCount = this._selection.getSelectedCount();
     this.setState({
       selectAccount: selectionCount
@@ -180,7 +180,7 @@ export default class Messages extends React.Component<{}, IMessageState> {
     return `${selectionCount} items selected`;
   }
 
-  _onFilter = (ev: any, text: any) => {
+  private _onFilter = (ev: any, text: any) => {
     this.setState({
       message: text ? this._allItems.filter(i => i.title.toLowerCase().indexOf(text) > -1) : this._allItems
     });
@@ -200,7 +200,7 @@ export default class Messages extends React.Component<{}, IMessageState> {
     }
     // Reset the items and columns to match the state.
     this.setState({
-      message: _copyAndSort(message, column.fieldName!, isSortedDescending),
+      message: this._copyAndSort(message, column.fieldName!, isSortedDescending),
       columns: columns.map(col => {
         col.isSorted = col.key === column.key;
         if (col.isSorted) {
@@ -210,9 +210,10 @@ export default class Messages extends React.Component<{}, IMessageState> {
       })
     });
   };
+
+  private _copyAndSort<T>(items: T[], columnKey: string, isSortedDescending?: boolean): T[] {
+    const key = columnKey as keyof T;
+    return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[key] < b[key] : a[key] > b[key]) ? 1 : -1));
+  };
 }
 
-function _copyAndSort<T>(items: T[], columnKey: string, isSortedDescending?: boolean): T[] {
-  const key = columnKey as keyof T;
-  return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[key] < b[key] : a[key] > b[key]) ? 1 : -1));
-}

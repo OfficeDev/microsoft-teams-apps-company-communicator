@@ -2,16 +2,16 @@ import * as React from 'react';
 import Messages from '../Messages/messages';
 import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
-import { configUrl } from '../configVariables';
+import { getBaseUrl } from '../configVariables';
 
 interface ITaskInfo {
     title?: string;
     height?: number;
     width?: number;
     url?: string;
-    card?: any;
-    fallbackUrl?: any;
-    completionBotId?: any;
+    card?: string;
+    fallbackUrl?: string;
+    completionBotId?: string;
 }
 
 export interface ITabContainerState {
@@ -22,23 +22,22 @@ export default class TabContainer extends React.Component<{}, ITabContainerState
     constructor(props: {}) {
         super(props);
         this.state = {
-            url: configUrl() + "/newmessage"
+            url: getBaseUrl() + "/newmessage"
         }
         this.escFunction = this.escFunction.bind(this);
     }
 
-    componentDidMount() {
+    public componentDidMount() {
         microsoftTeams.initialize();
         //- Handle the Esc key
         document.addEventListener("keydown", this.escFunction, false);
-
     }
 
-    componentWillUnmount() {
+    public componentWillUnmount() {
         document.removeEventListener("keydown", this.escFunction, false);
     }
 
-    escFunction(event: any) {
+    public escFunction(event: any) {
         if (event.keyCode === 27 || (event.key === "Escape")) {
             microsoftTeams.tasks.submitTask();
         }
@@ -57,8 +56,7 @@ export default class TabContainer extends React.Component<{}, ITabContainerState
         );
     }
 
-    onNewPost = (event: React.MouseEvent<HTMLButtonElement>) => {
-
+    public onNewPost = (event: React.MouseEvent<HTMLButtonElement>) => {
         let taskInfo: ITaskInfo = {
             url: this.state.url,
             title: "New Announcement",

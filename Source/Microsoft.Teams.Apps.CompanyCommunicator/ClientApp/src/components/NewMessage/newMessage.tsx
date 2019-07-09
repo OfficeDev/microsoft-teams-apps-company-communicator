@@ -91,14 +91,14 @@ export default class NewMessage extends React.Component<{}, formState> {
         }
     }
 
-    componentDidMount() {
+    public componentDidMount() {
         let adaptiveCard = new AdaptiveCards.AdaptiveCard();
         adaptiveCard.parse(this.state.card);
         let renderedCard = adaptiveCard.render();
         document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
     }
 
-    render() {
+    public render(): JSX.Element {
         return (
             <div className="taskModule">
                 <div className="formContainer">
@@ -171,7 +171,7 @@ export default class NewMessage extends React.Component<{}, formState> {
         );
     }
 
-    onValueChanged = (event: any) => {
+    private onValueChanged = (event: any) => {
         this.card.body[0].text = event.target.value;
         this.setState({
             title: event.target.value,
@@ -181,7 +181,7 @@ export default class NewMessage extends React.Component<{}, formState> {
         });
     }
 
-    onSummaryChanged = (event: any) => {
+    private onSummaryChanged = (event: any) => {
         this.card.body[2].text = event.target.value;
         this.setState({
             summary: event.target.value,
@@ -191,19 +191,19 @@ export default class NewMessage extends React.Component<{}, formState> {
         });
     }
 
-    onArticleLinkChanged = (event: any) => {
+    private onArticleLinkChanged = (event: any) => {
         this.setState({ articleLink: event.target.value });
     }
 
-    onImageLinkChanged = (event: any) => {
+    private onImageLinkChanged = (event: any) => {
         this.setState({ imageLink: event.target.value });
     }
 
-    onAttachmentLinkChanged = (event: any) => {
+    private onAttachmentLinkChanged = (event: any) => {
         this.setState({ attachmentLink: event.target.value });
     }
 
-    updateCard = () => {
+    private updateCard = () => {
         let adaptiveCard = new AdaptiveCards.AdaptiveCard();
         adaptiveCard.parse(this.state.card);
         let renderedCard = adaptiveCard.render();

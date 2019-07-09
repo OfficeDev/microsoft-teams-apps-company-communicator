@@ -1,6 +1,6 @@
 import React from 'react';
 import * as microsoftTeams from "@microsoft/teams-js";
-import { configUrl } from './configVariables';
+import { getBaseUrl } from './configVariables';
 
 export interface IConfigState {
     url: string;
@@ -10,11 +10,11 @@ class Configuration extends React.Component<{}, IConfigState> {
     constructor(props: {}) {
         super(props);
         this.state = {
-            url: configUrl() + "/messages"
+            url: getBaseUrl() + "/messages"
         }
     }
 
-    componentDidMount() {
+    public componentDidMount() {
         microsoftTeams.initialize();
 
         microsoftTeams.settings.registerOnSaveHandler((saveEvent) => {
@@ -31,7 +31,7 @@ class Configuration extends React.Component<{}, IConfigState> {
 
     }
 
-    render() {
+    public render() {
         return (
             <div>
                 <h3>Company Communicator App Configuration Page</h3>
