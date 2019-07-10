@@ -1,8 +1,10 @@
 import * as React from 'react';
 import Messages from '../Messages/messages';
+import DraftMessages from '../DraftMessages/draftMessages';
 import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../configVariables';
+import { Accordion } from '@stardust-ui/react';
 
 interface ITaskInfo {
     title?: string;
@@ -44,13 +46,37 @@ export default class TabContainer extends React.Component<{}, ITabContainerState
     }
 
     public render(): JSX.Element {
+        const panels = [
+            {
+                title: 'Draft Messages',
+                content: {
+                    key: 'sent',
+                    content: (
+                        <div className="messages">
+                            <DraftMessages></DraftMessages>
+                        </div>
+                    ),
+                },
+            },
+            {
+                title: 'Sent Messages',
+                content: {
+                    key: 'draft',
+                    content: (
+                        <div className="messages">
+                            <Messages></Messages>
+                        </div>
+                    ),
+                },
+            }
+        ]
         return (
             <div className="tabContainer">
                 <div className="newPostBtn">
                     <button className="primaryBtn" onClick={this.onNewPost}>New Post</button>
                 </div>
-                <div className="messages">
-                    <Messages></Messages>
+                <div className="messageContainer">
+                    <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
                 </div>
             </div>
         );
