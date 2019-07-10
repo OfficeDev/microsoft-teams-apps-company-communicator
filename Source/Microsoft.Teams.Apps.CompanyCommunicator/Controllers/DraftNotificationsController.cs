@@ -4,12 +4,12 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
-    using System;
     using System.Collections.Generic;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
 
     /// <summary>
     /// Controller for the draft notification data.
@@ -17,6 +17,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
     public class DraftNotificationsController
     {
+        private readonly INotificationRepository notificationRepository;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
+        /// </summary>
+        /// <param name="notificationRepository">Notification respository service that deals with the table storage in azure.</param>
+        public DraftNotificationsController(INotificationRepository notificationRepository)
+        {
+            this.notificationRepository = notificationRepository;
+        }
+
         /// <summary>
         /// Create a new draft notification.
         /// </summary>
@@ -24,7 +35,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPost("api/draftNotifications")]
         public void CreateDraftNotification([FromBody]Notification notification)
         {
-            Console.WriteLine(notification.Id);
+            var notificationEntity = new NotificationEntity
+            {
+                PartitionKey = "Notification",
+                RowKey = notification.Id,
+                Title = notification.Title,
+                IsDraft = true,
+            };
+
+            this.notificationRepository.CreateOrUpdate(notificationEntity);
         }
 
         /// <summary>
@@ -34,7 +53,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("api/draftNotifications")]
         public IEnumerable<Notification> GetDraftNotifications()
         {
-            var result = this.GetFakeNotifications();
+            var notificationEntities = this.notificationRepository.All(true);
+
+            var result = new List<Notification>();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                var notification = new Notification
+                {
+                    Id = notificationEntity.RowKey,
+                    Title = notificationEntity.RowKey,
+                    Date = notificationEntity.Date,
+                    Recipients = "30,0,1",
+                    Acknowledgements = "acknowledgements",
+                    Reactions = "like 3",
+                    Responses = "view 3",
+                };
+
+                result.Add(notification);
+            }
 
             return result;
         }
@@ -45,75 +81,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="id">Draft notification Id.</param>
         /// <returns>Required draft notification.</returns>
         [HttpGet("api/draftNotifications/{id}")]
-        public Notification GetDraftNotificationById(int id)
+        public Notification GetDraftNotificationById(string id)
         {
-            return
-                new Notification
-                {
-                    Id = id,
-                    Title = "A Testing Message (Draft from service)",
-                    Date = "12/16/2018",
-                    Recipients = "30,0,1",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                };
-        }
+            var notificationEntity = this.notificationRepository.Get("Notification", id);
 
-        private IEnumerable<Notification> GetFakeNotifications()
-        {
-            var result = new List<Notification>
+            var result = new Notification
             {
-                new Notification
-                {
-                    Id = 1,
-                    Title = "A Testing Message (Draft from service)",
-                    Date = "12/16/2018",
-                    Recipients = "30,0,1",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 2,
-                    Title = "Testing",
-                    Date = "11/16/2019",
-                    Recipients = "40,6,8",
-                    Acknowledgements = "acknowledgements (Draft from service)",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 3,
-                    Title = "Security Advisory Heightened Security During New Year's Eve Celebrations (Draft from service)",
-                    Date = "12/16/2019",
-                    Recipients = "90,6,8",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 4,
-                    Title = "Security Advisory Heightened Security During New Year's Eve Celebrations (Draft from service)",
-                    Date = "12/16/2019",
-                    Recipients = "40,6,8",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 5,
-                    Title = "Upcoming Holiday (Draft from service)",
-                    Date = "12/16/2019",
-                    Recipients = "14,6,8",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
+                Id = id,
+                Title = notificationEntity.RowKey,
+                Date = notificationEntity.Date,
+                Recipients = "30,0,1",
+                Acknowledgements = "acknowledgements",
+                Reactions = "like 3",
+                Responses = "view 3",
             };
 
             return result;
