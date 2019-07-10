@@ -14,7 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// <summary>
         /// Gets or sets Notification Id.
         /// </summary>
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets Title value.

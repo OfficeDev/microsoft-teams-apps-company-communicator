@@ -4,16 +4,27 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
-    using System;
     using System.Collections.Generic;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
 
     /// <summary>
     /// Controller for the sent notification data.
     /// </summary>
     public class SentNotificationsController
     {
+        private readonly INotificationRepository notificationRepository;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
+        /// </summary>
+        /// <param name="notificationRepository">Notification respository service that deals with the table storage in azure.</param>
+        public SentNotificationsController(INotificationRepository notificationRepository)
+        {
+            this.notificationRepository = notificationRepository;
+        }
+
         /// <summary>
         /// Create a new sent notification.
         /// </summary>
@@ -21,7 +32,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPost("api/sentNotifications")]
         public void CreateSentNotification([FromBody]Notification notification)
         {
-            Console.WriteLine(notification.Id);
+            var notificationEntity = new NotificationEntity
+            {
+                PartitionKey = "Notification",
+                RowKey = notification.Id,
+                Title = notification.Title,
+                IsDraft = false,
+            };
+
+            this.notificationRepository.CreateOrUpdate(notificationEntity);
         }
 
         /// <summary>
@@ -31,7 +50,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("api/sentNotifications")]
         public IEnumerable<Notification> GetSentNotifications()
         {
-            var result = this.GetFakeNotifications();
+            var notificationEntities = this.notificationRepository.All(false);
+
+            var result = new List<Notification>();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                var notification = new Notification
+                {
+                    Id = notificationEntity.RowKey,
+                    Title = notificationEntity.RowKey,
+                    Date = notificationEntity.Date,
+                    Recipients = "30,0,1",
+                    Acknowledgements = "acknowledgements",
+                    Reactions = "like 3",
+                    Responses = "view 3",
+                };
+
+                result.Add(notification);
+            }
 
             return result;
         }
@@ -42,75 +78,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="id">Id of the requested sent notification.</param>
         /// <returns>Required sent notification.</returns>
         [HttpGet("api/sentNotifications/{id}")]
-        public Notification GetSentNotificationById(int id)
+        public Notification GetSentNotificationById(string id)
         {
-            return
-                new Notification
-                {
-                    Id = id,
-                    Title = "A Testing Message (from service)",
-                    Date = "12/16/2018",
-                    Recipients = "30,0,1",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                };
-        }
+            var notificationEntity = this.notificationRepository.Get("Notification", id);
 
-        private IEnumerable<Notification> GetFakeNotifications()
-        {
-            var result = new List<Notification>
+            var result = new Notification
             {
-                new Notification
-                {
-                    Id = 6,
-                    Title = "A Testing Message (from service)",
-                    Date = "12/16/2018",
-                    Recipients = "30,0,1",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 7,
-                    Title = "Testing",
-                    Date = "11/16/2019",
-                    Recipients = "40,6,8",
-                    Acknowledgements = "acknowledgements (from service)",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 8,
-                    Title = "Security Advisory Heightened Security During New Year's Eve Celebrations (from service)",
-                    Date = "12/16/2019",
-                    Recipients = "90,6,8",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 9,
-                    Title = "Security Advisory Heightened Security During New Year's Eve Celebrations (from service)",
-                    Date = "12/16/2019",
-                    Recipients = "40,6,8",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 10,
-                    Title = "Upcoming Holiday (from service)",
-                    Date = "12/16/2019",
-                    Recipients = "14,6,8",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
+                Id = id,
+                Title = notificationEntity.RowKey,
+                Date = notificationEntity.Date,
+                Recipients = "30,0,1",
+                Acknowledgements = "acknowledgements",
+                Reactions = "like 3",
+                Responses = "view 3",
             };
 
             return result;

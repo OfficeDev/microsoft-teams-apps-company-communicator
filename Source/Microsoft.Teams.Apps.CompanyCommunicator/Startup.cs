@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
 
     /// <summary>
     /// Register services in DI container, and set up middlewares in the pipeline.
@@ -47,6 +48,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
             // Register bot services in DI container
             services.AddBot();
+
+            // Register respository services in DI container
+            services.AddRepositories();
         }
 
         /// <summary>
