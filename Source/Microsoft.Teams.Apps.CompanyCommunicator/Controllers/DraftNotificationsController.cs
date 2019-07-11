@@ -22,7 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
         /// </summary>
-        /// <param name="notificationRepository">Notification respository service that deals with the table storage in azure.</param>
+        /// <param name="notificationRepository">Notification respository instance.</param>
         public DraftNotificationsController(INotificationRepository notificationRepository)
         {
             this.notificationRepository = notificationRepository;
@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         {
             var notificationEntity = new NotificationEntity
             {
-                PartitionKey = "Notification",
+                PartitionKey = "Announcement",
                 RowKey = notification.Id,
                 Title = notification.Title,
                 IsDraft = true,
@@ -61,7 +61,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 var notification = new Notification
                 {
                     Id = notificationEntity.RowKey,
-                    Title = notificationEntity.RowKey,
+                    Title = notificationEntity.Title,
                     Date = notificationEntity.Date,
                     Recipients = "30,0,1",
                     Acknowledgements = "acknowledgements",
@@ -83,12 +83,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("api/draftNotifications/{id}")]
         public Notification GetDraftNotificationById(string id)
         {
-            var notificationEntity = this.notificationRepository.Get("Notification", id);
+            var notificationEntity = this.notificationRepository.Get("Announcement", id);
+            if (notificationEntity == null)
+            {
+                return null;
+            }
 
             var result = new Notification
             {
                 Id = id,
-                Title = notificationEntity.RowKey,
+                Title = notificationEntity.Title,
                 Date = notificationEntity.Date,
                 Recipients = "30,0,1",
                 Acknowledgements = "acknowledgements",

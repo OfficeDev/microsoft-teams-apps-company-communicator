@@ -8,7 +8,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
     using Microsoft.Azure.Cosmos.Table;
 
     /// <summary>
-    /// Notification entity class used in the repository service.
+    /// Notification entity class used in repository.
+    /// This class contains a collection of Recipeint entities.
     /// </summary>
     public class NotificationEntity : TableEntity
     {
