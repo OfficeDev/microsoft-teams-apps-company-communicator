@@ -4,11 +4,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
 {
-    using Microsoft.Azure.Cosmos.Table;
-
     /// <summary>
-    /// Recipeint entity class used in the respository server.
-    /// A notification entity has a collection of Recipeint entities.
+    /// Recipeint entity class used in respository.
     /// </summary>
     public class RecipientEntity
     {
@@ -20,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// <summary>
         /// Gets or sets notification state.
         /// </summary>
-        public DeliveryState NotificationState { get; set; }
+        public DeliveryStatus NotificationState { get; set; }
 
         // other properties
         // Acknowlegement

@@ -1,4 +1,4 @@
-﻿// <copyright file="DeliveryState.cs" company="Microsoft">
+﻿// <copyright file="DeliveryStatus.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
     /// <summary>
     /// Enuerables indicating the state of a notification per recipient.
     /// </summary>
-    public enum DeliveryState
+    public enum DeliveryStatus
     {
         /// <summary>
         /// Indicating a notification was delivered successfully.

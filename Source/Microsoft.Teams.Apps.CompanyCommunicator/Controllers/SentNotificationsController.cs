@@ -34,7 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         {
             var notificationEntity = new NotificationEntity
             {
-                PartitionKey = "Notification",
+                PartitionKey = "Announcement",
                 RowKey = notification.Id,
                 Title = notification.Title,
                 IsDraft = false,
@@ -58,7 +58,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 var notification = new Notification
                 {
                     Id = notificationEntity.RowKey,
-                    Title = notificationEntity.RowKey,
+                    Title = notificationEntity.Title,
                     Date = notificationEntity.Date,
                     Recipients = "30,0,1",
                     Acknowledgements = "acknowledgements",
@@ -80,12 +80,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("api/sentNotifications/{id}")]
         public Notification GetSentNotificationById(string id)
         {
-            var notificationEntity = this.notificationRepository.Get("Notification", id);
+            var notificationEntity = this.notificationRepository.Get("Announcement", id);
+            if (notificationEntity == null)
+            {
+                return null;
+            }
 
             var result = new Notification
             {
                 Id = id,
-                Title = notificationEntity.RowKey,
+                Title = notificationEntity.Title,
                 Date = notificationEntity.Date,
                 Recipients = "30,0,1",
                 Acknowledgements = "acknowledgements",
