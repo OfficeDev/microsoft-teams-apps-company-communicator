@@ -8,13 +8,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using System.Collections.Generic;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Auth;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
 
     /// <summary>
     /// Controller for the draft notification data.
     /// </summary>
-    [Authorize(PolicyNames.MustHaveUpnClaimPolicy)]
+    [Authorize(PolicyNames.MustBeValidUpnPolicy)]
     public class DraftNotificationsController
     {
         /// <summary>

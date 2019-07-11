@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Auth
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 {
     /// <summary>
     /// This class lists the names of the custom authorization policies in the project.
@@ -12,6 +12,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Auth
         /// <summary>
         /// The name of the authorization policy, MustHaveUpnClaimPolicy.
         /// </summary>
-        public const string MustHaveUpnClaimPolicy = "MustContainUpnClaimPolicy";
+        public const string MustBeValidUpnPolicy = "MustBeValidUpnPolicy";
     }
 }

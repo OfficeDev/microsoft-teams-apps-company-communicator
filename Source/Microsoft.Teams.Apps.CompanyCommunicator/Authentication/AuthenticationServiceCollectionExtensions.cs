@@ -1,26 +1,27 @@
-﻿// <copyright file="AuthServiceCollectionExtensions.cs" company="Microsoft">
+﻿// <copyright file="AuthenticationServiceCollectionExtensions.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Auth
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 {
     using Microsoft.AspNetCore.Authentication.AzureAD.UI;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.IdentityModel.Tokens;
 
     /// <summary>
     /// Extension class for registering auth services in DI container.
     /// </summary>
-    public static class AuthServiceCollectionExtensions
+    public static class AuthenticationServiceCollectionExtensions
     {
         /// <summary>
-        /// Extension method to register the auth services.
+        /// Extension method to register the authentication services.
         /// </summary>
         /// <param name="services">IServiceCollection instance.</param>
         /// <param name="configuration">IConfiguration instance.</param>
-        public static void AddAuth(this IServiceCollection services, IConfiguration configuration)
+        public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
             RegisterAuthenticationServices(services, configuration);
 
@@ -33,13 +34,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Auth
             services.AddAuthentication(options => { options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; })
                 .AddJwtBearer(options =>
                 {
-                    var azureadoptions = new AzureADOptions();
-                    configuration.Bind("AzureAd", azureadoptions);
-                    options.Authority = $"{azureadoptions.Instance}{azureadoptions.TenantId}/v2.0";
-                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    var azureADOptions = new AzureADOptions();
+                    configuration.Bind("AzureAD", azureADOptions);
+                    options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidAudience = $"{azureadoptions.ClientId}",
-                        ValidIssuer = $"{azureadoptions.Instance}{azureadoptions.TenantId}/v2.0",
+                        ValidAudience = $"{azureADOptions.ClientId}",
+                        ValidIssuer = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0",
                     };
                 });
         }
@@ -48,13 +49,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Auth
         {
             services.AddAuthorization(options =>
             {
-                var mustContainUpnClaimRequirement = new MustContainUpnClaimRequirement();
+                var mustContainUpnClaimRequirement = new MustBeValidUpnRequirement();
                 options.AddPolicy(
-                    PolicyNames.MustHaveUpnClaimPolicy,
+                    PolicyNames.MustBeValidUpnPolicy,
                     policyBuilder => policyBuilder.AddRequirements(mustContainUpnClaimRequirement));
             });
 
-            services.AddSingleton<IAuthorizationHandler, MustContainUpnHandler>();
+            services.AddSingleton<IAuthorizationHandler, MustBeValidUpnHandler>();
         }
     }
 }

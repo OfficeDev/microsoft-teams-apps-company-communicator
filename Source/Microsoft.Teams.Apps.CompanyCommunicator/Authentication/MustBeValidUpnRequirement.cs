@@ -1,8 +1,8 @@
-﻿// <copyright file="MustContainUpnClaimRequirement.cs" company="Microsoft">
+﻿// <copyright file="MustBeValidUpnRequirement.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Auth
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 {
     using Microsoft.AspNetCore.Authorization;
 
@@ -10,7 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Auth
     /// This class is an authorization policy requirement.
     /// It specifies that an id token must contain Upn claim.
     /// </summary>
-    public class MustContainUpnClaimRequirement : IAuthorizationRequirement
+    public class MustBeValidUpnRequirement : IAuthorizationRequirement
     {
     }
 }
