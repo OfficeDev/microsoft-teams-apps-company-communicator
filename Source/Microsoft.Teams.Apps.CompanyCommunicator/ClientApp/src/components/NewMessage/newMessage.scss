@@ -8,8 +8,19 @@
         bottom: 8.4rem;
         width: 100%;
 
+        h3 {
+            font-size: 1.6rem;
+            margin: 2rem 3.2rem 0rem 3.2rem;
+        }
+
+        h4 {
+            margin: 0.6rem 3.2rem 1rem 3.2rem;
+            font-size: 1.4rem;
+            font-weight: 100;
+        }
+
         .formContentContainer {
-            width: 55%;
+            width: 53%;
             float: left;
             display: inline;
 
@@ -78,7 +89,37 @@
         .adaptiveCardContainer {
             width: 45%;
             display: inline;
+            //float: left;
+        }
+
+        .boardSelection {
+            padding-left: 2.5rem;
+            display: inline;
+            width: 40%;
             float: left;
+
+            .dropDown {
+                display: block;
+
+                button {
+                    height: 2.6rem;
+                    font-size: 1.4rem;
+                    margin-right: 0rem;
+                    margin: 0.5rem 0rem;
+                }
+            }
+        }
+
+        .checkboxBtns {
+            margin: 0rem 3.2rem;
+            display: inline;
+            float: left;
+            width: 50%;
+
+            p {
+                margin: 1rem 0rem;
+                font-size: 1.4rem;
+            }
         }
     }
 
@@ -93,6 +134,10 @@
             display: inline;
             float: right;
             margin-right: 3.2rem;
+
+            #saveBtn {
+                margin-left: 0.8rem;
+            }
         }
     }
 }
