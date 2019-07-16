@@ -4,7 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -17,6 +16,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     /// </summary>
     public class CompanyCommunicatorBot : ActivityHandler
     {
+        private readonly TeamsDataCapture teamsDataCapture;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CompanyCommunicatorBot"/> class.
+        /// </summary>
+        /// <param name="teamsDataCapture">Teams data capture service.</param>
+        public CompanyCommunicatorBot(TeamsDataCapture teamsDataCapture)
+        {
+            this.teamsDataCapture = teamsDataCapture;
+        }
+
         /// <summary>
         /// The bot framework calls the method when receiving a message from an user.
         /// </summary>
@@ -37,7 +47,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <param name="turnContext">ITurnContext instance.</param>
         /// <param name="cancellationToken">CancellationToken instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
+        protected override async Task OnMembersAddedAsync(
+            IList<ChannelAccount> membersAdded,
+            ITurnContext<IConversationUpdateActivity> turnContext,
+            CancellationToken cancellationToken)
         {
             await base.OnMembersAddedAsync(membersAdded, turnContext, cancellationToken);
 
@@ -47,11 +60,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 if (member.Id != turnContext.Activity.Recipient.Id)
                 {
                     await this.SendAsync(turnContext, cancellationToken, "Hello and Welcome!");
-                    await this.RecordAsync(
-                        member.Id,
-                        "AddedOnMembersAdded",
-                        turnContext.Activity.Recipient.Id,
-                        turnContext.Activity.Conversation.ConversationType);
                 }
             }
         }
@@ -63,7 +71,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <param name="turnContext">ITurnContext instance.</param>
         /// <param name="cancellationToken">CancellationToken instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        protected override async Task OnMembersRemovedAsync(IList<ChannelAccount> membersRemoved, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
+        protected override async Task OnMembersRemovedAsync(
+            IList<ChannelAccount> membersRemoved,
+            ITurnContext<IConversationUpdateActivity> turnContext,
+            CancellationToken cancellationToken)
         {
             await base.OnMembersRemovedAsync(membersRemoved, turnContext, cancellationToken);
 
@@ -72,11 +83,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 // Take action if this event includes user being removed
                 if (member.Id != turnContext.Activity.Recipient.Id)
                 {
-                    await this.RecordAsync(
-                        member.Id,
-                        "RemovedOnMembersRemoved",
-                        turnContext.Activity.Recipient.Id,
-                        turnContext.Activity.Conversation.ConversationType);
                 }
             }
         }
@@ -88,7 +94,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <param name="cancellationToken">A cancellation token that can be used by other objects
         /// or threads to receive notice of cancellation.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        protected override async Task OnConversationUpdateActivityAsync(ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
+        protected override async Task OnConversationUpdateActivityAsync(
+            ITurnContext<IConversationUpdateActivity> turnContext,
+            CancellationToken cancellationToken)
         {
             // base.OnConversationUpdateActivityAsync is useful when it comes to responding to users being added to or removed from the conversation.
             // For example, a bot could respond to a user being added by greeting the user.
@@ -98,51 +106,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             await base.OnConversationUpdateActivityAsync(turnContext, cancellationToken);
 
             var activity = turnContext.Activity;
-            var fromId = activity.From.Id;
             var botId = activity.Recipient.Id;
 
             // Take action if this event includes the bot being added
             if (activity.MembersAdded?.FirstOrDefault(p => p.Id == botId) != null)
             {
+                this.teamsDataCapture.OnAdded(activity);
                 await this.SendAsync(turnContext, cancellationToken, "Hello and Welcome!");
-                await this.RecordAsync(
-                    fromId,
-                    "AddedOnConversationUpdateActivity",
-                    botId,
-                    activity.Conversation.ConversationType);
             }
 
             // Take action if this event includes the bot being removed
             if (activity.MembersRemoved?.FirstOrDefault(p => p.Id == botId) != null)
             {
-                await this.RecordAsync(
-                    fromId,
-                    "RemovedOnConversationUpdateActivity",
-                    botId,
-                    activity.Conversation.ConversationType);
+                this.teamsDataCapture.OnRemoved(activity);
             }
         }
 
-        private async Task RecordAsync(string fromId, string mutation, string botId, string conversationType)
-        {
-            await Task.Run(() =>
-            {
-                Console.WriteLine($"Event: {mutation}");
-                Console.WriteLine($"FromId: {fromId}");
-                Console.WriteLine($"ConversationType: {conversationType}");
-                Console.WriteLine($"BotId: {botId}");
-                Console.WriteLine();
-            });
-        }
-
-        private async Task SendAsync(ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken, string message)
+        private async Task SendAsync(
+            ITurnContext<IConversationUpdateActivity> turnContext,
+            CancellationToken cancellationToken,
+            string message)
         {
             var card = new HeroCard
             {
                 Title = "Company Communicator",
                 Subtitle = "Powered by Microsoft Bot Framework",
                 Text = message,
-                Images = new List<CardImage> { new CardImage("https://sec.ch9.ms/ch9/7ff5/e07cfef0-aa3b-40bb-9baa-7c9ef8ff7ff5/buildreactionbotframework_960.jpg") },
                 Buttons = new List<CardAction> { new CardAction(ActionTypes.OpenUrl, "Get Started", value: "https://docs.microsoft.com/bot-framework") },
             };
 

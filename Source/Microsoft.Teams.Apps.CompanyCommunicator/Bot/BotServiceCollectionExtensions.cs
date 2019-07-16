@@ -24,10 +24,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
 
             // Create the Bot Framework Adapter.
-            services.AddSingleton<IBotFrameworkHttpAdapter, BotFrameworkHttpAdapter>();
+            services.AddSingleton<BotFrameworkHttpAdapter>();
 
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
             services.AddTransient<IBot, CompanyCommunicatorBot>();
+
+            // Create the Teams Data Capture.
+            services.AddTransient<TeamsDataCapture>();
         }
     }
 }

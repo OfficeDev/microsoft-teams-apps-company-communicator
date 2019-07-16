@@ -5,6 +5,9 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
 {
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User;
 
     /// <summary>
     /// Extension class for registering respository services in DI container.
@@ -17,7 +20,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// <param name="services">IServiceCollection instance.</param>
         public static void AddRepositories(this IServiceCollection services)
         {
-            services.AddTransient<INotificationRepository, NotificationRepository>();
+            services.AddTransient<NotificationRepository>();
+            services.AddTransient<UserDataRepository>();
+            services.AddTransient<TeamsDataRepository>();
         }
     }
 }
