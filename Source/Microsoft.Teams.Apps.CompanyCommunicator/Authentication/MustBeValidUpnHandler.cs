@@ -4,6 +4,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 {
+    using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
@@ -11,13 +13,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
-    /// This class is an authorization handler.
-    /// It handles the authorization requirement, MustContainUpnClaimRequirement.
+    /// This class is an authorization handler, which handles the authorization requirement.
     /// </summary>
     public class MustBeValidUpnHandler : AuthorizationHandler<MustBeValidUpnRequirement>
     {
         private readonly bool disableAuthentication;
-        private readonly string validUpns;
+        private readonly HashSet<string> validUpnSet;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MustBeValidUpnHandler"/> class.
@@ -25,12 +26,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// <param name="configuration">ASP.NET Core <see cref="IConfiguration"/> instance.</param>
         public MustBeValidUpnHandler(IConfiguration configuration)
         {
-            this.disableAuthentication = configuration.GetValue<bool>("DisableAuthentication", true);
-            this.validUpns = configuration.GetValue<string>("ValidUpns", string.Empty);
+            this.disableAuthentication = configuration.GetValue<bool>("DisableAuthentication", false);
+            var validUpns = configuration.GetValue<string>("ValidUpns", string.Empty);
+            this.validUpnSet = validUpns
+                ?.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                ?.Select(p => p.Trim())
+                ?.ToHashSet()
+                ?? new HashSet<string>();
         }
 
         /// <summary>
-        /// This method handles the authorization requirement, MustContainUpnClaimRequirement.
+        /// This method handles the authorization requirement.
         /// </summary>
         /// <param name="context">AuthorizationHandlerContext instance.</param>
         /// <param name="requirement">MustContainUpnClaimRequirement instance.</param>
@@ -62,13 +68,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                 return false;
             }
 
-            var validUpnSet = this.validUpns.Split(',').Select(p => p.Trim()).ToHashSet();
-            if (validUpnSet.Count == 0)
-            {
-                return false;
-            }
-
-            return validUpnSet.Contains(upn);
+            return this.validUpnSet.Contains(upn, StringComparer.OrdinalIgnoreCase);
         }
     }
 }
