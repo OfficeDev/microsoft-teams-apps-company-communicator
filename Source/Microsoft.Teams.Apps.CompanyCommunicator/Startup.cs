@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
 
     /// <summary>
@@ -37,6 +38,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         /// <param name="services">IServiceCollection instance.</param>
         public void ConfigureServices(IServiceCollection services)
         {
+            // Register auth services in DI container.
+            services.AddAuthentication(this.Configuration);
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // In production, the React files will be served from this directory
@@ -67,6 +71,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
+
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
