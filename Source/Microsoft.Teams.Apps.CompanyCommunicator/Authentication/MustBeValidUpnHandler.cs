@@ -39,7 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// This method handles the authorization requirement.
         /// </summary>
         /// <param name="context">AuthorizationHandlerContext instance.</param>
-        /// <param name="requirement">MustContainUpnClaimRequirement instance.</param>
+        /// <param name="requirement">IAuthorizationRequirement instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         protected override Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
