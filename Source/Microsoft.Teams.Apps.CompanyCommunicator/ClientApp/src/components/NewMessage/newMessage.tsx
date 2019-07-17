@@ -15,12 +15,12 @@ export interface formState {
     btnTitle?: string,
     author: string,
     card?: any,
-    onNext: boolean,
+    page: string,
     channel?: string,
     team?: string,
-    channelBtn: boolean,
-    teamBtn: boolean,
-    allusersBtn: boolean
+    channelBox: boolean,
+    teamBox: boolean,
+    allusersBox: boolean
 }
 
 export default class NewMessage extends React.Component<{}, formState> {
@@ -62,7 +62,7 @@ export default class NewMessage extends React.Component<{}, formState> {
             ],
             "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
             "version": "1.0"
-        }
+        };
 
         this.state = {
             title: "",
@@ -72,12 +72,12 @@ export default class NewMessage extends React.Component<{}, formState> {
             imageLink: "",
             btnTitle: "",
             card: this.card,
-            onNext: false,
+            page: "CardCreation",
             channel: "Team",
             team: "Team",
-            channelBtn: false,
-            teamBtn: false,
-            allusersBtn: false
+            channelBox: false,
+            teamBox: false,
+            allusersBox: false
         }
     }
 
@@ -98,62 +98,7 @@ export default class NewMessage extends React.Component<{}, formState> {
     }
 
     public render(): JSX.Element {
-        if (this.state.onNext) {
-            return (
-                <div className="taskModule">
-                    <div className="formContainer">
-
-                        <h3>Recipient Selection</h3>
-                        <h4>Please choose the groups you would like to send your message to.</h4>
-
-                        <div className="checkboxBtns">
-                            <p className="checkboxBtn">
-                                <Checkbox checked={this.state.channelBtn} label="Send to a Team(s)" value="teamtest" onChecked={this.onChannel} />
-                            </p>
-
-                            <p className="checkboxBtn">
-                                <Checkbox checked={this.state.teamBtn} label="Send to the team members of a Team(s)" value="teams" onChecked={this.onTeam} />
-                            </p>
-
-                            <p className="checkboxBtn">
-                                <Checkbox checked={this.state.allusersBtn} label="Send to all users" value="users" onChecked={this.onAlluser} />
-                            </p>
-                        </div>
-
-                        <div className="boardSelection">
-                            <Dropdown
-                                className="dropDown"
-                                autoFocus
-                                mainButtonText={this.state.channel}
-                                style={{ width: '50%' }}
-                                items={[
-                                    { text: 'Team 1', onClick: () => { this.setState({ channel: "Team 1" }) } },
-                                    { text: 'Team 2', onClick: () => { this.setState({ channel: "Team 2" }) } }
-                                ]}
-                            />
-
-                            <Dropdown
-                                className="dropDown"
-                                autoFocus
-                                mainButtonText={this.state.team}
-                                style={{ width: '50%' }}
-                                items={[
-                                    { text: 'Team 1', onClick: () => { this.setState({ team: "Team 1" }) } },
-                                    { text: 'Team 2', onClick: () => { this.setState({ team: "Team 2" }) } }
-                                ]}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="footerContainer">
-                        <div className="buttonContainer">
-                            <Button content="Back" onClick={this.onBack} secondary />
-                            <Button content="Save" disabled={!(this.state.channelBtn || this.state.teamBtn || this.state.allusersBtn)} id="saveBtn" onClick={this.onSave} primary />
-                        </div>
-                    </div>
-                </div>
-            );
-        } else {
+        if (this.state.page === "CardCreation") {
             return (
                 <div className="taskModule">
                     <div className="formContainer">
@@ -206,7 +151,7 @@ export default class NewMessage extends React.Component<{}, formState> {
                                 value={this.state.btnTitle}
                                 label="Button Title"
                                 placeholder="Button title"
-                                onChange={this.onbtnTitleChanged}
+                                onChange={this.onBtnTitleChanged}
                                 status={this.state.btnTitle ? "updated" : undefined}
                                 autoComplete="off"
                             />
@@ -216,7 +161,7 @@ export default class NewMessage extends React.Component<{}, formState> {
                                 value={this.state.btnLink}
                                 label="Button Url"
                                 placeholder="Button url"
-                                onChange={this.onbtnLinkChanged}
+                                onChange={this.onBtnLinkChanged}
                                 status={this.state.btnLink ? "updated" : undefined}
                                 autoComplete="off"
                             />
@@ -233,6 +178,64 @@ export default class NewMessage extends React.Component<{}, formState> {
                 </div>
             );
         }
+        else if (this.state.page === "AudienceSelection") {
+            return (
+                <div className="taskModule">
+                    <div className="formContainer">
+
+                        <h3>Recipient Selection</h3>
+                        <h4>Please choose the groups you would like to send your message to.</h4>
+
+                        <div className="checkboxBtns">
+                            <p className="checkboxBtn">
+                                <Checkbox checked={this.state.channelBox} label="Send to a Team(s)" value="teamtest" onChecked={this.onChannel} />
+                            </p>
+
+                            <p className="checkboxBtn">
+                                <Checkbox checked={this.state.teamBox} label="Send to the team members of a Team(s)" value="teams" onChecked={this.onTeam} />
+                            </p>
+
+                            <p className="checkboxBtn">
+                                <Checkbox checked={this.state.allusersBox} label="Send to all users" value="users" onChecked={this.onAlluser} />
+                            </p>
+                        </div>
+
+                        <div className="boardSelection">
+                            <Dropdown
+                                className="dropDown"
+                                autoFocus
+                                mainButtonText={this.state.channel}
+                                style={{ width: '50%' }}
+                                items={[
+                                    { text: 'Team 1', onClick: () => { this.setState({ channel: "Team 1" }) } },
+                                    { text: 'Team 2', onClick: () => { this.setState({ channel: "Team 2" }) } }
+                                ]}
+                            />
+
+                            <Dropdown
+                                className="dropDown"
+                                autoFocus
+                                mainButtonText={this.state.team}
+                                style={{ width: '50%' }}
+                                items={[
+                                    { text: 'Team 1', onClick: () => { this.setState({ team: "Team 1" }) } },
+                                    { text: 'Team 2', onClick: () => { this.setState({ team: "Team 2" }) } }
+                                ]}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="footerContainer">
+                        <div className="buttonContainer">
+                            <Button content="Back" onClick={this.onBack} secondary />
+                            <Button content="Save" disabled={!(this.state.channelBox || this.state.teamBox || this.state.allusersBox)} id="saveBtn" onClick={this.onSave} primary />
+                        </div>
+                    </div>
+                </div>
+            );
+        } else {
+            return (<div>Error</div>);
+        }
     }
 
     private onSave = () => {
@@ -247,29 +250,29 @@ export default class NewMessage extends React.Component<{}, formState> {
 
     private onAlluser = () => {
         this.setState({
-            allusersBtn: !this.state.allusersBtn
+            allusersBox: !this.state.allusersBox
         })
     }
 
     private onTeam = () => {
         this.setState({
-            teamBtn: !this.state.teamBtn
+            teamBox: !this.state.teamBox
         })
     }
 
     private onChannel = (checked: boolean, value?: any) => {
         this.setState({
-            channelBtn: !this.state.channelBtn
+            channelBox: !this.state.channelBox
         })
     }
 
     private onNext = (event: any) => {
-        this.setState({ onNext: !this.state.onNext });
+        this.setState({ page: "AudienceSelection" });
     }
 
     private onBack = (event: any) => {
         this.setState({
-            onNext: !this.state.onNext
+            page: "CardCreation"
         }, () => {
             this.updateCard();
         });
@@ -306,7 +309,7 @@ export default class NewMessage extends React.Component<{}, formState> {
     }
 
 
-    private onbtnLinkChanged = (event: any) => {
+    private onBtnLinkChanged = (event: any) => {
 
         if (event.target.value !== "" && this.state.btnTitle !== "") {
             this.card.actions = [
@@ -344,7 +347,7 @@ export default class NewMessage extends React.Component<{}, formState> {
         });
     }
 
-    private onbtnTitleChanged = (event: any) => {
+    private onBtnTitleChanged = (event: any) => {
         if (this.state.btnLink !== "" && event.target.value !== "") {
             this.card.actions = [
                 {
