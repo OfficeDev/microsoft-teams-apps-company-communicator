@@ -20,7 +20,7 @@ export interface formState {
     team?: string,
     channelBox: boolean,
     teamBox: boolean,
-    allusersBox: boolean
+    allUsersBox: boolean
 }
 
 export default class NewMessage extends React.Component<{}, formState> {
@@ -77,7 +77,7 @@ export default class NewMessage extends React.Component<{}, formState> {
             team: "Team",
             channelBox: false,
             teamBox: false,
-            allusersBox: false
+            allUsersBox: false
         }
     }
 
@@ -196,7 +196,7 @@ export default class NewMessage extends React.Component<{}, formState> {
                             </p>
 
                             <p className="checkboxBtn">
-                                <Checkbox checked={this.state.allusersBox} label="Send to all users" value="users" onChecked={this.onAlluser} />
+                                <Checkbox checked={this.state.allUsersBox} label="Send to all users" value="users" onChecked={this.onAlluser} />
                             </p>
                         </div>
 
@@ -228,7 +228,7 @@ export default class NewMessage extends React.Component<{}, formState> {
                     <div className="footerContainer">
                         <div className="buttonContainer">
                             <Button content="Back" onClick={this.onBack} secondary />
-                            <Button content="Save" disabled={!(this.state.channelBox || this.state.teamBox || this.state.allusersBox)} id="saveBtn" onClick={this.onSave} primary />
+                            <Button content="Save" disabled={!(this.state.channelBox || this.state.teamBox || this.state.allUsersBox)} id="saveBtn" onClick={this.onSave} primary />
                         </div>
                     </div>
                 </div>
@@ -250,7 +250,7 @@ export default class NewMessage extends React.Component<{}, formState> {
 
     private onAlluser = () => {
         this.setState({
-            allusersBox: !this.state.allusersBox
+            allUsersBox: !this.state.allUsersBox
         })
     }
 
@@ -308,35 +308,6 @@ export default class NewMessage extends React.Component<{}, formState> {
         });
     }
 
-
-    private onBtnLinkChanged = (event: any) => {
-
-        if (event.target.value !== "" && this.state.btnTitle !== "") {
-            this.card.actions = [
-                {
-                    "type": "Action.OpenUrl",
-                    "title": this.state.btnTitle,
-                    "url": event.target.value
-                }
-            ];
-
-            this.setState({
-                btnLink: event.target.value,
-                card: this.card
-            }, () => {
-                this.updateCard();
-            });
-        } else {
-            delete this.card.actions;
-            this.setState({
-                btnLink: event.target.value
-            }, () => {
-                this.updateCard();
-            });
-        }
-
-    }
-
     private onImageLinkChanged = (event: any) => {
         this.card.body[1].url = event.target.value;
         this.setState({
@@ -371,6 +342,34 @@ export default class NewMessage extends React.Component<{}, formState> {
                 this.updateCard();
             });
         }
+    }
+
+    private onBtnLinkChanged = (event: any) => {
+
+        if (event.target.value !== "" && this.state.btnTitle !== "") {
+            this.card.actions = [
+                {
+                    "type": "Action.OpenUrl",
+                    "title": this.state.btnTitle,
+                    "url": event.target.value
+                }
+            ];
+
+            this.setState({
+                btnLink: event.target.value,
+                card: this.card
+            }, () => {
+                this.updateCard();
+            });
+        } else {
+            delete this.card.actions;
+            this.setState({
+                btnLink: event.target.value
+            }, () => {
+                this.updateCard();
+            });
+        }
+
     }
 
     private updateCard = () => {
