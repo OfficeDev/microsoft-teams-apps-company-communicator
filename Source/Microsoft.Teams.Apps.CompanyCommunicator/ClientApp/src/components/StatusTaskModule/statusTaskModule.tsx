@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './statusTaskModule.scss';
-import { getMessageDetails } from '../../apis/messageListApi';
+import { getSentNotification } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 
 export interface IMessage {
@@ -47,7 +47,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
 
     private getItem = async (id: number) => {
         try {
-            const response = await getMessageDetails(id);
+            const response = await getSentNotification(id);
             this.setState({
                 message: response.data
             });
