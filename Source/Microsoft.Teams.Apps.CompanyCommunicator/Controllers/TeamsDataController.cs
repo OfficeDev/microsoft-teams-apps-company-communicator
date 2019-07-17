@@ -5,7 +5,9 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System.Collections.Generic;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User;
@@ -14,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     /// Teams data controller.
     /// </summary>
     [Route("api/teamsData")]
+    [Authorize(PolicyNames.MustBeValidUpnPolicy)]
     public class TeamsDataController
     {
         private readonly TeamsDataRepository teamsDataRepository;
