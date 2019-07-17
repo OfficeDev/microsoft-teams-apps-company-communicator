@@ -10,20 +10,19 @@ import './messages.scss';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getDetailsListHeaderStyle, getDetailsListHeaderColumnStyle } from './messages.style';
 import { Icon } from '@stardust-ui/react';
-
 import { connect } from 'react-redux';
 import { selectMessage, getMessagesList } from '../../actions';
 import * as microsoftTeams from "@microsoft/teams-js";
-import { getBaseUrl } from '../configVariables';
+import { getBaseUrl } from '../../configVariables';
 
 export interface ITaskInfo {
   title?: string;
   height?: number;
   width?: number;
   url?: string;
-  card?: any;
-  fallbackUrl?: any;
-  completionBotId?: any;
+  card?: string;
+  fallbackUrl?: string;
+  completionBotId?: string;
 }
 
 export interface IMessage {
@@ -113,11 +112,11 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
 
           return (
             <div className="content">
-              <TooltipHost content="Sent Successfully!" calloutProps={{ gapSpace: 0 }}>
+              <TooltipHost content="Success" calloutProps={{ gapSpace: 0 }}>
                 <Icon name="stardust-checkmark" xSpacing="after"> </Icon>{success}
               </TooltipHost>
 
-              <TooltipHost content="Sent Failure!" calloutProps={{ gapSpace: 0 }}>
+              <TooltipHost content="Failure" calloutProps={{ gapSpace: 0 }}>
                 <Icon name="stardust-close" xSpacing="both" />{failure}
               </TooltipHost>
 

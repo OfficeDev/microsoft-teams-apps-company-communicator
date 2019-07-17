@@ -3,7 +3,7 @@ import Messages from '../Messages/messages';
 import DraftMessages from '../DraftMessages/draftMessages';
 import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
-import { getBaseUrl } from '../configVariables';
+import { getBaseUrl } from '../../configVariables';
 import { Accordion } from '@stardust-ui/react';
 
 interface ITaskInfo {

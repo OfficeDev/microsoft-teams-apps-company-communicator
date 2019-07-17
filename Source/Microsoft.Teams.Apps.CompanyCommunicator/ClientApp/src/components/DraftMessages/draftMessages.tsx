@@ -35,8 +35,8 @@ export interface IMessageState {
 }
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
-  private _selection: Selection;
-  private _columns: IColumn[];
+  private selection: Selection;
+  private columns: IColumn[];
 
   constructor(props: IMessageProps) {
     super(props);
@@ -47,7 +47,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
      * 
      */
 
-    this._columns = [
+    this.columns = [
       {
         key: 'column1',
         name: 'Title',
@@ -69,14 +69,14 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     this.state = {
       message: props.messages,
       selectionDetails: "",
-      columns: this._columns,
+      columns: this.columns,
       selectAccount: 0,
       itemsAccount: this.props.messages.length,
       width: window.innerWidth,
       height: window.innerHeight,
     };
 
-    this._selection = new Selection({
+    this.selection = new Selection({
       onSelectionChanged: () => {
         this.setState({ selectionDetails: this.getSelectionDetails(this.state.message.length) });
       }
@@ -97,12 +97,12 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     return (
       <div>
         <Fabric>
-          <MarqueeSelection selection={this._selection}>
+          <MarqueeSelection selection={this.selection}>
             <DetailsList
               items={this.state.message}
               columns={this.state.columns}
               setKey="set"
-              selection={this._selection}
+              selection={this.selection}
               selectionPreservedOnEmptyClick={true}
               onColumnHeaderClick={this.onColumnClick}
               ariaLabelForSelectionColumn="Toggle selection"
@@ -118,13 +118,13 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   }
 
   private getSelectionDetails = (num: number): string => {
-    let selectionCount = this._selection.getSelectedCount();
+    let selectionCount = this.selection.getSelectedCount();
 
     this.setState({
       selectAccount: selectionCount
     });
 
-    let selectedItem = this._selection.getSelection();
+    let selectedItem = this.selection.getSelection();
     this.props.selectMessage(selectedItem);
 
     return `${selectionCount} items selected`;

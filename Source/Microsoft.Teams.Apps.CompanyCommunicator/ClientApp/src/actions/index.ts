@@ -1,4 +1,4 @@
-import messageList from '../apis/messageList';
+import { getMessageList, getDraftMessage } from '../apis/messageListApi';
 
 export const selectMessage = (message: any) => {
     return {
@@ -8,11 +8,11 @@ export const selectMessage = (message: any) => {
 };
 
 export const getMessagesList = () => async (dispatch: any) => {
-    const response = await messageList.get('/sentnotifications');
+    const response = await getMessageList();
     dispatch({ type: 'FETCH_MESSAGES', payload: response.data });
 };
 
 export const getDraftMessagesList = () => async (dispatch: any) => {
-    const response = await messageList.get('/draftnotifications');
+    const response = await getDraftMessage();
     dispatch({ type: 'FETCH_DRAFTMESSAGES', payload: response.data });
 };

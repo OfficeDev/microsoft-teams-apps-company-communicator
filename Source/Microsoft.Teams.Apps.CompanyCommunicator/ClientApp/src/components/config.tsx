@@ -1,6 +1,6 @@
 import React from 'react';
 import * as microsoftTeams from "@microsoft/teams-js";
-import { getBaseUrl } from './configVariables';
+import { getBaseUrl } from '../configVariables';
 
 export interface IConfigState {
     url: string;
