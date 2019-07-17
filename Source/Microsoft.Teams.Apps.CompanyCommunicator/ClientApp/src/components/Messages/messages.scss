@@ -6,8 +6,41 @@
   white-space: nowrap;
   overflow: hidden;
   width: 100%;
+
+  .contentTitle {
+    text-decoration: none;
+
+    &:hover {
+      color: #6264A7;
+      cursor: pointer;
+      border-bottom: 0.1rem solid #6264A7;
+      text-decoration: none;
+    }
+  }
+
+  .recipientsContent {
+    display: inline;
+
+    .recipients {
+      display: inline;
+    }
+
+    .tooltip {
+      margin: 0rem 1rem;
+    }
+  }
 }
 
 .sortIcon {
   margin: 1.2rem 0.3rem;
+}
+
+.ms-CommandBar {
+  height: 100%;
+  padding: 0rem;
+  background-color: transparent;
+
+  .moreBtn {
+    background-color: transparent !important;
+  }
 }
