@@ -10,7 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
-    /// Respository for the notification data in the table storage.
+    /// Base respository for the data stored in the Azure Table Storage.
     /// </summary>
     /// <typeparam name="T">Entity class type.</typeparam>
     public class BaseRepository<T>
@@ -22,7 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// Initializes a new instance of the <see cref="BaseRepository{T}"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
-        /// <param name="tableName">Table name.</param>
+        /// <param name="tableName">The name of the table in Azure Table Storage.</param>
         public BaseRepository(IConfiguration configuration, string tableName)
         {
             var storageAccountSASConnectionString = configuration.GetValue<string>("StorageAccountSASConnectionString");

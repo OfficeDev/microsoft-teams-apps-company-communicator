@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
     /// <summary>
-    /// Message model class.
+    /// Sent notification summary model class.
     /// </summary>
     public class SentNotificationSummary
     {

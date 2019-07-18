@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
 {
     /// <summary>
-    /// Enuerables indicating the state of a notification per recipient.
+    /// Enumerable indicating a notification's delivery status.
     /// </summary>
     public enum DeliveryStatus
     {
@@ -20,7 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         Succeeded,
 
         /// <summary>
-        /// Indicating a notification was failed in sending to a recipient.
+        /// Indicating a notification was failed in sending to a audience.
         /// </summary>
         Failed,
 

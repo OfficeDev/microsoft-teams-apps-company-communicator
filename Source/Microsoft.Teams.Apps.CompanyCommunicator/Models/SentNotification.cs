@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
     using System.Collections.Generic;
 
     /// <summary>
-    /// Notification model class.
+    /// Sent notification model class.
     /// </summary>
     public class SentNotification
     {

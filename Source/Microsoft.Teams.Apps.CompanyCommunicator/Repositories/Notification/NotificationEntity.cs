@@ -4,15 +4,12 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
 {
-    using System.Collections;
     using System.Collections.Generic;
-    using System.Net;
     using Microsoft.Azure.Cosmos.Table;
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Notification entity class used in repository.
-    /// This class contains a collection of Recipeint entities.
+    /// Notification entity class.
     /// </summary>
     public class NotificationEntity : TableEntity
     {
@@ -68,7 +65,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
 
         /// <summary>
         /// Gets or sets TeamsInString value.
-        /// This property is a walk around to save the Teams list in Table Storage.
+        /// This property helps to save the Teams data in Azure Table storage.
+        /// Table Storage doesn't support array type of property directly.
         /// </summary>
         public string TeamsInString { get; set; }
 
@@ -91,7 +89,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
 
         /// <summary>
         /// Gets or sets RostersInString value.
-        /// This property is a walk around to save the Rosters list in Table Storage.
+        /// This property helps to save the Rosters list in Table Storage.
+        /// Table Storage doesn't support array type of property directly.
         /// </summary>
         public string RostersInString { get; set; }
 

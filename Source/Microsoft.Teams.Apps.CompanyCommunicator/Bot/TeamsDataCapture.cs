@@ -11,7 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Newtonsoft.Json.Linq;
 
     /// <summary>
-    /// Capture teams data.
+    /// Service to capture teams data.
     /// </summary>
     public class TeamsDataCapture
     {
@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <summary>
         /// Add channel or personal data in Table Storage.
         /// </summary>
-        /// <param name="activity">Activity instance.</param>
+        /// <param name="activity">Teams activity instance.</param>
         public void OnAdded(IConversationUpdateActivity activity)
         {
             switch (activity.Conversation.ConversationType)
@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <summary>
         /// Remove channel or personal data in table storage.
         /// </summary>
-        /// <param name="activity">Activity instance.</param>
+        /// <param name="activity">Teams activity instance.</param>
         public void OnRemoved(IConversationUpdateActivity activity)
         {
             switch (activity.Conversation.ConversationType)

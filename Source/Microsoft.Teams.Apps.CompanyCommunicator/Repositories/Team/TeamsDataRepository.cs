@@ -5,10 +5,9 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
 {
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
 
     /// <summary>
-    /// Respository for the team data stored in the table storage.
+    /// Respository of the team data stored in the table storage.
     /// </summary>
     public class TeamsDataRepository : BaseRepository<TeamsDataEntity>
     {

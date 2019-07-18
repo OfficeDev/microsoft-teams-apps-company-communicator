@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User
     using Microsoft.Azure.Cosmos.Table;
 
     /// <summary>
-    /// User entity class.
+    /// User data entity class.
     /// </summary>
     public class UserDataEntity : TableEntity
     {

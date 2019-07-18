@@ -20,11 +20,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         public static readonly string UserData = "UserData";
 
         /// <summary>
-        /// Bot conversation reference partition key name.
-        /// </summary>
-        public static readonly string BotConversationReference = "BotConversationReference";
-
-        /// <summary>
         /// Notification partition key name.
         /// </summary>
         public static readonly string Notification = "Notification";

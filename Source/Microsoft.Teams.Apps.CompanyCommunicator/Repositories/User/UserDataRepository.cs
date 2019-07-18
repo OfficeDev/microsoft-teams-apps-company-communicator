@@ -5,10 +5,9 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User
 {
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
 
     /// <summary>
-    /// Respository for the user data in the table storage.
+    /// Respository of the user data stored in the table storage.
     /// </summary>
     public class UserDataRepository : BaseRepository<UserDataEntity>
     {

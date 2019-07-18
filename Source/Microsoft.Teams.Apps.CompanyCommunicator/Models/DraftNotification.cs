@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
     using System.Collections.Generic;
 
     /// <summary>
-    /// Notification model class.
+    /// Draft notification model class.
     /// </summary>
     public class DraftNotification
     {

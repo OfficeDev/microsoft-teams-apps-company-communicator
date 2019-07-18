@@ -31,12 +31,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
-        /// Create a new sent notification.
+        /// Send a draft notification, which turns the draft to be a sent notification.
         /// </summary>
         /// <param name="notification">An instance of <see cref="DraftNotification"/> class.</param>
-        /// <returns>Action Result.</returns>
+        /// <returns>The result of an action method.</returns>
         [HttpPost("api/sentNotifications")]
-        public IActionResult CreatedSentNotification([FromBody]DraftNotification notification)
+        public IActionResult CreateSentNotification([FromBody]DraftNotification notification)
         {
             var notificationEntity = this.notificationRepository.Get(PartitionKeyNames.Notification, notification.Id);
             if (notificationEntity != null)
@@ -52,7 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
-        /// Get sent notifications.
+        /// Get all sent notification summaries.
         /// </summary>
         /// <returns>A list of <see cref="SentNotificationSummary"/> instances.</returns>
         [HttpGet("api/sentNotifications")]

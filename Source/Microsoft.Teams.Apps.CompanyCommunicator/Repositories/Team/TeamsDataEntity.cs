@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
     using Microsoft.Azure.Cosmos.Table;
 
     /// <summary>
-    /// Team entity class.
+    /// Teams data entity class.
     /// </summary>
     public class TeamsDataEntity : TableEntity
     {

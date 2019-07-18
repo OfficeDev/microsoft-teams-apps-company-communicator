@@ -13,7 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User;
 
     /// <summary>
-    /// Teams data controller.
+    /// Controller for the teams data.
     /// </summary>
     [Route("api/teamsData")]
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
@@ -60,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
-        /// Get all users' data.
+        /// Get all users data.
         /// </summary>
         /// <returns>A list of user data.</returns>
         [HttpGet("personal")]

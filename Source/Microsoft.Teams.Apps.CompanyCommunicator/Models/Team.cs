@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
     /// <summary>
-    /// Team model class.
+    /// Teams data model class.
     /// </summary>
     public class Team
     {
