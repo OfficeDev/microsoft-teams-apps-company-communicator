@@ -1,4 +1,4 @@
-﻿// <copyright file="User.cs" company="Microsoft">
+﻿// <copyright file="UserData.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User
     /// <summary>
     /// User model class.
     /// </summary>
-    public class User
+    public class UserData
     {
         /// <summary>
         /// Gets or sets name.

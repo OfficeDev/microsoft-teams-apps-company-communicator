@@ -40,13 +40,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <returns>A list of team data.</returns>
         [HttpGet("channel")]
-        public IEnumerable<Team> GetAllChannelTypeData()
+        public IEnumerable<TeamsData> GetAllChannelTypeData()
         {
             var entities = this.teamsDataRepository.All();
-            var result = new List<Team>();
+            var result = new List<TeamsData>();
             foreach (var entity in entities)
             {
-                var team = new Team
+                var team = new TeamsData
                 {
                     TeamId = entity.TeamId,
                     Name = entity.Name,
@@ -64,13 +64,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <returns>A list of user data.</returns>
         [HttpGet("personal")]
-        public IEnumerable<User> GetAllPersonalTypeData()
+        public IEnumerable<UserData> GetAllPersonalTypeData()
         {
             var entities = this.userDataRepository.All();
-            var result = new List<User>();
+            var result = new List<UserData>();
             foreach (var entity in entities)
             {
-                var user = new User
+                var user = new UserData
                 {
                     Name = entity.Name,
                     Email = entity.Email,

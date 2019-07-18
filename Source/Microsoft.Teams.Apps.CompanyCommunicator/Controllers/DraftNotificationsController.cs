@@ -16,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     /// <summary>
     /// Controller for the draft notification data.
     /// </summary>
+    [Route("api/draftNotifications")]
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
     public class DraftNotificationsController : ControllerBase
     {
@@ -33,8 +34,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <summary>
         /// Create a new draft notification.
         /// </summary>
-        /// <param name="notification">An instance of <see cref="DraftNotification"/> class.</param>
-        [HttpPost("api/draftNotifications")]
+        /// <param name="notification">A new Draft Notification to be created.</param>
+        [HttpPost]
         public void CreateDraftNotification([FromBody]DraftNotification notification)
         {
             var id = Guid.NewGuid().ToString();
@@ -49,6 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Author = notification.Author,
                 ButtonTitle = notification.ButtonTitle,
                 ButtonLink = notification.ButtonLink,
+                CreatedBy = this.HttpContext.User?.Identity?.Name,
                 CreatedDate = DateTime.UtcNow.ToShortDateString(),
                 IsDraft = true,
                 Teams = this.IdToAudience(notification.Teams),
@@ -60,11 +62,97 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
+        /// Create a new draft notification.
+        /// </summary>
+        /// <param name="id">The id of a Draft Notification to be cloned.</param>
+        /// <returns>If the passed in id is invalide, it returns 404 not found error. Otherwise, it returns 200 Ok.</returns>
+        [HttpPost("duplicates/{id}")]
+        public IActionResult DuplicateDraftNotification(string id)
+        {
+            var notificationEntity = this.notificationRepository.Get(PartitionKeyNames.Notification, id);
+            if (notificationEntity != null)
+            {
+                var newId = Guid.NewGuid().ToString();
+                var newNotificationEntity = new NotificationEntity
+                {
+                    PartitionKey = PartitionKeyNames.Notification,
+                    RowKey = newId,
+                    Id = newId,
+                    Title = notificationEntity.Title,
+                    ImageLink = notificationEntity.ImageLink,
+                    Summary = notificationEntity.Summary,
+                    Author = notificationEntity.Author,
+                    ButtonTitle = notificationEntity.ButtonTitle,
+                    ButtonLink = notificationEntity.ButtonLink,
+                    CreatedBy = this.HttpContext.User?.Identity?.Name,
+                    CreatedDate = DateTime.UtcNow.ToShortDateString(),
+                    IsDraft = true,
+                    Teams = notificationEntity.Teams,
+                    Rosters = notificationEntity.Rosters,
+                    AllUsers = notificationEntity.AllUsers,
+                };
+
+                this.notificationRepository.CreateOrUpdate(newNotificationEntity);
+
+                return this.Ok();
+            }
+
+            return this.NotFound();
+        }
+
+        /// <summary>
+        /// Update an existing draft notification.
+        /// </summary>
+        /// <param name="notification">An existing Draft Notification to be updated.</param>
+        [HttpPut]
+        public void UpdateDraftNotification([FromBody]DraftNotification notification)
+        {
+            var notificationEntity = new NotificationEntity
+            {
+                PartitionKey = PartitionKeyNames.Notification,
+                RowKey = notification.Id,
+                Id = notification.Id,
+                Title = notification.Title,
+                ImageLink = notification.ImageLink,
+                Summary = notification.Summary,
+                Author = notification.Author,
+                ButtonTitle = notification.ButtonTitle,
+                ButtonLink = notification.ButtonLink,
+                CreatedBy = this.HttpContext.User?.Identity?.Name,
+                CreatedDate = DateTime.UtcNow.ToShortDateString(),
+                IsDraft = true,
+                Teams = this.IdToAudience(notification.Teams),
+                Rosters = this.IdToAudience(notification.Rosters),
+                AllUsers = notification.AllUsers,
+            };
+
+            this.notificationRepository.CreateOrUpdate(notificationEntity);
+        }
+
+        /// <summary>
+        /// Delete an existing draft notification.
+        /// </summary>
+        /// <param name="id">The id of the draft notification to be deleted.</param>
+        /// <returns>If the passed in Id is invalide, it returns 404 not found error. Otherwise, it returns 200 Ok.</returns>
+        [HttpDelete("{id}")]
+        public IActionResult DeleteDraftNotification(string id)
+        {
+            var notificationEntity = this.notificationRepository.Get(PartitionKeyNames.Notification, id);
+            if (notificationEntity != null)
+            {
+                this.notificationRepository.Delete(notificationEntity);
+                return this.Ok();
+            }
+
+            return this.NotFound();
+        }
+
+        /// <summary>
         /// Get draft notifications.
         /// </summary>
         /// <returns>A list of <see cref="DraftNotificationSummary"/> instances.</returns>
-        [HttpGet("api/draftNotifications")]
-        public IEnumerable<DraftNotificationSummary> GetDraftNotifications()
+        [HttpGet]
+        public ActionResult<IEnumerable<DraftNotificationSummary>> GetAllDraftNotifications()
         {
             var notificationEntities = this.notificationRepository.All(true);
 
@@ -87,9 +175,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// Get a draft notification by Id.
         /// </summary>
         /// <param name="id">Draft notification Id.</param>
-        /// <returns>The draft notification with the specific id.</returns>
-        [HttpGet("api/draftNotifications/{id}")]
-        public IActionResult GetDraftNotificationById(string id)
+        /// <returns>It returns the draft notification with the passed in id.
+        /// The returning value is wrapped in a ActionResult object.
+        /// If the passed in id is invalid, it returns 404 not found error.</returns>
+        [HttpGet("{id}")]
+        public ActionResult<DraftNotification> GetDraftNotificationById(string id)
         {
             var notificationEntity = this.notificationRepository.Get(PartitionKeyNames.Notification, id);
             if (notificationEntity != null)

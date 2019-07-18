@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Configuration;
 
@@ -34,7 +35,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
                     QueryComparisons.Equal,
                     isDraft);
 
-            var entities = this.All(filter);
+            var entities = this.All(filter).Take(25);
 
             return entities;
         }

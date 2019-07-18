@@ -49,6 +49,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         public string ButtonLink { get; set; }
 
         /// <summary>
+        /// Gets or sets the CreatedBy value.
+        /// </summary>
+        public string CreatedBy { get; set; }
+
+        /// <summary>
         /// Gets or sets the Created Date value.
         /// </summary>
         public string CreatedDate { get; set; }
