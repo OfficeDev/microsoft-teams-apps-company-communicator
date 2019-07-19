@@ -52,6 +52,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public string CreatedDate { get; set; }
 
         /// <summary>
+        /// Gets or sets the Sent Date value.
+        /// </summary>
+        public string SentDate { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of audiences received the notification successfully.
         /// </summary>
         public int Succeeded { get; set; }

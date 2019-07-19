@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.SentNotification
 {
     /// <summary>
     /// Audience entity class.
@@ -12,7 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         /// <summary>
         /// Gets or sets team Id.
         /// </summary>
-        public string TeamId { get; set; }
+        public string AadId { get; set; }
 
         /// <summary>
         /// Gets or sets delivery state.

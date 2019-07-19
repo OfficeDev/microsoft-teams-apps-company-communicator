@@ -79,11 +79,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         /// Gets or sets Teams audience collection.
         /// </summary>
         [IgnoreProperty]
-        public IEnumerable<AudienceEntity> Teams
+        public IEnumerable<string> Teams
         {
             get
             {
-                return JsonConvert.DeserializeObject<IEnumerable<AudienceEntity>>(this.TeamsInString);
+                return JsonConvert.DeserializeObject<IEnumerable<string>>(this.TeamsInString);
             }
 
             set
@@ -103,11 +103,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         /// Gets or sets Rosters audience collection.
         /// </summary>
         [IgnoreProperty]
-        public IEnumerable<AudienceEntity> Rosters
+        public IEnumerable<string> Rosters
         {
             get
             {
-                return JsonConvert.DeserializeObject<IEnumerable<AudienceEntity>>(this.RostersInString);
+                return JsonConvert.DeserializeObject<IEnumerable<string>>(this.RostersInString);
             }
 
             set
@@ -122,18 +122,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         public bool AllUsers { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of audiences received the notification successfully.
+        /// Gets or sets version number.
         /// </summary>
-        public int Succeeded { get; set; }
-
-        /// <summary>
-        /// Gets or sets the number of audiences who failed in receiving the notification.
-        /// </summary>
-        public int Failed { get; set; }
-
-        /// <summary>
-        /// Gets or sets the number of audiences throttled out.
-        /// </summary>
-        public int Throttled { get; set; }
+        public string Version { get; set; }
     }
 }

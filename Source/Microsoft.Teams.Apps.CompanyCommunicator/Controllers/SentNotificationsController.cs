@@ -69,7 +69,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     Title = notificationEntity.Title,
                     CreatedDate = notificationEntity.CreatedDate,
                     SentDate = notificationEntity.SentDate,
-                    Recipients = $"{notificationEntity.Succeeded},{notificationEntity.Failed},{notificationEntity.Throttled}",
+                    Recipients = $"5,1,2",
                 };
 
                 result.Add(summary);
@@ -99,9 +99,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     ButtonTitle = notificationEntity.ButtonTitle,
                     ButtonLink = notificationEntity.ButtonLink,
                     CreatedDate = notificationEntity.CreatedDate,
-                    Succeeded = notificationEntity.Succeeded,
-                    Failed = notificationEntity.Failed,
-                    Throttled = notificationEntity.Throttled,
+                    SentDate = notificationEntity.SentDate,
+                    Succeeded = 10,
+                    Failed = 1,
+                    Throttled = 1,
                 };
 
                 return this.Ok(result);

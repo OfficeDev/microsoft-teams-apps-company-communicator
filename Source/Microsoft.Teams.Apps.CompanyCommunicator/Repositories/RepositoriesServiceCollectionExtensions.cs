@@ -5,7 +5,9 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
 {
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.ActiveNotification;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.SentNotification;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User;
 
@@ -20,9 +22,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// <param name="services">IServiceCollection instance.</param>
         public static void AddRepositories(this IServiceCollection services)
         {
-            services.AddTransient<NotificationRepository>();
-            services.AddTransient<UserDataRepository>();
-            services.AddTransient<TeamsDataRepository>();
+            services.AddSingleton<ActiveNotificationRepository>();
+            services.AddSingleton<SentNotificationRepository>();
+            services.AddSingleton<NotificationRepository>();
+            services.AddSingleton<UserDataRepository>();
+            services.AddSingleton<TeamsDataRepository>();
         }
     }
 }

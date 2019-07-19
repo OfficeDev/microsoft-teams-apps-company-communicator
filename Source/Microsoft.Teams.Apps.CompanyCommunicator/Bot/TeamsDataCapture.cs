@@ -134,7 +134,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             var userDataEntity = new UserDataEntity
             {
                 PartitionKey = PartitionKeyNames.UserData,
-                RowKey = activity?.From?.Id,
+                RowKey = activity?.From?.AadObjectId,
                 AadId = activity?.From?.AadObjectId,
                 UserId = activity?.From?.Id,
                 ConversationId = activity?.Conversation?.Id,

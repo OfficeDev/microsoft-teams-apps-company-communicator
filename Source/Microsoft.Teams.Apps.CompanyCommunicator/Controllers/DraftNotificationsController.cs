@@ -53,8 +53,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 CreatedBy = this.HttpContext.User?.Identity?.Name,
                 CreatedDate = DateTime.UtcNow.ToShortDateString(),
                 IsDraft = true,
-                Teams = this.IdToAudience(notification.Teams),
-                Rosters = this.IdToAudience(notification.Rosters),
+                Teams = notification.Teams,
+                Rosters = notification.Rosters,
                 AllUsers = notification.AllUsers,
             };
 
@@ -121,8 +121,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 CreatedBy = this.HttpContext.User?.Identity?.Name,
                 CreatedDate = DateTime.UtcNow.ToShortDateString(),
                 IsDraft = true,
-                Teams = this.IdToAudience(notification.Teams),
-                Rosters = this.IdToAudience(notification.Rosters),
+                Teams = notification.Teams,
+                Rosters = notification.Rosters,
                 AllUsers = notification.AllUsers,
             };
 
@@ -194,8 +194,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     ButtonTitle = notificationEntity.ButtonTitle,
                     ButtonLink = notificationEntity.ButtonLink,
                     CreatedDate = notificationEntity.CreatedDate,
-                    Teams = this.AudienceToId(notificationEntity.Teams),
-                    Rosters = this.AudienceToId(notificationEntity.Rosters),
+                    Teams = notificationEntity.Teams,
+                    Rosters = notificationEntity.Rosters,
                     AllUsers = notificationEntity.AllUsers,
                 };
 
@@ -203,39 +203,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             return this.NotFound();
-        }
-
-        private IEnumerable<AudienceEntity> IdToAudience(IEnumerable<string> teamIds)
-        {
-            var result = new List<AudienceEntity>();
-            if (teamIds != null)
-            {
-                foreach (var id in teamIds)
-                {
-                    var audience = new AudienceEntity
-                    {
-                        TeamId = id,
-                        DeliveryState = DeliveryStatus.Pending,
-                    };
-                    result.Add(audience);
-                }
-            }
-
-            return result;
-        }
-
-        private IEnumerable<string> AudienceToId(IEnumerable<AudienceEntity> audiences)
-        {
-            var result = new List<string>();
-            if (audiences != null)
-            {
-                foreach (var audience in audiences)
-                {
-                    result.Add(audience.TeamId);
-                }
-            }
-
-            return result;
         }
     }
 }
