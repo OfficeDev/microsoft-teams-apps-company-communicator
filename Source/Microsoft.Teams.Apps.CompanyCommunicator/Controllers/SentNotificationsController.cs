@@ -6,10 +6,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
+    using Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
 
@@ -20,14 +22,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     public class SentNotificationsController : ControllerBase
     {
         private readonly NotificationRepository notificationRepository;
+        private readonly NotificationDelivery notificationDelivery;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
         /// </summary>
         /// <param name="notificationRepository">Notification respository service that deals with the table storage in azure.</param>
-        public SentNotificationsController(NotificationRepository notificationRepository)
+        /// <param name="notificationDelivery">Notification delivery service instance.</param>
+        public SentNotificationsController(
+            NotificationRepository notificationRepository,
+            NotificationDelivery notificationDelivery)
         {
             this.notificationRepository = notificationRepository;
+            this.notificationDelivery = notificationDelivery;
         }
 
         /// <summary>
@@ -36,11 +43,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notification">An instance of <see cref="DraftNotification"/> class.</param>
         /// <returns>The result of an action method.</returns>
         [HttpPost("api/sentNotifications")]
-        public IActionResult CreateSentNotification([FromBody]DraftNotification notification)
+        public async Task<IActionResult> CreateSentNotification([FromBody]DraftNotification notification)
         {
             var notificationEntity = this.notificationRepository.Get(PartitionKeyNames.Notification, notification.Id);
             if (notificationEntity != null)
             {
+                await this.notificationDelivery.Send(notificationEntity.Id);
+
                 notificationEntity.IsDraft = false;
                 notificationEntity.SentDate = DateTime.UtcNow.ToShortDateString();
                 this.notificationRepository.CreateOrUpdate(notificationEntity);

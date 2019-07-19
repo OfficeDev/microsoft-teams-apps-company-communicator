@@ -15,12 +15,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// Extension method to register notification delivery services in DI container.
         /// </summary>
         /// <param name="services">IServiceCollection instance.</param>
-        public static void AddRepositories(this IServiceCollection services)
+        public static void AddNotificationDelivery(this IServiceCollection services)
         {
-            services.AddTransient<AdaptiveCardGenerator>();
             services.AddTransient<NotificationDelivery>();
-            services.AddTransient<RosterLoader>();
-            services.AddTransient<MessageQueue>();
+
+            services.AddTransient<ActiveNotificationCreator>();
+
+            services.AddTransient<UserDataProvider>();
+
+            services.AddSingleton<MessageQueue>();
         }
     }
 }

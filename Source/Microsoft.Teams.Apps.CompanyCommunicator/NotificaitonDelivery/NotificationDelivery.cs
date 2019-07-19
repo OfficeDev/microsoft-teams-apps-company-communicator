@@ -4,43 +4,37 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 {
+    using System.Threading.Tasks;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.ActiveNotification;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User;
 
     /// <summary>
     /// Notification delivery service.
     /// </summary>
     public class NotificationDelivery
     {
-        private readonly ActiveNotificationRepository activeNotificationRepository;
         private readonly NotificationRepository notificationRepository;
-        private readonly UserDataRepository userDataRepository;
-        private readonly TeamsDataRepository teamsDataRepository;
-        private readonly AdaptiveCardGenerator adaptiveCardGenerator;
+        private readonly UserDataProvider userDataProvider;
+        private readonly ActiveNotificationCreator activeNotificationCreator;
+        private readonly MessageQueue messageQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationDelivery"/> class.
         /// </summary>
-        /// <param name="activeNotificationRepository">Active Notification Repository instance.</param>
-        /// <param name="notificationRepository">Notification Repository instance.</param>
-        /// <param name="teamsDataRepository">Teams Data Repository instance.</param>
-        /// <param name="userDataRepository">User Data Repository instance.</param>
-        /// <param name="adaptiveCardGenerator">Adaptive Card Generator instance.</param>
+        /// <param name="notificationRepository">Notification repository service.</param>
+        /// <param name="userDataProvider">User Data Provider instance.</param>
+        /// <param name="activeNotificationCreator">Adaptive Card Generator instance.</param>
+        /// <param name="messageQueue">Message Queue service.</param>
         public NotificationDelivery(
-            ActiveNotificationRepository activeNotificationRepository,
             NotificationRepository notificationRepository,
-            UserDataRepository userDataRepository,
-            TeamsDataRepository teamsDataRepository,
-            AdaptiveCardGenerator adaptiveCardGenerator)
+            UserDataProvider userDataProvider,
+            ActiveNotificationCreator activeNotificationCreator,
+            MessageQueue messageQueue)
         {
-            this.activeNotificationRepository = activeNotificationRepository;
             this.notificationRepository = notificationRepository;
-            this.userDataRepository = userDataRepository;
-            this.teamsDataRepository = teamsDataRepository;
-            this.adaptiveCardGenerator = adaptiveCardGenerator;
+            this.userDataProvider = userDataProvider;
+            this.activeNotificationCreator = activeNotificationCreator;
+            this.messageQueue = messageQueue;
         }
 
         /// <summary>
@@ -48,7 +42,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// </summary>
         /// <param name="notificationId">Id of the notification to be sent.</param>
         /// <returns>Indicating whether the notification was sent successfully or not.</returns>
-        public bool Send(string notificationId)
+        public async Task<bool> Send(string notificationId)
         {
             var notification = this.notificationRepository.Get(PartitionKeyNames.Notification, notificationId);
             if (notification == null || !notification.IsDraft)
@@ -57,16 +51,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
             }
 
             // Set in ActiveNotification data
+            this.activeNotificationCreator.Create(notificationId);
 
             // Get all users
+            var userDataDictionary = this.userDataProvider.GetUserDataDictionary();
 
             // Get all teams
+            var roster = await this.userDataProvider.GetAllTeamsRosterAsync();
 
             // Deduplicate users
+            var deDuplicatedRoster = this.userDataProvider.Deduplicate(userDataDictionary, roster);
 
             // Set in SentNotificaiton data and counts
 
             // Create MB message.
+            this.messageQueue.Enqueue(notificationId, deDuplicatedRoster);
+
             return true;
         }
     }

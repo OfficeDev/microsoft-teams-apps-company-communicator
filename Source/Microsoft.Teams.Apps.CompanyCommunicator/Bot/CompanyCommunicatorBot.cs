@@ -9,6 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Connector;
     using Microsoft.Bot.Schema;
 
     /// <summary>
@@ -28,6 +29,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         }
 
         /// <summary>
+        /// Gets or sets ConnectorClient value.
+        /// </summary>
+        public IConnectorClient ConnectorClient { get; set; }
+
+        /// <summary>
         /// The bot framework calls the method when receiving a message from an user.
         /// </summary>
         /// <param name="turnContext">ITurnContext instance.</param>
@@ -35,6 +41,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <returns>A task that represents the work queued to execute.</returns>
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
+            this.ConnectorClient = turnContext.TurnState.Get<IConnectorClient>();
+
             await base.OnMessageActivityAsync(turnContext, cancellationToken);
 
             await turnContext.SendActivityAsync(MessageFactory.Text($"Echo: {turnContext.Activity.Text}"), cancellationToken);

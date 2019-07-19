@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
     /// <summary>
     /// User model class.

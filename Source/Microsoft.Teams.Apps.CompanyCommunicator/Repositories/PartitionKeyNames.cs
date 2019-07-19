@@ -23,5 +23,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// Notification partition key name.
         /// </summary>
         public static readonly string Notification = "Notification";
+
+        /// <summary>
+        /// Active Notification partition key name.
+        /// </summary>
+        public static readonly string ActiveNotification = "ActiveNotification";
+
+        /// <summary>
+        /// Sent Notification partition key name.
+        /// </summary>
+        public static readonly string SentNotification = "SentNotification";
     }
 }
