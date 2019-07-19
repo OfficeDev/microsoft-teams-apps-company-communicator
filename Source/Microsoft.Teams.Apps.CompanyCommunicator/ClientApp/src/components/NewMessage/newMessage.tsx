@@ -1,11 +1,26 @@
 import * as React from 'react';
 import './newMessage.scss';
 import './teamTheme.scss';
-import { Input, TextArea } from 'msteams-ui-components-react';
+import { Input, TextArea, IDropdownItemProps } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
-import { Dropdown, Checkbox } from 'msteams-ui-components-react';
-import { Button } from '@stardust-ui/react';
+import { Checkbox, Dropdown } from 'msteams-ui-components-react';
+import { Button, Loader } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
+import { RouteComponentProps } from 'react-router-dom';
+import { getDraftNotification, getTeams, creatDraftNotification, updateDraftNotification } from '../../apis/messageListApi';
+
+export interface IDraftMessage {
+    id?: string,
+    title: string,
+    imageLink?: string,
+    summary?: string,
+    author: string,
+    buttonTitle?: string,
+    buttonLink?: string,
+    teams: any[],
+    rosters: any[],
+    allUsers: boolean
+}
 
 export interface formState {
     title: string,
@@ -17,16 +32,26 @@ export interface formState {
     card?: any,
     page: string,
     channel?: string,
+    channelID: string,
     team?: string,
+    teamID: string,
     channelBox: boolean,
     teamBox: boolean,
-    allUsersBox: boolean
+    allUsersBox: boolean,
+    teams?: any[],
+    exists?: boolean,
+    messageId: string,
+    loader: boolean;
 }
 
-export default class NewMessage extends React.Component<{}, formState> {
+export interface INewMessageProps extends RouteComponentProps {
+    getDraftMessagesList?: any;
+}
+
+export default class NewMessage extends React.Component<INewMessageProps, formState> {
     private card: any;
 
-    constructor(props: {}) {
+    constructor(props: INewMessageProps) {
         super(props);
 
         this.card = {
@@ -35,7 +60,7 @@ export default class NewMessage extends React.Component<{}, formState> {
                 {
                     "type": "TextBlock",
                     "weight": "Bolder",
-                    "text": "",
+                    "text": "Title",
                     "size": "ExtraLarge",
                     "wrap": true
                 },
@@ -57,7 +82,7 @@ export default class NewMessage extends React.Component<{}, formState> {
                     "wrap": true,
                     "size": "Small",
                     "weight": "Lighter",
-                    "text": "Sent by:"
+                    "text": "Sent by: Anonymous"
                 }
             ],
             "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
@@ -73,24 +98,135 @@ export default class NewMessage extends React.Component<{}, formState> {
             btnTitle: "",
             card: this.card,
             page: "CardCreation",
-            channel: "Team",
-            team: "Team",
+            channel: "",
+            channelID: "",
+            team: "",
+            teamID: "",
             channelBox: false,
             teamBox: false,
-            allUsersBox: false
+            allUsersBox: false,
+            messageId: "",
+            loader: true
         }
     }
 
-    public componentDidMount() {
+    public async componentDidMount() {
         microsoftTeams.initialize();
         //- Handle the Esc key
         document.addEventListener("keydown", this.escFunction, false);
-        let adaptiveCard = new AdaptiveCards.AdaptiveCard();
-        adaptiveCard.parse(this.state.card);
-        let renderedCard = adaptiveCard.render();
-        document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
-        let link = this.state.btnLink;
-        adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
+        let params = this.props.match.params;
+        this.getTeamList().then(() => {
+            if ('id' in params) {
+                let id = params['id'];
+                this.getItem(id).then(() => {
+                    this.setState({
+                        exists: true,
+                        messageId: id
+                    })
+                });
+            } else {
+                this.setState({
+                    exists: false,
+                    loader: false
+                }, () => {
+                    let adaptiveCard = new AdaptiveCards.AdaptiveCard();
+                    adaptiveCard.parse(this.state.card);
+                    let renderedCard = adaptiveCard.render();
+                    document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
+                    let link = this.state.btnLink;
+                    adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
+                })
+            }
+        });
+    }
+
+    private getTeamList = async () => {
+        try {
+            const response = await getTeams();
+            this.setState({
+                channel: response.data[0].name,
+                team: response.data[0].name,
+                channelID: response.data[0].teamId,
+                teamID: response.data[0].teamId,
+                teams: response.data
+            });
+        } catch (error) {
+            return error;
+        }
+    }
+
+    private getTeamName = (id: string) => {
+        let teamName = "";
+        let teams = this.state.teams;
+        if (teams !== undefined) {
+            for (let i = 0; i < teams.length; i++) {
+                if (teams[i].teamId === id) {
+                    return teams[i].name;
+                }
+            }
+        }
+        return teamName;
+    }
+
+    private getItem = async (id: number) => {
+        try {
+            const response = await getDraftNotification(id);
+            let draftMessageDetail = response.data;
+            if (draftMessageDetail.teams.length === 0) {
+                this.setState({
+                    channelBox: false
+                });
+            } else {
+                let channel = this.getTeamName(draftMessageDetail.teams[0]);
+                this.setState({
+                    channelBox: true,
+                    channel: channel,
+                    channelID: draftMessageDetail.teams[0]
+                });
+            }
+
+            if (draftMessageDetail.rosters.length === 0) {
+                this.setState({
+                    teamBox: false
+                });
+            } else {
+                let team = this.getTeamName(draftMessageDetail.rosters[0]);
+                this.setState({
+                    teamBox: true,
+                    team: team,
+                    teamID: draftMessageDetail.rosters[0]
+                });
+            }
+
+            this.card.body[0].text = draftMessageDetail.title;
+            this.card.body[1].url = draftMessageDetail.imageLink;
+            this.card.body[2].text = draftMessageDetail.summary;
+            this.card.body[3].text = "Sent by : " + draftMessageDetail.author;
+            if (draftMessageDetail.buttonTitle !== "" && draftMessageDetail.buttonLink !== "") {
+                this.card.actions = [
+                    {
+                        "type": "Action.OpenUrl",
+                        "title": draftMessageDetail.buttonTitle,
+                        "url": draftMessageDetail.buttonLink
+                    }
+                ];
+            }
+
+            this.setState({
+                title: draftMessageDetail.title,
+                summary: draftMessageDetail.summary,
+                btnLink: draftMessageDetail.buttonLink,
+                imageLink: draftMessageDetail.imageLink,
+                btnTitle: draftMessageDetail.buttonTitle,
+                author: draftMessageDetail.author,
+                allUsersBox: draftMessageDetail.allUsers,
+                loader: false
+            }, () => {
+                this.updateCard();
+            });
+        } catch (error) {
+            return error;
+        }
     }
 
     public componentWillUnmount() {
@@ -98,148 +234,249 @@ export default class NewMessage extends React.Component<{}, formState> {
     }
 
     public render(): JSX.Element {
-        if (this.state.page === "CardCreation") {
+        if (this.state.loader) {
             return (
-                <div className="taskModule">
-                    <div className="formContainer">
-                        <div className="formContentContainer" >
-                            <Input
-                                className="inputField"
-                                value={this.state.title}
-                                label="Title"
-                                placeholder="Title"
-                                errorLabel={!this.state.title ? "This value is required" : undefined}
-                                onChange={this.onValueChanged}
-                                status={this.state.title ? "updated" : undefined}
-                                autoComplete="off"
-                                required
-                            />
-
-                            <Input
-                                className="inputField"
-                                value={this.state.imageLink}
-                                label="Image Link"
-                                placeholder="Image link (optional)"
-                                onChange={this.onImageLinkChanged}
-                                status={this.state.imageLink ? "updated" : undefined}
-                                autoComplete="off"
-                            />
-
-                            <TextArea
-                                className="inputField textArea"
-                                autoFocus
-                                placeholder="Summary (optional)"
-                                label="Summary"
-                                value={this.state.summary}
-                                onChange={this.onSummaryChanged}
-                            />
-
-                            <Input
-                                className="inputField"
-                                value={this.state.author}
-                                label="Author"
-                                placeholder="Author"
-                                errorLabel={!this.state.author ? "This value is required" : undefined}
-                                onChange={this.onAuthorChanged}
-                                status={this.state.author ? "updated" : undefined}
-                                autoComplete="off"
-                                required
-                            />
-
-                            <Input
-                                className="inputField"
-                                value={this.state.btnTitle}
-                                label="Button Title"
-                                placeholder="Button title"
-                                onChange={this.onBtnTitleChanged}
-                                status={this.state.btnTitle ? "updated" : undefined}
-                                autoComplete="off"
-                            />
-
-                            <Input
-                                className="inputField"
-                                value={this.state.btnLink}
-                                label="Button Url"
-                                placeholder="Button url"
-                                onChange={this.onBtnLinkChanged}
-                                status={this.state.btnLink ? "updated" : undefined}
-                                autoComplete="off"
-                            />
-                        </div>
-                        <div className="adaptiveCardContainer">
-                        </div>
-                    </div>
-
-                    <div className="footerContainer">
-                        <div className="buttonContainer">
-                            <Button content="Next" disabled={this.state.title === "" || this.state.author === ""} id="saveBtn" onClick={this.onNext} primary />
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-        else if (this.state.page === "AudienceSelection") {
-            return (
-                <div className="taskModule">
-                    <div className="formContainer">
-
-                        <h3>Recipient Selection</h3>
-                        <h4>Please choose the groups you would like to send your message to.</h4>
-
-                        <div className="checkboxBtns">
-                            <p className="checkboxBtn">
-                                <Checkbox checked={this.state.channelBox} label="Send to a Team(s)" value="teamtest" onChecked={this.onChannel} />
-                            </p>
-
-                            <p className="checkboxBtn">
-                                <Checkbox checked={this.state.teamBox} label="Send to the team members of a Team(s)" value="teams" onChecked={this.onTeam} />
-                            </p>
-
-                            <p className="checkboxBtn">
-                                <Checkbox checked={this.state.allUsersBox} label="Send to all users" value="users" onChecked={this.onAlluser} />
-                            </p>
-                        </div>
-
-                        <div className="boardSelection">
-                            <Dropdown
-                                className="dropDown"
-                                autoFocus
-                                mainButtonText={this.state.channel}
-                                style={{ width: '50%' }}
-                                items={[
-                                    { text: 'Team 1', onClick: () => { this.setState({ channel: "Team 1" }) } },
-                                    { text: 'Team 2', onClick: () => { this.setState({ channel: "Team 2" }) } }
-                                ]}
-                            />
-
-                            <Dropdown
-                                className="dropDown"
-                                autoFocus
-                                mainButtonText={this.state.team}
-                                style={{ width: '50%' }}
-                                items={[
-                                    { text: 'Team 1', onClick: () => { this.setState({ team: "Team 1" }) } },
-                                    { text: 'Team 2', onClick: () => { this.setState({ team: "Team 2" }) } }
-                                ]}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="footerContainer">
-                        <div className="buttonContainer">
-                            <Button content="Back" onClick={this.onBack} secondary />
-                            <Button content="Save" disabled={!(this.state.channelBox || this.state.teamBox || this.state.allUsersBox)} id="saveBtn" onClick={this.onSave} primary />
-                        </div>
-                    </div>
-                </div>
+                <Loader />
             );
         } else {
-            return (<div>Error</div>);
+            if (this.state.page === "CardCreation") {
+                return (
+                    <div className="taskModule">
+                        <div className="formContainer">
+                            <div className="formContentContainer" >
+                                <Input
+                                    className="inputField"
+                                    value={this.state.title}
+                                    label="Title"
+                                    placeholder="Title"
+                                    errorLabel={!this.state.title ? "This value is required" : undefined}
+                                    onChange={this.onValueChanged}
+                                    status={this.state.title ? "updated" : undefined}
+                                    autoComplete="off"
+                                    required
+                                />
+
+                                <Input
+                                    className="inputField"
+                                    value={this.state.imageLink}
+                                    label="Image Link"
+                                    placeholder="Image link (optional)"
+                                    onChange={this.onImageLinkChanged}
+                                    status={this.state.imageLink ? "updated" : undefined}
+                                    autoComplete="off"
+                                />
+
+                                <TextArea
+                                    className="inputField textArea"
+                                    autoFocus
+                                    placeholder="Summary (optional)"
+                                    label="Summary"
+                                    value={this.state.summary}
+                                    onChange={this.onSummaryChanged}
+                                />
+
+                                <Input
+                                    className="inputField"
+                                    value={this.state.author}
+                                    label="Author"
+                                    placeholder="Author"
+                                    errorLabel={!this.state.author ? "This value is required" : undefined}
+                                    onChange={this.onAuthorChanged}
+                                    status={this.state.author ? "updated" : undefined}
+                                    autoComplete="off"
+                                    required
+                                />
+
+                                <Input
+                                    className="inputField"
+                                    value={this.state.btnTitle}
+                                    label="Button Title"
+                                    placeholder="Button title"
+                                    onChange={this.onBtnTitleChanged}
+                                    status={this.state.btnTitle ? "updated" : undefined}
+                                    autoComplete="off"
+                                />
+
+                                <Input
+                                    className="inputField"
+                                    value={this.state.btnLink}
+                                    label="Button Url"
+                                    placeholder="Button url"
+                                    onChange={this.onBtnLinkChanged}
+                                    status={this.state.btnLink ? "updated" : undefined}
+                                    autoComplete="off"
+                                />
+                            </div>
+                            <div className="adaptiveCardContainer">
+                            </div>
+                        </div>
+
+                        <div className="footerContainer">
+                            <div className="buttonContainer">
+                                <Button content="Next" disabled={this.state.title === "" || this.state.author === ""} id="saveBtn" onClick={this.onNext} primary />
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+            else if (this.state.page === "AudienceSelection") {
+                return (
+                    <div className="taskModule">
+                        <div className="formContainer">
+
+                            <h3>Recipient Selection</h3>
+                            <h4>Please choose the groups you would like to send your message to.</h4>
+
+                            <div className="checkboxBtns">
+                                <p className="checkboxBtn">
+                                    <Checkbox checked={this.state.channelBox} label="Send to a Team(s)" value="teamtest" onChecked={this.onChannel} />
+                                </p>
+
+                                <p className="checkboxBtn">
+                                    <Checkbox checked={this.state.teamBox} label="Send to the team members of a Team(s)" value="teams" onChecked={this.onTeam} disabled={this.state.allUsersBox} />
+                                </p>
+
+                                <p className="checkboxBtn">
+                                    <Checkbox checked={this.state.allUsersBox} label="Send to all users" value="users" onChecked={this.onAlluser} />
+                                </p>
+                            </div>
+
+                            <div className="boardSelection">
+                                <Dropdown
+                                    className="dropDown"
+                                    autoFocus
+                                    mainButtonText={this.state.channel}
+                                    style={{ width: '50%' }}
+                                    items={this.renderChannels()}
+                                />
+
+                                <Dropdown
+                                    className="dropDown"
+                                    autoFocus
+                                    mainButtonText={this.state.team}
+                                    style={{ width: '50%' }}
+                                    items={this.renderTeams()}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="footerContainer">
+                            <div className="buttonContainer">
+                                <Button content="Back" onClick={this.onBack} secondary />
+                                <Button content="Save" disabled={!(this.state.channelBox || this.state.teamBox || this.state.allUsersBox)} id="saveBtn" onClick={this.onSave} primary />
+                            </div>
+                        </div>
+                    </div>
+                );
+            } else {
+                return (<div>Error</div>);
+            }
         }
     }
 
+    private renderChannels = (): IDropdownItemProps[] => {
+        let teams: any[] = [];
+        if (this.state.teams !== undefined) {
+            this.state.teams.forEach(element => {
+                teams.push({
+                    text: element.name, onClick: () => {
+                        this.setState(
+                            { channel: element.name, channelID: element.teamId }
+                        )
+                    }
+                });
+            });
+        } else {
+            return [];
+        }
+        return teams;
+    }
+
+    private renderTeams = (): IDropdownItemProps[] => {
+        let teams: any[] = [];
+        if (this.state.teams !== undefined) {
+            this.state.teams.forEach(element => {
+                teams.push({ text: element.name, onClick: () => { this.setState({ team: element.name, teamID: element.teamId }) } });
+            });
+        } else {
+            return [];
+        }
+        return teams;
+    }
+
     private onSave = () => {
-        microsoftTeams.tasks.submitTask();
+        if (this.state.exists) {
+            this.editDraftMessage().then(() => {
+                microsoftTeams.tasks.submitTask();
+            });
+        } else {
+            this.postDraftMessage().then(() => {
+                microsoftTeams.tasks.submitTask();
+            });
+        }
+    }
+
+    private editDraftMessage = async () => {
+        let teams: string[] = [];
+        let rosters: string[] = [];
+
+        if (this.state.channelBox) {
+            teams.push(this.state.channelID);
+        }
+
+        if (this.state.teamBox) {
+            rosters.push(this.state.teamID);
+        }
+
+        try {
+            let draftMessage: IDraftMessage = {
+                id: this.state.messageId,
+                title: this.state.title,
+                imageLink: this.state.imageLink,
+                summary: this.state.summary,
+                author: this.state.author,
+                buttonTitle: this.state.btnTitle,
+                buttonLink: this.state.btnLink,
+                teams: teams,
+                rosters: rosters,
+                allUsers: this.state.allUsersBox
+            };
+
+            const response = await updateDraftNotification(draftMessage);
+        } catch (error) {
+            return error;
+        }
+    }
+
+    private postDraftMessage = async () => {
+        let teams: string[] = [];
+        let rosters: string[] = [];
+
+        if (this.state.channelBox) {
+            teams.push(this.state.channelID);
+        }
+
+        if (this.state.teamBox) {
+            rosters.push(this.state.teamID);
+        }
+
+        try {
+            let draftMessage: IDraftMessage = {
+                title: this.state.title,
+                imageLink: this.state.imageLink,
+                summary: this.state.summary,
+                author: this.state.author,
+                buttonTitle: this.state.btnTitle,
+                buttonLink: this.state.btnLink,
+                teams: teams,
+                rosters: rosters,
+                allUsers: this.state.allUsersBox
+            };
+
+            const response = await creatDraftNotification(draftMessage);
+        } catch (error) {
+            return error;
+        }
     }
 
     public escFunction(event: any) {
@@ -250,6 +487,7 @@ export default class NewMessage extends React.Component<{}, formState> {
 
     private onAlluser = () => {
         this.setState({
+            teamBox: false,
             allUsersBox: !this.state.allUsersBox
         })
     }

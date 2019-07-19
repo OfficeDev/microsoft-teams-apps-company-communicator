@@ -5,6 +5,8 @@ import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../../configVariables';
 import { Accordion } from '@stardust-ui/react';
+import { getDraftMessagesList } from '../../actions';
+import { connect } from 'react-redux';
 
 interface ITaskInfo {
     title?: string;
@@ -16,12 +18,16 @@ interface ITaskInfo {
     completionBotId?: string;
 }
 
+export interface ITaskInfoProps {
+    getDraftMessagesList?: any;
+}
+
 export interface ITabContainerState {
     url: string;
 }
 
-export default class TabContainer extends React.Component<{}, ITabContainerState> {
-    constructor(props: {}) {
+class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
+    constructor(props: ITaskInfoProps) {
         super(props);
         this.state = {
             url: getBaseUrl() + "/newmessage"
@@ -92,8 +98,15 @@ export default class TabContainer extends React.Component<{}, ITabContainerState
         }
 
         let submitHandler = (err: any, result: any) => {
+            this.props.getDraftMessagesList();
         };
 
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     }
 }
+
+const mapStateToProps = (state: any) => {
+    return { messages: state.draftMessagesList };
+}
+
+export default connect(mapStateToProps, { getDraftMessagesList })(TabContainer);
