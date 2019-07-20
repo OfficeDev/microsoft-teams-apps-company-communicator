@@ -17,6 +17,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// <param name="services">IServiceCollection instance.</param>
         public static void AddNotificationDelivery(this IServiceCollection services)
         {
+            services.AddSingleton<BotConnectorManager>();
+
             services.AddTransient<NotificationDelivery>();
 
             services.AddTransient<ActiveNotificationCreator>();

@@ -62,7 +62,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
             // Deduplicate users
             var deDuplicatedRoster = this.userDataProvider.Deduplicate(userDataDictionary, roster);
 
-            // Set in SentNotificaiton data and counts
+            // todo: Set in SentNotificaiton data and counts
 
             // Create MB message.
             this.messageQueue.Enqueue(notificationId, deDuplicatedRoster);

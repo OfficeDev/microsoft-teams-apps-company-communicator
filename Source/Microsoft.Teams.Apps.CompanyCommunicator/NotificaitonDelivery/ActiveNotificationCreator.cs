@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 {
+    using System;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.ActiveNotification;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
@@ -84,6 +85,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
                 RowKey = notification.Id,
                 NotificationId = notification.Id,
                 Content = AdaptiveCardTemplate,
+                TokenExpiration = DateTime.UtcNow - TimeSpan.FromDays(1),
             };
 
             this.activeNotificationRepository.CreateOrUpdate(activeNotification);

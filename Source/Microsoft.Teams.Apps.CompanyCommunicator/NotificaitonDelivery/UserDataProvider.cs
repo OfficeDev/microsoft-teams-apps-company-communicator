@@ -8,9 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Bot.Builder;
     using Microsoft.Bot.Connector;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User;
     using Newtonsoft.Json.Linq;
@@ -20,22 +18,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
     /// </summary>
     public class UserDataProvider
     {
-        private readonly CompanyCommunicatorBot bot;
+        private readonly BotConnectorManager botConnectorManager;
         private readonly UserDataRepository userDataRepository;
         private readonly TeamsDataRepository teamsDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserDataProvider"/> class.
         /// </summary>
-        /// <param name="bot">Bot instance.</param>
+        /// <param name="botConnectorManager">Bot connector manager service.</param>
         /// <param name="userDataRepository">User Data repository service.</param>
         /// <param name="teamsDataRepository">Teams Data repository service.</param>
         public UserDataProvider(
-            IBot bot,
+            BotConnectorManager botConnectorManager,
             UserDataRepository userDataRepository,
             TeamsDataRepository teamsDataRepository)
         {
-            this.bot = bot as CompanyCommunicatorBot;
+            this.botConnectorManager = botConnectorManager;
             this.userDataRepository = userDataRepository;
             this.teamsDataRepository = teamsDataRepository;
         }
@@ -98,33 +96,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// <returns>Roster of the team with the passed in id.</returns>
         public async Task<IEnumerable<UserDataEntity>> GetTeamRosterAsync(string teamId)
         {
-            var connectorClient = this.bot.ConnectorClient;
-            if (connectorClient == null)
+            try
             {
-                throw new ApplicationException("Bot Connector Client is not initialized. Please initialize it before accessing teams roster.");
+                var members = await this.botConnectorManager.ConnectorClient.Conversations.GetConversationMembersAsync(teamId);
+
+                return members.Select(member =>
+                {
+                    var userDataEntity = new UserDataEntity
+                    {
+                        UserId = member.Id,
+                        Name = member.Name,
+                    };
+
+                    if (member.Properties is JObject jObject)
+                    {
+                        userDataEntity.Email = jObject["email"].ToString();
+                        userDataEntity.Upn = jObject["userPrincipalName"].ToString();
+                        userDataEntity.AadId = jObject["objectId"].ToString();
+                        userDataEntity.TenantId = jObject["tenantId"].ToString();
+                        userDataEntity.ConversationId = null;
+                        userDataEntity.ServiceUrl = null;
+                    }
+
+                    return userDataEntity;
+                });
             }
-
-            var members = await connectorClient.Conversations.GetConversationMembersAsync(teamId);
-            return members.Select(member =>
+            catch
             {
-                var userDataEntity = new UserDataEntity
-                {
-                    UserId = member.Id,
-                    Name = member.Name,
-                };
-
-                if (member.Properties is JObject jObject)
-                {
-                    userDataEntity.Email = jObject["email"].ToString();
-                    userDataEntity.Upn = jObject["userPrincipalName"].ToString();
-                    userDataEntity.AadId = jObject["objectId"].ToString();
-                    userDataEntity.TenantId = jObject["tenantId"].ToString();
-                    userDataEntity.ConversationId = null;
-                    userDataEntity.ServiceUrl = null;
-                }
-
-                return userDataEntity;
-            });
+                throw new ApplicationException("The app is not authorized to access the bot service. Please send a message to the bot, then it will work.");
+            }
         }
 
         /// <summary>

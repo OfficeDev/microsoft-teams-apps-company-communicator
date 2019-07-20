@@ -125,5 +125,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         /// Gets or sets version number.
         /// </summary>
         public string Version { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of audiences received the notification successfully.
+        /// </summary>
+        public int Succeeded { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of audiences who failed in receiving the notification.
+        /// </summary>
+        public int Failed { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of audiences throttled out.
+        /// </summary>
+        public int Throttled { get; set; }
     }
 }
