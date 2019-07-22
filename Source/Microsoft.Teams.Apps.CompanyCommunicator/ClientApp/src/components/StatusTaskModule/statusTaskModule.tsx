@@ -4,6 +4,10 @@ import { getSentNotification } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
 import { Loader } from '@stardust-ui/react';
+import {
+    getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
+    setCardAuthor, setCardBtn
+} from '../AdaptiveCard/adaptiveCard';
 
 export interface IMessage {
     id: string;
@@ -38,40 +42,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
     constructor(props: RouteComponentProps) {
         super(props);
 
-        this.card = {
-            "type": "AdaptiveCard",
-            "body": [
-                {
-                    "type": "TextBlock",
-                    "weight": "Bolder",
-                    "text": "Title",
-                    "size": "ExtraLarge",
-                    "wrap": true
-                },
-                {
-                    "type": "Image",
-                    "spacing": "Default",
-                    "url": "",
-                    "size": "Stretch",
-                    "width": "400px",
-                    "altText": ""
-                },
-                {
-                    "type": "TextBlock",
-                    "text": "",
-                    "wrap": true
-                },
-                {
-                    "type": "TextBlock",
-                    "wrap": true,
-                    "size": "Small",
-                    "weight": "Lighter",
-                    "text": "Sent by: Anonymous"
-                }
-            ],
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.0"
-        };
+        this.card = getInitAdaptiveCard();
 
         this.state = {
             message: this.initMessage,
@@ -88,18 +59,12 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                 this.setState({
                     loader: false
                 }, () => {
-                    this.card.body[0].text = this.state.message.title;
-                    this.card.body[1].url = this.state.message.imageLink;
-                    this.card.body[2].text = this.state.message.summary;
-                    this.card.body[3].text = "Sent by : " + this.state.message.author;
+                    setCardTitle(this.card, this.state.message.title);
+                    setCardImageLink(this.card, this.state.message.imageLink);
+                    setCardSummary(this.card, this.state.message.summary);
+                    setCardAuthor(this.card, this.state.message.author);
                     if (this.state.message.buttonTitle !== "" && this.state.message.buttonLink !== "") {
-                        this.card.actions = [
-                            {
-                                "type": "Action.OpenUrl",
-                                "title": this.state.message.buttonTitle,
-                                "url": this.state.message.buttonLink
-                            }
-                        ];
+                        setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink);
                     }
 
                     let adaptiveCard = new AdaptiveCards.AdaptiveCard();
@@ -127,7 +92,9 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
     public render(): JSX.Element {
         if (this.state.loader) {
             return (
-                <Loader />
+                <div className="Loader">
+                    <Loader />
+                </div>
             );
         } else {
             return (

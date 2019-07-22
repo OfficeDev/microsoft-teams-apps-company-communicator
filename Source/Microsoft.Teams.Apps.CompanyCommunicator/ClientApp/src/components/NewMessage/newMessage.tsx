@@ -8,6 +8,10 @@ import { Button, Loader } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { RouteComponentProps } from 'react-router-dom';
 import { getDraftNotification, getTeams, creatDraftNotification, updateDraftNotification } from '../../apis/messageListApi';
+import {
+    getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
+    setCardAuthor, setCardBtn
+} from '../AdaptiveCard/adaptiveCard';
 
 export interface IDraftMessage {
     id?: string,
@@ -54,40 +58,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     constructor(props: INewMessageProps) {
         super(props);
 
-        this.card = {
-            "type": "AdaptiveCard",
-            "body": [
-                {
-                    "type": "TextBlock",
-                    "weight": "Bolder",
-                    "text": "Title",
-                    "size": "ExtraLarge",
-                    "wrap": true
-                },
-                {
-                    "type": "Image",
-                    "spacing": "Default",
-                    "url": "",
-                    "size": "Stretch",
-                    "width": "400px",
-                    "altText": ""
-                },
-                {
-                    "type": "TextBlock",
-                    "text": "",
-                    "wrap": true
-                },
-                {
-                    "type": "TextBlock",
-                    "wrap": true,
-                    "size": "Small",
-                    "weight": "Lighter",
-                    "text": "Sent by: Anonymous"
-                }
-            ],
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.0"
-        };
+        this.card = getInitAdaptiveCard();
 
         this.state = {
             title: "",
@@ -198,18 +169,12 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 });
             }
 
-            this.card.body[0].text = draftMessageDetail.title;
-            this.card.body[1].url = draftMessageDetail.imageLink;
-            this.card.body[2].text = draftMessageDetail.summary;
-            this.card.body[3].text = "Sent by : " + draftMessageDetail.author;
+            setCardTitle(this.card, draftMessageDetail.title);
+            setCardImageLink(this.card, draftMessageDetail.imageLink);
+            setCardSummary(this.card, draftMessageDetail.summary);
+            setCardAuthor(this.card, draftMessageDetail.author);
             if (draftMessageDetail.buttonTitle !== "" && draftMessageDetail.buttonLink !== "") {
-                this.card.actions = [
-                    {
-                        "type": "Action.OpenUrl",
-                        "title": draftMessageDetail.buttonTitle,
-                        "url": draftMessageDetail.buttonLink
-                    }
-                ];
+                setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
             }
 
             this.setState({
@@ -236,7 +201,9 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     public render(): JSX.Element {
         if (this.state.loader) {
             return (
-                <Loader />
+                <div className="Loader">
+                    <Loader />
+                </div>
             );
         } else {
             if (this.state.page === "CardCreation") {
@@ -280,11 +247,9 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     value={this.state.author}
                                     label="Author"
                                     placeholder="Author"
-                                    errorLabel={!this.state.author ? "This value is required" : undefined}
                                     onChange={this.onAuthorChanged}
                                     status={this.state.author ? "updated" : undefined}
                                     autoComplete="off"
-                                    required
                                 />
 
                                 <Input
@@ -313,7 +278,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
                         <div className="footerContainer">
                             <div className="buttonContainer">
-                                <Button content="Next" disabled={this.state.title === "" || this.state.author === ""} id="saveBtn" onClick={this.onNext} primary />
+                                <Button content="Next" disabled={this.state.title === ""} id="saveBtn" onClick={this.onNext} primary />
                             </div>
                         </div>
                     </div>

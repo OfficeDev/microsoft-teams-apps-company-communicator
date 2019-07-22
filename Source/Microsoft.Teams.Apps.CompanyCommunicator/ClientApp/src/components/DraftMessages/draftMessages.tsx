@@ -212,8 +212,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         }
       },
       {
-        key: 'delet',
-        name: 'Delet',
+        key: 'delete',
+        name: 'Delete',
         onClick: () => {
           this.deleteDraftMessage(id).then(() => {
             this.props.getDraftMessagesList();
@@ -230,11 +230,10 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         },
       },
       {
-        key: 'sent',
-        name: 'Sent',
+        key: 'send',
+        name: 'Send',
         onClick: () => {
           this.getDraftMessage(id).then(() => {
-            console.log("ddddd payload", this.state.sentMessagePayload);
             this.sentDraftMessage(this.state.sentMessagePayload).then(() => {
               this.props.getDraftMessagesList();
               this.props.getMessagesList();
