@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
+namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
 {
     using System;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
@@ -73,7 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// <param name="notificationId">Notification Id.</param>
         public void Create(string notificationId)
         {
-            var notification = this.notificationRepository.Get(PartitionKeyNames.Notification, notificationId);
+            var notification = this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, notificationId);
             if (notification == null)
             {
                 return;
@@ -81,7 +81,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 
             var activeNotification = new ActiveNotificationEntity
             {
-                PartitionKey = PartitionKeyNames.Notification,
+                PartitionKey = PartitionKeyNames.Notification.DraftNotifications,
                 RowKey = notification.Id,
                 NotificationId = notification.Id,
                 Content = AdaptiveCardTemplate,

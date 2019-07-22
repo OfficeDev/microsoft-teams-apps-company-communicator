@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.ActiveNotificati
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
-    /// Respository of the notification data.
+    /// Respository for the active notification data.
     /// </summary>
     public class ActiveNotificationRepository : BaseRepository<ActiveNotificationEntity>
     {

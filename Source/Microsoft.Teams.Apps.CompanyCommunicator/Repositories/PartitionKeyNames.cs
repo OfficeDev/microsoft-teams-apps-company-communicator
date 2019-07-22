@@ -10,28 +10,40 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
     public static class PartitionKeyNames
     {
         /// <summary>
-        /// Teams data partition key name.
+        /// Teams data partition key names.
         /// </summary>
-        public static readonly string TeamsData = "TeamsData";
+        public static class Metadata
+        {
+            /// <summary>
+            /// Team data partition key name.
+            /// </summary>
+            public static readonly string TeamData = "TeamData";
+
+            /// <summary>
+            /// Users data partition key name.
+            /// </summary>
+            public static readonly string UserData = "UserData";
+        }
 
         /// <summary>
-        /// Users data partition key name.
+        /// Notification partition key names.
         /// </summary>
-        public static readonly string UserData = "UserData";
+        public static class Notification
+        {
+            /// <summary>
+            /// Draft notifications partition key name.
+            /// </summary>
+            public static readonly string DraftNotifications = "DraftNotifications";
 
-        /// <summary>
-        /// Notification partition key name.
-        /// </summary>
-        public static readonly string Notification = "Notification";
+            /// <summary>
+            /// Sent notifications partition key name.
+            /// </summary>
+            public static readonly string SentNotifications = "SentNotifications";
 
-        /// <summary>
-        /// Active Notification partition key name.
-        /// </summary>
-        public static readonly string ActiveNotification = "ActiveNotification";
-
-        /// <summary>
-        /// Sent Notification partition key name.
-        /// </summary>
-        public static readonly string SentNotification = "SentNotification";
+            /// <summary>
+            /// Active notifications partition key name.
+            /// </summary>
+            public static readonly string ActiveNotifications = "ActiveNotifications";
+        }
     }
 }

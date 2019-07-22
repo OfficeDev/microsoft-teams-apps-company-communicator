@@ -9,48 +9,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
     /// <summary>
     /// Draft notification model class.
     /// </summary>
-    public class DraftNotification
+    public class DraftNotification : BaseNotification
     {
-        /// <summary>
-        /// Gets or sets Id.
-        /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets Title value.
-        /// </summary>
-        public string Title { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Image Link value.
-        /// </summary>
-        public string ImageLink { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Summary value.
-        /// </summary>
-        public string Summary { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Author value.
-        /// </summary>
-        public string Author { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Button Title value.
-        /// </summary>
-        public string ButtonTitle { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Button Link value.
-        /// </summary>
-        public string ButtonLink { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Created Date value.
-        /// </summary>
-        public string CreatedDate { get; set; }
-
         /// <summary>
         /// Gets or sets Teams audience id collection.
         /// </summary>

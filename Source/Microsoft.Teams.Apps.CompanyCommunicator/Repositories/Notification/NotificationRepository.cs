@@ -4,10 +4,12 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Models;
 
     /// <summary>
     /// Respository of the notification data.
@@ -38,6 +40,36 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
             var entities = this.All(filter).Take(25);
 
             return entities;
+        }
+
+        /// <summary>
+        /// Create a new draft notification.
+        /// </summary>
+        /// <param name="notification">Draft Notification model class instance passed in from Web API.</param>
+        /// <param name="userName">Name of the user who is running the application.</param>
+        public void CreateDraftNotification(DraftNotification notification, string userName)
+        {
+            var id = Guid.NewGuid().ToString();
+            var notificationEntity = new NotificationEntity
+            {
+                PartitionKey = PartitionKeyNames.Notification.DraftNotifications,
+                RowKey = id,
+                Id = id,
+                Title = notification.Title,
+                ImageLink = notification.ImageLink,
+                Summary = notification.Summary,
+                Author = notification.Author,
+                ButtonTitle = notification.ButtonTitle,
+                ButtonLink = notification.ButtonLink,
+                CreatedBy = userName,
+                CreatedDate = DateTime.UtcNow.ToShortDateString(),
+                IsDraft = true,
+                Teams = notification.Teams,
+                Rosters = notification.Rosters,
+                AllUsers = notification.AllUsers,
+            };
+
+            this.CreateOrUpdate(notificationEntity);
         }
     }
 }

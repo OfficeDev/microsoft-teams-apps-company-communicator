@@ -5,27 +5,27 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.SentNotification
 {
     /// <summary>
-    /// Enumerable indicating a notification's delivery status.
+    /// Enum indicating a notification's delivery status.
     /// </summary>
     public enum DeliveryStatus
     {
         /// <summary>
-        /// Indicating a notification is pending for delivery.
+        /// Indicates a notification is pending for delivery.
         /// </summary>
         Pending,
 
         /// <summary>
-        /// Indicating a notification was delivered successfully.
+        /// Indicates a notification was delivered successfully.
         /// </summary>
         Succeeded,
 
         /// <summary>
-        /// Indicating a notification was failed in sending to a audience.
+        /// Indicates a notification was failed in delivering.
         /// </summary>
         Failed,
 
         /// <summary>
-        /// Indicating a notification was throttled.
+        /// Indicates a notification was throttled out.
         /// </summary>
         Throttled,
     }

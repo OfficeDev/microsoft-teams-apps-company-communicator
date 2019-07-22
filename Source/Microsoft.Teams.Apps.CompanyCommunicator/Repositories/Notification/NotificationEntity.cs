@@ -122,23 +122,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         public bool AllUsers { get; set; }
 
         /// <summary>
-        /// Gets or sets version number.
+        /// Gets or sets message version number.
         /// </summary>
-        public string Version { get; set; }
+        public string MessageVersion { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of audiences received the notification successfully.
+        /// Gets or sets the number of recipients who have received the notification successfully.
         /// </summary>
         public int Succeeded { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of audiences who failed in receiving the notification.
+        /// Gets or sets the number of recipients who failed in receiving the notification.
         /// </summary>
         public int Failed { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of audiences throttled out.
+        /// Gets or sets the number of recipients who were throttled out.
         /// </summary>
         public int Throttled { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the sending process is completed or not.
+        /// </summary>
+        public bool IsCompleted { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the notitification is visible.
+        /// When sending a notification, the application needs a bit of processing time, e.g. turn the notification from draft to sent partition.
+        /// A notification will be invisible when it's under processing.
+        /// </summary>
+        public bool IsVisible { get; set; }
     }
 }

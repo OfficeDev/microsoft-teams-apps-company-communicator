@@ -23,10 +23,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         public static void AddRepositories(this IServiceCollection services)
         {
             services.AddSingleton<ActiveNotificationRepository>();
-            services.AddSingleton<SentNotificationRepository>();
+            services.AddSingleton<SentNotificationDataRepository>();
             services.AddSingleton<NotificationRepository>();
             services.AddSingleton<UserDataRepository>();
-            services.AddSingleton<TeamsDataRepository>();
+            services.AddSingleton<TeamDataRepository>();
         }
     }
 }

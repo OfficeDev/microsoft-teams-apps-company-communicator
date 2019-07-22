@@ -1,4 +1,4 @@
-﻿// <copyright file="SentNotificationEntity.cs" company="Microsoft">
+﻿// <copyright file="SentNotificationDataEntity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -11,7 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.SentNotification
     /// <summary>
     /// Sent notification entity class.
     /// </summary>
-    public class SentNotificationEntity : TableEntity
+    public class SentNotificationDataEntity : TableEntity
     {
         /// <summary>
         /// Gets or sets NotificationId value.
@@ -29,11 +29,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.SentNotification
         /// Gets or sets Audiences value.
         /// </summary>
         [IgnoreProperty]
-        public IEnumerable<AudienceEntity> Audiences
+        public IEnumerable<RecipientEntity> Audiences
         {
             get
             {
-                return JsonConvert.DeserializeObject<IEnumerable<AudienceEntity>>(this.AudiencesInString);
+                return JsonConvert.DeserializeObject<IEnumerable<RecipientEntity>>(this.AudiencesInString);
             }
 
             set

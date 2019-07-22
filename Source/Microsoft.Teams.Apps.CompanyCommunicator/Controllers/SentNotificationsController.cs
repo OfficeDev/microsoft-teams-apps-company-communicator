@@ -19,6 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     /// Controller for the sent notification data.
     /// </summary>
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
+    [Route("api/sentNotifications")]
     public class SentNotificationsController : ControllerBase
     {
         private readonly NotificationRepository notificationRepository;
@@ -38,33 +39,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
-        /// Send a draft notification, which turns the draft to be a sent notification.
+        /// Send a notification, which turns a draft to be a sent notification.
         /// </summary>
         /// <param name="notification">An instance of <see cref="DraftNotification"/> class.</param>
         /// <returns>The result of an action method.</returns>
-        [HttpPost("api/sentNotifications")]
+        [HttpPost]
         public async Task<IActionResult> CreateSentNotification([FromBody]DraftNotification notification)
         {
-            var notificationEntity = this.notificationRepository.Get(PartitionKeyNames.Notification, notification.Id);
-            if (notificationEntity != null)
+            var notificationEntity = this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, notification.Id);
+            if (notificationEntity == null)
             {
-                await this.notificationDelivery.Send(notificationEntity.Id);
-
-                notificationEntity.IsDraft = false;
-                notificationEntity.SentDate = DateTime.UtcNow.ToShortDateString();
-                this.notificationRepository.CreateOrUpdate(notificationEntity);
-
-                return this.Ok();
+                return this.NotFound();
             }
 
-            return this.NotFound();
+            await this.notificationDelivery.Send(notificationEntity.Id);
+
+            notificationEntity.IsDraft = false;
+            notificationEntity.SentDate = DateTime.UtcNow.ToShortDateString();
+            this.notificationRepository.CreateOrUpdate(notificationEntity);
+
+            return this.Ok();
         }
 
         /// <summary>
         /// Get all sent notification summaries.
         /// </summary>
         /// <returns>A list of <see cref="SentNotificationSummary"/> instances.</returns>
-        [HttpGet("api/sentNotifications")]
+        [HttpGet]
         public IEnumerable<SentNotificationSummary> GetSentNotifications()
         {
             var notificationEntities = this.notificationRepository.All(false);
@@ -78,7 +79,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     Title = notificationEntity.Title,
                     CreatedDate = notificationEntity.CreatedDate,
                     SentDate = notificationEntity.SentDate,
-                    Recipients = $"5,1,2",
+                    Succeeded = notificationEntity.Succeeded,
+                    Failed = notificationEntity.Failed,
+                    Throttled = notificationEntity.Throttled,
+                    Recipients = $"{notificationEntity.Succeeded},{notificationEntity.Failed},{notificationEntity.Throttled}",
                 };
 
                 result.Add(summary);
@@ -92,32 +96,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <param name="id">Id of the requested sent notification.</param>
         /// <returns>Required sent notification.</returns>
-        [HttpGet("api/sentNotifications/{id}")]
+        [HttpGet("{id}")]
         public IActionResult GetSentNotificationById(string id)
         {
-            var notificationEntity = this.notificationRepository.Get(PartitionKeyNames.Notification, id);
-            if (notificationEntity != null)
+            var notificationEntity = this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, id);
+            if (notificationEntity == null)
             {
-                var result = new SentNotification
-                {
-                    Id = notificationEntity.Id,
-                    Title = notificationEntity.Title,
-                    ImageLink = notificationEntity.ImageLink,
-                    Summary = notificationEntity.Summary,
-                    Author = notificationEntity.Author,
-                    ButtonTitle = notificationEntity.ButtonTitle,
-                    ButtonLink = notificationEntity.ButtonLink,
-                    CreatedDate = notificationEntity.CreatedDate,
-                    SentDate = notificationEntity.SentDate,
-                    Succeeded = 10,
-                    Failed = 1,
-                    Throttled = 1,
-                };
-
-                return this.Ok(result);
+                return this.NotFound();
             }
 
-            return this.NotFound();
+            var result = new SentNotification
+            {
+                Id = notificationEntity.Id,
+                Title = notificationEntity.Title,
+                ImageLink = notificationEntity.ImageLink,
+                Summary = notificationEntity.Summary,
+                Author = notificationEntity.Author,
+                ButtonTitle = notificationEntity.ButtonTitle,
+                ButtonLink = notificationEntity.ButtonLink,
+                CreatedDate = notificationEntity.CreatedDate,
+                SentDate = notificationEntity.SentDate,
+                Succeeded = 10,
+                Failed = 1,
+                Throttled = 1,
+            };
+
+            return this.Ok(result);
         }
     }
 }

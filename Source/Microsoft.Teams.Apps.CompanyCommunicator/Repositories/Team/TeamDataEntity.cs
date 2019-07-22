@@ -1,4 +1,4 @@
-﻿// <copyright file="TeamsDataEntity.cs" company="Microsoft">
+﻿// <copyright file="TeamDataEntity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -9,7 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
     /// <summary>
     /// Teams data entity class.
     /// </summary>
-    public class TeamsDataEntity : TableEntity
+    public class TeamDataEntity : TableEntity
     {
         /// <summary>
         /// Gets or sets team Id.

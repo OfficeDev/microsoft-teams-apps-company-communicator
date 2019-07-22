@@ -14,13 +14,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
     using Newtonsoft.Json.Linq;
 
     /// <summary>
-    /// The class analyses the teams data captured in the bot, and provides all user data to the delivery process.
+    /// The class provides the user data by using the team data captured in the bot.
     /// </summary>
     public class UserDataProvider
     {
         private readonly BotConnectorManager botConnectorManager;
         private readonly UserDataRepository userDataRepository;
-        private readonly TeamsDataRepository teamsDataRepository;
+        private readonly TeamDataRepository teamsDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserDataProvider"/> class.
@@ -31,7 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         public UserDataProvider(
             BotConnectorManager botConnectorManager,
             UserDataRepository userDataRepository,
-            TeamsDataRepository teamsDataRepository)
+            TeamDataRepository teamsDataRepository)
         {
             this.botConnectorManager = botConnectorManager;
             this.userDataRepository = userDataRepository;

@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 {
     using System.Threading.Tasks;
+    using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
 
@@ -44,7 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// <returns>Indicating whether the notification was sent successfully or not.</returns>
         public async Task<bool> Send(string notificationId)
         {
-            var notification = this.notificationRepository.Get(PartitionKeyNames.Notification, notificationId);
+            var notification = this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, notificationId);
             if (notification == null || !notification.IsDraft)
             {
                 return false;

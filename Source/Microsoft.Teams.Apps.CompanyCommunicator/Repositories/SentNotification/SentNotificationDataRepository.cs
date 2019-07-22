@@ -1,4 +1,4 @@
-﻿// <copyright file="SentNotificationRepository.cs" company="Microsoft">
+﻿// <copyright file="SentNotificationDataRepository.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -9,13 +9,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.SentNotification
     /// <summary>
     /// Respository of the notification data.
     /// </summary>
-    public class SentNotificationRepository : BaseRepository<SentNotificationEntity>
+    public class SentNotificationDataRepository : BaseRepository<SentNotificationDataEntity>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SentNotificationRepository"/> class.
+        /// Initializes a new instance of the <see cref="SentNotificationDataRepository"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
-        public SentNotificationRepository(IConfiguration configuration)
+        public SentNotificationDataRepository(IConfiguration configuration)
             : base(configuration, "SentNotification")
         {
         }

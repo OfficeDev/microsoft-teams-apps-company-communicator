@@ -25,8 +25,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// <param name="tableName">The name of the table in Azure Table Storage.</param>
         public BaseRepository(IConfiguration configuration, string tableName)
         {
-            var storageAccountSASConnectionString = configuration.GetValue<string>("StorageAccountSASConnectionString");
-            var storageAccount = CloudStorageAccount.Parse(storageAccountSASConnectionString);
+            var storageAccountConnectionString = configuration.GetValue<string>("StorageAccountConnectionString");
+            var storageAccount = CloudStorageAccount.Parse(storageAccountConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
             this.table = tableClient.GetTableReference(tableName);
             this.table.CreateIfNotExists();
