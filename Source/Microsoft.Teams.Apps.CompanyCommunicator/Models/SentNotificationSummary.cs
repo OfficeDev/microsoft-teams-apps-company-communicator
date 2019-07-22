@@ -30,11 +30,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public string SentDate { get; set; }
 
         /// <summary>
-        /// Gets or sets Recipients value.
-        /// </summary>
-        public string Recipients { get; set; }
-
-        /// <summary>
         /// Gets or sets the number of recipients who have received the notification successfully.
         /// </summary>
         public int Succeeded { get; set; }

@@ -145,12 +145,5 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         /// Gets or sets a value indicating whether the sending process is completed or not.
         /// </summary>
         public bool IsCompleted { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the notitification is visible.
-        /// When sending a notification, the application needs a bit of processing time, e.g. turn the notification from draft to sent partition.
-        /// A notification will be invisible when it's under processing.
-        /// </summary>
-        public bool IsVisible { get; set; }
     }
 }

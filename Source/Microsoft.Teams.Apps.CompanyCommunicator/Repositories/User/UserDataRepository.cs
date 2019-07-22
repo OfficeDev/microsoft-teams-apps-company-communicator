@@ -27,12 +27,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User
         /// </summary>
         /// <param name="activity">Bot conversation update activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task SavePersonalTypeData(IConversationUpdateActivity activity)
+        public async Task SaveUserDataAsync(IConversationUpdateActivity activity)
         {
-            var userDataEntity = this.ParsePersonalTypeData(activity);
+            var userDataEntity = this.ParseUserData(activity);
             if (userDataEntity != null)
             {
-                await this.CreateOrUpdate(userDataEntity);
+                await this.CreateOrUpdateAsync(userDataEntity);
             }
         }
 
@@ -41,20 +41,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User
         /// </summary>
         /// <param name="activity">Bot conversation update activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task RemovePersonalTypeData(IConversationUpdateActivity activity)
+        public async Task RemoveUserDataAsync(IConversationUpdateActivity activity)
         {
-            var userDataEntity = this.ParsePersonalTypeData(activity);
+            var userDataEntity = this.ParseUserData(activity);
             if (userDataEntity != null)
             {
-                var found = await this.Get(PartitionKeyNames.Metadata.UserData, userDataEntity.UserId);
+                var found = await this.GetAsync(PartitionKeyNames.Metadata.UserData, userDataEntity.UserId);
                 if (found != null)
                 {
-                    await this.Delete(found);
+                    await this.DeleteAsync(found);
                 }
             }
         }
 
-        private UserDataEntity ParsePersonalTypeData(IConversationUpdateActivity activity)
+        private UserDataEntity ParseUserData(IConversationUpdateActivity activity)
         {
             var rowKey = activity?.From?.AadObjectId;
             if (rowKey != null)

@@ -73,9 +73,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// </summary>
         /// <param name="notificationId">Notification Id.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task Create(string notificationId)
+        public async Task CreateAsync(string notificationId)
         {
-            var notification = await this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, notificationId);
+            var notification = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notificationId);
             if (notification == null)
             {
                 return;
@@ -90,7 +90,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
                 TokenExpiration = DateTime.UtcNow - TimeSpan.FromDays(1),
             };
 
-            await this.activeNotificationRepository.CreateOrUpdate(activeNotification);
+            await this.activeNotificationRepository.CreateOrUpdateAsync(activeNotification);
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// Get all data entities from the table storage.
         /// </summary>
         /// <returns>All data entities.</returns>
-        public async Task<IEnumerable<T>> All()
+        public async Task<IEnumerable<T>> GetAllAsync()
         {
             return await Task.Run(() =>
             {
@@ -54,14 +54,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// </summary>
         /// <param name="entity">Entity to be created or updated.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task CreateOrUpdate(T entity)
+        public async Task CreateOrUpdateAsync(T entity)
         {
-            await Task.Run(() =>
-            {
-                var operation = TableOperation.InsertOrReplace(entity);
+            var operation = TableOperation.InsertOrReplace(entity);
 
-                this.table.Execute(operation);
-            });
+            await this.table.ExecuteAsync(operation);
         }
 
         /// <summary>
@@ -69,14 +66,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// </summary>
         /// <param name="entity">Entity to be deleted.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task Delete(T entity)
+        public async Task DeleteAsync(T entity)
         {
-            await Task.Run(() =>
-            {
-                var operation = TableOperation.Delete(entity);
+            var operation = TableOperation.Delete(entity);
 
-                this.table.Execute(operation);
-            });
+            await this.table.ExecuteAsync(operation);
         }
 
         /// <summary>
@@ -85,16 +79,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// <param name="partitionKey">The partition key of the entity.</param>
         /// <param name="rowKey">The row key fo the entity.</param>
         /// <returns>The entity matching the keys.</returns>
-        public async Task<T> Get(string partitionKey, string rowKey)
+        public async Task<T> GetAsync(string partitionKey, string rowKey)
         {
-            return await Task.Run(() =>
-            {
-                var operation = TableOperation.Retrieve<T>(partitionKey, rowKey);
+            var operation = TableOperation.Retrieve<T>(partitionKey, rowKey);
 
-                var result = this.table.Execute(operation);
+            var result = await this.table.ExecuteAsync(operation);
 
-                return result.Result as T;
-            });
+            return result.Result as T;
         }
 
         /// <summary>
@@ -102,7 +93,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// </summary>
         /// <param name="filter">Filter to the result.</param>
         /// <returns>All data entities.</returns>
-        protected async Task<IEnumerable<T>> All(string filter)
+        protected async Task<IEnumerable<T>> GetAllAsync(string filter)
         {
             return await Task.Run(() =>
             {

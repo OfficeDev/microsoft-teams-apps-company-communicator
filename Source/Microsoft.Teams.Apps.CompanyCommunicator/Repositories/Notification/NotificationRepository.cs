@@ -31,14 +31,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         /// </summary>
         /// <param name="isDraft">Indicates if the function shall return draft notifications or not.</param>
         /// <returns>All notitification entities.</returns>
-        public async Task<IEnumerable<NotificationEntity>> All(bool isDraft)
+        public async Task<IEnumerable<NotificationEntity>> GetAllAsync(bool isDraft)
         {
             var filter = TableQuery.GenerateFilterConditionForBool(
                     nameof(NotificationEntity.IsDraft),
                     QueryComparisons.Equal,
                     isDraft);
 
-            var entities = await this.All(filter);
+            var entities = await this.GetAllAsync(filter);
 
             return entities.Take(25);
         }
@@ -49,7 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         /// <param name="notification">Draft Notification model class instance passed in from Web API.</param>
         /// <param name="userName">Name of the user who is running the application.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task CreateDraftNotification(DraftNotification notification, string userName)
+        public async Task CreateDraftNotificationAsync(DraftNotification notification, string userName)
         {
             var id = Guid.NewGuid().ToString();
             var notificationEntity = new NotificationEntity
@@ -71,7 +71,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
                 AllUsers = notification.AllUsers,
             };
 
-            await this.CreateOrUpdate(notificationEntity);
+            await this.CreateOrUpdateAsync(notificationEntity);
         }
     }
 }

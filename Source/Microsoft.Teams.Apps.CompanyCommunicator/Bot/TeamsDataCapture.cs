@@ -17,19 +17,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         private const string PersonalType = "personal";
         private const string ChannelType = "channel";
 
-        private readonly TeamDataRepository teamsDataRepository;
+        private readonly TeamDataRepository teamDataRepository;
         private readonly UserDataRepository userDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamsDataCapture"/> class.
         /// </summary>
-        /// <param name="teamsDataRepository">Team data repository instance.</param>
+        /// <param name="teamDataRepository">Team data repository instance.</param>
         /// <param name="userDataRepository">User data repository instance.</param>
         public TeamsDataCapture(
-            TeamDataRepository teamsDataRepository,
+            TeamDataRepository teamDataRepository,
             UserDataRepository userDataRepository)
         {
-            this.teamsDataRepository = teamsDataRepository;
+            this.teamDataRepository = teamDataRepository;
             this.userDataRepository = userDataRepository;
         }
 
@@ -38,15 +38,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// </summary>
         /// <param name="activity">Teams activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task OnBotAdded(IConversationUpdateActivity activity)
+        public async Task OnBotAddedAsync(IConversationUpdateActivity activity)
         {
             switch (activity.Conversation.ConversationType)
             {
                 case TeamsDataCapture.ChannelType:
-                    await this.teamsDataRepository.SaveChannelTypeData(activity);
+                    await this.teamDataRepository.SaveTeamDataAsync(activity);
                     break;
                 case TeamsDataCapture.PersonalType:
-                    await this.userDataRepository.SavePersonalTypeData(activity);
+                    await this.userDataRepository.SaveUserDataAsync(activity);
                     break;
                 default: break;
             }
@@ -57,15 +57,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// </summary>
         /// <param name="activity">Teams activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task OnBotRemoved(IConversationUpdateActivity activity)
+        public async Task OnBotRemovedAsync(IConversationUpdateActivity activity)
         {
             switch (activity.Conversation.ConversationType)
             {
                 case TeamsDataCapture.ChannelType:
-                    await this.teamsDataRepository.RemoveChannelTypeData(activity);
+                    await this.teamDataRepository.RemoveTeamDataAsync(activity);
                     break;
                 case TeamsDataCapture.PersonalType:
-                    await this.userDataRepository.RemovePersonalTypeData(activity);
+                    await this.userDataRepository.RemoveUserDataAsync(activity);
                     break;
                 default: break;
             }

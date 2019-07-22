@@ -15,29 +15,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     /// <summary>
     /// Controller for the teams data.
     /// </summary>
-    [Route("api/teamsData")]
+    [Route("api/teamData")]
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
     public class TeamDataController
     {
-        private readonly TeamDataRepository teamsDataRepository;
+        private readonly TeamDataRepository teamDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamDataController"/> class.
         /// </summary>
-        /// <param name="teamsDataRepository">Teams data repository instance.</param>
-        public TeamDataController(TeamDataRepository teamsDataRepository)
+        /// <param name="teamDataRepository">Teams data repository instance.</param>
+        public TeamDataController(TeamDataRepository teamDataRepository)
         {
-            this.teamsDataRepository = teamsDataRepository;
+            this.teamDataRepository = teamDataRepository;
         }
 
         /// <summary>
-        /// Get all teams data.
+        /// Get data for all teams.
         /// </summary>
         /// <returns>A list of team data.</returns>
-        [HttpGet("team")]
-        public async Task<IEnumerable<TeamData>> GetAllChannelTypeData()
+        [HttpGet]
+        public async Task<IEnumerable<TeamData>> GetAllChannelTypeDataAsync()
         {
-            var entities = await this.teamsDataRepository.All();
+            var entities = await this.teamDataRepository.GetAllAsync();
             var result = new List<TeamData>();
             foreach (var entity in entities)
             {

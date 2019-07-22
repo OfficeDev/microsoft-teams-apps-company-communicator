@@ -43,19 +43,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// </summary>
         /// <param name="notificationId">Id of the notification to be sent.</param>
         /// <returns>Indicating whether the notification was sent successfully or not.</returns>
-        public async Task<bool> Send(string notificationId)
+        public async Task<bool> SendAsync(string notificationId)
         {
-            var notification = await this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, notificationId);
+            var notification = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notificationId);
             if (notification == null || !notification.IsDraft)
             {
                 return false;
             }
 
             // Set in ActiveNotification data
-            await this.activeNotificationCreator.Create(notificationId);
+            await this.activeNotificationCreator.CreateAsync(notificationId);
 
             // Get all users
-            var userDataDictionary = await this.userDataProvider.GetUserDataDictionary();
+            var userDataDictionary = await this.userDataProvider.GetUserDataDictionaryAsync();
 
             // Get all teams
             var roster = await this.userDataProvider.GetAllTeamsRosterAsync();

@@ -44,19 +44,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notification">An instance of <see cref="DraftNotification"/> class.</param>
         /// <returns>The result of an action method.</returns>
         [HttpPost]
-        public async Task<IActionResult> CreateSentNotification([FromBody]DraftNotification notification)
+        public async Task<IActionResult> CreateSentNotificationAsync([FromBody]DraftNotification notification)
         {
-            var notificationEntity = await this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, notification.Id);
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notification.Id);
             if (notificationEntity == null)
             {
                 return this.NotFound();
             }
 
-            await this.notificationDelivery.Send(notificationEntity.Id);
+            await this.notificationDelivery.SendAsync(notificationEntity.Id);
 
             notificationEntity.IsDraft = false;
             notificationEntity.SentDate = DateTime.UtcNow.ToShortDateString();
-            await this.notificationRepository.CreateOrUpdate(notificationEntity);
+            await this.notificationRepository.CreateOrUpdateAsync(notificationEntity);
 
             return this.Ok();
         }
@@ -66,9 +66,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <returns>A list of <see cref="SentNotificationSummary"/> instances.</returns>
         [HttpGet]
-        public async Task<IEnumerable<SentNotificationSummary>> GetSentNotifications()
+        public async Task<IEnumerable<SentNotificationSummary>> GetSentNotificationsAsync()
         {
-            var notificationEntities = await this.notificationRepository.All(false);
+            var notificationEntities = await this.notificationRepository.GetAllAsync(false);
 
             var result = new List<SentNotificationSummary>();
             foreach (var notificationEntity in notificationEntities)
@@ -82,7 +82,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     Succeeded = notificationEntity.Succeeded,
                     Failed = notificationEntity.Failed,
                     Throttled = notificationEntity.Throttled,
-                    Recipients = $"{notificationEntity.Succeeded},{notificationEntity.Failed},{notificationEntity.Throttled}",
                 };
 
                 result.Add(summary);
@@ -97,9 +96,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="id">Id of the requested sent notification.</param>
         /// <returns>Required sent notification.</returns>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetSentNotificationById(string id)
+        public async Task<IActionResult> GetSentNotificationByIdAsync(string id)
         {
-            var notificationEntity = await this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, id);
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, id);
             if (notificationEntity == null)
             {
                 return this.NotFound();

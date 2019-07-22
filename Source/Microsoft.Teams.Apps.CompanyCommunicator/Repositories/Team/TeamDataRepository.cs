@@ -28,12 +28,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
         /// </summary>
         /// <param name="activity">Bot conversation update activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task SaveChannelTypeData(IConversationUpdateActivity activity)
+        public async Task SaveTeamDataAsync(IConversationUpdateActivity activity)
         {
-            var teamDataEntity = this.ParseChannelTypeData(activity);
+            var teamDataEntity = this.ParseTeamDataAsync(activity);
             if (teamDataEntity != null)
             {
-                await this.CreateOrUpdate(teamDataEntity);
+                await this.CreateOrUpdateAsync(teamDataEntity);
             }
         }
 
@@ -42,20 +42,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
         /// </summary>
         /// <param name="activity">Bot conversation update activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task RemoveChannelTypeData(IConversationUpdateActivity activity)
+        public async Task RemoveTeamDataAsync(IConversationUpdateActivity activity)
         {
-            var teamDataEntity = this.ParseChannelTypeData(activity);
+            var teamDataEntity = this.ParseTeamDataAsync(activity);
             if (teamDataEntity != null)
             {
-                var found = await this.Get(PartitionKeyNames.Metadata.TeamData, teamDataEntity.TeamId);
+                var found = await this.GetAsync(PartitionKeyNames.Metadata.TeamData, teamDataEntity.TeamId);
                 if (found != null)
                 {
-                    await this.Delete(found);
+                    await this.DeleteAsync(found);
                 }
             }
         }
 
-        private TeamDataEntity ParseChannelTypeData(IConversationUpdateActivity activity)
+        private TeamDataEntity ParseTeamDataAsync(IConversationUpdateActivity activity)
         {
             if (activity?.ChannelData is JObject jObject &&
                 jObject["team"]["id"] != null &&

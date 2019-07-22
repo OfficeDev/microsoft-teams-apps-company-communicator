@@ -38,9 +38,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notification">A new Draft Notification to be created.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [HttpPost]
-        public async Task CreateDraftNotification([FromBody]DraftNotification notification)
+        public async Task CreateDraftNotificationAsync([FromBody]DraftNotification notification)
         {
-            await this.notificationRepository.CreateDraftNotification(
+            await this.notificationRepository.CreateDraftNotificationAsync(
                 notification,
                 this.HttpContext.User?.Identity?.Name);
         }
@@ -51,9 +51,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="id">The id of a Draft Notification to be duplicated.</param>
         /// <returns>If the passed in id is invalid, it returns 404 not found error. Otherwise, it returns 200 Ok.</returns>
         [HttpPost("duplicates/{id}")]
-        public async Task<IActionResult> DuplicateDraftNotification(string id)
+        public async Task<IActionResult> DuplicateDraftNotificationAsync(string id)
         {
-            var notificationEntity = await this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, id);
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, id);
 
             if (notificationEntity == null)
             {
@@ -80,7 +80,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 AllUsers = notificationEntity.AllUsers,
             };
 
-            await this.notificationRepository.CreateOrUpdate(newNotificationEntity);
+            await this.notificationRepository.CreateOrUpdateAsync(newNotificationEntity);
 
             return this.Ok();
         }
@@ -91,7 +91,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notification">An existing Draft Notification to be updated.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [HttpPut]
-        public async Task UpdateDraftNotification([FromBody]DraftNotification notification)
+        public async Task UpdateDraftNotificationAsync([FromBody]DraftNotification notification)
         {
             var notificationEntity = new NotificationEntity
             {
@@ -112,7 +112,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 AllUsers = notification.AllUsers,
             };
 
-            await this.notificationRepository.CreateOrUpdate(notificationEntity);
+            await this.notificationRepository.CreateOrUpdateAsync(notificationEntity);
         }
 
         /// <summary>
@@ -121,15 +121,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="id">The id of the draft notification to be deleted.</param>
         /// <returns>If the passed in Id is invalid, it returns 404 not found error. Otherwise, it returns 200 Ok.</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDraftNotification(string id)
+        public async Task<IActionResult> DeleteDraftNotificationAsync(string id)
         {
-            var notificationEntity = await this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, id);
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, id);
             if (notificationEntity == null)
             {
                 return this.NotFound();
             }
 
-            await this.notificationRepository.Delete(notificationEntity);
+            await this.notificationRepository.DeleteAsync(notificationEntity);
             return this.Ok();
         }
 
@@ -138,9 +138,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <returns>A list of <see cref="DraftNotificationSummary"/> instances.</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetAllDraftNotifications()
+        public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetAllDraftNotificationsAsync()
         {
-            var notificationEntities = await this.notificationRepository.All(true);
+            var notificationEntities = await this.notificationRepository.GetAllAsync(true);
 
             var result = new List<DraftNotificationSummary>();
             foreach (var notificationEntity in notificationEntities)
@@ -165,9 +165,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// The returning value is wrapped in a ActionResult object.
         /// If the passed in id is invalid, it returns 404 not found error.</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<DraftNotification>> GetDraftNotificationById(string id)
+        public async Task<ActionResult<DraftNotification>> GetDraftNotificationByIdAsync(string id)
         {
-            var notificationEntity = await this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, id);
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, id);
             if (notificationEntity == null)
             {
                 return this.NotFound();
