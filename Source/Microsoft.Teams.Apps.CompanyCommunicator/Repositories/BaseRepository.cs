@@ -16,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
     public class BaseRepository<T>
         where T : TableEntity, new()
     {
-        private readonly CloudTable notificationTable;
+        private readonly CloudTable table;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseRepository{T}"/> class.
@@ -28,7 +28,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
             var storageAccountSASConnectionString = configuration.GetValue<string>("StorageAccountSASConnectionString");
             var storageAccount = CloudStorageAccount.Parse(storageAccountSASConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
-            this.notificationTable = tableClient.GetTableReference(tableName);
+            this.table = tableClient.GetTableReference(tableName);
+            this.table.CreateIfNotExists();
         }
 
         /// <summary>
@@ -39,7 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         {
             var query = new TableQuery<T>();
 
-            var entities = this.notificationTable.ExecuteQuery<T>(query);
+            var entities = this.table.ExecuteQuery<T>(query);
 
             return entities.ToList();
         }
@@ -52,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         {
             var operation = TableOperation.InsertOrReplace(entity);
 
-            this.notificationTable.Execute(operation);
+            this.table.Execute(operation);
         }
 
         /// <summary>
@@ -63,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         {
             var operation = TableOperation.Delete(entity);
 
-            this.notificationTable.Execute(operation);
+            this.table.Execute(operation);
         }
 
         /// <summary>
@@ -76,7 +77,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         {
             var operation = TableOperation.Retrieve<T>(partitionKey, rowKey);
 
-            var result = this.notificationTable.Execute(operation);
+            var result = this.table.Execute(operation);
 
             return result.Result as T;
         }
@@ -90,7 +91,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         {
             var query = new TableQuery<T>().Where(filter);
 
-            var entities = this.notificationTable.ExecuteQuery<T>(query);
+            var entities = this.table.ExecuteQuery<T>(query);
 
             return entities.ToList();
         }
