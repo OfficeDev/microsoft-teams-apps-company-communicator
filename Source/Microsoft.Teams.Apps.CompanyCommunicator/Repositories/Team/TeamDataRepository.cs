@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
 {
+    using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Configuration;
     using Newtonsoft.Json.Linq;
@@ -26,12 +27,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
         /// Add channel data in Table Storage.
         /// </summary>
         /// <param name="activity">Bot conversation update activity instance.</param>
-        public void SaveChannelTypeData(IConversationUpdateActivity activity)
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task SaveChannelTypeData(IConversationUpdateActivity activity)
         {
             var teamDataEntity = this.ParseChannelTypeData(activity);
             if (teamDataEntity != null)
             {
-                this.CreateOrUpdate(teamDataEntity);
+                await this.CreateOrUpdate(teamDataEntity);
             }
         }
 
@@ -39,15 +41,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
         /// Remove channel data in table storage.
         /// </summary>
         /// <param name="activity">Bot conversation update activity instance.</param>
-        public void RemoveChannelTypeData(IConversationUpdateActivity activity)
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task RemoveChannelTypeData(IConversationUpdateActivity activity)
         {
             var teamDataEntity = this.ParseChannelTypeData(activity);
             if (teamDataEntity != null)
             {
-                var found = this.Get(PartitionKeyNames.Metadata.TeamData, teamDataEntity.TeamId);
+                var found = await this.Get(PartitionKeyNames.Metadata.TeamData, teamDataEntity.TeamId);
                 if (found != null)
                 {
-                    this.Delete(found);
+                    await this.Delete(found);
                 }
             }
         }

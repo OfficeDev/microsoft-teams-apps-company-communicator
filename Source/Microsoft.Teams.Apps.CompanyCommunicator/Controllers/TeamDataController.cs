@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
@@ -34,9 +35,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <returns>A list of team data.</returns>
         [HttpGet("team")]
-        public IEnumerable<TeamData> GetAllChannelTypeData()
+        public async Task<IEnumerable<TeamData>> GetAllChannelTypeData()
         {
-            var entities = this.teamsDataRepository.All();
+            var entities = await this.teamsDataRepository.All();
             var result = new List<TeamData>();
             foreach (var entity in entities)
             {

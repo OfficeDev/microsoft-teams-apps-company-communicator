@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
+    using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User;
@@ -36,15 +37,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// Add channel or personal data in Table Storage.
         /// </summary>
         /// <param name="activity">Teams activity instance.</param>
-        public void OnBotAdded(IConversationUpdateActivity activity)
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task OnBotAdded(IConversationUpdateActivity activity)
         {
             switch (activity.Conversation.ConversationType)
             {
                 case TeamsDataCapture.ChannelType:
-                    this.teamsDataRepository.SaveChannelTypeData(activity);
+                    await this.teamsDataRepository.SaveChannelTypeData(activity);
                     break;
                 case TeamsDataCapture.PersonalType:
-                    this.userDataRepository.SavePersonalTypeData(activity);
+                    await this.userDataRepository.SavePersonalTypeData(activity);
                     break;
                 default: break;
             }
@@ -54,15 +56,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// Remove channel or personal data in table storage.
         /// </summary>
         /// <param name="activity">Teams activity instance.</param>
-        public void OnBotRemoved(IConversationUpdateActivity activity)
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task OnBotRemoved(IConversationUpdateActivity activity)
         {
             switch (activity.Conversation.ConversationType)
             {
                 case TeamsDataCapture.ChannelType:
-                    this.teamsDataRepository.RemoveChannelTypeData(activity);
+                    await this.teamsDataRepository.RemoveChannelTypeData(activity);
                     break;
                 case TeamsDataCapture.PersonalType:
-                    this.userDataRepository.RemovePersonalTypeData(activity);
+                    await this.userDataRepository.RemovePersonalTypeData(activity);
                     break;
                 default: break;
             }

@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User
 {
+    using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Configuration;
 
@@ -25,12 +26,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User
         /// Add personal data in Table Storage.
         /// </summary>
         /// <param name="activity">Bot conversation update activity instance.</param>
-        public void SavePersonalTypeData(IConversationUpdateActivity activity)
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task SavePersonalTypeData(IConversationUpdateActivity activity)
         {
             var userDataEntity = this.ParsePersonalTypeData(activity);
             if (userDataEntity != null)
             {
-                this.CreateOrUpdate(userDataEntity);
+                await this.CreateOrUpdate(userDataEntity);
             }
         }
 
@@ -38,15 +40,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User
         /// Remove personal data in table storage.
         /// </summary>
         /// <param name="activity">Bot conversation update activity instance.</param>
-        public void RemovePersonalTypeData(IConversationUpdateActivity activity)
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task RemovePersonalTypeData(IConversationUpdateActivity activity)
         {
             var userDataEntity = this.ParsePersonalTypeData(activity);
             if (userDataEntity != null)
             {
-                var found = this.Get(PartitionKeyNames.Metadata.UserData, userDataEntity.UserId);
+                var found = await this.Get(PartitionKeyNames.Metadata.UserData, userDataEntity.UserId);
                 if (found != null)
                 {
-                    this.Delete(found);
+                    await this.Delete(found);
                 }
             }
         }

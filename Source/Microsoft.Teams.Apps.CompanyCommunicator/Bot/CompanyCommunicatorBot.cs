@@ -111,14 +111,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             // Take action if this event includes the bot being added
             if (activity.MembersAdded?.FirstOrDefault(p => p.Id == botId) != null)
             {
-                this.teamsDataCapture.OnBotAdded(activity);
+                await this.teamsDataCapture.OnBotAdded(activity);
                 await this.SendAsync(turnContext, cancellationToken, "Hello and Welcome!");
             }
 
             // Take action if this event includes the bot being removed
             if (activity.MembersRemoved?.FirstOrDefault(p => p.Id == botId) != null)
             {
-                this.teamsDataCapture.OnBotRemoved(activity);
+                await this.teamsDataCapture.OnBotRemoved(activity);
             }
         }
 

@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
 {
     using System;
+    using System.Threading.Tasks;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.ActiveNotification;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
@@ -71,9 +72,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// Generate an adaptive card in json.
         /// </summary>
         /// <param name="notificationId">Notification Id.</param>
-        public void Create(string notificationId)
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task Create(string notificationId)
         {
-            var notification = this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, notificationId);
+            var notification = await this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, notificationId);
             if (notification == null)
             {
                 return;
@@ -88,7 +90,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
                 TokenExpiration = DateTime.UtcNow - TimeSpan.FromDays(1),
             };
 
-            this.activeNotificationRepository.CreateOrUpdate(activeNotification);
+            await this.activeNotificationRepository.CreateOrUpdate(activeNotification);
         }
     }
 }

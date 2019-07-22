@@ -42,9 +42,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// Get all user data.
         /// </summary>
         /// <returns>User data dictionary.</returns>
-        public Dictionary<string, UserDataEntity> GetUserDataDictionary()
+        public async Task<Dictionary<string, UserDataEntity>> GetUserDataDictionary()
         {
-            var userDataEntities = this.userDataRepository.All();
+            var userDataEntities = await this.userDataRepository.All();
             var result = new Dictionary<string, UserDataEntity>();
             foreach (var userDataEntity in userDataEntities)
             {
@@ -62,7 +62,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         {
             var result = new List<UserDataEntity>();
 
-            var teams = this.teamsDataRepository.All();
+            var teams = await this.teamsDataRepository.All();
             foreach (var team in teams)
             {
                 var teamRoster = await this.GetTeamRosterAsync(team.TeamId);

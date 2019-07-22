@@ -6,6 +6,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Configuration;
 
@@ -36,35 +37,46 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// Get all data entities from the table storage.
         /// </summary>
         /// <returns>All data entities.</returns>
-        public IEnumerable<T> All()
+        public async Task<IEnumerable<T>> All()
         {
-            var query = new TableQuery<T>();
+            return await Task.Run(() =>
+            {
+                var query = new TableQuery<T>();
 
-            var entities = this.table.ExecuteQuery<T>(query);
+                var entities = this.table.ExecuteQuery<T>(query);
 
-            return entities.ToList();
+                return entities.ToList();
+            });
         }
 
         /// <summary>
         /// Create or update an entity in the table storage.
         /// </summary>
         /// <param name="entity">Entity to be created or updated.</param>
-        public void CreateOrUpdate(T entity)
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task CreateOrUpdate(T entity)
         {
-            var operation = TableOperation.InsertOrReplace(entity);
+            await Task.Run(() =>
+            {
+                var operation = TableOperation.InsertOrReplace(entity);
 
-            this.table.Execute(operation);
+                this.table.Execute(operation);
+            });
         }
 
         /// <summary>
         /// Delete an entity in the table storage.
         /// </summary>
         /// <param name="entity">Entity to be deleted.</param>
-        public void Delete(T entity)
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task Delete(T entity)
         {
-            var operation = TableOperation.Delete(entity);
+            await Task.Run(() =>
+            {
+                var operation = TableOperation.Delete(entity);
 
-            this.table.Execute(operation);
+                this.table.Execute(operation);
+            });
         }
 
         /// <summary>
@@ -73,13 +85,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// <param name="partitionKey">The partition key of the entity.</param>
         /// <param name="rowKey">The row key fo the entity.</param>
         /// <returns>The entity matching the keys.</returns>
-        public T Get(string partitionKey, string rowKey)
+        public async Task<T> Get(string partitionKey, string rowKey)
         {
-            var operation = TableOperation.Retrieve<T>(partitionKey, rowKey);
+            return await Task.Run(() =>
+            {
+                var operation = TableOperation.Retrieve<T>(partitionKey, rowKey);
 
-            var result = this.table.Execute(operation);
+                var result = this.table.Execute(operation);
 
-            return result.Result as T;
+                return result.Result as T;
+            });
         }
 
         /// <summary>
@@ -87,13 +102,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// </summary>
         /// <param name="filter">Filter to the result.</param>
         /// <returns>All data entities.</returns>
-        protected IEnumerable<T> All(string filter)
+        protected async Task<IEnumerable<T>> All(string filter)
         {
-            var query = new TableQuery<T>().Where(filter);
+            return await Task.Run(() =>
+            {
+                var query = new TableQuery<T>().Where(filter);
 
-            var entities = this.table.ExecuteQuery<T>(query);
+                var entities = this.table.ExecuteQuery<T>(query);
 
-            return entities.ToList();
+                return entities.ToList();
+            });
         }
     }
 }

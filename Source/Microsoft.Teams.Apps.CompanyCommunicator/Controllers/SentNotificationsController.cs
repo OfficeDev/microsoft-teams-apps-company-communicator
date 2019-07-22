@@ -46,7 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateSentNotification([FromBody]DraftNotification notification)
         {
-            var notificationEntity = this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, notification.Id);
+            var notificationEntity = await this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, notification.Id);
             if (notificationEntity == null)
             {
                 return this.NotFound();
@@ -56,7 +56,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             notificationEntity.IsDraft = false;
             notificationEntity.SentDate = DateTime.UtcNow.ToShortDateString();
-            this.notificationRepository.CreateOrUpdate(notificationEntity);
+            await this.notificationRepository.CreateOrUpdate(notificationEntity);
 
             return this.Ok();
         }
@@ -66,9 +66,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <returns>A list of <see cref="SentNotificationSummary"/> instances.</returns>
         [HttpGet]
-        public IEnumerable<SentNotificationSummary> GetSentNotifications()
+        public async Task<IEnumerable<SentNotificationSummary>> GetSentNotifications()
         {
-            var notificationEntities = this.notificationRepository.All(false);
+            var notificationEntities = await this.notificationRepository.All(false);
 
             var result = new List<SentNotificationSummary>();
             foreach (var notificationEntity in notificationEntities)
@@ -97,9 +97,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="id">Id of the requested sent notification.</param>
         /// <returns>Required sent notification.</returns>
         [HttpGet("{id}")]
-        public IActionResult GetSentNotificationById(string id)
+        public async Task<IActionResult> GetSentNotificationById(string id)
         {
-            var notificationEntity = this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, id);
+            var notificationEntity = await this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, id);
             if (notificationEntity == null)
             {
                 return this.NotFound();

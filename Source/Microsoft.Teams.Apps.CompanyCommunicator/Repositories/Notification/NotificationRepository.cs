@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
@@ -30,16 +31,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         /// </summary>
         /// <param name="isDraft">Indicates if the function shall return draft notifications or not.</param>
         /// <returns>All notitification entities.</returns>
-        public IEnumerable<NotificationEntity> All(bool isDraft)
+        public async Task<IEnumerable<NotificationEntity>> All(bool isDraft)
         {
             var filter = TableQuery.GenerateFilterConditionForBool(
                     nameof(NotificationEntity.IsDraft),
                     QueryComparisons.Equal,
                     isDraft);
 
-            var entities = this.All(filter).Take(25);
+            var entities = await this.All(filter);
 
-            return entities;
+            return entities.Take(25);
         }
 
         /// <summary>
@@ -47,7 +48,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
         /// </summary>
         /// <param name="notification">Draft Notification model class instance passed in from Web API.</param>
         /// <param name="userName">Name of the user who is running the application.</param>
-        public void CreateDraftNotification(DraftNotification notification, string userName)
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task CreateDraftNotification(DraftNotification notification, string userName)
         {
             var id = Guid.NewGuid().ToString();
             var notificationEntity = new NotificationEntity
@@ -69,7 +71,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification
                 AllUsers = notification.AllUsers,
             };
 
-            this.CreateOrUpdate(notificationEntity);
+            await this.CreateOrUpdate(notificationEntity);
         }
     }
 }

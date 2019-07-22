@@ -45,17 +45,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// <returns>Indicating whether the notification was sent successfully or not.</returns>
         public async Task<bool> Send(string notificationId)
         {
-            var notification = this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, notificationId);
+            var notification = await this.notificationRepository.Get(PartitionKeyNames.Notification.DraftNotifications, notificationId);
             if (notification == null || !notification.IsDraft)
             {
                 return false;
             }
 
             // Set in ActiveNotification data
-            this.activeNotificationCreator.Create(notificationId);
+            await this.activeNotificationCreator.Create(notificationId);
 
             // Get all users
-            var userDataDictionary = this.userDataProvider.GetUserDataDictionary();
+            var userDataDictionary = await this.userDataProvider.GetUserDataDictionary();
 
             // Get all teams
             var roster = await this.userDataProvider.GetAllTeamsRosterAsync();
