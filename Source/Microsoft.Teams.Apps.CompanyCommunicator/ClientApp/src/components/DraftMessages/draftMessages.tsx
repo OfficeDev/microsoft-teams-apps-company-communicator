@@ -12,7 +12,7 @@ import { getBaseUrl } from '../../configVariables';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { Loader } from '@stardust-ui/react';
 import { IButtonProps, CommandBar, DirectionalHint } from 'office-ui-fabric-react';
-import { getSentNotification, deleteDraftNotification, duplicateDraftNotification, sendDraftNotification } from '../../apis/messageListApi';
+import { getDraftNotification, deleteDraftNotification, duplicateDraftNotification, sendDraftNotification } from '../../apis/messageListApi';
 
 export interface ITaskInfo {
   title?: string;
@@ -233,7 +233,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         key: 'send',
         name: 'Send',
         onClick: () => {
-          this.getSentMessage(id).then(() => {
+          this.getDraftMessage(id).then(() => {
             this.sendDraftMessage(this.state.sentMessagePayload).then(() => {
               this.props.getDraftMessagesList();
               this.props.getMessagesList();
@@ -244,9 +244,9 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     ];
   };
 
-  private getSentMessage = async (id: number) => {
+  private getDraftMessage = async (id: number) => {
     try {
-      const response = await getSentNotification(id);
+      const response = await getDraftNotification(id);
       this.setState({
         sentMessagePayload: response.data
       });

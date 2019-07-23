@@ -28,7 +28,7 @@ export const getInitAdaptiveCard = () => {
                     "wrap": true,
                     "size": "Small",
                     "weight": "Lighter",
-                    "text": "Sent by: Anonymous"
+                    "text": ""
                 }
             ],
             "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
@@ -70,11 +70,11 @@ export const setCardAuthor = (card: any, author?: string) => {
 }
 
 export const getCardBtnTitle = (card: any) => {
-    return card.actions.title;
+    return card.actions[0].title;
 }
 
 export const getCardBtnLink = (card: any) => {
-    return card.actions.url;
+    return card.actions[0].url;
 }
 
 export const setCardBtn = (card: any, buttonTitle?: string, buttonLink?: string) => {
