@@ -19,7 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         public TeamDataRepository(IConfiguration configuration)
-            : base(configuration, "TeamsData")
+            : base(configuration, "TeamData")
         {
         }
 
@@ -30,7 +30,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
         /// <returns>A task that represents the work queued to execute.</returns>
         public async Task SaveTeamDataAsync(IConversationUpdateActivity activity)
         {
-            var teamDataEntity = this.ParseTeamDataAsync(activity);
+            var teamDataEntity = this.ParseTeamData(activity);
             if (teamDataEntity != null)
             {
                 await this.CreateOrUpdateAsync(teamDataEntity);
@@ -44,7 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
         /// <returns>A task that represents the work queued to execute.</returns>
         public async Task RemoveTeamDataAsync(IConversationUpdateActivity activity)
         {
-            var teamDataEntity = this.ParseTeamDataAsync(activity);
+            var teamDataEntity = this.ParseTeamData(activity);
             if (teamDataEntity != null)
             {
                 var found = await this.GetAsync(PartitionKeyNames.Metadata.TeamData, teamDataEntity.TeamId);
@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
             }
         }
 
-        private TeamDataEntity ParseTeamDataAsync(IConversationUpdateActivity activity)
+        private TeamDataEntity ParseTeamData(IConversationUpdateActivity activity)
         {
             if (activity?.ChannelData is JObject jObject &&
                 jObject["team"]["id"] != null &&

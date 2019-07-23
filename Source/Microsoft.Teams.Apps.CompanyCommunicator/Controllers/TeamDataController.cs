@@ -24,7 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamDataController"/> class.
         /// </summary>
-        /// <param name="teamDataRepository">Teams data repository instance.</param>
+        /// <param name="teamDataRepository">Team data repository instance.</param>
         public TeamDataController(TeamDataRepository teamDataRepository)
         {
             this.teamDataRepository = teamDataRepository;
@@ -35,7 +35,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <returns>A list of team data.</returns>
         [HttpGet]
-        public async Task<IEnumerable<TeamData>> GetAllChannelTypeDataAsync()
+        public async Task<IEnumerable<TeamData>> GetAllTeamDataAsync()
         {
             var entities = await this.teamDataRepository.GetAllAsync();
             var result = new List<TeamData>();

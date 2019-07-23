@@ -20,7 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
     {
         private readonly BotConnectorManager botConnectorManager;
         private readonly UserDataRepository userDataRepository;
-        private readonly TeamDataRepository teamsDataRepository;
+        private readonly TeamDataRepository teamDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserDataProvider"/> class.
@@ -35,7 +35,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         {
             this.botConnectorManager = botConnectorManager;
             this.userDataRepository = userDataRepository;
-            this.teamsDataRepository = teamsDataRepository;
+            this.teamDataRepository = teamsDataRepository;
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         {
             var result = new List<UserDataEntity>();
 
-            var teams = await this.teamsDataRepository.GetAllAsync();
+            var teams = await this.teamDataRepository.GetAllAsync();
             foreach (var team in teams)
             {
                 var teamRoster = await this.GetTeamRosterAsync(team.TeamId);
