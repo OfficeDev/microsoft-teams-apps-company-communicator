@@ -198,6 +198,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
+        /// Get draft notifificaiton summary (for consent page) by notification Id.
+        /// </summary>
+        /// <param name="notificationId">Draft notification Id.</param>
+        /// <returns>It returns the draft notification summary (for consent page) with the passed in id.
+        /// The returning value is wrapped in a ActionResult object.
+        /// If the passed in id is invalid, it returns 404 not found error.</returns>
+        [HttpGet("consent-summaries/{notificationId}")]
+        public async Task<ActionResult<DraftNotificationSummaryForConsent>> GetDraftNotificationSummaryByIdForConsentAsync(string notificationId)
+        {
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notificationId);
+            if (notificationEntity == null)
+            {
+                return this.NotFound();
+            }
+
+            var result = new DraftNotificationSummaryForConsent
+            {
+                NotificationId = notificationId,
+                TeamNames = await this.GetTeamNamesByIdsAsync(notificationEntity.Teams),
+                RosterNames = await this.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
+                AllUsers = notificationEntity.AllUsers,
+            };
+
+            return this.Ok(result);
+        }
+
+        /// <summary>
         /// Get draft notifification summary (for consent page) by notification Id.
         /// </summary>
         /// <param name="notificationId">Draft notification Id.</param>
