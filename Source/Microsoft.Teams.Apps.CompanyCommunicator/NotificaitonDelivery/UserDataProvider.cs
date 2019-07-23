@@ -27,15 +27,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// </summary>
         /// <param name="botConnectorManager">Bot connector manager service.</param>
         /// <param name="userDataRepository">User Data repository service.</param>
-        /// <param name="teamsDataRepository">Teams Data repository service.</param>
+        /// <param name="teamDataRepository">Team Data repository service.</param>
         public UserDataProvider(
             BotConnectorManager botConnectorManager,
             UserDataRepository userDataRepository,
-            TeamDataRepository teamsDataRepository)
+            TeamDataRepository teamDataRepository)
         {
             this.botConnectorManager = botConnectorManager;
             this.userDataRepository = userDataRepository;
-            this.teamDataRepository = teamsDataRepository;
+            this.teamDataRepository = teamDataRepository;
         }
 
         /// <summary>
