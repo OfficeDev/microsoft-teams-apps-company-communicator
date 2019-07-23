@@ -23,14 +23,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     public class DraftNotificationsController : ControllerBase
     {
         private readonly NotificationRepository notificationRepository;
+        private readonly TeamDataRepository teamDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
         /// </summary>
         /// <param name="notificationRepository">Notification respository instance.</param>
-        public DraftNotificationsController(NotificationRepository notificationRepository)
+        /// <param name="teamDataRepository">Team data repository instance.</param>
+        public DraftNotificationsController(
+            NotificationRepository notificationRepository,
+            TeamDataRepository teamDataRepository)
         {
             this.notificationRepository = notificationRepository;
+            this.teamDataRepository = teamDataRepository;
         }
 
         /// <summary>
@@ -190,6 +195,54 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             };
 
             return this.Ok(result);
+        }
+
+        /// <summary>
+        /// Get draft notifificaiton summary (for consent page) by notification Id.
+        /// </summary>
+        /// <param name="notificationId">Draft notification Id.</param>
+        /// <returns>It returns the draft notification summary (for consent page) with the passed in id.
+        /// The returning value is wrapped in a ActionResult object.
+        /// If the passed in id is invalid, it returns 404 not found error.</returns>
+        [HttpGet("consent-summaries/{notificationId}")]
+        public async Task<ActionResult<DraftNotificationSummaryForConsent>> GetDraftNotificationSummaryByIdForConsentAsync(string notificationId)
+        {
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notificationId);
+            if (notificationEntity == null)
+            {
+                return this.NotFound();
+            }
+
+            var result = new DraftNotificationSummaryForConsent
+            {
+                NotificationId = notificationId,
+                TeamNames = await this.GetTeamNamesByIdsAsync(notificationEntity.Teams),
+                RosterNames = await this.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
+                AllUsers = notificationEntity.AllUsers,
+            };
+
+            return this.Ok(result);
+        }
+
+        private async Task<IEnumerable<string>> GetTeamNamesByIdsAsync(IEnumerable<string> ids)
+        {
+            var result = new List<string>();
+
+            if (ids == null)
+            {
+                return result;
+            }
+
+            foreach (var id in ids)
+            {
+                var teamDataEntity = await this.teamDataRepository.GetAsync(PartitionKeyNames.Metadata.TeamData, id);
+                if (teamDataEntity != null)
+                {
+                    result.Add(teamDataEntity.Name);
+                }
+            }
+
+            return result;
         }
     }
 }
