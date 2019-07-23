@@ -6,35 +6,153 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
 
     /// <summary>
     /// Controller for the draft notification data.
     /// </summary>
+    [Route("api/draftNotifications")]
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
-    public class DraftNotificationsController
+    public class DraftNotificationsController : ControllerBase
     {
+        private readonly NotificationRepository notificationRepository;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
+        /// </summary>
+        /// <param name="notificationRepository">Notification respository instance.</param>
+        public DraftNotificationsController(NotificationRepository notificationRepository)
+        {
+            this.notificationRepository = notificationRepository;
+        }
+
         /// <summary>
         /// Create a new draft notification.
         /// </summary>
-        /// <param name="notification">An instance of <see cref="Notification"/> class.</param>
-        [HttpPost("api/draftNotifications")]
-        public void CreateDraftNotification([FromBody]Notification notification)
+        /// <param name="notification">A new Draft Notification to be created.</param>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [HttpPost]
+        public async Task CreateDraftNotificationAsync([FromBody]DraftNotification notification)
         {
-            Console.WriteLine(notification.Id);
+            await this.notificationRepository.CreateDraftNotificationAsync(
+                notification,
+                this.HttpContext.User?.Identity?.Name);
+        }
+
+        /// <summary>
+        /// Duplicate an existing draft notification.
+        /// </summary>
+        /// <param name="id">The id of a Draft Notification to be duplicated.</param>
+        /// <returns>If the passed in id is invalid, it returns 404 not found error. Otherwise, it returns 200 Ok.</returns>
+        [HttpPost("duplicates/{id}")]
+        public async Task<IActionResult> DuplicateDraftNotificationAsync(string id)
+        {
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, id);
+
+            if (notificationEntity == null)
+            {
+                return this.NotFound();
+            }
+
+            var newId = Guid.NewGuid().ToString();
+            var newNotificationEntity = new NotificationEntity
+            {
+                PartitionKey = PartitionKeyNames.Notification.DraftNotifications,
+                RowKey = newId,
+                Id = newId,
+                Title = notificationEntity.Title,
+                ImageLink = notificationEntity.ImageLink,
+                Summary = notificationEntity.Summary,
+                Author = notificationEntity.Author,
+                ButtonTitle = notificationEntity.ButtonTitle,
+                ButtonLink = notificationEntity.ButtonLink,
+                CreatedBy = this.HttpContext.User?.Identity?.Name,
+                CreatedDate = DateTime.UtcNow.ToShortDateString(),
+                IsDraft = true,
+                Teams = notificationEntity.Teams,
+                Rosters = notificationEntity.Rosters,
+                AllUsers = notificationEntity.AllUsers,
+            };
+
+            await this.notificationRepository.CreateOrUpdateAsync(newNotificationEntity);
+
+            return this.Ok();
+        }
+
+        /// <summary>
+        /// Update an existing draft notification.
+        /// </summary>
+        /// <param name="notification">An existing Draft Notification to be updated.</param>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [HttpPut]
+        public async Task UpdateDraftNotificationAsync([FromBody]DraftNotification notification)
+        {
+            var notificationEntity = new NotificationEntity
+            {
+                PartitionKey = PartitionKeyNames.Notification.DraftNotifications,
+                RowKey = notification.Id,
+                Id = notification.Id,
+                Title = notification.Title,
+                ImageLink = notification.ImageLink,
+                Summary = notification.Summary,
+                Author = notification.Author,
+                ButtonTitle = notification.ButtonTitle,
+                ButtonLink = notification.ButtonLink,
+                CreatedBy = this.HttpContext.User?.Identity?.Name,
+                CreatedDate = DateTime.UtcNow.ToShortDateString(),
+                IsDraft = true,
+                Teams = notification.Teams,
+                Rosters = notification.Rosters,
+                AllUsers = notification.AllUsers,
+            };
+
+            await this.notificationRepository.CreateOrUpdateAsync(notificationEntity);
+        }
+
+        /// <summary>
+        /// Delete an existing draft notification.
+        /// </summary>
+        /// <param name="id">The id of the draft notification to be deleted.</param>
+        /// <returns>If the passed in Id is invalid, it returns 404 not found error. Otherwise, it returns 200 Ok.</returns>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDraftNotificationAsync(string id)
+        {
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, id);
+            if (notificationEntity == null)
+            {
+                return this.NotFound();
+            }
+
+            await this.notificationRepository.DeleteAsync(notificationEntity);
+            return this.Ok();
         }
 
         /// <summary>
         /// Get draft notifications.
         /// </summary>
-        /// <returns>A list of <see cref="Notification"/> instances.</returns>
-        [HttpGet("api/draftNotifications")]
-        public IEnumerable<Notification> GetDraftNotifications()
+        /// <returns>A list of <see cref="DraftNotificationSummary"/> instances.</returns>
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetAllDraftNotificationsAsync()
         {
-            var result = this.GetFakeNotifications();
+            var notificationEntities = await this.notificationRepository.GetAllAsync(true);
+
+            var result = new List<DraftNotificationSummary>();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                var summary = new DraftNotificationSummary
+                {
+                    Id = notificationEntity.Id,
+                    Title = notificationEntity.Title,
+                };
+
+                result.Add(summary);
+            }
 
             return result;
         }
@@ -43,80 +161,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// Get a draft notification by Id.
         /// </summary>
         /// <param name="id">Draft notification Id.</param>
-        /// <returns>Required draft notification.</returns>
-        [HttpGet("api/draftNotifications/{id}")]
-        public Notification GetDraftNotificationById(int id)
+        /// <returns>It returns the draft notification with the passed in id.
+        /// The returning value is wrapped in a ActionResult object.
+        /// If the passed in id is invalid, it returns 404 not found error.</returns>
+        [HttpGet("{id}")]
+        public async Task<ActionResult<DraftNotification>> GetDraftNotificationByIdAsync(string id)
         {
-            return
-                new Notification
-                {
-                    Id = id,
-                    Title = "A Testing Message (Draft from service)",
-                    Date = "12/16/2018",
-                    Recipients = "30,0,1",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                };
-        }
-
-        private IEnumerable<Notification> GetFakeNotifications()
-        {
-            var result = new List<Notification>
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, id);
+            if (notificationEntity == null)
             {
-                new Notification
-                {
-                    Id = 1,
-                    Title = "A Testing Message (Draft from service)",
-                    Date = "12/16/2018",
-                    Recipients = "30,0,1",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 2,
-                    Title = "Testing",
-                    Date = "11/16/2019",
-                    Recipients = "40,6,8",
-                    Acknowledgements = "acknowledgements (Draft from service)",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 3,
-                    Title = "Security Advisory Heightened Security During New Year's Eve Celebrations (Draft from service)",
-                    Date = "12/16/2019",
-                    Recipients = "90,6,8",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 4,
-                    Title = "Security Advisory Heightened Security During New Year's Eve Celebrations (Draft from service)",
-                    Date = "12/16/2019",
-                    Recipients = "40,6,8",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 5,
-                    Title = "Upcoming Holiday (Draft from service)",
-                    Date = "12/16/2019",
-                    Recipients = "14,6,8",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
+                return this.NotFound();
+            }
+
+            var result = new DraftNotification
+            {
+                Id = notificationEntity.Id,
+                Title = notificationEntity.Title,
+                ImageLink = notificationEntity.ImageLink,
+                Summary = notificationEntity.Summary,
+                Author = notificationEntity.Author,
+                ButtonTitle = notificationEntity.ButtonTitle,
+                ButtonLink = notificationEntity.ButtonLink,
+                CreatedDate = notificationEntity.CreatedDate,
+                Teams = notificationEntity.Teams,
+                Rosters = notificationEntity.Rosters,
+                AllUsers = notificationEntity.AllUsers,
             };
 
-            return result;
+            return this.Ok(result);
         }
     }
 }
