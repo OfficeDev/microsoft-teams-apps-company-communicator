@@ -17,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public string NotificationId { get; set; }
 
         /// <summary>
-        /// Gets or sets Team Names vlaue.
+        /// Gets or sets Team Names value.
         /// </summary>
         public IEnumerable<string> TeamNames { get; set; }
 
