@@ -103,29 +103,18 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         data: 'string',
         headerClassName: mergeStyles(getDetailsListHeaderColumnStyle()),
         onRender: (item) => {
-          let success: string = "0";
-          let failure: string = "0";
-          let throttled: string = "0";
-
-          if (item != null && item.recipients !== "") {
-            let numbers = item.recipients.split(",");
-            success = numbers[0];
-            failure = numbers[1];
-            throttled = numbers[2];
-          }
-
           return (
             <div className="content">
               <TooltipHost content="Success" calloutProps={{ gapSpace: 0 }}>
-                <Icon name="stardust-checkmark" xSpacing="after"> </Icon>{success}
+                <Icon name="stardust-checkmark" xSpacing="after"> </Icon>{item.succeeded}
               </TooltipHost>
 
               <TooltipHost content="Failure" calloutProps={{ gapSpace: 0 }}>
-                <Icon name="stardust-close" xSpacing="both" />{failure}
+                <Icon name="stardust-close" xSpacing="both" />{item.failed}
               </TooltipHost>
 
               <TooltipHost content="Throttled" calloutProps={{ gapSpace: 0 }}>
-                <Icon name="exclamation-circle" xSpacing="both" />{throttled}
+                <Icon name="exclamation-circle" xSpacing="both" />{item.throttled}
               </TooltipHost>
             </div>
           );
