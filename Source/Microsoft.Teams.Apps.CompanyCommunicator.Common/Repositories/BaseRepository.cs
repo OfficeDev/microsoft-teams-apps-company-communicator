@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -26,7 +26,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// <param name="tableName">The name of the table in Azure Table Storage.</param>
         public BaseRepository(IConfiguration configuration, string tableName)
         {
-            var storageAccountConnectionString = configuration.GetValue<string>("StorageAccountConnectionString");
+            var storageAccountConnectionString = configuration["StorageAccountConnectionString"];
             var storageAccount = CloudStorageAccount.Parse(storageAccountConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
             this.table = tableClient.GetTableReference(tableName);

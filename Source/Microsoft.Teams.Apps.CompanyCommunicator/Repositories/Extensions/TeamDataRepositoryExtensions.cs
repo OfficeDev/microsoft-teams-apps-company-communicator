@@ -1,61 +1,59 @@
-﻿// <copyright file="TeamDataRepository.cs" company="Microsoft">
+﻿// <copyright file="TeamDataRepositoryExtensions.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
 {
     using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
     using Newtonsoft.Json.Linq;
 
     /// <summary>
-    /// Respository of the team data stored in the table storage.
+    /// Extensions for the respository of the team data stored in the table storage.
     /// </summary>
-    public class TeamDataRepository : BaseRepository<TeamDataEntity>
+    public static class TeamDataRepositoryExtensions
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TeamDataRepository"/> class.
-        /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
-        public TeamDataRepository(IConfiguration configuration)
-            : base(configuration, "TeamData")
-        {
-        }
-
         /// <summary>
         /// Add channel data in Table Storage.
         /// </summary>
+        /// <param name="teamDataRepository">The team data repository.</param>
         /// <param name="activity">Bot conversation update activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task SaveTeamDataAsync(IConversationUpdateActivity activity)
+        public static async Task SaveTeamDataAsync(
+            this TeamDataRepository teamDataRepository,
+            IConversationUpdateActivity activity)
         {
-            var teamDataEntity = this.ParseTeamData(activity);
+            var teamDataEntity = TeamDataRepositoryExtensions.ParseTeamData(activity);
             if (teamDataEntity != null)
             {
-                await this.CreateOrUpdateAsync(teamDataEntity);
+                await teamDataRepository.CreateOrUpdateAsync(teamDataEntity);
             }
         }
 
         /// <summary>
         /// Remove channel data in table storage.
         /// </summary>
+        /// <param name="teamDataRepository">The team data repository.</param>
         /// <param name="activity">Bot conversation update activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task RemoveTeamDataAsync(IConversationUpdateActivity activity)
+        public static async Task RemoveTeamDataAsync(
+            this TeamDataRepository teamDataRepository,
+            IConversationUpdateActivity activity)
         {
-            var teamDataEntity = this.ParseTeamData(activity);
+            var teamDataEntity = TeamDataRepositoryExtensions.ParseTeamData(activity);
             if (teamDataEntity != null)
             {
-                var found = await this.GetAsync(PartitionKeyNames.Metadata.TeamData, teamDataEntity.TeamId);
+                var found = await teamDataRepository.GetAsync(PartitionKeyNames.Metadata.TeamData, teamDataEntity.TeamId);
                 if (found != null)
                 {
-                    await this.DeleteAsync(found);
+                    await teamDataRepository.DeleteAsync(found);
                 }
             }
         }
 
-        private TeamDataEntity ParseTeamData(IConversationUpdateActivity activity)
+        private static TeamDataEntity ParseTeamData(IConversationUpdateActivity activity)
         {
             if (activity?.ChannelData is JObject jObject &&
                 jObject["team"]["id"] != null &&

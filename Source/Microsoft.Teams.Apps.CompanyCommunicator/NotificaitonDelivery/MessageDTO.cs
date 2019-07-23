@@ -4,7 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 {
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.User;
 
     /// <summary>
     /// DTO class for the objects stored in the message queue.

@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.ActiveNotification
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ActiveNotification
 {
     using Microsoft.Extensions.Configuration;
 

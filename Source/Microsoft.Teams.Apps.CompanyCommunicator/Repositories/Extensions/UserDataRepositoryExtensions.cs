@@ -1,60 +1,58 @@
-﻿// <copyright file="UserDataRepository.cs" company="Microsoft">
+﻿// <copyright file="UserDataRepositoryExtensions.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
 {
     using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.User;
 
     /// <summary>
-    /// Respository of the user data stored in the table storage.
+    /// Extensions for the respository of the user data stored in the table storage.
     /// </summary>
-    public class UserDataRepository : BaseRepository<UserDataEntity>
+    public static class UserDataRepositoryExtensions
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserDataRepository"/> class.
-        /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
-        public UserDataRepository(IConfiguration configuration)
-            : base(configuration, "UserData")
-        {
-        }
-
         /// <summary>
         /// Add personal data in Table Storage.
         /// </summary>
+        /// <param name="userDataRepository">The user data repository.</param>
         /// <param name="activity">Bot conversation update activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task SaveUserDataAsync(IConversationUpdateActivity activity)
+        public static async Task SaveUserDataAsync(
+            this UserDataRepository userDataRepository,
+            IConversationUpdateActivity activity)
         {
-            var userDataEntity = this.ParseUserData(activity);
+            var userDataEntity = UserDataRepositoryExtensions.ParseUserData(activity);
             if (userDataEntity != null)
             {
-                await this.CreateOrUpdateAsync(userDataEntity);
+                await userDataRepository.CreateOrUpdateAsync(userDataEntity);
             }
         }
 
         /// <summary>
         /// Remove personal data in table storage.
         /// </summary>
+        /// <param name="userDataRepository">The user data repository.</param>
         /// <param name="activity">Bot conversation update activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task RemoveUserDataAsync(IConversationUpdateActivity activity)
+        public static async Task RemoveUserDataAsync(
+            this UserDataRepository userDataRepository,
+            IConversationUpdateActivity activity)
         {
-            var userDataEntity = this.ParseUserData(activity);
+            var userDataEntity = UserDataRepositoryExtensions.ParseUserData(activity);
             if (userDataEntity != null)
             {
-                var found = await this.GetAsync(PartitionKeyNames.Metadata.UserData, userDataEntity.UserId);
+                var found = await userDataRepository.GetAsync(PartitionKeyNames.Metadata.UserData, userDataEntity.UserId);
                 if (found != null)
                 {
-                    await this.DeleteAsync(found);
+                    await userDataRepository.DeleteAsync(found);
                 }
             }
         }
 
-        private UserDataEntity ParseUserData(IConversationUpdateActivity activity)
+        private static UserDataEntity ParseUserData(IConversationUpdateActivity activity)
         {
             var rowKey = activity?.From?.AadObjectId;
             if (rowKey != null)

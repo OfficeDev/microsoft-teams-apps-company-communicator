@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 {
     /// <summary>
     /// Partition key names used in the table storage.
