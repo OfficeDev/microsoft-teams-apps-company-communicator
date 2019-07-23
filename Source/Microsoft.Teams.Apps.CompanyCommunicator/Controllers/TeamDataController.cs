@@ -53,40 +53,5 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             return result;
         }
-
-        /// <summary>
-        /// Get data for teams by Ids.
-        /// </summary>
-        /// <param name="idsInString">Team ids in string format.</param>
-        /// <returns>A list of team data matching the incoming Ids.
-        /// If the passed in ids are invalid, it returns 404 not found error.</returns>
-        [HttpGet("{idsInString}")]
-        public async Task<ActionResult<IEnumerable<TeamData>>> GetTeamDataByIdsAsync(string idsInString)
-        {
-            if (string.IsNullOrWhiteSpace(idsInString))
-            {
-                return this.NotFound();
-            }
-
-            var ids = idsInString
-                .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(p => p.Trim());
-
-            var result = new List<TeamData>();
-            foreach (var id in ids)
-            {
-                var teamData = new TeamData();
-                teamData.TeamId = id;
-                var teamDataEntity = await this.teamDataRepository.GetAsync(PartitionKeyNames.Metadata.TeamData, id);
-                if (teamDataEntity != null)
-                {
-                    teamData.Name = teamDataEntity.Name;
-                }
-
-                result.Add(teamData);
-            }
-
-            return this.Ok(result);
-        }
     }
 }
