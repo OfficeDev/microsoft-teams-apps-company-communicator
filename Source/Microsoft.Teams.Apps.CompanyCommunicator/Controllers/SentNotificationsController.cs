@@ -6,35 +6,86 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
+    using Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
 
     /// <summary>
     /// Controller for the sent notification data.
     /// </summary>
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
-    public class SentNotificationsController
+    [Route("api/sentNotifications")]
+    public class SentNotificationsController : ControllerBase
     {
+        private readonly NotificationRepository notificationRepository;
+        private readonly NotificationDelivery notificationDelivery;
+
         /// <summary>
-        /// Create a new sent notification.
+        /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
         /// </summary>
-        /// <param name="notification">An instance of <see cref="Notification"/> class.</param>
-        [HttpPost("api/sentNotifications")]
-        public void CreateSentNotification([FromBody]Notification notification)
+        /// <param name="notificationRepository">Notification respository service that deals with the table storage in azure.</param>
+        /// <param name="notificationDelivery">Notification delivery service instance.</param>
+        public SentNotificationsController(
+            NotificationRepository notificationRepository,
+            NotificationDelivery notificationDelivery)
         {
-            Console.WriteLine(notification.Id);
+            this.notificationRepository = notificationRepository;
+            this.notificationDelivery = notificationDelivery;
         }
 
         /// <summary>
-        /// Get sent notifications.
+        /// Send a notification, which turns a draft to be a sent notification.
         /// </summary>
-        /// <returns>A list of <see cref="Notification"/> instances.</returns>
-        [HttpGet("api/sentNotifications")]
-        public IEnumerable<Notification> GetSentNotifications()
+        /// <param name="notification">An instance of <see cref="DraftNotification"/> class.</param>
+        /// <returns>The result of an action method.</returns>
+        [HttpPost]
+        public async Task<IActionResult> CreateSentNotificationAsync([FromBody]DraftNotification notification)
         {
-            var result = this.GetFakeNotifications();
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notification.Id);
+            if (notificationEntity == null)
+            {
+                return this.NotFound();
+            }
+
+            await this.notificationDelivery.SendAsync(notificationEntity.Id);
+
+            notificationEntity.IsDraft = false;
+            notificationEntity.SentDate = DateTime.UtcNow.ToShortDateString();
+            await this.notificationRepository.CreateOrUpdateAsync(notificationEntity);
+
+            return this.Ok();
+        }
+
+        /// <summary>
+        /// Get all sent notification summaries.
+        /// </summary>
+        /// <returns>A list of <see cref="SentNotificationSummary"/> instances.</returns>
+        [HttpGet]
+        public async Task<IEnumerable<SentNotificationSummary>> GetSentNotificationsAsync()
+        {
+            var notificationEntities = await this.notificationRepository.GetAllAsync(false);
+
+            var result = new List<SentNotificationSummary>();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                var summary = new SentNotificationSummary
+                {
+                    Id = notificationEntity.Id,
+                    Title = notificationEntity.Title,
+                    CreatedDate = notificationEntity.CreatedDate,
+                    SentDate = notificationEntity.SentDate,
+                    Succeeded = notificationEntity.Succeeded,
+                    Failed = notificationEntity.Failed,
+                    Throttled = notificationEntity.Throttled,
+                };
+
+                result.Add(summary);
+            }
 
             return result;
         }
@@ -44,79 +95,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <param name="id">Id of the requested sent notification.</param>
         /// <returns>Required sent notification.</returns>
-        [HttpGet("api/sentNotifications/{id}")]
-        public Notification GetSentNotificationById(int id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetSentNotificationByIdAsync(string id)
         {
-            return
-                new Notification
-                {
-                    Id = id,
-                    Title = "A Testing Message (from service)",
-                    Date = "12/16/2018",
-                    Recipients = "30,0,1",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                };
-        }
-
-        private IEnumerable<Notification> GetFakeNotifications()
-        {
-            var result = new List<Notification>
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, id);
+            if (notificationEntity == null)
             {
-                new Notification
-                {
-                    Id = 6,
-                    Title = "A Testing Message (from service)",
-                    Date = "12/16/2018",
-                    Recipients = "30,0,1",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 7,
-                    Title = "Testing",
-                    Date = "11/16/2019",
-                    Recipients = "40,6,8",
-                    Acknowledgements = "acknowledgements (from service)",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 8,
-                    Title = "Security Advisory Heightened Security During New Year's Eve Celebrations (from service)",
-                    Date = "12/16/2019",
-                    Recipients = "90,6,8",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 9,
-                    Title = "Security Advisory Heightened Security During New Year's Eve Celebrations (from service)",
-                    Date = "12/16/2019",
-                    Recipients = "40,6,8",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
-                new Notification
-                {
-                    Id = 10,
-                    Title = "Upcoming Holiday (from service)",
-                    Date = "12/16/2019",
-                    Recipients = "14,6,8",
-                    Acknowledgements = "acknowledgements",
-                    Reactions = "like 3",
-                    Responses = "view 3",
-                },
+                return this.NotFound();
+            }
+
+            var result = new SentNotification
+            {
+                Id = notificationEntity.Id,
+                Title = notificationEntity.Title,
+                ImageLink = notificationEntity.ImageLink,
+                Summary = notificationEntity.Summary,
+                Author = notificationEntity.Author,
+                ButtonTitle = notificationEntity.ButtonTitle,
+                ButtonLink = notificationEntity.ButtonLink,
+                CreatedDate = notificationEntity.CreatedDate,
+                SentDate = notificationEntity.SentDate,
+                Succeeded = 10,
+                Failed = 1,
+                Throttled = 1,
             };
 
-            return result;
+            return this.Ok(result);
         }
     }
 }

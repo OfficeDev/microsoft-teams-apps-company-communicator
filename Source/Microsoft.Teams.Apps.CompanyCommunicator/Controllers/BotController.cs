@@ -16,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [ApiController]
     public class BotController : ControllerBase
     {
-        private readonly IBotFrameworkHttpAdapter adapter;
+        private readonly BotFrameworkHttpAdapter adapter;
         private readonly IBot bot;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <param name="adapter">Bot framework http adpater instance.</param>
         /// <param name="bot">Bot instance.</param>
-        public BotController(IBotFrameworkHttpAdapter adapter, IBot bot)
+        public BotController(BotFrameworkHttpAdapter adapter, IBot bot)
         {
             this.adapter = adapter;
             this.bot = bot;
