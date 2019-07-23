@@ -33,7 +33,7 @@ export const duplicateDraftNotification = async (id: number): Promise<any> => {
     return await axios.post(url);
 }
 
-export const sentDraftNotification = async (payload: {}): Promise<any> => {
+export const sendDraftNotification = async (payload: {}): Promise<any> => {
     let url = baseAxiosUrl + "/sentnotifications";
     return await axios.post(url, payload);
 }
@@ -43,7 +43,7 @@ export const updateDraftNotification = async (payload: {}): Promise<any> => {
     return await axios.put(url, payload);
 }
 
-export const creatDraftNotification = async (payload: {}): Promise<any> => {
+export const createDraftNotification = async (payload: {}): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications";
     return await axios.post(url, payload);
 }

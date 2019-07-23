@@ -7,7 +7,7 @@ import { Checkbox, Dropdown } from 'msteams-ui-components-react';
 import { Button, Loader } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { RouteComponentProps } from 'react-router-dom';
-import { getDraftNotification, getTeams, creatDraftNotification, updateDraftNotification } from '../../apis/messageListApi';
+import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification } from '../../apis/messageListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
@@ -438,7 +438,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 allUsers: this.state.allUsersBox
             };
 
-            const response = await creatDraftNotification(draftMessage);
+            const response = await createDraftNotification(draftMessage);
         } catch (error) {
             return error;
         }
@@ -502,7 +502,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onAuthorChanged = (event: any) => {
-        this.card.body[3].text = "Sent by : " + event.target.value;
+        this.card.body[3].text = event.target.value;
         this.setState({
             author: event.target.value,
             card: this.card

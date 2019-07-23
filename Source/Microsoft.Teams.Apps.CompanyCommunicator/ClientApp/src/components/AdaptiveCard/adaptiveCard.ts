@@ -66,7 +66,7 @@ export const getCardAuthor = (card: any) => {
 }
 
 export const setCardAuthor = (card: any, author?: string) => {
-    card.body[3].text = "Sent by : " + author;
+    card.body[3].text = author;
 }
 
 export const getCardBtnTitle = (card: any) => {
@@ -86,4 +86,3 @@ export const setCardBtn = (card: any, buttonTitle?: string, buttonLink?: string)
         }
     ];
 }
-

@@ -12,7 +12,7 @@ import { getBaseUrl } from '../../configVariables';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { Loader } from '@stardust-ui/react';
 import { IButtonProps, CommandBar, DirectionalHint } from 'office-ui-fabric-react';
-import { getSentNotification, deleteDraftNotification, duplicateDraftNotification, sentDraftNotification } from '../../apis/messageListApi';
+import { getSentNotification, deleteDraftNotification, duplicateDraftNotification, sendDraftNotification } from '../../apis/messageListApi';
 
 export interface ITaskInfo {
   title?: string;
@@ -233,8 +233,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         key: 'send',
         name: 'Send',
         onClick: () => {
-          this.getDraftMessage(id).then(() => {
-            this.sentDraftMessage(this.state.sentMessagePayload).then(() => {
+          this.getSentMessage(id).then(() => {
+            this.sendDraftMessage(this.state.sentMessagePayload).then(() => {
               this.props.getDraftMessagesList();
               this.props.getMessagesList();
             });
@@ -244,7 +244,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     ];
   };
 
-  private getDraftMessage = async (id: number) => {
+  private getSentMessage = async (id: number) => {
     try {
       const response = await getSentNotification(id);
       this.setState({
@@ -255,9 +255,9 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     }
   }
 
-  private sentDraftMessage = async (payload: {}) => {
+  private sendDraftMessage = async (payload: {}) => {
     try {
-      const response = await sentDraftNotification(payload);
+      const response = await sendDraftNotification(payload);
     } catch (error) {
       return error;
     }
