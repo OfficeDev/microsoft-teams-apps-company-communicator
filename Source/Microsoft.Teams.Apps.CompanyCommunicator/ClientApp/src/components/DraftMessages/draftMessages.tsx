@@ -7,7 +7,22 @@ import './draftMessages.scss';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getDetailsListHeaderStyle, getDetailsListHeaderColumnStyle } from './draftMessages.style';
 import { connect } from 'react-redux';
-import { selectMessage, getDraftMessagesList } from '../../actions';
+import { selectMessage, getDraftMessagesList, getMessagesList } from '../../actions';
+import { getBaseUrl } from '../../configVariables';
+import * as microsoftTeams from "@microsoft/teams-js";
+import { Loader } from '@stardust-ui/react';
+import { IButtonProps, CommandBar, DirectionalHint } from 'office-ui-fabric-react';
+import { getDraftNotification, deleteDraftNotification, duplicateDraftNotification, sendDraftNotification } from '../../apis/messageListApi';
+
+export interface ITaskInfo {
+  title?: string;
+  height?: number;
+  width?: number;
+  url?: string;
+  card?: string;
+  fallbackUrl?: string;
+  completionBotId?: string;
+}
 
 export interface IMessage {
   title: string;
@@ -22,6 +37,7 @@ export interface IMessageProps {
   messages: IMessage[];
   selectMessage?: any;
   getDraftMessagesList?: any;
+  getMessagesList?: any;
 }
 
 export interface IMessageState {
@@ -32,6 +48,8 @@ export interface IMessageState {
   itemsAccount: number;
   width: number;
   height: number;
+  sentMessagePayload?: any;
+  loader: boolean;
 }
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
@@ -61,9 +79,54 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         headerClassName: mergeStyles(getDetailsListHeaderColumnStyle()),
         className: 'employee',
         onRender: (item) => {
-          return <span className="content">{item.title}</span>;
+          const onTitleClicked = (id: string) => {
+            let url = getBaseUrl() + "/newmessage/" + id;
+            this.onOpenTaskModule(null, url, "New Announcement");
+          }
+          return (
+            <span className="content">
+              <button className="contentTitle" onClick={() => onTitleClicked(item.id)}>{item.title}</button>
+            </span>
+          );
         },
       },
+      {
+        key: 'column2',
+        name: '',
+        fieldName: 'More',
+        minWidth: 110,
+        isRowHeader: true,
+        isSortedDescending: false,
+        sortAscendingAriaLabel: 'Sorted A to Z',
+        sortDescendingAriaLabel: 'Sorted Z to A',
+        data: 'string',
+        headerClassName: mergeStyles(getDetailsListHeaderColumnStyle()),
+        onRender: (item) => {
+          const customButton = (props: IButtonProps) => {
+            return (
+              <div></div>
+            );
+          };
+
+          return (
+            <CommandBar
+              overflowButtonProps={{
+                ariaLabel: 'More commands',
+                menuProps: {
+                  items: [], // Items must be passed for typesafety, but commandBar will determine items rendered in overflow
+                  isBeakVisible: true,
+                  beakWidth: 20,
+                  gapSpace: 10,
+                  directionalHint: DirectionalHint.bottomCenter
+                },
+                className: 'moreBtn'
+              }}
+              buttonAs={customButton}
+              items={this.getItems()}
+              overflowItems={this.getOverflowItems(item)}
+            />);
+        },
+      }
     ];
 
     this.state = {
@@ -74,6 +137,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
       itemsAccount: this.props.messages.length,
       width: window.innerWidth,
       height: window.innerHeight,
+      loader: true
     };
 
     this.selection = new Selection({
@@ -84,37 +148,152 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   }
 
   public componentDidMount() {
+    microsoftTeams.initialize();
     this.props.getDraftMessagesList();
   }
 
   public componentWillReceiveProps(nextProps: any) {
     this.setState({
       message: nextProps.messages,
+      loader: false
     })
   }
 
   public render(): JSX.Element {
-    return (
-      <div>
-        <Fabric>
-          <MarqueeSelection selection={this.selection}>
-            <DetailsList
-              items={this.state.message}
-              columns={this.state.columns}
-              setKey="set"
-              selection={this.selection}
-              selectionPreservedOnEmptyClick={true}
-              onColumnHeaderClick={this.onColumnClick}
-              ariaLabelForSelectionColumn="Toggle selection"
-              ariaLabelForSelectAllCheckbox="Toggle selection for all items"
-              checkboxVisibility={CheckboxVisibility.hidden}
-              styles={getDetailsListHeaderStyle()}
-              onItemInvoked={this.onItemInvoked}
-            />
-          </MarqueeSelection>
-        </Fabric>
-      </div>
-    );
+    if (this.state.loader) {
+      return (
+        <Loader />
+      );
+    } else {
+      return (
+        <div>
+          <Fabric>
+            <MarqueeSelection selection={this.selection}>
+              <DetailsList
+                items={this.state.message}
+                columns={this.state.columns}
+                setKey="set"
+                selection={this.selection}
+                selectionPreservedOnEmptyClick={true}
+                onColumnHeaderClick={this.onColumnClick}
+                ariaLabelForSelectionColumn="Toggle selection"
+                ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+                checkboxVisibility={CheckboxVisibility.hidden}
+                styles={getDetailsListHeaderStyle()}
+                onItemInvoked={this.onItemInvoked}
+              />
+            </MarqueeSelection>
+          </Fabric>
+        </div>
+      );
+    }
+  }
+
+  private getItems = () => {
+    return [];
+  };
+
+  private getOverflowItems = (item: any) => {
+    let id = item.id;
+    return [
+      {
+        key: 'preview',
+        name: 'Preview',
+        onClick: () => {
+
+        }
+      },
+      {
+        key: 'edit',
+        name: 'Edit',
+        onClick: () => {
+          let url = getBaseUrl() + "/newmessage/" + id;
+          this.onOpenTaskModule(null, url, "New Announcement");
+        }
+      },
+      {
+        key: 'delete',
+        name: 'Delete',
+        onClick: () => {
+          this.deleteDraftMessage(id).then(() => {
+            this.props.getDraftMessagesList();
+          });
+        }
+      },
+      {
+        key: 'duplicate',
+        name: 'Duplicate',
+        onClick: () => {
+          this.duplicateDraftMessage(id).then(() => {
+            this.props.getDraftMessagesList();
+          });
+        },
+      },
+      {
+        key: 'send',
+        name: 'Send',
+        onClick: () => {
+          this.getDraftMessage(id).then(() => {
+            this.sendDraftMessage(this.state.sentMessagePayload).then(() => {
+              this.props.getDraftMessagesList();
+              this.props.getMessagesList();
+            });
+          });
+        },
+      }
+    ];
+  };
+
+  private getDraftMessage = async (id: number) => {
+    try {
+      const response = await getDraftNotification(id);
+      this.setState({
+        sentMessagePayload: response.data
+      });
+    } catch (error) {
+      return error;
+    }
+  }
+
+  private sendDraftMessage = async (payload: {}) => {
+    try {
+      const response = await sendDraftNotification(payload);
+    } catch (error) {
+      return error;
+    }
+  }
+
+  private duplicateDraftMessage = async (id: number) => {
+    try {
+      const response = await duplicateDraftNotification(id);
+    } catch (error) {
+      return error;
+    }
+  }
+
+  private deleteDraftMessage = async (id: number) => {
+    try {
+      const response = await deleteDraftNotification(id);
+    } catch (error) {
+      return error;
+    }
+  }
+
+  private onOpenTaskModule = (event: any, url: string, title: string) => {
+    let taskInfo: ITaskInfo = {
+      url: url,
+      title: title,
+      height: 530,
+      width: 1000,
+      fallbackUrl: url
+    }
+
+    let submitHandler = (err: any, result: any) => {
+      this.props.getDraftMessagesList();
+      this.forceUpdate();
+    };
+
+    microsoftTeams.tasks.startTask(taskInfo, submitHandler);
   }
 
   private getSelectionDetails = (num: number): string => {
@@ -172,4 +351,4 @@ const mapStateToProps = (state: any) => {
   return { messages: state.draftMessagesList };
 }
 
-export default connect(mapStateToProps, { selectMessage, getDraftMessagesList })(DraftMessages);
+export default connect(mapStateToProps, { selectMessage, getDraftMessagesList, getMessagesList })(DraftMessages);
