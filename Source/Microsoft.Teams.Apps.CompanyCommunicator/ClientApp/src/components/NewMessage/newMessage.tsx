@@ -217,7 +217,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     label="Title"
                                     placeholder="Title"
                                     errorLabel={!this.state.title ? "This value is required" : undefined}
-                                    onChange={this.onValueChanged}
+                                    onChange={this.onTitleChanged}
                                     status={this.state.title ? "updated" : undefined}
                                     autoComplete="off"
                                     required
@@ -481,7 +481,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         });
     }
 
-    private onValueChanged = (event: any) => {
+    private onTitleChanged = (event: any) => {
         setCardTitle(this.card, event.target.value);
         this.setState({
             title: event.target.value,
