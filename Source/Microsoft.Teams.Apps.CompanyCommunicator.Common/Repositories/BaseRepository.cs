@@ -17,8 +17,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
     public class BaseRepository<T>
         where T : TableEntity, new()
     {
-        private readonly CloudTable table;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseRepository{T}"/> class.
         /// </summary>
@@ -29,9 +27,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             var storageAccountConnectionString = configuration["StorageAccountConnectionString"];
             var storageAccount = CloudStorageAccount.Parse(storageAccountConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
-            this.table = tableClient.GetTableReference(tableName);
-            this.table.CreateIfNotExists();
+            this.Table = tableClient.GetTableReference(tableName);
+            this.Table.CreateIfNotExists();
         }
+
+        /// <summary>
+        /// Gets cloud table instance.
+        /// </summary>
+        protected CloudTable Table { get; }
 
         /// <summary>
         /// Get all data entities from the table storage.
@@ -43,7 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             {
                 var query = new TableQuery<T>();
 
-                var entities = this.table.ExecuteQuery<T>(query);
+                var entities = this.Table.ExecuteQuery<T>(query);
 
                 return entities.ToList();
             });
@@ -58,7 +61,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         {
             var operation = TableOperation.InsertOrReplace(entity);
 
-            await this.table.ExecuteAsync(operation);
+            await this.Table.ExecuteAsync(operation);
         }
 
         /// <summary>
@@ -70,7 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         {
             var operation = TableOperation.Delete(entity);
 
-            await this.table.ExecuteAsync(operation);
+            await this.Table.ExecuteAsync(operation);
         }
 
         /// <summary>
@@ -83,7 +86,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         {
             var operation = TableOperation.Retrieve<T>(partitionKey, rowKey);
 
-            var result = await this.table.ExecuteAsync(operation);
+            var result = await this.Table.ExecuteAsync(operation);
 
             return result.Result as T;
         }
@@ -99,7 +102,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             {
                 var query = new TableQuery<T>().Where(filter);
 
-                var entities = this.table.ExecuteQuery<T>(query);
+                var entities = this.Table.ExecuteQuery<T>(query);
 
                 return entities.ToList();
             });
