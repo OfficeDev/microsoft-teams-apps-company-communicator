@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Bot.Schema;
@@ -58,13 +59,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
         /// <summary>
         /// Get team names by Ids.
         /// </summary>
+        /// <param name="teamDataRepository">The team data repository.</param>
         /// <param name="ids">Team ids.</param>
         /// <returns>Names of the teams matching incoming ids.</returns>
-        public async Task<IEnumerable<string>> GetTeamNamesByIdsAsync(IEnumerable<string> ids)
+        public static async Task<IEnumerable<string>> GetTeamNamesByIdsAsync(
+            this TeamDataRepository teamDataRepository,
+            IEnumerable<string> ids)
         {
             var result = new List<string>();
 
-            if (ids == null)
+            if (ids == null || ids.Count() == 0)
             {
                 return result;
             }
@@ -75,7 +79,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 batchOperations.Add(TableOperation.Retrieve(PartitionKeyNames.Metadata.TeamData, id));
             }
 
-            var batchResult = await this.Table.ExecuteBatchAsync(batchOperations);
+            var batchResult = await teamDataRepository.Table.ExecuteBatchAsync(batchOperations);
 
             foreach (var singleResult in batchResult)
             {
