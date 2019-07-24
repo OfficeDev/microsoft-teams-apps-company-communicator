@@ -2,12 +2,12 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.SentNotification
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotification
 {
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
-    /// Respository of the notification data.
+    /// Respository of the notification data in the table storage.
     /// </summary>
     public class SentNotificationDataRepository : BaseRepository<SentNotificationDataEntity>
     {

@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
 {
     using Microsoft.Azure.Cosmos.Table;
 

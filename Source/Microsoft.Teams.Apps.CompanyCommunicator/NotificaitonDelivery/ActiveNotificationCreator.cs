@@ -6,9 +6,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.ActiveNotification;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ActiveNotification;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
 
     /// <summary>
     /// Active Notification creator.

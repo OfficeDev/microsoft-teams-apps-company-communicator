@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.SentNotification
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotification
 {
     /// <summary>
     /// Enum indicating a notification's delivery status.

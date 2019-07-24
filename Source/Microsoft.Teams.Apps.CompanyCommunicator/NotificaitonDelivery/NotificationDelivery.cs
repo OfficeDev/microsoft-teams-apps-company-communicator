@@ -5,9 +5,9 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 {
     using System.Threading.Tasks;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
     using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
 
     /// <summary>
     /// Notification delivery service.

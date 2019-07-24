@@ -9,8 +9,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Bot.Connector;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.User;
     using Newtonsoft.Json.Linq;
 
     /// <summary>

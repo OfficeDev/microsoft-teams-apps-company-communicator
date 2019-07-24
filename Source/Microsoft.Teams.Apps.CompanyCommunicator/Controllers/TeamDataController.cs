@@ -9,8 +9,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Team;
 
     /// <summary>
     /// Controller for the teams data.

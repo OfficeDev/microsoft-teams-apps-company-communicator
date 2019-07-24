@@ -10,10 +10,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Notification;
 
     /// <summary>
     /// Controller for the sent notification data.

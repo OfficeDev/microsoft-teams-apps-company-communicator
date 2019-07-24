@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 {
     using System.Collections.Generic;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.User;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.User;
 
     /// <summary>
     /// Message queue class.

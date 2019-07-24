@@ -2,12 +2,12 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.ActiveNotification
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ActiveNotification
 {
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
-    /// Respository for the active notification data.
+    /// Respository for the active notification data in the table storage.
     /// </summary>
     public class ActiveNotificationRepository : BaseRepository<ActiveNotificationEntity>
     {
