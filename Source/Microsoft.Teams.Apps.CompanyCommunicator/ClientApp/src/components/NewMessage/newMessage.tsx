@@ -42,7 +42,6 @@ export interface formState {
     exists?: boolean,
     messageId: string,
     loader: boolean;
-    selectedTeams?: [];
 }
 
 export interface INewMessageProps extends RouteComponentProps {
