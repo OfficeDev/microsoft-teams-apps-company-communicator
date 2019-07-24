@@ -216,8 +216,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var result = new DraftNotificationSummaryForConsent
             {
                 NotificationId = notificationId,
-                TeamNames = await this.GetTeamNamesByIdsAsync(notificationEntity.Teams),
-                RosterNames = await this.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
+                TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),
+                RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
                 AllUsers = notificationEntity.AllUsers,
             };
 
