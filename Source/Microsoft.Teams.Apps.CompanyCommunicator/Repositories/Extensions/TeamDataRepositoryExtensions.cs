@@ -85,7 +85,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
             {
                 var entity = singleResult.Result as DynamicTableEntity;
                 var name = entity?.Properties["Name"]?.ToString();
-                result.Add(name);
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    result.Add(name);
+                }
             }
 
             return result;
