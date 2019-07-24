@@ -482,7 +482,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onValueChanged = (event: any) => {
-        this.card.body[0].text = "" + event.target.value;
+        setCardTitle(this.card, event.target.value);
         this.setState({
             title: event.target.value,
             card: this.card
@@ -492,7 +492,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onSummaryChanged = (event: any) => {
-        this.card.body[2].text = "" + event.target.value;
+        setCardSummary(this.card, event.target.value);
         this.setState({
             summary: event.target.value,
             card: this.card
@@ -502,7 +502,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onAuthorChanged = (event: any) => {
-        this.card.body[3].text = event.target.value;
+        setCardAuthor(this.card, event.target.value);
         this.setState({
             author: event.target.value,
             card: this.card
@@ -512,7 +512,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onImageLinkChanged = (event: any) => {
-        this.card.body[1].url = event.target.value;
+        setCardImageLink(this.card, event.target.value);
         this.setState({
             imageLink: event.target.value,
             card: this.card
@@ -523,14 +523,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
     private onBtnTitleChanged = (event: any) => {
         if (this.state.btnLink !== "" && event.target.value !== "") {
-            this.card.actions = [
-                {
-                    "type": "Action.OpenUrl",
-                    "title": event.target.value,
-                    "url": this.state.btnLink
-                }
-            ];
-
+            setCardBtn(this.card, event.target.value, this.state.btnLink);
             this.setState({
                 btnTitle: event.target.value,
                 card: this.card
@@ -548,16 +541,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onBtnLinkChanged = (event: any) => {
-
         if (event.target.value !== "" && this.state.btnTitle !== "") {
-            this.card.actions = [
-                {
-                    "type": "Action.OpenUrl",
-                    "title": this.state.btnTitle,
-                    "url": event.target.value
-                }
-            ];
-
+            setCardBtn(this.card, this.state.btnTitle, event.target.value);
             this.setState({
                 btnLink: event.target.value,
                 card: this.card
@@ -572,7 +557,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 this.updateCard();
             });
         }
-
     }
 
     private updateCard = () => {
