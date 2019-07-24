@@ -1,10 +1,10 @@
 import * as React from 'react';
 import './newMessage.scss';
 import './teamTheme.scss';
-import { Input, TextArea, IDropdownItemProps } from 'msteams-ui-components-react';
+import { Input, TextArea } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
-import { Checkbox, Dropdown } from 'msteams-ui-components-react';
-import { Button, Loader } from '@stardust-ui/react';
+import { Checkbox } from 'msteams-ui-components-react';
+import { Button, Loader, Dropdown } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { RouteComponentProps } from 'react-router-dom';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification } from '../../apis/messageListApi';
@@ -35,10 +35,6 @@ export interface formState {
     author: string,
     card?: any,
     page: string,
-    channel?: string,
-    channelID: string,
-    team?: string,
-    teamID: string,
     channelBox: boolean,
     teamBox: boolean,
     allUsersBox: boolean,
@@ -46,6 +42,7 @@ export interface formState {
     exists?: boolean,
     messageId: string,
     loader: boolean;
+    selectedTeams?: [];
 }
 
 export interface INewMessageProps extends RouteComponentProps {
@@ -54,6 +51,8 @@ export interface INewMessageProps extends RouteComponentProps {
 
 export default class NewMessage extends React.Component<INewMessageProps, formState> {
     private card: any;
+    private selectedTeamsDropdownOne: any[] = [];
+    private selectedTeamsDropdownTwo: any[] = [];
 
     constructor(props: INewMessageProps) {
         super(props);
@@ -69,10 +68,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             btnTitle: "",
             card: this.card,
             page: "CardCreation",
-            channel: "",
-            channelID: "",
-            team: "",
-            teamID: "",
             channelBox: false,
             teamBox: false,
             allUsersBox: false,
@@ -115,10 +110,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         try {
             const response = await getTeams();
             this.setState({
-                channel: response.data[0].name,
-                team: response.data[0].name,
-                channelID: response.data[0].teamId,
-                teamID: response.data[0].teamId,
                 teams: response.data
             });
         } catch (error) {
@@ -148,11 +139,9 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                     channelBox: false
                 });
             } else {
-                let channel = this.getTeamName(draftMessageDetail.teams[0]);
+                this.selectedTeamsDropdownOne = draftMessageDetail.teams;
                 this.setState({
                     channelBox: true,
-                    channel: channel,
-                    channelID: draftMessageDetail.teams[0]
                 });
             }
 
@@ -161,11 +150,9 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                     teamBox: false
                 });
             } else {
-                let team = this.getTeamName(draftMessageDetail.rosters[0]);
+                this.selectedTeamsDropdownTwo = draftMessageDetail.rosters;
                 this.setState({
                     teamBox: true,
-                    team: team,
-                    teamID: draftMessageDetail.rosters[0]
                 });
             }
 
@@ -308,19 +295,23 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
                             <div className="boardSelection">
                                 <Dropdown
-                                    className="dropDown"
-                                    autoFocus
-                                    mainButtonText={this.state.channel}
-                                    style={{ width: '50%' }}
-                                    items={this.renderChannels()}
+                                    style={{ margin: '1rem 0rem' }}
+                                    multiple
+                                    items={this.getTeamsNameList()}
+                                    placeholder="Select your teams"
+                                    getA11ySelectionMessage={this.getA11SelectionMessageOne}
+                                    noResultsMessage="We couldn't find any matches."
+                                    defaultValue={this.selectedTeamsOne()}
                                 />
 
                                 <Dropdown
-                                    className="dropDown"
-                                    autoFocus
-                                    mainButtonText={this.state.team}
-                                    style={{ width: '50%' }}
-                                    items={this.renderTeams()}
+                                    style={{ margin: '1rem 0rem' }}
+                                    multiple
+                                    items={this.getTeamsNameList()}
+                                    placeholder="Select your teams"
+                                    getA11ySelectionMessage={this.getA11SelectionMessageTwo}
+                                    noResultsMessage="We couldn't find any matches."
+                                    defaultValue={this.selectedTeamsTwo()}
                                 />
                             </div>
                         </div>
@@ -339,34 +330,109 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
     }
 
-    private renderChannels = (): IDropdownItemProps[] => {
-        let teams: any[] = [];
-        if (this.state.teams !== undefined) {
-            this.state.teams.forEach(element => {
-                teams.push({
-                    text: element.name, onClick: () => {
-                        this.setState(
-                            { channel: element.name, channelID: element.teamId }
-                        )
-                    }
-                });
-            });
-        } else {
-            return [];
-        }
-        return teams;
+    // private renderChannels = (): IDropdownItemProps[] => {
+    //     let teams: any[] = [];
+    //     if (this.state.teams !== undefined) {
+    //         this.state.teams.forEach(element => {
+    //             teams.push({
+    //                 text: element.name, onClick: () => {
+    //                     this.setState(
+    //                         { channel: element.name, channelID: element.teamId }
+    //                     )
+    //                 }
+    //             });
+    //         });
+    //     } else {
+    //         return [];
+    //     }
+    //     return teams;
+    // }
+
+    // private renderTeams = (): IDropdownItemProps[] => {
+    //     let teams: any[] = [];
+    //     if (this.state.teams !== undefined) {
+    //         this.state.teams.forEach(element => {
+    //             teams.push({ text: element.name, onClick: () => { this.setState({ team: element.name, teamID: element.teamId }) } });
+    //         });
+    //     } else {
+    //         return [];
+    //     }
+    //     return teams;
+    // }
+    private selectedTeamsOne = () => {
+        let selectedTeams: any[] = [];
+        this.selectedTeamsDropdownOne.map((element) => {
+            selectedTeams.push(this.getTeamNamebyId(element));
+        });
+        return selectedTeams;
     }
 
-    private renderTeams = (): IDropdownItemProps[] => {
-        let teams: any[] = [];
-        if (this.state.teams !== undefined) {
-            this.state.teams.forEach(element => {
-                teams.push({ text: element.name, onClick: () => { this.setState({ team: element.name, teamID: element.teamId }) } });
+    private selectedTeamsTwo = () => {
+        let selectedTeams: any[] = [];
+        this.selectedTeamsDropdownTwo.map((element) => {
+            selectedTeams.push(this.getTeamNamebyId(element));
+        });
+        return selectedTeams;
+    }
+
+    private getA11SelectionMessageOne = {
+        onAdd: (item: any) => {
+            this.selectedTeamsDropdownOne.push(this.getTeamIdbyName(item));
+            return item
+        },
+        onRemove: (item: any) => {
+            this.selectedTeamsDropdownOne = this.selectedTeamsDropdownOne.filter((value, index, arr) => {
+                return value !== this.getTeamIdbyName(item)
             });
-        } else {
-            return [];
+            return item
+        },
+    }
+
+    private getA11SelectionMessageTwo = {
+        onAdd: (item: any) => {
+            this.selectedTeamsDropdownTwo.push(this.getTeamIdbyName(item));
+            return item
+        },
+        onRemove: (item: any) => {
+            this.selectedTeamsDropdownTwo = this.selectedTeamsDropdownTwo.filter((value, index, arr) => {
+                return value !== this.getTeamIdbyName(item)
+            });
+            return item
+        },
+    }
+
+    private getTeamsNameList = () => {
+        if (this.state.teams !== undefined) {
+            let teamNames: any[] = [];
+            this.state.teams.forEach(element => {
+                teamNames.push(element.name);
+            });
+            return teamNames;
         }
-        return teams;
+    }
+
+    private getTeamIdbyName = (name: string): string => {
+        let id: string = "";
+        if (this.state.teams !== undefined) {
+            this.state.teams.map((item) => {
+                if (item.name === name) {
+                    id = item.teamId;
+                }
+            });
+        }
+        return id;
+    }
+
+    private getTeamNamebyId = (id: string): string => {
+        let name: string = "";
+        if (this.state.teams !== undefined) {
+            this.state.teams.map((item) => {
+                if (item.teamId === id) {
+                    name = item.name;
+                }
+            });
+        }
+        return name;
     }
 
     private onSave = () => {
@@ -386,11 +452,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         let rosters: string[] = [];
 
         if (this.state.channelBox) {
-            teams.push(this.state.channelID);
+            teams = this.selectedTeamsDropdownOne;
         }
 
         if (this.state.teamBox) {
-            rosters.push(this.state.teamID);
+            rosters = this.selectedTeamsDropdownTwo;
         }
 
         try {
@@ -418,11 +484,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         let rosters: string[] = [];
 
         if (this.state.channelBox) {
-            teams.push(this.state.channelID);
+            teams = this.selectedTeamsDropdownOne;
         }
 
         if (this.state.teamBox) {
-            rosters.push(this.state.teamID);
+            rosters = this.selectedTeamsDropdownTwo;
         }
 
         try {
