@@ -4,7 +4,7 @@ import './teamTheme.scss';
 import { Input, TextArea } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
 import { Checkbox } from 'msteams-ui-components-react';
-import { Button, Loader, Dropdown } from '@stardust-ui/react';
+import { Button, Loader, Dropdown, DropdownProps } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { RouteComponentProps } from 'react-router-dom';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification } from '../../apis/messageListApi';
@@ -294,7 +294,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
                             <div className="boardSelection">
                                 <Dropdown
-                                    style={{ margin: '1rem 0rem' }}
+                                    style={{ margin: '0rem 0rem' }}
                                     multiple
                                     items={this.getTeamsNameList()}
                                     placeholder="Select your teams"
