@@ -4,9 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
 {
-    using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
-    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Respository of the team data stored in the table storage.
@@ -18,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         public TeamDataRepository(IConfiguration configuration)
-            : base(configuration, "TeamData")
+            : base(configuration, "TeamData", PartitionKeyNames.Metadata.TeamData)
         {
         }
     }
