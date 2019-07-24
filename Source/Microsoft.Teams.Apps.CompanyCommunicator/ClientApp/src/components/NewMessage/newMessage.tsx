@@ -300,7 +300,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     placeholder="Select your teams"
                                     getA11ySelectionMessage={this.getA11SelectionMessageOne}
                                     noResultsMessage="We couldn't find any matches."
-                                    defaultValue={this.selectedTeamsOne()}
+                                    defaultValue={this.defaultTeamsOne()}
                                 />
 
                                 <Dropdown
@@ -310,7 +310,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     placeholder="Select your teams"
                                     getA11ySelectionMessage={this.getA11SelectionMessageTwo}
                                     noResultsMessage="We couldn't find any matches."
-                                    defaultValue={this.selectedTeamsTwo()}
+                                    defaultValue={this.defaultTeamsTwo()}
                                 />
                             </div>
                         </div>
@@ -329,7 +329,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
     }
 
-    private selectedTeamsOne = () => {
+    private defaultTeamsOne = () => {
         let selectedTeams: any[] = [];
         this.selectedTeamsDropdownOne.map((element) => {
             selectedTeams.push(this.getTeamNamebyId(element));
@@ -337,7 +337,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         return selectedTeams;
     }
 
-    private selectedTeamsTwo = () => {
+    private defaultTeamsTwo = () => {
         let selectedTeams: any[] = [];
         this.selectedTeamsDropdownTwo.map((element) => {
             selectedTeams.push(this.getTeamNamebyId(element));
