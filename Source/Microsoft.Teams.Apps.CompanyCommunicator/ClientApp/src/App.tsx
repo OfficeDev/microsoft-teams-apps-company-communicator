@@ -18,6 +18,7 @@ class App extends React.Component {
               <Route exact path="/configtab" component={Configuration} />
               <Route exact path="/messages" component={TabContainer} />
               <Route exact path="/newmessage" component={NewMessage} />
+              <Route exact path="/newmessage/:id" component={NewMessage} />
               <Route exact path="/viewstatus/:id" component={StatusTaskModule} />
               <Route exact path="/viewcontent/:id" component={ContentTaskModule} />
             </Switch>

@@ -6,6 +6,19 @@
   white-space: nowrap;
   overflow: hidden;
   width: 100%;
+
+  .contentTitle {
+    text-decoration: none;
+    background-color: transparent;
+    border: none;
+
+    &:hover {
+      color: #6264A7;
+      cursor: pointer;
+      border-bottom: 0.1rem solid #6264A7;
+      text-decoration: none;
+    }
+  }
 }
 
 .sortIcon {

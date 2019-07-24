@@ -9,11 +9,13 @@ import { DirectionalHint } from 'office-ui-fabric-react/lib/Callout';
 import './messages.scss';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getDetailsListHeaderStyle, getDetailsListHeaderColumnStyle } from './messages.style';
-import { Icon } from '@stardust-ui/react';
+import { Icon, Loader } from '@stardust-ui/react';
 import { connect } from 'react-redux';
-import { selectMessage, getMessagesList } from '../../actions';
+import { selectMessage, getMessagesList, getDraftMessagesList } from '../../actions';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../../configVariables';
+import { duplicateDraftNotification } from '../../apis/messageListApi';
+
 
 export interface ITaskInfo {
   title?: string;
@@ -38,6 +40,7 @@ export interface IMessageProps {
   messagesList: IMessage[];
   selectMessage?: any;
   getMessagesList?: any;
+  getDraftMessagesList?: any;
 }
 
 export interface IMessageState {
@@ -48,6 +51,7 @@ export interface IMessageState {
   itemsAccount: number;
   width: number;
   height: number;
+  loader: boolean;
 }
 
 class Messages extends React.Component<IMessageProps, IMessageState> {
@@ -83,7 +87,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
           }
           return (
             <span className="content" >
-              <a className="contentTitle" onClick={() => onTitleClicked(item.id)}>{item.title}</a>
+              <button className="contentTitle" onClick={() => onTitleClicked(item.id)}>{item.title}</button>
             </span>);
         },
       },
@@ -99,29 +103,18 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         data: 'string',
         headerClassName: mergeStyles(getDetailsListHeaderColumnStyle()),
         onRender: (item) => {
-          let success: string = "0";
-          let failure: string = "0";
-          let throttled: string = "0";
-
-          if (item != null && item.recipients !== "") {
-            let numbers = item.recipients.split(",");
-            success = numbers[0];
-            failure = numbers[1];
-            throttled = numbers[2];
-          }
-
           return (
             <div className="content">
               <TooltipHost content="Success" calloutProps={{ gapSpace: 0 }}>
-                <Icon name="stardust-checkmark" xSpacing="after"> </Icon>{success}
+                <Icon name="stardust-checkmark" xSpacing="after"> </Icon>{item.succeeded}
               </TooltipHost>
 
               <TooltipHost content="Failure" calloutProps={{ gapSpace: 0 }}>
-                <Icon name="stardust-close" xSpacing="both" />{failure}
+                <Icon name="stardust-close" xSpacing="both" />{item.failed}
               </TooltipHost>
 
               <TooltipHost content="Throttled" calloutProps={{ gapSpace: 0 }}>
-                <Icon name="exclamation-circle" xSpacing="both" />{throttled}
+                <Icon name="exclamation-circle" xSpacing="both" />{item.throttled}
               </TooltipHost>
             </div>
           );
@@ -139,7 +132,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         data: 'string',
         headerClassName: mergeStyles(getDetailsListHeaderColumnStyle()),
         onRender: (item) => {
-          return <span className="content">{item.date}</span>;
+          return <span className="content">{item.sentDate}</span>;
         },
       },
       {
@@ -189,6 +182,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
       itemsAccount: this.props.messagesList.length,
       width: window.innerWidth,
       height: window.innerHeight,
+      loader: true
     };
 
     this.selection = new Selection({
@@ -213,40 +207,47 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
   public componentWillReceiveProps(nextProps: any) {
     if (this.props !== nextProps) {
       this.setState({
-        message: nextProps.messagesList
+        message: nextProps.messagesList,
+        loader: false
       });
     }
   }
 
   public render(): JSX.Element {
-    return (
-      <div>
-        <Fabric>
-          <TextField
-            className="filter"
-            label="Filter by title:"
-            onChange={this.onFilter}
-            styles={{ root: { maxWidth: '300px' } }}
-          />
-          <MarqueeSelection selection={this.selection}>
-            <DetailsList
-              items={this.state.message}
-              columns={this.state.columns}
-              setKey="set"
-              selection={this.selection}
-              selectionPreservedOnEmptyClick={true}
-              onColumnHeaderClick={this.onColumnClick}
-              ariaLabelForSelectionColumn="Toggle selection"
-              ariaLabelForSelectAllCheckbox="Toggle selection for all items"
-              checkboxVisibility={CheckboxVisibility.hidden}
-              styles={getDetailsListHeaderStyle()}
-              onRenderCheckbox={this.renderCheckbox}
-              onItemInvoked={this.onItemInvoked}
+    if (this.state.loader) {
+      return (
+        <Loader />
+      );
+    } else {
+      return (
+        <div>
+          <Fabric>
+            <TextField
+              className="filter"
+              label="Filter by title:"
+              onChange={this.onFilter}
+              styles={{ root: { maxWidth: '300px' } }}
             />
-          </MarqueeSelection>
-        </Fabric>
-      </div>
-    );
+            <MarqueeSelection selection={this.selection}>
+              <DetailsList
+                items={this.state.message}
+                columns={this.state.columns}
+                setKey="set"
+                selection={this.selection}
+                selectionPreservedOnEmptyClick={true}
+                onColumnHeaderClick={this.onColumnClick}
+                ariaLabelForSelectionColumn="Toggle selection"
+                ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+                checkboxVisibility={CheckboxVisibility.hidden}
+                styles={getDetailsListHeaderStyle()}
+                onRenderCheckbox={this.renderCheckbox}
+                onItemInvoked={this.onItemInvoked}
+              />
+            </MarqueeSelection>
+          </Fabric>
+        </div>
+      );
+    }
   }
 
   private escFunction = (event: any) => {
@@ -271,30 +272,33 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         }
       },
       {
-        key: 'content',
-        name: 'View Content',
+        key: 'duplicate',
+        name: 'Duplicate',
         onClick: () => {
-          let url = getBaseUrl() + "/viewcontent/" + id;
-          this.onOpenTaskModule(null, url, "View Content");
+          // let url = getBaseUrl() + "/viewcontent/" + id;
+          // this.onOpenTaskModule(null, url, "View Content");
+          this.duplicateDraftMessage(id).then(() => {
+            this.props.getDraftMessagesList();
+          });
         }
-      },
-      {
-        key: 'retry',
-        name: 'Retry',
-        onClick: () => {
-          console.log("clicked retry");
-        },
-
       }
     ];
   };
+
+  private duplicateDraftMessage = async (id: number) => {
+    try {
+      const response = await duplicateDraftNotification(id);
+    } catch (error) {
+      return error;
+    }
+  }
 
   private onOpenTaskModule = (event: any, url: string, title: string) => {
     let taskInfo: ITaskInfo = {
       url: url,
       title: title,
       height: 530,
-      width: 600,
+      width: 1000,
       fallbackUrl: url
     }
 
@@ -361,4 +365,4 @@ const mapStateToProps = (state: any) => {
   return { messagesList: state.messagesList };
 }
 
-export default connect(mapStateToProps, { selectMessage, getMessagesList })(Messages);
+export default connect(mapStateToProps, { selectMessage, getMessagesList, getDraftMessagesList })(Messages);
