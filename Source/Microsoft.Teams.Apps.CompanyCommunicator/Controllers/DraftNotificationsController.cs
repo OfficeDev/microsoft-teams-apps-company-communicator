@@ -215,33 +215,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var result = new DraftNotificationSummaryForConsent
             {
                 NotificationId = notificationId,
-                TeamNames = await this.GetTeamNamesByIdsAsync(notificationEntity.Teams),
-                RosterNames = await this.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
+                TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),
+                RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
                 AllUsers = notificationEntity.AllUsers,
             };
 
             return this.Ok(result);
-        }
-
-        private async Task<IEnumerable<string>> GetTeamNamesByIdsAsync(IEnumerable<string> ids)
-        {
-            var result = new List<string>();
-
-            if (ids == null)
-            {
-                return result;
-            }
-
-            foreach (var id in ids)
-            {
-                var teamDataEntity = await this.teamDataRepository.GetAsync(PartitionKeyNames.Metadata.TeamData, id);
-                if (teamDataEntity != null)
-                {
-                    result.Add(teamDataEntity.Name);
-                }
-            }
-
-            return result;
         }
     }
 }
