@@ -34,7 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// <summary>
         /// Gets cloud table instance.
         /// </summary>
-        protected CloudTable Table { get; }
+        public CloudTable Table { get; }
 
         /// <summary>
         /// Get all data entities from the table storage.
