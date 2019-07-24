@@ -330,35 +330,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
     }
 
-    // private renderChannels = (): IDropdownItemProps[] => {
-    //     let teams: any[] = [];
-    //     if (this.state.teams !== undefined) {
-    //         this.state.teams.forEach(element => {
-    //             teams.push({
-    //                 text: element.name, onClick: () => {
-    //                     this.setState(
-    //                         { channel: element.name, channelID: element.teamId }
-    //                     )
-    //                 }
-    //             });
-    //         });
-    //     } else {
-    //         return [];
-    //     }
-    //     return teams;
-    // }
-
-    // private renderTeams = (): IDropdownItemProps[] => {
-    //     let teams: any[] = [];
-    //     if (this.state.teams !== undefined) {
-    //         this.state.teams.forEach(element => {
-    //             teams.push({ text: element.name, onClick: () => { this.setState({ team: element.name, teamID: element.teamId }) } });
-    //         });
-    //     } else {
-    //         return [];
-    //     }
-    //     return teams;
-    // }
     private selectedTeamsOne = () => {
         let selectedTeams: any[] = [];
         this.selectedTeamsDropdownOne.map((element) => {
