@@ -121,8 +121,7 @@
             width: 50%;
 
             p {
-                margin: 1rem 0rem;
-                font-size: 1.4rem;
+                margin: 1.5rem 0rem;
             }
         }
     }
@@ -151,5 +150,15 @@
 
     .ms-Callout-main {
         max-height: 300px !important;
+    }
+}
+
+
+.is-checked {
+    .ms-Checkbox-label {
+        .ms-Checkbox-checkbox {
+            background: #464775 !important;
+            border: #464775 !important;
+        }
     }
 }
