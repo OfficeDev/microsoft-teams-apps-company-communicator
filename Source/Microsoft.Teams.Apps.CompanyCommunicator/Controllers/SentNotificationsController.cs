@@ -4,7 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
@@ -46,17 +45,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateSentNotificationAsync([FromBody]DraftNotification notification)
         {
-            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notification.Id);
-            if (notificationEntity == null)
+            var draftNotificationEntity = await this.notificationRepository.GetAsync(
+                PartitionKeyNames.Notification.DraftNotifications,
+                notification.Id);
+            if (draftNotificationEntity == null)
             {
                 return this.NotFound();
             }
 
-            await this.notificationDelivery.SendAsync(notificationEntity.Id);
+            await this.notificationDelivery.SendAsync(draftNotificationEntity);
 
-            notificationEntity.IsDraft = false;
-            notificationEntity.SentDate = DateTime.UtcNow.ToShortDateString();
-            await this.notificationRepository.CreateOrUpdateAsync(notificationEntity);
+            await this.notificationRepository.MoveDraftToSentPartition(draftNotificationEntity);
 
             return this.Ok();
         }
