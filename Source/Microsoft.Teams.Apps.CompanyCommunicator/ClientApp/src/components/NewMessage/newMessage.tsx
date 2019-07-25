@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './newMessage.scss';
 import './teamTheme.scss';
-import { Input, TextArea, IDropdownItemProps } from 'msteams-ui-components-react';
+import { Input, TextArea } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
 import { Checkbox } from 'msteams-ui-components-react';
 import { Button, Loader } from '@stardust-ui/react';
@@ -12,7 +12,7 @@ import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
-import { Dropdown, IDropdownOption, IDropdownStyles, CheckboxVisibility } from 'office-ui-fabric-react';
+import { Dropdown } from 'office-ui-fabric-react';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 
 export interface IDraftMessage {
