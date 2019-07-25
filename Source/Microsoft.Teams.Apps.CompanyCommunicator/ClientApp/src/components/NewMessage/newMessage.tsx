@@ -3,7 +3,7 @@ import './newMessage.scss';
 import './teamTheme.scss';
 import { Input, TextArea, IDropdownItemProps } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
-import { Checkbox, Dropdown } from 'msteams-ui-components-react';
+import { Checkbox } from 'msteams-ui-components-react';
 import { Button, Loader } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { RouteComponentProps } from 'react-router-dom';
@@ -12,6 +12,8 @@ import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
+import { Dropdown, IDropdownOption, IDropdownStyles, CheckboxVisibility } from 'office-ui-fabric-react';
+import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 
 export interface IDraftMessage {
     id?: string,
@@ -35,10 +37,6 @@ export interface formState {
     author: string,
     card?: any,
     page: string,
-    channel?: string,
-    channelID: string,
-    team?: string,
-    teamID: string,
     channelBox: boolean,
     teamBox: boolean,
     allUsersBox: boolean,
@@ -54,10 +52,13 @@ export interface INewMessageProps extends RouteComponentProps {
 
 export default class NewMessage extends React.Component<INewMessageProps, formState> {
     private card: any;
+    private selectedTeams: any[] = [];
+    private selectedRosters: any[] = [];
+
 
     constructor(props: INewMessageProps) {
         super(props);
-
+        initializeIcons();
         this.card = getInitAdaptiveCard();
 
         this.state = {
@@ -69,10 +70,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             btnTitle: "",
             card: this.card,
             page: "CardCreation",
-            channel: "",
-            channelID: "",
-            team: "",
-            teamID: "",
             channelBox: false,
             teamBox: false,
             allUsersBox: false,
@@ -115,10 +112,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         try {
             const response = await getTeams();
             this.setState({
-                channel: response.data[0].name,
-                team: response.data[0].name,
-                channelID: response.data[0].teamId,
-                teamID: response.data[0].teamId,
                 teams: response.data
             });
         } catch (error) {
@@ -151,9 +144,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 let channel = this.getTeamName(draftMessageDetail.teams[0]);
                 this.setState({
                     channelBox: true,
-                    channel: channel,
-                    channelID: draftMessageDetail.teams[0]
                 });
+                this.selectedTeams = draftMessageDetail.teams;
             }
 
             if (draftMessageDetail.rosters.length === 0) {
@@ -164,9 +156,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 let team = this.getTeamName(draftMessageDetail.rosters[0]);
                 this.setState({
                     teamBox: true,
-                    team: team,
-                    teamID: draftMessageDetail.rosters[0]
                 });
+                this.selectedRosters = draftMessageDetail.rosters;
             }
 
             setCardTitle(this.card, draftMessageDetail.title);
@@ -307,20 +298,21 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                             </div>
 
                             <div className="boardSelection">
+
                                 <Dropdown
-                                    className="dropDown"
-                                    autoFocus
-                                    mainButtonText={this.state.channel}
-                                    style={{ width: '50%' }}
-                                    items={this.renderChannels()}
+                                    placeholder="Select options"
+                                    defaultSelectedKeys={this.selectedTeams}
+                                    multiSelect
+                                    options={this.getItems()}
+                                    onChange={this.onTeamsChange}
                                 />
 
                                 <Dropdown
-                                    className="dropDown"
-                                    autoFocus
-                                    mainButtonText={this.state.team}
-                                    style={{ width: '50%' }}
-                                    items={this.renderTeams()}
+                                    placeholder="Select options"
+                                    defaultSelectedKeys={this.selectedRosters}
+                                    multiSelect
+                                    options={this.getItems()}
+                                    onChange={this.onRostersChange}
                                 />
                             </div>
                         </div>
@@ -339,34 +331,44 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
     }
 
-    private renderChannels = (): IDropdownItemProps[] => {
+    private getItems = () => {
         let teams: any[] = [];
         if (this.state.teams !== undefined) {
-            this.state.teams.forEach(element => {
+            this.state.teams.forEach((element) => {
                 teams.push({
-                    text: element.name, onClick: () => {
-                        this.setState(
-                            { channel: element.name, channelID: element.teamId }
-                        )
-                    }
+                    key: element.teamId,
+                    text: element.name
                 });
             });
-        } else {
-            return [];
         }
         return teams;
     }
 
-    private renderTeams = (): IDropdownItemProps[] => {
-        let teams: any[] = [];
-        if (this.state.teams !== undefined) {
-            this.state.teams.forEach(element => {
-                teams.push({ text: element.name, onClick: () => { this.setState({ team: element.name, teamID: element.teamId }) } });
-            });
-        } else {
-            return [];
+    private onTeamsChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
+        console.log("event", event);
+        if (option !== undefined) {
+            if (option.selected == true) {
+                this.selectedTeams.push(option.key)
+            } else {
+                let index = this.selectedTeams.indexOf(option.key);
+                if (index > -1) {
+                    this.selectedTeams.splice(index, 1);
+                }
+            }
         }
-        return teams;
+    }
+
+    private onRostersChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
+        if (option !== undefined) {
+            if (option.selected == true) {
+                this.selectedRosters.push(option.key)
+            } else {
+                let index = this.selectedRosters.indexOf(option.key);
+                if (index > -1) {
+                    this.selectedRosters.splice(index, 1);
+                }
+            }
+        }
     }
 
     private onSave = () => {
@@ -386,11 +388,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         let rosters: string[] = [];
 
         if (this.state.channelBox) {
-            teams.push(this.state.channelID);
+            teams = this.selectedTeams;
         }
 
         if (this.state.teamBox) {
-            rosters.push(this.state.teamID);
+            rosters = this.selectedRosters;
         }
 
         try {
@@ -418,11 +420,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         let rosters: string[] = [];
 
         if (this.state.channelBox) {
-            teams.push(this.state.channelID);
+            teams = this.selectedTeams;
         }
 
         if (this.state.teamBox) {
-            rosters.push(this.state.teamID);
+            rosters = this.selectedRosters;
         }
 
         try {
