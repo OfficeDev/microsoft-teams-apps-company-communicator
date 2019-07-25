@@ -4,9 +4,9 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
@@ -30,14 +30,51 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <returns>All notitification entities.</returns>
         public async Task<IEnumerable<NotificationEntity>> GetAllAsync(bool isDraft)
         {
-            var filter = TableQuery.GenerateFilterConditionForBool(
-                nameof(NotificationEntity.IsDraft),
-                QueryComparisons.Equal,
-                isDraft);
+            var partitionKey = isDraft ? PartitionKeyNames.Notification.DraftNotifications : PartitionKeyNames.Notification.SentNotifications;
 
-            var result = await this.GetWithFilterAsync(filter);
+            var result = await this.GetAllAsync(partitionKey);
 
             return result;
+        }
+
+        /// <summary>
+        /// Move a draft notification from draft to sent partition.
+        /// </summary>
+        /// <param name="draftNotificationEntity">The draft notificatin instance to be moved to the sent partition.</param>
+        /// <returns>Indicates if it moves the draft to sent partition successfully.</returns>
+        public async Task<bool> MoveDraftToSentPartition(NotificationEntity draftNotificationEntity)
+        {
+            if (draftNotificationEntity == null)
+            {
+                return false;
+            }
+
+            // Create a sent notification based on the draft notification.
+            var sentNotificationEntity = new NotificationEntity
+            {
+                PartitionKey = PartitionKeyNames.Notification.SentNotifications,
+                RowKey = draftNotificationEntity.RowKey,
+                Id = draftNotificationEntity.Id,
+                Title = draftNotificationEntity.Title,
+                ImageLink = draftNotificationEntity.ImageLink,
+                Summary = draftNotificationEntity.Summary,
+                Author = draftNotificationEntity.Author,
+                ButtonTitle = draftNotificationEntity.ButtonTitle,
+                ButtonLink = draftNotificationEntity.ButtonLink,
+                CreatedBy = draftNotificationEntity.CreatedBy,
+                CreatedDate = draftNotificationEntity.CreatedDate,
+                SentDate = DateTime.UtcNow.ToShortDateString(),
+                IsDraft = false,
+                Teams = draftNotificationEntity.Teams,
+                Rosters = draftNotificationEntity.Rosters,
+                AllUsers = draftNotificationEntity.AllUsers,
+            };
+            await this.CreateOrUpdateAsync(sentNotificationEntity);
+
+            // Delete the draft notification.
+            await this.DeleteAsync(draftNotificationEntity);
+
+            return true;
         }
     }
 }

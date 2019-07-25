@@ -5,7 +5,6 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 {
     using System.Threading.Tasks;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
     using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
 
@@ -41,18 +40,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// <summary>
         /// Send a notification to target users.
         /// </summary>
-        /// <param name="notificationId">Id of the notification to be sent.</param>
+        /// <param name="draftNotification">The draft notification to be sent.</param>
         /// <returns>Indicating whether the notification was sent successfully or not.</returns>
-        public async Task<bool> SendAsync(string notificationId)
+        public async Task<bool> SendAsync(NotificationEntity draftNotification)
         {
-            var notification = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notificationId);
-            if (notification == null || !notification.IsDraft)
+            if (draftNotification == null || !draftNotification.IsDraft)
             {
                 return false;
             }
 
             // Set in ActiveNotification data
-            await this.activeNotificationCreator.CreateAsync(notificationId);
+            await this.activeNotificationCreator.CreateAsync(draftNotification.Id);
 
             // Get all users
             var userDataDictionary = await this.userDataProvider.GetUserDataDictionaryAsync();
@@ -66,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
             // todo: Set in SentNotificaiton data and counts
 
             // Create MB message.
-            this.messageQueue.Enqueue(notificationId, deDuplicatedRoster);
+            this.messageQueue.Enqueue(draftNotification.Id, deDuplicatedRoster);
 
             return true;
         }
