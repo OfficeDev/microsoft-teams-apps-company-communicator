@@ -345,7 +345,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onTeamsChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
-        console.log("event", event);
         if (option !== undefined) {
             if (option.selected == true) {
                 this.selectedTeams.push(option.key)
