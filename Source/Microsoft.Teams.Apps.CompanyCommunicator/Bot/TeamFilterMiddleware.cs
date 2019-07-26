@@ -30,6 +30,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task OnTurnAsync(ITurnContext turnContext, NextDelegate next, CancellationToken cancellationToken = default)
         {
+            // todo: turnContext contains information of channel data, team, tenant, and etc.
+            // What need to be done with the information? How to filter by the information?
             await next(cancellationToken).ConfigureAwait(false);
         }
     }
