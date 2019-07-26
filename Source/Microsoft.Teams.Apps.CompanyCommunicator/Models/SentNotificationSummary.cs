@@ -43,10 +43,5 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets the number of recipients who were throttled out.
         /// </summary>
         public int Throttled { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the sending process is completed or not.
-        /// </summary>
-        public bool IsCompleted { get; set; }
     }
 }

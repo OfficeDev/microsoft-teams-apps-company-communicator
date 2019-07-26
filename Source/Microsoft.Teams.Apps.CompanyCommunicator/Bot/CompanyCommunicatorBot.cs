@@ -108,12 +108,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             var activity = turnContext.Activity;
             var botId = activity.Recipient.Id;
 
-            var isTeamRenamed = this.IsTeamInformationUpdated(activity);
-            if (isTeamRenamed)
-            {
-                await this.teamsDataCapture.OnTeamInformationUpdated(activity);
-            }
-
             // Take action if this event includes the bot being added
             if (activity.MembersAdded?.FirstOrDefault(p => p.Id == botId) != null)
             {
@@ -128,26 +122,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             }
         }
 
-        private bool IsTeamInformationUpdated(IConversationUpdateActivity activity)
-        {
-            if (activity == null)
-            {
-                return false;
-            }
-
-            var channelDataDTO = activity.GetChannelData<ChannelDataDTO>();
-            if (channelDataDTO == null)
-            {
-                return false;
-            }
-
-            return channelDataDTO.EventType == "teamRenamed";
-        }
-
         private async Task SendAsync(
-                ITurnContext<IConversationUpdateActivity> turnContext,
-                CancellationToken cancellationToken,
-                string message)
+            ITurnContext<IConversationUpdateActivity> turnContext,
+            CancellationToken cancellationToken,
+            string message)
         {
             var card = new HeroCard
             {
