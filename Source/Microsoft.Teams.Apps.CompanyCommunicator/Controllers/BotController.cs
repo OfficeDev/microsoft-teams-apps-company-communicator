@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
 
     /// <summary>
     /// Message controller for the bot.
@@ -25,7 +26,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <param name="adapter">Bot framework http adpater instance.</param>
         /// <param name="bot">Bot instance.</param>
-        public BotController(BotFrameworkHttpAdapter adapter, IBot bot)
+        public BotController(AdapterWithTeamFilter adapter, IBot bot)
         {
             this.adapter = adapter;
             this.bot = bot;
