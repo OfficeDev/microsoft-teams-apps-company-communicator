@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
+    using Microsoft.Bot.Connector.Authentication;
 
     /// <summary>
     /// Bot adapter with teams filter.
@@ -14,8 +15,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <summary>
         /// Initializes a new instance of the <see cref="AdapterWithTeamFilter"/> class.
         /// </summary>
+        /// <param name="credentialProvider">Credential provider serive instance.</param>
         /// <param name="teamFilterMiddleware">Team filter middleware instance.</param>
-        public AdapterWithTeamFilter(TeamFilterMiddleware teamFilterMiddleware)
+        public AdapterWithTeamFilter(
+            ICredentialProvider credentialProvider,
+            TeamFilterMiddleware teamFilterMiddleware)
+            : base(credentialProvider)
         {
             this.Use(teamFilterMiddleware);
         }
