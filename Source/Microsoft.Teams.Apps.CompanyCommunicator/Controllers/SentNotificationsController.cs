@@ -6,7 +6,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
     using System.Collections.Generic;
-    using System.Data.SqlClient;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
