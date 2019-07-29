@@ -330,7 +330,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
     private getItems = () => {
         let teams: any[] = [];
-        if ((this.state.teams !== undefined) && (this.state.teams !== null)) {
+        if (this.state.teams) {
             this.state.teams.forEach((element) => {
                 teams.push({
                     key: element.teamId,
@@ -342,7 +342,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onTeamsChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
-        if (option !== null) {
+        if (option) {
             if (option.selected == true) {
                 this.selectedTeams.push(option.key)
             } else {
@@ -355,7 +355,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onRostersChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
-        if (option !== null) {
+        if (option) {
             if (option.selected == true) {
                 this.selectedRosters.push(option.key)
             } else {
