@@ -135,13 +135,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 return false;
             }
 
-            var channelDataDTO = activity.GetChannelData<ChannelDataDTO>();
-            if (channelDataDTO == null)
+            var channelData = activity.GetChannelData<Microsoft.Bot.Connector.Teams.Models.TeamsChannelData>();
+            if (channelData == null)
             {
                 return false;
             }
 
-            return channelDataDTO.EventType == "teamRenamed";
+            return channelData.EventType == "teamRenamed";
         }
 
         private async Task SendAsync(
