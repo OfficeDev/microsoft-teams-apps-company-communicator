@@ -11,8 +11,8 @@ import { selectMessage, getDraftMessagesList, getMessagesList } from '../../acti
 import { getBaseUrl } from '../../configVariables';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { Loader, Button } from '@stardust-ui/react';
-import { IButtonProps, CommandBar, DirectionalHint, Dialog, DialogFooter, DialogType, ContextualMenu } from 'office-ui-fabric-react';
-import { getDraftNotification, deleteDraftNotification, duplicateDraftNotification, sendDraftNotification } from '../../apis/messageListApi';
+import { IButtonProps, CommandBar, DirectionalHint, Dialog, DialogType, ContextualMenu } from 'office-ui-fabric-react';
+import { getDraftNotification, deleteDraftNotification, duplicateDraftNotification, sendDraftNotification, getConsentSummaries } from '../../apis/messageListApi';
 
 export interface ITaskInfo {
   title?: string;
@@ -53,9 +53,9 @@ export interface IMessageState {
   sentMessagePayload?: any;
   loader: boolean;
   dialogHidden: boolean;
-  teamNames?: any[];
-  rosterNames?: any[];
-  allUsers?: boolean;
+  teamNames: string[];
+  rosterNames: string[];
+  allUsers: boolean;
 }
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
@@ -144,7 +144,10 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
       width: window.innerWidth,
       height: window.innerHeight,
       loader: true,
-      dialogHidden: true
+      dialogHidden: true,
+      teamNames: [],
+      rosterNames: [],
+      allUsers: false,
     };
 
     this.selection = new Selection({
@@ -215,9 +218,9 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
           >
 
             <ul>
-              <li>{this.state.teamNames}</li>
-              <li>{this.state.rosterNames}</li>
-              <li>{this.state.allUsers}</li>
+              {this.displaySelectedTeams()}
+              <li>{this.state.rosterNames.map(roster => <span>{roster}</span>)}</li>
+              <li>Send to all users : {this.state.allUsers}</li>
             </ul>
 
             <div className="footerContainer">
@@ -230,6 +233,14 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
           </Dialog>
         </div>
       );
+    }
+  }
+
+  private displaySelectedTeams = () => {
+    if (this.state.teamNames.length == 0) {
+      return (<div />);
+    } else {
+      return (<li>{this.state.teamNames.map(team => <span>{team}</span>)}</li>);
     }
   }
 
@@ -281,9 +292,14 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         key: 'send',
         name: 'Send',
         onClick: () => {
-          this.setState({
-            dialogHidden: false
-          });
+          getConsentSummaries(id).then((response) => {
+            this.setState({
+              dialogHidden: false
+            });
+
+            console.log("printing", response);
+          }
+          );
         },
       }
     ];
