@@ -219,8 +219,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
 
             <ul>
               {this.displaySelectedTeams()}
-              <li>{this.state.rosterNames.map(roster => <span>{roster}</span>)}</li>
-              <li>Send to all users : {this.state.allUsers}</li>
+              {this.displayRosterTeams()}
+              {this.displayAllUsers()}
             </ul>
 
             <div className="footerContainer">
@@ -237,14 +237,46 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   }
 
   private displaySelectedTeams = () => {
-    if (this.state.teamNames.length == 0) {
+    let length = this.state.teamNames.length;
+    if (length == 0) {
       return (<div />);
     } else {
-      return (<li>{this.state.teamNames.map(team => <span>{team}</span>)}</li>);
+      return (<li key="teamNames">{this.state.teamNames.map((team, index) => {
+        if (length === index + 1) {
+          return (<span key="teamName" >{team}</span>);
+        } else {
+          return (<span key="teamName" >{team} , </span>);
+        }
+      })}</li>
+      );
     }
   }
 
-  private closeDialog = (): void => {
+  private displayRosterTeams = () => {
+    let length = this.state.rosterNames.length;
+    if (length == 0) {
+      return (<div />);
+    } else {
+      return (<li key="rosterNames">{this.state.rosterNames.map((roster, index) => {
+        if (length === index + 1) {
+          return (<span key="rosterName">{roster}</span>);
+        } else {
+          return (<span key="rosterName">{roster} , </span>);
+        }
+      })}</li>
+      );
+    }
+  }
+
+  private displayAllUsers = () => {
+    if (!this.state.allUsers) {
+      return (<div />);
+    } else {
+      return (<li key="alluser">Send to all users </li>);
+    }
+  }
+
+  private closeDialog = () => {
     this.setState({ dialogHidden: true });
   };
 
@@ -294,10 +326,11 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         onClick: () => {
           getConsentSummaries(id).then((response) => {
             this.setState({
-              dialogHidden: false
+              dialogHidden: false,
+              teamNames: response.data.teamNames,
+              rosterNames: response.data.rosterNames,
+              allUsers: response.data.allUsers
             });
-
-            console.log("printing", response);
           }
           );
         },
@@ -311,21 +344,17 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     let message = this.props.selectedMessage;
     let id = message[0].id;
     this.getDraftMessage(id).then(() => {
-      this.getDraftMessage(id).then(() => {
-        this.sendDraftMessage(this.state.sentMessagePayload).then(() => {
-          this.props.getDraftMessagesList().then(() => {
-            this.props.getMessagesList().then(() => {
-              this.setState({
-                dialogHidden: true
-              });
+      this.sendDraftMessage(this.state.sentMessagePayload).then(() => {
+        this.props.getDraftMessagesList().then(() => {
+          this.props.getMessagesList().then(() => {
+            this.setState({
+              dialogHidden: true
             });
           });
         });
       });
     });
   }
-
-
 
   private getDraftMessage = async (id: number) => {
     try {
@@ -399,7 +428,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   };
 
   private onItemInvoked = (item: IMessage): void => {
-    alert(`Item invoked: ${item.title}`);
+    //Commented code out and Will update Later
+    //alert(`Item invoked: ${item.title}`);
   };
 
   private onColumnClick = (event: any, column: any): void => {

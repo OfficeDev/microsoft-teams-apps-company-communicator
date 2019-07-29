@@ -331,7 +331,8 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
   };
 
   private onItemInvoked = (item: IMessage): void => {
-    alert(`Item invoked: ${item.title}`);
+    // Commented code out and Will update Later
+    // alert(`Item invoked: ${item.title}`);
   };
 
   private onColumnClick = (event: any, column: any): void => {
