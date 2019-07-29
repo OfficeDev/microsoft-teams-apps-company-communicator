@@ -1,9 +1,8 @@
 import * as React from 'react';
 import './newMessage.scss';
 import './teamTheme.scss';
-import { Input, TextArea } from 'msteams-ui-components-react';
+import { Input, TextArea, Checkbox } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
-import { Checkbox } from 'msteams-ui-components-react';
 import { Button, Loader } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { RouteComponentProps } from 'react-router-dom';
@@ -52,8 +51,8 @@ export interface INewMessageProps extends RouteComponentProps {
 
 export default class NewMessage extends React.Component<INewMessageProps, formState> {
     private card: any;
-    private selectedTeams: any[] = [];
-    private selectedRosters: any[] = [];
+    private selectedTeams: string[] = [];
+    private selectedRosters: string[] = [];
 
 
     constructor(props: INewMessageProps) {
@@ -141,7 +140,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                     channelBox: false
                 });
             } else {
-                let channel = this.getTeamName(draftMessageDetail.teams[0]);
                 this.setState({
                     channelBox: true,
                 });
@@ -153,7 +151,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                     teamBox: false
                 });
             } else {
-                let team = this.getTeamName(draftMessageDetail.rosters[0]);
                 this.setState({
                     teamBox: true,
                 });
@@ -300,7 +297,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                             <div className="boardSelection">
 
                                 <Dropdown
-                                    placeholder="Select options"
+                                    placeholder="Select team(s)"
                                     defaultSelectedKeys={this.selectedTeams}
                                     multiSelect
                                     options={this.getItems()}
@@ -308,7 +305,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 />
 
                                 <Dropdown
-                                    placeholder="Select options"
+                                    placeholder="Select roster(s)"
                                     defaultSelectedKeys={this.selectedRosters}
                                     multiSelect
                                     options={this.getItems()}
@@ -333,7 +330,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
     private getItems = () => {
         let teams: any[] = [];
-        if (this.state.teams !== undefined) {
+        if ((this.state.teams !== undefined) && (this.state.teams !== null)) {
             this.state.teams.forEach((element) => {
                 teams.push({
                     key: element.teamId,
@@ -345,7 +342,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onTeamsChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
-        if (option !== undefined) {
+        if (option !== null) {
             if (option.selected == true) {
                 this.selectedTeams.push(option.key)
             } else {
@@ -358,7 +355,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onRostersChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
-        if (option !== undefined) {
+        if (option !== null) {
             if (option.selected == true) {
                 this.selectedRosters.push(option.key)
             } else {
