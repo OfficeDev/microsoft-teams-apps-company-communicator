@@ -65,7 +65,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
 
             var teamDataEntities = await this.GetAllAsync(filter);
 
-            return teamDataEntities.Select(p => p.TeamId);
+            return teamDataEntities.Select(p => p.Name);
         }
     }
 }
