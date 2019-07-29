@@ -146,24 +146,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 
         private async Task<IList<T>> ExecuteQueryAsync(
             TableQuery<T> query,
-            CancellationToken ct = default,
-            Action<IList<T>> onProgress = null)
+            CancellationToken ct = default)
         {
-            var maximumDataItems = 25;
-
-            var result = new List<T>();
-            TableContinuationToken token = null;
-
-            do
+            try
             {
-                TableQuerySegment<T> seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, token);
-                token = seg.ContinuationToken;
-                result.AddRange(seg);
-                onProgress?.Invoke(result);
-            }
-            while (token != null && !ct.IsCancellationRequested && result.Count < maximumDataItems);
+                var result = new List<T>();
+                TableContinuationToken token = null;
 
-            return result.Take(maximumDataItems).ToList();
+                do
+                {
+                    TableQuerySegment<T> seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, token);
+                    token = seg.ContinuationToken;
+                    result.AddRange(seg);
+                }
+                while (token != null && !ct.IsCancellationRequested);
+
+                return result.ToList();
+            }
+            catch (StorageException e)
+            {
+                Console.WriteLine(e.Message);
+                throw;
+            }
         }
     }
 }
