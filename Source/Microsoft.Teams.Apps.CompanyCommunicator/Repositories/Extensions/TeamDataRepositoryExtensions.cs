@@ -5,9 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
 {
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
@@ -54,44 +52,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                     await teamDataRepository.DeleteAsync(found);
                 }
             }
-        }
-
-        /// <summary>
-        /// Get team names by Ids.
-        /// </summary>
-        /// <param name="teamDataRepository">The team data repository.</param>
-        /// <param name="ids">Team ids.</param>
-        /// <returns>Names of the teams matching incoming ids.</returns>
-        public static async Task<IEnumerable<string>> GetTeamNamesByIdsAsync(
-            this TeamDataRepository teamDataRepository,
-            IEnumerable<string> ids)
-        {
-            var result = new List<string>();
-
-            if (ids == null || ids.Count() == 0)
-            {
-                return result;
-            }
-
-            var batchOperations = new TableBatchOperation();
-            foreach (var id in ids)
-            {
-                batchOperations.Add(TableOperation.Retrieve(PartitionKeyNames.Metadata.TeamData, id));
-            }
-
-            var batchResult = await teamDataRepository.Table.ExecuteBatchAsync(batchOperations);
-
-            foreach (var singleResult in batchResult)
-            {
-                var entity = singleResult.Result as DynamicTableEntity;
-                var name = entity?.Properties["Name"]?.ToString();
-                if (!string.IsNullOrWhiteSpace(name))
-                {
-                    result.Add(name);
-                }
-            }
-
-            return result;
         }
 
         private static TeamDataEntity ParseTeamData(IConversationUpdateActivity activity)
