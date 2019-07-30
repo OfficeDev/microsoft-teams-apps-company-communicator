@@ -4,8 +4,10 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Configuration;
@@ -17,37 +19,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
     public class BaseRepository<T>
         where T : TableEntity, new()
     {
-        private readonly CloudTable table;
+        private readonly string defaultPartitionKey;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseRepository{T}"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="tableName">The name of the table in Azure Table Storage.</param>
-        public BaseRepository(IConfiguration configuration, string tableName)
+        /// <param name="defaultPartitionKey">Default partition key value.</param>
+        public BaseRepository(IConfiguration configuration, string tableName, string defaultPartitionKey)
         {
             var storageAccountConnectionString = configuration["StorageAccountConnectionString"];
             var storageAccount = CloudStorageAccount.Parse(storageAccountConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
-            this.table = tableClient.GetTableReference(tableName);
-            this.table.CreateIfNotExists();
+            this.Table = tableClient.GetTableReference(tableName);
+            this.Table.CreateIfNotExists();
+
+            this.defaultPartitionKey = defaultPartitionKey;
         }
 
         /// <summary>
-        /// Get all data entities from the table storage.
+        /// Gets cloud table instance.
         /// </summary>
-        /// <returns>All data entities.</returns>
-        public async Task<IEnumerable<T>> GetAllAsync()
-        {
-            return await Task.Run(() =>
-            {
-                var query = new TableQuery<T>();
-
-                var entities = this.table.ExecuteQuery<T>(query);
-
-                return entities.ToList();
-            });
-        }
+        public CloudTable Table { get; }
 
         /// <summary>
         /// Create or update an entity in the table storage.
@@ -58,7 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         {
             var operation = TableOperation.InsertOrReplace(entity);
 
-            await this.table.ExecuteAsync(operation);
+            await this.Table.ExecuteAsync(operation);
         }
 
         /// <summary>
@@ -70,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         {
             var operation = TableOperation.Delete(entity);
 
-            await this.table.ExecuteAsync(operation);
+            await this.Table.ExecuteAsync(operation);
         }
 
         /// <summary>
@@ -83,26 +77,97 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         {
             var operation = TableOperation.Retrieve<T>(partitionKey, rowKey);
 
-            var result = await this.table.ExecuteAsync(operation);
+            var result = await this.Table.ExecuteAsync(operation);
 
             return result.Result as T;
         }
 
         /// <summary>
-        /// Get all data entities from the table storage.
+        /// Get entities from the table storage in a partition with a filter.
         /// </summary>
         /// <param name="filter">Filter to the result.</param>
+        /// <param name="partition">Partition key value.</param>
         /// <returns>All data entities.</returns>
-        protected async Task<IEnumerable<T>> GetAllAsync(string filter)
+        public async Task<IEnumerable<T>> GetWithFilterAsync(string filter, string partition = null)
         {
-            return await Task.Run(() =>
+            var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
+
+            var combinedFilter = this.CombineFilters(filter, partitionKeyFilter);
+
+            var query = new TableQuery<T>().Where(combinedFilter);
+
+            var entities = await this.ExecuteQueryAsync(query);
+
+            return entities;
+        }
+
+        /// <summary>
+        /// Get all data entities from the table storage in a partition.
+        /// </summary>
+        /// <param name="partition">Partition key value.</param>
+        /// <returns>All data entities.</returns>
+        public async Task<IEnumerable<T>> GetAllAsync(string partition = null)
+        {
+            var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
+
+            var query = new TableQuery<T>().Where(partitionKeyFilter);
+
+            var entities = await this.ExecuteQueryAsync(query);
+
+            return entities;
+        }
+
+        private string CombineFilters(string filter1, string filter2)
+        {
+            if (string.IsNullOrWhiteSpace(filter1) && string.IsNullOrWhiteSpace(filter2))
             {
-                var query = new TableQuery<T>().Where(filter);
+                return string.Empty;
+            }
+            else if (string.IsNullOrWhiteSpace(filter1))
+            {
+                return filter2;
+            }
+            else if (string.IsNullOrWhiteSpace(filter2))
+            {
+                return filter1;
+            }
 
-                var entities = this.table.ExecuteQuery<T>(query);
+            return TableQuery.CombineFilters(filter1, TableOperators.And, filter2);
+        }
 
-                return entities.ToList();
-            });
+        private string GetPartitionKeyFilter(string partition)
+        {
+            var filter = TableQuery.GenerateFilterCondition(
+                nameof(TableEntity.PartitionKey),
+                QueryComparisons.Equal,
+                string.IsNullOrWhiteSpace(partition) ? this.defaultPartitionKey : partition);
+            return filter;
+        }
+
+        private async Task<IList<T>> ExecuteQueryAsync(
+            TableQuery<T> query,
+            CancellationToken ct = default)
+        {
+            try
+            {
+                var result = new List<T>();
+                TableContinuationToken token = null;
+
+                do
+                {
+                    TableQuerySegment<T> seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, token);
+                    token = seg.ContinuationToken;
+                    result.AddRange(seg);
+                }
+                while (token != null && !ct.IsCancellationRequested);
+
+                return result;
+            }
+            catch (StorageException e)
+            {
+                Console.WriteLine(e.Message);
+                throw;
+            }
         }
     }
 }
