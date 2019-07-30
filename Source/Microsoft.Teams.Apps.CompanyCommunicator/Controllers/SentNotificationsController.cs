@@ -114,9 +114,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ButtonLink = notificationEntity.ButtonLink,
                 CreatedDate = notificationEntity.CreatedDate,
                 SentDate = notificationEntity.SentDate,
-                Succeeded = 10,
-                Failed = 1,
-                Throttled = 1,
+                Succeeded = notificationEntity.Succeeded,
+                Failed = notificationEntity.Failed,
+                Throttled = notificationEntity.Throttled,
             };
 
             return this.Ok(result);
