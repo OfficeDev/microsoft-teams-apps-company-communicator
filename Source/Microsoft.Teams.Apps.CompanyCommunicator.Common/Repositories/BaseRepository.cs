@@ -161,7 +161,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
                 }
                 while (token != null && !ct.IsCancellationRequested);
 
-                return result.ToList();
+                return result;
             }
             catch (StorageException e)
             {
