@@ -94,14 +94,13 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
       {
         key: 'column2',
         name: '',
-        fieldName: 'Loader',
+        fieldName: 'SendingIndicator',
         minWidth: 120,
         isRowHeader: true,
         data: 'string',
         headerClassName: mergeStyles(getDetailsListHeaderColumnStyle()),
         onRender: (item) => {
-          let isCompleted = item.isCompleted;
-          if (isCompleted) {
+          if (item.isCompleted) {
             return <div />;
           } else {
             return <Loader className="sending" size="smallest" label="sending" labelPosition="end" inline />
