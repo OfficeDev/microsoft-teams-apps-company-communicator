@@ -1,3 +1,11 @@
+.ms-DetailsRow {
+  height: 4.4rem;
+}
+
+.ms-CommandBar {
+  background: transparent;
+}
+
 .content {
   font-size: 1.4rem;
   color: #333333;
@@ -23,4 +31,38 @@
 
 .sortIcon {
   margin: 1.2rem 0.3rem;
+}
+
+.ms-Dialog-main {
+  max-width: 60rem !important;
+  min-width: 60rem !important;
+
+  .footerContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    padding: 2rem 0rem 3.2rem 0rem;
+    width: 100%;
+
+    .hiddenLoader {
+      display: none;
+    }
+
+    .sendingLoader {
+      float: left;
+      width: 12rem;
+      margin-right: 2rem;
+      height: 3rem;
+    }
+
+    .buttonContainer {
+      display: inline;
+      float: right;
+      margin-right: 3.2rem;
+
+      #saveBtn {
+        margin-left: 0.8rem;
+      }
+    }
+  }
 }

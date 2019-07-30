@@ -348,7 +348,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
   };
 
   private onItemInvoked = (item: IMessage): void => {
-    alert(`Item invoked: ${item.title}`);
+    // Called when the message is double clicked or invoked with the enter key on a selected message - currently not used.
   };
 
   private onColumnClick = (event: any, column: any): void => {
