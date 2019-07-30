@@ -52,11 +52,13 @@ export interface IMessageState {
   width: number;
   height: number;
   loader: boolean;
+  time: any;
 }
 
 class Messages extends React.Component<IMessageProps, IMessageState> {
   private selection: Selection;
   private columns: IColumn[];
+  private interval: any;
 
   constructor(props: IMessageProps) {
     super(props);
@@ -182,7 +184,8 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
       itemsAccount: this.props.messagesList.length,
       width: window.innerWidth,
       height: window.innerHeight,
-      loader: true
+      loader: true,
+      time: Date.now(),
     };
 
     this.selection = new Selection({
@@ -198,10 +201,17 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
     microsoftTeams.initialize();
     this.props.getMessagesList();
     document.addEventListener("keydown", this.escFunction, false);
+    this.interval = setInterval(() => {
+      this.setState({ time: Date.now() }, () => {
+        this.props.getMessagesList();
+      }
+      );
+    }, 60000);
   }
 
   public componentWillUnmount() {
     document.removeEventListener("keydown", this.escFunction, false);
+    clearInterval(this.interval);
   }
 
   public componentWillReceiveProps(nextProps: any) {
