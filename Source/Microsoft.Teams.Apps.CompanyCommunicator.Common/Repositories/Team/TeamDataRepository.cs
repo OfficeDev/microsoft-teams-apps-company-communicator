@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
 {
     using Microsoft.Azure.Cosmos.Table;
+    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
