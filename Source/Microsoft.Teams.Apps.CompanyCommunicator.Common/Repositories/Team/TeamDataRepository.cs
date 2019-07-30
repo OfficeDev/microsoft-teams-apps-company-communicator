@@ -36,7 +36,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
                 return new List<string>();
             }
 
-            var rowKeyFilter = string.Empty;
+            var rowKeysFilter = string.Empty;
             foreach (var id in ids)
             {
                 var singleRowKeyFilter = TableQuery.GenerateFilterCondition(
@@ -44,17 +44,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
                     QueryComparisons.Equal,
                     id);
 
-                if (string.IsNullOrWhiteSpace(rowKeyFilter))
+                if (string.IsNullOrWhiteSpace(rowKeysFilter))
                 {
-                    rowKeyFilter = singleRowKeyFilter;
+                    rowKeysFilter = singleRowKeyFilter;
                 }
                 else
                 {
-                    rowKeyFilter = TableQuery.CombineFilters(rowKeyFilter, TableOperators.Or, singleRowKeyFilter);
+                    rowKeysFilter = TableQuery.CombineFilters(rowKeysFilter, TableOperators.Or, singleRowKeyFilter);
                 }
             }
 
-            var teamDataEntities = await this.GetWithFilterAsync(rowKeyFilter);
+            var teamDataEntities = await this.GetWithFilterAsync(rowKeysFilter);
 
             return teamDataEntities.Select(p => p.Name);
         }
