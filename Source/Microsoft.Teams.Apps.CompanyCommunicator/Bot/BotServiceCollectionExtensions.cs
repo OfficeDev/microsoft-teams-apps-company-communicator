@@ -34,7 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             // Create the Teams Data Capture service.
             services.AddSingleton<TeamsDataCapture>();
 
-            // Create the Bot team filter middleware service.
+            // Create the Bot channel filter (channelId==msteams) middleware service.
             services.AddSingleton<TeamFilterMiddleware>();
         }
     }
