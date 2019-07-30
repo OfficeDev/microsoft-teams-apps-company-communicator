@@ -5,8 +5,8 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
 {
     using System.Threading.Tasks;
-    using Microsoft.Bot.Connector.Teams.Models;
     using Microsoft.Bot.Schema;
+    using Microsoft.Bot.Schema.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
 
