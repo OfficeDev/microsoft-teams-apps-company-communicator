@@ -10,9 +10,9 @@ import { connect } from 'react-redux';
 import { selectMessage, getDraftMessagesList, getMessagesList } from '../../actions';
 import { getBaseUrl } from '../../configVariables';
 import * as microsoftTeams from "@microsoft/teams-js";
-import { Loader } from '@stardust-ui/react';
-import { IButtonProps, CommandBar, DirectionalHint } from 'office-ui-fabric-react';
-import { getDraftNotification, deleteDraftNotification, duplicateDraftNotification, sendDraftNotification } from '../../apis/messageListApi';
+import { Loader, Button } from '@stardust-ui/react';
+import { IButtonProps, CommandBar, DirectionalHint, Dialog, DialogType, ContextualMenu } from 'office-ui-fabric-react';
+import { getDraftNotification, deleteDraftNotification, duplicateDraftNotification, sendDraftNotification, getConsentSummaries } from '../../apis/messageListApi';
 
 export interface ITaskInfo {
   title?: string;
@@ -25,6 +25,7 @@ export interface ITaskInfo {
 }
 
 export interface IMessage {
+  id: string;
   title: string;
   date: string;
   recipients: string;
@@ -35,6 +36,7 @@ export interface IMessage {
 
 export interface IMessageProps {
   messages: IMessage[];
+  selectedMessage: any;
   selectMessage?: any;
   getDraftMessagesList?: any;
   getMessagesList?: any;
@@ -50,6 +52,10 @@ export interface IMessageState {
   height: number;
   sentMessagePayload?: any;
   loader: boolean;
+  dialogHidden: boolean;
+  teamNames: string[];
+  rosterNames: string[];
+  allUsers: boolean;
 }
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
@@ -137,7 +143,11 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
       itemsAccount: this.props.messages.length,
       width: window.innerWidth,
       height: window.innerHeight,
-      loader: true
+      loader: true,
+      dialogHidden: true,
+      teamNames: [],
+      rosterNames: [],
+      allUsers: false,
     };
 
     this.selection = new Selection({
@@ -184,10 +194,91 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
               />
             </MarqueeSelection>
           </Fabric>
+
+          <Dialog
+            className="sendDialog"
+            hidden={this.state.dialogHidden}
+            onDismiss={this.closeDialog}
+            dialogContentProps={{
+              type: DialogType.normal,
+              title: 'Send this message?',
+              subText: 'Send to the following recipients?'
+            }}
+            modalProps={{
+              titleAriaId: "Send Dialog",
+              subtitleAriaId: "Send Dialog",
+              isBlocking: false,
+              styles: { main: { minWidth: 600, height: 300 } },
+              dragOptions: {
+                moveMenuItemText: 'Move',
+                closeMenuItemText: 'Close',
+                menu: ContextualMenu
+              }
+            }}
+          >
+
+            <ul>
+              {this.displaySelectedTeams()}
+              {this.displayRosterTeams()}
+              {this.displayAllUsers()}
+            </ul>
+
+            <div className="footerContainer">
+              <div className="buttonContainer">
+                <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="Sending" labelPosition="end" />
+                <Button content="Cancel" onClick={this.closeDialog} secondary />
+                <Button content="Send" id="saveBtn" onClick={this.onSendMessage} primary />
+              </div>
+            </div>
+          </Dialog>
         </div>
       );
     }
   }
+
+  private displaySelectedTeams = () => {
+    let length = this.state.teamNames.length;
+    if (length == 0) {
+      return (<div />);
+    } else {
+      return (<li key="teamNames">{this.state.teamNames.map((team, index) => {
+        if (length === index + 1) {
+          return (<span key={`teamName${index}`} >{team}</span>);
+        } else {
+          return (<span key={`teamName${index}`} >{team}, </span>);
+        }
+      })}</li>
+      );
+    }
+  }
+
+  private displayRosterTeams = () => {
+    let length = this.state.rosterNames.length;
+    if (length == 0) {
+      return (<div />);
+    } else {
+      return (<li key="rosterNames">{this.state.rosterNames.map((roster, index) => {
+        if (length === index + 1) {
+          return (<span key={`rosterName${index}`}>{roster}</span>);
+        } else {
+          return (<span key={`rosterName${index}`}>{roster}, </span>);
+        }
+      })}</li>
+      );
+    }
+  }
+
+  private displayAllUsers = () => {
+    if (!this.state.allUsers) {
+      return (<div />);
+    } else {
+      return (<li key="alluser">Send to all users</li>);
+    }
+  }
+
+  private closeDialog = () => {
+    this.setState({ dialogHidden: true });
+  };
 
   private getItems = () => {
     return [];
@@ -233,16 +324,36 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         key: 'send',
         name: 'Send',
         onClick: () => {
-          this.getDraftMessage(id).then(() => {
-            this.sendDraftMessage(this.state.sentMessagePayload).then(() => {
-              this.props.getDraftMessagesList();
-              this.props.getMessagesList();
+          getConsentSummaries(id).then((response) => {
+            this.setState({
+              dialogHidden: false,
+              teamNames: response.data.teamNames,
+              rosterNames: response.data.rosterNames,
+              allUsers: response.data.allUsers
             });
           });
         },
       }
     ];
   };
+
+  private onSendMessage = () => {
+    let spanner = document.getElementsByClassName("sendingLoader");
+    spanner[0].classList.remove("hiddenLoader");
+    let message = this.props.selectedMessage;
+    let id = message[0].id;
+    this.getDraftMessage(id).then(() => {
+      this.sendDraftMessage(this.state.sentMessagePayload).then(() => {
+        this.props.getDraftMessagesList().then(() => {
+          this.props.getMessagesList().then(() => {
+            this.setState({
+              dialogHidden: true
+            });
+          });
+        });
+      });
+    });
+  }
 
   private getDraftMessage = async (id: number) => {
     try {
@@ -316,7 +427,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   };
 
   private onItemInvoked = (item: IMessage): void => {
-    alert(`Item invoked: ${item.title}`);
+    // Called when the message is double clicked or invoked with the enter key on a selected message - currently not used.
   };
 
   private onColumnClick = (event: any, column: any): void => {
@@ -348,7 +459,7 @@ function _copyAndSort<T>(items: T[], columnKey: string, isSortedDescending?: boo
 }
 
 const mapStateToProps = (state: any) => {
-  return { messages: state.draftMessagesList };
+  return { messages: state.draftMessagesList, selectedMessage: state.selectedMessage };
 }
 
 export default connect(mapStateToProps, { selectMessage, getDraftMessagesList, getMessagesList })(DraftMessages);

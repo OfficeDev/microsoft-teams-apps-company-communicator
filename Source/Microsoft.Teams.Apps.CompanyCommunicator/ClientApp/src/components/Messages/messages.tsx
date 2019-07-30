@@ -95,6 +95,22 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
       },
       {
         key: 'column2',
+        name: '',
+        fieldName: 'SendingIndicator',
+        minWidth: 120,
+        isRowHeader: true,
+        data: 'string',
+        headerClassName: mergeStyles(getDetailsListHeaderColumnStyle()),
+        onRender: (item) => {
+          if (item.isCompleted) {
+            return <div />;
+          } else {
+            return <Loader className="sending" size="smallest" label="sending" labelPosition="end" inline />
+          }
+        },
+      },
+      {
+        key: 'column3',
         name: 'Recipients',
         fieldName: 'Recipients',
         minWidth: 180,
@@ -123,7 +139,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         },
       },
       {
-        key: 'column3',
+        key: 'column4',
         name: 'Date',
         fieldName: 'Date',
         minWidth: 180,
@@ -138,7 +154,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         },
       },
       {
-        key: 'column4',
+        key: 'column5',
         name: '',
         fieldName: 'More',
         minWidth: 110,
@@ -341,7 +357,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
   };
 
   private onItemInvoked = (item: IMessage): void => {
-    alert(`Item invoked: ${item.title}`);
+    // Called when the message is double clicked or invoked with the enter key on a selected message - currently not used.
   };
 
   private onColumnClick = (event: any, column: any): void => {
