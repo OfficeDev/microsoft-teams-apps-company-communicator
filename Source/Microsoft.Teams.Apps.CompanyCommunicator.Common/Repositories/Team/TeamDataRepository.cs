@@ -4,7 +4,9 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
 {
-    using Microsoft.Azure.Cosmos.Table;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Configuration;
 
