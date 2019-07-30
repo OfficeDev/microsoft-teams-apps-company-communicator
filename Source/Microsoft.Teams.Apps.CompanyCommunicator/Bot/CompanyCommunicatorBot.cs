@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Schema;
+    using Microsoft.Bot.Schema.Teams;
 
     /// <summary>
     /// Company Communicator Bot.
@@ -135,7 +136,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 return false;
             }
 
-            var channelData = activity.GetChannelData<Microsoft.Bot.Connector.Teams.Models.TeamsChannelData>();
+            var channelData = activity.GetChannelData<TeamsChannelData>();
             if (channelData == null)
             {
                 return false;
