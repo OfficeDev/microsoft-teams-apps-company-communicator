@@ -14,6 +14,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     /// </summary>
     public class TeamFilterMiddleware : IMiddleware
     {
+        private static readonly string MsTeamsChannelId = "msteams";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamFilterMiddleware"/> class.
         /// </summary>
@@ -23,6 +25,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
         /// <summary>
         /// Processes an incoming activity.
+        /// If an activity meets the following condition(s), the bot will not be executed. It return 200 Ok to client directly.
+        /// * If channel is not "msteams".
         /// </summary>
         /// <param name="turnContext">Context object containing information for a single turn of conversation with a user.</param>
         /// <param name="next">The delegate to call to continue the bot middleware pipeline.</param>
@@ -30,9 +34,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task OnTurnAsync(ITurnContext turnContext, NextDelegate next, CancellationToken cancellationToken = default)
         {
-            // todo: turnContext contains information of channel data, team, tenant, and etc.
-            // What need to be done with the information? How to filter by the information?
-            await next(cancellationToken).ConfigureAwait(false);
+            var isMsTeamsChannel = this.ValidateChannel(turnContext);
+
+            if (isMsTeamsChannel)
+            {
+                await next(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private bool ValidateChannel(ITurnContext turnContext)
+        {
+            return turnContext?.Activity?.ChannelId == MsTeamsChannelId;
         }
     }
 }
