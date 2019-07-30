@@ -205,8 +205,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
               subText: 'Send to the following recipients?'
             }}
             modalProps={{
-              titleAriaId: "Sent Dialog",
-              subtitleAriaId: "Sent Dialog",
+              titleAriaId: "Send Dialog",
+              subtitleAriaId: "Send Dialog",
               isBlocking: false,
               styles: { main: { minWidth: 600, height: 300 } },
               dragOptions: {
@@ -245,7 +245,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         if (length === index + 1) {
           return (<span key="teamName" >{team}</span>);
         } else {
-          return (<span key="teamName" >{team} , </span>);
+          return (<span key="teamName" >{team},</span>);
         }
       })}</li>
       );
@@ -261,7 +261,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         if (length === index + 1) {
           return (<span key="rosterName">{roster}</span>);
         } else {
-          return (<span key="rosterName">{roster} , </span>);
+          return (<span key="rosterName">{roster},</span>);
         }
       })}</li>
       );
@@ -272,7 +272,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     if (!this.state.allUsers) {
       return (<div />);
     } else {
-      return (<li key="alluser">Send to all users </li>);
+      return (<li key="alluser">Send to all users</li>);
     }
   }
 
@@ -331,8 +331,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
               rosterNames: response.data.rosterNames,
               allUsers: response.data.allUsers
             });
-          }
-          );
+          });
         },
       }
     ];
@@ -428,8 +427,6 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   };
 
   private onItemInvoked = (item: IMessage): void => {
-    //Commented code out and Will update Later
-    //alert(`Item invoked: ${item.title}`);
   };
 
   private onColumnClick = (event: any, column: any): void => {
