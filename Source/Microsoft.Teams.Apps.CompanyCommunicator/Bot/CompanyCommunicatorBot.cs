@@ -17,6 +17,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     /// </summary>
     public class CompanyCommunicatorBot : ActivityHandler
     {
+        private static readonly string TeamRenamedEventType = "teamRenamed";
+
         private readonly TeamsDataCapture teamsDataCapture;
 
         /// <summary>
@@ -142,7 +144,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 return false;
             }
 
-            return channelData.EventType == "teamRenamed";
+            return channelData.EventType == TeamRenamedEventType;
         }
 
         private async Task SendAsync(
