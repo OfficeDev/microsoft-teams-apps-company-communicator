@@ -16,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ActiveNot
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         public ActiveNotificationRepository(IConfiguration configuration)
-            : base(configuration, "ActiveNotification")
+            : base(configuration, "ActiveNotification", PartitionKeyNames.Notification.ActiveNotifications)
         {
         }
     }

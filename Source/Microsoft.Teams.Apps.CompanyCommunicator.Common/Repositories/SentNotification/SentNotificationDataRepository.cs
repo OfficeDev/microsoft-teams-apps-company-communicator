@@ -16,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         public SentNotificationDataRepository(IConfiguration configuration)
-            : base(configuration, "SentNotification")
+            : base(configuration, "SentNotification", PartitionKeyNames.Notification.SentNotifications)
         {
         }
     }
