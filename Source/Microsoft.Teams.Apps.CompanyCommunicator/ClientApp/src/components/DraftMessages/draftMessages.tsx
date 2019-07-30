@@ -243,9 +243,9 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     } else {
       return (<li key="teamNames">{this.state.teamNames.map((team, index) => {
         if (length === index + 1) {
-          return (<span key="teamName" >{team}</span>);
+          return (<span key={`teamName${index}`} >{team}</span>);
         } else {
-          return (<span key="teamName" >{team}, </span>);
+          return (<span key={`teamName${index}`} >{team}, </span>);
         }
       })}</li>
       );
@@ -259,9 +259,9 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     } else {
       return (<li key="rosterNames">{this.state.rosterNames.map((roster, index) => {
         if (length === index + 1) {
-          return (<span key="rosterName">{roster}</span>);
+          return (<span key={`rosterName${index}`}>{roster}</span>);
         } else {
-          return (<span key="rosterName">{roster}, </span>);
+          return (<span key={`rosterName${index}`}>{roster}, </span>);
         }
       })}</li>
       );

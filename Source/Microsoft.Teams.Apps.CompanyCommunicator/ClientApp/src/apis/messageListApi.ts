@@ -54,8 +54,6 @@ export const getTeams = async (): Promise<any> => {
 }
 
 export const getConsentSummaries = async (id: number): Promise<any> => {
-    //let url = baseAxiosUrl + "/draftnotifications/consentSummaries/" + id;
-    //will retest and update url after PR #14 in 
-    let url = "https://microsoftteamsappscompanycommunicatortemp.azurewebsites.net/api/draftnotifications/consentSummaries/" + id;
+    let url = baseAxiosUrl + "/draftnotifications/consentSummaries/" + id;
     return await axios.get(url);
 }
