@@ -25,8 +25,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
         /// <summary>
         /// Processes an incoming activity.
-        /// If an activity meets the following condition(s), the bot will not be executed. It return 200 Ok to client directly.
-        /// * If channel is not "msteams".
+        /// If an activity's channel id is not "msteams", then the middleware short circuit the pipeline,
+        /// the handlers and middlewares that listed after the TeamFilterMiddleware in the pipeline will be skipped.
         /// </summary>
         /// <param name="turnContext">Context object containing information for a single turn of conversation with a user.</param>
         /// <param name="next">The delegate to call to continue the bot middleware pipeline.</param>
