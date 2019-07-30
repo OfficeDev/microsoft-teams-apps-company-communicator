@@ -17,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     /// </summary>
     [Route("api/teamData")]
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
-    public class TeamDataController
+    public class TeamDataController : ControllerBase
     {
         private readonly TeamDataRepository teamDataRepository;
 
