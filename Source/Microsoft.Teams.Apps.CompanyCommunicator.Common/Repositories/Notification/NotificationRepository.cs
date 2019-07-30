@@ -5,7 +5,6 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification
 {
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Configuration;
@@ -20,7 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         public NotificationRepository(IConfiguration configuration)
-            : base(configuration, "Notification")
+            : base(configuration, "Notification", PartitionKeyNames.Notification.DraftNotifications)
         {
         }
 
@@ -32,13 +31,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public async Task<IEnumerable<NotificationEntity>> GetAllAsync(bool isDraft)
         {
             var filter = TableQuery.GenerateFilterConditionForBool(
-                    nameof(NotificationEntity.IsDraft),
-                    QueryComparisons.Equal,
-                    isDraft);
+                nameof(NotificationEntity.IsDraft),
+                QueryComparisons.Equal,
+                isDraft);
 
-            var entities = await this.GetAllAsync(filter);
+            var result = await this.GetWithFilterAsync(filter);
 
-            return entities.Take(25);
+            return result;
         }
     }
 }

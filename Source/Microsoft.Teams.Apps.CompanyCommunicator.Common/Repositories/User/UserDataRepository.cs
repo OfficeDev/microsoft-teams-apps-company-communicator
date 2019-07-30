@@ -16,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.User
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         public UserDataRepository(IConfiguration configuration)
-            : base(configuration, "UserData")
+            : base(configuration, "UserData", PartitionKeyNames.Metadata.UserData)
         {
         }
     }

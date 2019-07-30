@@ -82,6 +82,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     Succeeded = notificationEntity.Succeeded,
                     Failed = notificationEntity.Failed,
                     Throttled = notificationEntity.Throttled,
+                    IsCompleted = notificationEntity.IsCompleted,
                 };
 
                 result.Add(summary);
