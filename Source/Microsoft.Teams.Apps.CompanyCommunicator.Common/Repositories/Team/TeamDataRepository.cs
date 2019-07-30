@@ -36,32 +36,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
                 return new List<string>();
             }
 
-            var partitionKeyFilter = TableQuery.GenerateFilterCondition(
-                nameof(TableEntity.PartitionKey),
-                QueryComparisons.Equal,
-                PartitionKeyNames.Metadata.TeamData);
-
-            var rowKeyFiter = string.Empty;
+            var rowKeyFilter = string.Empty;
             foreach (var id in ids)
             {
-                var subRowKeyFilter = TableQuery.GenerateFilterCondition(
+                var singleRowKeyFilter = TableQuery.GenerateFilterCondition(
                     nameof(TableEntity.RowKey),
                     QueryComparisons.Equal,
-                    id.ToString());
+                    id);
 
-                if (string.IsNullOrWhiteSpace(rowKeyFiter))
+                if (string.IsNullOrWhiteSpace(rowKeyFilter))
                 {
-                    rowKeyFiter = subRowKeyFilter;
+                    rowKeyFilter = singleRowKeyFilter;
                 }
                 else
                 {
-                    rowKeyFiter = TableQuery.CombineFilters(rowKeyFiter, TableOperators.Or, subRowKeyFilter);
+                    rowKeyFilter = TableQuery.CombineFilters(rowKeyFilter, TableOperators.Or, singleRowKeyFilter);
                 }
             }
 
-            var filter = TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, rowKeyFiter);
-
-            var teamDataEntities = await this.GetAllAsync(filter);
+            var teamDataEntities = await this.GetWithFilterAsync(rowKeyFilter);
 
             return teamDataEntities.Select(p => p.Name);
         }
