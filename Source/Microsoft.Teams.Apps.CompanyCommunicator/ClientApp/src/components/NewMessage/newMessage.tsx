@@ -42,7 +42,9 @@ export interface formState {
     teams?: any[],
     exists?: boolean,
     messageId: string,
-    loader: boolean;
+    loader: boolean,
+    selectedTeamsNum: number,
+    selectedRosterNum: number
 }
 
 export interface INewMessageProps extends RouteComponentProps {
@@ -73,7 +75,9 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             teamBox: false,
             allUsersBox: false,
             messageId: "",
-            loader: true
+            loader: true,
+            selectedTeamsNum: 0,
+            selectedRosterNum: 0
         }
     }
 
@@ -142,6 +146,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             } else {
                 this.setState({
                     channelBox: true,
+                    selectedTeamsNum: draftMessageDetail.teams.length
                 });
                 this.selectedTeams = draftMessageDetail.teams;
             }
@@ -153,6 +158,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             } else {
                 this.setState({
                     teamBox: true,
+                    selectedRosterNum: draftMessageDetail.rosters.length
                 });
                 this.selectedRosters = draftMessageDetail.rosters;
             }
@@ -302,6 +308,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     multiSelect
                                     options={this.getItems()}
                                     onChange={this.onTeamsChange}
+                                    disabled={!this.state.channelBox}
                                 />
 
                                 <Dropdown
@@ -310,6 +317,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     multiSelect
                                     options={this.getItems()}
                                     onChange={this.onRostersChange}
+                                    disabled={!this.state.teamBox}
                                 />
                             </div>
                         </div>
@@ -317,7 +325,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                         <div className="footerContainer">
                             <div className="buttonContainer">
                                 <Button content="Back" onClick={this.onBack} secondary />
-                                <Button content="Save" disabled={!(this.state.channelBox || this.state.teamBox || this.state.allUsersBox)} id="saveBtn" onClick={this.onSave} primary />
+                                <Button content="Save" disabled={!((this.state.channelBox && (this.state.selectedTeamsNum !== 0)) || (this.state.teamBox && (this.state.selectedRosterNum !== 0)) || this.state.allUsersBox)} id="saveBtn" onClick={this.onSave} primary />
                             </div>
                         </div>
                     </div>
@@ -344,11 +352,17 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     private onTeamsChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
         if (option) {
             if (option.selected == true) {
-                this.selectedTeams.push(option.key)
+                this.selectedTeams.push(option.key);
+                this.setState({
+                    selectedTeamsNum: this.selectedTeams.length
+                });
             } else {
                 let index = this.selectedTeams.indexOf(option.key);
                 if (index > -1) {
                     this.selectedTeams.splice(index, 1);
+                    this.setState({
+                        selectedTeamsNum: this.selectedTeams.length
+                    });
                 }
             }
         }
@@ -357,11 +371,17 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     private onRostersChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
         if (option) {
             if (option.selected == true) {
-                this.selectedRosters.push(option.key)
+                this.selectedRosters.push(option.key);
+                this.setState({
+                    selectedRosterNum: this.selectedRosters.length
+                });
             } else {
                 let index = this.selectedRosters.indexOf(option.key);
                 if (index > -1) {
                     this.selectedRosters.splice(index, 1);
+                    this.setState({
+                        selectedRosterNum: this.selectedRosters.length
+                    });
                 }
             }
         }
