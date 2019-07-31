@@ -25,18 +25,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly NotificationRepository notificationRepository;
         private readonly TeamDataRepository teamDataRepository;
+        private readonly TableRowKeyGenerator tableRowKeyGenerator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
         /// </summary>
         /// <param name="notificationRepository">Notification respository instance.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
+        /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
         public DraftNotificationsController(
             NotificationRepository notificationRepository,
-            TeamDataRepository teamDataRepository)
+            TeamDataRepository teamDataRepository,
+            TableRowKeyGenerator tableRowKeyGenerator)
         {
             this.notificationRepository = notificationRepository;
             this.teamDataRepository = teamDataRepository;
+            this.tableRowKeyGenerator = tableRowKeyGenerator;
         }
 
         /// <summary>
@@ -49,6 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         {
             await this.notificationRepository.CreateDraftNotificationAsync(
                 notification,
+                this.tableRowKeyGenerator,
                 this.HttpContext.User?.Identity?.Name);
         }
 
@@ -67,27 +72,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var newId = Guid.NewGuid().ToString();
-            var newNotificationEntity = new NotificationEntity
-            {
-                PartitionKey = PartitionKeyNames.Notification.DraftNotifications,
-                RowKey = newId,
-                Id = newId,
-                Title = notificationEntity.Title,
-                ImageLink = notificationEntity.ImageLink,
-                Summary = notificationEntity.Summary,
-                Author = notificationEntity.Author,
-                ButtonTitle = notificationEntity.ButtonTitle,
-                ButtonLink = notificationEntity.ButtonLink,
-                CreatedBy = this.HttpContext.User?.Identity?.Name,
-                CreatedDate = DateTime.UtcNow.ToShortDateString(),
-                IsDraft = true,
-                Teams = notificationEntity.Teams,
-                Rosters = notificationEntity.Rosters,
-                AllUsers = notificationEntity.AllUsers,
-            };
+            var createdBy = this.HttpContext.User?.Identity?.Name;
 
-            await this.notificationRepository.CreateOrUpdateAsync(newNotificationEntity);
+            await this.notificationRepository.DuplicateDraftNotificationAsync(notificationEntity, createdBy);
 
             return this.Ok();
         }
@@ -112,7 +99,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ButtonTitle = notification.ButtonTitle,
                 ButtonLink = notification.ButtonLink,
                 CreatedBy = this.HttpContext.User?.Identity?.Name,
-                CreatedDate = DateTime.UtcNow.ToShortDateString(),
+                CreatedTime = DateTime.UtcNow,
                 IsDraft = true,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,
@@ -189,7 +176,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Author = notificationEntity.Author,
                 ButtonTitle = notificationEntity.ButtonTitle,
                 ButtonLink = notificationEntity.ButtonLink,
-                CreatedDate = notificationEntity.CreatedDate,
+                CreatedTime = notificationEntity.CreatedTime,
                 Teams = notificationEntity.Teams,
                 Rosters = notificationEntity.Rosters,
                 AllUsers = notificationEntity.AllUsers,

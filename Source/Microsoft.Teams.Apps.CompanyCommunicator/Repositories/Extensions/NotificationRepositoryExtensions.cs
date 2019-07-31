@@ -20,19 +20,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
         /// </summary>
         /// <param name="notificationRepository">The notification respository.</param>
         /// <param name="notification">Draft Notification model class instance passed in from Web API.</param>
+        /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
         /// <param name="userName">Name of the user who is running the application.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         public static async Task CreateDraftNotificationAsync(
             this NotificationRepository notificationRepository,
             DraftNotification notification,
+            TableRowKeyGenerator tableRowKeyGenerator,
             string userName)
         {
-            var id = Guid.NewGuid().ToString();
+            var newId = tableRowKeyGenerator.NewKeyInLogHeadPattern();
+
             var notificationEntity = new NotificationEntity
             {
                 PartitionKey = PartitionKeyNames.Notification.DraftNotifications,
-                RowKey = id,
-                Id = id,
+                RowKey = newId,
+                Id = newId,
                 Title = notification.Title,
                 ImageLink = notification.ImageLink,
                 Summary = notification.Summary,
@@ -40,7 +43,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 ButtonTitle = notification.ButtonTitle,
                 ButtonLink = notification.ButtonLink,
                 CreatedBy = userName,
-                CreatedDate = DateTime.UtcNow.ToShortDateString(),
+                CreatedTime = DateTime.UtcNow,
                 IsDraft = true,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,

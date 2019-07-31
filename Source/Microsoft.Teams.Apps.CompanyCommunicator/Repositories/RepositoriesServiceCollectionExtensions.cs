@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
 {
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ActiveNotification;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotification;
@@ -27,6 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
             services.AddSingleton<NotificationRepository>();
             services.AddSingleton<UserDataRepository>();
             services.AddSingleton<TeamDataRepository>();
+            services.AddSingleton<TableRowKeyGenerator>();
         }
     }
 }

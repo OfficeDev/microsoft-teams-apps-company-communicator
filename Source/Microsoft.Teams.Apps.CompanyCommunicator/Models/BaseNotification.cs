@@ -4,6 +4,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
+    using System;
+
     /// <summary>
     /// Base notification model class.
     /// </summary>
@@ -47,6 +49,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// <summary>
         /// Gets or sets the Created Date value.
         /// </summary>
-        public string CreatedDate { get; set; }
+        public DateTime CreatedTime { get; set; }
     }
 }
