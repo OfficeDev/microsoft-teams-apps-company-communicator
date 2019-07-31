@@ -37,6 +37,15 @@
   max-width: 60rem !important;
   min-width: 60rem !important;
 
+  .ms-Dialog-inner {
+    max-height: 15rem;
+    overflow: auto;
+
+    .label {
+      font-weight: bold;
+    }
+  }
+
   .footerContainer {
     position: fixed;
     bottom: 0;
@@ -50,7 +59,7 @@
 
     .sendingLoader {
       float: left;
-      width: 12rem;
+      width: 18rem;
       margin-right: 2rem;
       height: 3rem;
     }
