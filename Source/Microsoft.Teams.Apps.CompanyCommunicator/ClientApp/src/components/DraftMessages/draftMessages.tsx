@@ -56,7 +56,7 @@ export interface IMessageState {
   teamNames: string[];
   rosterNames: string[];
   allUsers: boolean;
-  time: any;
+  time: number;
 }
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
@@ -166,8 +166,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     this.interval = setInterval(() => {
       this.setState({ time: Date.now() }, () => {
         this.props.getDraftMessagesList();
-      }
-      );
+      });
     }, 60000);
   }
 

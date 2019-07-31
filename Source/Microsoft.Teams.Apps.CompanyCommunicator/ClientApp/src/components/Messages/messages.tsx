@@ -52,7 +52,7 @@ export interface IMessageState {
   width: number;
   height: number;
   loader: boolean;
-  time: any;
+  time: number;
 }
 
 class Messages extends React.Component<IMessageProps, IMessageState> {
@@ -220,8 +220,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
     this.interval = setInterval(() => {
       this.setState({ time: Date.now() }, () => {
         this.props.getMessagesList();
-      }
-      );
+      });
     }, 60000);
   }
 
