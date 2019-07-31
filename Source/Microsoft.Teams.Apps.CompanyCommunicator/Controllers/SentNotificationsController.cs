@@ -61,13 +61,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
-        /// Get all sent notification summaries.
+        /// Get most recently sent notification summaries.
         /// </summary>
         /// <returns>A list of <see cref="SentNotificationSummary"/> instances.</returns>
         [HttpGet]
         public async Task<IEnumerable<SentNotificationSummary>> GetSentNotificationsAsync()
         {
-            var notificationEntities = await this.notificationRepository.GetAllAsync(false);
+            var notificationEntities = await this.notificationRepository.GetMostRecentSentNotifications();
 
             var result = new List<SentNotificationSummary>();
             foreach (var notificationEntity in notificationEntities)

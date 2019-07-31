@@ -24,15 +24,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <summary>
-        /// Get all notification entities from the table storage.
+        /// Get all draft notification entities from the table storage.
         /// </summary>
-        /// <param name="isDraft">Indicates if the function shall return draft notifications or not.</param>
-        /// <returns>All notitification entities.</returns>
-        public async Task<IEnumerable<NotificationEntity>> GetAllAsync(bool isDraft)
+        /// <returns>All draft notitification entities.</returns>
+        public async Task<IEnumerable<NotificationEntity>> GetAllDraftNotificationsAsync()
         {
-            var partitionKey = isDraft ? PartitionKeyNames.Notification.DraftNotifications : PartitionKeyNames.Notification.SentNotifications;
+            var result = await this.GetAllAsync(PartitionKeyNames.Notification.DraftNotifications);
 
-            var result = await this.GetAllAsync(partitionKey);
+            return result;
+        }
+
+        /// <summary>
+        /// Get the top 25 most recently sent notification entities from the table storage.
+        /// </summary>
+        /// <returns>The top 25 most recently sent notitification entities.</returns>
+        public async Task<IEnumerable<NotificationEntity>> GetMostRecentSentNotifications()
+        {
+            var result = await this.GetAllAsync(PartitionKeyNames.Notification.SentNotifications);
 
             return result;
         }
@@ -40,13 +48,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <summary>
         /// Move a draft notification from draft to sent partition.
         /// </summary>
-        /// <param name="draftNotificationEntity">The draft notificatin instance to be moved to the sent partition.</param>
+        /// <param name="draftNotificationEntity">The draft notification instance to be moved to the sent partition.</param>
         /// <returns>Indicates if it moves the draft to sent partition successfully.</returns>
-        public async Task<bool> MoveDraftToSentPartition(NotificationEntity draftNotificationEntity)
+        public async Task MoveDraftToSentPartition(NotificationEntity draftNotificationEntity)
         {
             if (draftNotificationEntity == null)
             {
-                return false;
+                return;
             }
 
             // Create a sent notification based on the draft notification.
@@ -73,8 +81,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
 
             // Delete the draft notification.
             await this.DeleteAsync(draftNotificationEntity);
-
-            return true;
         }
     }
 }

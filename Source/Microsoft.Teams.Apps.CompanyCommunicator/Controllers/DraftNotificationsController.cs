@@ -141,7 +141,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetAllDraftNotificationsAsync()
         {
-            var notificationEntities = await this.notificationRepository.GetAllAsync(true);
+            var notificationEntities = await this.notificationRepository.GetAllDraftNotificationsAsync();
 
             var result = new List<DraftNotificationSummary>();
             foreach (var notificationEntity in notificationEntities)
