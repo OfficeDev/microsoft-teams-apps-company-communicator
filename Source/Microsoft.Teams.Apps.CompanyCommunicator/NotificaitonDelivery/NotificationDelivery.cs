@@ -40,17 +40,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// <summary>
         /// Send a notification to target users.
         /// </summary>
-        /// <param name="draftNotification">The draft notification to be sent.</param>
+        /// <param name="draftNotificationEntity">The draft notification to be sent.</param>
         /// <returns>Indicating whether the notification was sent successfully or not.</returns>
-        public async Task<bool> SendAsync(NotificationEntity draftNotification)
+        public async Task SendAsync(NotificationEntity draftNotificationEntity)
         {
-            if (draftNotification == null || !draftNotification.IsDraft)
+            if (draftNotificationEntity == null || !draftNotificationEntity.IsDraft)
             {
-                return false;
+                return;
             }
 
             // Set in ActiveNotification data
-            await this.activeNotificationCreator.CreateAsync(draftNotification.Id);
+            await this.activeNotificationCreator.CreateAsync(draftNotificationEntity.Id);
 
             // Get all users
             var userDataDictionary = await this.userDataProvider.GetUserDataDictionaryAsync();
@@ -64,9 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
             // todo: Set in SentNotificaiton data and counts
 
             // Create MB message.
-            this.messageQueue.Enqueue(draftNotification.Id, deDuplicatedRoster);
-
-            return true;
+            this.messageQueue.Enqueue(draftNotificationEntity.Id, deDuplicatedRoster);
         }
     }
 }
