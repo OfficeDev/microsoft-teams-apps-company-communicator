@@ -49,7 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Move a draft notification from draft to sent partition.
         /// </summary>
         /// <param name="draftNotificationEntity">The draft notification instance to be moved to the sent partition.</param>
-        /// <returns>Indicates if it moves the draft to sent partition successfully.</returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         public async Task MoveDraftToSentPartition(NotificationEntity draftNotificationEntity)
         {
             if (draftNotificationEntity == null)

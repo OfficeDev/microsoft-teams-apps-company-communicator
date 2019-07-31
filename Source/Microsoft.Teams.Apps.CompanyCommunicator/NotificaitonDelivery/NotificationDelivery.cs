@@ -41,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// Send a notification to target users.
         /// </summary>
         /// <param name="draftNotificationEntity">The draft notification to be sent.</param>
-        /// <returns>Indicating whether the notification was sent successfully or not.</returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         public async Task SendAsync(NotificationEntity draftNotificationEntity)
         {
             if (draftNotificationEntity == null || !draftNotificationEntity.IsDraft)
