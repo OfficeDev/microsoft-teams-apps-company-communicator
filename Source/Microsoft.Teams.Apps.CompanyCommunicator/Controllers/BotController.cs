@@ -36,7 +36,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// Delegate the processing of the HTTP POST to the adapter.
         /// The adapter will invoke the bot.
         /// </summary>
-        /// <returns>An instance of <see cref="System.Threading.Tasks.Task"/> class.</returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [HttpPost]
         public async Task PostAsync()
         {
