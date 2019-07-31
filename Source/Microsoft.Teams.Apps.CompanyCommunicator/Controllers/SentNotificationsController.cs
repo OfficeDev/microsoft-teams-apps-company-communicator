@@ -76,7 +76,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 {
                     Id = notificationEntity.Id,
                     Title = notificationEntity.Title,
-                    CreatedDate = notificationEntity.CreatedDate,
+                    CreatedTime = notificationEntity.CreatedTime,
                     SentDate = notificationEntity.SentDate,
                     Succeeded = notificationEntity.Succeeded,
                     Failed = notificationEntity.Failed,
@@ -113,7 +113,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Author = notificationEntity.Author,
                 ButtonTitle = notificationEntity.ButtonTitle,
                 ButtonLink = notificationEntity.ButtonLink,
-                CreatedDate = notificationEntity.CreatedDate,
+                CreatedTime = notificationEntity.CreatedTime,
                 SentDate = notificationEntity.SentDate,
                 Succeeded = notificationEntity.Succeeded,
                 Failed = notificationEntity.Failed,

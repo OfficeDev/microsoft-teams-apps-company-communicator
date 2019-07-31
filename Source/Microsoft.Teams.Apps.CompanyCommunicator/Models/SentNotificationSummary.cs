@@ -4,6 +4,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
+    using System;
+
     /// <summary>
     /// Sent notification summary model class.
     /// </summary>
@@ -22,7 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// <summary>
         /// Gets or sets Created Date value.
         /// </summary>
-        public string CreatedDate { get; set; }
+        public DateTime CreatedTime { get; set; }
 
         /// <summary>
         /// Gets or sets Sent Date value.

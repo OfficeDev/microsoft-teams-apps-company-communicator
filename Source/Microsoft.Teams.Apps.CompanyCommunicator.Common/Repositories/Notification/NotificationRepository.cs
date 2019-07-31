@@ -14,13 +14,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     /// </summary>
     public class NotificationRepository : BaseRepository<NotificationEntity>
     {
+        private readonly TableRowKeyGenerator tableRowKeyGenerator;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationRepository"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
-        public NotificationRepository(IConfiguration configuration)
+        /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
+        public NotificationRepository(IConfiguration configuration, TableRowKeyGenerator tableRowKeyGenerator)
             : base(configuration, "Notification", PartitionKeyNames.Notification.DraftNotifications)
         {
+            this.tableRowKeyGenerator = tableRowKeyGenerator;
         }
 
         /// <summary>
@@ -40,7 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <returns>The top 25 most recently sent notitification entities.</returns>
         public async Task<IEnumerable<NotificationEntity>> GetMostRecentSentNotifications()
         {
-            var result = await this.GetAllAsync(PartitionKeyNames.Notification.SentNotifications);
+            var result = await this.GetAllAsync(PartitionKeyNames.Notification.SentNotifications, 25);
 
             return result;
         }
@@ -57,12 +61,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 return;
             }
 
+            var newId = this.tableRowKeyGenerator.NewKeyInLogTailPattern();
+
             // Create a sent notification based on the draft notification.
             var sentNotificationEntity = new NotificationEntity
             {
                 PartitionKey = PartitionKeyNames.Notification.SentNotifications,
-                RowKey = draftNotificationEntity.RowKey,
-                Id = draftNotificationEntity.Id,
+                RowKey = newId,
+                Id = newId,
                 Title = draftNotificationEntity.Title,
                 ImageLink = draftNotificationEntity.ImageLink,
                 Summary = draftNotificationEntity.Summary,
@@ -70,7 +76,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 ButtonTitle = draftNotificationEntity.ButtonTitle,
                 ButtonLink = draftNotificationEntity.ButtonLink,
                 CreatedBy = draftNotificationEntity.CreatedBy,
-                CreatedDate = draftNotificationEntity.CreatedDate,
+                CreatedTime = draftNotificationEntity.CreatedTime,
                 SentDate = DateTime.UtcNow.ToShortDateString(),
                 IsDraft = false,
                 Teams = draftNotificationEntity.Teams,
@@ -81,6 +87,40 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
 
             // Delete the draft notification.
             await this.DeleteAsync(draftNotificationEntity);
+        }
+
+        /// <summary>
+        /// Duplicate an existing draft notification.
+        /// </summary>
+        /// <param name="notificationEntity">The notification entity to be duplicated.</param>
+        /// <param name="createdBy">Created by.</param>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task DuplicateDraftNotificationAsync(
+            NotificationEntity notificationEntity,
+            string createdBy)
+        {
+            var newId = this.tableRowKeyGenerator.NewKeyInLogHeadPattern();
+
+            var newNotificationEntity = new NotificationEntity
+            {
+                PartitionKey = PartitionKeyNames.Notification.DraftNotifications,
+                RowKey = newId,
+                Id = newId,
+                Title = notificationEntity.Title,
+                ImageLink = notificationEntity.ImageLink,
+                Summary = notificationEntity.Summary,
+                Author = notificationEntity.Author,
+                ButtonTitle = notificationEntity.ButtonTitle,
+                ButtonLink = notificationEntity.ButtonLink,
+                CreatedBy = createdBy,
+                CreatedTime = DateTime.UtcNow,
+                IsDraft = true,
+                Teams = notificationEntity.Teams,
+                Rosters = notificationEntity.Rosters,
+                AllUsers = notificationEntity.AllUsers,
+            };
+
+            await this.CreateOrUpdateAsync(newNotificationEntity);
         }
     }
 }

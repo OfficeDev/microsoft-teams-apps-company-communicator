@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification
 {
+    using System;
     using System.Collections.Generic;
     using Microsoft.Azure.Cosmos.Table;
     using Newtonsoft.Json;
@@ -56,7 +57,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <summary>
         /// Gets or sets the Created Date value.
         /// </summary>
-        public string CreatedDate { get; set; }
+        public DateTime CreatedTime { get; set; }
 
         /// <summary>
         /// Gets or sets the Sent Date value.
