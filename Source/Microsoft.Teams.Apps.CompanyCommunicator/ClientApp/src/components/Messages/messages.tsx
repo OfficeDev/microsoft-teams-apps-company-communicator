@@ -52,7 +52,6 @@ export interface IMessageState {
   width: number;
   height: number;
   loader: boolean;
-  time: number;
 }
 
 class Messages extends React.Component<IMessageProps, IMessageState> {
@@ -201,7 +200,6 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
       width: window.innerWidth,
       height: window.innerHeight,
       loader: true,
-      time: Date.now(),
     };
 
     this.selection = new Selection({
@@ -218,9 +216,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
     this.props.getMessagesList();
     document.addEventListener("keydown", this.escFunction, false);
     this.interval = setInterval(() => {
-      this.setState({ time: Date.now() }, () => {
-        this.props.getMessagesList();
-      });
+      this.props.getMessagesList();
     }, 60000);
   }
 
