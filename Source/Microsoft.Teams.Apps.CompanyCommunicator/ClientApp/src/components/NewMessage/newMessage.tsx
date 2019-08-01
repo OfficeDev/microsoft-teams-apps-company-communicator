@@ -325,7 +325,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                         <div className="footerContainer">
                             <div className="buttonContainer">
                                 <Button content="Back" onClick={this.onBack} secondary />
-                                <Button content="Save" disabled={this.disabledSavebtn()} id="saveBtn" onClick={this.onSave} primary />
+                                <Button content="Save" disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
                             </div>
                         </div>
                     </div>
@@ -336,7 +336,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
     }
 
-    private disabledSavebtn = () => {
+    private isSaveBtnDisabled = () => {
         let teamsSelectionIsValid = (this.state.teamsBox && (this.state.selectedTeamsNum !== 0)) || (!this.state.teamsBox);
         let rostersSelectionIsValid = (this.state.rostersBox && (this.state.selectedRostersNum !== 0)) || (!this.state.rostersBox);
         let nothingSelected = (!this.state.teamsBox) && (!this.state.rostersBox) && (!this.state.allUsersBox);
