@@ -4,18 +4,22 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Schema;
+    using Microsoft.Bot.Schema.Teams;
 
     /// <summary>
     /// Company Communicator Bot.
     /// </summary>
     public class CompanyCommunicatorBot : ActivityHandler
     {
+        private static readonly string TeamRenamedEventType = "teamRenamed";
+
         private readonly TeamsDataCapture teamsDataCapture;
 
         /// <summary>
@@ -108,6 +112,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             var activity = turnContext.Activity;
             var botId = activity.Recipient.Id;
 
+            var isTeamRenamed = this.IsTeamInformationUpdated(activity);
+            if (isTeamRenamed)
+            {
+                await this.teamsDataCapture.OnTeamInformationUpdated(activity);
+            }
+
             // Take action if this event includes the bot being added
             if (activity.MembersAdded?.FirstOrDefault(p => p.Id == botId) != null)
             {
@@ -120,6 +130,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             {
                 await this.teamsDataCapture.OnBotRemovedAsync(activity);
             }
+        }
+
+        private bool IsTeamInformationUpdated(IConversationUpdateActivity activity)
+        {
+            if (activity == null)
+            {
+                return false;
+            }
+
+            var channelData = activity.GetChannelData<TeamsChannelData>();
+            if (channelData == null)
+            {
+                return false;
+            }
+
+            return CompanyCommunicatorBot.TeamRenamedEventType.Equals(channelData.EventType, StringComparison.OrdinalIgnoreCase);
         }
 
         private async Task SendAsync(

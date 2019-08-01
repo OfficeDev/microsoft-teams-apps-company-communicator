@@ -6,9 +6,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
 {
     using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
+    using Microsoft.Bot.Schema.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
-    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Extensions for the respository of the team data stored in the table storage.
@@ -55,18 +55,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
 
         private static TeamDataEntity ParseTeamData(IConversationUpdateActivity activity)
         {
-            if (activity?.ChannelData is JObject jObject &&
-                jObject["team"]["id"] != null &&
-                !string.IsNullOrEmpty(jObject["team"]["id"].ToString()))
+            var channelData = activity.GetChannelData<TeamsChannelData>();
+            if (channelData != null)
             {
                 var teamsDataEntity = new TeamDataEntity
                 {
                     PartitionKey = PartitionKeyNames.Metadata.TeamData,
-                    RowKey = jObject["team"]["id"].ToString(),
-                    TeamId = jObject["team"]["id"].ToString(),
-                    Name = jObject["team"]["name"].ToString(),
+                    RowKey = channelData.Team.Id,
+                    TeamId = channelData.Team.Id,
+                    Name = channelData.Team.Name,
                     ServiceUrl = activity.ServiceUrl,
-                    TenantId = jObject["tenant"]["id"].ToString(),
+                    TenantId = channelData.Tenant.Id,
                 };
 
                 return teamsDataEntity;
