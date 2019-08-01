@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
 
     /// <summary>
     /// Message controller for the bot.
@@ -23,9 +24,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// Initializes a new instance of the <see cref="BotController"/> class.
         /// Dependency Injection will provide the Adapter and IBot implementation at runtime.
         /// </summary>
-        /// <param name="adapter">Bot framework http adpater instance.</param>
-        /// <param name="bot">Bot instance.</param>
-        public BotController(BotFrameworkHttpAdapter adapter, IBot bot)
+        /// <param name="adapter">Company Communicator Bot Adapter instance.</param>
+        /// <param name="bot">Company Communicator Bot instance.</param>
+        public BotController(CompanyCommunicatorBotAdapter adapter, IBot bot)
         {
             this.adapter = adapter;
             this.bot = bot;
