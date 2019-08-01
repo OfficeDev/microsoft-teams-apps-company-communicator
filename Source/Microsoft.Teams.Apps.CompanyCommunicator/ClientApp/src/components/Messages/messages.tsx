@@ -240,7 +240,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         <Loader />
       );
     } else if (this.state.message.length === 0) {
-      return (<div className="results">You have no sent messages</div>);
+      return (<div className="results">You have no sent messages.</div>);
     }
     else {
       return (
