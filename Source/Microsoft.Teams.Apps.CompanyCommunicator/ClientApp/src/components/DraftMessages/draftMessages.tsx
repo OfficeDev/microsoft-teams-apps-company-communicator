@@ -257,7 +257,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     if (length == 0) {
       return (<div />);
     } else {
-      return (<div key="rosterNames"> <span className="label">Team members(s): </span> {this.state.rosterNames.map((roster, index) => {
+      return (<div key="rosterNames"> <span className="label">Team(s) members: </span> {this.state.rosterNames.map((roster, index) => {
         if (length === index + 1) {
           return (<span key={`rosterName${index}`}>{roster}</span>);
         } else {
@@ -272,7 +272,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     if (!this.state.allUsers) {
       return (<div />);
     } else {
-      return (<div key="alluser"> <span className="label"> All users </span></div>);
+      return (<div key="allUsers"> <span className="label">All users</span></div>);
     }
   }
 
