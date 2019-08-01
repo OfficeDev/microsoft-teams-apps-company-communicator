@@ -36,15 +36,15 @@ export interface formState {
     author: string,
     card?: any,
     page: string,
-    channelBox: boolean,
-    teamBox: boolean,
+    teamsBox: boolean,
+    rostersBox: boolean,
     allUsersBox: boolean,
     teams?: any[],
     exists?: boolean,
     messageId: string,
     loader: boolean,
     selectedTeamsNum: number,
-    selectedRosterNum: number
+    selectedRostersNum: number
 }
 
 export interface INewMessageProps extends RouteComponentProps {
@@ -71,13 +71,13 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             btnTitle: "",
             card: this.card,
             page: "CardCreation",
-            channelBox: false,
-            teamBox: false,
+            teamsBox: false,
+            rostersBox: false,
             allUsersBox: false,
             messageId: "",
             loader: true,
             selectedTeamsNum: 0,
-            selectedRosterNum: 0
+            selectedRostersNum: 0
         }
     }
 
@@ -141,11 +141,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             let draftMessageDetail = response.data;
             if (draftMessageDetail.teams.length === 0) {
                 this.setState({
-                    channelBox: false
+                    teamsBox: false
                 });
             } else {
                 this.setState({
-                    channelBox: true,
+                    teamsBox: true,
                     selectedTeamsNum: draftMessageDetail.teams.length
                 });
                 this.selectedTeams = draftMessageDetail.teams;
@@ -153,12 +153,12 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
             if (draftMessageDetail.rosters.length === 0) {
                 this.setState({
-                    teamBox: false
+                    rostersBox: false
                 });
             } else {
                 this.setState({
-                    teamBox: true,
-                    selectedRosterNum: draftMessageDetail.rosters.length
+                    rostersBox: true,
+                    selectedRostersNum: draftMessageDetail.rosters.length
                 });
                 this.selectedRosters = draftMessageDetail.rosters;
             }
@@ -288,11 +288,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
                             <div className="checkboxBtns">
                                 <p className="checkboxBtn">
-                                    <Checkbox checked={this.state.channelBox} label="Send to a Team(s)" value="teamtest" onChecked={this.onChannel} />
+                                    <Checkbox checked={this.state.teamsBox} label="Send to a Team(s)" value="teamtest" onChecked={this.onChannel} />
                                 </p>
 
                                 <p className="checkboxBtn">
-                                    <Checkbox checked={this.state.teamBox} label="Send to the team members of a Team(s)" value="teams" onChecked={this.onTeam} disabled={this.state.allUsersBox} />
+                                    <Checkbox checked={this.state.rostersBox} label="Send to the team members of a Team(s)" value="teams" onChecked={this.onTeam} disabled={this.state.allUsersBox} />
                                 </p>
 
                                 <p className="checkboxBtn">
@@ -308,7 +308,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     multiSelect
                                     options={this.getItems()}
                                     onChange={this.onTeamsChange}
-                                    disabled={!this.state.channelBox}
+                                    disabled={!this.state.teamsBox}
                                 />
 
                                 <Dropdown
@@ -317,7 +317,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     multiSelect
                                     options={this.getItems()}
                                     onChange={this.onRostersChange}
-                                    disabled={!this.state.teamBox}
+                                    disabled={!this.state.rostersBox}
                                 />
                             </div>
                         </div>
@@ -325,7 +325,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                         <div className="footerContainer">
                             <div className="buttonContainer">
                                 <Button content="Back" onClick={this.onBack} secondary />
-                                <Button content="Save" disabled={!((this.state.channelBox && (this.state.selectedTeamsNum !== 0)) || (this.state.teamBox && (this.state.selectedRosterNum !== 0)) || this.state.allUsersBox)} id="saveBtn" onClick={this.onSave} primary />
+                                <Button content="Save" disabled={this.disabledSavebtn()} id="saveBtn" onClick={this.onSave} primary />
                             </div>
                         </div>
                     </div>
@@ -333,6 +333,18 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             } else {
                 return (<div>Error</div>);
             }
+        }
+    }
+
+    private disabledSavebtn = () => {
+        let teamsSelectionIsValid = (this.state.teamsBox && (this.state.selectedTeamsNum !== 0)) || (!this.state.teamsBox);
+        let rostersSelectionIsValid = (this.state.rostersBox && (this.state.selectedRostersNum !== 0)) || (!this.state.rostersBox);
+        let nothingSelected = (!this.state.teamsBox) && (!this.state.rostersBox) && (!this.state.allUsersBox);
+
+        if (!teamsSelectionIsValid || !rostersSelectionIsValid || nothingSelected) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -373,14 +385,14 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             if (option.selected == true) {
                 this.selectedRosters.push(option.key);
                 this.setState({
-                    selectedRosterNum: this.selectedRosters.length
+                    selectedRostersNum: this.selectedRosters.length
                 });
             } else {
                 let index = this.selectedRosters.indexOf(option.key);
                 if (index > -1) {
                     this.selectedRosters.splice(index, 1);
                     this.setState({
-                        selectedRosterNum: this.selectedRosters.length
+                        selectedRostersNum: this.selectedRosters.length
                     });
                 }
             }
@@ -403,11 +415,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         let teams: string[] = [];
         let rosters: string[] = [];
 
-        if (this.state.channelBox) {
+        if (this.state.teamsBox) {
             teams = this.selectedTeams;
         }
 
-        if (this.state.teamBox) {
+        if (this.state.rostersBox) {
             rosters = this.selectedRosters;
         }
 
@@ -435,11 +447,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         let teams: string[] = [];
         let rosters: string[] = [];
 
-        if (this.state.channelBox) {
+        if (this.state.teamsBox) {
             teams = this.selectedTeams;
         }
 
-        if (this.state.teamBox) {
+        if (this.state.rostersBox) {
             rosters = this.selectedRosters;
         }
 
@@ -470,20 +482,20 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
     private onAlluser = () => {
         this.setState({
-            teamBox: false,
+            rostersBox: false,
             allUsersBox: !this.state.allUsersBox
         })
     }
 
     private onTeam = () => {
         this.setState({
-            teamBox: !this.state.teamBox
+            rostersBox: !this.state.rostersBox
         })
     }
 
     private onChannel = (checked: boolean, value?: any) => {
         this.setState({
-            channelBox: !this.state.channelBox
+            teamsBox: !this.state.teamsBox
         })
     }
 
