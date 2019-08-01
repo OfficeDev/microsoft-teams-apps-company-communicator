@@ -228,15 +228,15 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
             }}
           >
 
-            <ul>
+            <div>
               {this.displaySelectedTeams()}
               {this.displayRosterTeams()}
               {this.displayAllUsers()}
-            </ul>
+            </div>
 
             <div className="footerContainer">
               <div className="buttonContainer">
-                <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="Sending" labelPosition="end" />
+                <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="Preparing message" labelPosition="end" />
                 <Button content="Cancel" onClick={this.closeDialog} secondary />
                 <Button content="Send" id="saveBtn" onClick={this.onSendMessage} primary />
               </div>
@@ -252,13 +252,13 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     if (length == 0) {
       return (<div />);
     } else {
-      return (<li key="teamNames">{this.state.teamNames.map((team, index) => {
+      return (<div key="teamNames"> <span className="label">Team(s): </span> {this.state.teamNames.map((team, index) => {
         if (length === index + 1) {
           return (<span key={`teamName${index}`} >{team}</span>);
         } else {
           return (<span key={`teamName${index}`} >{team}, </span>);
         }
-      })}</li>
+      })}</div>
       );
     }
   }
@@ -268,13 +268,13 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     if (length == 0) {
       return (<div />);
     } else {
-      return (<li key="rosterNames">{this.state.rosterNames.map((roster, index) => {
+      return (<div key="rosterNames"> <span className="label">Team(s) members: </span> {this.state.rosterNames.map((roster, index) => {
         if (length === index + 1) {
           return (<span key={`rosterName${index}`}>{roster}</span>);
         } else {
           return (<span key={`rosterName${index}`}>{roster}, </span>);
         }
-      })}</li>
+      })}</div>
       );
     }
   }
@@ -283,7 +283,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     if (!this.state.allUsers) {
       return (<div />);
     } else {
-      return (<li key="alluser">Send to all users</li>);
+      return (<div key="allUsers"> <span className="label">All users</span></div>);
     }
   }
 
