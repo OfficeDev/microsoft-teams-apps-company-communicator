@@ -61,6 +61,7 @@ export interface IMessageState {
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   private selection: Selection;
   private columns: IColumn[];
+  private interval: any;
 
   constructor(props: IMessageProps) {
     super(props);
@@ -160,6 +161,9 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   public componentDidMount() {
     microsoftTeams.initialize();
     this.props.getDraftMessagesList();
+    this.interval = setInterval(() => {
+      this.props.getDraftMessagesList();
+    }, 60000);
   }
 
   public componentWillReceiveProps(nextProps: any) {
@@ -167,6 +171,10 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
       message: nextProps.messages,
       loader: false
     })
+  }
+
+  public componentWillUnmount() {
+    clearInterval(this.interval);
   }
 
   public render(): JSX.Element {
