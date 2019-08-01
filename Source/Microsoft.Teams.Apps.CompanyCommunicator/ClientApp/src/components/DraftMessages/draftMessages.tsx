@@ -56,6 +56,7 @@ export interface IMessageState {
   teamNames: string[];
   rosterNames: string[];
   allUsers: boolean;
+  messageId: number
 }
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
@@ -149,6 +150,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
       teamNames: [],
       rosterNames: [],
       allUsers: false,
+      messageId: 0
     };
 
     this.selection = new Selection({
@@ -340,7 +342,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
               dialogHidden: false,
               teamNames: response.data.teamNames,
               rosterNames: response.data.rosterNames,
-              allUsers: response.data.allUsers
+              allUsers: response.data.allUsers,
+              messageId: id,
             });
           });
         },
@@ -351,8 +354,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   private onSendMessage = () => {
     let spanner = document.getElementsByClassName("sendingLoader");
     spanner[0].classList.remove("hiddenLoader");
-    let message = this.props.selectedMessage;
-    let id = message[0].id;
+    let id = this.state.messageId;
     this.getDraftMessage(id).then(() => {
       this.sendDraftMessage(this.state.sentMessagePayload).then(() => {
         this.props.getDraftMessagesList().then(() => {
