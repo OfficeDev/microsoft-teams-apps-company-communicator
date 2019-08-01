@@ -209,10 +209,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     className="inputField"
                                     value={this.state.title}
                                     label="Title"
-                                    placeholder="Title"
-                                    errorLabel={!this.state.title ? "This value is required" : undefined}
+                                    placeholder="Title (required)"
                                     onChange={this.onTitleChanged}
-                                    status={this.state.title ? "updated" : undefined}
                                     autoComplete="off"
                                     required
                                 />
@@ -223,7 +221,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     label="Image Link"
                                     placeholder="Image link (optional)"
                                     onChange={this.onImageLinkChanged}
-                                    status={this.state.imageLink ? "updated" : undefined}
                                     autoComplete="off"
                                 />
 
@@ -240,9 +237,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     className="inputField"
                                     value={this.state.author}
                                     label="Author"
-                                    placeholder="Author"
+                                    placeholder="Author (optional)"
                                     onChange={this.onAuthorChanged}
-                                    status={this.state.author ? "updated" : undefined}
                                     autoComplete="off"
                                 />
 
@@ -250,9 +246,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     className="inputField"
                                     value={this.state.btnTitle}
                                     label="Button Title"
-                                    placeholder="Button title"
+                                    placeholder="Button title (optional)"
                                     onChange={this.onBtnTitleChanged}
-                                    status={this.state.btnTitle ? "updated" : undefined}
                                     autoComplete="off"
                                 />
 
@@ -260,9 +255,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     className="inputField"
                                     value={this.state.btnLink}
                                     label="Button Url"
-                                    placeholder="Button url"
+                                    placeholder="Button url (optional)"
                                     onChange={this.onBtnLinkChanged}
-                                    status={this.state.btnLink ? "updated" : undefined}
                                     autoComplete="off"
                                 />
                             </div>
