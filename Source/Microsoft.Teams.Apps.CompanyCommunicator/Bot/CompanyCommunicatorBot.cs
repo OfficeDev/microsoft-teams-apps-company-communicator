@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -144,13 +145,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 return false;
             }
 
-            return channelData.EventType == TeamRenamedEventType;
+            return CompanyCommunicatorBot.TeamRenamedEventType.Equals(channelData.EventType, StringComparison.OrdinalIgnoreCase);
         }
 
         private async Task SendAsync(
-                ITurnContext<IConversationUpdateActivity> turnContext,
-                CancellationToken cancellationToken,
-                string message)
+            ITurnContext<IConversationUpdateActivity> turnContext,
+            CancellationToken cancellationToken,
+            string message)
         {
             var card = new HeroCard
             {

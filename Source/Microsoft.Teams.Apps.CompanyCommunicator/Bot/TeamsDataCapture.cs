@@ -73,7 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         }
 
         /// <summary>
-        /// Update team information in the tabel storage.
+        /// Update team information in the table storage.
         /// </summary>
         /// <param name="activity">Teams activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
