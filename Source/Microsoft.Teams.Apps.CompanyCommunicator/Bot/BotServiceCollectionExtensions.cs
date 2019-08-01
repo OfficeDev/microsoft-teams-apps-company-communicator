@@ -23,10 +23,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             // Create the credential provider to be used with the Bot Framework Adapter.
             services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
 
-            // Create the Bot Framework Adapter.
-            services.AddSingleton<AdapterWithTeamFilter>();
-
-            services.AddSingleton<BotFrameworkHttpAdapter>();
+            // Create the Company Communicator Bot Adapter.
+            services.AddSingleton<CompanyCommunicatorBotAdapter>();
 
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
             services.AddSingleton<IBot, CompanyCommunicatorBot>();
@@ -34,8 +32,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             // Create the Teams Data Capture service.
             services.AddSingleton<TeamsDataCapture>();
 
-            // Create the Bot team filter middleware service.
-            services.AddSingleton<TeamFilterMiddleware>();
+            // Create the Bot's Teams message filter middleware service.
+            services.AddSingleton<TeamsMessageFilterMiddleware>();
         }
     }
 }
