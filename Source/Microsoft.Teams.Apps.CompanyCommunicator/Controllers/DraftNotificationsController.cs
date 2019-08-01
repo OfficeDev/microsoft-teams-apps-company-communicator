@@ -25,22 +25,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly NotificationRepository notificationRepository;
         private readonly TeamDataRepository teamDataRepository;
-        private readonly TableRowKeyGenerator tableRowKeyGenerator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
         /// </summary>
         /// <param name="notificationRepository">Notification respository instance.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
-        /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
         public DraftNotificationsController(
             NotificationRepository notificationRepository,
-            TeamDataRepository teamDataRepository,
-            TableRowKeyGenerator tableRowKeyGenerator)
+            TeamDataRepository teamDataRepository)
         {
             this.notificationRepository = notificationRepository;
             this.teamDataRepository = teamDataRepository;
-            this.tableRowKeyGenerator = tableRowKeyGenerator;
         }
 
         /// <summary>
@@ -53,7 +49,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         {
             await this.notificationRepository.CreateDraftNotificationAsync(
                 notification,
-                this.tableRowKeyGenerator,
                 this.HttpContext.User?.Identity?.Name);
         }
 
@@ -99,7 +94,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ButtonTitle = notification.ButtonTitle,
                 ButtonLink = notification.ButtonLink,
                 CreatedBy = this.HttpContext.User?.Identity?.Name,
-                CreatedTime = DateTime.UtcNow,
+                CreatedDateTime = DateTime.UtcNow,
                 IsDraft = true,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,
@@ -176,7 +171,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Author = notificationEntity.Author,
                 ButtonTitle = notificationEntity.ButtonTitle,
                 ButtonLink = notificationEntity.ButtonLink,
-                CreatedTime = notificationEntity.CreatedTime,
+                CreatedDateTime = notificationEntity.CreatedDateTime,
                 Teams = notificationEntity.Teams,
                 Rosters = notificationEntity.Rosters,
                 AllUsers = notificationEntity.AllUsers,

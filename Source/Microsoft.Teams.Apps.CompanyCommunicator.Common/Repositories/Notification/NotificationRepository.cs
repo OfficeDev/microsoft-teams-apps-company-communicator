@@ -14,8 +14,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     /// </summary>
     public class NotificationRepository : BaseRepository<NotificationEntity>
     {
-        private readonly TableRowKeyGenerator tableRowKeyGenerator;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationRepository"/> class.
         /// </summary>
@@ -24,8 +22,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public NotificationRepository(IConfiguration configuration, TableRowKeyGenerator tableRowKeyGenerator)
             : base(configuration, "Notification", PartitionKeyNames.Notification.DraftNotifications)
         {
-            this.tableRowKeyGenerator = tableRowKeyGenerator;
+            this.TableRowKeyGenerator = tableRowKeyGenerator;
         }
+
+        /// <summary>
+        /// Gets table row key generator.
+        /// </summary>
+        public TableRowKeyGenerator TableRowKeyGenerator { get; }
 
         /// <summary>
         /// Get all draft notification entities from the table storage.
@@ -61,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 return;
             }
 
-            var newId = this.tableRowKeyGenerator.NewKeyInLogTailPattern();
+            var newId = this.TableRowKeyGenerator.NewKeyOrderingMostRecentToOldest();
 
             // Create a sent notification based on the draft notification.
             var sentNotificationEntity = new NotificationEntity
@@ -76,7 +79,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 ButtonTitle = draftNotificationEntity.ButtonTitle,
                 ButtonLink = draftNotificationEntity.ButtonLink,
                 CreatedBy = draftNotificationEntity.CreatedBy,
-                CreatedTime = draftNotificationEntity.CreatedTime,
+                CreatedDateTime = draftNotificationEntity.CreatedDateTime,
                 SentDate = DateTime.UtcNow.ToShortDateString(),
                 IsDraft = false,
                 Teams = draftNotificationEntity.Teams,
@@ -99,7 +102,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             NotificationEntity notificationEntity,
             string createdBy)
         {
-            var newId = this.tableRowKeyGenerator.NewKeyInLogHeadPattern();
+            var newId = this.TableRowKeyGenerator.NewKeyOrderingOldestToMostRecent();
 
             var newNotificationEntity = new NotificationEntity
             {
@@ -113,7 +116,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 ButtonTitle = notificationEntity.ButtonTitle,
                 ButtonLink = notificationEntity.ButtonLink,
                 CreatedBy = createdBy,
-                CreatedTime = DateTime.UtcNow,
+                CreatedDateTime = DateTime.UtcNow,
                 IsDraft = true,
                 Teams = notificationEntity.Teams,
                 Rosters = notificationEntity.Rosters,

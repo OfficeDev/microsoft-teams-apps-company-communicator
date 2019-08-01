@@ -105,7 +105,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// Get all data entities from the table storage in a partition.
         /// </summary>
         /// <param name="partition">Partition key value.</param>
-        /// <param name="count">The number of entities should be returned.</param>
+        /// <param name="count">The number of entities queried for.</param>
         /// <returns>All data entities.</returns>
         public async Task<IEnumerable<T>> GetAllAsync(string partition = null, int? count = null)
         {

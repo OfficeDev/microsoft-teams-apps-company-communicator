@@ -7,31 +7,30 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
     using System;
 
     /// <summary>
-    /// This class uses the log tail pattern to generate row keys.
-    /// The generated rowKeys are based off timestamps, so that the order in the table is from most recent to least recent.
+    /// This class generates rowKeys based off timestamps so that the order of the table is correct.
     /// </summary>
     public class TableRowKeyGenerator
     {
         /// <summary>
-        /// Generate a new row key using log tail pattern. Most recent => oldest.
+        /// Generate a new row key based off of the current timestamp such that the keys are ordered most recent => oldest.
         /// </summary>
         /// <returns>A new row key.</returns>
-        public string NewKeyInLogTailPattern()
+        public string NewKeyOrderingMostRecentToOldest()
         {
-            var invertedTicksInString = string.Format("{0:D19}", DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks);
+            var invertedTickString = string.Format("{0:D19}", DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks);
 
-            return invertedTicksInString;
+            return invertedTickString;
         }
 
         /// <summary>
-        /// Generate a new row key using log head pattern. Oldest => most recent.
+        /// Generate a new row key based off of the current timestamp such that the keys are ordered oldest => most recent.
         /// </summary>
         /// <returns>A new row key.</returns>
-        public string NewKeyInLogHeadPattern()
+        public string NewKeyOrderingOldestToMostRecent()
         {
-            var invertedTicksInString = string.Format("{0:D19}", DateTime.UtcNow.Ticks);
+            var ticksString = string.Format("{0:D19}", DateTime.UtcNow.Ticks);
 
-            return invertedTicksInString;
+            return ticksString;
         }
     }
 }

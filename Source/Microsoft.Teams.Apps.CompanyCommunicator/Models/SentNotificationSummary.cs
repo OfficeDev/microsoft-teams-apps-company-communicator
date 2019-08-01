@@ -22,9 +22,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public string Title { get; set; }
 
         /// <summary>
-        /// Gets or sets Created Date value.
+        /// Gets or sets Created DateTime value.
         /// </summary>
-        public DateTime CreatedTime { get; set; }
+        public DateTime CreatedDateTime { get; set; }
 
         /// <summary>
         /// Gets or sets Sent Date value.
