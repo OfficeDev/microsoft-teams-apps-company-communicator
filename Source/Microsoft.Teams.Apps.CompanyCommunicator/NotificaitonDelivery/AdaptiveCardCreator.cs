@@ -77,8 +77,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
             {
                 card.Actions.Add(new AdaptiveOpenUrlAction()
                 {
-                    Url = new Uri(buttonUrl),
                     Title = buttonTitle,
+                    Url = new Uri(buttonUrl),
                 });
             }
 
