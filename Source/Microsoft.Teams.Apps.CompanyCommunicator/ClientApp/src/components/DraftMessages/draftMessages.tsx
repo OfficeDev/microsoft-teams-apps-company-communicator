@@ -300,7 +300,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     return [
       {
         key: 'preview',
-        name: 'Preview in channel',
+        name: 'Preview in this channel',
         onClick: () => {
 
         }
