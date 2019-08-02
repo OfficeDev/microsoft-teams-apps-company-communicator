@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
 {
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -57,6 +58,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
             var teamDataEntities = await this.GetWithFilterAsync(rowKeysFilter);
 
             return teamDataEntities.Select(p => p.Name);
+        }
+
+        /// <summary>
+        /// Get all team data entities, and sort the result alphabetically by name.
+        /// </summary>
+        /// <returns>The team data entites sorted alphabetically by name.</returns>
+        public async Task<IEnumerable<TeamDataEntity>> GetAllSortedAlphabeticallyByNameAsync()
+        {
+            var teamDataEntities = await this.GetAllAsync();
+            var sortedSet = new SortedSet<TeamDataEntity>(teamDataEntities, new TeamDataEntityComparer());
+            return sortedSet;
+        }
+
+        private class TeamDataEntityComparer : IComparer<TeamDataEntity>
+        {
+            public int Compare(TeamDataEntity x, TeamDataEntity y)
+            {
+                return x.Name.CompareTo(y.Name);
+            }
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet]
         public async Task<IEnumerable<TeamData>> GetAllTeamDataAsync()
         {
-            var entities = await this.teamDataRepository.GetAllAsync();
+            var entities = await this.teamDataRepository.GetAllSortedAlphabeticallyByNameAsync();
             var result = new List<TeamData>();
             foreach (var entity in entities)
             {
