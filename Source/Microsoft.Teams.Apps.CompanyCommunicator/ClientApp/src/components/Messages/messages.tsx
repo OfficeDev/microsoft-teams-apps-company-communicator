@@ -104,7 +104,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
           if (item.isCompleted) {
             return <div />;
           } else {
-            return <Loader className="sending" size="smallest" label="sending" labelPosition="end" inline />
+            return <Loader className="sending" size="smallest" label="Sending" labelPosition="end" inline />
           }
         },
       },

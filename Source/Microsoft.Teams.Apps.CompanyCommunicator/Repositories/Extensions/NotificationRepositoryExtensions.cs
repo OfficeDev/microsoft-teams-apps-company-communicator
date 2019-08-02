@@ -27,12 +27,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
             DraftNotification notification,
             string userName)
         {
-            var id = Guid.NewGuid().ToString();
+            var newId = notificationRepository.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent();
+
             var notificationEntity = new NotificationEntity
             {
                 PartitionKey = PartitionKeyNames.Notification.DraftNotifications,
-                RowKey = id,
-                Id = id,
+                RowKey = newId,
+                Id = newId,
                 Title = notification.Title,
                 ImageLink = notification.ImageLink,
                 Summary = notification.Summary,
@@ -40,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 ButtonTitle = notification.ButtonTitle,
                 ButtonLink = notification.ButtonLink,
                 CreatedBy = userName,
-                CreatedDate = DateTime.UtcNow.ToShortDateString(),
+                CreatedDateTime = DateTime.UtcNow,
                 IsDraft = true,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,
