@@ -28,7 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 
             services.AddSingleton<MessageQueue>();
 
-            services.AddSingleton<AdaptiveCardGenerator>();
+            services.AddSingleton<AdaptiveCardCreator>();
         }
     }
 }
