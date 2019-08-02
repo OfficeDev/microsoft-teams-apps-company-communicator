@@ -114,7 +114,7 @@
             }
         }
 
-        .checkboxBtns {
+        .radioBtns {
             margin: 0rem 3.2rem;
             display: inline;
             float: left;
@@ -122,6 +122,11 @@
 
             p {
                 margin: 1.5rem 0rem;
+            }
+
+            .dropdown {
+                margin: 1rem 1rem 1rem 2rem;
+                width: 30rem;
             }
         }
     }

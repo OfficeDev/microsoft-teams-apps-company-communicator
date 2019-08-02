@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './newMessage.scss';
 import './teamTheme.scss';
-import { Input, TextArea, Checkbox } from 'msteams-ui-components-react';
+import { Input, TextArea, Checkbox, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
 import { Button, Loader } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -44,7 +44,8 @@ export interface formState {
     messageId: string,
     loader: boolean,
     selectedTeamsNum: number,
-    selectedRostersNum: number
+    selectedRostersNum: number,
+    selectedRadioBtn: string,
 }
 
 export interface INewMessageProps extends RouteComponentProps {
@@ -77,7 +78,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             messageId: "",
             loader: true,
             selectedTeamsNum: 0,
-            selectedRostersNum: 0
+            selectedRostersNum: 0,
+            selectedRadioBtn: "",
         }
     }
 
@@ -146,7 +148,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             } else {
                 this.setState({
                     teamsBox: true,
-                    selectedTeamsNum: draftMessageDetail.teams.length
+                    selectedTeamsNum: draftMessageDetail.teams.length,
+                    selectedRadioBtn: "teams",
                 });
                 this.selectedTeams = draftMessageDetail.teams;
             }
@@ -158,9 +161,16 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             } else {
                 this.setState({
                     rostersBox: true,
-                    selectedRostersNum: draftMessageDetail.rosters.length
+                    selectedRostersNum: draftMessageDetail.rosters.length,
+                    selectedRadioBtn: "rosters",
                 });
                 this.selectedRosters = draftMessageDetail.rosters;
+            }
+
+            if (draftMessageDetail.allUsers) {
+                this.setState({
+                    selectedRadioBtn: "allUsers",
+                })
             }
 
             setCardTitle(this.card, draftMessageDetail.title);
@@ -276,50 +286,45 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 return (
                     <div className="taskModule">
                         <div className="formContainer">
-
-                            <h3>Recipient Selection</h3>
-                            <h4>Please choose the groups you would like to send your message to.</h4>
-
-                            <div className="checkboxBtns">
-                                <p className="checkboxBtn">
-                                    <Checkbox checked={this.state.teamsBox} label="Send to a Team(s)" value="teamtest" onChecked={this.onChannel} />
-                                </p>
-
-                                <p className="checkboxBtn">
-                                    <Checkbox checked={this.state.rostersBox} label="Send to the team members of a Team(s)" value="teams" onChecked={this.onTeam} disabled={this.state.allUsersBox} />
-                                </p>
-
-                                <p className="checkboxBtn">
-                                    <Checkbox checked={this.state.allUsersBox} label="Send to all users" value="users" onChecked={this.onAlluser} />
-                                </p>
+                            <div className="formContentContainer" >
+                                <h3>Recipient selection</h3>
+                                <h4>Please choose the groups you would like to send your message to:</h4>
+                                <RadiobuttonGroup
+                                    className="radioBtns"
+                                    value={this.state.selectedRadioBtn}
+                                    onSelected={this.onGroupSelected}
+                                >
+                                    <Radiobutton name="grouped" value="teams" label="Send to General channels in:" />
+                                    <Dropdown
+                                        placeholder="Select team(s)"
+                                        defaultSelectedKeys={this.selectedTeams}
+                                        multiSelect
+                                        options={this.getItems()}
+                                        onChange={this.onTeamsChange}
+                                        disabled={!this.state.teamsBox}
+                                        className="dropdown"
+                                    />
+                                    <Radiobutton name="grouped" value="rosters" label="Send in chat" />
+                                    <Dropdown
+                                        placeholder="Choose team(s) members"
+                                        defaultSelectedKeys={this.selectedRosters}
+                                        multiSelect
+                                        options={this.getItems()}
+                                        onChange={this.onRostersChange}
+                                        disabled={!this.state.rostersBox}
+                                        className="dropdown"
+                                    />
+                                    <Radiobutton name="grouped" value="allUsers" label="Send in chat to all users" />
+                                </RadiobuttonGroup>
                             </div>
-
-                            <div className="boardSelection">
-
-                                <Dropdown
-                                    placeholder="Select team(s)"
-                                    defaultSelectedKeys={this.selectedTeams}
-                                    multiSelect
-                                    options={this.getItems()}
-                                    onChange={this.onTeamsChange}
-                                    disabled={!this.state.teamsBox}
-                                />
-
-                                <Dropdown
-                                    placeholder="Select roster(s)"
-                                    defaultSelectedKeys={this.selectedRosters}
-                                    multiSelect
-                                    options={this.getItems()}
-                                    onChange={this.onRostersChange}
-                                    disabled={!this.state.rostersBox}
-                                />
+                            <div className="adaptiveCardContainer">
                             </div>
                         </div>
 
                         <div className="footerContainer">
                             <div className="buttonContainer">
                                 <Button content="Back" onClick={this.onBack} secondary />
-                                <Button content="Save" disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
+                                <Button content="Save as draft" disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
                             </div>
                         </div>
                     </div>
@@ -328,6 +333,31 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 return (<div>Error</div>);
             }
         }
+    }
+
+    private onGroupSelected = (value: any) => {
+        if (value === "teams") {
+            this.setState({
+                teamsBox: true,
+                rostersBox: false,
+                allUsersBox: false,
+            });
+        } else if (value === "rosters") {
+            this.setState({
+                teamsBox: false,
+                rostersBox: true,
+                allUsersBox: false,
+            });
+        } else {
+            this.setState({
+                teamsBox: false,
+                rostersBox: false,
+                allUsersBox: true,
+            });
+        }
+        this.setState({
+            selectedRadioBtn: value
+        });
     }
 
     private isSaveBtnDisabled = () => {
@@ -494,7 +524,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onNext = (event: any) => {
-        this.setState({ page: "AudienceSelection" });
+        this.setState({
+            page: "AudienceSelection"
+        }, () => {
+            this.updateCard();
+        });
     }
 
     private onBack = (event: any) => {
