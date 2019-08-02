@@ -8,7 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
     using AdaptiveCards;
 
     /// <summary>
-    /// Adaptive Card Generator service.
+    /// Adaptive Card Creator service.
     /// </summary>
     public class AdaptiveCardCreator
     {
