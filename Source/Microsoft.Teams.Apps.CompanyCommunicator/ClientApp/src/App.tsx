@@ -4,9 +4,9 @@ import Configuration from './components/config';
 import TabContainer from './components/TabContainer/tabContainer';
 import NewMessage from './components/NewMessage/newMessage';
 import StatusTaskModule from './components/StatusTaskModule/statusTaskModule';
-import ContentTaskModule from './components/ContentTaskModule/contentTaskModule';
 import './App.scss';
 import { Provider, themes } from '@stardust-ui/react';
+import ConfirmationTaskModule from './components/ConfirmationTaskModule/confirmationTaskModule';
 
 class App extends React.Component {
   public render(): JSX.Element {
@@ -20,7 +20,7 @@ class App extends React.Component {
               <Route exact path="/newmessage" component={NewMessage} />
               <Route exact path="/newmessage/:id" component={NewMessage} />
               <Route exact path="/viewstatus/:id" component={StatusTaskModule} />
-              <Route exact path="/viewcontent/:id" component={ContentTaskModule} />
+              <Route exact path="/confirmation/:id" component={ConfirmationTaskModule} />
             </Switch>
           </BrowserRouter>
         </div>
