@@ -27,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
             DraftNotification notification,
             string userName)
         {
-            var newId = notificationRepository.TableRowKeyGenerator.NewKeyOrderingOldestToMostRecent();
+            var newId = notificationRepository.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent();
 
             var notificationEntity = new NotificationEntity
             {

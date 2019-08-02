@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             await this.notificationDelivery.SendAsync(draftNotificationEntity);
 
-            await this.notificationRepository.MoveDraftToSentPartition(draftNotificationEntity);
+            await this.notificationRepository.MoveDraftToSentPartitionAsync(draftNotificationEntity);
 
             return this.Ok();
         }
@@ -67,7 +67,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet]
         public async Task<IEnumerable<SentNotificationSummary>> GetSentNotificationsAsync()
         {
-            var notificationEntities = await this.notificationRepository.GetMostRecentSentNotifications();
+            var notificationEntities = await this.notificationRepository.GetMostRecentSentNotificationsAsync();
 
             var result = new List<SentNotificationSummary>();
             foreach (var notificationEntity in notificationEntities)

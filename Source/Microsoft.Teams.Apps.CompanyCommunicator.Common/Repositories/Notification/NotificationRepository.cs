@@ -45,7 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Get the top 25 most recently sent notification entities from the table storage.
         /// </summary>
         /// <returns>The top 25 most recently sent notitification entities.</returns>
-        public async Task<IEnumerable<NotificationEntity>> GetMostRecentSentNotifications()
+        public async Task<IEnumerable<NotificationEntity>> GetMostRecentSentNotificationsAsync()
         {
             var result = await this.GetAllAsync(PartitionKeyNames.Notification.SentNotifications, 25);
 
@@ -57,14 +57,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// </summary>
         /// <param name="draftNotificationEntity">The draft notification instance to be moved to the sent partition.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task MoveDraftToSentPartition(NotificationEntity draftNotificationEntity)
+        public async Task MoveDraftToSentPartitionAsync(NotificationEntity draftNotificationEntity)
         {
             if (draftNotificationEntity == null)
             {
                 return;
             }
 
-            var newId = this.TableRowKeyGenerator.NewKeyOrderingMostRecentToOldest();
+            var newId = this.TableRowKeyGenerator.CreateNewKeyOrderingMostRecentToOldest();
 
             // Create a sent notification based on the draft notification.
             var sentNotificationEntity = new NotificationEntity
@@ -80,7 +80,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 ButtonLink = draftNotificationEntity.ButtonLink,
                 CreatedBy = draftNotificationEntity.CreatedBy,
                 CreatedDateTime = draftNotificationEntity.CreatedDateTime,
-                SentDate = DateTime.UtcNow.ToShortDateString(),
+                SentDate = null,
                 IsDraft = false,
                 Teams = draftNotificationEntity.Teams,
                 Rosters = draftNotificationEntity.Rosters,
@@ -102,7 +102,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             NotificationEntity notificationEntity,
             string createdBy)
         {
-            var newId = this.TableRowKeyGenerator.NewKeyOrderingOldestToMostRecent();
+            var newId = this.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent();
 
             var newNotificationEntity = new NotificationEntity
             {

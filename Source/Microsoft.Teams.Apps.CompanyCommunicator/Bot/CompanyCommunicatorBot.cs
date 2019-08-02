@@ -115,7 +115,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             var isTeamRenamed = this.IsTeamInformationUpdated(activity);
             if (isTeamRenamed)
             {
-                await this.teamsDataCapture.OnTeamInformationUpdated(activity);
+                await this.teamsDataCapture.OnTeamInformationUpdatedAsync(activity);
             }
 
             // Take action if this event includes the bot being added
