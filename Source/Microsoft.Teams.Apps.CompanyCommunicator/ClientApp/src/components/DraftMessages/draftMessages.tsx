@@ -56,7 +56,7 @@ export interface IMessageState {
   teamNames: string[];
   rosterNames: string[];
   allUsers: boolean;
-  messageId: number
+  messageId: number;
 }
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
@@ -150,7 +150,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
       teamNames: [],
       rosterNames: [],
       allUsers: false,
-      messageId: 0
+      messageId: 0,
     };
 
     this.selection = new Selection({
