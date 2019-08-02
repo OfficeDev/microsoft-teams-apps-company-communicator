@@ -312,7 +312,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         name: 'Edit',
         onClick: () => {
           let url = getBaseUrl() + "/newmessage/" + id;
-          this.onOpenTaskModule(null, url, "New Announcement");
+          this.onOpenTaskModule(null, url, "New message");
         }
       },
       {
