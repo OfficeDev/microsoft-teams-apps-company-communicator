@@ -13,6 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
     /// </summary>
     public class NotificationDelivery
     {
+        private readonly NotificationRepository notificationRepository;
         private readonly UserDataProvider userDataProvider;
         private readonly ActiveNotificationCreator activeNotificationCreator;
         private readonly MessageQueue messageQueue;
@@ -20,14 +21,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationDelivery"/> class.
         /// </summary>
+        /// <param name="notificationRepository">Notification repository service.</param>
         /// <param name="userDataProvider">User Data Provider instance.</param>
         /// <param name="activeNotificationCreator">Adaptive Card Generator instance.</param>
         /// <param name="messageQueue">Message Queue service.</param>
         public NotificationDelivery(
+            NotificationRepository notificationRepository,
             UserDataProvider userDataProvider,
             ActiveNotificationCreator activeNotificationCreator,
             MessageQueue messageQueue)
         {
+            this.notificationRepository = notificationRepository;
             this.userDataProvider = userDataProvider;
             this.activeNotificationCreator = activeNotificationCreator;
             this.messageQueue = messageQueue;

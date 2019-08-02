@@ -15,12 +15,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// <summary>
         /// Create an adaptive card instance.
         /// </summary>
-        /// <param name="title">The adaptive card's Title value.</param>
+        /// <param name="title">The adaptive card's title value.</param>
         /// <param name="imageUrl">The adaptive card's image URL.</param>
         /// <param name="summary">The adaptive card's summary value.</param>
         /// <param name="author">The adaptive card's author value.</param>
-        /// <returns>Generated adaptive card instance.</returns>
-        public AdaptiveCard CreateAdaptiveCard(string title, string imageUrl, string summary, string author)
+        /// <param name="buttonTitle">The adaptive card's button title value.</param>
+        /// <param name="buttonUrl">The adaptive card's button url value.</param>
+        /// <returns>The created adaptive card instance.</returns>
+        public AdaptiveCard CreateAdaptiveCard(
+            string title,
+            string imageUrl,
+            string summary,
+            string author,
+            string buttonTitle,
+            string buttonUrl)
         {
             var version = new AdaptiveSchemaVersion(1, 0);
             AdaptiveCard card = new AdaptiveCard(version);
@@ -32,27 +40,47 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
                 Weight = AdaptiveTextWeight.Bolder,
                 Wrap = true,
             });
-            card.Body.Add(new AdaptiveImage()
+
+            if (!string.IsNullOrWhiteSpace(imageUrl))
             {
-                Spacing = AdaptiveSpacing.Default,
-                Url = new Uri(imageUrl),
-                Size = AdaptiveImageSize.Stretch,
-                Style = AdaptiveImageStyle.Person,
-                AltText = string.Empty,
-                PixelWidth = 400,
-            });
-            card.Body.Add(new AdaptiveTextBlock()
+                card.Body.Add(new AdaptiveImage()
+                {
+                    Url = new Uri(imageUrl),
+                    Spacing = AdaptiveSpacing.Default,
+                    Size = AdaptiveImageSize.Stretch,
+                    AltText = string.Empty,
+                    PixelWidth = 400,
+                });
+            }
+
+            if (!string.IsNullOrWhiteSpace(summary))
             {
-                Text = summary,
-                Wrap = true,
-            });
-            card.Body.Add(new AdaptiveTextBlock()
+                card.Body.Add(new AdaptiveTextBlock()
+                {
+                    Text = summary,
+                    Wrap = true,
+                });
+            }
+
+            if (!string.IsNullOrWhiteSpace(author))
             {
-                Text = author,
-                Size = AdaptiveTextSize.Small,
-                Weight = AdaptiveTextWeight.Lighter,
-                Wrap = true,
-            });
+                card.Body.Add(new AdaptiveTextBlock()
+                {
+                    Text = author,
+                    Size = AdaptiveTextSize.Small,
+                    Weight = AdaptiveTextWeight.Lighter,
+                    Wrap = true,
+                });
+            }
+
+            if (!string.IsNullOrWhiteSpace(buttonTitle) && !string.IsNullOrWhiteSpace(buttonUrl))
+            {
+                card.Actions.Add(new AdaptiveOpenUrlAction()
+                {
+                    Url = new Uri(buttonUrl),
+                    Title = buttonTitle,
+                });
+            }
 
             return card;
         }
