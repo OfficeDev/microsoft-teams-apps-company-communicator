@@ -98,7 +98,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSentNotificationByIdAsync(string id)
         {
-            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, id);
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.SentNotifications, id);
             if (notificationEntity == null)
             {
                 return this.NotFound();
