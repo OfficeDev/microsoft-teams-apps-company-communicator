@@ -67,27 +67,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var newId = Guid.NewGuid().ToString();
-            var newNotificationEntity = new NotificationEntity
-            {
-                PartitionKey = PartitionKeyNames.Notification.DraftNotifications,
-                RowKey = newId,
-                Id = newId,
-                Title = notificationEntity.Title,
-                ImageLink = notificationEntity.ImageLink,
-                Summary = notificationEntity.Summary,
-                Author = notificationEntity.Author,
-                ButtonTitle = notificationEntity.ButtonTitle,
-                ButtonLink = notificationEntity.ButtonLink,
-                CreatedBy = this.HttpContext.User?.Identity?.Name,
-                CreatedDate = DateTime.UtcNow.ToShortDateString(),
-                IsDraft = true,
-                Teams = notificationEntity.Teams,
-                Rosters = notificationEntity.Rosters,
-                AllUsers = notificationEntity.AllUsers,
-            };
+            var createdBy = this.HttpContext.User?.Identity?.Name;
 
-            await this.notificationRepository.CreateOrUpdateAsync(newNotificationEntity);
+            await this.notificationRepository.DuplicateDraftNotificationAsync(notificationEntity, createdBy);
 
             return this.Ok();
         }
@@ -112,7 +94,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ButtonTitle = notification.ButtonTitle,
                 ButtonLink = notification.ButtonLink,
                 CreatedBy = this.HttpContext.User?.Identity?.Name,
-                CreatedDate = DateTime.UtcNow.ToShortDateString(),
+                CreatedDateTime = DateTime.UtcNow,
                 IsDraft = true,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,
@@ -189,7 +171,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Author = notificationEntity.Author,
                 ButtonTitle = notificationEntity.ButtonTitle,
                 ButtonLink = notificationEntity.ButtonLink,
-                CreatedDate = notificationEntity.CreatedDate,
+                CreatedDateTime = notificationEntity.CreatedDateTime,
                 Teams = notificationEntity.Teams,
                 Rosters = notificationEntity.Rosters,
                 AllUsers = notificationEntity.AllUsers,

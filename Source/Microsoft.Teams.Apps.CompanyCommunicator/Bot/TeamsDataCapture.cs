@@ -77,7 +77,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// </summary>
         /// <param name="activity">Teams activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task OnTeamInformationUpdated(IConversationUpdateActivity activity)
+        public async Task OnTeamInformationUpdatedAsync(IConversationUpdateActivity activity)
         {
             await this.teamDataRepository.SaveTeamDataAsync(activity);
         }
