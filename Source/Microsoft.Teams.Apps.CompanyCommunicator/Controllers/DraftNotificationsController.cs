@@ -14,6 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
+    using Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
 
     /// <summary>
@@ -25,18 +26,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly NotificationRepository notificationRepository;
         private readonly TeamDataRepository teamDataRepository;
+        private readonly NotificationPreview notificationPreview;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
         /// </summary>
         /// <param name="notificationRepository">Notification respository instance.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
+        /// <param name="notificationPreview">Notification preview service.</param>
         public DraftNotificationsController(
             NotificationRepository notificationRepository,
-            TeamDataRepository teamDataRepository)
+            TeamDataRepository teamDataRepository,
+            NotificationPreview notificationPreview)
         {
             this.notificationRepository = notificationRepository;
             this.teamDataRepository = teamDataRepository;
+            this.notificationPreview = notificationPreview;
         }
 
         /// <summary>
@@ -204,6 +209,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             };
 
             return this.Ok(result);
+        }
+
+        /// <summary>
+        /// Preview a draft notification.
+        /// </summary>
+        /// <param name="notificationId">Draft notification Id.</param>
+        /// <returns>It returns the draft notification summary (for consent page) with the passed in id.
+        /// If the passed in id is invalid, it returns 404 not found error.</returns>
+        [HttpPost("previews/{notificationId}")]
+        public async Task<ActionResult> PreviewDraftNotificationAsync(string notificationId)
+        {
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notificationId);
+            if (notificationEntity == null)
+            {
+                return this.NotFound();
+            }
+
+            // Todo: get real id from logged in user's identity.
+            var previewerAadId = "7fae99ec-d260-4a5e-9403-0e3874415213";
+            await this.notificationPreview.Preview(previewerAadId, notificationEntity);
+
+            return this.Ok();
         }
     }
 }
