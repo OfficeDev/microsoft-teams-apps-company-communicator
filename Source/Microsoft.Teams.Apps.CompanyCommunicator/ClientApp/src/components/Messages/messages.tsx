@@ -123,7 +123,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
           return (
             <div className="content">
               <TooltipHost content="Success" calloutProps={{ gapSpace: 0 }}>
-                <Icon name="stardust-checkmark" xSpacing="after" className="green" outline> </Icon>{item.succeeded}
+                <Icon name="stardust-checkmark" xSpacing="after" className="green" outline />{item.succeeded}
               </TooltipHost>
 
               <TooltipHost content="Failure" calloutProps={{ gapSpace: 0 }}>
