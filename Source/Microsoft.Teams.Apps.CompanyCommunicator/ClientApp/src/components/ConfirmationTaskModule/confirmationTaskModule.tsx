@@ -1,13 +1,14 @@
 import * as React from 'react';
 import './confirmationTaskModule.scss';
-import { getSentNotification } from '../../apis/messageListApi';
+import { getDraftNotification, getConsentSummaries } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
-import { Loader } from '@stardust-ui/react';
+import { Loader, Button } from '@stardust-ui/react';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
+import * as microsoftTeams from "@microsoft/teams-js";
 
 export interface IMessage {
     id: string;
@@ -29,6 +30,10 @@ export interface IMessage {
 export interface IStatusState {
     message: IMessage;
     loader: boolean;
+    teamNames: string[];
+    rosterNames: string[];
+    allUsers: boolean;
+    messageId: number;
 }
 
 class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatusState> {
@@ -46,33 +51,48 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
 
         this.state = {
             message: this.initMessage,
-            loader: true
+            loader: true,
+            teamNames: [],
+            rosterNames: [],
+            allUsers: false,
+            messageId: 0,
         };
     }
 
     public componentDidMount() {
+        microsoftTeams.initialize();
+
         let params = this.props.match.params;
 
         if ('id' in params) {
             let id = params['id'];
             this.getItem(id).then(() => {
-                this.setState({
-                    loader: false
-                }, () => {
-                    setCardTitle(this.card, this.state.message.title);
-                    setCardImageLink(this.card, this.state.message.imageLink);
-                    setCardSummary(this.card, this.state.message.summary);
-                    setCardAuthor(this.card, this.state.message.author);
-                    if (this.state.message.buttonTitle !== "" && this.state.message.buttonLink !== "") {
-                        setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink);
-                    }
+                getConsentSummaries(id).then((response) => {
+                    this.setState({
+                        teamNames: response.data.teamNames,
+                        rosterNames: response.data.rosterNames,
+                        allUsers: response.data.allUsers,
+                        messageId: id,
+                    }, () => {
+                        this.setState({
+                            loader: false
+                        }, () => {
+                            setCardTitle(this.card, this.state.message.title);
+                            setCardImageLink(this.card, this.state.message.imageLink);
+                            setCardSummary(this.card, this.state.message.summary);
+                            setCardAuthor(this.card, this.state.message.author);
+                            if (this.state.message.buttonTitle !== "" && this.state.message.buttonLink !== "") {
+                                setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink);
+                            }
 
-                    let adaptiveCard = new AdaptiveCards.AdaptiveCard();
-                    adaptiveCard.parse(this.card);
-                    let renderedCard = adaptiveCard.render();
-                    document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
-                    let link = this.state.message.buttonLink;
-                    adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
+                            let adaptiveCard = new AdaptiveCards.AdaptiveCard();
+                            adaptiveCard.parse(this.card);
+                            let renderedCard = adaptiveCard.render();
+                            document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
+                            let link = this.state.message.buttonLink;
+                            adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
+                        });
+                    });
                 });
             });
         }
@@ -80,7 +100,7 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
 
     private getItem = async (id: number) => {
         try {
-            const response = await getSentNotification(id);
+            const response = await getDraftNotification(id);
             this.setState({
                 message: response.data
             });
@@ -102,31 +122,17 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
                     <div className="formContainer">
                         <div className="formContentContainer" >
                             <div className="contentField">
-                                <h3>Title</h3>
-                                <span>{this.state.message.title}</span>
+                                <h3>Send this message?</h3>
+                                <span>Send to the following recipients?</span>
                             </div>
 
-                            <div className="contentField">
-                                <h3>Create by</h3>
-                                <span>Anonymous</span>
+                            <div className="results">
+                                {this.displaySelectedTeams()}
+                                {this.displayRosterTeams()}
+                                {this.displayAllUsers()}
                             </div>
 
-                            <div className="contentField">
-                                <h3>Date Sent</h3>
-                                <span>{this.state.message.sentDate}</span>
-                            </div>
 
-                            <div className="contentField">
-                                <h3>Results</h3>
-                                <label>Success : </label>
-                                <span>{this.state.message.succeeded}</span>
-                                <br />
-                                <label>Failure : </label>
-                                <span>{this.state.message.failed}</span>
-                                <br />
-                                <label>Throttled : </label>
-                                <span>{this.state.message.throttled}</span>
-                            </div>
                         </div>
                         <div className="adaptiveCardContainer">
                         </div>
@@ -134,10 +140,56 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
 
                     <div className="footerContainer">
                         <div className="buttonContainer">
+                            <Button content="Cancel" onClick={this.onCancel} secondary />
+
                         </div>
                     </div>
                 </div>
             );
+        }
+    }
+
+    private onCancel = () => {
+        microsoftTeams.tasks.submitTask();
+    }
+
+    private displaySelectedTeams = () => {
+        let length = this.state.teamNames.length;
+        if (length == 0) {
+            return (<div />);
+        } else {
+            return (<div key="teamNames"> <span className="label">Team(s): </span> {this.state.teamNames.map((team, index) => {
+                if (length === index + 1) {
+                    return (<span key={`teamName${index}`} >{team}</span>);
+                } else {
+                    return (<span key={`teamName${index}`} >{team}, </span>);
+                }
+            })}</div>
+            );
+        }
+    }
+
+    private displayRosterTeams = () => {
+        let length = this.state.rosterNames.length;
+        if (length == 0) {
+            return (<div />);
+        } else {
+            return (<div key="rosterNames"> <span className="label">Team(s) members: </span> {this.state.rosterNames.map((roster, index) => {
+                if (length === index + 1) {
+                    return (<span key={`rosterName${index}`}>{roster}</span>);
+                } else {
+                    return (<span key={`rosterName${index}`}>{roster}, </span>);
+                }
+            })}</div>
+            );
+        }
+    }
+
+    private displayAllUsers = () => {
+        if (!this.state.allUsers) {
+            return (<div />);
+        } else {
+            return (<div key="allUsers"> <span className="label">All users</span></div>);
         }
     }
 }

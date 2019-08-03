@@ -337,6 +337,9 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         key: 'send',
         name: 'Send',
         onClick: () => {
+          let url = getBaseUrl() + "/confirmation/" + id;
+          this.onOpenTaskModule(null, url, "Send Confirmation");
+
           getConsentSummaries(id).then((response) => {
             this.setState({
               dialogHidden: false,
