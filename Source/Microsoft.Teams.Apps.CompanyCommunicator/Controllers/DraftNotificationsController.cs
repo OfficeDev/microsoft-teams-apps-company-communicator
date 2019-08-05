@@ -60,8 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPost("duplicates/{id}")]
         public async Task<IActionResult> DuplicateDraftNotificationAsync(string id)
         {
-            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, id);
-
+            var notificationEntity = await this.FindNotificationToDuplicate(id);
             if (notificationEntity == null)
             {
                 return this.NotFound();
@@ -72,6 +71,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             await this.notificationRepository.DuplicateDraftNotificationAsync(notificationEntity, createdBy);
 
             return this.Ok();
+        }
+
+        private async Task<NotificationEntity> FindNotificationToDuplicate(string notificationId)
+        {
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notificationId);
+            if (notificationEntity == null)
+            {
+                notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.SentNotifications, notificationId);
+            }
+            
+            return notificationEntity;
         }
 
         /// <summary>

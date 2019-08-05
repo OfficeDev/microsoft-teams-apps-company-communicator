@@ -10,9 +10,9 @@ import { connect } from 'react-redux';
 import { selectMessage, getDraftMessagesList, getMessagesList } from '../../actions';
 import { getBaseUrl } from '../../configVariables';
 import * as microsoftTeams from "@microsoft/teams-js";
-import { Loader, Button } from '@stardust-ui/react';
-import { IButtonProps, CommandBar, DirectionalHint, Dialog, DialogType, ContextualMenu } from 'office-ui-fabric-react';
-import { getDraftNotification, deleteDraftNotification, duplicateDraftNotification, sendDraftNotification, getConsentSummaries } from '../../apis/messageListApi';
+import { Loader } from '@stardust-ui/react';
+import { IButtonProps, CommandBar, DirectionalHint } from 'office-ui-fabric-react';
+import { deleteDraftNotification, duplicateDraftNotification } from '../../apis/messageListApi';
 
 export interface ITaskInfo {
   title?: string;
@@ -50,7 +50,6 @@ export interface IMessageState {
   itemsAccount: number;
   width: number;
   height: number;
-  sentMessagePayload?: any;
   loader: boolean;
   dialogHidden: boolean;
   teamNames: string[];
@@ -207,91 +206,10 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
               />
             </MarqueeSelection>
           </Fabric>
-
-          <Dialog
-            className="sendDialog"
-            hidden={this.state.dialogHidden}
-            onDismiss={this.closeDialog}
-            dialogContentProps={{
-              type: DialogType.normal,
-              title: 'Send this message?',
-              subText: 'Send to the following recipients?'
-            }}
-            modalProps={{
-              titleAriaId: "Send Dialog",
-              subtitleAriaId: "Send Dialog",
-              isBlocking: false,
-              styles: { main: { minWidth: 600, height: 300 } },
-              dragOptions: {
-                moveMenuItemText: 'Move',
-                closeMenuItemText: 'Close',
-                menu: ContextualMenu
-              }
-            }}
-          >
-
-            <div>
-              {this.displaySelectedTeams()}
-              {this.displayRosterTeams()}
-              {this.displayAllUsers()}
-            </div>
-
-            <div className="footerContainer">
-              <div className="buttonContainer">
-                <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="Preparing message" labelPosition="end" />
-                <Button content="Cancel" onClick={this.closeDialog} secondary />
-                <Button content="Send" id="saveBtn" onClick={this.onSendMessage} primary />
-              </div>
-            </div>
-          </Dialog>
         </div>
       );
     }
   }
-
-  private displaySelectedTeams = () => {
-    let length = this.state.teamNames.length;
-    if (length == 0) {
-      return (<div />);
-    } else {
-      return (<div key="teamNames"> <span className="label">Team(s): </span> {this.state.teamNames.map((team, index) => {
-        if (length === index + 1) {
-          return (<span key={`teamName${index}`} >{team}</span>);
-        } else {
-          return (<span key={`teamName${index}`} >{team}, </span>);
-        }
-      })}</div>
-      );
-    }
-  }
-
-  private displayRosterTeams = () => {
-    let length = this.state.rosterNames.length;
-    if (length == 0) {
-      return (<div />);
-    } else {
-      return (<div key="rosterNames"> <span className="label">Team(s) members: </span> {this.state.rosterNames.map((roster, index) => {
-        if (length === index + 1) {
-          return (<span key={`rosterName${index}`}>{roster}</span>);
-        } else {
-          return (<span key={`rosterName${index}`}>{roster}, </span>);
-        }
-      })}</div>
-      );
-    }
-  }
-
-  private displayAllUsers = () => {
-    if (!this.state.allUsers) {
-      return (<div />);
-    } else {
-      return (<div key="allUsers"> <span className="label">All users</span></div>);
-    }
-  }
-
-  private closeDialog = () => {
-    this.setState({ dialogHidden: true });
-  };
 
   private getItems = () => {
     return [];
@@ -339,56 +257,10 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         onClick: () => {
           let url = getBaseUrl() + "/confirmation/" + id;
           this.onOpenTaskModule(null, url, "Send Confirmation");
-
-          getConsentSummaries(id).then((response) => {
-            this.setState({
-              dialogHidden: false,
-              teamNames: response.data.teamNames,
-              rosterNames: response.data.rosterNames,
-              allUsers: response.data.allUsers,
-              messageId: id,
-            });
-          });
         },
       }
     ];
   };
-
-  private onSendMessage = () => {
-    let spanner = document.getElementsByClassName("sendingLoader");
-    spanner[0].classList.remove("hiddenLoader");
-    let id = this.state.messageId;
-    this.getDraftMessage(id).then(() => {
-      this.sendDraftMessage(this.state.sentMessagePayload).then(() => {
-        this.props.getDraftMessagesList().then(() => {
-          this.props.getMessagesList().then(() => {
-            this.setState({
-              dialogHidden: true
-            });
-          });
-        });
-      });
-    });
-  }
-
-  private getDraftMessage = async (id: number) => {
-    try {
-      const response = await getDraftNotification(id);
-      this.setState({
-        sentMessagePayload: response.data
-      });
-    } catch (error) {
-      return error;
-    }
-  }
-
-  private sendDraftMessage = async (payload: {}) => {
-    try {
-      const response = await sendDraftNotification(payload);
-    } catch (error) {
-      return error;
-    }
-  }
 
   private duplicateDraftMessage = async (id: number) => {
     try {
@@ -416,8 +288,9 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     }
 
     let submitHandler = (err: any, result: any) => {
-      this.props.getDraftMessagesList();
-      this.forceUpdate();
+      this.props.getDraftMessagesList().then(() => {
+        this.props.getMessagesList();
+      });
     };
 
     microsoftTeams.tasks.startTask(taskInfo, submitHandler);

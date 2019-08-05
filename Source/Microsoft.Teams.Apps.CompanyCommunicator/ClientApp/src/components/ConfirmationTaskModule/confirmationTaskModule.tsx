@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './confirmationTaskModule.scss';
-import { getDraftNotification, getConsentSummaries } from '../../apis/messageListApi';
+import { getDraftNotification, getConsentSummaries, sendDraftNotification } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
 import { Loader, Button } from '@stardust-ui/react';
@@ -131,8 +131,6 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
                                 {this.displayRosterTeams()}
                                 {this.displayAllUsers()}
                             </div>
-
-
                         </div>
                         <div className="adaptiveCardContainer">
                         </div>
@@ -140,13 +138,23 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
 
                     <div className="footerContainer">
                         <div className="buttonContainer">
+                            <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="Preparing message" labelPosition="end" />
                             <Button content="Cancel" onClick={this.onCancel} secondary />
-
+                            <Button content="Send" id="saveBtn" onClick={this.onSendMessage} primary />
                         </div>
                     </div>
                 </div>
             );
         }
+    }
+
+    private onSendMessage = () => {
+        let spanner = document.getElementsByClassName("sendingLoader");
+        spanner[0].classList.remove("hiddenLoader");
+        let id = this.state.messageId;
+        sendDraftNotification(this.state.message).then(() => {
+            microsoftTeams.tasks.submitTask();
+        });
     }
 
     private onCancel = () => {

@@ -48,6 +48,17 @@
         padding: 2rem 0rem 3.2rem 0rem;
         width: 100%;
 
+        .hiddenLoader {
+            display: none;
+        }
+
+        .sendingLoader {
+            float: left;
+            width: 18rem;
+            margin-right: 2rem;
+            height: 3rem;
+        }
+
         .buttonContainer {
             display: inline;
             float: right;
