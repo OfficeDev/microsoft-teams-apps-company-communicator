@@ -511,25 +511,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
     }
 
-    private onAlluser = () => {
-        this.setState({
-            rostersOptionSelected: false,
-            allUsersOptionSelected: !this.state.allUsersOptionSelected
-        })
-    }
-
-    private onTeam = () => {
-        this.setState({
-            rostersOptionSelected: !this.state.rostersOptionSelected
-        })
-    }
-
-    private onChannel = (checked: boolean, value?: any) => {
-        this.setState({
-            teamsOptionSelected: !this.state.teamsOptionSelected
-        })
-    }
-
     private onNext = (event: any) => {
         this.setState({
             page: "AudienceSelection"
