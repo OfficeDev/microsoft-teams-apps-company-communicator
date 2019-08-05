@@ -49,7 +49,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
                     Spacing = AdaptiveSpacing.Default,
                     Size = AdaptiveImageSize.Stretch,
                     AltText = string.Empty,
-                    PixelWidth = 400,
                 });
             }
 
