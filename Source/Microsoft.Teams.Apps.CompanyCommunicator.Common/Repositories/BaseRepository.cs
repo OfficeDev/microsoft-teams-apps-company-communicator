@@ -105,17 +105,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// Get all data entities from the table storage in a partition.
         /// </summary>
         /// <param name="partition">Partition key value.</param>
-        /// <param name="count">The number of entities queried for.</param>
+        /// <param name="takeCount">The number of entities queried for.</param>
         /// <returns>All data entities.</returns>
-        public async Task<IEnumerable<T>> GetAllAsync(string partition = null, int? count = null)
+        public async Task<IEnumerable<T>> GetAllAsync(string partition = null, int? takeCount = null)
         {
             var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
 
-            var query = count == null
-                ? new TableQuery<T>().Where(partitionKeyFilter)
-                : new TableQuery<T>().Where(partitionKeyFilter).Take(count);
+            var query = new TableQuery<T>().Where(partitionKeyFilter);
 
-            var entities = await this.ExecuteQueryAsync(query);
+            var entities = await this.ExecuteQueryAsync(query, takeCount);
 
             return entities;
         }
@@ -149,8 +147,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 
         private async Task<IList<T>> ExecuteQueryAsync(
             TableQuery<T> query,
+            int? takeCount = null,
             CancellationToken ct = default)
         {
+            query.TakeCount = takeCount;
+
             try
             {
                 var result = new List<T>();
@@ -162,7 +163,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
                     token = seg.ContinuationToken;
                     result.AddRange(seg);
                 }
-                while (token != null && !ct.IsCancellationRequested);
+                while (token != null
+                    && !ct.IsCancellationRequested
+                    && (takeCount == null || result.Count < takeCount.Value));
 
                 return result;
             }
