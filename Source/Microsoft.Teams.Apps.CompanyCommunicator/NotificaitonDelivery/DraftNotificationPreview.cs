@@ -91,7 +91,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
                 await this.botFrameworkHttpAdapter.ContinueConversationAsync(
                     this.botAppId,
                     conversationReference,
-                    async (ctx, ct) => await this.SendAdaptiveCardAsync(ctx, draftNotificationEntity),
+                    async (turnContext, cancellationToken) => await this.SendAdaptiveCardAsync(turnContext, draftNotificationEntity),
                     CancellationToken.None);
                 return HttpStatusCode.OK;
             }
