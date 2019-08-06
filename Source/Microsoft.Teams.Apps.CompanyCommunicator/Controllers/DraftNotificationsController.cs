@@ -6,6 +6,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -26,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly NotificationRepository notificationRepository;
         private readonly TeamDataRepository teamDataRepository;
-        private readonly NotificationPreview notificationPreview;
+        private readonly DraftNotificationPreview notificationPreview;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
@@ -37,7 +38,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public DraftNotificationsController(
             NotificationRepository notificationRepository,
             TeamDataRepository teamDataRepository,
-            NotificationPreview notificationPreview)
+            DraftNotificationPreview notificationPreview)
         {
             this.notificationRepository = notificationRepository;
             this.teamDataRepository = teamDataRepository;
@@ -212,25 +213,44 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
-        /// Preview a draft notification.
+        /// Preview draft notification.
         /// </summary>
-        /// <param name="notificationId">Draft notification Id.</param>
+        /// <param name="draftNotificationPreviewRequest">Draft notification preview request.</param>
         /// <returns>It returns the draft notification summary (for consent page) with the passed in id.
         /// If the passed in id is invalid, it returns 404 not found error.</returns>
-        [HttpPost("previews/{notificationId}")]
-        public async Task<ActionResult> PreviewDraftNotificationAsync(string notificationId)
+        [HttpPost("previews")]
+        public async Task<ActionResult> PreviewDraftNotificationAsync(
+            [FromBody] DraftNotificationPreviewRequest draftNotificationPreviewRequest)
         {
-            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notificationId);
-            if (notificationEntity == null)
+            if (draftNotificationPreviewRequest == null
+                || string.IsNullOrWhiteSpace(draftNotificationPreviewRequest.DraftNotificationId)
+                || string.IsNullOrWhiteSpace(draftNotificationPreviewRequest.TeamsTeamId)
+                || string.IsNullOrWhiteSpace(draftNotificationPreviewRequest.TeamsChannelId))
             {
-                return this.NotFound();
+                return this.BadRequest();
             }
 
-            // Todo: get real id from logged in user's identity.
-            var previewerAadId = "7fae99ec-d260-4a5e-9403-0e3874415213";
-            await this.notificationPreview.Preview(previewerAadId, notificationEntity);
+            var notificationEntity = await this.notificationRepository.GetAsync(
+                PartitionKeyNames.Notification.DraftNotifications,
+                draftNotificationPreviewRequest.DraftNotificationId);
+            if (notificationEntity == null)
+            {
+                return this.NotFound($"Notification {draftNotificationPreviewRequest.DraftNotificationId} not found.");
+            }
 
-            return this.Ok();
+            var teamDataEntity = await this.teamDataRepository.GetAsync(
+                PartitionKeyNames.Metadata.TeamData,
+                draftNotificationPreviewRequest.TeamsTeamId);
+            if (teamDataEntity == null)
+            {
+                return this.NotFound($"Team {draftNotificationPreviewRequest.TeamsTeamId} not found.");
+            }
+
+            var result = await this.notificationPreview.Preview(
+                notificationEntity,
+                teamDataEntity,
+                draftNotificationPreviewRequest.TeamsChannelId);
+            return this.StatusCode(result == null ? (int)HttpStatusCode.InternalServerError : (int)result.Value);
         }
     }
 }

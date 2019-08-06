@@ -33,7 +33,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 
             services.AddSingleton<BotFrameworkHttpAdapter>();
 
-            services.AddSingleton<NotificationPreview>();
+            services.AddSingleton<DraftNotificationPreview>();
         }
     }
 }
