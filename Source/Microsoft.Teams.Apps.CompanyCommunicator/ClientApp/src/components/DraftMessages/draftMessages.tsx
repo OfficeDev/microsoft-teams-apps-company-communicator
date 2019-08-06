@@ -88,7 +88,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         onRender: (item) => {
           const onTitleClicked = (id: string) => {
             let url = getBaseUrl() + "/newmessage/" + id;
-            this.onOpenTaskModule(null, url, "New message");
+            this.onOpenTaskModule(null, url, "Edit message");
           }
           return (
             <span className="content">
@@ -230,7 +230,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         name: 'Edit',
         onClick: () => {
           let url = getBaseUrl() + "/newmessage/" + id;
-          this.onOpenTaskModule(null, url, "New message");
+          this.onOpenTaskModule(null, url, "Edit message");
         }
       },
       {
@@ -255,8 +255,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         key: 'send',
         name: 'Send',
         onClick: () => {
-          let url = getBaseUrl() + "/confirmation/" + id;
-          this.onOpenTaskModule(null, url, "Send Confirmation");
+          let url = getBaseUrl() + "/sendconfirmation/" + id;
+          this.onOpenTaskModule(null, url, "Send confirmation");
         },
       }
     ];

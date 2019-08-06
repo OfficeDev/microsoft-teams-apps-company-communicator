@@ -1,5 +1,5 @@
 import * as React from 'react';
-import './confirmationTaskModule.scss';
+import './sendConfirmationTaskModule.scss';
 import { getDraftNotification, getConsentSummaries, sendDraftNotification } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
@@ -14,11 +14,11 @@ export interface IMessage {
     id: string;
     title: string;
     acknowledgements?: string;
-    reactions?: string;
-    responses?: string;
-    succeeded?: string;
-    failed?: string;
-    throttled?: string;
+    reactions?: number;
+    responses?: number;
+    succeeded?: number;
+    failed?: number;
+    throttled?: number;
     sentDate?: string;
     imageLink?: string;
     summary?: string;
@@ -36,7 +36,7 @@ export interface IStatusState {
     messageId: number;
 }
 
-class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatusState> {
+class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IStatusState> {
     private initMessage = {
         id: "",
         title: ""
@@ -81,7 +81,7 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
                             setCardImageLink(this.card, this.state.message.imageLink);
                             setCardSummary(this.card, this.state.message.summary);
                             setCardAuthor(this.card, this.state.message.author);
-                            if (this.state.message.buttonTitle !== "" && this.state.message.buttonLink !== "") {
+                            if (this.state.message.buttonTitle && this.state.message.buttonLink) {
                                 setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink);
                             }
 
@@ -89,8 +89,10 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
                             adaptiveCard.parse(this.card);
                             let renderedCard = adaptiveCard.render();
                             document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
-                            let link = this.state.message.buttonLink;
-                            adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
+                            if (this.state.message.buttonLink) {
+                                let link = this.state.message.buttonLink;
+                                adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); };
+                            }
                         });
                     });
                 });
@@ -123,13 +125,13 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
                         <div className="formContentContainer" >
                             <div className="contentField">
                                 <h3>Send this message?</h3>
-                                <span>Send to the following recipients?</span>
+                                <span>Send to the following recipients:</span>
                             </div>
 
                             <div className="results">
                                 {this.displaySelectedTeams()}
-                                {this.displayRosterTeams()}
-                                {this.displayAllUsers()}
+                                {this.displaySelectedRosterTeams()}
+                                {this.displayAllUsersSelection()}
                             </div>
                         </div>
                         <div className="adaptiveCardContainer">
@@ -140,7 +142,7 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
                         <div className="buttonContainer">
                             <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="Preparing message" labelPosition="end" />
                             <Button content="Cancel" onClick={this.onCancel} secondary />
-                            <Button content="Send" id="saveBtn" onClick={this.onSendMessage} primary />
+                            <Button content="Send" id="sendBtn" onClick={this.onSendMessage} primary />
                         </div>
                     </div>
                 </div>
@@ -151,7 +153,6 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
     private onSendMessage = () => {
         let spanner = document.getElementsByClassName("sendingLoader");
         spanner[0].classList.remove("hiddenLoader");
-        let id = this.state.messageId;
         sendDraftNotification(this.state.message).then(() => {
             microsoftTeams.tasks.submitTask();
         });
@@ -177,7 +178,7 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
         }
     }
 
-    private displayRosterTeams = () => {
+    private displaySelectedRosterTeams = () => {
         let length = this.state.rosterNames.length;
         if (length == 0) {
             return (<div />);
@@ -193,7 +194,7 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
         }
     }
 
-    private displayAllUsers = () => {
+    private displayAllUsersSelection = () => {
         if (!this.state.allUsers) {
             return (<div />);
         } else {
@@ -202,4 +203,4 @@ class ConfirmationTaskModule extends React.Component<RouteComponentProps, IStatu
     }
 }
 
-export default ConfirmationTaskModule;
+export default SendConfirmationTaskModule;

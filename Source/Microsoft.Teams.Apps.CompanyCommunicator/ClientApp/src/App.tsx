@@ -6,7 +6,7 @@ import NewMessage from './components/NewMessage/newMessage';
 import StatusTaskModule from './components/StatusTaskModule/statusTaskModule';
 import './App.scss';
 import { Provider, themes } from '@stardust-ui/react';
-import ConfirmationTaskModule from './components/ConfirmationTaskModule/confirmationTaskModule';
+import SendConfirmationTaskModule from './components/SendConfirmationTaskModule/sendConfirmationTaskModule';
 
 class App extends React.Component {
   public render(): JSX.Element {
@@ -20,7 +20,7 @@ class App extends React.Component {
               <Route exact path="/newmessage" component={NewMessage} />
               <Route exact path="/newmessage/:id" component={NewMessage} />
               <Route exact path="/viewstatus/:id" component={StatusTaskModule} />
-              <Route exact path="/confirmation/:id" component={ConfirmationTaskModule} />
+              <Route exact path="/sendconfirmation/:id" component={SendConfirmationTaskModule} />
             </Switch>
           </BrowserRouter>
         </div>
