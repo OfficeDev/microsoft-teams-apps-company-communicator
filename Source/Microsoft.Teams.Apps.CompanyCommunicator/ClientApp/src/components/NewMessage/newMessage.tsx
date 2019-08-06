@@ -13,6 +13,7 @@ import {
 } from '../AdaptiveCard/adaptiveCard';
 import { Dropdown } from 'office-ui-fabric-react';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
+import { getBaseUrl } from '../../configVariables';
 
 export interface IDraftMessage {
     id?: string,
@@ -62,8 +63,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         super(props);
         initializeIcons();
         this.card = getInitAdaptiveCard();
-        let url = window.location + "";
-        let imgUrl = url.replace("/newmessage", "") + "/image/imagePlaceholder.png";
+        let imgUrl = getBaseUrl() + "/image/imagePlaceholder.png";
         setCardImageLink(this.card, imgUrl);
         setCardSummary(this.card, "Summary");
         setCardAuthor(this.card, "- Author");
