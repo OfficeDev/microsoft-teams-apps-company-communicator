@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './newMessage.scss';
 import './teamTheme.scss';
-import { Input, TextArea, Checkbox } from 'msteams-ui-components-react';
+import { Input, TextArea, Checkbox, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
 import { Button, Loader } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -36,15 +36,16 @@ export interface formState {
     author: string,
     card?: any,
     page: string,
-    teamsBox: boolean,
-    rostersBox: boolean,
-    allUsersBox: boolean,
+    teamsOptionSelected: boolean,
+    rostersOptionSelected: boolean,
+    allUsersOptionSelected: boolean,
     teams?: any[],
     exists?: boolean,
     messageId: string,
     loader: boolean,
     selectedTeamsNum: number,
-    selectedRostersNum: number
+    selectedRostersNum: number,
+    selectedRadioBtn: string,
 }
 
 export interface INewMessageProps extends RouteComponentProps {
@@ -71,13 +72,14 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             btnTitle: "",
             card: this.card,
             page: "CardCreation",
-            teamsBox: false,
-            rostersBox: false,
-            allUsersBox: false,
+            teamsOptionSelected: false,
+            rostersOptionSelected: false,
+            allUsersOptionSelected: false,
             messageId: "",
             loader: true,
             selectedTeamsNum: 0,
-            selectedRostersNum: 0
+            selectedRostersNum: 0,
+            selectedRadioBtn: "",
         }
     }
 
@@ -141,26 +143,34 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             let draftMessageDetail = response.data;
             if (draftMessageDetail.teams.length === 0) {
                 this.setState({
-                    teamsBox: false
+                    teamsOptionSelected: false
                 });
             } else {
                 this.setState({
-                    teamsBox: true,
-                    selectedTeamsNum: draftMessageDetail.teams.length
+                    teamsOptionSelected: true,
+                    selectedTeamsNum: draftMessageDetail.teams.length,
+                    selectedRadioBtn: "teams",
                 });
                 this.selectedTeams = draftMessageDetail.teams;
             }
 
             if (draftMessageDetail.rosters.length === 0) {
                 this.setState({
-                    rostersBox: false
+                    rostersOptionSelected: false
                 });
             } else {
                 this.setState({
-                    rostersBox: true,
-                    selectedRostersNum: draftMessageDetail.rosters.length
+                    rostersOptionSelected: true,
+                    selectedRostersNum: draftMessageDetail.rosters.length,
+                    selectedRadioBtn: "rosters",
                 });
                 this.selectedRosters = draftMessageDetail.rosters;
+            }
+
+            if (draftMessageDetail.allUsers) {
+                this.setState({
+                    selectedRadioBtn: "allUsers",
+                })
             }
 
             setCardTitle(this.card, draftMessageDetail.title);
@@ -178,7 +188,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 imageLink: draftMessageDetail.imageLink,
                 btnTitle: draftMessageDetail.buttonTitle,
                 author: draftMessageDetail.author,
-                allUsersBox: draftMessageDetail.allUsers,
+                allUsersOptionSelected: draftMessageDetail.allUsers,
                 loader: false
             }, () => {
                 this.updateCard();
@@ -276,50 +286,45 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 return (
                     <div className="taskModule">
                         <div className="formContainer">
-
-                            <h3>Recipient Selection</h3>
-                            <h4>Please choose the groups you would like to send your message to.</h4>
-
-                            <div className="checkboxBtns">
-                                <p className="checkboxBtn">
-                                    <Checkbox checked={this.state.teamsBox} label="Send to a Team(s)" value="teamtest" onChecked={this.onChannel} />
-                                </p>
-
-                                <p className="checkboxBtn">
-                                    <Checkbox checked={this.state.rostersBox} label="Send to the team members of a Team(s)" value="teams" onChecked={this.onTeam} disabled={this.state.allUsersBox} />
-                                </p>
-
-                                <p className="checkboxBtn">
-                                    <Checkbox checked={this.state.allUsersBox} label="Send to all users" value="users" onChecked={this.onAlluser} />
-                                </p>
+                            <div className="formContentContainer" >
+                                <h3>Recipient selection</h3>
+                                <h4>Please choose the groups you would like to send your message to:</h4>
+                                <RadiobuttonGroup
+                                    className="radioBtns"
+                                    value={this.state.selectedRadioBtn}
+                                    onSelected={this.onGroupSelected}
+                                >
+                                    <Radiobutton name="grouped" value="teams" label="Send to General channel(s)" />
+                                    <Dropdown
+                                        placeholder="Select team(s)"
+                                        defaultSelectedKeys={this.selectedTeams}
+                                        multiSelect
+                                        options={this.getItems()}
+                                        onChange={this.onTeamsChange}
+                                        disabled={!this.state.teamsOptionSelected}
+                                        className="dropdown"
+                                    />
+                                    <Radiobutton name="grouped" value="rosters" label="Send in chat" />
+                                    <Dropdown
+                                        placeholder="Choose team(s) members"
+                                        defaultSelectedKeys={this.selectedRosters}
+                                        multiSelect
+                                        options={this.getItems()}
+                                        onChange={this.onRostersChange}
+                                        disabled={!this.state.rostersOptionSelected}
+                                        className="dropdown"
+                                    />
+                                    <Radiobutton name="grouped" value="allUsers" label="Send in chat to all users" />
+                                </RadiobuttonGroup>
                             </div>
-
-                            <div className="boardSelection">
-
-                                <Dropdown
-                                    placeholder="Select team(s)"
-                                    defaultSelectedKeys={this.selectedTeams}
-                                    multiSelect
-                                    options={this.getItems()}
-                                    onChange={this.onTeamsChange}
-                                    disabled={!this.state.teamsBox}
-                                />
-
-                                <Dropdown
-                                    placeholder="Select roster(s)"
-                                    defaultSelectedKeys={this.selectedRosters}
-                                    multiSelect
-                                    options={this.getItems()}
-                                    onChange={this.onRostersChange}
-                                    disabled={!this.state.rostersBox}
-                                />
+                            <div className="adaptiveCardContainer">
                             </div>
                         </div>
 
                         <div className="footerContainer">
                             <div className="buttonContainer">
                                 <Button content="Back" onClick={this.onBack} secondary />
-                                <Button content="Save" disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
+                                <Button content="Save as draft" disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
                             </div>
                         </div>
                     </div>
@@ -330,10 +335,42 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
     }
 
+    private onGroupSelected = (value: any) => {
+        if (value === "teams") {
+            this.setState({
+                teamsOptionSelected: true,
+                rostersOptionSelected: false,
+                allUsersOptionSelected: false,
+            });
+        } else if (value === "rosters") {
+            this.setState({
+                teamsOptionSelected: false,
+                rostersOptionSelected: true,
+                allUsersOptionSelected: false,
+            });
+        } else if (value === "allUsers") {
+            this.setState({
+                teamsOptionSelected: false,
+                rostersOptionSelected: false,
+                allUsersOptionSelected: true,
+            });
+        }
+        else {
+            this.setState({
+                teamsOptionSelected: false,
+                rostersOptionSelected: false,
+                allUsersOptionSelected: false,
+            });
+        }
+        this.setState({
+            selectedRadioBtn: value
+        });
+    }
+
     private isSaveBtnDisabled = () => {
-        let teamsSelectionIsValid = (this.state.teamsBox && (this.state.selectedTeamsNum !== 0)) || (!this.state.teamsBox);
-        let rostersSelectionIsValid = (this.state.rostersBox && (this.state.selectedRostersNum !== 0)) || (!this.state.rostersBox);
-        let nothingSelected = (!this.state.teamsBox) && (!this.state.rostersBox) && (!this.state.allUsersBox);
+        let teamsSelectionIsValid = (this.state.teamsOptionSelected && (this.state.selectedTeamsNum !== 0)) || (!this.state.teamsOptionSelected);
+        let rostersSelectionIsValid = (this.state.rostersOptionSelected && (this.state.selectedRostersNum !== 0)) || (!this.state.rostersOptionSelected);
+        let nothingSelected = (!this.state.teamsOptionSelected) && (!this.state.rostersOptionSelected) && (!this.state.allUsersOptionSelected);
 
         if (!teamsSelectionIsValid || !rostersSelectionIsValid || nothingSelected) {
             return true;
@@ -409,11 +446,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         let teams: string[] = [];
         let rosters: string[] = [];
 
-        if (this.state.teamsBox) {
+        if (this.state.teamsOptionSelected) {
             teams = this.selectedTeams;
         }
 
-        if (this.state.rostersBox) {
+        if (this.state.rostersOptionSelected) {
             rosters = this.selectedRosters;
         }
 
@@ -428,7 +465,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 buttonLink: this.state.btnLink,
                 teams: teams,
                 rosters: rosters,
-                allUsers: this.state.allUsersBox
+                allUsers: this.state.allUsersOptionSelected
             };
 
             const response = await updateDraftNotification(draftMessage);
@@ -441,11 +478,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         let teams: string[] = [];
         let rosters: string[] = [];
 
-        if (this.state.teamsBox) {
+        if (this.state.teamsOptionSelected) {
             teams = this.selectedTeams;
         }
 
-        if (this.state.rostersBox) {
+        if (this.state.rostersOptionSelected) {
             rosters = this.selectedRosters;
         }
 
@@ -459,7 +496,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 buttonLink: this.state.btnLink,
                 teams: teams,
                 rosters: rosters,
-                allUsers: this.state.allUsersBox
+                allUsers: this.state.allUsersOptionSelected
             };
 
             const response = await createDraftNotification(draftMessage);
@@ -474,27 +511,12 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
     }
 
-    private onAlluser = () => {
-        this.setState({
-            rostersBox: false,
-            allUsersBox: !this.state.allUsersBox
-        })
-    }
-
-    private onTeam = () => {
-        this.setState({
-            rostersBox: !this.state.rostersBox
-        })
-    }
-
-    private onChannel = (checked: boolean, value?: any) => {
-        this.setState({
-            teamsBox: !this.state.teamsBox
-        })
-    }
-
     private onNext = (event: any) => {
-        this.setState({ page: "AudienceSelection" });
+        this.setState({
+            page: "AudienceSelection"
+        }, () => {
+            this.updateCard();
+        });
     }
 
     private onBack = (event: any) => {

@@ -91,7 +91,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
     public onNewPost = (event: React.MouseEvent<HTMLButtonElement>) => {
         let taskInfo: ITaskInfo = {
             url: this.state.url,
-            title: "New Announcement",
+            title: "New message",
             height: 530,
             width: 1000,
             fallbackUrl: this.state.url,

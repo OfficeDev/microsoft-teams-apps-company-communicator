@@ -88,7 +88,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         onRender: (item) => {
           const onTitleClicked = (id: string) => {
             let url = getBaseUrl() + "/newmessage/" + id;
-            this.onOpenTaskModule(null, url, "New Announcement");
+            this.onOpenTaskModule(null, url, "New message");
           }
           return (
             <span className="content">
@@ -230,7 +230,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         name: 'Edit',
         onClick: () => {
           let url = getBaseUrl() + "/newmessage/" + id;
-          this.onOpenTaskModule(null, url, "New Announcement");
+          this.onOpenTaskModule(null, url, "New message");
         }
       },
       {
