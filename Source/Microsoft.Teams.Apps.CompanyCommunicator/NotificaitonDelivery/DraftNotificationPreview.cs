@@ -52,7 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         }
 
         /// <summary>
-        /// Preview a draft notificaiton.
+        /// Preview a draft notification.
         /// </summary>
         /// <param name="draftNotificationEntity">Draft notification entity.</param>
         /// <param name="teamDataEntity">The team data entity.</param>
@@ -79,7 +79,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
             // Create bot conversation reference.
             var conversationReference = this.PrepareConversationReferenceAsync(teamDataEntity, teamsChannelId);
 
-            // Ensure the bot service url is trusted.
+            // Ensure the bot service URL is trusted.
             if (!MicrosoftAppCredentials.IsTrustedServiceUrl(conversationReference.ServiceUrl))
             {
                 MicrosoftAppCredentials.TrustServiceUrl(conversationReference.ServiceUrl);

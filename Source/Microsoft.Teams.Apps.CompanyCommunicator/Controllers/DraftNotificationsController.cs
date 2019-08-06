@@ -6,7 +6,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
     using System.Collections.Generic;
-    using System.Net;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -32,7 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
         /// </summary>
-        /// <param name="notificationRepository">Notification respository instance.</param>
+        /// <param name="notificationRepository">Notification repository instance.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
         /// <param name="notificationPreview">Notification preview service.</param>
         public DraftNotificationsController(
@@ -218,11 +217,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="draftNotificationPreviewRequest">Draft notification preview request.</param>
         /// <returns>.</returns>
         /// <returns>
-        /// It returns 400 badrequest error, if the incoming paramter, draftNotificationPreviewRequest, is invalid.
-        /// It returns 404 not found error, if the DraftNotificationId or TeamsTeamId (contained in draftNotificationPreviewRequest) is not found in the table storage.
-        /// It returns 500 internal error, if this method throws an unhandled exception.
-        /// It returns 429 too many requests error, if the preview request is throttled by the bot service.
-        /// It returns 200 Ok, if the method is executed successfully.</returns>
+        /// It returns 400 bad request error if the incoming parameter, draftNotificationPreviewRequest, is invalid.
+        /// It returns 404 not found error if the DraftNotificationId or TeamsTeamId (contained in draftNotificationPreviewRequest) is not found in the table storage.
+        /// It returns 500 internal error if this method throws an unhandled exception.
+        /// It returns 429 too many requests error if the preview request is throttled by the bot service.
+        /// It returns 200 Ok if the method is executed successfully.</returns>
         [HttpPost("previews")]
         public async Task<ActionResult> PreviewDraftNotificationAsync(
             [FromBody] DraftNotificationPreviewRequest draftNotificationPreviewRequest)
