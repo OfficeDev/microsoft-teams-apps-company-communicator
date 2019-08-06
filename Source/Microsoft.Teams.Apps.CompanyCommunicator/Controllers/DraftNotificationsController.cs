@@ -215,7 +215,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// Preview draft notification.
         /// </summary>
         /// <param name="draftNotificationPreviewRequest">Draft notification preview request.</param>
-        /// <returns>.</returns>
         /// <returns>
         /// It returns 400 bad request error if the incoming parameter, draftNotificationPreviewRequest, is invalid.
         /// It returns 404 not found error if the DraftNotificationId or TeamsTeamId (contained in draftNotificationPreviewRequest) is not found in the table storage.
