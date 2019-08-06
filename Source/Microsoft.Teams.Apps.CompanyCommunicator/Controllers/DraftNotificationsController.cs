@@ -216,8 +216,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// Preview draft notification.
         /// </summary>
         /// <param name="draftNotificationPreviewRequest">Draft notification preview request.</param>
-        /// <returns>It returns the draft notification summary (for consent page) with the passed in id.
-        /// If the passed in id is invalid, it returns 404 not found error.</returns>
+        /// <returns>.</returns>
+        /// <returns>
+        /// It returns 400 badrequest error, if the incoming paramter, draftNotificationPreviewRequest, is invalid.
+        /// It returns 404 not found error, if the DraftNotificationId or TeamsTeamId (contained in draftNotificationPreviewRequest) is not found in the table storage.
+        /// It returns 500 internal error, if this method throws an unhandled exception.
+        /// It returns 429 too many requests error, if the preview request is throttled by the bot service.
+        /// It returns 200 Ok, if the method is executed successfully.</returns>
         [HttpPost("previews")]
         public async Task<ActionResult> PreviewDraftNotificationAsync(
             [FromBody] DraftNotificationPreviewRequest draftNotificationPreviewRequest)
@@ -250,7 +255,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 notificationEntity,
                 teamDataEntity,
                 draftNotificationPreviewRequest.TeamsChannelId);
-            return this.StatusCode(result == null ? (int)HttpStatusCode.InternalServerError : (int)result.Value);
+            return this.StatusCode((int)result);
         }
     }
 }

@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
     /// <summary>
-    /// Preview draft notification request model class.
+    /// Draft notification preview request model class.
     /// </summary>
     public class DraftNotificationPreviewRequest
     {

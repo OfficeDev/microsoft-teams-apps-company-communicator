@@ -18,7 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
 
     /// <summary>
-    /// Notification preview service.
+    /// Draft notification preview service.
     /// </summary>
     public class DraftNotificationPreview
     {
@@ -44,7 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
             this.botAppId = configuration["MicrosoftAppId"];
             if (string.IsNullOrEmpty(this.botAppId))
             {
-                throw new ApplicationException("MicrosftAppId setting is not set properly in the configuration.");
+                throw new ApplicationException("MicrosftAppId setting is missing in the configuration.");
             }
 
             this.adaptiveCardCreator = adaptiveCardCreator;
@@ -56,9 +56,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
         /// </summary>
         /// <param name="draftNotificationEntity">Draft notification entity.</param>
         /// <param name="teamDataEntity">The team data entity.</param>
-        /// <param name="channelId">The change </param>
-        /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task<HttpStatusCode?> Preview(NotificationEntity draftNotificationEntity, TeamDataEntity teamDataEntity, string channelId)
+        /// <param name="teamsChannelId">The Teams channel id.</param>
+        /// <returns>It returns HttpStatusCode.OK, if this method triggers the bot service to send adaptive card successfully.
+        /// It returns HttpStatusCode.TooManyRequests, if the bot service throttled the request to send adaptive card.</returns>
+        public async Task<HttpStatusCode> Preview(NotificationEntity draftNotificationEntity, TeamDataEntity teamDataEntity, string teamsChannelId)
         {
             if (draftNotificationEntity == null)
             {
@@ -70,35 +71,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
                 throw new ArgumentException("Null team data entity.");
             }
 
-            if (string.IsNullOrWhiteSpace(channelId))
+            if (string.IsNullOrWhiteSpace(teamsChannelId))
             {
                 throw new ArgumentException("Null channel id.");
             }
 
             // Create bot conversation reference.
-            var conversationReference = this.PrepareConversationReferenceAsync(teamDataEntity, channelId);
+            var conversationReference = this.PrepareConversationReferenceAsync(teamDataEntity, teamsChannelId);
 
             // Ensure the bot service url is trusted.
-            MicrosoftAppCredentials.TrustServiceUrl(conversationReference.ServiceUrl);
+            if (!MicrosoftAppCredentials.IsTrustedServiceUrl(conversationReference.ServiceUrl))
+            {
+                MicrosoftAppCredentials.TrustServiceUrl(conversationReference.ServiceUrl);
+            }
 
             // Trigger bot to send the adaptive card.
-            HttpStatusCode? result = null;
-            await this.botFrameworkHttpAdapter.ContinueConversationAsync(
-                this.botAppId,
-                conversationReference,
-                async (ctx, ct) => result = await this.SendAdaptiveCardAsync(ctx, draftNotificationEntity),
-                CancellationToken.None);
-            return result;
-        }
-
-        private async Task<HttpStatusCode> SendAdaptiveCardAsync(
-            ITurnContext turnContext,
-            NotificationEntity draftNotificationEntity)
-        {
             try
             {
-                var reply = this.CreateReply(draftNotificationEntity);
-                await turnContext.SendActivityAsync(reply);
+                await this.botFrameworkHttpAdapter.ContinueConversationAsync(
+                    this.botAppId,
+                    conversationReference,
+                    async (ctx, ct) => await this.SendAdaptiveCardAsync(ctx, draftNotificationEntity),
+                    CancellationToken.None);
                 return HttpStatusCode.OK;
             }
             catch (ErrorResponseException e)
@@ -110,8 +104,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
                     return HttpStatusCode.TooManyRequests;
                 }
 
-                return HttpStatusCode.InternalServerError;
+                throw;
             }
+        }
+
+        private async Task SendAdaptiveCardAsync(
+            ITurnContext turnContext,
+            NotificationEntity draftNotificationEntity)
+        {
+            var reply = this.CreateReply(draftNotificationEntity);
+            await turnContext.SendActivityAsync(reply);
         }
 
         private ConversationReference PrepareConversationReferenceAsync(TeamDataEntity teamDataEntity, string channelId)
