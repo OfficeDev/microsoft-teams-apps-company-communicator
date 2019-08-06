@@ -1,10 +1,11 @@
-﻿// <copyright file="NotificationPreview.cs" company="Microsoft">
+﻿// <copyright file="DraftNotificationPreview.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 {
     using System;
+    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using AdaptiveCards;
@@ -13,33 +14,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.User;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
 
     /// <summary>
     /// Notification preview service.
     /// </summary>
-    public class NotificationPreview
+    public class DraftNotificationPreview
     {
         private static readonly string MsTeamsChannelId = "msteams";
+        private static readonly string ChannelConversationType = "channel";
+        private static readonly string ThrottledErrorResponse = "Throttled";
 
         private readonly string botAppId;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
-        private readonly UserDataRepository userDataRepository;
         private readonly BotFrameworkHttpAdapter botFrameworkHttpAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NotificationPreview"/> class.
+        /// Initializes a new instance of the <see cref="DraftNotificationPreview"/> class.
         /// </summary>
         /// <param name="configuration">Application configuration service.</param>
         /// <param name="adaptiveCardCreator">Adaptive card creator service.</param>
-        /// <param name="userDataRepository">User data repository service.</param>
         /// <param name="botFrameworkHttpAdapter">Bot framework http adapter instance.</param>
-        public NotificationPreview(
+        public DraftNotificationPreview(
             IConfiguration configuration,
             AdaptiveCardCreator adaptiveCardCreator,
-            UserDataRepository userDataRepository,
             BotFrameworkHttpAdapter botFrameworkHttpAdapter)
         {
             this.botAppId = configuration["MicrosoftAppId"];
@@ -49,56 +48,74 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
             }
 
             this.adaptiveCardCreator = adaptiveCardCreator;
-            this.userDataRepository = userDataRepository;
             this.botFrameworkHttpAdapter = botFrameworkHttpAdapter;
         }
 
         /// <summary>
         /// Preview a draft notificaiton.
         /// </summary>
-        /// <param name="previewerAadId">The previewer's Aad id.</param>
         /// <param name="draftNotificationEntity">Draft notification entity.</param>
+        /// <param name="teamDataEntity">The team data entity.</param>
+        /// <param name="channelId">The change </param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task Preview(string previewerAadId, NotificationEntity draftNotificationEntity)
+        public async Task<HttpStatusCode?> Preview(NotificationEntity draftNotificationEntity, TeamDataEntity teamDataEntity, string channelId)
         {
-            if (string.IsNullOrWhiteSpace(previewerAadId))
-            {
-                throw new ArgumentException("Null previewer id.");
-            }
-
             if (draftNotificationEntity == null)
             {
                 throw new ArgumentException("Null draft notification entity.");
             }
 
+            if (teamDataEntity == null)
+            {
+                throw new ArgumentException("Null team data entity.");
+            }
+
+            if (string.IsNullOrWhiteSpace(channelId))
+            {
+                throw new ArgumentException("Null channel id.");
+            }
+
             // Create bot conversation reference.
-            var conversationReference = await this.PrepareConversationReferenceAsync(previewerAadId);
+            var conversationReference = this.PrepareConversationReferenceAsync(teamDataEntity, channelId);
 
             // Ensure the bot service url is trusted.
             MicrosoftAppCredentials.TrustServiceUrl(conversationReference.ServiceUrl);
 
             // Trigger bot to send the adaptive card.
+            HttpStatusCode? result = null;
             await this.botFrameworkHttpAdapter.ContinueConversationAsync(
                 this.botAppId,
                 conversationReference,
-                async (ctx, ct) =>
-                {
-                    var reply = this.CreateReply(draftNotificationEntity);
-                    await ctx.SendActivityAsync(reply);
-                },
+                async (ctx, ct) => result = await this.SendAdaptiveCardAsync(ctx, draftNotificationEntity),
                 CancellationToken.None);
+            return result;
         }
 
-        private async Task<ConversationReference> PrepareConversationReferenceAsync(string previewerAadId)
+        private async Task<HttpStatusCode> SendAdaptiveCardAsync(
+            ITurnContext turnContext,
+            NotificationEntity draftNotificationEntity)
         {
-            var userDataEntity = await this.userDataRepository.GetAsync(
-                PartitionKeyNames.Metadata.UserData,
-                previewerAadId);
-            if (userDataEntity == null)
+            try
             {
-                throw new ApplicationException("Previewer's user data doesn't exist in data storage.");
+                var reply = this.CreateReply(draftNotificationEntity);
+                await turnContext.SendActivityAsync(reply);
+                return HttpStatusCode.OK;
             }
+            catch (ErrorResponseException e)
+            {
+                var errorResponse = (ErrorResponse)e.Body;
+                if (errorResponse != null
+                    && errorResponse.Error.Code.Equals(ThrottledErrorResponse, StringComparison.OrdinalIgnoreCase))
+                {
+                    return HttpStatusCode.TooManyRequests;
+                }
 
+                return HttpStatusCode.InternalServerError;
+            }
+        }
+
+        private ConversationReference PrepareConversationReferenceAsync(TeamDataEntity teamDataEntity, string channelId)
+        {
             var channelAccount = new ChannelAccount
             {
                 Id = $"28:{this.botAppId}",
@@ -106,9 +123,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 
             var conversationAccount = new ConversationAccount
             {
-                ConversationType = "personal",
-                Id = userDataEntity.ConversationId,
-                TenantId = userDataEntity.TenantId,
+                ConversationType = ChannelConversationType,
+                Id = channelId,
+                TenantId = teamDataEntity.TenantId,
             };
 
             var result = new ConversationReference
@@ -116,7 +133,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
                 Bot = channelAccount,
                 ChannelId = MsTeamsChannelId,
                 Conversation = conversationAccount,
-                ServiceUrl = userDataEntity.ServiceUrl,
+                ServiceUrl = teamDataEntity.ServiceUrl,
             };
 
             return result;

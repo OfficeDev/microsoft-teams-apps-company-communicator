@@ -72,12 +72,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
                 });
             }
 
-            if (!string.IsNullOrWhiteSpace(buttonTitle) && !string.IsNullOrWhiteSpace(buttonUrl))
+            if (!string.IsNullOrWhiteSpace(buttonTitle)
+                && !string.IsNullOrWhiteSpace(buttonUrl))
             {
                 card.Actions.Add(new AdaptiveOpenUrlAction()
                 {
                     Title = buttonTitle,
-                    Url = new Uri(buttonUrl),
+                    Url = new Uri(buttonUrl, UriKind.RelativeOrAbsolute),
                 });
             }
 
