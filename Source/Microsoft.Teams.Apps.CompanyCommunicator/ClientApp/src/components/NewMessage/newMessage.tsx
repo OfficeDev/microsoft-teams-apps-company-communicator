@@ -62,6 +62,12 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         super(props);
         initializeIcons();
         this.card = getInitAdaptiveCard();
+        let url = window.location + "";
+        let imgUrl = url.replace("/newmessage", "") + "/image/imagePlaceholder.png";
+        setCardImageLink(this.card, imgUrl);
+        setCardSummary(this.card, "Summary");
+        setCardAuthor(this.card, "- Author");
+        setCardBtn(this.card, "Button title", "");
 
         this.state = {
             title: "",
@@ -106,8 +112,10 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                     adaptiveCard.parse(this.state.card);
                     let renderedCard = adaptiveCard.render();
                     document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
-                    let link = this.state.btnLink;
-                    adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
+                    if (this.state.btnLink) {
+                        let link = this.state.btnLink;
+                        adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
+                    }
                 })
             }
         });
