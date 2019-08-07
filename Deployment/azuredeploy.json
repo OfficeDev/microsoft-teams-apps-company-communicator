@@ -205,8 +205,16 @@
               "value": "[listkeys(variables('authRuleResourceId'), '2017-04-01').primaryConnectionString]"
             },
             {
-              "name": "TenantId",
+              "name": "AllowedTenants",
               "value": "[parameters('tenantId')]"
+            },
+            {
+              "name": "DisableTenantFilter",
+              "value": "true"
+            },
+            {
+              "name": "ValidUpns",
+              "value": "[parameters('senderUPNList')]"
             },
             {
               "name": "DisableAuthentication",
