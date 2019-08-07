@@ -190,9 +190,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             setCardImageLink(this.card, draftMessageDetail.imageLink);
             setCardSummary(this.card, draftMessageDetail.summary);
             setCardAuthor(this.card, draftMessageDetail.author);
-            if (draftMessageDetail.buttonTitle !== "" && draftMessageDetail.buttonLink !== "") {
-                setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
-            }
+            setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
 
             this.setState({
                 title: draftMessageDetail.title,
