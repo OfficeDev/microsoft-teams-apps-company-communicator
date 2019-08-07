@@ -13,7 +13,7 @@ import * as microsoftTeams from "@microsoft/teams-js";
 export interface IMessage {
     id: string;
     title: string;
-    acknowledgements?: string;
+    acknowledgements?: number;
     reactions?: number;
     responses?: number;
     succeeded?: number;
