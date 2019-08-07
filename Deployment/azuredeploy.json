@@ -56,7 +56,7 @@
         "description": "The ID of the tenant to which the app will be deployed."
       }
     },
-    "sku": {
+    "hostingPlanSku": {
       "type": "string",
       "allowedValues": [
         "Basic",
@@ -68,7 +68,7 @@
         "description": "The pricing tier for the hosting plan."
       }
     },
-    "planSize": {
+    "hostingPlanSize": {
       "type": "string",
       "allowedValues": [
         "1",
@@ -78,6 +78,17 @@
       "defaultValue": "1",
       "metadata": {
         "description": "The size of the hosting plan (small, medium, or large)."
+      }
+    },
+    "functionHostingPlan": {
+      "type": "string",
+      "allowedValues": [
+        "Consumption",
+        "Dedicated"
+      ],
+      "defaultValue": "Dedicated",
+      "metadata": {
+        "description": "The hosting plan type for the Azure function."
       }
     },
     "location": {
@@ -111,7 +122,8 @@
     "storageAccountName": "[uniquestring(concat(resourceGroup().id, parameters('baseResourceName')))]",
     "appInsightsName": "[parameters('baseResourceName')]",
     "functionAppName": "[concat(parameters('baseResourceName'), '-function')]",
-    "functionAppHostingPlanName": "[parameters('baseResourceName')]",
+    "isFunctionAppConsumptionPlan": "[equals(parameters('functionHostingPlan'), 'Consumption')]",
+    "functionAppHostingPlanName": "[if(variables('isFunctionAppConsumptionPlan'), variables('functionAppName'), parameters('baseResourceName'))]",
     "serviceBusNamespaceName": "[parameters('baseResourceName')]",
     "serviceBusSendQueueName": "company-communicator-send",
     "defaultSASKeyName": "RootManageSharedAccessKey",
@@ -120,8 +132,8 @@
       "Free",
       "Shared"
     ],
-    "isSharedPlan": "[contains(variables('sharedSkus'), parameters('sku'))]",
-    "skuFamily": "[if(equals(parameters('sku'), 'Shared'), 'D', take(parameters('sku'), 1))]"
+    "isSharedPlan": "[contains(variables('sharedSkus'), parameters('hostingPlanSku'))]",
+    "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]"
   },
   "resources": [
     {
@@ -145,9 +157,9 @@
         "numberOfWorkers": 1
       },
       "sku": {
-        "name": "[if(variables('isSharedPlan'), concat(variables('skuFamily'),'1'), concat(variables('skuFamily'),parameters('planSize')))]",
-        "tier": "[parameters('sku')]",
-        "size": "[concat(variables('skuFamily'), parameters('planSize'))]",
+        "name": "[if(variables('isSharedPlan'), concat(variables('skuFamily'), '1'), concat(variables('skuFamily'), parameters('hostingPlanSize')))]",
+        "tier": "[parameters('hostingPlanSku')]",
+        "size": "[concat(variables('skuFamily'), parameters('hostingPlanSize'))]",
         "family": "[variables('skuFamily')]",
         "capacity": 0
       }
@@ -170,7 +182,7 @@
         "dailyMemoryTimeQuota": 0,
         "httpsOnly": true,
         "siteConfig": {
-          "alwaysOn": true,
+          "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
               "name": "PROJECT",
@@ -203,6 +215,10 @@
             {
               "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
               "value": "[reference(resourceId('Microsoft.Insights/components/', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
+            },
+            {
+              "name": "WEBSITE_NODE_DEFAULT_VERSION",
+              "value": "6.9.0"
             }
           ]
         }
@@ -316,6 +332,18 @@
       ]
     },
     {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2015-04-01",
+      "name": "[variables('functionAppName')]",
+      "condition": "[variables('isFunctionAppConsumptionPlan')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "name": "[variables('functionAppName')]",
+        "computeMode": "Dynamic",
+        "sku": "Dynamic"
+      }
+    },
+    {
       "apiVersion": "2016-08-01",
       "type": "Microsoft.Web/sites",
       "name": "[variables('functionAppName')]",
@@ -327,7 +355,7 @@
         "hostingEnvironment": "",
         "clientAffinityEnabled": false,
         "siteConfig": {
-          "alwaysOn": "[not(variables('isSharedPlan'))]",
+          "alwaysOn": "[and(not(variables('isFunctionAppConsumptionPlan')), not(variables('isSharedPlan')))]",
           "appSettings": [
             {
               "name": "PROJECT",
