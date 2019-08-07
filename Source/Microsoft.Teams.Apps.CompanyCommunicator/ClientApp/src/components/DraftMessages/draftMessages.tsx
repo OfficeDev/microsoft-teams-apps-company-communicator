@@ -244,7 +244,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
           sendPreview(payload).then((response) => {
             return response.status;
           }).catch((error) => {
-            alert(error);
+            return error;
           });
         }
       },
