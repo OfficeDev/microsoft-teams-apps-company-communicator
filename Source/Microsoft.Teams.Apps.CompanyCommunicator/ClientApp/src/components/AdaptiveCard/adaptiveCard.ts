@@ -89,5 +89,4 @@ export const setCardBtn = (card: any, buttonTitle?: string, buttonLink?: string)
     } else {
         delete card.actions;
     }
-
 }
