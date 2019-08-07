@@ -24,19 +24,27 @@
         "description": "The client secret of the bot Azure AD app."
       }
     },
-    "configAppClientId": {
-      "type": "string",
-      "minLength": 36,
-      "maxLength": 36,
-      "metadata": {
-        "description": "The client ID of the of the configuration Azure AD app, e.g., 123e4567-e89b-12d3-a456-426655440000."
-      }
-    },
-    "configAdminUPNList": {
+    "senderUPNList": {
       "type": "string",
       "minLength": 1,
       "metadata": {
-        "description": "Semicolon-delimited list of the user principal names (UPNs) allowed to access the configuration app."
+        "description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
+      }
+    },
+    "botDisplayName": {
+      "type": "string",
+      "defaultValue": "Company Communicator",
+      "minLength": 1,
+      "metadata": {
+        "description": "The bot display name."
+      }
+    },
+    "botDescription": {
+      "type": "string",
+      "defaultValue": "Company Communicator",
+      "minLength": 1,
+      "metadata": {
+        "description": "The bot description."
       }
     },
     "tenantId": {
@@ -79,36 +87,12 @@
         "description": "Location for all resources."
       }
     },
-    "qnaMakerSku": {
-      "type": "string",
-      "allowedValues": [
-        "F0 (3 managed documents per month, 3 transactions per second, 100 transactions per minute, 50K transactions per month)",
-        "S0 ($10 per month for unlimited documents, 3 transactions per second, 100 transactions per minute)"
-      ],
-      "defaultValue": "S0 ($10 per month for unlimited documents, 3 transactions per second, 100 transactions per minute)",
-      "metadata": {
-        "description": "The pricing tier for the QnAMaker service."
-      }
-    },
-    "searchServiceSku": {
-      "type": "string",
-      "allowedValues": [
-        "F (3 indexes)",
-        "B (15 indexes)",
-        "S (50 indexes)",
-        "S2 (200 indexes)"
-      ],
-      "defaultValue": "B (15 indexes)",
-      "metadata": {
-        "description": "The pricing tier for the Azure Search service."
-      }
-    },
     "gitRepoUrl": {
       "type": "string",
       "metadata": {
         "description": "The URL to the GitHub repository to deploy."
       },
-      "defaultValue": "https://github.com/OfficeDev/microsoft-teams-faqplusplus-app.git"
+      "defaultValue": "https://github.com/OfficeDev/microsoft-teams-company-communicator-app.git"
     },
     "gitBranch": {
       "type": "string",
@@ -125,23 +109,13 @@
     "botAppUrl": "[concat('https://', variables('botAppDomain'))]",
     "hostingPlanName": "[parameters('baseResourceName')]",
     "storageAccountName": "[uniquestring(concat(resourceGroup().id, parameters('baseResourceName')))]",
-    "botAppInsightsName": "[parameters('baseResourceName')]",
-    "configAppName": "[concat(parameters('baseResourceName'), '-config')]",
-    "configAppUrl": "[concat('https://', variables('configAppName'), '.azurewebsites.net')]",
-    "configAppInsightsName": "[concat(parameters('baseResourceName'), '-config')]",
-    "qnaMakerAccountName": "[parameters('baseResourceName')]",
-    "qnaMakerLocation": "westus",
-    "qnaMakerAppServiceName": "[concat(parameters('baseResourceName'), '-qnamaker')]",
-    "qnaMakerAppInsightsName": "[concat(parameters('baseResourceName'), '-qnamaker')]",
-    "qnaMakerSkuValue": "[substring(parameters('qnaMakerSku'), 0, 2)]",
-    "azureSearchName": "[concat(uniquestring(concat(resourceGroup().id, parameters('baseResourceName'))), '-search')]",
-    "azureSearchSkus": {
-      "F ": "free",
-      "B ": "basic",
-      "S ": "standard",
-      "S2": "standard2"
-    },
-    "azureSearchSkuValue": "[variables('azureSearchSkus')[toUpper(substring(parameters('searchServiceSku'), 0, 2))]]",
+    "appInsightsName": "[parameters('baseResourceName')]",
+    "functionAppName": "[concat(parameters('baseResourceName'), '-function')]",
+    "functionAppHostingPlanName": "[parameters('baseResourceName')]",
+    "serviceBusNamespaceName": "[parameters('baseResourceName')]",
+    "serviceBusSendQueueName": "company-communicator-send",
+    "defaultSASKeyName": "RootManageSharedAccessKey",
+    "authRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('serviceBusNamespaceName'), variables('defaultSASKeyName'))]",
     "sharedSkus": [
       "Free",
       "Shared"
@@ -199,8 +173,8 @@
           "alwaysOn": true,
           "appSettings": [
             {
-              "name": "SITE_ROLE",
-              "value": "bot"
+              "name": "PROJECT",
+              "value": "Source/Microsoft.Teams.Apps.CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj"
             },
             {
               "name": "MicrosoftAppId",
@@ -211,44 +185,24 @@
               "value": "[parameters('botClientSecret')]"
             },
             {
-              "name": "StorageConnectionString",
+              "name": "StorageAccountConnectionString",
               "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]"
             },
             {
-              "name": "QnAMakerHostUrl",
-              "value": "[concat('https://', reference(resourceId('Microsoft.Web/sites', variables('qnaMakerAppServiceName'))).hostNames[0])]"
+              "name": "ServiceBusConnection",
+              "value": "[listkeys(variables('authRuleResourceId'), '2017-04-01').primaryConnectionString]"
             },
             {
               "name": "TenantId",
               "value": "[parameters('tenantId')]"
             },
             {
-              "name": "AppBaseUri",
-              "value": "[concat('https://', variables('botAppDomain'))]"
+              "name": "DisableAuthentication",
+              "value": "true"
             },
             {
               "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-              "value": "[reference(resourceId('Microsoft.Insights/components/', variables('botAppInsightsName')), '2015-05-01').InstrumentationKey]"
-            },
-            {
-              "name": "ApplicationInsightsLogLevel",
-              "value": "Debug"
-            },
-            {
-              "name": "ScoreThreshold",
-              "value": "0.5"
-            },
-            {
-              "name": "SearchServiceName",
-              "value": "[variables('azureSearchName')]"
-            },
-            {
-              "name": "SearchServiceAdminApiKey",
-              "value": "[listAdminKeys(resourceId('Microsoft.Search/searchServices/', variables('azureSearchName')), '2015-08-19').primaryKey]"
-            },
-            {
-              "name": "SearchServiceQueryApiKey",
-              "value": "[listQueryKeys(resourceId('Microsoft.Search/searchServices/', variables('azureSearchName')), '2015-08-19').value[0].key]"
+              "value": "[reference(resourceId('Microsoft.Insights/components/', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
             }
           ]
         }
@@ -256,10 +210,8 @@
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
-        "[resourceId('Microsoft.Web/sites', variables('qnaMakerAppServiceName'))]",
-        "[resourceId('Microsoft.CognitiveServices/accounts/', variables('qnaMakerAccountName'))]",
-        "[resourceId('Microsoft.Search/searchServices/', variables('azureSearchName'))]",
-        "[resourceId('Microsoft.Insights/components/', variables('botAppInsightsName'))]"
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
+        "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]"
       ],
       "resources": [
         {
@@ -280,7 +232,7 @@
     },
     {
       "apiVersion": "2015-05-01",
-      "name": "[variables('botAppInsightsName')]",
+      "name": "[variables('appInsightsName')]",
       "type": "Microsoft.Insights/components",
       "location": "[parameters('location')]",
       "tags": {
@@ -301,10 +253,11 @@
       },
       "kind": "sdk",
       "properties": {
-        "displayName": "[variables('botName')]",
+        "displayName": "[parameters('botDisplayName')]",
+        "description": "[parameters('botDescription')]",
         "msaAppId": "[parameters('botClientId')]",
         "endpoint": "[concat(variables('botAppUrl'), '/api/messages')]",
-        "developerAppInsightKey": "[reference(resourceId('Microsoft.Insights/components', variables('botAppInsightsName')), '2015-05-01').InstrumentationKey]"
+        "developerAppInsightKey": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
       },
       "resources": [
         {
@@ -329,206 +282,126 @@
       ]
     },
     {
-      "type": "Microsoft.Web/sites",
-      "apiVersion": "2016-08-01",
-      "name": "[variables('configAppName')]",
+      "type": "Microsoft.ServiceBus/namespaces",
+      "apiVersion": "2017-04-01",
+      "name": "[variables('serviceBusNamespaceName')]",
       "location": "[parameters('location')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
-        "[resourceId('Microsoft.CognitiveServices/accounts/', variables('qnaMakerAccountName'))]",
-        "[resourceId('Microsoft.Insights/components/', variables('configAppInsightsName'))]"
-      ],
-      "kind": "app",
+      "sku": {
+        "name": "Basic",
+        "tier": "Basic"
+      },
+      "resources": [
+        {
+          "type": "Queues",
+          "apiVersion": "2017-04-01",
+          "name": "[variables('serviceBusSendQueueName')]",
+          "dependsOn": [
+            "[concat('Microsoft.ServiceBus/namespaces/', variables('serviceBusNamespaceName'))]"
+          ],
+          "properties": {
+            "lockDuration": "PT30S",
+            "maxSizeInMegabytes": 1024,
+            "requiresDuplicateDetection": false,
+            "requiresSession": false,
+            "defaultMessageTimeToLive": "P14D",
+            "deadLetteringOnMessageExpiration": false,
+            "enableBatchedOperations": true,
+            "duplicateDetectionHistoryTimeWindow": "PT10M",
+            "maxDeliveryCount": 10,
+            "status": "Active",
+            "enablePartitioning": false,
+            "enableExpress": false
+          }
+        }
+      ]
+    },
+    {
+      "apiVersion": "2016-08-01",
+      "type": "Microsoft.Web/sites",
+      "name": "[variables('functionAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp",
       "properties": {
-        "name": "[variables('configAppName')]",
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
-        "enabled": true,
-        "reserved": false,
-        "scmSiteAlsoStopped": false,
-        "clientAffinityEnabled": true,
-        "clientCertEnabled": false,
-        "hostNamesDisabled": false,
-        "containerSize": 0,
-        "dailyMemoryTimeQuota": 0,
-        "httpsOnly": true,
+        "name": "[variables('functionAppName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('functionAppHostingPlanName'))]",
+        "hostingEnvironment": "",
+        "clientAffinityEnabled": false,
         "siteConfig": {
-          "alwaysOn": false,
+          "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
-              "name": "SITE_ROLE",
-              "value": "config"
+              "name": "PROJECT",
+              "value": "Source/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj"
             },
             {
-              "name": "StorageConnectionString",
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
+            },
+            {
+              "name": "AzureWebJobsDashboard",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~2"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "dotnet"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
               "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]"
             },
             {
-              "name": "QnAMakerApiEndpointUrl",
-              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts/', variables('qnaMakerAccountName')), '2017-04-18').endpoint]"
-            },
-            {
-              "name": "QnAMakerSubscriptionKey",
-              "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts/', variables('qnaMakerAccountName')), '2017-04-18').key1]"
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[toLower(variables('functionAppName'))]"
             },
             {
               "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-              "value": "[reference(resourceId('Microsoft.Insights/components/', variables('configAppInsightsName')), '2015-05-01').InstrumentationKey]"
+              "value": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
             },
             {
-              "name": "ida:AADInstance",
-              "value": "https://login.microsoftonline.com/"
+              "name": "MaxNumberOfAttempts",
+              "value": "10"
             },
             {
-              "name": "ida:ClientId",
-              "value": "[parameters('configAppClientId')]"
+              "name": "MicrosoftAppId",
+              "value": "[parameters('botClientId')]"
             },
             {
-              "name": "ida:TenantId",
-              "value": "[parameters('tenantId')]"
+              "name": "MicrosoftAppPassword",
+              "value": "[parameters('botClientSecret')]"
             },
             {
-              "name": "ida:RedirectUri",
-              "value": "[variables('configAppUrl')]"
+              "name": "StorageAccountConnectionString",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]"
             },
             {
-              "name": "ida:PostLogoutRedirectUri",
-              "value": "[variables('configAppUrl')]"
-            },
-            {
-              "name": "ValidUpns",
-              "value": "[parameters('configAdminUPNList')]"
+              "name": "ServiceBusConnection",
+              "value": "[listkeys(variables('authRuleResourceId'), '2017-04-01').primaryConnectionString]"
             }
           ]
         }
       },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('functionAppHostingPlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]"
+      ],
       "resources": [
         {
-          "apiVersion": "2016-08-01",
+          "apiVersion": "2015-08-01",
           "name": "web",
           "type": "sourcecontrols",
           "condition": "[not(empty(parameters('gitRepoUrl')))]",
           "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', variables('configAppName'))]"
+            "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]"
           ],
           "properties": {
             "RepoUrl": "[parameters('gitRepoUrl')]",
             "branch": "[parameters('gitBranch')]",
             "IsManualIntegration": true
-          }
-        }
-      ]
-    },
-    {
-      "apiVersion": "2015-05-01",
-      "name": "[variables('configAppInsightsName')]",
-      "type": "Microsoft.Insights/components",
-      "location": "[parameters('location')]",
-      "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('configAppName'))]": "Resource"
-      },
-      "properties": {
-        "Application_Type": "web",
-        "Request_Source": "rest"
-      }
-    },
-    {
-      "type": "Microsoft.CognitiveServices/accounts",
-      "kind": "QnAMaker",
-      "name": "[variables('qnaMakerAccountName')]",
-      "apiVersion": "2017-04-18",
-      "location": "[variables('qnaMakerLocation')]",
-      "sku": {
-        "name": "[variables('qnaMakerSkuValue')]"
-      },
-      "properties": {
-        "apiProperties": {
-          "qnaRuntimeEndpoint": "[concat('https://', reference(resourceId('Microsoft.Web/sites', variables('qnaMakerAppServiceName'))).hostNames[0])]"
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/Sites', variables('qnaMakerAppServiceName'))]",
-        "[resourceId('Microsoft.Search/searchServices/', variables('azureSearchName'))]",
-        "[resourceId('microsoft.insights/components/', variables('qnaMakerAppInsightsName'))]"
-      ]
-    },
-    {
-      "name": "[variables('azureSearchName')]",
-      "type": "Microsoft.Search/searchServices",
-      "apiVersion": "2015-08-19",
-      "location": "[parameters('location')]",
-      "tags": {
-        "isqnamaker": "true"
-      },
-      "properties": {
-        "replicaCount": 1,
-        "partitionCount": 1,
-        "hostingMode": "default"
-      },
-      "sku": {
-        "name": "[toLower(variables('azureSearchSkuValue'))]"
-      }
-    },
-    {
-      "type": "Microsoft.Web/sites",
-      "apiVersion": "2016-08-01",
-      "name": "[variables('qnaMakerAppServiceName')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "enabled": true,
-        "siteConfig": {
-          "cors": {
-            "allowedOrigins": [
-              "*"
-            ]
-          }
-        },
-        "name": "[variables('qnaMakerAppServiceName')]",
-        "serverFarmId": "[concat('/subscriptions/', subscription().id,'/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]",
-        "hostingEnvironment": ""
-      },
-      "tags": {
-        "isqnamaker": "true",
-        "[concat('hidden-related:', '/subscriptions/', subscription().id,'/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]": "empty"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Web/serverfarms/', variables('hostingPlanName'))]"
-      ],
-      "resources": [
-        {
-          "name": "[variables('qnaMakerAppInsightsName')]",
-          "type": "microsoft.insights/components",
-          "kind": "web",
-          "apiVersion": "2015-05-01",
-          "location": "[parameters('location')]",
-          "tags": {
-            "[concat('hidden-link:', resourceId('Microsoft.Web/sites/', variables('qnaMakerAppServiceName')))]": "Resource"
-          },
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/sites/', variables('qnaMakerAppServiceName'))]"
-          ],
-          "properties": {
-            "ApplicationId": "[variables('qnaMakerAppServiceName')]"
-          }
-        },
-        {
-          "apiVersion": "2015-08-01",
-          "name": "appsettings",
-          "type": "config",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/Sites', variables('qnaMakerAppServiceName'))]",
-            "[resourceId('Microsoft.Search/searchServices/', variables('azureSearchName'))]"
-          ],
-          "properties": {
-            "AzureSearchName": "[variables('azureSearchName')]",
-            "AzureSearchAdminKey": "[listAdminKeys(resourceId('Microsoft.Search/searchServices/', variables('azureSearchName')), '2015-08-19').primaryKey]",
-            "UserAppInsightsKey": "[reference(resourceId('Microsoft.Insights/components/', variables('qnaMakerAppInsightsName')), '2015-05-01').InstrumentationKey]",
-            "UserAppInsightsName": "[variables('qnaMakerAppInsightsName')]",
-            "UserAppInsightsAppId": "[reference(resourceId('Microsoft.Insights/components/', variables('qnaMakerAppInsightsName')), '2015-05-01').AppId]",
-            "PrimaryEndpointKey": "[concat(variables('qnaMakerAppServiceName'), '-PrimaryEndpointKey')]",
-            "SecondaryEndpointKey": "[concat(variables('qnaMakerAppServiceName'), '-SecondaryEndpointKey')]",
-            "DefaultAnswer": "No good match found in KB.",
-            "QNAMAKER_EXTENSION_VERSION": "latest"
           }
         }
       ]
