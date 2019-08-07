@@ -13,6 +13,7 @@ import {
 } from '../AdaptiveCard/adaptiveCard';
 import { Dropdown } from 'office-ui-fabric-react';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
+import { getBaseUrl } from '../../configVariables';
 
 export interface IDraftMessage {
     id?: string,
@@ -62,6 +63,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         super(props);
         initializeIcons();
         this.card = getInitAdaptiveCard();
+        this.setDefaultCard(this.card);
 
         this.state = {
             title: "",
@@ -106,11 +108,22 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                     adaptiveCard.parse(this.state.card);
                     let renderedCard = adaptiveCard.render();
                     document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
-                    let link = this.state.btnLink;
-                    adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
+                    if (this.state.btnLink) {
+                        let link = this.state.btnLink;
+                        adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); };
+                    }
                 })
             }
         });
+    }
+
+    public setDefaultCard = (card: any) => {
+        setCardTitle(card, "Title");
+        let imgUrl = getBaseUrl() + "/image/imagePlaceholder.png";
+        setCardImageLink(card, imgUrl);
+        setCardSummary(card, "Summary");
+        setCardAuthor(card, "- Author");
+        setCardBtn(card, "Button title", "https://adaptivecards.io");
     }
 
     private getTeamList = async () => {
@@ -177,9 +190,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             setCardImageLink(this.card, draftMessageDetail.imageLink);
             setCardSummary(this.card, draftMessageDetail.summary);
             setCardAuthor(this.card, draftMessageDetail.author);
-            if (draftMessageDetail.buttonTitle !== "" && draftMessageDetail.buttonLink !== "") {
-                setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
-            }
+            setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
 
             this.setState({
                 title: draftMessageDetail.title,
@@ -528,52 +539,92 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onTitleChanged = (event: any) => {
+        let showDefaultCard = (!event.target.value && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
         setCardTitle(this.card, event.target.value);
+        setCardImageLink(this.card, this.state.imageLink);
+        setCardSummary(this.card, this.state.summary);
+        setCardAuthor(this.card, this.state.author);
+        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
         this.setState({
             title: event.target.value,
             card: this.card
         }, () => {
-            this.updateCard();
-        });
-    }
-
-    private onSummaryChanged = (event: any) => {
-        setCardSummary(this.card, event.target.value);
-        this.setState({
-            summary: event.target.value,
-            card: this.card
-        }, () => {
-            this.updateCard();
-        });
-    }
-
-    private onAuthorChanged = (event: any) => {
-        setCardAuthor(this.card, event.target.value);
-        this.setState({
-            author: event.target.value,
-            card: this.card
-        }, () => {
+            if (showDefaultCard) {
+                this.setDefaultCard(this.card);
+            }
             this.updateCard();
         });
     }
 
     private onImageLinkChanged = (event: any) => {
+        let showDefaultCard = (!this.state.title && !event.target.value && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
+        setCardTitle(this.card, this.state.title);
         setCardImageLink(this.card, event.target.value);
+        setCardSummary(this.card, this.state.summary);
+        setCardAuthor(this.card, this.state.author);
+        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
         this.setState({
             imageLink: event.target.value,
             card: this.card
         }, () => {
+            if (showDefaultCard) {
+                this.setDefaultCard(this.card);
+            }
+            this.updateCard();
+        });
+    }
+
+    private onSummaryChanged = (event: any) => {
+        let showDefaultCard = (!this.state.title && !this.state.imageLink && !event.target.value && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
+        setCardTitle(this.card, this.state.title);
+        setCardImageLink(this.card, this.state.imageLink);
+        setCardSummary(this.card, event.target.value);
+        setCardAuthor(this.card, this.state.author);
+        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
+        this.setState({
+            summary: event.target.value,
+            card: this.card
+        }, () => {
+            if (showDefaultCard) {
+                this.setDefaultCard(this.card);
+            }
+            this.updateCard();
+        });
+    }
+
+    private onAuthorChanged = (event: any) => {
+        let showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !event.target.value && !this.state.btnTitle && !this.state.btnLink);
+        setCardTitle(this.card, this.state.title);
+        setCardImageLink(this.card, this.state.imageLink);
+        setCardSummary(this.card, this.state.summary);
+        setCardAuthor(this.card, event.target.value);
+        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
+        this.setState({
+            author: event.target.value,
+            card: this.card
+        }, () => {
+            if (showDefaultCard) {
+                this.setDefaultCard(this.card);
+            }
             this.updateCard();
         });
     }
 
     private onBtnTitleChanged = (event: any) => {
-        if (this.state.btnLink !== "" && event.target.value !== "") {
+        let showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !event.target.value && !this.state.btnLink);
+        setCardTitle(this.card, this.state.title);
+        setCardImageLink(this.card, this.state.imageLink);
+        setCardSummary(this.card, this.state.summary);
+        setCardAuthor(this.card, this.state.author);
+        if (event.target.value && this.state.btnLink) {
             setCardBtn(this.card, event.target.value, this.state.btnLink);
             this.setState({
                 btnTitle: event.target.value,
                 card: this.card
             }, () => {
+                if (showDefaultCard) {
+                    this.setDefaultCard(this.card);
+                }
                 this.updateCard();
             });
         } else {
@@ -581,18 +632,29 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             this.setState({
                 btnTitle: event.target.value,
             }, () => {
+                if (showDefaultCard) {
+                    this.setDefaultCard(this.card);
+                }
                 this.updateCard();
             });
         }
     }
 
     private onBtnLinkChanged = (event: any) => {
-        if (event.target.value !== "" && this.state.btnTitle !== "") {
+        let showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !event.target.value);
+        setCardTitle(this.card, this.state.title);
+        setCardSummary(this.card, this.state.summary);
+        setCardAuthor(this.card, this.state.author);
+        setCardImageLink(this.card, this.state.imageLink);
+        if (this.state.btnTitle && event.target.value) {
             setCardBtn(this.card, this.state.btnTitle, event.target.value);
             this.setState({
                 btnLink: event.target.value,
                 card: this.card
             }, () => {
+                if (showDefaultCard) {
+                    this.setDefaultCard(this.card);
+                }
                 this.updateCard();
             });
         } else {
@@ -600,6 +662,9 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             this.setState({
                 btnLink: event.target.value
             }, () => {
+                if (showDefaultCard) {
+                    this.setDefaultCard(this.card);
+                }
                 this.updateCard();
             });
         }
