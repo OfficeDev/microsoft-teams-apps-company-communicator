@@ -226,7 +226,7 @@
             },
             {
               "name": "WEBSITE_NODE_DEFAULT_VERSION",
-              "value": "6.9.0"
+              "value": "10.15.2"
             }
           ]
         }
