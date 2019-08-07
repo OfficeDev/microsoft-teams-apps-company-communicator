@@ -105,15 +105,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// Get all data entities from the table storage in a partition.
         /// </summary>
         /// <param name="partition">Partition key value.</param>
-        /// <param name="takeCount">The number of entities queried for.</param>
+        /// <param name="count">The max number of desired entities.</param>
         /// <returns>All data entities.</returns>
-        public async Task<IEnumerable<T>> GetAllAsync(string partition = null, int? takeCount = null)
+        public async Task<IEnumerable<T>> GetAllAsync(string partition = null, int? count = null)
         {
             var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
 
             var query = new TableQuery<T>().Where(partitionKeyFilter);
 
-            var entities = await this.ExecuteQueryAsync(query, takeCount);
+            var entities = await this.ExecuteQueryAsync(query, count);
 
             return entities;
         }
@@ -147,10 +147,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 
         private async Task<IList<T>> ExecuteQueryAsync(
             TableQuery<T> query,
-            int? takeCount = null,
+            int? count = null,
             CancellationToken ct = default)
         {
-            query.TakeCount = takeCount;
+            query.TakeCount = count;
 
             try
             {
@@ -165,7 +165,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
                 }
                 while (token != null
                     && !ct.IsCancellationRequested
-                    && (takeCount == null || result.Count < takeCount.Value));
+                    && (count == null || result.Count < count.Value));
 
                 return result;
             }
