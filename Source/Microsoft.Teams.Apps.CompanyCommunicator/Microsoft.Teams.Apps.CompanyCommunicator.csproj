@@ -31,14 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Controllers\MessageController.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Remove="stylecop.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
   </ItemGroup>
 
