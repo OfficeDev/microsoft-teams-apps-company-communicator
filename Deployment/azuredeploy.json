@@ -303,8 +303,8 @@
       "name": "[variables('serviceBusNamespaceName')]",
       "location": "[parameters('location')]",
       "sku": {
-        "name": "Basic",
-        "tier": "Basic"
+        "name": "Standard",
+        "tier": "Standard"
       },
       "resources": [
         {
