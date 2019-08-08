@@ -73,17 +73,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             return this.Ok();
         }
 
-        private async Task<NotificationEntity> FindNotificationToDuplicate(string notificationId)
-        {
-            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notificationId);
-            if (notificationEntity == null)
-            {
-                notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.SentNotifications, notificationId);
-            }
-            
-            return notificationEntity;
-        }
-
         /// <summary>
         /// Update an existing draft notification.
         /// </summary>
@@ -214,6 +203,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             };
 
             return this.Ok(result);
+        }
+
+        private async Task<NotificationEntity> FindNotificationToDuplicate(string notificationId)
+        {
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notificationId);
+            if (notificationEntity == null)
+            {
+                notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.SentNotifications, notificationId);
+            }
+
+            return notificationEntity;
         }
     }
 }
