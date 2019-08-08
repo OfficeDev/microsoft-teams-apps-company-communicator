@@ -12,7 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
-    using Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery;
+    using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
 
     /// <summary>
