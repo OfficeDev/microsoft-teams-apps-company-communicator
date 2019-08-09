@@ -4,7 +4,6 @@
 }
 
 .taskModule {
-    width: 80rem;
 
     .formContainer {
         overflow-y: auto;
@@ -25,9 +24,6 @@
         }
 
         .formContentContainer {
-            width: 53%;
-            float: left;
-            display: inline;
 
             .inputField {
                 margin: 0rem 3.2rem;
@@ -89,11 +85,6 @@
                     bottom: 2.5rem;
                 }
             }
-        }
-
-        .adaptiveCardContainer {
-            width: 45%;
-            display: inline;
         }
 
         .boardSelection {

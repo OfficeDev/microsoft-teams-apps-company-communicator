@@ -24,3 +24,57 @@
         margin: 1rem 1rem 1rem 2rem;
     }
 }
+
+@media only screen and (min-width : 1000px) {
+    .taskModule {
+        .formContainer {
+            .formContentContainer {
+                width: 53%;
+                float: left;
+                display: inline;
+            }
+
+            .adaptiveCardContainer {
+                width: 45%;
+                display: inline;
+                float: right;
+            }
+        }
+    }
+}
+
+@media only screen and (min-width : 780px)and (max-width : 999px) {
+    .taskModule {
+        .formContainer {
+            .formContentContainer {
+                width: 48%;
+                float: left;
+                display: inline;
+            }
+
+            .adaptiveCardContainer {
+                width: 45%;
+                display: inline;
+                float: right;
+                margin-right: 3rem;
+            }
+        }
+    }
+}
+
+@media screen and (min-width : 0px) and (max-width: 779px) {
+    .taskModule {
+        .formContainer {
+            .formContentContainer {
+                width: 100%;
+                display: block;
+            }
+
+            .adaptiveCardContainer {
+                width: 100% !important;
+                display: block !important;
+                margin: 2rem auto;
+            }
+        }
+    }
+}
