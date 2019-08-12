@@ -9,7 +9,7 @@ import { DirectionalHint } from 'office-ui-fabric-react/lib/Callout';
 import './messages.scss';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getDetailsListHeaderStyle, getDetailsListHeaderColumnStyle } from './messages.style';
-import { Icon, Loader } from '@stardust-ui/react';
+import { Icon, Loader, List, Flex, Text } from '@stardust-ui/react';
 import { connect } from 'react-redux';
 import { selectMessage, getMessagesList, getDraftMessagesList } from '../../actions';
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -235,6 +235,21 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
   }
 
   public render(): JSX.Element {
+
+    let keyCount = 0;
+    // Function to translate items from IPreviewCard to List.Item format
+    const processItem = (message: any) => {
+      keyCount++;
+      const out = {
+        key: keyCount,
+        endMedia: this.MoreIcon,
+        content: this.messageContent(message),
+        styles: { margin: '2px 2px 0 0' },
+      };
+      return out;
+    };
+    const outList = this.state.message.map(processItem);
+
     if (this.state.loader) {
       return (
         <Loader />
@@ -244,35 +259,97 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
     }
     else {
       return (
-        <div>
-          <Fabric>
-            <TextField
-              className="filter"
-              label="Filter by title:"
-              onChange={this.onFilter}
-              styles={{ root: { maxWidth: '300px' } }}
-            />
-            <MarqueeSelection selection={this.selection}>
-              <DetailsList
-                items={this.state.message}
-                columns={this.state.columns}
-                setKey="set"
-                selection={this.selection}
-                selectionPreservedOnEmptyClick={true}
-                onColumnHeaderClick={this.onColumnClick}
-                ariaLabelForSelectionColumn="Toggle selection"
-                ariaLabelForSelectAllCheckbox="Toggle selection for all items"
-                checkboxVisibility={CheckboxVisibility.hidden}
-                styles={getDetailsListHeaderStyle()}
-                onRenderCheckbox={this.renderCheckbox}
-                onItemInvoked={this.onItemInvoked}
-              />
-            </MarqueeSelection>
-          </Fabric>
-        </div>
+        <List selectable items={outList} />
+        // <div>
+        //   <Fabric>
+        //     <TextField
+        //       className="filter"
+        //       label="Filter by title:"
+        //       onChange={this.onFilter}
+        //       styles={{ root: { maxWidth: '300px' } }}
+        //     />
+        //     <MarqueeSelection selection={this.selection}>
+        //       <DetailsList
+        //         items={this.state.message}
+        //         columns={this.state.columns}
+        //         setKey="set"
+        //         selection={this.selection}
+        //         selectionPreservedOnEmptyClick={true}
+        //         onColumnHeaderClick={this.onColumnClick}
+        //         ariaLabelForSelectionColumn="Toggle selection"
+        //         ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+        //         checkboxVisibility={CheckboxVisibility.hidden}
+        //         styles={getDetailsListHeaderStyle()}
+        //         onRenderCheckbox={this.renderCheckbox}
+        //         onItemInvoked={this.onItemInvoked}
+        //       />
+        //     </MarqueeSelection>
+        //   </Fabric>
+        // </div>
       );
     }
   }
+
+  private onMore = () => {
+    console.log("printing on More");
+  }
+
+  private MoreIcon = () => {
+    return (<span onClick={this.onMore}>&hellip;</span>);
+  }
+
+  private sendIndicator = (message: any) => {
+    if (message.isCompleted) {
+      return (<Text />);
+    } else {
+      return <Loader className="sending" size="smallest" label="Sending" labelPosition="end" inline />
+    }
+  }
+
+  private messageContent = (message: any) => {
+
+    return (
+      <Flex vAlign="center" fill gap="gap.small" onClick={() => { console.log("print content") }}>
+        <Flex.Item size="size.quarter">
+          <Text
+            truncated
+            content={message.title}
+          >
+          </Text>
+        </Flex.Item>
+        <Flex.Item size="size.quarter">
+          {this.sendIndicator}
+        </Flex.Item>
+        <Flex.Item size="size.quarter">
+          <div>
+            <TooltipHost content="Success" calloutProps={{ gapSpace: 0 }}>
+              <Icon name="stardust-checkmark" xSpacing="after" className="green" outline />{message.succeeded}
+            </TooltipHost>
+
+            <TooltipHost content="Failure" calloutProps={{ gapSpace: 0 }}>
+              <Icon name="stardust-close" xSpacing="both" className="red" outline />{message.failed}
+            </TooltipHost>
+
+            <TooltipHost content="Throttled" calloutProps={{ gapSpace: 0 }}>
+              <Icon name="exclamation-circle" xSpacing="both" className="brand" outline />{message.throttled}
+            </TooltipHost>
+          </div>
+        </Flex.Item>
+
+        <Flex.Item size="size.quarter">
+          <Text
+            truncated
+            content={message.title}
+          />
+        </Flex.Item>
+
+        <Flex.Item shrink={0}>
+          <Text title="More Options" />
+        </Flex.Item>
+      </Flex>
+    );
+  }
+
 
   private escFunction = (event: any) => {
     if (event.keyCode === 27 || (event.key === "Escape")) {

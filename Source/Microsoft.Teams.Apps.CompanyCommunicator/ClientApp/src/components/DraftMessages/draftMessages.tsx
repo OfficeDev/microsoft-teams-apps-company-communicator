@@ -62,11 +62,12 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   private selection: Selection;
   private columns: IColumn[];
   private interval: any;
+  //private ellipsis: any;
 
   constructor(props: IMessageProps) {
     super(props);
     initializeIcons();
-
+    // this.ellipsis: JSX.Element = ;
     /**
      * Build up columns
      * 
@@ -179,74 +180,37 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   }
 
   public render(): JSX.Element {
-    const [Height, setHeight] = React.useState(window.innerHeight);
-    const updateHeight = () => {
-      setHeight(window.innerHeight);
-    };
+    // const [Height, setHeight] = React.useState(window.innerHeight);
+    // const updateHeight = () => {
+    //   setHeight(window.innerHeight);
+    // };
 
-    React.useEffect(() => {
-      window.addEventListener('resize', updateHeight);
-      return () => {
-        window.removeEventListener('resize', updateHeight);
-      };
-    }, [Height]);
+    // React.useEffect(() => {
+    //   window.addEventListener('resize', updateHeight);
+    //   return () => {
+    //     window.removeEventListener('resize', updateHeight);
+    //   };
+    // }, [Height]);
 
     let keyCount = 0;
     // Function to translate items from IPreviewCard to List.Item format
-    const processItem = (item: ICard): IProcessedItem => {
+    const processItem = (message: any) => {
       keyCount++;
       const out = {
         key: keyCount,
+        endMedia: this.MoreIcon,
         content: (
-          <Flex vAlign="center" fill gap="gap.small">
+          <Flex vAlign="center" fill gap="gap.small" onClick={() => { console.log("print content") }}>
             <Flex.Item>
-              <Text>Title</Text>
+              <Text>{message.title}</Text>
             </Flex.Item>
-            <Flex.Item size="size.small" shrink={0} grow={1}>
-              <Text
-                truncated
-                size="medium"
-                weight="semibold"
-                content="fff"
-                title="ff"
-              />
-            </Flex.Item>
-            {item.preview.subTitle ? (
-              <Flex.Item size="size.medium" shrink={1} grow={0}>
-                <Text
-                  truncated
-                  size="medium"
-                  weight="regular"
-                  content="ff"
-                  title="ff"
-                />
-              </Flex.Item>
-            ) : null}
-            {item.preview.text ? (
-              <Flex.Item size="size.half" shrink={3} grow={0} aria-label={"ff"}>
-                <Text
-                  truncated
-                  size="medium"
-                  weight="regular"
-                  content={"ff"}
-                  title={"ff"}
-                />
-              </Flex.Item>
-            ) : null}
-            {item.content.actions ? (
-              <Flex.Item shrink={0}>
-                <Text title="More Options" />
-              </Flex.Item>
-            ) : null}
           </Flex>
         ),
         styles: { margin: '2px 2px 0 0' },
-        onClick: (): void => { console.log("print") },
       };
       return out;
     };
     const outList = this.state.message.map(processItem);
-
 
     if (this.state.loader) {
       return (
@@ -257,7 +221,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     }
     else {
       return (
-        <List selectable items={outList} styles={{ height: `${Height - 48}px`, overflow: 'scroll' }} />
+        <List selectable items={outList} />
 
 
         // <div>
@@ -281,6 +245,14 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         // </div>
       );
     }
+  }
+
+  private MoreIcon = () => {
+    return (<span onClick={this.onMore}>&hellip;</span>);
+  }
+
+  private onMore = () => {
+    console.log("printing on More");
   }
 
   private getItems = () => {
