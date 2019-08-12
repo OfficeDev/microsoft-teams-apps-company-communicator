@@ -10,15 +10,13 @@ import SendConfirmationTaskModule from './components/SendConfirmationTaskModule/
 import * as microsoftTeams from "@microsoft/teams-js";
 
 export interface IAppState {
-  theme: string;
+  theme: string | undefined;
 }
 
 class App extends React.Component<{}, IAppState> {
-  private app: any;
 
   constructor(props: {}) {
     super(props);
-    this.app = this;
     this.state = {
       theme: "",
     }
@@ -27,7 +25,7 @@ class App extends React.Component<{}, IAppState> {
   public componentDidMount() {
     microsoftTeams.initialize();
     microsoftTeams.getContext((context) => {
-      this.app.setState({
+      this.setState({
         theme: context.theme
       });
     });
