@@ -56,8 +56,8 @@ export interface IMessageState {
   rosterNames: string[];
   allUsers: boolean;
   messageId: number;
-  teamsTeamId: string | undefined;
-  teamsChannelId: string | undefined;
+  teamsTeamId?: string;
+  teamsChannelId?: string;
 }
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
