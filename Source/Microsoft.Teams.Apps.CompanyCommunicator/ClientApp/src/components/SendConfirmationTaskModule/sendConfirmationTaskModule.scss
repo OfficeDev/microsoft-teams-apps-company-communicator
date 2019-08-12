@@ -14,10 +14,6 @@
         width: 100%;
 
         .formContentContainer {
-            width: 53%;
-            float: left;
-            display: inline;
-
             .contentField {
                 margin: 0rem 3.2rem;
 
@@ -33,11 +29,6 @@
                     font-weight: bold;
                 }
             }
-        }
-
-        .adaptiveCardContainer {
-            width: 45%;
-            display: inline;
         }
     }
 
