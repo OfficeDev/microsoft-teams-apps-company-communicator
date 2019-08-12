@@ -56,15 +56,14 @@ export interface IMessageState {
   rosterNames: string[];
   allUsers: boolean;
   messageId: number;
-  teamsTeamId: string;
-  teamsChannelId: string;
+  teamsTeamId: string | undefined;
+  teamsChannelId: string | undefined;
 }
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   private selection: Selection;
   private columns: IColumn[];
   private interval: any;
-  private that: any;
 
   constructor(props: IMessageProps) {
     super(props);
@@ -162,14 +161,12 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         this.setState({ selectionDetails: this.getSelectionDetails(this.state.message.length) });
       }
     });
-
-    this.that = this;
   }
 
   public componentDidMount() {
     microsoftTeams.initialize();
     microsoftTeams.getContext((context) => {
-      this.that.setState({
+      this.setState({
         teamsTeamId: context.teamId,
         teamsChannelId: context.channelId,
       });
