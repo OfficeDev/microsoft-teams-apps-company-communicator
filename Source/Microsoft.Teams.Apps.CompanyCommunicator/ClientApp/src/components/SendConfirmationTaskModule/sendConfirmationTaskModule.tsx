@@ -164,7 +164,7 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
 
     private displaySelectedTeams = () => {
         let length = this.state.teamNames.length;
-        if (length == 0) {
+        if (length === 0) {
             return (<div />);
         } else {
             return (<div key="teamNames"> <span className="label">Team(s): </span> {this.state.teamNames.map((team, index) => {
@@ -180,7 +180,7 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
 
     private displaySelectedRosterTeams = () => {
         let length = this.state.rosterNames.length;
-        if (length == 0) {
+        if (length === 0) {
             return (<div />);
         } else {
             return (<div key="rosterNames"> <span className="label">Team(s) members: </span> {this.state.rosterNames.map((roster, index) => {

@@ -57,3 +57,8 @@ export const getConsentSummaries = async (id: number): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications/consentSummaries/" + id;
     return await axios.get(url);
 }
+
+export const sendPreview = async (payload: {}): Promise<any> => {
+    let url = baseAxiosUrl + "/draftNotifications/previews";
+    return await axios.post(url, payload);
+}
