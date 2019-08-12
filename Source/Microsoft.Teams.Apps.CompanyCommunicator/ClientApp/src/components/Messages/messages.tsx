@@ -177,7 +177,6 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                 menuProps: {
                   items: [], // Items must be passed for typesafety, but commandBar will determine items rendered in overflow
                   isBeakVisible: false,
-                  beakWidth: 20,
                   gapSpace: 5,
                   directionalHint: DirectionalHint.bottomCenter
                 },
