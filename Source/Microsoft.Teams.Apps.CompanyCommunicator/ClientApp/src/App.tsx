@@ -41,17 +41,8 @@ class App extends React.Component<{}, IAppState> {
     });
   }
 
-  public setTheme = () => {
-    if (this.state.theme === "default") {
-      return (
-        <Provider theme={themes.teams}>
-          <div className="defaultContainer">
-            {this.getAppDom()}
-          </div>
-        </Provider>
-      );
-    }
-    else if (this.state.theme === "dark") {
+  public setThemeComponent = () => {
+    if (this.state.theme === "dark") {
       return (
         <Provider theme={themes.teamsDark}>
           {this.getAppDom()}
@@ -62,6 +53,14 @@ class App extends React.Component<{}, IAppState> {
       return (
         <Provider theme={themes.teamsHighContrast}>
           {this.getAppDom()}
+        </Provider>
+      );
+    } else {
+      return (
+        <Provider theme={themes.teams}>
+          <div className="defaultContainer">
+            {this.getAppDom()}
+          </div>
         </Provider>
       );
     }
@@ -87,7 +86,7 @@ class App extends React.Component<{}, IAppState> {
   public render(): JSX.Element {
     return (
       <div>
-        {this.setTheme()}
+        {this.setThemeComponent()}
       </div>
     );
   }
