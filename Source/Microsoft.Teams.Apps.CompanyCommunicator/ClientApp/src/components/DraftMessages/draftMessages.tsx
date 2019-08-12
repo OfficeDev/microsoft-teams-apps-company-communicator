@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { selectMessage, getDraftMessagesList, getMessagesList } from '../../actions';
 import { getBaseUrl } from '../../configVariables';
 import * as microsoftTeams from "@microsoft/teams-js";
-import { Loader } from '@stardust-ui/react';
+import { Loader, List, Flex, Text } from '@stardust-ui/react';
 import { IButtonProps, CommandBar, DirectionalHint, DropdownMenuItemType } from 'office-ui-fabric-react';
 import { deleteDraftNotification, duplicateDraftNotification } from '../../apis/messageListApi';
 
@@ -179,6 +179,75 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   }
 
   public render(): JSX.Element {
+    const [Height, setHeight] = React.useState(window.innerHeight);
+    const updateHeight = () => {
+      setHeight(window.innerHeight);
+    };
+
+    React.useEffect(() => {
+      window.addEventListener('resize', updateHeight);
+      return () => {
+        window.removeEventListener('resize', updateHeight);
+      };
+    }, [Height]);
+
+    let keyCount = 0;
+    // Function to translate items from IPreviewCard to List.Item format
+    const processItem = (item: ICard): IProcessedItem => {
+      keyCount++;
+      const out = {
+        key: keyCount,
+        content: (
+          <Flex vAlign="center" fill gap="gap.small">
+            <Flex.Item>
+              <Text>Title</Text>
+            </Flex.Item>
+            <Flex.Item size="size.small" shrink={0} grow={1}>
+              <Text
+                truncated
+                size="medium"
+                weight="semibold"
+                content="fff"
+                title="ff"
+              />
+            </Flex.Item>
+            {item.preview.subTitle ? (
+              <Flex.Item size="size.medium" shrink={1} grow={0}>
+                <Text
+                  truncated
+                  size="medium"
+                  weight="regular"
+                  content="ff"
+                  title="ff"
+                />
+              </Flex.Item>
+            ) : null}
+            {item.preview.text ? (
+              <Flex.Item size="size.half" shrink={3} grow={0} aria-label={"ff"}>
+                <Text
+                  truncated
+                  size="medium"
+                  weight="regular"
+                  content={"ff"}
+                  title={"ff"}
+                />
+              </Flex.Item>
+            ) : null}
+            {item.content.actions ? (
+              <Flex.Item shrink={0}>
+                <Text title="More Options" />
+              </Flex.Item>
+            ) : null}
+          </Flex>
+        ),
+        styles: { margin: '2px 2px 0 0' },
+        onClick: (): void => { console.log("print") },
+      };
+      return out;
+    };
+    const outList = this.state.message.map(processItem);
+
+
     if (this.state.loader) {
       return (
         <Loader />
@@ -188,25 +257,28 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     }
     else {
       return (
-        <div>
-          <Fabric>
-            <MarqueeSelection selection={this.selection}>
-              <DetailsList
-                items={this.state.message}
-                columns={this.state.columns}
-                setKey="set"
-                selection={this.selection}
-                selectionPreservedOnEmptyClick={true}
-                onColumnHeaderClick={this.onColumnClick}
-                ariaLabelForSelectionColumn="Toggle selection"
-                ariaLabelForSelectAllCheckbox="Toggle selection for all items"
-                checkboxVisibility={CheckboxVisibility.hidden}
-                styles={getDetailsListHeaderStyle()}
-                onItemInvoked={this.onItemInvoked}
-              />
-            </MarqueeSelection>
-          </Fabric>
-        </div>
+        <List selectable items={outList} styles={{ height: `${Height - 48}px`, overflow: 'scroll' }} />
+
+
+        // <div>
+        //   {/* <Fabric>
+        //     <MarqueeSelection selection={this.selection}>
+        //       <DetailsList
+        //         items={this.state.message}
+        //         columns={this.state.columns}
+        //         setKey="set"
+        //         selection={this.selection}
+        //         selectionPreservedOnEmptyClick={true}
+        //         onColumnHeaderClick={this.onColumnClick}
+        //         ariaLabelForSelectionColumn="Toggle selection"
+        //         ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+        //         checkboxVisibility={CheckboxVisibility.hidden}
+        //         styles={getDetailsListHeaderStyle()}
+        //         onItemInvoked={this.onItemInvoked}
+        //       />
+        //     </MarqueeSelection>
+        //   </Fabric> */}
+        // </div>
       );
     }
   }
