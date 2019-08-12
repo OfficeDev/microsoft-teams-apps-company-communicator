@@ -123,9 +123,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
                 ariaLabel: 'More commands',
                 menuProps: {
                   items: [], // Items must be passed for typesafety, but commandBar will determine items rendered in overflow
-                  isBeakVisible: true,
-                  beakWidth: 20,
-                  gapSpace: 10,
+                  isBeakVisible: false,
+                  gapSpace: 5,
                   directionalHint: DirectionalHint.bottomCenter
                 },
                 className: 'moreBtn'
@@ -230,6 +229,14 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     let id = item.id;
     return [
       {
+        key: 'send',
+        name: 'Send',
+        onClick: () => {
+          let url = getBaseUrl() + "/sendconfirmation/" + id;
+          this.onOpenTaskModule(null, url, "Send confirmation");
+        },
+      },
+      {
         key: 'preview',
         name: 'Preview in this channel',
         onClick: () => {
@@ -254,15 +261,6 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         }
       },
       {
-        key: 'delete',
-        name: 'Delete',
-        onClick: () => {
-          this.deleteDraftMessage(id).then(() => {
-            this.props.getDraftMessagesList();
-          });
-        }
-      },
-      {
         key: 'duplicate',
         name: 'Duplicate',
         onClick: () => {
@@ -272,13 +270,18 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         },
       },
       {
-        key: 'send',
-        name: 'Send',
+        key: 'divider',
+        className: "divider",
+      },
+      {
+        key: 'delete',
+        name: 'Delete',
         onClick: () => {
-          let url = getBaseUrl() + "/sendconfirmation/" + id;
-          this.onOpenTaskModule(null, url, "Send confirmation");
-        },
-      }
+          this.deleteDraftMessage(id).then(() => {
+            this.props.getDraftMessagesList();
+          });
+        }
+      },
     ];
   };
 
