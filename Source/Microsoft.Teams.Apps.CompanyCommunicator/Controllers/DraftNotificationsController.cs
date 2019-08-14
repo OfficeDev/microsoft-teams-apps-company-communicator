@@ -26,22 +26,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly NotificationRepository notificationRepository;
         private readonly TeamDataRepository teamDataRepository;
-        private readonly DraftNotificationPreview notificationPreview;
+        private readonly DraftNotificationPreviewService draftNotificationPreviewService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
         /// </summary>
         /// <param name="notificationRepository">Notification repository instance.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
-        /// <param name="notificationPreview">Notification preview service.</param>
+        /// <param name="draftNotificationPreviewService">Draft notification preview service.</param>
         public DraftNotificationsController(
             NotificationRepository notificationRepository,
             TeamDataRepository teamDataRepository,
-            DraftNotificationPreview notificationPreview)
+            DraftNotificationPreviewService draftNotificationPreviewService)
         {
             this.notificationRepository = notificationRepository;
             this.teamDataRepository = teamDataRepository;
-            this.notificationPreview = notificationPreview;
+            this.draftNotificationPreviewService = draftNotificationPreviewService;
         }
 
         /// <summary>
@@ -238,7 +238,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 draftNotificationPreviewRequest.DraftNotificationId);
             if (notificationEntity == null)
             {
-                return this.NotFound($"Notification {draftNotificationPreviewRequest.DraftNotificationId} not found.");
+                return this.BadRequest($"Notification {draftNotificationPreviewRequest.DraftNotificationId} not found.");
             }
 
             var teamDataEntity = await this.teamDataRepository.GetAsync(
@@ -246,10 +246,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 draftNotificationPreviewRequest.TeamsTeamId);
             if (teamDataEntity == null)
             {
-                return this.NotFound($"Team {draftNotificationPreviewRequest.TeamsTeamId} not found.");
+                return this.BadRequest($"Team {draftNotificationPreviewRequest.TeamsTeamId} not found.");
             }
 
-            var result = await this.notificationPreview.Preview(
+            var result = await this.draftNotificationPreviewService.SendPreview(
                 notificationEntity,
                 teamDataEntity,
                 draftNotificationPreviewRequest.TeamsChannelId);

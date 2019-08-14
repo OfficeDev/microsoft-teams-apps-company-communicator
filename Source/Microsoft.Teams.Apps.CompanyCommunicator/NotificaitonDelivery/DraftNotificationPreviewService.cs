@@ -1,4 +1,4 @@
-﻿// <copyright file="DraftNotificationPreview.cs" company="Microsoft">
+﻿// <copyright file="DraftNotificationPreviewService.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -14,13 +14,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
 
     /// <summary>
     /// Draft notification preview service.
     /// </summary>
-    public class DraftNotificationPreview
+    public class DraftNotificationPreviewService
     {
         private static readonly string MsTeamsChannelId = "msteams";
         private static readonly string ChannelConversationType = "channel";
@@ -28,38 +29,38 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 
         private readonly string botAppId;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
-        private readonly BotFrameworkHttpAdapter botFrameworkHttpAdapter;
+        private readonly CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DraftNotificationPreview"/> class.
+        /// Initializes a new instance of the <see cref="DraftNotificationPreviewService"/> class.
         /// </summary>
         /// <param name="configuration">Application configuration service.</param>
         /// <param name="adaptiveCardCreator">Adaptive card creator service.</param>
-        /// <param name="botFrameworkHttpAdapter">Bot framework http adapter instance.</param>
-        public DraftNotificationPreview(
+        /// <param name="companyCommunicatorBotAdapter">Bot framework http adapter instance.</param>
+        public DraftNotificationPreviewService(
             IConfiguration configuration,
             AdaptiveCardCreator adaptiveCardCreator,
-            BotFrameworkHttpAdapter botFrameworkHttpAdapter)
+            CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter)
         {
             this.botAppId = configuration["MicrosoftAppId"];
             if (string.IsNullOrEmpty(this.botAppId))
             {
-                throw new ApplicationException("MicrosftAppId setting is missing in the configuration.");
+                throw new ApplicationException("MicrosoftAppId setting is missing in the configuration.");
             }
 
             this.adaptiveCardCreator = adaptiveCardCreator;
-            this.botFrameworkHttpAdapter = botFrameworkHttpAdapter;
+            this.companyCommunicatorBotAdapter = companyCommunicatorBotAdapter;
         }
 
         /// <summary>
-        /// Preview a draft notification.
+        /// Send a preview of a draft notification.
         /// </summary>
         /// <param name="draftNotificationEntity">Draft notification entity.</param>
         /// <param name="teamDataEntity">The team data entity.</param>
         /// <param name="teamsChannelId">The Teams channel id.</param>
-        /// <returns>It returns HttpStatusCode.OK, if this method triggers the bot service to send adaptive card successfully.
-        /// It returns HttpStatusCode.TooManyRequests, if the bot service throttled the request to send adaptive card.</returns>
-        public async Task<HttpStatusCode> Preview(NotificationEntity draftNotificationEntity, TeamDataEntity teamDataEntity, string teamsChannelId)
+        /// <returns>It returns HttpStatusCode.OK, if this method triggers the bot service to send the adaptive card successfully.
+        /// It returns HttpStatusCode.TooManyRequests, if the bot service throttled the request to send the adaptive card.</returns>
+        public async Task<HttpStatusCode> SendPreview(NotificationEntity draftNotificationEntity, TeamDataEntity teamDataEntity, string teamsChannelId)
         {
             if (draftNotificationEntity == null)
             {
@@ -88,7 +89,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
             // Trigger bot to send the adaptive card.
             try
             {
-                await this.botFrameworkHttpAdapter.ContinueConversationAsync(
+                await this.companyCommunicatorBotAdapter.ContinueConversationAsync(
                     this.botAppId,
                     conversationReference,
                     async (turnContext, cancellationToken) => await this.SendAdaptiveCardAsync(turnContext, draftNotificationEntity),
@@ -99,21 +100,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
             {
                 var errorResponse = (ErrorResponse)e.Body;
                 if (errorResponse != null
-                    && errorResponse.Error.Code.Equals(ThrottledErrorResponse, StringComparison.OrdinalIgnoreCase))
+                    && errorResponse.Error.Code.Equals(DraftNotificationPreviewService.ThrottledErrorResponse, StringComparison.OrdinalIgnoreCase))
                 {
                     return HttpStatusCode.TooManyRequests;
                 }
 
                 throw;
             }
-        }
-
-        private async Task SendAdaptiveCardAsync(
-            ITurnContext turnContext,
-            NotificationEntity draftNotificationEntity)
-        {
-            var reply = this.CreateReply(draftNotificationEntity);
-            await turnContext.SendActivityAsync(reply);
         }
 
         private ConversationReference PrepareConversationReferenceAsync(TeamDataEntity teamDataEntity, string channelId)
@@ -125,20 +118,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 
             var conversationAccount = new ConversationAccount
             {
-                ConversationType = ChannelConversationType,
+                ConversationType = DraftNotificationPreviewService.ChannelConversationType,
                 Id = channelId,
                 TenantId = teamDataEntity.TenantId,
             };
 
-            var result = new ConversationReference
+            var conversationReference = new ConversationReference
             {
                 Bot = channelAccount,
-                ChannelId = MsTeamsChannelId,
+                ChannelId = DraftNotificationPreviewService.MsTeamsChannelId,
                 Conversation = conversationAccount,
                 ServiceUrl = teamDataEntity.ServiceUrl,
             };
 
-            return result;
+            return conversationReference;
+        }
+
+        private async Task SendAdaptiveCardAsync(
+            ITurnContext turnContext,
+            NotificationEntity draftNotificationEntity)
+        {
+            var reply = this.CreateReply(draftNotificationEntity);
+            await turnContext.SendActivityAsync(reply);
         }
 
         private IMessageActivity CreateReply(NotificationEntity draftNotificationEntity)

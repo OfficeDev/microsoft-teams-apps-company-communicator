@@ -31,9 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
 
             services.AddTransient<AdaptiveCardCreator>();
 
-            services.AddSingleton<BotFrameworkHttpAdapter>();
-
-            services.AddSingleton<DraftNotificationPreview>();
+            services.AddTransient<DraftNotificationPreviewService>();
         }
     }
 }

@@ -45,7 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
             {
                 card.Body.Add(new AdaptiveImage()
                 {
-                    Url = new Uri(imageUrl),
+                    Url = new Uri(imageUrl, UriKind.RelativeOrAbsolute),
                     Spacing = AdaptiveSpacing.Default,
                     Size = AdaptiveImageSize.Stretch,
                     AltText = string.Empty,
