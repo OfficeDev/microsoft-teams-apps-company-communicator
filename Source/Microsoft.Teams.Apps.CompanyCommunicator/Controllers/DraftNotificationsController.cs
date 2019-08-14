@@ -14,6 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
+    using Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
 
     /// <summary>
@@ -25,18 +26,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly NotificationRepository notificationRepository;
         private readonly TeamDataRepository teamDataRepository;
+        private readonly DraftNotificationPreviewService draftNotificationPreviewService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
         /// </summary>
-        /// <param name="notificationRepository">Notification respository instance.</param>
+        /// <param name="notificationRepository">Notification repository instance.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
+        /// <param name="draftNotificationPreviewService">Draft notification preview service.</param>
         public DraftNotificationsController(
             NotificationRepository notificationRepository,
-            TeamDataRepository teamDataRepository)
+            TeamDataRepository teamDataRepository,
+            DraftNotificationPreviewService draftNotificationPreviewService)
         {
             this.notificationRepository = notificationRepository;
             this.teamDataRepository = teamDataRepository;
+            this.draftNotificationPreviewService = draftNotificationPreviewService;
         }
 
         /// <summary>
@@ -214,6 +219,51 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             };
 
             return this.Ok(result);
+        }
+
+        /// <summary>
+        /// Preview draft notification.
+        /// </summary>
+        /// <param name="draftNotificationPreviewRequest">Draft notification preview request.</param>
+        /// <returns>
+        /// It returns 400 bad request error if the incoming parameter, draftNotificationPreviewRequest, is invalid.
+        /// It returns 404 not found error if the DraftNotificationId or TeamsTeamId (contained in draftNotificationPreviewRequest) is not found in the table storage.
+        /// It returns 500 internal error if this method throws an unhandled exception.
+        /// It returns 429 too many requests error if the preview request is throttled by the bot service.
+        /// It returns 200 Ok if the method is executed successfully.</returns>
+        [HttpPost("previews")]
+        public async Task<ActionResult> PreviewDraftNotificationAsync(
+            [FromBody] DraftNotificationPreviewRequest draftNotificationPreviewRequest)
+        {
+            if (draftNotificationPreviewRequest == null
+                || string.IsNullOrWhiteSpace(draftNotificationPreviewRequest.DraftNotificationId)
+                || string.IsNullOrWhiteSpace(draftNotificationPreviewRequest.TeamsTeamId)
+                || string.IsNullOrWhiteSpace(draftNotificationPreviewRequest.TeamsChannelId))
+            {
+                return this.BadRequest();
+            }
+
+            var notificationEntity = await this.notificationRepository.GetAsync(
+                PartitionKeyNames.Notification.DraftNotifications,
+                draftNotificationPreviewRequest.DraftNotificationId);
+            if (notificationEntity == null)
+            {
+                return this.BadRequest($"Notification {draftNotificationPreviewRequest.DraftNotificationId} not found.");
+            }
+
+            var teamDataEntity = await this.teamDataRepository.GetAsync(
+                PartitionKeyNames.Metadata.TeamData,
+                draftNotificationPreviewRequest.TeamsTeamId);
+            if (teamDataEntity == null)
+            {
+                return this.BadRequest($"Team {draftNotificationPreviewRequest.TeamsTeamId} not found.");
+            }
+
+            var result = await this.draftNotificationPreviewService.SendPreview(
+                notificationEntity,
+                teamDataEntity,
+                draftNotificationPreviewRequest.TeamsChannelId);
+            return this.StatusCode((int)result);
         }
     }
 }

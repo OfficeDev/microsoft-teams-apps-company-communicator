@@ -30,10 +30,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         {
             this.Use(teamsMessageFilterMiddleware);
 
-            this.UseTenantFilterMiddlewareIfEnabled(configuration);
+            this.UseTenantFilterMiddleware(configuration);
         }
 
-        private void UseTenantFilterMiddlewareIfEnabled(IConfiguration configuration)
+        private void UseTenantFilterMiddleware(IConfiguration configuration)
         {
             var disableTenantFilter = configuration.GetValue<bool>("DisableTenantFilter", false);
             if (disableTenantFilter)
