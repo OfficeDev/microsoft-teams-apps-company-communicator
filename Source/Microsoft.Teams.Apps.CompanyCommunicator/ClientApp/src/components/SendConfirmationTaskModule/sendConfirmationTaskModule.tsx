@@ -141,7 +141,6 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
                     <div className="footerContainer">
                         <div className="buttonContainer">
                             <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="Preparing message" labelPosition="end" />
-                            <Button content="Cancel" onClick={this.onCancel} secondary />
                             <Button content="Send" id="sendBtn" onClick={this.onSendMessage} primary />
                         </div>
                     </div>
@@ -156,10 +155,6 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
         sendDraftNotification(this.state.message).then(() => {
             microsoftTeams.tasks.submitTask();
         });
-    }
-
-    private onCancel = () => {
-        microsoftTeams.tasks.submitTask();
     }
 
     private displaySelectedTeams = () => {

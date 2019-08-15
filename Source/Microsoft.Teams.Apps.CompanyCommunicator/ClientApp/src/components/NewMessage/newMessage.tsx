@@ -74,14 +74,14 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             btnTitle: "",
             card: this.card,
             page: "CardCreation",
-            teamsOptionSelected: false,
+            teamsOptionSelected: true,
             rostersOptionSelected: false,
             allUsersOptionSelected: false,
             messageId: "",
             loader: true,
             selectedTeamsNum: 0,
             selectedRostersNum: 0,
-            selectedRadioBtn: "",
+            selectedRadioBtn: "teams",
         }
     }
 
