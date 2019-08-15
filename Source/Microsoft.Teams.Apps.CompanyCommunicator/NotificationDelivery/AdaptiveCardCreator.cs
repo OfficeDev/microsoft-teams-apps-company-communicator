@@ -45,7 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
             {
                 card.Body.Add(new AdaptiveImage()
                 {
-                    Url = new Uri(imageUrl),
+                    Url = new Uri(imageUrl, UriKind.RelativeOrAbsolute),
                     Spacing = AdaptiveSpacing.Default,
                     Size = AdaptiveImageSize.Stretch,
                     AltText = string.Empty,
@@ -72,12 +72,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
                 });
             }
 
-            if (!string.IsNullOrWhiteSpace(buttonTitle) && !string.IsNullOrWhiteSpace(buttonUrl))
+            if (!string.IsNullOrWhiteSpace(buttonTitle)
+                && !string.IsNullOrWhiteSpace(buttonUrl))
             {
                 card.Actions.Add(new AdaptiveOpenUrlAction()
                 {
                     Title = buttonTitle,
-                    Url = new Uri(buttonUrl),
+                    Url = new Uri(buttonUrl, UriKind.RelativeOrAbsolute),
                 });
             }
 

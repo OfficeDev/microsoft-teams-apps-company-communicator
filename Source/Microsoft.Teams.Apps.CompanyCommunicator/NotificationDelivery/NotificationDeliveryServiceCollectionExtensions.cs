@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
 {
+    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
 
@@ -29,6 +30,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
             services.AddSingleton<MessageQueue>();
 
             services.AddTransient<AdaptiveCardCreator>();
+
+            services.AddTransient<DraftNotificationPreviewService>();
         }
     }
 }

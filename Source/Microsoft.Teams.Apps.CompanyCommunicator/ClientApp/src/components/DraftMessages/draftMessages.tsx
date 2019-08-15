@@ -12,7 +12,7 @@ import { getBaseUrl } from '../../configVariables';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { Loader } from '@stardust-ui/react';
 import { IButtonProps, CommandBar, DirectionalHint } from 'office-ui-fabric-react';
-import { deleteDraftNotification, duplicateDraftNotification } from '../../apis/messageListApi';
+import { deleteDraftNotification, duplicateDraftNotification, sendPreview } from '../../apis/messageListApi';
 
 export interface ITaskInfo {
   title?: string;
@@ -56,6 +56,8 @@ export interface IMessageState {
   rosterNames: string[];
   allUsers: boolean;
   messageId: number;
+  teamsTeamId?: string;
+  teamsChannelId?: string;
 }
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
@@ -121,9 +123,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
                 ariaLabel: 'More commands',
                 menuProps: {
                   items: [], // Items must be passed for typesafety, but commandBar will determine items rendered in overflow
-                  isBeakVisible: true,
-                  beakWidth: 20,
-                  gapSpace: 10,
+                  isBeakVisible: false,
+                  gapSpace: 5,
                   directionalHint: DirectionalHint.bottomCenter
                 },
                 className: 'moreBtn'
@@ -150,6 +151,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
       rosterNames: [],
       allUsers: false,
       messageId: 0,
+      teamsTeamId: "",
+      teamsChannelId: "",
     };
 
     this.selection = new Selection({
@@ -161,6 +164,13 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
 
   public componentDidMount() {
     microsoftTeams.initialize();
+    microsoftTeams.getContext((context) => {
+      this.setState({
+        teamsTeamId: context.teamId,
+        teamsChannelId: context.channelId,
+      });
+    });
+
     this.props.getDraftMessagesList();
     this.interval = setInterval(() => {
       this.props.getDraftMessagesList();
@@ -219,10 +229,27 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     let id = item.id;
     return [
       {
+        key: 'send',
+        name: 'Send',
+        onClick: () => {
+          let url = getBaseUrl() + "/sendconfirmation/" + id;
+          this.onOpenTaskModule(null, url, "Send confirmation");
+        },
+      },
+      {
         key: 'preview',
         name: 'Preview in this channel',
         onClick: () => {
-
+          let payload = {
+            draftNotificationId: id,
+            teamsTeamId: this.state.teamsTeamId,
+            teamsChannelId: this.state.teamsChannelId,
+          }
+          sendPreview(payload).then((response) => {
+            return response.status;
+          }).catch((error) => {
+            return error;
+          });
         }
       },
       {
@@ -231,15 +258,6 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         onClick: () => {
           let url = getBaseUrl() + "/newmessage/" + id;
           this.onOpenTaskModule(null, url, "Edit message");
-        }
-      },
-      {
-        key: 'delete',
-        name: 'Delete',
-        onClick: () => {
-          this.deleteDraftMessage(id).then(() => {
-            this.props.getDraftMessagesList();
-          });
         }
       },
       {
@@ -252,13 +270,18 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         },
       },
       {
-        key: 'send',
-        name: 'Send',
+        key: 'divider',
+        className: "divider",
+      },
+      {
+        key: 'delete',
+        name: 'Delete',
         onClick: () => {
-          let url = getBaseUrl() + "/sendconfirmation/" + id;
-          this.onOpenTaskModule(null, url, "Send confirmation");
-        },
-      }
+          this.deleteDraftMessage(id).then(() => {
+            this.props.getDraftMessagesList();
+          });
+        }
+      },
     ];
   };
 

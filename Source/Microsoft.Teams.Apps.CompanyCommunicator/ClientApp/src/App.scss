@@ -1,8 +1,11 @@
 /**
 * Gobal Styles for APP
 */
-.appContainer {
+.defaultContainer {
     background-color: #f3f2f1;
+}
+
+.appContainer {
     width: 100%;
 
     .primaryBtn {
@@ -149,7 +152,7 @@
     border: 0.2rem solid #c8c6c4;
     border-top: 0.2rem solid #6265A9;
     border-radius: 0.3rem;
-    margin: 0rem 0rem 0rem 55rem !important;
+    margin: 0rem auto !important;
     width: 35rem;
     padding: 1.6rem !important;
 }

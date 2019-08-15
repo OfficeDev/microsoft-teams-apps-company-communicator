@@ -405,7 +405,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
     private onTeamsChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
         if (option) {
-            if (option.selected == true) {
+            if (option.selected === true) {
                 this.selectedTeams.push(option.key);
                 this.setState({
                     selectedTeamsNum: this.selectedTeams.length
@@ -424,7 +424,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
     private onRostersChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
         if (option) {
-            if (option.selected == true) {
+            if (option.selected === true) {
                 this.selectedRosters.push(option.key);
                 this.setState({
                     selectedRostersNum: this.selectedRosters.length

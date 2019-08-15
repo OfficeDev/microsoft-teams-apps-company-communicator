@@ -176,9 +176,8 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                 ariaLabel: 'More commands',
                 menuProps: {
                   items: [], // Items must be passed for typesafety, but commandBar will determine items rendered in overflow
-                  isBeakVisible: true,
-                  beakWidth: 20,
-                  gapSpace: 10,
+                  isBeakVisible: false,
+                  gapSpace: 5,
                   directionalHint: DirectionalHint.bottomCenter
                 },
                 className: 'moreBtn'
