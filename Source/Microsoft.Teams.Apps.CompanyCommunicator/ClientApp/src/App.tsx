@@ -8,9 +8,12 @@ import './App.scss';
 import { Provider, themes } from '@stardust-ui/react';
 import SendConfirmationTaskModule from './components/SendConfirmationTaskModule/sendConfirmationTaskModule';
 import * as microsoftTeams from "@microsoft/teams-js";
+import { TeamsThemeContext, getContext, ThemeStyle } from 'msteams-ui-components-react';
+
 
 export interface IAppState {
-  theme?: string;
+  theme: string;
+  themeNum: number;
 }
 
 class App extends React.Component<{}, IAppState> {
@@ -19,18 +22,22 @@ class App extends React.Component<{}, IAppState> {
     super(props);
     this.state = {
       theme: "",
+      themeNum: ThemeStyle.Light,
     }
   }
 
   public componentDidMount() {
     microsoftTeams.initialize();
     microsoftTeams.getContext((context) => {
+      let theme = context.theme || "";
+      this.updateTheme(theme);
       this.setState({
-        theme: context.theme
+        theme: theme
       });
     });
 
     microsoftTeams.registerOnThemeChangeHandler((theme) => {
+      this.updateTheme(theme);
       this.setState({
         theme: theme,
       }, () => {
@@ -64,20 +71,42 @@ class App extends React.Component<{}, IAppState> {
     }
   }
 
+  private updateTheme = (theme: string) => {
+    if (theme === "dark") {
+      this.setState({
+        themeNum: ThemeStyle.Dark
+      });
+    } else if (theme === "contrast") {
+      this.setState({
+        themeNum: ThemeStyle.HighContrast
+      });
+    } else {
+      this.setState({
+        themeNum: ThemeStyle.Light
+      });
+    }
+  }
+
   public getAppDom = () => {
+    const context = getContext({
+      baseFontSize: 10,
+      style: this.state.themeNum
+    });
     return (
-      <div className="appContainer">
-        <BrowserRouter>
-          <Switch>
-            <Route exact path="/configtab" component={Configuration} />
-            <Route exact path="/messages" component={TabContainer} />
-            <Route exact path="/newmessage" component={NewMessage} />
-            <Route exact path="/newmessage/:id" component={NewMessage} />
-            <Route exact path="/viewstatus/:id" component={StatusTaskModule} />
-            <Route exact path="/sendconfirmation/:id" component={SendConfirmationTaskModule} />
-          </Switch>
-        </BrowserRouter>
-      </div>
+      <TeamsThemeContext.Provider value={context}>
+        <div className="appContainer">
+          <BrowserRouter>
+            <Switch>
+              <Route exact path="/configtab" component={Configuration} />
+              <Route exact path="/messages" component={TabContainer} />
+              <Route exact path="/newmessage" component={NewMessage} />
+              <Route exact path="/newmessage/:id" component={NewMessage} />
+              <Route exact path="/viewstatus/:id" component={StatusTaskModule} />
+              <Route exact path="/sendconfirmation/:id" component={SendConfirmationTaskModule} />
+            </Switch>
+          </BrowserRouter>
+        </div>
+      </TeamsThemeContext.Provider>
     );
   }
 
