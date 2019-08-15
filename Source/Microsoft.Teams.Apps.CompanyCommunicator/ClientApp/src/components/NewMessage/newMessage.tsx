@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './newMessage.scss';
 import './teamTheme.scss';
-import { Input, TextArea, Checkbox, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
+import { Input, TextArea, Radiobutton, RadiobuttonGroup, TeamsThemeContext, getContext, ThemeStyle } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
 import { Button, Loader } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -47,6 +47,7 @@ export interface formState {
     selectedTeamsNum: number,
     selectedRostersNum: number,
     selectedRadioBtn: string,
+    theme: number;
 }
 
 export interface INewMessageProps extends RouteComponentProps {
@@ -82,11 +83,21 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             selectedTeamsNum: 0,
             selectedRostersNum: 0,
             selectedRadioBtn: "teams",
+            theme: ThemeStyle.Light,
         }
     }
 
     public async componentDidMount() {
         microsoftTeams.initialize();
+        microsoftTeams.getContext((context) => {
+            let theme = context.theme || "";
+            this.updateTheme(theme);
+        });
+
+        microsoftTeams.registerOnThemeChangeHandler((theme) => {
+            this.updateTheme(theme);
+        });
+
         //- Handle the Esc key
         document.addEventListener("keydown", this.escFunction, false);
         let params = this.props.match.params;
@@ -214,6 +225,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     public render(): JSX.Element {
+        const context = getContext({
+            baseFontSize: 10,
+            style: this.state.theme
+        });
+
         if (this.state.loader) {
             return (
                 <div className="Loader">
@@ -226,60 +242,62 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                     <div className="taskModule">
                         <div className="formContainer">
                             <div className="formContentContainer" >
-                                <Input
-                                    className="inputField"
-                                    value={this.state.title}
-                                    label="Title"
-                                    placeholder="Title (required)"
-                                    onChange={this.onTitleChanged}
-                                    autoComplete="off"
-                                    required
-                                />
+                                <TeamsThemeContext.Provider value={context}>
+                                    <Input
+                                        className="inputField"
+                                        value={this.state.title}
+                                        label="Title"
+                                        placeholder="Title (required)"
+                                        onChange={this.onTitleChanged}
+                                        autoComplete="off"
+                                        required
+                                    />
 
-                                <Input
-                                    className="inputField"
-                                    value={this.state.imageLink}
-                                    label="Image Link"
-                                    placeholder="Image link"
-                                    onChange={this.onImageLinkChanged}
-                                    autoComplete="off"
-                                />
+                                    <Input
+                                        className="inputField"
+                                        value={this.state.imageLink}
+                                        label="Image Link"
+                                        placeholder="Image link"
+                                        onChange={this.onImageLinkChanged}
+                                        autoComplete="off"
+                                    />
 
-                                <TextArea
-                                    className="inputField textArea"
-                                    autoFocus
-                                    placeholder="Summary"
-                                    label="Summary"
-                                    value={this.state.summary}
-                                    onChange={this.onSummaryChanged}
-                                />
+                                    <TextArea
+                                        className="inputField textArea"
+                                        autoFocus
+                                        placeholder="Summary"
+                                        label="Summary"
+                                        value={this.state.summary}
+                                        onChange={this.onSummaryChanged}
+                                    />
 
-                                <Input
-                                    className="inputField"
-                                    value={this.state.author}
-                                    label="Author"
-                                    placeholder="Author"
-                                    onChange={this.onAuthorChanged}
-                                    autoComplete="off"
-                                />
+                                    <Input
+                                        className="inputField"
+                                        value={this.state.author}
+                                        label="Author"
+                                        placeholder="Author"
+                                        onChange={this.onAuthorChanged}
+                                        autoComplete="off"
+                                    />
 
-                                <Input
-                                    className="inputField"
-                                    value={this.state.btnTitle}
-                                    label="Button Title"
-                                    placeholder="Button title"
-                                    onChange={this.onBtnTitleChanged}
-                                    autoComplete="off"
-                                />
+                                    <Input
+                                        className="inputField"
+                                        value={this.state.btnTitle}
+                                        label="Button Title"
+                                        placeholder="Button title"
+                                        onChange={this.onBtnTitleChanged}
+                                        autoComplete="off"
+                                    />
 
-                                <Input
-                                    className="inputField"
-                                    value={this.state.btnLink}
-                                    label="Button Url"
-                                    placeholder="Button url"
-                                    onChange={this.onBtnLinkChanged}
-                                    autoComplete="off"
-                                />
+                                    <Input
+                                        className="inputField"
+                                        value={this.state.btnLink}
+                                        label="Button Url"
+                                        placeholder="Button url"
+                                        onChange={this.onBtnLinkChanged}
+                                        autoComplete="off"
+                                    />
+                                </TeamsThemeContext.Provider>
                             </div>
                             <div className="adaptiveCardContainer">
                             </div>
@@ -346,6 +364,22 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
     }
 
+    private updateTheme = (theme: string) => {
+        if (theme === "dark") {
+            this.setState({
+                theme: ThemeStyle.Dark
+            });
+        } else if (theme === "contrast") {
+            this.setState({
+                theme: ThemeStyle.HighContrast
+            });
+        } else {
+            this.setState({
+                theme: ThemeStyle.Light
+            });
+        }
+    }
+
     private onGroupSelected = (value: any) => {
         if (value === "teams") {
             this.setState({
@@ -393,8 +427,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     private isNextBtnDisabled = () => {
         const title = this.state.title;
         const btnTitle = this.state.btnTitle;
-        const btnLink = this.state.btnLink; 
-        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink))); 
+        const btnLink = this.state.btnLink;
+        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink)));
     }
 
     private getItems = () => {
