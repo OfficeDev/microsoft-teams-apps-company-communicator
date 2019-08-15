@@ -30,6 +30,7 @@ export interface ITaskInfo {
     fallbackUrl?: string;
     completionBotId?: string;
 }
+
 class Overflow extends React.Component<OverflowProps, OverflowState> {
     constructor(props: OverflowProps) {
         super(props);
