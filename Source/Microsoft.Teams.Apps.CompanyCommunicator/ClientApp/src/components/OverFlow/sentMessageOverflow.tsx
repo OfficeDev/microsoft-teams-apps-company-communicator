@@ -17,7 +17,6 @@ export interface OverflowProps {
 
 export interface OverflowState {
     menuOpen: boolean;
-    setMenuOpen: boolean;
 }
 
 export interface ITaskInfo {
@@ -35,7 +34,6 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
         super(props);
         this.state = {
             menuOpen: false,
-            setMenuOpen: false,
         };
     }
 
@@ -61,6 +59,9 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                             content: 'View status',
                             onClick: (event: any) => {
                                 event.stopPropagation();
+                                this.setState({
+                                    menuOpen: false,
+                                });
                                 let url = getBaseUrl() + "/viewstatus/" + this.props.message.id;
                                 this.onOpenTaskModule(null, url, "View status");
                             }
@@ -70,6 +71,9 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                             content: 'Duplicate',
                             onClick: (event: any) => {
                                 event.stopPropagation();
+                                this.setState({
+                                    menuOpen: false,
+                                });
                                 this.duplicateDraftMessage(this.props.message.id).then(() => {
                                     this.props.getDraftMessagesList();
                                 });

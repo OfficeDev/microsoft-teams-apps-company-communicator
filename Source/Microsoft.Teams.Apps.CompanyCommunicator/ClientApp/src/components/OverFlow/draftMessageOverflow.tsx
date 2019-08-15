@@ -19,7 +19,6 @@ export interface OverflowState {
     teamsTeamId?: string;
     teamsChannelId?: string;
     menuOpen: boolean;
-    setMenuOpen: boolean;
 }
 
 export interface ITaskInfo {
@@ -38,7 +37,6 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
             teamsChannelId: '',
             teamsTeamId: '',
             menuOpen: false,
-            setMenuOpen: false,
         };
     }
 
@@ -70,6 +68,9 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                             content: 'Send',
                             onClick: (event: any) => {
                                 event.stopPropagation();
+                                this.setState({
+                                    menuOpen: false,
+                                });
                                 let url = getBaseUrl() + "/sendconfirmation/" + this.props.message.id;
                                 this.onOpenTaskModule(null, url, "Send confirmation");
                             }
@@ -79,6 +80,9 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                             content: 'Preview in this channel',
                             onClick: (event: any) => {
                                 event.stopPropagation();
+                                this.setState({
+                                    menuOpen: false,
+                                });
                                 let payload = {
                                     draftNotificationId: this.props.message.id,
                                     teamsTeamId: this.state.teamsTeamId,
@@ -96,6 +100,9 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                             content: 'Edit',
                             onClick: (event: any) => {
                                 event.stopPropagation();
+                                this.setState({
+                                    menuOpen: false,
+                                });
                                 let url = getBaseUrl() + "/newmessage/" + this.props.message.id;
                                 this.onOpenTaskModule(null, url, "Edit message");
                             }
@@ -105,6 +112,9 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                             content: 'Duplicate',
                             onClick: (event: any) => {
                                 event.stopPropagation();
+                                this.setState({
+                                    menuOpen: false,
+                                });
                                 this.duplicateDraftMessage(this.props.message.id).then(() => {
                                     this.props.getDraftMessagesList();
                                 });
@@ -119,6 +129,9 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                             content: 'Delete',
                             onClick: (event: any) => {
                                 event.stopPropagation();
+                                this.setState({
+                                    menuOpen: false,
+                                });
                                 this.deleteDraftMessage(this.props.message.id).then(() => {
                                     this.props.getDraftMessagesList();
                                 });
