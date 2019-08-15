@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
+namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
 {
     using System.Collections.Generic;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.User;

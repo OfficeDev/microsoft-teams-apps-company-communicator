@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
+namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
 {
     using System.Threading.Tasks;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
@@ -61,7 +61,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
             // Deduplicate users
             var deDuplicatedRoster = this.userDataProvider.Deduplicate(userDataDictionary, roster);
 
-            // todo: Set in SentNotificaiton data and counts
+            // todo: Set in SentNotification data and counts
 
             // Create MB message.
             this.messageQueue.Enqueue(draftNotificationEntity.Id, deDuplicatedRoster);

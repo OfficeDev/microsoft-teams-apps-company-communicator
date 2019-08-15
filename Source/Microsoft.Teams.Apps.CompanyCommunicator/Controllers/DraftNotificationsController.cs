@@ -14,7 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
-    using Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery;
+    using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
 
     /// <summary>
@@ -76,17 +76,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             await this.notificationRepository.DuplicateDraftNotificationAsync(notificationEntity, createdBy);
 
             return this.Ok();
-        }
-
-        private async Task<NotificationEntity> FindNotificationToDuplicate(string notificationId)
-        {
-            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notificationId);
-            if (notificationEntity == null)
-            {
-                notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.SentNotifications, notificationId);
-            }
-            
-            return notificationEntity;
         }
 
         /// <summary>
@@ -264,6 +253,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 teamDataEntity,
                 draftNotificationPreviewRequest.TeamsChannelId);
             return this.StatusCode((int)result);
+        }
+
+        private async Task<NotificationEntity> FindNotificationToDuplicate(string notificationId)
+        {
+            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.DraftNotifications, notificationId);
+            if (notificationEntity == null)
+            {
+                notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.SentNotifications, notificationId);
+            }
+
+            return notificationEntity;
         }
     }
 }

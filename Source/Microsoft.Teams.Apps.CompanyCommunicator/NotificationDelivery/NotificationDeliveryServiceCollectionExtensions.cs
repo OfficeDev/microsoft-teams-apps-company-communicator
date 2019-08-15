@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificaitonDelivery
+namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
 {
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Extensions.DependencyInjection;
