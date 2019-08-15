@@ -3,6 +3,64 @@
 */
 .defaultContainer {
     background-color: #f3f2f1;
+
+    .list {
+        .ui-list__item:first-child {
+            background-color: #f3f2f1;
+            color: black;
+
+            &:hover {
+                background-color: #f3f2f1;
+                color: black;
+                cursor: context-menu;
+            }
+
+            .menuContainer {
+                display: none;
+            }
+        }
+
+        .ui-list__item {
+            background-color: white;
+            color: black;
+
+            &:hover {
+                color: rgb(255, 255, 255);
+                background-color: rgb(139, 140, 199);
+
+                .ui-menu {
+                    background-color: rgb(139, 140, 199);
+                }
+            }
+
+            .ui-menu {
+                margin: 0px;
+                padding: 0px;
+                background-color: white;
+            }
+
+            .menuContainer {
+                .ui-menu {
+                    background-color: white;
+
+                    li:first-child {
+                        margin-top: 0.8rem;
+                    }
+
+                    li:last-child {
+                        margin-bottom: 0.8rem;
+                    }
+
+                    li {
+                        &:hover {
+                            color: white;
+                            background-color: rgb(139, 140, 199);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 .appContainer {

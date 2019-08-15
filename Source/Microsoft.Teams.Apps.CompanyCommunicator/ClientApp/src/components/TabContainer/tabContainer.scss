@@ -8,6 +8,11 @@
     .messageContainer {
         clear: both;
         display: block;
+
+        .ui-accordion__title {
+            margin-top: 1.5rem;
+        }
+
     }
 
     .ms-DetailsRow {
