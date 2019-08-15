@@ -99,7 +99,7 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
             height: 530,
             width: 1000,
             fallbackUrl: url,
-        }
+        };
         let submitHandler = (err: any, result: any) => {
         };
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
