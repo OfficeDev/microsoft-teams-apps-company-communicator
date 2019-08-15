@@ -1,67 +1,18 @@
-.content {
-  font-size: 1.4rem;
-  color: #333333;
-  display: block;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  width: 100%;
-
-  .green {
-    color: #237B4B;
-  }
-
-  .red {
-    color: #8E192E;
-  }
-
-  .brand {
-    color: #6264A7;
-  }
-
-  .contentTitle {
-    text-decoration: none;
-    background-color: transparent;
-    border: none;
-
-    &:hover {
-      color: #6264A7;
-      cursor: pointer;
-      border-bottom: 0.1rem solid #6264A7;
-      text-decoration: none;
-    }
-  }
-
-  .recipientsContent {
-    display: inline;
-
-    .recipients {
-      display: inline;
-    }
-
-    .tooltip {
-      margin: 0rem 1rem;
-    }
-  }
-}
-
-.sortIcon {
-  margin: 1.2rem 0.3rem;
-}
-
-.ms-CommandBar {
-  height: 100%;
-  padding: 0rem;
-  background-color: transparent;
-
-  .moreBtn {
-    background-color: transparent !important;
-  }
-}
-
 .sending {
   margin: 0 auto;
   padding: 0;
   height: 1.5rem;
   padding-top: 0.5rem;
+}
+
+.green {
+  color: #237B4B;
+}
+
+.red {
+  color: #8E192E;
+}
+
+.brand {
+  color: #6264A7;
 }
