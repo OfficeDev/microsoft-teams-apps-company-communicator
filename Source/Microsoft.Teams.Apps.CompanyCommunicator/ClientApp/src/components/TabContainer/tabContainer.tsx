@@ -4,7 +4,7 @@ import DraftMessages from '../DraftMessages/draftMessages';
 import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../../configVariables';
-import { Accordion } from '@stardust-ui/react';
+import { Accordion, Button } from '@stardust-ui/react';
 import { getDraftMessagesList } from '../../actions';
 import { connect } from 'react-redux';
 
@@ -79,7 +79,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
         return (
             <div className="tabContainer">
                 <div className="newPostBtn">
-                    <button className="primaryBtn" onClick={this.onNewPost}>New Post</button>
+                    <Button content="New Post" onClick={this.onNewPost} primary />
                 </div>
                 <div className="messageContainer">
                     <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
@@ -88,7 +88,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
         );
     }
 
-    public onNewPost = (event: React.MouseEvent<HTMLButtonElement>) => {
+    public onNewPost = () => {
         let taskInfo: ITaskInfo = {
             url: this.state.url,
             title: "New message",
