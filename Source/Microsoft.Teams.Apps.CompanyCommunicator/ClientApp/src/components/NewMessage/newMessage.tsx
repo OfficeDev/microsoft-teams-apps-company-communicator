@@ -287,7 +287,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
                         <div className="footerContainer">
                             <div className="buttonContainer">
-                                <Button content="Next" disabled={this.state.title === ""} id="saveBtn" onClick={this.onNext} primary />
+                                <Button content="Next" disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
                             </div>
                         </div>
                     </div>
@@ -388,6 +388,13 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         } else {
             return false;
         }
+    }
+
+    private isNextBtnDisabled = () => {
+        const title = this.state.title;
+        const btnTitle = this.state.btnTitle;
+        const btnLink = this.state.btnLink; 
+        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink))); 
     }
 
     private getItems = () => {
