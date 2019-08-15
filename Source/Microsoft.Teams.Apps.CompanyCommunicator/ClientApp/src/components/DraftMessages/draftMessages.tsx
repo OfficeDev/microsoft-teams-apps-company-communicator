@@ -6,7 +6,7 @@ import { selectMessage, getDraftMessagesList, getMessagesList } from '../../acti
 import { getBaseUrl } from '../../configVariables';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { Loader, List, Flex, Text } from '@stardust-ui/react';
-import Overflow from '../OverFlow/draftmessageOverFlow';
+import Overflow from '../OverFlow/draftMessageOverflow';
 
 export interface ITaskInfo {
   title?: string;
@@ -93,13 +93,11 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
       const out = {
         key: keyCount,
         content: (
-          <Flex vAlign="center" fill gap="gap.small" >
-            <Flex.Item shrink={0} grow={1}
-            >
+          <Flex vAlign="center" fill gap="gap.small">
+            <Flex.Item shrink={0} grow={1}>
               <Text>{message.title}</Text>
             </Flex.Item>
-            <Flex.Item shrink={0} hAlign="end"
-              vAlign="center" >
+            <Flex.Item shrink={0} hAlign="end" vAlign="center">
               <Overflow message={message} title="" />
             </Flex.Item>
           </Flex>

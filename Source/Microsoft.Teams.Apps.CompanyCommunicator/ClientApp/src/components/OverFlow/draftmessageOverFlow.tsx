@@ -32,16 +32,16 @@ export interface ITaskInfo {
     completionBotId?: string;
 }
 class Overflow extends React.Component<OverflowProps, OverflowState> {
-
     constructor(props: OverflowProps) {
         super(props);
         this.state = {
             teamsChannelId: '',
             teamsTeamId: '',
             menuOpen: false,
-            setMenuOpen: false
-        }
+            setMenuOpen: false,
+        };
     }
+
     public componentDidMount() {
         microsoftTeams.initialize();
         microsoftTeams.getContext((context) => {
@@ -129,7 +129,7 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                 onMenuOpenChange: (e: any, { menuOpen }: any) => {
                     this.setState({
                         menuOpen: !this.state.menuOpen
-                    })
+                    });
                 },
             },
         ];
@@ -143,8 +143,8 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
             title: title,
             height: 530,
             width: 1000,
-            fallbackUrl: url
-        }
+            fallbackUrl: url,
+        };
 
         let submitHandler = (err: any, result: any) => {
             this.props.getDraftMessagesList().then(() => {

@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { selectMessage, getMessagesList, getDraftMessagesList } from '../../actions';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../../configVariables';
-import Overflow from '../OverFlow/sentmessageOverFlow';
+import Overflow from '../OverFlow/sentMessageOverflow';
 
 export interface ITaskInfo {
   title?: string;
@@ -86,7 +86,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         content: this.messageContent(message),
         onClick: (): void => {
           let url = getBaseUrl() + "/viewstatus/" + message.id;
-          this.onOpenTaskModule(null, url, "View Status");
+          this.onOpenTaskModule(null, url, "View status");
         },
         styles: { margin: '0.2rem 0.2rem 0 0' },
       };

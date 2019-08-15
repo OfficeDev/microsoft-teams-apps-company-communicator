@@ -15,6 +15,11 @@ export interface OverflowProps {
     getDraftMessagesList?: any;
 }
 
+export interface OverflowState {
+    menuOpen: boolean;
+    setMenuOpen: boolean;
+}
+
 export interface ITaskInfo {
     title?: string;
     height?: number;
@@ -25,72 +30,85 @@ export interface ITaskInfo {
     completionBotId?: string;
 }
 
-const Overflow: React.FC<OverflowProps> = (props: OverflowProps): JSX.Element => {
-    microsoftTeams.initialize();
-    const [menuOpen, setMenuOpen] = React.useState(false);
+class Overflow extends React.Component<OverflowProps, OverflowState> {
+    constructor(props: OverflowProps) {
+        super(props);
+        this.state = {
+            menuOpen: false,
+            setMenuOpen: false,
+        };
+    }
 
-    const onOpenTaskModule = (event: any, url: string, title: string) => {
+    public componentDidMount() {
+        microsoftTeams.initialize();
+    }
+
+    public render(): JSX.Element {
+        const items = [
+            {
+                key: 'more',
+                icon: {
+                    name: 'more',
+                    outline: true,
+                },
+                menuOpen: this.state.menuOpen,
+                active: this.state.menuOpen,
+                indicator: false,
+                menu: {
+                    items: [
+                        {
+                            key: 'status',
+                            content: 'View status',
+                            onClick: (event: any) => {
+                                event.stopPropagation();
+                                let url = getBaseUrl() + "/viewstatus/" + this.props.message.id;
+                                this.onOpenTaskModule(null, url, "View status");
+                            }
+                        },
+                        {
+                            key: 'duplicate',
+                            content: 'Duplicate',
+                            onClick: (event: any) => {
+                                event.stopPropagation();
+                                this.duplicateDraftMessage(this.props.message.id).then(() => {
+                                    this.props.getDraftMessagesList();
+                                });
+                            }
+                        },
+                    ],
+                },
+                onMenuOpenChange: (e: any, { menuOpen }: any) => {
+                    this.setState({
+                        menuOpen: !this.state.menuOpen
+                    });
+                },
+            },
+        ];
+
+        return <Menu className="menuContainer" iconOnly items={items} styles={this.props.styles} title={this.props.title} />;
+    }
+
+    private onOpenTaskModule = (event: any, url: string, title: string) => {
         let taskInfo: ITaskInfo = {
             url: url,
             title: title,
             height: 530,
             width: 1000,
-            fallbackUrl: url
+            fallbackUrl: url,
         }
         let submitHandler = (err: any, result: any) => {
         };
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     }
 
-    const duplicateDraftMessage = async (id: number) => {
+    private duplicateDraftMessage = async (id: number) => {
         try {
             const response = await duplicateDraftNotification(id);
         } catch (error) {
             return error;
         }
     }
-
-    const items = [
-        {
-            key: 'more',
-            icon: {
-                name: 'more',
-                outline: true,
-            },
-            menuOpen,
-            active: menuOpen,
-            indicator: false,
-            menu: {
-                items: [
-                    {
-                        key: 'status',
-                        content: 'View Status',
-                        onClick: (event: any) => {
-                            event.stopPropagation();
-                            let url = getBaseUrl() + "/viewstatus/" + props.message.id;
-                            onOpenTaskModule(null, url, "View Status");
-                        }
-                    },
-                    {
-                        key: 'duplicate',
-                        content: 'Duplicate',
-                        onClick: (event: any) => {
-                            event.stopPropagation();
-                            duplicateDraftMessage(props.message.id).then(() => {
-                                props.getDraftMessagesList();
-                            });
-                        }
-                    },
-                ],
-            },
-            onMenuOpenChange: (e: any, { menuOpen }: any) => {
-                setMenuOpen(menuOpen);
-            },
-        },
-    ];
-
-    return <Menu className="menuContainer" iconOnly items={items} styles={props.styles} title={props.title} />;
-};
+}
 
 const mapStateToProps = (state: any) => {
     return { messagesList: state.messagesList };
