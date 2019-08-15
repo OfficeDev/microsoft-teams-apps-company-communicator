@@ -65,7 +65,7 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                 menu: {
                     items: [
                         {
-                            key: 'Send',
+                            key: 'send',
                             content: 'Send',
                             onClick: (event: any) => {
                                 event.stopPropagation();
