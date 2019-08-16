@@ -13,7 +13,7 @@ import { TeamsThemeContext, getContext, ThemeStyle } from 'msteams-ui-components
 
 export interface IAppState {
   theme: string;
-  themeNum: number;
+  themeStyle: number;
 }
 
 class App extends React.Component<{}, IAppState> {
@@ -22,7 +22,7 @@ class App extends React.Component<{}, IAppState> {
     super(props);
     this.state = {
       theme: "",
-      themeNum: ThemeStyle.Light,
+      themeStyle: ThemeStyle.Light,
     }
   }
 
@@ -74,15 +74,15 @@ class App extends React.Component<{}, IAppState> {
   private updateTheme = (theme: string) => {
     if (theme === "dark") {
       this.setState({
-        themeNum: ThemeStyle.Dark
+        themeStyle: ThemeStyle.Dark
       });
     } else if (theme === "contrast") {
       this.setState({
-        themeNum: ThemeStyle.HighContrast
+        themeStyle: ThemeStyle.HighContrast
       });
     } else {
       this.setState({
-        themeNum: ThemeStyle.Light
+        themeStyle: ThemeStyle.Light
       });
     }
   }
@@ -90,7 +90,7 @@ class App extends React.Component<{}, IAppState> {
   public getAppDom = () => {
     const context = getContext({
       baseFontSize: 10,
-      style: this.state.themeNum
+      style: this.state.themeStyle
     });
     return (
       <TeamsThemeContext.Provider value={context}>

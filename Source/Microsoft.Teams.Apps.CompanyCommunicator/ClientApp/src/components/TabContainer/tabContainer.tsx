@@ -79,7 +79,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
         return (
             <div className="tabContainer">
                 <div className="newPostBtn">
-                    <Button content="New Post" onClick={this.onNewPost} primary />
+                    <Button content="New message" onClick={this.onNewMessage} primary />
                 </div>
                 <div className="messageContainer">
                     <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
@@ -88,7 +88,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
         );
     }
 
-    public onNewPost = () => {
+    public onNewMessage = () => {
         let taskInfo: ITaskInfo = {
             url: this.state.url,
             title: "New message",
