@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './newMessage.scss';
 import './teamTheme.scss';
-import { Input, TextArea, Checkbox, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
+import { Input, TextArea, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
 import { Button, Loader } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
@@ -393,8 +393,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     private isNextBtnDisabled = () => {
         const title = this.state.title;
         const btnTitle = this.state.btnTitle;
-        const btnLink = this.state.btnLink; 
-        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink))); 
+        const btnLink = this.state.btnLink;
+        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink)));
     }
 
     private getItems = () => {
