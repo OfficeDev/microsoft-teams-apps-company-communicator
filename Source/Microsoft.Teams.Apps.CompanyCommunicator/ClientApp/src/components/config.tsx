@@ -33,7 +33,7 @@ class Configuration extends React.Component<{}, IConfigState> {
 
     public render(): JSX.Element {
         return (
-            <div>
+            <div className="configContainer">
                 <h3>Company Communicator App Configuration Page</h3>
             </div>
         );
