@@ -3,7 +3,7 @@ import './newMessage.scss';
 import './teamTheme.scss';
 import { Input, TextArea, Checkbox, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader } from '@stardust-ui/react';
+import { Button, Loader, Dropdown } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { RouteComponentProps } from 'react-router-dom';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification } from '../../apis/messageListApi';
@@ -11,9 +11,15 @@ import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
-import { Dropdown } from 'office-ui-fabric-react';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getBaseUrl } from '../../configVariables';
+
+type dorpdownItem = {
+    header: string,
+    team: {
+        id: string
+    }
+}
 
 export interface IDraftMessage {
     id?: string,
@@ -47,6 +53,8 @@ export interface formState {
     selectedTeamsNum: number,
     selectedRostersNum: number,
     selectedRadioBtn: string,
+    selectedTeams: dorpdownItem[],
+    selectedRosters: dorpdownItem[]
 }
 
 export interface INewMessageProps extends RouteComponentProps {
@@ -55,9 +63,6 @@ export interface INewMessageProps extends RouteComponentProps {
 
 export default class NewMessage extends React.Component<INewMessageProps, formState> {
     private card: any;
-    private selectedTeams: string[] = [];
-    private selectedRosters: string[] = [];
-
 
     constructor(props: INewMessageProps) {
         super(props);
@@ -82,6 +87,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             selectedTeamsNum: 0,
             selectedRostersNum: 0,
             selectedRadioBtn: "teams",
+            selectedTeams: [],
+            selectedRosters: []
         }
     }
 
@@ -94,9 +101,13 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             if ('id' in params) {
                 let id = params['id'];
                 this.getItem(id).then(() => {
+                    const selectedTeams = this.makeDropdownItemList(this.state.selectedTeams, this.state.teams);
+                    const selectedRosters = this.makeDropdownItemList(this.state.selectedRosters, this.state.teams);
                     this.setState({
                         exists: true,
-                        messageId: id
+                        messageId: id,
+                        selectedTeams: selectedTeams,
+                        selectedRosters: selectedRosters
                     })
                 });
             } else {
@@ -115,6 +126,20 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 })
             }
         });
+    }
+
+    private makeDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
+        const dropDownItemList: dorpdownItem[] = [];
+        items.forEach(element =>
+            dropDownItemList.push(
+                typeof element !== "string" ? element : {
+                    header: fromItems!.find(x => x.teamId === element).name,
+                    team: {
+                        id: element
+                    }
+                })
+        );
+        return dropDownItemList;
     }
 
     public setDefaultCard = (card: any) => {
@@ -137,54 +162,21 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
     }
 
-    private getTeamName = (id: string) => {
-        let teamName = "";
-        let teams = this.state.teams;
-        if (teams !== undefined) {
-            for (let i = 0; i < teams.length; i++) {
-                if (teams[i].teamId === id) {
-                    return teams[i].name;
-                }
-            }
-        }
-        return teamName;
-    }
-
     private getItem = async (id: number) => {
         try {
             const response = await getDraftNotification(id);
-            let draftMessageDetail = response.data;
-            if (draftMessageDetail.teams.length === 0) {
-                this.setState({
-                    teamsOptionSelected: false
-                });
-            } else {
-                this.setState({
-                    teamsOptionSelected: true,
-                    selectedTeamsNum: draftMessageDetail.teams.length,
-                    selectedRadioBtn: "teams",
-                });
-                this.selectedTeams = draftMessageDetail.teams;
-            }
+            const draftMessageDetail = response.data;
+            const selectedRadioButton = draftMessageDetail.rosters.length > 0 ? "rosters" : draftMessageDetail.allUsers ? "allUsers" : "teams";
 
-            if (draftMessageDetail.rosters.length === 0) {
-                this.setState({
-                    rostersOptionSelected: false
-                });
-            } else {
-                this.setState({
-                    rostersOptionSelected: true,
-                    selectedRostersNum: draftMessageDetail.rosters.length,
-                    selectedRadioBtn: "rosters",
-                });
-                this.selectedRosters = draftMessageDetail.rosters;
-            }
-
-            if (draftMessageDetail.allUsers) {
-                this.setState({
-                    selectedRadioBtn: "allUsers",
-                })
-            }
+            this.setState({
+                teamsOptionSelected: draftMessageDetail.teams.length > 0,
+                selectedTeamsNum: draftMessageDetail.teams.length,
+                rostersOptionSelected: draftMessageDetail.rosters.length > 0,
+                selectedRostersNum: draftMessageDetail.rosters.length,
+                selectedRadioBtn: selectedRadioButton,
+                selectedTeams: draftMessageDetail.teams,
+                selectedRosters: draftMessageDetail.rosters
+            });
 
             setCardTitle(this.card, draftMessageDetail.title);
             setCardImageLink(this.card, draftMessageDetail.imageLink);
@@ -307,23 +299,21 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 >
                                     <Radiobutton name="grouped" value="teams" label="Send to General channel(s)" />
                                     <Dropdown
+                                        hidden={!this.state.teamsOptionSelected}
                                         placeholder="Select team(s)"
-                                        defaultSelectedKeys={this.selectedTeams}
-                                        multiSelect
-                                        options={this.getItems()}
-                                        onChange={this.onTeamsChange}
-                                        disabled={!this.state.teamsOptionSelected}
-                                        className="dropdown"
+                                        multiple
+                                        items={this.getItems()}
+                                        value={this.state.selectedTeams}
+                                        onSelectedChange={this.onTeamsChange}
                                     />
                                     <Radiobutton name="grouped" value="rosters" label="Send in chat" />
                                     <Dropdown
+                                        hidden={!this.state.rostersOptionSelected}
                                         placeholder="Choose team(s) members"
-                                        defaultSelectedKeys={this.selectedRosters}
-                                        multiSelect
-                                        options={this.getItems()}
-                                        onChange={this.onRostersChange}
-                                        disabled={!this.state.rostersOptionSelected}
-                                        className="dropdown"
+                                        multiple
+                                        items={this.getItems()}
+                                        value={this.state.selectedRosters}
+                                        onSelectedChange={this.onRostersChange}
                                     />
                                     <Radiobutton name="grouped" value="allUsers" label="Send in chat to all users" />
                                 </RadiobuttonGroup>
@@ -347,177 +337,109 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onGroupSelected = (value: any) => {
-        if (value === "teams") {
-            this.setState({
-                teamsOptionSelected: true,
-                rostersOptionSelected: false,
-                allUsersOptionSelected: false,
-            });
-        } else if (value === "rosters") {
-            this.setState({
-                teamsOptionSelected: false,
-                rostersOptionSelected: true,
-                allUsersOptionSelected: false,
-            });
-        } else if (value === "allUsers") {
-            this.setState({
-                teamsOptionSelected: false,
-                rostersOptionSelected: false,
-                allUsersOptionSelected: true,
-            });
-        }
-        else {
-            this.setState({
-                teamsOptionSelected: false,
-                rostersOptionSelected: false,
-                allUsersOptionSelected: false,
-            });
-        }
         this.setState({
-            selectedRadioBtn: value
+            selectedRadioBtn: value,
+            teamsOptionSelected: value === 'teams',
+            rostersOptionSelected: value === 'rosters',
+            allUsersOptionSelected: value === 'allUsers',
+            selectedTeams: value === 'teams' ? this.state.selectedTeams : [],
+            selectedTeamsNum: value === 'teams' ? this.state.selectedTeamsNum : 0,
+            selectedRosters: value === 'rosters' ? this.state.selectedRosters : [],
+            selectedRostersNum: value === 'rosters' ? this.state.selectedRostersNum : 0,
         });
     }
 
     private isSaveBtnDisabled = () => {
-        let teamsSelectionIsValid = (this.state.teamsOptionSelected && (this.state.selectedTeamsNum !== 0)) || (!this.state.teamsOptionSelected);
-        let rostersSelectionIsValid = (this.state.rostersOptionSelected && (this.state.selectedRostersNum !== 0)) || (!this.state.rostersOptionSelected);
-        let nothingSelected = (!this.state.teamsOptionSelected) && (!this.state.rostersOptionSelected) && (!this.state.allUsersOptionSelected);
+        const teamsSelectionIsValid = (this.state.teamsOptionSelected && (this.state.selectedTeamsNum !== 0)) || (!this.state.teamsOptionSelected);
+        const rostersSelectionIsValid = (this.state.rostersOptionSelected && (this.state.selectedRostersNum !== 0)) || (!this.state.rostersOptionSelected);
+        const nothingSelected = (!this.state.teamsOptionSelected) && (!this.state.rostersOptionSelected) && (!this.state.allUsersOptionSelected);
 
-        if (!teamsSelectionIsValid || !rostersSelectionIsValid || nothingSelected) {
-            return true;
-        } else {
-            return false;
-        }
+        return (!teamsSelectionIsValid || !rostersSelectionIsValid || nothingSelected)
     }
 
     private isNextBtnDisabled = () => {
         const title = this.state.title;
         const btnTitle = this.state.btnTitle;
-        const btnLink = this.state.btnLink; 
-        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink))); 
+        const btnLink = this.state.btnLink;
+        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink)));
     }
 
     private getItems = () => {
-        let teams: any[] = [];
+        const resultedTeams: dorpdownItem[] = [];
         if (this.state.teams) {
-            this.state.teams.forEach((element) => {
-                teams.push({
-                    key: element.teamId,
-                    text: element.name
+            let remainingUserTeams = this.state.teams;
+            if (this.state.selectedRadioBtn !== "allUsers") {
+                remainingUserTeams = this.state.selectedRadioBtn === "teams" ? this.state.teams.filter(x => this.state.selectedTeams.findIndex(y => y.team.id === x.teamId) < 0) : this.state.teams.filter(x => this.state.selectedRosters.findIndex(y => y.team.id === x.teamId) < 0);
+            }
+            remainingUserTeams.forEach((element) => {
+                resultedTeams.push({
+                    header: element.name,
+                    team: {
+                        id: element.teamId
+                    }
                 });
             });
         }
-        return teams;
+        return resultedTeams;
+    }
+    private onTeamsChange = (event: any, itemsData: any) => {
+        this.setState({
+            selectedTeams: itemsData.value,
+            selectedTeamsNum: itemsData.value.length,
+            selectedRosters: [],
+            selectedRostersNum: 0
+        })
     }
 
-    private onTeamsChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
-        if (option) {
-            if (option.selected === true) {
-                this.selectedTeams.push(option.key);
-                this.setState({
-                    selectedTeamsNum: this.selectedTeams.length
-                });
-            } else {
-                let index = this.selectedTeams.indexOf(option.key);
-                if (index > -1) {
-                    this.selectedTeams.splice(index, 1);
-                    this.setState({
-                        selectedTeamsNum: this.selectedTeams.length
-                    });
-                }
-            }
-        }
-    }
-
-    private onRostersChange = (event: React.FormEvent<HTMLDivElement>, option?: any, index?: number) => {
-        if (option) {
-            if (option.selected === true) {
-                this.selectedRosters.push(option.key);
-                this.setState({
-                    selectedRostersNum: this.selectedRosters.length
-                });
-            } else {
-                let index = this.selectedRosters.indexOf(option.key);
-                if (index > -1) {
-                    this.selectedRosters.splice(index, 1);
-                    this.setState({
-                        selectedRostersNum: this.selectedRosters.length
-                    });
-                }
-            }
-        }
+    private onRostersChange = (event: any, itemsData: any) => {
+        this.setState({
+            selectedRosters: itemsData.value,
+            selectedRostersNum: itemsData.value.length,
+            selectedTeams: [],
+            selectedTeamsNum: 0
+        })
     }
 
     private onSave = () => {
+        const selectedTeams: string[] = [];
+        const selctedRosters: string[] = [];
+        this.state.selectedTeams.forEach(x => selectedTeams.push(x.team.id));
+        this.state.selectedRosters.forEach(x => selctedRosters.push(x.team.id));
+
+        const draftMessage: IDraftMessage = {
+            id: this.state.messageId,
+            title: this.state.title,
+            imageLink: this.state.imageLink,
+            summary: this.state.summary,
+            author: this.state.author,
+            buttonTitle: this.state.btnTitle,
+            buttonLink: this.state.btnLink,
+            teams: selectedTeams,
+            rosters: selctedRosters,
+            allUsers: this.state.allUsersOptionSelected
+        };
+
         if (this.state.exists) {
-            this.editDraftMessage().then(() => {
+            this.editDraftMessage(draftMessage).then(() => {
                 microsoftTeams.tasks.submitTask();
             });
         } else {
-            this.postDraftMessage().then(() => {
+            this.postDraftMessage(draftMessage).then(() => {
                 microsoftTeams.tasks.submitTask();
             });
         }
     }
-
-    private editDraftMessage = async () => {
-        let teams: string[] = [];
-        let rosters: string[] = [];
-
-        if (this.state.teamsOptionSelected) {
-            teams = this.selectedTeams;
-        }
-
-        if (this.state.rostersOptionSelected) {
-            rosters = this.selectedRosters;
-        }
-
+    private editDraftMessage = async (draftMessage: IDraftMessage) => {
         try {
-            let draftMessage: IDraftMessage = {
-                id: this.state.messageId,
-                title: this.state.title,
-                imageLink: this.state.imageLink,
-                summary: this.state.summary,
-                author: this.state.author,
-                buttonTitle: this.state.btnTitle,
-                buttonLink: this.state.btnLink,
-                teams: teams,
-                rosters: rosters,
-                allUsers: this.state.allUsersOptionSelected
-            };
-
-            const response = await updateDraftNotification(draftMessage);
+            await updateDraftNotification(draftMessage);
         } catch (error) {
             return error;
         }
     }
 
-    private postDraftMessage = async () => {
-        let teams: string[] = [];
-        let rosters: string[] = [];
-
-        if (this.state.teamsOptionSelected) {
-            teams = this.selectedTeams;
-        }
-
-        if (this.state.rostersOptionSelected) {
-            rosters = this.selectedRosters;
-        }
-
+    private postDraftMessage = async (draftMessage: IDraftMessage) => {
         try {
-            let draftMessage: IDraftMessage = {
-                title: this.state.title,
-                imageLink: this.state.imageLink,
-                summary: this.state.summary,
-                author: this.state.author,
-                buttonTitle: this.state.btnTitle,
-                buttonLink: this.state.btnLink,
-                teams: teams,
-                rosters: rosters,
-                allUsers: this.state.allUsersOptionSelected
-            };
-
-            const response = await createDraftNotification(draftMessage);
+            await createDraftNotification(draftMessage);
         } catch (error) {
             return error;
         }
@@ -618,7 +540,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onBtnTitleChanged = (event: any) => {
-        let showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !event.target.value && !this.state.btnLink);
+        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !event.target.value && !this.state.btnLink);
         setCardTitle(this.card, this.state.title);
         setCardImageLink(this.card, this.state.imageLink);
         setCardSummary(this.card, this.state.summary);
@@ -648,7 +570,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onBtnLinkChanged = (event: any) => {
-        let showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !event.target.value);
+        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !event.target.value);
         setCardTitle(this.card, this.state.title);
         setCardSummary(this.card, this.state.summary);
         setCardAuthor(this.card, this.state.author);
@@ -678,16 +600,16 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private updateCard = () => {
-        let adaptiveCard = new AdaptiveCards.AdaptiveCard();
+        const adaptiveCard = new AdaptiveCards.AdaptiveCard();
         adaptiveCard.parse(this.state.card);
-        let renderedCard = adaptiveCard.render();
-        let container = document.getElementsByClassName('adaptiveCardContainer')[0].firstChild;
+        const renderedCard = adaptiveCard.render();
+        const container = document.getElementsByClassName('adaptiveCardContainer')[0].firstChild;
         if (container != null) {
             container.replaceWith(renderedCard);
         } else {
             document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
         }
-        let link = this.state.btnLink;
+        const link = this.state.btnLink;
         adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
     }
 }
