@@ -5,6 +5,19 @@
     background-color: #f3f2f1;
 
     .list {
+        .succeeded {
+            color: #237B4B;
+
+        }
+
+        .failed {
+            color: #8E192E;
+        }
+
+        .throttled {
+            color: #6264A7;
+        }
+
         .ui-list__item:first-child {
             background-color: #f3f2f1;
             color: black;
@@ -66,19 +79,232 @@
         background-color: #fff;
         width: 100%;
     }
+
+    .ac-container {
+        border: 0.2rem solid #c8c6c4;
+        border-top: 0.2rem solid #6265A9;
+        border-radius: 0.3rem;
+        margin: 0rem auto !important;
+        width: 35rem;
+        padding: 1.6rem !important;
+    }
 }
 
 .darkContainer {
+    background-color: #2d2c2c;
+
+    .list {
+        .succeeded {
+            color: #92C353;
+
+        }
+
+        .failed {
+            color: #F9526B;
+        }
+
+        .throttled {
+            color: #E2E2F6;
+        }
+
+        .ui-list__item:first-child {
+            background-color: #2d2c2c;
+            color: #fff;
+
+            &:hover {
+                background-color: #2d2c2c;
+                color: #fff;
+                cursor: context-menu;
+            }
+
+            .menuContainer {
+                display: none;
+            }
+        }
+
+        .ui-list__item {
+            background-color: #2d2c2c;
+            color: #fff;
+            border: solid #201f1f;
+            border-width: 0 0 2px;
+
+            &:hover {
+                color: rgb(255, 255, 255);
+                background-color: rgba(98, 100, 167, .8);
+
+                .ui-menu {
+                    background-color: inherit;
+                    outline: none;
+                }
+            }
+
+            .ui-menu {
+                margin: 0px;
+                padding: 0px;
+                outline: none;
+                background-color: #2d2c2c;
+            }
+
+            .menuContainer {
+
+                .ii:hover {
+                    color: #fff;
+                }
+
+                .ui-menu {
+                    background-color: #2d2c2c;
+
+                    li:first-child {
+                        margin-top: 0.8rem;
+                    }
+
+                    li:last-child {
+                        margin-bottom: 0.8rem;
+                    }
+
+                    li {
+                        &:hover {
+                            color: white;
+                            background-color: rgba(98, 100, 167, .8);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     .Loader {
         background-color: #2D2C2C;
         width: 100%;
     }
+
+    .ac-container {
+        border: 0.2rem solid #1B1A1A;
+        border-top: 0.2rem solid #6265A9;
+        border-radius: 0.3rem;
+        margin: 0rem auto !important;
+        width: 35rem;
+        padding: 1.6rem !important;
+        background-color: #2D2C2C !important;
+    }
+
+    .ac-textBlock {
+        color: #fff !important;
+    }
+
+    .ac-pushButton {
+        padding: 0.4rem 1rem 0.5rem 1rem;
+        height: 3.2rem;
+        background-color: #2D2C2C;
+        color: #A6A7DC;
+        border: 0.2rem solid #E2E2F6;
+        border-radius: 0.4rem;
+    }
 }
 
 .highContrastContainer {
+    background-color: #000;
+
+    .list {
+        .ui-list__item:first-child {
+            background-color: #000;
+            color: #fff;
+            border: none;
+
+            &:hover {
+                background-color: #000;
+                color: #fff;
+                cursor: context-menu;
+            }
+
+            .menuContainer {
+                display: none;
+            }
+        }
+
+        .ui-list__item {
+            background-color: #000;
+            color: #fff;
+            border: solid #fff;
+            border-width: 0.1rem;
+            margin-top: 0rem;
+
+            &:hover {
+                color: #000;
+                background-color: #ffff01;
+
+                .ui-menu {
+                    background-color: inherit;
+                    color: #000;
+                    outline: none;
+                }
+            }
+
+            .ui-menu {
+                margin: 0px;
+                padding: 0px;
+                outline: none;
+                background-color: #000;
+
+                &:hover {
+                    border: 0.1rem solid #000;
+                }
+            }
+
+            .menuContainer {
+
+                .ii:hover {
+                    color: #fff;
+                }
+
+                .ui-menu {
+                    background-color: #000;
+                    color: #fff;
+
+                    li:first-child {
+                        margin-top: 0.8rem;
+                    }
+
+                    li:last-child {
+                        margin-bottom: 0.8rem;
+                    }
+
+                    li {
+                        &:hover {
+                            color: #000;
+                            background-color: #ffff01;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     .Loader {
         background-color: #000000;
         width: 100%;
+    }
+
+    .ac-container {
+        border: 0.2rem solid #fff;
+        border-radius: 0.3rem;
+        margin: 0rem auto !important;
+        width: 35rem;
+        padding: 1.6rem !important;
+        background-color: #000 !important;
+    }
+
+    .ac-textBlock {
+        color: #fff !important;
+    }
+
+    .ac-pushButton {
+        padding: 0.4rem 1rem 0.5rem 1rem;
+        height: 3.2rem;
+        background-color: #000;
+        color: #fff;
+        border: 0.2rem solid #fff;
+        border-radius: 0.4rem;
     }
 }
 
@@ -223,13 +449,4 @@
     ::-webkit-scrollbar {
         width: 1rem;
     }
-}
-
-.ac-container {
-    border: 0.2rem solid #c8c6c4;
-    border-top: 0.2rem solid #6265A9;
-    border-radius: 0.3rem;
-    margin: 0rem auto !important;
-    width: 35rem;
-    padding: 1.6rem !important;
 }
