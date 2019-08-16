@@ -50,14 +50,18 @@ class App extends React.Component<{}, IAppState> {
     if (this.state.theme === "dark") {
       return (
         <Provider theme={themes.teamsDark}>
-          {this.getAppDom()}
+          <div className="darkContainer">
+            {this.getAppDom()}
+          </div>
         </Provider>
       );
     }
     else if (this.state.theme === "contrast") {
       return (
         <Provider theme={themes.teamsHighContrast}>
-          {this.getAppDom()}
+          <div className="highContrastContainer">
+            {this.getAppDom()}
+          </div>
         </Provider>
       );
     } else {

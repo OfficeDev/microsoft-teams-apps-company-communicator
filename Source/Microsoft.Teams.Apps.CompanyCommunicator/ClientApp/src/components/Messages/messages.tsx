@@ -177,13 +177,13 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
           <div>
             <TooltipHost content="Success" calloutProps={{ gapSpace: 0 }}>
-              <Icon name="stardust-checkmark" xSpacing="after" className="green" outline />{message.succeeded}
+              <Icon name="stardust-checkmark" xSpacing="after" className="succeeded" outline />{message.succeeded}
             </TooltipHost>
             <TooltipHost content="Failure" calloutProps={{ gapSpace: 0 }}>
-              <Icon name="stardust-close" xSpacing="both" className="red" outline />{message.failed}
+              <Icon name="stardust-close" xSpacing="both" className="failed" outline />{message.failed}
             </TooltipHost>
             <TooltipHost content="Throttled" calloutProps={{ gapSpace: 0 }}>
-              <Icon name="exclamation-circle" xSpacing="both" className="brand" outline />{message.throttled}
+              <Icon name="exclamation-circle" xSpacing="both" className="throttled" outline />{message.throttled}
             </TooltipHost>
           </div>
         </Flex.Item>

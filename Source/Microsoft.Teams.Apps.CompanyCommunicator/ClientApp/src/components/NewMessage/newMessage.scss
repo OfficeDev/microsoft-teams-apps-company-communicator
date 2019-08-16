@@ -1,10 +1,4 @@
-.Loader {
-    background-color: #fff;
-    width: 100%;
-}
-
 .taskModule {
-
     .formContainer {
         overflow-y: auto;
         position: absolute;
@@ -31,7 +25,11 @@
                 span {
                     font-size: 1.2rem;
                     display: block;
-                    margin: 1rem 0rem 0rem 0rem;
+                    margin: 0.9rem 0rem 0.65rem 0rem;
+
+                    &:nth-child(2) {
+                        color: #C4314B;
+                    }
                 }
 
                 input {
@@ -53,7 +51,11 @@
                 span {
                     font-size: 1.2rem;
                     display: block;
-                    margin: 1rem 0rem 0rem 0rem;
+                    margin: 0.9rem 0rem 0.65rem 0rem;
+
+                    &:nth-child(2) {
+                        color: #C4314B;
+                    }
                 }
 
                 textarea {
