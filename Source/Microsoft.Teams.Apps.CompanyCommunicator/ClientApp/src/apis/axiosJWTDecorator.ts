@@ -63,9 +63,11 @@ export class AxiosJWTDecorator {
         window.location.href = "/errorpage/403";
       } else if (errorStatus === 401) {
         window.location.href = "/errorpage/401";
+      } else {
+        window.location.href = "/errorpage";
       }
     } else {
-      window.location.href = "errorpage";
+      window.location.href = "/errorpage";
     }
   }
 
