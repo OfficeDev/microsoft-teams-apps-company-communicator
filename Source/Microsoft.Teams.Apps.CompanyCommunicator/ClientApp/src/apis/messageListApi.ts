@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from './axiosJWTDecorator';
 import { getBaseUrl } from '../configVariables';
 
 let baseAxiosUrl = getBaseUrl() + '/api';

@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 {
+    using System;
     using Microsoft.AspNetCore.Authentication.AzureAD.UI;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
@@ -41,8 +42,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                     {
                         ValidAudience = $"{azureADOptions.ClientId}",
                         ValidIssuer = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0",
+                        IssuerValidator = AuthenticationServiceCollectionExtensions.IssuerValidator,
                     };
                 });
+        }
+
+        private static string IssuerValidator(
+            string issuer,
+            SecurityToken securityToken,
+            TokenValidationParameters validationParameters)
+        {
+            var validIssuer = validationParameters?.ValidIssuer;
+            if (!string.IsNullOrWhiteSpace(validIssuer)
+                && validIssuer.Equals(issuer, StringComparison.OrdinalIgnoreCase))
+            {
+                return issuer;
+            }
+
+            throw new ApplicationException("Invalid issuer!");
         }
 
         private static void RegisterAuthorizationPolicy(IServiceCollection services)

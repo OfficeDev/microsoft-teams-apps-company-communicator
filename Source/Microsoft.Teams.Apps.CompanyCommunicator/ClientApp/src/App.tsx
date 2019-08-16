@@ -8,6 +8,7 @@ import './App.scss';
 import { Provider, themes } from '@stardust-ui/react';
 import SendConfirmationTaskModule from './components/SendConfirmationTaskModule/sendConfirmationTaskModule';
 import * as microsoftTeams from "@microsoft/teams-js";
+import ErrorPage from "./components/ErrorPage/errorPage";
 
 export interface IAppState {
   theme?: string;
@@ -75,6 +76,7 @@ class App extends React.Component<{}, IAppState> {
             <Route exact path="/newmessage/:id" component={NewMessage} />
             <Route exact path="/viewstatus/:id" component={StatusTaskModule} />
             <Route exact path="/sendconfirmation/:id" component={SendConfirmationTaskModule} />
+            <Route exact path="/errorpage/:id" component={ErrorPage} />
           </Switch>
         </BrowserRouter>
       </div>
