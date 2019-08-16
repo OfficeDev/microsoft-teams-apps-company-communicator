@@ -27,8 +27,7 @@
     "configurationUrl": "https://<<appDomain>>/configtab",
     "canUpdateConfiguration": true,
     "scopes": [
-      "team",
-      "groupchat"
+      "team"
     ]
   }],
   "bots": [{
