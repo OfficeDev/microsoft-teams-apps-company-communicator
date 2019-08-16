@@ -1,0 +1,41 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.5/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.5",
+  "version": "1.0.0",
+  "id": "148a66bb-e83d-425a-927d-09f4299a9274",
+  "packageName": "com.microsoft.teams.companycommunicator",
+  "developer": {
+    "name": "<<companyName>>",
+    "websiteUrl": "<<websiteUrl>>",
+    "privacyUrl": "<<privacyUrl>>",
+    "termsOfUseUrl": "<<termsOfUseUrl>>"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "Company Communicator",
+    "full": "Company Communicator"
+  },
+  "description": {
+    "short": "Company Communicator",
+    "full": "Company Communicator"
+  },
+  "accentColor": "#64A2CC",
+  "bots": [{
+    "botId": "<<botId>>",
+    "scopes": [
+      "personal"
+    ],
+    "supportsFiles": false,
+    "isNotificationOnly": false
+  }],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "<<appDomain>>"
+  ]
+}
