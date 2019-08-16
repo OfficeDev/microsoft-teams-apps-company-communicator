@@ -90,12 +90,12 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         }
     }
 
-    private formatNotificationDate = (notification: string) => {
-        if (notification) {
-            notification = (new Date(notification)).toLocaleString(navigator.language, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
-            notification = notification.replace(',', '');
+    private formatNotificationDate = (notificationDate: string) => {
+        if (notificationDate) {
+            notificationDate = (new Date(notificationDate)).toLocaleString(navigator.language, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
+            notificationDate = notificationDate.replace(',', '');
         }
-        return notification;
+        return notificationDate;
     }
 
     public render(): JSX.Element {

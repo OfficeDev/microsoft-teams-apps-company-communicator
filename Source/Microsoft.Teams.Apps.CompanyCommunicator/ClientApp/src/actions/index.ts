@@ -32,10 +32,10 @@ export const getDraftMessagesList = () => async (dispatch: any) => {
     dispatch({ type: 'FETCH_DRAFTMESSAGES', payload: response.data });
 };
 
-const formatNotificationDate = (notification: string) => {
-    if (notification) {
-        notification = (new Date(notification)).toLocaleString(navigator.language, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
-        notification = notification.replace(',', '');
+const formatNotificationDate = (notificationDate: string) => {
+    if (notificationDate) {
+        notificationDate = (new Date(notificationDate)).toLocaleString(navigator.language, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
+        notificationDate = notificationDate.replace(',', '');
     }
-    return notification;
+    return notificationDate;
 }
