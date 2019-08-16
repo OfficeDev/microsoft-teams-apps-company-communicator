@@ -81,7 +81,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
     private getItem = async (id: number) => {
         try {
             const response = await getSentNotification(id);
-            response.data.sentDate = this.formatDate(response.data.sentDate);
+            response.data.sentDate = this.formatNotificationDate(response.data.sentDate);
             this.setState({
                 message: response.data
             });
@@ -90,7 +90,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         }
     }
 
-    private formatDate = (notification: string) => {
+    private formatNotificationDate = (notification: string) => {
         if (notification) {
             notification = (new Date(notification)).toLocaleString(navigator.language, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true })
             notification = notification.replace(',', '');
