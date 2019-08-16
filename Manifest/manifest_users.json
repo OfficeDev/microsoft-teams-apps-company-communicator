@@ -19,8 +19,8 @@
     "full": "Company Communicator"
   },
   "description": {
-    "short": "Company Communicator",
-    "full": "Company Communicator"
+    "short": "Broadcast messages to multiple teams and people in one go",
+    "full": "Broadcasts messages to multiple teams and individuals through channel posts and chat messages"
   },
   "accentColor": "#64A2CC",
   "bots": [{

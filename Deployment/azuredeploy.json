@@ -41,7 +41,7 @@
     },
     "appDescription": {
       "type": "string",
-      "defaultValue": "Broadcasts company messages to multiple teams or individual recipients",
+      "defaultValue": "Broadcast messages to multiple teams and people in one go",
       "minLength": 1,
       "metadata": {
         "description": "The app (and bot) description."
