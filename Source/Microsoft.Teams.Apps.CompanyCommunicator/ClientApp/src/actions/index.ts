@@ -8,7 +8,7 @@ type Notification = {
     sentDate: string,
     succeeded: number,
     throttled: number,
-    title: string
+    title: string,
 }
 
 export const selectMessage = (message: any) => {
@@ -34,7 +34,7 @@ export const getDraftMessagesList = () => async (dispatch: any) => {
 
 const formatNotificationDate = (notification: string) => {
     if (notification) {
-        notification = (new Date(notification)).toLocaleString(navigator.language, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true })
+        notification = (new Date(notification)).toLocaleString(navigator.language, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
         notification = notification.replace(',', '');
     }
     return notification;
