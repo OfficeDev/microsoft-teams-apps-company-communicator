@@ -40,6 +40,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         /// <param name="services">IServiceCollection instance.</param>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddApplicationInsightsTelemetry();
+
             // Register auth services in DI container.
             services.AddAuthentication(this.Configuration);
 
