@@ -7,7 +7,6 @@
     .list {
         .succeeded {
             color: #237B4B;
-
         }
 
         .failed {
@@ -96,7 +95,6 @@
     .list {
         .succeeded {
             color: #92C353;
-
         }
 
         .failed {
@@ -126,7 +124,7 @@
             background-color: #2d2c2c;
             color: #fff;
             border: solid #201f1f;
-            border-width: 0 0 2px;
+            border-width: 0 0 0.2rem;
 
             &:hover {
                 color: rgb(255, 255, 255);
@@ -146,7 +144,6 @@
             }
 
             .menuContainer {
-
                 .ii:hover {
                     color: #fff;
                 }
@@ -253,7 +250,6 @@
             }
 
             .menuContainer {
-
                 .ii:hover {
                     color: #fff;
                 }
