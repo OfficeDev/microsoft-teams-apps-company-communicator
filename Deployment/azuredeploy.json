@@ -378,7 +378,7 @@
         "hostingEnvironment": "",
         "clientAffinityEnabled": false,
         "siteConfig": {
-          "alwaysOn": "[and(not(variables('isFunctionAppConsumptionPlan')), not(variables('isSharedPlan')))]",
+          "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
               "name": "PROJECT",
