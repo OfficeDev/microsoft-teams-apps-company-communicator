@@ -94,7 +94,7 @@
 }
 
 .darkContainer {
-    background-color: #000;
+    background-color: #201f1f;
 
     .configContainer {
         background-color: #2d2c2c;
@@ -114,11 +114,11 @@
         }
 
         .ui-list__item:first-child {
-            background-color: #000;
+            background-color: #201f1f;
             color: #fff;
 
             &:hover {
-                background-color: #000;
+                background-color: #201f1f;
                 color: #fff;
                 cursor: context-menu;
             }
