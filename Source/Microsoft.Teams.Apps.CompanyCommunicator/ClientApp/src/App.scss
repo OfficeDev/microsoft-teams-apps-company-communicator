@@ -4,6 +4,10 @@
 .defaultContainer {
     background-color: #f3f2f1;
 
+    .configContainer {
+        background-color: #fff;
+    }
+
     .list {
         .succeeded {
             color: #237B4B;
@@ -90,7 +94,11 @@
 }
 
 .darkContainer {
-    background-color: #2d2c2c;
+    background-color: #000;
+
+    .configContainer {
+        background-color: #2d2c2c;
+    }
 
     .list {
         .succeeded {
@@ -106,11 +114,11 @@
         }
 
         .ui-list__item:first-child {
-            background-color: #2d2c2c;
+            background-color: #000;
             color: #fff;
 
             &:hover {
-                background-color: #2d2c2c;
+                background-color: #000;
                 color: #fff;
                 cursor: context-menu;
             }
@@ -123,8 +131,6 @@
         .ui-list__item {
             background-color: #2d2c2c;
             color: #fff;
-            border: solid #201f1f;
-            border-width: 0 0 0.2rem;
 
             &:hover {
                 color: rgb(255, 255, 255);
@@ -201,6 +207,10 @@
 
 .highContrastContainer {
     background-color: #000;
+
+    .configContainer {
+        background-color: #000;
+    }
 
     .list {
         .ui-list__item:first-child {
