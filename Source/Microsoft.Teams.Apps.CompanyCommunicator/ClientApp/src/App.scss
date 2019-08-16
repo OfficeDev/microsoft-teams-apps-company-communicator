@@ -61,6 +61,25 @@
             }
         }
     }
+
+    .Loader {
+        background-color: #fff;
+        width: 100%;
+    }
+}
+
+.darkContainer {
+    .Loader {
+        background-color: #2D2C2C;
+        width: 100%;
+    }
+}
+
+.highContrastContainer {
+    .Loader {
+        background-color: #000000;
+        width: 100%;
+    }
 }
 
 .appContainer {
