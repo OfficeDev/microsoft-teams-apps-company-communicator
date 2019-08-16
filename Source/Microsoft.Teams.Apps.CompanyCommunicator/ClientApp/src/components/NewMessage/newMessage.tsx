@@ -3,7 +3,7 @@ import './newMessage.scss';
 import './teamTheme.scss';
 import { Input, TextArea, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader } from '@stardust-ui/react';
+import { Button, Loader, Text } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { RouteComponentProps } from 'react-router-dom';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification } from '../../apis/messageListApi';
@@ -298,14 +298,13 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                     <div className="taskModule">
                         <div className="formContainer">
                             <div className="formContentContainer" >
-                                <h3>Recipient selection</h3>
-                                <h4>Please choose the groups you would like to send your message to:</h4>
+                                <h3>Choose how you want to send your message</h3>
                                 <RadiobuttonGroup
                                     className="radioBtns"
                                     value={this.state.selectedRadioBtn}
                                     onSelected={this.onGroupSelected}
                                 >
-                                    <Radiobutton name="grouped" value="teams" label="Send to General channel(s)" />
+                                    <Radiobutton name="grouped" value="teams" label="Send to General channel of specific teams" />
                                     <Dropdown
                                         placeholder="Select team(s)"
                                         defaultSelectedKeys={this.selectedTeams}
@@ -315,7 +314,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                         disabled={!this.state.teamsOptionSelected}
                                         className="dropdown"
                                     />
-                                    <Radiobutton name="grouped" value="rosters" label="Send in chat" />
+                                    <Radiobutton name="grouped" value="rosters" label="Send in chat to specific people" />
                                     <Dropdown
                                         placeholder="Choose team(s) members"
                                         defaultSelectedKeys={this.selectedRosters}
@@ -325,7 +324,10 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                         disabled={!this.state.rostersOptionSelected}
                                         className="dropdown"
                                     />
-                                    <Radiobutton name="grouped" value="allUsers" label="Send in chat to all users" />
+                                    <Radiobutton name="grouped" value="allUsers" label="Send in chat to everyone" />
+                                    <div className="noteText hide">
+                                        <Text content="Note: This option sends the message to everyone in your org who has access to Company Communicator." error />
+                                    </div>
                                 </RadiobuttonGroup>
                             </div>
                             <div className="adaptiveCardContainer">
@@ -348,18 +350,27 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
     private onGroupSelected = (value: any) => {
         if (value === "teams") {
+            let note = document.getElementsByClassName("noteText");
+            note[0].classList.add("hide");
+
             this.setState({
                 teamsOptionSelected: true,
                 rostersOptionSelected: false,
                 allUsersOptionSelected: false,
             });
         } else if (value === "rosters") {
+            let note = document.getElementsByClassName("noteText");
+            note[0].classList.add("hide");
+
             this.setState({
                 teamsOptionSelected: false,
                 rostersOptionSelected: true,
                 allUsersOptionSelected: false,
             });
         } else if (value === "allUsers") {
+            let note = document.getElementsByClassName("noteText");
+            note[0].classList.remove("hide");
+
             this.setState({
                 teamsOptionSelected: false,
                 rostersOptionSelected: false,
@@ -367,6 +378,9 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             });
         }
         else {
+            let note = document.getElementsByClassName("noteText");
+            note[0].classList.add("hide");
+
             this.setState({
                 teamsOptionSelected: false,
                 rostersOptionSelected: false,
