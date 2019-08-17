@@ -1,0 +1,52 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.5/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.5",
+  "version": "1.0.0",
+  "id": "1c07cd26-a088-4db8-8928-ace382fa219f",
+  "packageName": "com.microsoft.teams.companycommunicator.authors",
+  "developer": {
+    "name": "<<companyName>>",
+    "websiteUrl": "<<websiteUrl>>",
+    "privacyUrl": "<<privacyUrl>>",
+    "termsOfUseUrl": "<<termsOfUseUrl>>"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "Company Communicator (Authors)",
+    "full": "Company Communicator (Authors)"
+  },
+  "description": {
+    "short": "Broadcast messages to multiple teams and people in one go",
+    "full": "Broadcasts messages to multiple teams and individuals through channel posts and chat messages"
+  },
+  "accentColor": "#64A2CC",
+  "configurableTabs": [{
+    "configurationUrl": "https://<<appDomain>>/configtab",
+    "canUpdateConfiguration": true,
+    "scopes": [
+      "team"
+    ]
+  }],
+  "bots": [{
+    "botId": "<<botId>>",
+    "scopes": [
+      "team"
+    ],
+    "supportsFiles": false,
+    "isNotificationOnly": false
+  }],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "<<appDomain>>"
+  ],
+  "webApplicationInfo": {
+    "id": "<<botId>>",
+    "resource": "api://<<appDomain>>"
+  }
+}
