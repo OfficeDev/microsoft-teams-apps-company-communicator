@@ -93,7 +93,7 @@
             margin: 0rem 3.2rem;
             display: inline;
             float: left;
-            width: 50%;
+            width: 70%;
 
             p {
                 margin: 1.5rem 0rem;
@@ -102,6 +102,14 @@
             .dropdown {
                 margin: 1rem 1rem 1rem 2rem;
                 width: 30rem;
+            }
+
+            .noteText {
+                margin: 1rem 0rem 1rem 2.5rem;
+            }
+
+            .hide {
+                display: none;
             }
         }
     }
