@@ -27,13 +27,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="tableName">The name of the table in Azure Table Storage.</param>
         /// <param name="defaultPartitionKey">Default partition key value.</param>
-        public BaseRepository(IConfiguration configuration, string tableName, string defaultPartitionKey)
+        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
+        public BaseRepository(
+            IConfiguration configuration,
+            string tableName,
+            string defaultPartitionKey,
+            bool isFromAzureFunction)
         {
             var storageAccountConnectionString = configuration["StorageAccountConnectionString"];
             var storageAccount = CloudStorageAccount.Parse(storageAccountConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
             this.Table = tableClient.GetTableReference(tableName);
-            this.Table.CreateIfNotExists();
+
+            if (!isFromAzureFunction)
+            {
+                this.Table.CreateIfNotExists();
+            }
 
             this.defaultPartitionKey = defaultPartitionKey;
         }
@@ -51,6 +60,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         public async Task CreateOrUpdateAsync(T entity)
         {
             var operation = TableOperation.InsertOrReplace(entity);
+
+            await this.Table.ExecuteAsync(operation);
+        }
+
+        /// <summary>
+        /// Insert or merge an entity in the table storage.
+        /// </summary>
+        /// <param name="entity">Entity to be inserted or merged</param>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task InsertOrMergeAsync(T entity)
+        {
+            var operation = TableOperation.InsertOrMerge(entity);
 
             await this.Table.ExecuteAsync(operation);
         }

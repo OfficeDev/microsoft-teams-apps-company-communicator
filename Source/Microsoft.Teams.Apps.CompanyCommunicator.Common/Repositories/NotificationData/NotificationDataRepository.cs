@@ -1,8 +1,8 @@
-﻿// <copyright file="NotificationRepository.cs" company="Microsoft">
+﻿// <copyright file="NotificationDataRepository.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData
 {
     using System;
     using System.Collections.Generic;
@@ -12,15 +12,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     /// <summary>
     /// Respository of the notification data in the table storage.
     /// </summary>
-    public class NotificationRepository : BaseRepository<NotificationEntity>
+    public class NotificationDataRepository : BaseRepository<NotificationDataEntity>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NotificationRepository"/> class.
+        /// Initializes a new instance of the <see cref="NotificationDataRepository"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
-        public NotificationRepository(IConfiguration configuration, TableRowKeyGenerator tableRowKeyGenerator)
-            : base(configuration, "Notification", PartitionKeyNames.Notification.DraftNotifications)
+        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
+        public NotificationDataRepository(
+            IConfiguration configuration,
+            TableRowKeyGenerator tableRowKeyGenerator,
+            bool isFromAzureFunction = false)
+            : base(
+                configuration,
+                PartitionKeyNames.NotificationDataTable.TableName,
+                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                isFromAzureFunction)
         {
             this.TableRowKeyGenerator = tableRowKeyGenerator;
         }
@@ -34,9 +42,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Get all draft notification entities from the table storage.
         /// </summary>
         /// <returns>All draft notitification entities.</returns>
-        public async Task<IEnumerable<NotificationEntity>> GetAllDraftNotificationsAsync()
+        public async Task<IEnumerable<NotificationDataEntity>> GetAllDraftNotificationsAsync()
         {
-            var result = await this.GetAllAsync(PartitionKeyNames.Notification.DraftNotifications);
+            var result = await this.GetAllAsync(PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition);
 
             return result;
         }
@@ -45,9 +53,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Get the top 25 most recently sent notification entities from the table storage.
         /// </summary>
         /// <returns>The top 25 most recently sent notitification entities.</returns>
-        public async Task<IEnumerable<NotificationEntity>> GetMostRecentSentNotificationsAsync()
+        public async Task<IEnumerable<NotificationDataEntity>> GetMostRecentSentNotificationsAsync()
         {
-            var result = await this.GetAllAsync(PartitionKeyNames.Notification.SentNotifications, 25);
+            var result = await this.GetAllAsync(PartitionKeyNames.NotificationDataTable.SentNotificationsPartition, 25);
 
             return result;
         }
@@ -56,20 +64,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Move a draft notification from draft to sent partition.
         /// </summary>
         /// <param name="draftNotificationEntity">The draft notification instance to be moved to the sent partition.</param>
-        /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task MoveDraftToSentPartitionAsync(NotificationEntity draftNotificationEntity)
+        /// <returns>The new SentNotification ID.</returns>
+        public async Task<string> MoveDraftToSentPartitionAsync(NotificationDataEntity draftNotificationEntity)
         {
             if (draftNotificationEntity == null)
             {
-                return;
+                return string.Empty;
             }
 
             var newId = this.TableRowKeyGenerator.CreateNewKeyOrderingMostRecentToOldest();
 
             // Create a sent notification based on the draft notification.
-            var sentNotificationEntity = new NotificationEntity
+            var sentNotificationEntity = new NotificationDataEntity
             {
-                PartitionKey = PartitionKeyNames.Notification.SentNotifications,
+                PartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
                 RowKey = newId,
                 Id = newId,
                 Title = draftNotificationEntity.Title,
@@ -79,17 +87,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 ButtonTitle = draftNotificationEntity.ButtonTitle,
                 ButtonLink = draftNotificationEntity.ButtonLink,
                 CreatedBy = draftNotificationEntity.CreatedBy,
-                CreatedDateTime = draftNotificationEntity.CreatedDateTime,
+                CreatedDate = draftNotificationEntity.CreatedDate,
                 SentDate = null,
                 IsDraft = false,
                 Teams = draftNotificationEntity.Teams,
                 Rosters = draftNotificationEntity.Rosters,
                 AllUsers = draftNotificationEntity.AllUsers,
+                MessageVersion = draftNotificationEntity.MessageVersion,
+                Succeeded = 0,
+                Failed = 0,
+                Throttled = 0,
+                TotalMessageCount = draftNotificationEntity.TotalMessageCount,
+                IsCompleted = false,
+                SendingStartedDate = DateTime.UtcNow,
             };
             await this.CreateOrUpdateAsync(sentNotificationEntity);
 
             // Delete the draft notification.
             await this.DeleteAsync(draftNotificationEntity);
+
+            return newId;
         }
 
         /// <summary>
@@ -99,14 +116,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <param name="createdBy">Created by.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         public async Task DuplicateDraftNotificationAsync(
-            NotificationEntity notificationEntity,
+            NotificationDataEntity notificationEntity,
             string createdBy)
         {
             var newId = this.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent();
 
-            var newNotificationEntity = new NotificationEntity
+            var newNotificationEntity = new NotificationDataEntity
             {
-                PartitionKey = PartitionKeyNames.Notification.DraftNotifications,
+                PartitionKey = PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
                 RowKey = newId,
                 Id = newId,
                 Title = notificationEntity.Title + " (copy)",
@@ -116,7 +133,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 ButtonTitle = notificationEntity.ButtonTitle,
                 ButtonLink = notificationEntity.ButtonLink,
                 CreatedBy = createdBy,
-                CreatedDateTime = DateTime.UtcNow,
+                CreatedDate = DateTime.UtcNow,
                 IsDraft = true,
                 Teams = notificationEntity.Teams,
                 Rosters = notificationEntity.Rosters,

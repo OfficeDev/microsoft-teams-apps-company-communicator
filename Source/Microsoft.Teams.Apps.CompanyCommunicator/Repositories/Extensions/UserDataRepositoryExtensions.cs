@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
     using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.User;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
     /// Extensions for the respository of the user data stored in the table storage.
@@ -44,7 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
             var userDataEntity = UserDataRepositoryExtensions.ParseUserData(activity);
             if (userDataEntity != null)
             {
-                var found = await userDataRepository.GetAsync(PartitionKeyNames.Metadata.UserData, userDataEntity.UserId);
+                var found = await userDataRepository.GetAsync(PartitionKeyNames.UserDataTable.UserDataPartition, userDataEntity.UserId);
                 if (found != null)
                 {
                     await userDataRepository.DeleteAsync(found);
@@ -59,7 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
             {
                 var userDataEntity = new UserDataEntity
                 {
-                    PartitionKey = PartitionKeyNames.Metadata.UserData,
+                    PartitionKey = PartitionKeyNames.UserDataTable.UserDataPartition,
                     RowKey = activity?.From?.AadObjectId,
                     AadId = activity?.From?.AadObjectId,
                     UserId = activity?.From?.Id,

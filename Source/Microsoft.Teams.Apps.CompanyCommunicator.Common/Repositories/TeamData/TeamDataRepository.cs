@@ -2,9 +2,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
 {
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -20,9 +19,42 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team
         /// Initializes a new instance of the <see cref="TeamDataRepository"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
-        public TeamDataRepository(IConfiguration configuration)
-            : base(configuration, "TeamData", PartitionKeyNames.Metadata.TeamData)
+        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
+        public TeamDataRepository(IConfiguration configuration, bool isFromAzureFunction = false)
+            : base(
+                  configuration,
+                  PartitionKeyNames.TeamDataTable.TableName,
+                  PartitionKeyNames.TeamDataTable.TeamDataPartition,
+                  isFromAzureFunction)
         {
+        }
+
+        /// <summary>
+        /// Gets team data entities by ID values.
+        /// </summary>
+        /// <param name="teamIds">Team IDs.</param>
+        /// <returns>Team data entities.</returns>
+        public async Task<IEnumerable<TeamDataEntity>> GetTeamDataEntitiesByIdsAsync(IEnumerable<string> teamIds)
+        {
+            var rowKeysFilter = string.Empty;
+            foreach (var teamId in teamIds)
+            {
+                var singleRowKeyFilter = TableQuery.GenerateFilterCondition(
+                    nameof(TableEntity.RowKey),
+                    QueryComparisons.Equal,
+                    teamId);
+
+                if (string.IsNullOrWhiteSpace(rowKeysFilter))
+                {
+                    rowKeysFilter = singleRowKeyFilter;
+                }
+                else
+                {
+                    rowKeysFilter = TableQuery.CombineFilters(rowKeysFilter, TableOperators.Or, singleRowKeyFilter);
+                }
+            }
+
+            return await this.GetWithFilterAsync(rowKeysFilter);
         }
 
         /// <summary>

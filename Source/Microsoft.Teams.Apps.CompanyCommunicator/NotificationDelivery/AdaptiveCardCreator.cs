@@ -6,12 +6,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
 {
     using System;
     using AdaptiveCards;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
     /// <summary>
     /// Adaptive Card Creator service.
     /// </summary>
     public class AdaptiveCardCreator
     {
+        /// <summary>
+        /// Creates an adaptive card.
+        /// </summary>
+        /// <param name="notificationDataEntity">Notification data entity.</param>
+        /// <returns>An adaptive card.</returns>
+        public AdaptiveCard CreateAdaptiveCard(NotificationDataEntity notificationDataEntity)
+        {
+            return this.CreateAdaptiveCard(
+                notificationDataEntity.Title,
+                notificationDataEntity.ImageLink,
+                notificationDataEntity.Summary,
+                notificationDataEntity.Author,
+                notificationDataEntity.ButtonTitle,
+                notificationDataEntity.ButtonLink);
+        }
+
         /// <summary>
         /// Create an adaptive card instance.
         /// </summary>

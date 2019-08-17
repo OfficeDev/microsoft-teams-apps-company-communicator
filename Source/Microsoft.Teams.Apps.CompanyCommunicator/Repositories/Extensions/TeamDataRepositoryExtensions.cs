@@ -8,7 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
 
     /// <summary>
     /// Extensions for the respository of the team data stored in the table storage.
@@ -45,7 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
             var teamDataEntity = TeamDataRepositoryExtensions.ParseTeamData(activity);
             if (teamDataEntity != null)
             {
-                var found = await teamDataRepository.GetAsync(PartitionKeyNames.Metadata.TeamData, teamDataEntity.TeamId);
+                var found = await teamDataRepository.GetAsync(PartitionKeyNames.TeamDataTable.TeamDataPartition, teamDataEntity.TeamId);
                 if (found != null)
                 {
                     await teamDataRepository.DeleteAsync(found);
@@ -60,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
             {
                 var teamsDataEntity = new TeamDataEntity
                 {
-                    PartitionKey = PartitionKeyNames.Metadata.TeamData,
+                    PartitionKey = PartitionKeyNames.TeamDataTable.TeamDataPartition,
                     RowKey = channelData.Team.Id,
                     TeamId = channelData.Team.Id,
                     Name = channelData.Team.Name,

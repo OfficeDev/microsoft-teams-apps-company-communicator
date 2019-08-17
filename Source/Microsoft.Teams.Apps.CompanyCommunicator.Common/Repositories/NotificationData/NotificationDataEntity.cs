@@ -1,8 +1,8 @@
-﻿// <copyright file="NotificationEntity.cs" company="Microsoft">
+﻿// <copyright file="NotificationDataEntity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData
 {
     using System;
     using System.Collections.Generic;
@@ -10,9 +10,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Notification entity class.
+    /// Notification data entity class.
     /// </summary>
-    public class NotificationEntity : TableEntity
+    public class NotificationDataEntity : TableEntity
     {
         /// <summary>
         /// Gets or sets Id.
@@ -57,12 +57,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <summary>
         /// Gets or sets the Created DateTime value.
         /// </summary>
-        public DateTime CreatedDateTime { get; set; }
+        public DateTime CreatedDate { get; set; }
 
         /// <summary>
-        /// Gets or sets the Sent Date value.
+        /// Gets or sets the Sent DateTime value.
         /// </summary>
-        public string SentDate { get; set; }
+        public DateTime? SentDate { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the notification is sent out or not.
@@ -146,5 +146,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets or sets a value indicating whether the sending process is completed or not.
         /// </summary>
         public bool IsCompleted { get; set; }
+
+        /// <summary>
+        /// Gets or sets the total number of expected messages to send.
+        /// </summary>
+        public int TotalMessageCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the sending started DateTime value.
+        /// </summary>
+        public DateTime? SendingStartedDate { get; set; }
     }
 }

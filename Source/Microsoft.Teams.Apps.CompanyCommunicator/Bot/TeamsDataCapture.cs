@@ -6,8 +6,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
     using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.User;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
 
     /// <summary>

@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.User
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
 {
     using Microsoft.Extensions.Configuration;
 
@@ -15,8 +15,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.User
         /// Initializes a new instance of the <see cref="UserDataRepository"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
-        public UserDataRepository(IConfiguration configuration)
-            : base(configuration, "UserData", PartitionKeyNames.Metadata.UserData)
+        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
+        public UserDataRepository(IConfiguration configuration, bool isFromAzureFunction = false)
+            : base(
+                configuration,
+                PartitionKeyNames.UserDataTable.TableName,
+                PartitionKeyNames.UserDataTable.UserDataPartition,
+                isFromAzureFunction)
         {
         }
     }

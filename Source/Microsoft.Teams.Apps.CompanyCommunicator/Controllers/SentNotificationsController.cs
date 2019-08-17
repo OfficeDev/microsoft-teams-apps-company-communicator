@@ -10,7 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
 
@@ -21,19 +21,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Route("api/sentNotifications")]
     public class SentNotificationsController : ControllerBase
     {
-        private readonly NotificationRepository notificationRepository;
+        private readonly NotificationDataRepository notificationDataRepository;
         private readonly NotificationDelivery notificationDelivery;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
         /// </summary>
-        /// <param name="notificationRepository">Notification respository service that deals with the table storage in azure.</param>
+        /// <param name="notificationDataRepository">Notification data respository service that deals with the table storage in azure.</param>
         /// <param name="notificationDelivery">Notification delivery service instance.</param>
         public SentNotificationsController(
-            NotificationRepository notificationRepository,
+            NotificationDataRepository notificationDataRepository,
             NotificationDelivery notificationDelivery)
         {
-            this.notificationRepository = notificationRepository;
+            this.notificationDataRepository = notificationDataRepository;
             this.notificationDelivery = notificationDelivery;
         }
 
@@ -45,8 +45,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateSentNotificationAsync([FromBody]DraftNotification draftNotification)
         {
-            var draftNotificationEntity = await this.notificationRepository.GetAsync(
-                PartitionKeyNames.Notification.DraftNotifications,
+            var draftNotificationEntity = await this.notificationDataRepository.GetAsync(
+                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
                 draftNotification.Id);
             if (draftNotificationEntity == null)
             {
@@ -54,8 +54,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             await this.notificationDelivery.SendAsync(draftNotificationEntity);
-
-            await this.notificationRepository.MoveDraftToSentPartitionAsync(draftNotificationEntity);
 
             return this.Ok();
         }
@@ -67,7 +65,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet]
         public async Task<IEnumerable<SentNotificationSummary>> GetSentNotificationsAsync()
         {
-            var notificationEntities = await this.notificationRepository.GetMostRecentSentNotificationsAsync();
+            var notificationEntities = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
 
             var result = new List<SentNotificationSummary>();
             foreach (var notificationEntity in notificationEntities)
@@ -76,7 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 {
                     Id = notificationEntity.Id,
                     Title = notificationEntity.Title,
-                    CreatedDateTime = notificationEntity.CreatedDateTime,
+                    CreatedDateTime = notificationEntity.CreatedDate,
                     SentDate = notificationEntity.SentDate,
                     Succeeded = notificationEntity.Succeeded,
                     Failed = notificationEntity.Failed,
@@ -98,7 +96,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSentNotificationByIdAsync(string id)
         {
-            var notificationEntity = await this.notificationRepository.GetAsync(PartitionKeyNames.Notification.SentNotifications, id);
+            var notificationEntity = await this.notificationDataRepository.GetAsync(
+                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                id);
             if (notificationEntity == null)
             {
                 return this.NotFound();
@@ -113,7 +113,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Author = notificationEntity.Author,
                 ButtonTitle = notificationEntity.ButtonTitle,
                 ButtonLink = notificationEntity.ButtonLink,
-                CreatedDateTime = notificationEntity.CreatedDateTime,
+                CreatedDateTime = notificationEntity.CreatedDate,
                 SentDate = notificationEntity.SentDate,
                 Succeeded = notificationEntity.Succeeded,
                 Failed = notificationEntity.Failed,

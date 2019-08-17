@@ -8,7 +8,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.Compan
 		{069D255F-37E5-49DA-90D2-E3942C64970C} = {069D255F-37E5-49DA-90D2-E3942C64970C}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Teams.Apps.CompanyCommunicator.Common", "Microsoft.Teams.Apps.CompanyCommunicator.Common\Microsoft.Teams.Apps.CompanyCommunicator.Common.csproj", "{069D255F-37E5-49DA-90D2-E3942C64970C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Common", "Microsoft.Teams.Apps.CompanyCommunicator.Common\Microsoft.Teams.Apps.CompanyCommunicator.Common.csproj", "{069D255F-37E5-49DA-90D2-E3942C64970C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Teams.Apps.CompanyCommunicator.Send.Func", "Microsoft.Teams.Apps.CompanyCommunicator.Send.Func\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj", "{3B8D012F-A70D-40E5-AFB7-65BCD90CACBE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{069D255F-37E5-49DA-90D2-E3942C64970C} = {069D255F-37E5-49DA-90D2-E3942C64970C}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +29,10 @@ Global
 		{069D255F-37E5-49DA-90D2-E3942C64970C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{069D255F-37E5-49DA-90D2-E3942C64970C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{069D255F-37E5-49DA-90D2-E3942C64970C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B8D012F-A70D-40E5-AFB7-65BCD90CACBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B8D012F-A70D-40E5-AFB7-65BCD90CACBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B8D012F-A70D-40E5-AFB7-65BCD90CACBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B8D012F-A70D-40E5-AFB7-65BCD90CACBE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

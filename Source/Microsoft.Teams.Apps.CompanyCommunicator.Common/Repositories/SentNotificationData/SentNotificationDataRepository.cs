@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotification
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData
 {
     using Microsoft.Extensions.Configuration;
 
@@ -15,8 +15,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// Initializes a new instance of the <see cref="SentNotificationDataRepository"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
-        public SentNotificationDataRepository(IConfiguration configuration)
-            : base(configuration, "SentNotification", PartitionKeyNames.Notification.SentNotifications)
+        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
+        public SentNotificationDataRepository(IConfiguration configuration, bool isFromAzureFunction = false)
+            : base(
+                configuration,
+                PartitionKeyNames.SentNotificationDataTable.TableName,
+                PartitionKeyNames.SentNotificationDataTable.DefaultPartition,
+                isFromAzureFunction)
         {
         }
     }
