@@ -1,10 +1,4 @@
-.Loader {
-    background-color: #fff;
-    width: 100%;
-}
-
 .taskModule {
-
     .formContainer {
         overflow-y: auto;
         position: absolute;
@@ -30,9 +24,8 @@
 
                 span {
                     font-size: 1.2rem;
-                    color: #484644;
                     display: block;
-                    margin: 1rem 0rem 0rem 0rem;
+                    margin: 0.8rem 0rem 0.4rem 0rem;
 
                     &:nth-child(2) {
                         color: #C4314B;
@@ -44,10 +37,6 @@
                     padding: 0.6rem 1.2rem;
                     font-size: 1.4rem;
                     margin: auto 0;
-
-                    &:focus {
-                        border-bottom: 0.1rem solid #464775;
-                    }
                 }
 
                 i {
@@ -61,9 +50,8 @@
 
                 span {
                     font-size: 1.2rem;
-                    color: #484644;
                     display: block;
-                    margin: 1rem 0rem 0rem 0rem;
+                    margin: 0.8rem 0rem 0.4rem 0rem;
 
                     &:nth-child(2) {
                         color: #C4314B;
@@ -75,10 +63,6 @@
                     padding: 0.6rem 1.2rem;
                     font-size: 1.4rem;
                     margin: auto 0;
-
-                    &:focus {
-                        border-bottom: 0.1rem solid #464775;
-                    }
                 }
 
                 i {
