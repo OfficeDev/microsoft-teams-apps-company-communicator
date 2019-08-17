@@ -55,8 +55,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             await this.notificationDelivery.SendAsync(draftNotificationEntity);
 
-            await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationEntity);
-
             return this.Ok();
         }
 

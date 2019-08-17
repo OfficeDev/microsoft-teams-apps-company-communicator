@@ -13,6 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     using Microsoft.Azure.ServiceBus.Core;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Newtonsoft.Json;
 
@@ -25,6 +26,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly MetadataProvider metadataProvider;
         private readonly SendingNotificationCreator sendingNotificationCreator;
+        private readonly SentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationDelivery"/> class.
@@ -33,16 +35,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// <param name="notificationDataRepository">Notification repository service.</param>
         /// <param name="metadataProvider">Metadata Provider instance.</param>
         /// <param name="sendingNotificationCreator">SendingNotification creator.</param>
+        /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         public NotificationDelivery(
             IConfiguration configuration,
             NotificationDataRepository notificationDataRepository,
             MetadataProvider metadataProvider,
-            SendingNotificationCreator sendingNotificationCreator)
+            SendingNotificationCreator sendingNotificationCreator,
+            SentNotificationDataRepository sentNotificationDataRepository)
         {
             this.configuration = configuration;
             this.notificationDataRepository = notificationDataRepository;
             this.metadataProvider = metadataProvider;
             this.sendingNotificationCreator = sendingNotificationCreator;
+            this.sentNotificationDataRepository = sentNotificationDataRepository;
         }
 
         /// <summary>
@@ -160,7 +165,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
             var queueMessageContent = new ServiceBusDataQueueMessageContent
             {
                 NotificationId = notificationId,
-                InitialSendDateTime = DateTime.UtcNow,
+                InitialSendDate = DateTime.UtcNow,
                 TotalMessageCount = totalMessageCount,
             };
             var messageBody = JsonConvert.SerializeObject(queueMessageContent);
@@ -186,7 +191,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         {
             public string NotificationId { get; set; }
 
-            public DateTime InitialSendDateTime { get; set; }
+            public DateTime InitialSendDate { get; set; }
 
             public int TotalMessageCount { get; set; }
         }

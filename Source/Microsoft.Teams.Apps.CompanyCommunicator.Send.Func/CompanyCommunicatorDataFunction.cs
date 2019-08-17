@@ -25,6 +25,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     /// </summary>
     public class CompanyCommunicatorDataFunction
     {
+        private static readonly int MaxMinutesOfRetrying = 35;
+
         private static SentNotificationDataRepository sentNotificationDataRepository = null;
 
         private static NotificationDataRepository notificationDataRepository = null;
@@ -69,86 +71,87 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             CompanyCommunicatorDataFunction.sendingNotificationDataRepository = CompanyCommunicatorDataFunction.sendingNotificationDataRepository
                 ?? new SendingNotificationDataRepository(configuration, isFromAzureFunction: true);
 
-            if (DateTime.UtcNow >= messageContent.InitialSendDateTime + TimeSpan.FromMinutes(35))
-            {
-                // Complete SentNotificationEntity
-                // Set unknown numbers
-            }
-            else
-            {
-                var sentNotificationDataEntities = await CompanyCommunicatorDataFunction.sentNotificationDataRepository.GetAllAsync(
-                    messageContent.NotificationId);
+            var sentNotificationDataEntities = await CompanyCommunicatorDataFunction.sentNotificationDataRepository.GetAllAsync(
+                messageContent.NotificationId);
 
-                if (sentNotificationDataEntities == null)
+            if (sentNotificationDataEntities == null)
+            {
+                if (DateTime.UtcNow >= messageContent.InitialSendDate + TimeSpan.FromMinutes(
+                    CompanyCommunicatorDataFunction.MaxMinutesOfRetrying))
                 {
-                    await this.SendTriggerToDataFunction(configuration, messageContent);
+                    await this.SetEmptyNotificationDataEntity(messageContent.NotificationId);
                     return;
                 }
 
-                var succeededCount = 0;
-                var failedCount = 0;
-                var throttledCount = 0;
-                var unknownCount = 0;
+                await this.SendTriggerToDataFunction(configuration, messageContent);
+                return;
+            }
 
-                DateTime lastSentDateTime = DateTime.MinValue;
+            var succeededCount = 0;
+            var failedCount = 0;
+            var throttledCount = 0;
+            var unknownCount = 0;
 
-                foreach (var sentNotificationDataEntity in sentNotificationDataEntities)
+            DateTime lastSentDateTime = DateTime.MinValue;
+
+            foreach (var sentNotificationDataEntity in sentNotificationDataEntities)
+            {
+                if (sentNotificationDataEntity.StatusCode == (int)HttpStatusCode.Created)
                 {
-                    if (sentNotificationDataEntity.StatusCode == (int)HttpStatusCode.Created)
-                    {
-                        succeededCount++;
-                    }
-                    else if (sentNotificationDataEntity.StatusCode == (int)HttpStatusCode.TooManyRequests)
-                    {
-                        throttledCount++;
-                    }
-                    else if (sentNotificationDataEntity.StatusCode == 0)
-                    {
-                        unknownCount++;
-                    }
-                    else
-                    {
-                        failedCount++;
-                    }
-
-                    if (sentNotificationDataEntity.SentDate != null
-                        && sentNotificationDataEntity.SentDate > lastSentDateTime)
-                    {
-                        lastSentDateTime = sentNotificationDataEntity.SentDate;
-                    }
+                    succeededCount++;
                 }
-
-                var notificationEntityUpdate = new UpdateNotificationEntity
+                else if (sentNotificationDataEntity.StatusCode == (int)HttpStatusCode.TooManyRequests)
                 {
-                    PartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
-                    RowKey = messageContent.NotificationId,
-                    Succeeded = succeededCount,
-                    Failed = failedCount,
-                    Throttled = throttledCount,
-                    Unknown = unknownCount,
-                };
-
-                // Purposefully exclude the unknown count because those messages may be sent later
-                var currentMessageCount = succeededCount
-                    + failedCount
-                    + throttledCount;
-
-                if (currentMessageCount == messageContent.TotalMessageCount)
+                    throttledCount++;
+                }
+                else if (sentNotificationDataEntity.StatusCode == 0)
                 {
-                    notificationEntityUpdate.IsCompleted = true;
-                    notificationEntityUpdate.SentDateTime = lastSentDateTime != DateTime.MinValue
-                        ? lastSentDateTime
-                        : DateTime.UtcNow;
+                    unknownCount++;
                 }
                 else
                 {
-                    await this.SendTriggerToDataFunction(configuration, messageContent);
+                    failedCount++;
                 }
 
-                var operation = TableOperation.InsertOrMerge(notificationEntityUpdate);
-
-                await CompanyCommunicatorDataFunction.notificationDataRepository.Table.ExecuteAsync(operation);
+                if (sentNotificationDataEntity.SentDate != null
+                    && sentNotificationDataEntity.SentDate > lastSentDateTime)
+                {
+                    lastSentDateTime = sentNotificationDataEntity.SentDate;
+                }
             }
+
+            var notificationDataEntityUpdate = new UpdateNotificationDataEntity
+            {
+                PartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                RowKey = messageContent.NotificationId,
+                Succeeded = succeededCount,
+                Failed = failedCount,
+                Throttled = throttledCount,
+                Unknown = unknownCount,
+            };
+
+            // Purposefully exclude the unknown count because those messages may be sent later
+            var currentMessageCount = succeededCount
+                + failedCount
+                + throttledCount;
+
+            if (currentMessageCount == messageContent.TotalMessageCount
+                || DateTime.UtcNow >= messageContent.InitialSendDate + TimeSpan.FromMinutes(
+                    CompanyCommunicatorDataFunction.MaxMinutesOfRetrying))
+            {
+                notificationDataEntityUpdate.IsCompleted = true;
+                notificationDataEntityUpdate.SentDate = lastSentDateTime != DateTime.MinValue
+                    ? lastSentDateTime
+                    : DateTime.UtcNow;
+            }
+            else
+            {
+                await this.SendTriggerToDataFunction(configuration, messageContent);
+            }
+
+            var operation = TableOperation.InsertOrMerge(notificationDataEntityUpdate);
+
+            await CompanyCommunicatorDataFunction.notificationDataRepository.Table.ExecuteAsync(operation);
         }
 
         private async Task SendTriggerToDataFunction(
@@ -172,16 +175,36 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             return new NotificationDataRepository(configuration, tableRowKeyGenerator, isFromAzureFunction: true);
         }
 
+        private async Task SetEmptyNotificationDataEntity(string notificationId)
+        {
+            var notificationDataEntityUpdate = new UpdateNotificationDataEntity
+            {
+                PartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                RowKey = notificationId,
+                Succeeded = 0,
+                Failed = 0,
+                Throttled = 0,
+                Unknown = 0,
+            };
+
+            notificationDataEntityUpdate.IsCompleted = true;
+            notificationDataEntityUpdate.SentDate = DateTime.UtcNow;
+
+            var operation = TableOperation.InsertOrMerge(notificationDataEntityUpdate);
+
+            await CompanyCommunicatorDataFunction.notificationDataRepository.Table.ExecuteAsync(operation);
+        }
+
         private class ServiceBusDataQueueMessageContent
         {
             public string NotificationId { get; set; }
 
-            public DateTime InitialSendDateTime { get; set; }
+            public DateTime InitialSendDate { get; set; }
 
             public int TotalMessageCount { get; set; }
         }
 
-        private class UpdateNotificationEntity : TableEntity
+        private class UpdateNotificationDataEntity : TableEntity
         {
             /// <summary>
             /// Gets or sets the number of recipients who have received the notification successfully.
@@ -211,7 +234,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             /// <summary>
             /// Gets or sets the Sent DateTime value.
             /// </summary>
-            public DateTime? SentDateTime { get; set; }
+            public DateTime? SentDate { get; set; }
         }
     }
 }

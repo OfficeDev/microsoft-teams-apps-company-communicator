@@ -37,6 +37,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
         private static string botAccessToken = null;
 
+        private static DateTime? botAccessTokenExpiration = null;
+
         /// <summary>
         /// Azure Function App triggered by messages from a Service Bus queue
         /// Used for sending messages from the bot.
@@ -93,8 +95,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 CompanyCommunicatorSendFunction.sentNotificationDataRepository = CompanyCommunicatorSendFunction.sentNotificationDataRepository
                     ?? new SentNotificationDataRepository(configuration, isFromAzureFunction: true);
 
-                CompanyCommunicatorSendFunction.botAccessToken = CompanyCommunicatorSendFunction.botAccessToken
-                    ?? await this.FetchTokenAsync(configuration, CompanyCommunicatorSendFunction.httpClient);
+                if (CompanyCommunicatorSendFunction.botAccessToken == null
+                    || CompanyCommunicatorSendFunction.botAccessTokenExpiration == null
+                    || DateTime.UtcNow > CompanyCommunicatorSendFunction.botAccessTokenExpiration)
+                {
+                    await this.FetchTokenAsync(configuration, CompanyCommunicatorSendFunction.httpClient);
+                }
 
                 var getActiveNotificationEntityTask = CompanyCommunicatorSendFunction.sendingNotificationDataRepository.GetAsync(
                     PartitionKeyNames.NotificationDataTable.SendingNotificationsPartition,
@@ -345,12 +351,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             await CompanyCommunicatorSendFunction.sentNotificationDataRepository.Table.ExecuteAsync(operation);
         }
 
-        private async Task<string> FetchTokenAsync(
+        private async Task FetchTokenAsync(
             IConfiguration configuration,
             HttpClient httpClient)
         {
-            string accessToken = null;
-
             var values = new Dictionary<string, string>
                 {
                     { "grant_type", "client_credentials" },
@@ -365,15 +369,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 if (tokenResponse.StatusCode == HttpStatusCode.OK)
                 {
                     var accessTokenContent = await tokenResponse.Content.ReadAsAsync<AccessTokenResponse>();
-                    accessToken = accessTokenContent.AccessToken;
+
+                    CompanyCommunicatorSendFunction.botAccessToken = accessTokenContent.AccessToken;
+
+                    var expiresInSeconds = 121;
+
+                    // If parsing fails, out variable is set to 0, so need to set the default
+                    if (!int.TryParse(accessTokenContent.ExpiresIn, out expiresInSeconds))
+                    {
+                        expiresInSeconds = 121;
+                    }
+
+                    // Remove two minutes in order to have a buffer amount of time.
+                    CompanyCommunicatorSendFunction.botAccessTokenExpiration = DateTime.UtcNow + TimeSpan.FromSeconds(expiresInSeconds - 120);
                 }
                 else
                 {
                     throw new Exception("Error fetching bot access token.");
                 }
             }
-
-            return accessToken;
         }
 
         private class ServiceBusSendQueueMessageContent
