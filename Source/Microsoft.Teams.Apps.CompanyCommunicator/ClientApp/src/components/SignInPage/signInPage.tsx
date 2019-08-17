@@ -10,11 +10,11 @@ const SignInPage: React.FunctionComponent<RouteComponentProps> = props => {
   function onSignIn() {
     microsoftTeams.authentication.authenticate({
       url: window.location.origin + "/signin-simple-start",
-      successCallback: function (result) {
-        console.log("Login succeeded: " + result);
+      successCallback: () => {
+        console.log("Login succeeded!");
         window.location.href = "/messages";
       },
-      failureCallback: function (reason) {
+      failureCallback: (reason) => {
         console.log("Login failed: " + reason);
         window.location.href = "/errorpage";
       }
