@@ -93,7 +93,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
     private formatNotificationDate = (notificationDate: string) => {
         if (notificationDate) {
             notificationDate = (new Date(notificationDate)).toLocaleString(navigator.language, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
-            notificationDate = notificationDate.replace(',', '');
+            notificationDate = notificationDate.replace(',', '\xa0\xa0');
         }
         return notificationDate;
     }
