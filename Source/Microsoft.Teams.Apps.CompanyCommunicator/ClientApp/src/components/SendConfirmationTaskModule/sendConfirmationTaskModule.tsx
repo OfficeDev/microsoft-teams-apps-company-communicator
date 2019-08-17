@@ -3,7 +3,7 @@ import './sendConfirmationTaskModule.scss';
 import { getDraftNotification, getConsentSummaries, sendDraftNotification } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
-import { Loader, Button } from '@stardust-ui/react';
+import { Loader, Button, Text } from '@stardust-ui/react';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
@@ -193,7 +193,12 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
         if (!this.state.allUsers) {
             return (<div />);
         } else {
-            return (<div key="allUsers"> <span className="label">All users</span></div>);
+            return (<div key="allUsers">
+                <span className="label">All users</span>
+                <div className="noteText">
+                    <Text content="Note: This option sends the message to everyone in your org who has access to Company Communicator." error />
+                </div>
+            </div>);
         }
     }
 }
