@@ -100,12 +100,12 @@
         background-color: #2d2c2c;
     }
 
-    .ui-dropdown__container 
-    {
+    .ui-dropdown__container {
         .ui-button, .ui-dropdown__selected-items, .ui-icon,.ui-list {
-        background-color: #201f1f !important;
+            background-color: #201f1f !important;
+        }
     }
-    }
+
     .list {
         .succeeded {
             color: #92C353;
