@@ -5,8 +5,7 @@ import * as microsoftTeams from "@microsoft/teams-js";
 import "./signInPage.scss";
 
 const SignInPage: React.FunctionComponent<RouteComponentProps> = props => {
-  const errorMessage =
-    "Sorry, you do not have permission to access this page. Please click the Sign in button to get the permission.";
+  const errorMessage = "Please sign in to continue.";
 
   function onSignIn() {
     microsoftTeams.authentication.authenticate({
@@ -26,7 +25,6 @@ const SignInPage: React.FunctionComponent<RouteComponentProps> = props => {
     <div className="sign-in-content-container">
       <Text
         content={errorMessage}
-        error
         size="medium"
       />
       <div className="space"></div>

@@ -21,16 +21,9 @@ const SignInSimpleEnd: React.FunctionComponent = () => {
         if (hashParams["error"]) {
             // Authentication/authorization failed
             microsoftTeams.authentication.notifyFailure(hashParams["error"]);
-        } else if (hashParams["access_token"]) {
-            // Get the stored state parameter and compare with incoming state
-            // Success -- return token information to the parent page
-            const result = JSON.stringify({
-                idToken: hashParams["id_token"],
-                accessToken: hashParams["access_token"],
-                tokenType: hashParams["token_type"],
-                expiresIn: hashParams["expires_in"]
-            });
-            microsoftTeams.authentication.notifySuccess(result);
+        } else if (hashParams["id_token"]) {
+            // Success
+            microsoftTeams.authentication.notifySuccess();
         } else {
             // Unexpected condition: hash does not contain error or access_token parameter
             microsoftTeams.authentication.notifyFailure("UnexpectedFailure");
