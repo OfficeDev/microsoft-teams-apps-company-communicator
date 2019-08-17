@@ -12,7 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
-    /// Controller for the teams data.
+    /// Controller for the authentication sign in data.
     /// </summary>
     [Route("api/authenticationMetadata")]
     public class AuthenticationMetadataController : ControllerBase
@@ -45,10 +45,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 ["redirect_uri"] = $"https://{windowLocationOriginDomain}/signin-simple-end",
                 ["client_id"] = this.clientId,
-                ["response_type"] = "id_token token",
+                ["response_type"] = "id_token",
                 ["response_mode"] = "fragment",
                 ["scope"] = "https://graph.microsoft.com/User.Read openid profile",
-                ["resource"] = "https://graph.microsoft.com/",
                 ["nonce"] = Guid.NewGuid().ToString(),
                 ["state"] = Guid.NewGuid().ToString(),
                 ["login_hint"] = loginHint,
@@ -57,7 +56,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 .Select(p => $"{p.Key}={HttpUtility.UrlEncode(p.Value)}")
                 .ToList();
 
-            var consentUrlPrefix = $"https://login.microsoftonline.com/{this.tenantId}/oauth2/authorize?";
+            var consentUrlPrefix = $"https://login.microsoftonline.com/{this.tenantId}/oauth2/v2.0/authorize?";
 
             var consentUrlString = consentUrlPrefix + string.Join('&', consentUrlComponentList);
 
