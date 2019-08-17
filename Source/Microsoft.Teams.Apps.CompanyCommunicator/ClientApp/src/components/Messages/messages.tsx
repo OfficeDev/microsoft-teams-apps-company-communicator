@@ -138,7 +138,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
           <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
             <Text
               truncated
-              content="Date"
+              content="Sent"
               weight="bold"
             >
             </Text>
@@ -185,6 +185,8 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             <TooltipHost content="Throttled" calloutProps={{ gapSpace: 0 }}>
               <Icon name="exclamation-circle" xSpacing="both" className="throttled" outline />{message.throttled}
             </TooltipHost>
+            {/* redbang outline */}
+
           </div>
         </Flex.Item>
         <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >

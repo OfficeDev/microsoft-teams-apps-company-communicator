@@ -14,11 +14,11 @@ import {
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getBaseUrl } from '../../configVariables';
 
-type dorpdownItem = {
+type dropdownItem = {
     header: string,
     team: {
-        id: string
-    }
+        id: string,
+    },
 }
 
 export interface IDraftMessage {
@@ -53,8 +53,8 @@ export interface formState {
     selectedTeamsNum: number,
     selectedRostersNum: number,
     selectedRadioBtn: string,
-    selectedTeams: dorpdownItem[],
-    selectedRosters: dorpdownItem[]
+    selectedTeams: dropdownItem[],
+    selectedRosters: dropdownItem[],
 }
 
 export interface INewMessageProps extends RouteComponentProps {
@@ -107,7 +107,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                         exists: true,
                         messageId: id,
                         selectedTeams: selectedTeams,
-                        selectedRosters: selectedRosters
+                        selectedRosters: selectedRosters,
                     })
                 });
             } else {
@@ -129,9 +129,9 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private makeDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
-        const dropDownItemList: dorpdownItem[] = [];
+        const dropdownItemList: dropdownItem[] = [];
         items.forEach(element =>
-            dropDownItemList.push(
+            dropdownItemList.push(
                 typeof element !== "string" ? element : {
                     header: fromItems!.find(x => x.teamId === element).name,
                     team: {
@@ -139,7 +139,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                     }
                 })
         );
-        return dropDownItemList;
+        return dropdownItemList;
     }
 
     public setDefaultCard = (card: any) => {
@@ -365,7 +365,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private getItems = () => {
-        const resultedTeams: dorpdownItem[] = [];
+        const resultedTeams: dropdownItem[] = [];
         if (this.state.teams) {
             let remainingUserTeams = this.state.teams;
             if (this.state.selectedRadioBtn !== "allUsers") {
@@ -382,6 +382,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
         return resultedTeams;
     }
+
     private onTeamsChange = (event: any, itemsData: any) => {
         this.setState({
             selectedTeams: itemsData.value,
@@ -429,6 +430,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             });
         }
     }
+
     private editDraftMessage = async (draftMessage: IDraftMessage) => {
         try {
             await updateDraftNotification(draftMessage);
