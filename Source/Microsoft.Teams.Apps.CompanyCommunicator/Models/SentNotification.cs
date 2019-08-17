@@ -4,7 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
-    using System.Collections.Generic;
+    using System;
 
     /// <summary>
     /// Sent notification model class.
@@ -12,9 +12,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
     public class SentNotification : BaseNotification
     {
         /// <summary>
-        /// Gets or sets the Sent Date value.
+        /// Gets or sets the Sent DateTime value.
         /// </summary>
-        public string SentDate { get; set; }
+        public DateTime? SentDate { get; set; }
 
         /// <summary>
         /// Gets or sets the number of recipients who have received the notification successfully.

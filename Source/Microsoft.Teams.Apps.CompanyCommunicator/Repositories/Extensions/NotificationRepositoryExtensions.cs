@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
     using System;
     using System.Threading.Tasks;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
 
     /// <summary>
@@ -23,15 +23,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
         /// <param name="userName">Name of the user who is running the application.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         public static async Task CreateDraftNotificationAsync(
-            this NotificationRepository notificationRepository,
+            this NotificationDataRepository notificationRepository,
             DraftNotification notification,
             string userName)
         {
             var newId = notificationRepository.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent();
 
-            var notificationEntity = new NotificationEntity
+            var notificationEntity = new NotificationDataEntity
             {
-                PartitionKey = PartitionKeyNames.Notification.DraftNotifications,
+                PartitionKey = PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
                 RowKey = newId,
                 Id = newId,
                 Title = notification.Title,
@@ -41,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 ButtonTitle = notification.ButtonTitle,
                 ButtonLink = notification.ButtonLink,
                 CreatedBy = userName,
-                CreatedDateTime = DateTime.UtcNow,
+                CreatedDate = DateTime.UtcNow,
                 IsDraft = true,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,

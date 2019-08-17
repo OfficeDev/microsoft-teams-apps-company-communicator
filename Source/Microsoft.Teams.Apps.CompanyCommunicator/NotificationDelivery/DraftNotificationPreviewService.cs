@@ -10,13 +10,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     using System.Threading.Tasks;
     using AdaptiveCards;
     using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notification;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Team;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
 
     /// <summary>
     /// Draft notification preview service.
@@ -60,7 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// <param name="teamsChannelId">The Teams channel id.</param>
         /// <returns>It returns HttpStatusCode.OK, if this method triggers the bot service to send the adaptive card successfully.
         /// It returns HttpStatusCode.TooManyRequests, if the bot service throttled the request to send the adaptive card.</returns>
-        public async Task<HttpStatusCode> SendPreview(NotificationEntity draftNotificationEntity, TeamDataEntity teamDataEntity, string teamsChannelId)
+        public async Task<HttpStatusCode> SendPreview(NotificationDataEntity draftNotificationEntity, TeamDataEntity teamDataEntity, string teamsChannelId)
         {
             if (draftNotificationEntity == null)
             {
@@ -136,13 +135,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
 
         private async Task SendAdaptiveCardAsync(
             ITurnContext turnContext,
-            NotificationEntity draftNotificationEntity)
+            NotificationDataEntity draftNotificationEntity)
         {
             var reply = this.CreateReply(draftNotificationEntity);
             await turnContext.SendActivityAsync(reply);
         }
 
-        private IMessageActivity CreateReply(NotificationEntity draftNotificationEntity)
+        private IMessageActivity CreateReply(NotificationDataEntity draftNotificationEntity)
         {
             var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCard(
                 draftNotificationEntity.Title,

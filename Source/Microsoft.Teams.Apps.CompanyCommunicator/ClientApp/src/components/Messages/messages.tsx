@@ -21,7 +21,7 @@ export interface ITaskInfo {
 
 export interface IMessage {
   title: string;
-  date: string;
+  sentDate: string;
   recipients: string;
   acknowledgements?: string;
   reactions?: string;

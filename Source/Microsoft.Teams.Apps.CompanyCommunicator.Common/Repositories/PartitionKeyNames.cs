@@ -10,40 +10,77 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
     public static class PartitionKeyNames
     {
         /// <summary>
-        /// Teams data partition key names.
+        /// Users data table partition key names.
         /// </summary>
-        public static class Metadata
+        public static class UserDataTable
         {
             /// <summary>
-            /// Team data partition key name.
+            /// Table name for user data table
             /// </summary>
-            public static readonly string TeamData = "TeamData";
+            public static readonly string TableName = "UserData";
 
             /// <summary>
             /// Users data partition key name.
             /// </summary>
-            public static readonly string UserData = "UserData";
+            public static readonly string UserDataPartition = "UserData";
         }
 
         /// <summary>
-        /// Notification partition key names.
+        /// Teams data table partition key names.
         /// </summary>
-        public static class Notification
+        public static class TeamDataTable
         {
+            /// <summary>
+            /// Table name for team data table
+            /// </summary>
+            public static readonly string TableName = "TeamData";
+
+            /// <summary>
+            /// Team data partition key name.
+            /// </summary>
+            public static readonly string TeamDataPartition = "TeamData";
+        }
+
+        /// <summary>
+        /// Notification data table partition key names.
+        /// </summary>
+        public static class NotificationDataTable
+        {
+            /// <summary>
+            /// Table name for notification data table
+            /// </summary>
+            public static readonly string TableName = "NotificationData";
+
             /// <summary>
             /// Draft notifications partition key name.
             /// </summary>
-            public static readonly string DraftNotifications = "DraftNotifications";
+            public static readonly string DraftNotificationsPartition = "DraftNotifications";
+
+            /// <summary>
+            /// Sending notifications partition key name.
+            /// </summary>
+            public static readonly string SendingNotificationsPartition = "SendingNotifications";
 
             /// <summary>
             /// Sent notifications partition key name.
             /// </summary>
-            public static readonly string SentNotifications = "SentNotifications";
+            public static readonly string SentNotificationsPartition = "SentNotifications";
+        }
+
+        /// <summary>
+        /// Sent notification data table partition key names.
+        /// </summary>
+        public static class SentNotificationDataTable
+        {
+            /// <summary>
+            /// Table name for sent notification data table
+            /// </summary>
+            public static readonly string TableName = "SentNotificationData";
 
             /// <summary>
-            /// Active notifications partition key name.
+            /// Default partion - should not be used.
             /// </summary>
-            public static readonly string ActiveNotifications = "ActiveNotifications";
+            public static readonly string DefaultPartition = "Default";
         }
     }
 }
