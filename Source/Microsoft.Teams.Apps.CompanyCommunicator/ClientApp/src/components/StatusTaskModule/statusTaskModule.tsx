@@ -93,7 +93,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
     private formatNotificationDate = (notificationDate: string) => {
         if (notificationDate) {
             notificationDate = (new Date(notificationDate)).toLocaleString(navigator.language, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
-            notificationDate = notificationDate.replace(',', '');
+            notificationDate = notificationDate.replace(',', '\xa0\xa0');
         }
         return notificationDate;
     }
@@ -114,17 +114,10 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                                 <h3>Title</h3>
                                 <span>{this.state.message.title}</span>
                             </div>
-
-                            <div className="contentField">
-                                <h3>Create by</h3>
-                                <span>Anonymous</span>
-                            </div>
-
                             <div className="contentField">
                                 <h3>Date Sent</h3>
                                 <span>{this.state.message.sentDate}</span>
                             </div>
-
                             <div className="contentField">
                                 <h3>Results</h3>
                                 <label>Success : </label>

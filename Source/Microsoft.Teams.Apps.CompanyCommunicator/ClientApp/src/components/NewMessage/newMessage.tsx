@@ -3,7 +3,7 @@ import './newMessage.scss';
 import './teamTheme.scss';
 import { Input, TextArea, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader, Dropdown } from '@stardust-ui/react';
+import { Button, Loader, Dropdown, Text } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { RouteComponentProps } from 'react-router-dom';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification } from '../../apis/messageListApi';
@@ -290,14 +290,13 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                     <div className="taskModule">
                         <div className="formContainer">
                             <div className="formContentContainer" >
-                                <h3>Recipient selection</h3>
-                                <h4>Please choose the groups you would like to send your message to:</h4>
+                                <h3>Choose how you want to send your message</h3>
                                 <RadiobuttonGroup
                                     className="radioBtns"
                                     value={this.state.selectedRadioBtn}
                                     onSelected={this.onGroupSelected}
                                 >
-                                    <Radiobutton name="grouped" value="teams" label="Send to General channel(s)" />
+                                    <Radiobutton name="grouped" value="teams" label="Send to General channel of specific teams" />
                                     <Dropdown
                                         hidden={!this.state.teamsOptionSelected}
                                         placeholder="Select team(s)"
@@ -306,7 +305,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                         value={this.state.selectedTeams}
                                         onSelectedChange={this.onTeamsChange}
                                     />
-                                    <Radiobutton name="grouped" value="rosters" label="Send in chat" />
+                                    <Radiobutton name="grouped" value="rosters" label="Send in chat to specific people" />
                                     <Dropdown
                                         hidden={!this.state.rostersOptionSelected}
                                         placeholder="Choose team(s) members"
@@ -315,7 +314,10 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                         value={this.state.selectedRosters}
                                         onSelectedChange={this.onRostersChange}
                                     />
-                                    <Radiobutton name="grouped" value="allUsers" label="Send in chat to all users" />
+                                    <Radiobutton name="grouped" value="allUsers" label="Send in chat to everyone" />
+                                    <div className="noteText hide">
+                                        <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
+                                    </div>
                                 </RadiobuttonGroup>
                             </div>
                             <div className="adaptiveCardContainer">
