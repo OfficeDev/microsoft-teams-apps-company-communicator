@@ -10,6 +10,9 @@ import SendConfirmationTaskModule from './components/SendConfirmationTaskModule/
 import * as microsoftTeams from "@microsoft/teams-js";
 import { TeamsThemeContext, getContext, ThemeStyle } from 'msteams-ui-components-react';
 import ErrorPage from "./components/ErrorPage/errorPage";
+import SignInPage from "./components/SignInPage/signInPage";
+import SignInSimpleStart from "./components/SignInPage/signInSimpleStart";
+import SignInSimpleEnd from "./components/SignInPage/signInSimpleEnd";
 
 export interface IAppState {
   theme: string;
@@ -109,6 +112,9 @@ class App extends React.Component<{}, IAppState> {
               <Route exact path="/sendconfirmation/:id" component={SendConfirmationTaskModule} />
               <Route exact path="/errorpage" component={ErrorPage} />
               <Route exact path="/errorpage/:id" component={ErrorPage} />
+              <Route exact path="/signin" component={SignInPage} />
+              <Route exact path="/signin-simple-start" component={SignInSimpleStart} />
+              <Route exact path="/signin-simple-end" component={SignInSimpleEnd} />
             </Switch>
           </BrowserRouter>
         </div>
