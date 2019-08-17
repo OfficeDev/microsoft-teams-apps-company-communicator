@@ -114,12 +114,10 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                                 <h3>Title</h3>
                                 <span>{this.state.message.title}</span>
                             </div>
-
                             <div className="contentField">
                                 <h3>Date Sent</h3>
                                 <span>{this.state.message.sentDate}</span>
                             </div>
-
                             <div className="contentField">
                                 <h3>Results</h3>
                                 <label>Success : </label>

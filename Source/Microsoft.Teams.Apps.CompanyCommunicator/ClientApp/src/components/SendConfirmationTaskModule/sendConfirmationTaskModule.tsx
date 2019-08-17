@@ -196,7 +196,7 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
             return (<div key="allUsers">
                 <span className="label">All users</span>
                 <div className="noteText">
-                    <Text content="Note: This option sends the message to everyone in your org who has access to Company Communicator." error />
+                    <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
                 </div>
             </div>);
         }

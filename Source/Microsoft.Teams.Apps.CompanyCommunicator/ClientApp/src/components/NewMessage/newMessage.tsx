@@ -326,7 +326,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     />
                                     <Radiobutton name="grouped" value="allUsers" label="Send in chat to everyone" />
                                     <div className="noteText hide">
-                                        <Text content="Note: This option sends the message to everyone in your org who has access to Company Communicator." error />
+                                        <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
                                     </div>
                                 </RadiobuttonGroup>
                             </div>
