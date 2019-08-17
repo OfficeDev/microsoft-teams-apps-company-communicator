@@ -4,10 +4,13 @@ import * as microsoftTeams from "@microsoft/teams-js";
 export class AxiosJWTDecorator {
   public async get<T = any, R = AxiosResponse<T>>(
     url: string,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
+    needAuthorizationHeader: boolean = true,
   ): Promise<R> {
     try {
-      config = await this.setupAuthorizationHeader(config);
+      if (needAuthorizationHeader) {
+        config = await this.setupAuthorizationHeader(config);
+      }
       return await axios.get(url, config);
     } catch (error) {
       this.handleError(error);
@@ -78,15 +81,19 @@ export class AxiosJWTDecorator {
 
     return new Promise<AxiosRequestConfig>((resolve, reject) => {
       const authTokenRequest = {
-        successCallback: function(token: string) {
+        successCallback: (token: string) => {
           if (!config) {
             config = axios.defaults;
           }
           config.headers["Authorization"] = `Bearer ${token}`;
           resolve(config);
         },
-        failureCallback: function(error: string) {
-          reject(error);
+        failureCallback: (error: string) => {
+          // When the getAuthToken function returns a "resourceRequiresConsent" error, 
+          // it means Azure AD needs the user's consent before issuing a token to the app. 
+          // The following code redirects the user to the "Sign in" page where the user can grant the consent. 
+          // Right now, the app redirects to the consent page for any error.
+          window.location.href = "/signin";
         },
         resources: []
       };

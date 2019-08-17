@@ -62,3 +62,8 @@ export const sendPreview = async (payload: {}): Promise<any> => {
     let url = baseAxiosUrl + "/draftNotifications/previews";
     return await axios.post(url, payload);
 }
+
+export const getAuthenticationConsentMetadata = async (windowLocationOriginDomain: string, login_hint: string): Promise<any> => {
+    let url = `${baseAxiosUrl}/authenticationMetadata/consentUrl?windowLocationOriginDomain=${windowLocationOriginDomain}&loginhint=${login_hint}`;
+    return await axios.get(url, undefined, false);
+}
