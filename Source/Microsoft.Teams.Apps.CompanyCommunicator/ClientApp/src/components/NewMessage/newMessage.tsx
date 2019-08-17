@@ -300,19 +300,23 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     <Dropdown
                                         hidden={!this.state.teamsOptionSelected}
                                         placeholder="Select team(s)"
+                                        search
                                         multiple
                                         items={this.getItems()}
                                         value={this.state.selectedTeams}
                                         onSelectedChange={this.onTeamsChange}
+                                        noResultsMessage="We couldn't find any matches."
                                     />
                                     <Radiobutton name="grouped" value="rosters" label="Send in chat to specific people" />
                                     <Dropdown
                                         hidden={!this.state.rostersOptionSelected}
                                         placeholder="Choose team(s) members"
+                                        search
                                         multiple
                                         items={this.getItems()}
                                         value={this.state.selectedRosters}
                                         onSelectedChange={this.onRostersChange}
+                                        noResultsMessage="We couldn't find any matches."
                                     />
                                     <Radiobutton name="grouped" value="allUsers" label="Send in chat to everyone" />
                                     <div className="noteText hide">
