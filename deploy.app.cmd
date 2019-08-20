@@ -67,6 +67,7 @@ SET MSBUILD_PATH=%ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild.exe
 echo Handling ASP.NET Core Web Application deployment.
 
 :: 1. Restore nuget packages
+echo Restoring NuGet packages
 call :ExecuteCmd dotnet restore "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator.sln"
 IF !ERRORLEVEL! NEQ 0 goto error
 
@@ -74,10 +75,15 @@ IF !ERRORLEVEL! NEQ 0 goto error
 echo Restoring npm packages (this can take several minutes)
 pushd "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator\ClientApp"
 call :ExecuteCmd npm install
+IF !ERRORLEVEL! NEQ 0 (
+    echo First attempt failed, retrying once
+    call :ExecuteCmd npm install
+)
 popd
 IF !ERRORLEVEL! NEQ 0 goto error
 
 :: 3. Build and publish
+echo Building the application
 call :ExecuteCmd dotnet publish "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator\Microsoft.Teams.Apps.CompanyCommunicator.csproj" --output "%DEPLOYMENT_TEMP%" --configuration Release
 IF !ERRORLEVEL! NEQ 0 goto error
 
