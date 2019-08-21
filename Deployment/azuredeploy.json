@@ -565,5 +565,15 @@
         "friendlyName": "[variables('frontDoorName')]"
       }
     }
-  ]
+  ],
+  "outputs": {
+    "botId": {
+      "type": "string",
+      "value": "[parameters('botClientId')]"
+    },
+    "appDomain": {
+      "type":"string",
+      "value": "[if(variables('useFrontDoor'), concat(variables('frontDoorName'), '.azurefd.net'), concat('Please create a custom domain name for ', variables('botAppDomain'), ' and use that in the manifest'))]"
+    }
+  }
 }
