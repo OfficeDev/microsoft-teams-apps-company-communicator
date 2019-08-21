@@ -61,9 +61,9 @@
   <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
     <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
     <Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install --no-audit" />
+    <Exec Condition=" '$(KuduDeployment)' == '' " WorkingDirectory="$(SpaRoot)" Command="npm install --no-audit" />
     <Message Importance="high" Text="Building the client app using 'npm'. This may take several minutes..." />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
+    <Exec Condition=" '$(KuduDeployment)' == '' " WorkingDirectory="$(SpaRoot)" Command="npm run build" />
     <Message Importance="high" Text="Finished building the client app" />
 
     <!-- Include the newly-built files in the publish output -->

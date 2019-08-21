@@ -82,12 +82,18 @@ IF !ERRORLEVEL! NEQ 0 (
 popd
 IF !ERRORLEVEL! NEQ 0 goto error
 
-:: 3. Build and publish
+:: 3. Build the client app
+echo Building the client app (this can take several minutes)
+pushd "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator\ClientApp"
+call :ExecuteCmd npm run build
+popd
+
+:: 4. Build and publish
 echo Building the application
-call :ExecuteCmd dotnet publish "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator\Microsoft.Teams.Apps.CompanyCommunicator.csproj" --output "%DEPLOYMENT_TEMP%" --configuration Release
+call :ExecuteCmd dotnet publish "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator\Microsoft.Teams.Apps.CompanyCommunicator.csproj" --output "%DEPLOYMENT_TEMP%" --configuration Release -property:KuduDeployment=1
 IF !ERRORLEVEL! NEQ 0 goto error
 
-:: 4. KuduSync
+:: 5. KuduSync
 call :ExecuteCmd "%KUDU_SYNC_CMD%" -v 50 -f "%DEPLOYMENT_TEMP%" -t "%DEPLOYMENT_TARGET%" -n "%NEXT_MANIFEST_PATH%" -p "%PREVIOUS_MANIFEST_PATH%" -i ".git;.hg;.deployment;deploy.cmd"
 IF !ERRORLEVEL! NEQ 0 goto error
 
