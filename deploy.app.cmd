@@ -87,6 +87,7 @@ echo Building the client app (this can take several minutes)
 pushd "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator\ClientApp"
 call :ExecuteCmd npm run build
 popd
+IF !ERRORLEVEL! NEQ 0 goto error
 
 :: 4. Build and publish
 echo Building the application
