@@ -487,6 +487,7 @@
               "backends": [
                 {
                   "address": "[variables('botAppDomain')]",
+                  "backendHostHeader": "[variables('botAppDomain')]",
                   "httpPort": 80,
                   "httpsPort": 443,
                   "priority": 1,
