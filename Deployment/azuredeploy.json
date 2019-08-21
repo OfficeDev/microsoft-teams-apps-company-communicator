@@ -31,6 +31,17 @@
         "description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
       }
     },
+    "customDomainOption": {
+      "type": "string",
+      "allowedValues": [
+        "Custom domain name (recommended)",
+        "Azure Front Door"
+      ],
+      "defaultValue": "Azure Front Door",
+      "metadata": {
+        "description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs. "
+      }
+    },
     "appDisplayName": {
       "type": "string",
       "defaultValue": "Company Communicator",
@@ -130,7 +141,8 @@
     ],
     "isSharedPlan": "[contains(variables('sharedSkus'), parameters('hostingPlanSku'))]",
     "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]",
-    "frontDoorName": "[parameters('baseResourceName')]"
+    "frontDoorName": "[parameters('baseResourceName')]",
+    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]"
   },
   "resources": [
     {
@@ -459,9 +471,10 @@
       ]
     },
     {
-      "type": "Microsoft.Network/frontDoors",
       "apiVersion": "2019-04-01",
+      "type": "Microsoft.Network/frontDoors",
       "name": "[variables('frontDoorName')]",
+      "condition": "[variables('useFrontDoor')]",
       "location": "Global",
       "dependsOn": [
         "[resourceId('Microsoft.Web/sites', variables('botAppName'))]"
@@ -532,7 +545,6 @@
                 }
               ],
               "acceptedProtocols": [
-                "Http",
                 "Https"
               ],
               "patternsToMatch": [
@@ -540,7 +552,7 @@
               ],
               "routeConfiguration": {
                 "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",                                
-                "forwardingProtocol": "MatchRequest",
+                "forwardingProtocol": "HttpsOnly",
                 "backendPool": {
                     "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', variables('frontDoorName'), 'backendPool1')]"
                 }                                
