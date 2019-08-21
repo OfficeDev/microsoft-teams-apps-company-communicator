@@ -5,7 +5,6 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
     using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -33,7 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             services.AddSingleton<TeamsDataCapture>();
 
             // Create the Bot's Teams message filter middleware service.
-            services.AddSingleton<TeamsMessageFilterMiddleware>();
+            services.AddSingleton<CompanyCommunicatorBotFilterMiddleware>();
         }
     }
 }
