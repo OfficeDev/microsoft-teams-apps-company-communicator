@@ -31,6 +31,17 @@
         "description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
       }
     },
+    "customDomainOption": {
+      "type": "string",
+      "allowedValues": [
+        "Custom domain name (recommended)",
+        "Azure Front Door"
+      ],
+      "defaultValue": "Azure Front Door",
+      "metadata": {
+        "description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs. "
+      }
+    },
     "appDisplayName": {
       "type": "string",
       "defaultValue": "Company Communicator",
@@ -52,7 +63,7 @@
       "minLength": 1,
       "defaultValue": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-company-communicator-app/master/Manifest/color.png",
       "metadata": {
-          "description": "The link to the icon for the app. It must resolve to a PNG file."
+        "description": "The link to the icon for the app. It must resolve to a PNG file."
       }
     },
     "tenantId": {
@@ -129,7 +140,9 @@
       "Shared"
     ],
     "isSharedPlan": "[contains(variables('sharedSkus'), parameters('hostingPlanSku'))]",
-    "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]"
+    "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]",
+    "frontDoorName": "[parameters('baseResourceName')]",
+    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]"
   },
   "resources": [
     {
@@ -183,6 +196,10 @@
             {
               "name": "PROJECT",
               "value": "Source/Microsoft.Teams.Apps.CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj"
+            },
+            {
+              "name": "SITE_ROLE",
+              "value": "app"
             },
             {
               "name": "AzureAd:TenantId",
@@ -385,6 +402,10 @@
               "value": "Source/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj"
             },
             {
+              "name": "SITE_ROLE",
+              "value": "function"
+            },
+            {
               "name": "AzureWebJobsStorage",
               "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
             },
@@ -456,6 +477,112 @@
           }
         }
       ]
+    },
+    {
+      "apiVersion": "2019-04-01",
+      "type": "Microsoft.Network/frontDoors",
+      "name": "[variables('frontDoorName')]",
+      "condition": "[variables('useFrontDoor')]",
+      "location": "Global",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('botAppName'))]"
+      ],
+      "properties": {
+        "backendPools": [
+          {
+            "name": "backendPool1",
+            "properties": {
+              "backends": [
+                {
+                  "address": "[variables('botAppDomain')]",
+                  "backendHostHeader": "[variables('botAppDomain')]",
+                  "httpPort": 80,
+                  "httpsPort": 443,
+                  "priority": 1,
+                  "weight": 50,
+                  "enabledState": "Enabled"
+                }
+              ],
+              "healthProbeSettings": {
+                "id": "[resourceId('Microsoft.Network/frontDoors/healthProbeSettings', variables('frontDoorName'), 'healthProbeSettings1')]"
+              },
+              "loadBalancingSettings": {
+                "id": "[resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', variables('frontDoorName'), 'loadBalancingSettings1')]"
+              },
+              "resourceState": "Enabled"
+            }
+          }
+        ],
+        "healthProbeSettings": [
+          {
+            "name": "healthProbeSettings1",
+            "properties": {
+              "intervalInSeconds": 30,
+              "path": "/",
+              "protocol": "Https",
+              "resourceState": "Enabled"
+            }
+          }
+        ],
+        "frontendEndpoints": [
+          {
+            "name": "frontendEndpoint1",
+            "properties": {
+              "hostName": "[concat(variables('frontDoorName'), '.azurefd.net')]",
+              "sessionAffinityEnabledState": "Disabled",
+              "sessionAffinityTtlSeconds": 0
+            }
+          }
+        ],
+        "loadBalancingSettings": [
+          {
+            "name": "loadBalancingSettings1",
+            "properties": {
+              "additionalLatencyMilliseconds": 0,
+              "sampleSize": 4,
+              "successfulSamplesRequired": 2
+            }
+          }
+        ],
+        "routingRules": [
+          {
+            "name": "routingRule1",
+            "properties": {
+              "frontendEndpoints": [
+                {
+                  "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', variables('frontDoorName'), 'frontendEndpoint1')]"
+                }
+              ],
+              "acceptedProtocols": [
+                "Https"
+              ],
+              "patternsToMatch": [
+                "/*"
+              ],
+              "routeConfiguration": {
+                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",                                
+                "forwardingProtocol": "HttpsOnly",
+                "backendPool": {
+                    "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', variables('frontDoorName'), 'backendPool1')]"
+                }                                
+              },
+              "enabledState": "Enabled"
+            }
+          }
+        ],
+        "enabledState": "Enabled",
+        "friendlyName": "[variables('frontDoorName')]"
+      }
     }
-  ]
+  ],
+  "outputs": {
+    "botId": {
+      "type": "string",
+      "value": "[parameters('botClientId')]"
+    },
+    "appDomain": {
+      "type":"string",
+      "value": "[if(variables('useFrontDoor'), concat(variables('frontDoorName'), '.azurefd.net'), concat('Please create a custom domain name for ', variables('botAppDomain'), ' and use that in the manifest'))]"
+    }
+  }
 }
