@@ -502,7 +502,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onImageLinkChanged = (event: any) => {
-        if (!event.target.value.startsWith("https://")) {
+        let url = event.target.value.toLowerCase();
+        if (!(url.startsWith("https://") || (url.startsWith("data:image/png;base64")) || (url.startsWith("data:image/jpeg;base64")) || (url.startsWith("data:image/gif;base64")))) {
             this.setState({
                 errorImageUrlMessage: "URL must start with https://"
             });
@@ -596,7 +597,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onBtnLinkChanged = (event: any) => {
-        if (!event.target.value.startsWith("https://")) {
+        if (!event.target.value.toLowerCase().startsWith("https://")) {
             this.setState({
                 errorButtonUrlMessage: "URL must start with https://"
             });
