@@ -526,8 +526,8 @@
           {
             "name": "healthProbeSettings1",
             "properties": {
-              "intervalInSeconds": 30,
-              "path": "/",
+              "intervalInSeconds": 255,
+              "path": "/health",
               "protocol": "Https",
               "resourceState": "Enabled"
             }
