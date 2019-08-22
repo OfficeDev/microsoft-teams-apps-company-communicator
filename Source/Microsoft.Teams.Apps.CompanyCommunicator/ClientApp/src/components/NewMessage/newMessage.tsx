@@ -55,6 +55,8 @@ export interface formState {
     selectedRadioBtn: string,
     selectedTeams: dropdownItem[],
     selectedRosters: dropdownItem[],
+    errorImageUrlMessage: string,
+    errorButtonUrlMessage: string,
 }
 
 export interface INewMessageProps extends RouteComponentProps {
@@ -88,7 +90,9 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             selectedRostersNum: 0,
             selectedRadioBtn: "teams",
             selectedTeams: [],
-            selectedRosters: []
+            selectedRosters: [],
+            errorImageUrlMessage: "",
+            errorButtonUrlMessage: "",
         }
     }
 
@@ -234,6 +238,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     label="Image Link"
                                     placeholder="Image link"
                                     onChange={this.onImageLinkChanged}
+                                    errorLabel={this.state.errorImageUrlMessage}
                                     autoComplete="off"
                                 />
 
@@ -270,6 +275,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     label="Button Url"
                                     placeholder="Button url"
                                     onChange={this.onBtnLinkChanged}
+                                    errorLabel={this.state.errorButtonUrlMessage}
                                     autoComplete="off"
                                 />
                             </div>
@@ -369,7 +375,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         const title = this.state.title;
         const btnTitle = this.state.btnTitle;
         const btnLink = this.state.btnLink;
-        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink)));
+        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink)) && (this.state.errorImageUrlMessage === "") && (this.state.errorButtonUrlMessage === ""));
     }
 
     private getItems = () => {
@@ -496,6 +502,17 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onImageLinkChanged = (event: any) => {
+        let url = event.target.value.toLowerCase();
+        if (!(url.startsWith("https://") || (url.startsWith("data:image/png;base64")) || (url.startsWith("data:image/jpeg;base64")) || (url.startsWith("data:image/gif;base64")))) {
+            this.setState({
+                errorImageUrlMessage: "URL must start with https://"
+            });
+        } else {
+            this.setState({
+                errorImageUrlMessage: ""
+            });
+        }
+
         let showDefaultCard = (!this.state.title && !event.target.value && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
         setCardTitle(this.card, this.state.title);
         setCardImageLink(this.card, event.target.value);
@@ -580,6 +597,16 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onBtnLinkChanged = (event: any) => {
+        if (!event.target.value.toLowerCase().startsWith("https://")) {
+            this.setState({
+                errorButtonUrlMessage: "URL must start with https://"
+            });
+        } else {
+            this.setState({
+                errorButtonUrlMessage: ""
+            });
+        }
+
         const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !event.target.value);
         setCardTitle(this.card, this.state.title);
         setCardSummary(this.card, this.state.summary);
