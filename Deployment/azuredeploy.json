@@ -216,7 +216,7 @@
             },
             {
               "name": "AzureAd:ValidIssuers",
-              "value": "[concat('https://login.microsoftonline.com/', parameters('botClientId'), '/v2.0,https://sts.windows.net/', parameters('botClientId'), '/')]"
+              "value": "[concat('https://login.microsoftonline.com/', parameters('tenantId'), '/v2.0,https://sts.windows.net/', parameters('tenantId'), '/')]"
             },
             {
               "name": "MicrosoftAppId",
