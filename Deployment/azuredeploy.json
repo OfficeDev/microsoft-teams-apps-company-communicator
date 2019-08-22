@@ -141,8 +141,9 @@
     ],
     "isSharedPlan": "[contains(variables('sharedSkus'), parameters('hostingPlanSku'))]",
     "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]",
+    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]",
     "frontDoorName": "[parameters('baseResourceName')]",
-    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]"
+    "frontDoorDomain": "[concat(variables('frontDoorName'), '.azurefd.net')]"
   },
   "resources": [
     {
@@ -208,6 +209,14 @@
             {
               "name": "AzureAd:ClientId",
               "value": "[parameters('botClientId')]"
+            },
+            {
+              "name": "AzureAd:ApplicationIdURI",
+              "value": "[if(variables('useFrontDoor'), concat('api://', variables('frontDoorDomain')), '')]"
+            },
+            {
+              "name": "AzureAd:ValidIssuers",
+              "value": "[concat('https://login.microsoftonline.com/', parameters('tenantId'), '/v2.0,https://sts.windows.net/', parameters('tenantId'), '/')]"
             },
             {
               "name": "MicrosoftAppId",
@@ -528,7 +537,7 @@
           {
             "name": "frontendEndpoint1",
             "properties": {
-              "hostName": "[concat(variables('frontDoorName'), '.azurefd.net')]",
+              "hostName": "[variables('frontDoorDomain')]",
               "sessionAffinityEnabledState": "Disabled",
               "sessionAffinityTtlSeconds": 0
             }
@@ -582,7 +591,7 @@
     },
     "appDomain": {
       "type":"string",
-      "value": "[if(variables('useFrontDoor'), concat(variables('frontDoorName'), '.azurefd.net'), concat('Please create a custom domain name for ', variables('botAppDomain'), ' and use that in the manifest'))]"
+      "value": "[if(variables('useFrontDoor'), variables('frontDoorDomain'), concat('Please create a custom domain name for ', variables('botAppDomain'), ' and use that in the manifest'))]"
     }
   }
 }
