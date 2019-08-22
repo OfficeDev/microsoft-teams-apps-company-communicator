@@ -185,6 +185,10 @@
               "value": "Source/Microsoft.Teams.Apps.CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj"
             },
             {
+              "name": "SITE_ROLE",
+              "value": "app"
+            },
+            {
               "name": "AzureAd:TenantId",
               "value": "[parameters('tenantId')]"
             },
@@ -383,6 +387,10 @@
             {
               "name": "PROJECT",
               "value": "Source/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj"
+            },
+            {
+              "name": "SITE_ROLE",
+              "value": "function"
             },
             {
               "name": "AzureWebJobsStorage",
