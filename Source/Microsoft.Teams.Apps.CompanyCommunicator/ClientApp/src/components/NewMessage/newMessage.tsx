@@ -319,8 +319,10 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                         noResultsMessage="We couldn't find any matches."
                                     />
                                     <Radiobutton name="grouped" value="allUsers" label="Send in chat to everyone" />
-                                    <div className="noteText hide">
-                                        <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
+                                    <div className={this.state.selectedRadioBtn === "allUsers" ? "" : "hide"}>
+                                        <div className="noteText">
+                                            <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
+                                        </div>
                                     </div>
                                 </RadiobuttonGroup>
                             </div>
