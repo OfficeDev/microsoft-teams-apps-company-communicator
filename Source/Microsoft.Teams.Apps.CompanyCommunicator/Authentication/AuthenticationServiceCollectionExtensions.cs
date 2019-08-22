@@ -104,7 +104,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 
             var applicationIdURI = configuration[AuthenticationServiceCollectionExtensions.ApplicationIdURIConfigurationSettingsKey];
 
-            var validAudiences = new List<string> { clientId, applicationIdURI };
+            var validAudiences = new List<string> { clientId, applicationIdURI.ToLower() };
 
             return validAudiences;
         }
