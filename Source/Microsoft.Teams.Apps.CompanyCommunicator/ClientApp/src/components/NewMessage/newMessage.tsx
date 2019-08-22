@@ -231,8 +231,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.imageLink}
-                                    label="Image Link"
-                                    placeholder="Image link"
+                                    label="Image URL"
+                                    placeholder="Image URL"
                                     onChange={this.onImageLinkChanged}
                                     autoComplete="off"
                                 />
@@ -258,7 +258,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.btnTitle}
-                                    label="Button Title"
+                                    label="Button title"
                                     placeholder="Button title"
                                     onChange={this.onBtnTitleChanged}
                                     autoComplete="off"
@@ -267,8 +267,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.btnLink}
-                                    label="Button Url"
-                                    placeholder="Button url"
+                                    label="Button URL"
+                                    placeholder="Button URL"
                                     onChange={this.onBtnLinkChanged}
                                     autoComplete="off"
                                 />
