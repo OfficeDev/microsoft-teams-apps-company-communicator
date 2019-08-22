@@ -41,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task OnTurnAsync(ITurnContext turnContext, NextDelegate next, CancellationToken cancellationToken = default)
         {
-            var isMsTeamsChannel = this.ValidateChannel(turnContext);
+            var isMsTeamsChannel = this.ValidateBotFrameworkChannelId(turnContext);
             if (!isMsTeamsChannel)
             {
                 return;
@@ -56,18 +56,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             await next(cancellationToken).ConfigureAwait(false);
         }
 
-        private bool ValidateChannel(ITurnContext turnContext)
+        private bool ValidateBotFrameworkChannelId(ITurnContext turnContext)
         {
-            var channelId = turnContext?.Activity?.ChannelId;
-            if (string.IsNullOrWhiteSpace(channelId))
-            {
-                var exceptionMessage = "Channel id is missing.";
-                Console.WriteLine(exceptionMessage);
-                throw new ApplicationException(exceptionMessage);
-            }
-
-            return channelId.Equals(
-                CompanyCommunicatorBotFilterMiddleware.MsTeamsChannelId,
+            return CompanyCommunicatorBotFilterMiddleware.MsTeamsChannelId.Equals(
+                turnContext?.Activity?.ChannelId,
                 StringComparison.OrdinalIgnoreCase);
         }
 
@@ -91,13 +83,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             }
 
             var tenantId = turnContext?.Activity?.Conversation?.TenantId;
-            if (string.IsNullOrWhiteSpace(tenantId))
-            {
-                var exceptionMessage = "tenant id is missing.";
-                Console.WriteLine(exceptionMessage);
-                throw new ApplicationException(exceptionMessage);
-            }
-
             return allowedTenantIds.Contains(tenantId);
         }
     }
