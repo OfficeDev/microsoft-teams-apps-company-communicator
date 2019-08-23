@@ -115,7 +115,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                                 <span>{this.state.message.title}</span>
                             </div>
                             <div className="contentField">
-                                <h3>Date Sent</h3>
+                                <h3>Date sent</h3>
                                 <span>{this.state.message.sentDate}</span>
                             </div>
                             <div className="contentField">
