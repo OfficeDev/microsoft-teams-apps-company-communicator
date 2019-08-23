@@ -153,23 +153,15 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
     return out;
   }
 
-  private sendIndicator = (message: any) => {
+  private renderSendingNumbersText = (message: any) => {
     if (message.isCompleted) {
       return (<Text />);
     } else {
-      return <Loader className="sending" size="smallest" label="Sending" labelPosition="end" inline />
-    }
-  }
-
-  private sendingNumbers = (message: any) => {
-    let currentNum = message.succeeded + message.failed + message.throttled;
-    if (message.isCompleted) {
-      return (<Text />);
-    } else {
+      let currentNum = message.succeeded + message.failed + message.throttled;
       return (
         <Text
           truncated
-          content={`Sending...  ${currentNum} / ${message.totalMessageCount}`}
+          content={`Sending...  ${currentNum} of ${message.totalMessageCount}`}
         >
         </Text>
       );
@@ -187,7 +179,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
           </Text>
         </Flex.Item>
         <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
-          {this.sendingNumbers(message)}
+          {this.renderSendingNumbersText(message)}
         </Flex.Item>
         <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
           <div>
