@@ -53,6 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                     {
                         ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(configuration),
                         ValidIssuers = AuthenticationServiceCollectionExtensions.GetValidIssuers(configuration),
+                        AudienceValidator = AuthenticationServiceCollectionExtensions.AudienceValidator,
                     };
                 });
         }
@@ -134,6 +135,40 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             });
 
             services.AddSingleton<IAuthorizationHandler, MustBeValidUpnHandler>();
+        }
+
+        private static bool AudienceValidator(
+            IEnumerable<string> audiences,
+            SecurityToken securityToken,
+            TokenValidationParameters validationParameters)
+        {
+            if (audiences == null || audiences.Count() == 0)
+            {
+                throw new ApplicationException("No audience defined in token!");
+            }
+
+            var validAudiences = validationParameters.ValidAudiences;
+            if (validAudiences == null || validAudiences.Count() == 0)
+            {
+                throw new ApplicationException("No valid audience defined in validationParameters!");
+            }
+
+            var validAudienceHashSet = new HashSet<string>(validAudiences, new AudienceComparer());
+
+            return validAudienceHashSet.Overlaps(audiences);
+        }
+
+        private class AudienceComparer : IEqualityComparer<string>
+        {
+            public bool Equals(string audience1, string audience2)
+            {
+                return audience1.Equals(audience2, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public int GetHashCode(string audience)
+            {
+                return audience.ToLower().GetHashCode();
+            }
         }
     }
 }
