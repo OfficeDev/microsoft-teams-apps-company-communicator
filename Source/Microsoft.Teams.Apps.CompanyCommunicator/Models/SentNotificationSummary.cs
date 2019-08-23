@@ -47,6 +47,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public int Throttled { get; set; }
 
         /// <summary>
+        /// Gets or sets the total number of messages to be sent.
+        /// </summary>
+        public int TotalMessageCount { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the sending process is completed or not.
         /// </summary>
         public bool IsCompleted { get; set; }
