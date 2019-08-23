@@ -138,11 +138,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         }
 
         private static bool AudienceValidator(
-            IEnumerable<string> audiences,
+            IEnumerable<string> tokenAudiences,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters)
         {
-            if (audiences == null || audiences.Count() == 0)
+            if (tokenAudiences == null || tokenAudiences.Count() == 0)
             {
                 throw new ApplicationException("No audience defined in token!");
             }
@@ -150,25 +150,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             var validAudiences = validationParameters.ValidAudiences;
             if (validAudiences == null || validAudiences.Count() == 0)
             {
-                throw new ApplicationException("No valid audience defined in validationParameters!");
+                throw new ApplicationException("No valid audiences defined in validationParameters!");
             }
 
-            var validAudienceHashSet = new HashSet<string>(validAudiences, new AudienceComparer());
-
-            return validAudienceHashSet.Overlaps(audiences);
-        }
-
-        private class AudienceComparer : IEqualityComparer<string>
-        {
-            public bool Equals(string audience1, string audience2)
+            foreach (var tokenAudience in tokenAudiences)
             {
-                return audience1.Equals(audience2, StringComparison.OrdinalIgnoreCase);
+                if (validAudiences.Any(validAudience => validAudience.Equals(tokenAudience, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
             }
 
-            public int GetHashCode(string audience)
-            {
-                return audience.ToLower().GetHashCode();
-            }
+            return false;
         }
     }
 }
