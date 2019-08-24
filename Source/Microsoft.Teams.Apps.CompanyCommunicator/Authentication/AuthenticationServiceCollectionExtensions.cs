@@ -53,6 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                     {
                         ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(configuration),
                         ValidIssuers = AuthenticationServiceCollectionExtensions.GetValidIssuers(configuration),
+                        AudienceValidator = AuthenticationServiceCollectionExtensions.AudienceValidator,
                     };
                 });
         }
@@ -134,6 +135,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             });
 
             services.AddSingleton<IAuthorizationHandler, MustBeValidUpnHandler>();
+        }
+
+        private static bool AudienceValidator(
+            IEnumerable<string> tokenAudiences,
+            SecurityToken securityToken,
+            TokenValidationParameters validationParameters)
+        {
+            if (tokenAudiences == null || tokenAudiences.Count() == 0)
+            {
+                throw new ApplicationException("No audience defined in token!");
+            }
+
+            var validAudiences = validationParameters.ValidAudiences;
+            if (validAudiences == null || validAudiences.Count() == 0)
+            {
+                throw new ApplicationException("No valid audiences defined in validationParameters!");
+            }
+
+            foreach (var tokenAudience in tokenAudiences)
+            {
+                if (validAudiences.Any(validAudience => validAudience.Equals(tokenAudience, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
