@@ -503,20 +503,14 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
     private onImageLinkChanged = (event: any) => {
         let url = event.target.value.toLowerCase();
-        if (url === "") {
+        if (!((url === "") || (url.startsWith("https://") || (url.startsWith("data:image/png;base64,")) || (url.startsWith("data:image/jpeg;base64,")) || (url.startsWith("data:image/gif;base64,"))))) {
+            this.setState({
+                errorImageUrlMessage: "URL must start with https://"
+            });
+        } else {
             this.setState({
                 errorImageUrlMessage: ""
             });
-        } else {
-            if (!(url.startsWith("https://") || (url.startsWith("data:image/png;base64,")) || (url.startsWith("data:image/jpeg;base64,")) || (url.startsWith("data:image/gif;base64,")))) {
-                this.setState({
-                    errorImageUrlMessage: "URL must start with https://"
-                });
-            } else {
-                this.setState({
-                    errorImageUrlMessage: ""
-                });
-            }
         }
 
         let showDefaultCard = (!this.state.title && !event.target.value && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
@@ -603,20 +597,14 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onBtnLinkChanged = (event: any) => {
-        if (event.target.value === "") {
+        if (!(event.target.value === "" || event.target.value.toLowerCase().startsWith("https://"))) {
+            this.setState({
+                errorButtonUrlMessage: "URL must start with https://"
+            });
+        } else {
             this.setState({
                 errorButtonUrlMessage: ""
             });
-        } else {
-            if (!event.target.value.toLowerCase().startsWith("https://")) {
-                this.setState({
-                    errorButtonUrlMessage: "URL must start with https://"
-                });
-            } else {
-                this.setState({
-                    errorButtonUrlMessage: ""
-                });
-            }
         }
 
         const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !event.target.value);
