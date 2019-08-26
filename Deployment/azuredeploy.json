@@ -143,7 +143,7 @@
     "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]",
     "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]",
     "frontDoorName": "[parameters('baseResourceName')]",
-    "frontDoorDomain": "[concat(variables('frontDoorName'), '.azurefd.net')]"
+    "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.net'))]"
   },
   "resources": [
     {
@@ -213,10 +213,6 @@
             {
               "name": "AzureAd:ApplicationIdURI",
               "value": "[if(variables('useFrontDoor'), concat('api://', variables('frontDoorDomain')), '')]"
-            },
-            {
-              "name": "AzureAd:ValidIssuers",
-              "value": "[concat('https://login.microsoftonline.com/', parameters('tenantId'), '/v2.0,https://sts.windows.net/', parameters('tenantId'), '/')]"
             },
             {
               "name": "MicrosoftAppId",
