@@ -258,7 +258,13 @@
               "name": "WEBSITE_NODE_DEFAULT_VERSION",
               "value": "10.15.2"
             }
-          ]
+          ],
+          "cors": {
+            "supportCredentials": true,
+            "allowedOrigins": [
+              "[concat('https://', variables('frontDoorDomain'))]"
+            ]
+          }
         }
       },
       "dependsOn": [
@@ -569,11 +575,37 @@
                 "/*"
               ],
               "routeConfiguration": {
-                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",                                
+                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",
                 "forwardingProtocol": "HttpsOnly",
                 "backendPool": {
-                    "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', variables('frontDoorName'), 'backendPool1')]"
-                }                                
+                  "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', variables('frontDoorName'), 'backendPool1')]"
+                }
+              },
+              "enabledState": "Enabled"
+            }
+          },
+          {
+            "name": "routingRule2",
+            "properties": {
+              "frontendEndpoints": [
+                {
+                  "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', variables('frontDoorName'), 'frontendEndpoint1')]"
+                }
+              ],
+              "acceptedProtocols": [
+                "Https"
+              ],
+              "patternsToMatch": [
+                "/api/*"
+              ],
+              "routeConfiguration": {
+                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorRedirectConfiguration",
+                "customFragment": null,
+                "customHost": "[variables('botAppDomain')]",
+                "customPath": "",
+                "redirectProtocol": "HttpsOnly",
+                "customQueryString": null,
+                "redirectType": "PermanentRedirect"
               },
               "enabledState": "Enabled"
             }
