@@ -143,8 +143,7 @@
     "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]",
     "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]",
     "frontDoorName": "[parameters('baseResourceName')]",
-    "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.net'))]",
-    "corsOriginFrontDoor": "[concat('https://', variables('frontDoorDomain'))]"
+    "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.net'))]"
   },
   "resources": [
     {
@@ -259,7 +258,7 @@
           "cors": {
             "supportCredentials": true,
             "allowedOrigins": [
-              "[variables('corsOriginFrontDoor')]"
+              "[concat('https://', variables('frontDoorDomain'))]"
             ]
           }
         }
