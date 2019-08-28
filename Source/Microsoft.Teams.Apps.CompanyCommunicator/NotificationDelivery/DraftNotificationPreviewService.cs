@@ -11,30 +11,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     using AdaptiveCards;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Schema;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
 
     /// <summary>
     /// Draft notification preview service.
     /// </summary>
-    public class DraftNotificationPreviewService : ContinueBotConversationService
+    public class DraftNotificationPreviewService
     {
+        private readonly ContinueBotConversationService continueBotConversationService;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationPreviewService"/> class.
         /// </summary>
-        /// <param name="configuration">Application configuration service.</param>
+        /// <param name="continueBotConversationService">Continue bot conversateion service.</param>
         /// <param name="adaptiveCardCreator">Adaptive card creator service.</param>
-        /// <param name="companyCommunicatorBotAdapter">Bot framework http adapter instance.</param>
         public DraftNotificationPreviewService(
-            IConfiguration configuration,
-            AdaptiveCardCreator adaptiveCardCreator,
-            CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter)
-            : base(configuration, companyCommunicatorBotAdapter)
+            ContinueBotConversationService continueBotConversationService,
+            AdaptiveCardCreator adaptiveCardCreator)
         {
+            this.continueBotConversationService = continueBotConversationService;
             this.adaptiveCardCreator = adaptiveCardCreator;
         }
 
@@ -56,18 +53,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
                 throw new ArgumentException("Null draft notification entity.");
             }
 
-            async Task BotCallbackHandler(ITurnContext turnContext, CancellationToken cancellationToken) =>
-                await this.SendAdaptiveCardAsync(turnContext, draftNotificationEntity);
+            async Task BotCallbackHandler(ITurnContext turnContext, CancellationToken cancellationToken)
+            {
+                var reply = this.CreateReply(draftNotificationEntity);
+                await turnContext.SendActivityAsync(reply);
+            }
 
-            return await this.ContinueBotConversationAsync(teamDataEntity, teamsChannelId, BotCallbackHandler);
-        }
-
-        private async Task SendAdaptiveCardAsync(
-            ITurnContext turnContext,
-            NotificationDataEntity draftNotificationEntity)
-        {
-            var reply = this.CreateReply(draftNotificationEntity);
-            await turnContext.SendActivityAsync(reply);
+            return await this.continueBotConversationService.ContinueBotConversationAsync(
+                teamDataEntity,
+                teamsChannelId,
+                BotCallbackHandler);
         }
 
         private IMessageActivity CreateReply(NotificationDataEntity draftNotificationEntity)

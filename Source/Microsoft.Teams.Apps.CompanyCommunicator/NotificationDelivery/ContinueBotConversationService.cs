@@ -23,7 +23,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         private static readonly string MsTeamsChannelId = "msteams";
         private static readonly string ChannelConversationType = "channel";
         private static readonly string ThrottledErrorResponse = "Throttled";
+
         private readonly string botAppId;
+        private readonly CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ContinueBotConversationService"/> class.
@@ -40,13 +42,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
                 throw new ApplicationException("MicrosoftAppId setting is missing in the configuration.");
             }
 
-            this.CompanyCommunicatorBotAdapter = companyCommunicatorBotAdapter;
+            this.companyCommunicatorBotAdapter = companyCommunicatorBotAdapter;
         }
-
-        /// <summary>
-        /// Gets company communicator bot adapter.
-        /// </summary>
-        protected CompanyCommunicatorBotAdapter CompanyCommunicatorBotAdapter { get; }
 
         /// <summary>
         /// Continue a bot conversation.
@@ -55,7 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// <param name="botCallbackHandler">Bot callback handler.</param>
         /// <returns>It returns HttpStatusCode.OK, if this method triggers the bot service to send the adaptive card successfully.
         /// It returns HttpStatusCode.TooManyRequests, if the bot service throttled the request to send the adaptive card.</returns>
-        protected async Task<HttpStatusCode> ContinueBotConversationAsync(
+        public async Task<HttpStatusCode> ContinueBotConversationAsync(
             TeamDataEntity teamDataEntity,
             BotCallbackHandler botCallbackHandler)
         {
@@ -75,7 +72,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// <param name="botCallbackHandler">Bot callback handler.</param>
         /// <returns>It returns HttpStatusCode.OK, if this method triggers the bot service to send the adaptive card successfully.
         /// It returns HttpStatusCode.TooManyRequests, if the bot service throttled the request to send the adaptive card.</returns>
-        protected async Task<HttpStatusCode> ContinueBotConversationAsync(
+        public async Task<HttpStatusCode> ContinueBotConversationAsync(
             TeamDataEntity teamDataEntity,
             string teamsChannelId,
             BotCallbackHandler botCallbackHandler)
@@ -102,7 +99,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
             // Trigger bot to send the adaptive card.
             try
             {
-                await this.CompanyCommunicatorBotAdapter.ContinueConversationAsync(
+                await this.companyCommunicatorBotAdapter.ContinueConversationAsync(
                     this.botAppId,
                     conversationReference,
                     botCallbackHandler,

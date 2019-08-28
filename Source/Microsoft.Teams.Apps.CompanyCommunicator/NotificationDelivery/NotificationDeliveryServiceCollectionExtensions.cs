@@ -26,8 +26,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
             services.AddTransient<AdaptiveCardCreator>();
 
             services.AddTransient<DraftNotificationPreviewService>();
-
-            services.AddTransient<GetBotConversationMemebersService>();
         }
     }
 }

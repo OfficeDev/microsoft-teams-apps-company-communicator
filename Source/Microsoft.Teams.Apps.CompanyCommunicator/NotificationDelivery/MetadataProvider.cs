@@ -7,7 +7,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Schema;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Newtonsoft.Json.Linq;
@@ -19,22 +23,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     {
         private readonly UserDataRepository userDataRepository;
         private readonly TeamDataRepository teamDataRepository;
-        private readonly GetBotConversationMemebersService getBotConversationMembersService;
+        private readonly ContinueBotConversationService continueBotConversationService;
+        private readonly CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataProvider"/> class.
         /// </summary>
         /// <param name="userDataRepository">User Data repository service.</param>
         /// <param name="teamDataRepository">Team Data repository service.</param>
-        /// <param name="getBotConversationMembersService">Get bot conversation members service.</param>
+        /// <param name="continueBotConversationService">Continue bot conversation service.</param>
+        /// <param name="companyCommunicatorBotAdapter">Company communicator bot adapter.</param>
         public MetadataProvider(
             UserDataRepository userDataRepository,
             TeamDataRepository teamDataRepository,
-            GetBotConversationMemebersService getBotConversationMembersService)
+            ContinueBotConversationService continueBotConversationService,
+            CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter)
         {
             this.userDataRepository = userDataRepository;
             this.teamDataRepository = teamDataRepository;
-            this.getBotConversationMembersService = getBotConversationMembersService;
+            this.continueBotConversationService = continueBotConversationService;
+            this.companyCommunicatorBotAdapter = companyCommunicatorBotAdapter;
         }
 
         /// <summary>
@@ -119,8 +127,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         {
             try
             {
-                var members = await this.getBotConversationMembersService.GetBotConversationMembersAsync(teamDataEntity);
-
+                var members = await this.GetBotConversationMembersAsync(teamDataEntity);
                 return members.Select(member =>
                 {
                     var userDataEntity = new UserDataEntity
@@ -198,6 +205,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
             }
 
             return teamReceiverEntities;
+        }
+
+        private async Task<IEnumerable<ChannelAccount>> GetBotConversationMembersAsync(TeamDataEntity teamDataEntity)
+        {
+            IList<ChannelAccount> members = null;
+
+            async Task BotCallbackHandler(ITurnContext turnContext, CancellationToken cancellationToken) =>
+                members = await this.companyCommunicatorBotAdapter.GetConversationMembersAsync(
+                    turnContext,
+                    CancellationToken.None);
+
+            await this.continueBotConversationService.ContinueBotConversationAsync(
+                teamDataEntity,
+                BotCallbackHandler);
+
+            return members ?? new List<ChannelAccount>();
         }
     }
 }
