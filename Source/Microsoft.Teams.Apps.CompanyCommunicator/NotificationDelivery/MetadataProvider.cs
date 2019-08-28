@@ -8,9 +8,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Bot.Connector;
-    using Microsoft.Bot.Connector.Authentication;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Newtonsoft.Json.Linq;
@@ -20,24 +17,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     /// </summary>
     public class MetadataProvider
     {
-        private readonly IConfiguration configuration;
         private readonly UserDataRepository userDataRepository;
         private readonly TeamDataRepository teamDataRepository;
+        private readonly GetBotConversationMemebersService getBotConversationMembersService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataProvider"/> class.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
         /// <param name="userDataRepository">User Data repository service.</param>
         /// <param name="teamDataRepository">Team Data repository service.</param>
+        /// <param name="getBotConversationMembersService">Get bot conversation members service.</param>
         public MetadataProvider(
-            IConfiguration configuration,
             UserDataRepository userDataRepository,
-            TeamDataRepository teamDataRepository)
+            TeamDataRepository teamDataRepository,
+            GetBotConversationMemebersService getBotConversationMembersService)
         {
-            this.configuration = configuration;
             this.userDataRepository = userDataRepository;
             this.teamDataRepository = teamDataRepository;
+            this.getBotConversationMembersService = getBotConversationMembersService;
         }
 
         /// <summary>
@@ -64,10 +61,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         {
             var rosterUserDataEntityDictionary = new Dictionary<string, UserDataEntity>();
 
-            var teams = await this.teamDataRepository.GetAllAsync();
-            foreach (var team in teams)
+            var teamDataEntities = await this.teamDataRepository.GetAllAsync();
+            foreach (var teamDataEntity in teamDataEntities)
             {
-                var roster = await this.GetTeamRosterAsync(team.ServiceUrl, team.TeamId);
+                var roster = await this.GetTeamRosterAsync(teamDataEntity);
                 this.AddRosterToUserDataEntityDictionary(roster, rosterUserDataEntityDictionary);
             }
 
@@ -87,7 +84,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
 
             foreach (var teamDataEntity in teamDataEntities)
             {
-                var roster = await this.GetTeamRosterAsync(teamDataEntity.ServiceUrl, teamDataEntity.TeamId);
+                var roster = await this.GetTeamRosterAsync(teamDataEntity);
 
                 this.AddRosterToUserDataEntityDictionary(roster, rosterUserDataEntityDictionary);
             }
@@ -116,24 +113,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// <summary>
         /// Get a team's roster.
         /// </summary>
-        /// <param name="serviceUrl">The service URL.</param>
-        /// <param name="teamId">Team id, e.g. "19:44777361677b439281a0f0cd914cb149@thread.skype".</param>
+        /// <param name="teamDataEntity">Team data entity.</param>
         /// <returns>Roster of the team with the passed in id.</returns>
-        public async Task<IEnumerable<UserDataEntity>> GetTeamRosterAsync(string serviceUrl, string teamId)
+        public async Task<IEnumerable<UserDataEntity>> GetTeamRosterAsync(TeamDataEntity teamDataEntity)
         {
             try
             {
-                MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
-
-                var botAppId = this.configuration.GetValue<string>("MicrosoftAppId");
-                var botAppPassword = this.configuration.GetValue<string>("MicrosoftAppPassword");
-
-                var connectorClient = new ConnectorClient(
-                    new Uri(serviceUrl),
-                    botAppId,
-                    botAppPassword);
-
-                var members = await connectorClient.Conversations.GetConversationMembersAsync(teamId);
+                var members = await this.getBotConversationMembersService.GetBotConversationMembersAsync(teamDataEntity);
 
                 return members.Select(member =>
                 {
@@ -150,7 +136,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
                         userDataEntity.AadId = jObject["objectId"].ToString();
                         userDataEntity.TenantId = jObject["tenantId"].ToString();
                         userDataEntity.ConversationId = null;
-                        userDataEntity.ServiceUrl = serviceUrl;
+                        userDataEntity.ServiceUrl = teamDataEntity.ServiceUrl;
                     }
 
                     return userDataEntity;
