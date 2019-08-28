@@ -5,7 +5,6 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
 {
     using System;
-    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
@@ -22,7 +21,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     {
         private static readonly string MsTeamsChannelId = "msteams";
         private static readonly string ChannelConversationType = "channel";
-        private static readonly string ThrottledErrorResponse = "Throttled";
 
         private readonly string botAppId;
         private readonly CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter;
@@ -50,9 +48,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// </summary>
         /// <param name="teamDataEntity">The team data entity.</param>
         /// <param name="botCallbackHandler">Bot callback handler.</param>
-        /// <returns>It returns HttpStatusCode.OK, if this method triggers the bot service to send the adaptive card successfully.
-        /// It returns HttpStatusCode.TooManyRequests, if the bot service throttled the request to send the adaptive card.</returns>
-        public async Task<HttpStatusCode> ContinueBotConversationAsync(
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task ContinueBotConversationAsync(
             TeamDataEntity teamDataEntity,
             BotCallbackHandler botCallbackHandler)
         {
@@ -61,7 +58,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
                 throw new ArgumentException("Null team data entity.");
             }
 
-            return await this.ContinueBotConversationAsync(teamDataEntity, teamDataEntity.TeamId, botCallbackHandler);
+            await this.ContinueBotConversationAsync(teamDataEntity, teamDataEntity.TeamId, botCallbackHandler);
         }
 
         /// <summary>
@@ -70,9 +67,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// <param name="teamDataEntity">The team data entity.</param>
         /// <param name="teamsChannelId">The Teams channel id.</param>
         /// <param name="botCallbackHandler">Bot callback handler.</param>
-        /// <returns>It returns HttpStatusCode.OK, if this method triggers the bot service to send the adaptive card successfully.
-        /// It returns HttpStatusCode.TooManyRequests, if the bot service throttled the request to send the adaptive card.</returns>
-        public async Task<HttpStatusCode> ContinueBotConversationAsync(
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task ContinueBotConversationAsync(
             TeamDataEntity teamDataEntity,
             string teamsChannelId,
             BotCallbackHandler botCallbackHandler)
@@ -96,27 +92,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
                 MicrosoftAppCredentials.TrustServiceUrl(conversationReference.ServiceUrl);
             }
 
-            // Trigger bot to send the adaptive card.
-            try
-            {
-                await this.companyCommunicatorBotAdapter.ContinueConversationAsync(
-                    this.botAppId,
-                    conversationReference,
-                    botCallbackHandler,
-                    CancellationToken.None);
-                return HttpStatusCode.OK;
-            }
-            catch (ErrorResponseException e)
-            {
-                var errorResponse = (ErrorResponse)e.Body;
-                if (errorResponse != null
-                    && errorResponse.Error.Code.Equals(ContinueBotConversationService.ThrottledErrorResponse, StringComparison.OrdinalIgnoreCase))
-                {
-                    return HttpStatusCode.TooManyRequests;
-                }
-
-                throw;
-            }
+            await this.companyCommunicatorBotAdapter.ContinueConversationAsync(
+                this.botAppId,
+                conversationReference,
+                botCallbackHandler,
+                CancellationToken.None);
         }
 
         private ConversationReference PrepareConversationReferenceAsync(

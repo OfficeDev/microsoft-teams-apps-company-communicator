@@ -19,6 +19,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     /// </summary>
     public class DraftNotificationPreviewService
     {
+        private static readonly string ThrottledErrorResponse = "Throttled";
+
         private readonly ContinueBotConversationService continueBotConversationService;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
 
@@ -59,10 +61,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
                 await turnContext.SendActivityAsync(reply);
             }
 
-            return await this.continueBotConversationService.ContinueBotConversationAsync(
-                teamDataEntity,
-                teamsChannelId,
-                BotCallbackHandler);
+            try
+            {
+                await this.continueBotConversationService.ContinueBotConversationAsync(
+                    teamDataEntity,
+                    teamsChannelId,
+                    BotCallbackHandler);
+
+                return HttpStatusCode.OK;
+            }
+            catch (ErrorResponseException e)
+            {
+                var errorResponse = (ErrorResponse)e.Body;
+                if (errorResponse != null
+                    && errorResponse.Error.Code.Equals(DraftNotificationPreviewService.ThrottledErrorResponse, StringComparison.OrdinalIgnoreCase))
+                {
+                    return HttpStatusCode.TooManyRequests;
+                }
+
+                throw;
+            }
         }
 
         private IMessageActivity CreateReply(NotificationDataEntity draftNotificationEntity)
