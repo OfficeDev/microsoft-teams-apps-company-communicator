@@ -39,6 +39,7 @@
         .ui-list__item {
             background-color: white;
             color: black;
+            padding: 0rem 1.6rem !important;
 
             &:hover {
                 color: rgb(255, 255, 255);
@@ -101,7 +102,11 @@
     }
 
     .ui-dropdown__container {
-        .ui-button, .ui-dropdown__selected-items, .ui-icon,.ui-list {
+
+        .ui-button,
+        .ui-dropdown__selected-items,
+        .ui-icon,
+        .ui-list {
             background-color: #201f1f !important;
         }
     }
@@ -137,6 +142,7 @@
         .ui-list__item {
             background-color: #2d2c2c;
             color: #fff;
+            padding: 0rem 1.6rem !important;
 
             &:hover {
                 color: rgb(255, 255, 255);
@@ -154,6 +160,7 @@
                 outline: none;
                 background-color: #2d2c2c;
             }
+
             .menuContainer {
                 .ii:hover {
                     color: #fff;
@@ -240,6 +247,7 @@
             border: solid #fff;
             border-width: 0.1rem;
             margin-top: 0rem;
+            padding: 0rem 1.6rem !important;
 
             &:hover {
                 color: #000;
