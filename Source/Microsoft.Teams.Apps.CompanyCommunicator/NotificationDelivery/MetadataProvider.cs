@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
@@ -67,14 +68,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// <returns>All teams' roster.</returns>
         public async Task<IDictionary<string, UserDataEntity>> GetAllTeamsRostersAsync()
         {
-            var rosterUserDataEntityDictionary = new Dictionary<string, UserDataEntity>();
-
             var teamDataEntities = await this.teamDataRepository.GetAllAsync();
-            foreach (var teamDataEntity in teamDataEntities)
-            {
-                var roster = await this.GetTeamRosterAsync(teamDataEntity);
-                this.AddRosterToUserDataEntityDictionary(roster, rosterUserDataEntityDictionary);
-            }
+
+            var rosterUserDataEntityDictionary = await this.GetTeamsRosterAsync(teamDataEntities);
 
             return rosterUserDataEntityDictionary;
         }
@@ -88,71 +84,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         {
             var teamDataEntities = await this.teamDataRepository.GetTeamDataEntitiesByIdsAsync(teamIds);
 
-            var rosterUserDataEntityDictionary = new Dictionary<string, UserDataEntity>();
-
-            foreach (var teamDataEntity in teamDataEntities)
-            {
-                var roster = await this.GetTeamRosterAsync(teamDataEntity);
-
-                this.AddRosterToUserDataEntityDictionary(roster, rosterUserDataEntityDictionary);
-            }
+            var rosterUserDataEntityDictionary = await this.GetTeamsRosterAsync(teamDataEntities);
 
             return rosterUserDataEntityDictionary;
-        }
-
-        /// <summary>
-        /// Merge a roster list to a dictionary of users.
-        /// </summary>
-        /// <param name="roster">Roster list.</param>
-        /// <param name="rosterUserDataEntityDictionary">Dictionary of users.</param>
-        public void AddRosterToUserDataEntityDictionary(
-            IEnumerable<UserDataEntity> roster,
-            IDictionary<string, UserDataEntity> rosterUserDataEntityDictionary)
-        {
-            foreach (var userDataEntity in roster)
-            {
-                if (!rosterUserDataEntityDictionary.ContainsKey(userDataEntity.AadId))
-                {
-                    rosterUserDataEntityDictionary.Add(userDataEntity.AadId, userDataEntity);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Get a team's roster.
-        /// </summary>
-        /// <param name="teamDataEntity">Team data entity.</param>
-        /// <returns>Roster of the team with the passed in id.</returns>
-        public async Task<IEnumerable<UserDataEntity>> GetTeamRosterAsync(TeamDataEntity teamDataEntity)
-        {
-            try
-            {
-                var members = await this.GetBotConversationMembersAsync(teamDataEntity);
-                return members.Select(member =>
-                {
-                    var userDataEntity = new UserDataEntity
-                    {
-                        UserId = member.Id,
-                        Name = member.Name,
-                    };
-
-                    if (member.Properties is JObject jObject)
-                    {
-                        userDataEntity.Email = jObject["email"]?.ToString();
-                        userDataEntity.Upn = jObject["userPrincipalName"]?.ToString();
-                        userDataEntity.AadId = jObject["objectId"].ToString();
-                        userDataEntity.TenantId = jObject["tenantId"].ToString();
-                        userDataEntity.ConversationId = null;
-                        userDataEntity.ServiceUrl = teamDataEntity.ServiceUrl;
-                    }
-
-                    return userDataEntity;
-                });
-            }
-            catch
-            {
-                throw new ApplicationException("The app is not authorized to access the bot service. Please send a message to the bot, then it will work.");
-            }
         }
 
         /// <summary>
@@ -207,20 +141,83 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
             return teamReceiverEntities;
         }
 
+        private async Task<IDictionary<string, UserDataEntity>> GetTeamsRosterAsync(IEnumerable<TeamDataEntity> teamDataEntities)
+        {
+            var rosterUserDataEntityDictionary = new Dictionary<string, UserDataEntity>();
+
+            foreach (var teamDataEntity in teamDataEntities)
+            {
+                var roster = await this.GetTeamRosterAsync(teamDataEntity);
+                this.AddRosterToUserDataEntityDictionary(roster, rosterUserDataEntityDictionary);
+            }
+
+            return rosterUserDataEntityDictionary;
+        }
+
+        private async Task<IEnumerable<UserDataEntity>> GetTeamRosterAsync(TeamDataEntity teamDataEntity)
+        {
+            var members = await this.GetBotConversationMembersAsync(teamDataEntity);
+            return members.Select(member =>
+            {
+                var userDataEntity = new UserDataEntity
+                {
+                    UserId = member.Id,
+                    Name = member.Name,
+                };
+
+                if (member.Properties is JObject jObject)
+                {
+                    userDataEntity.Email = jObject["email"]?.ToString();
+                    userDataEntity.Upn = jObject["userPrincipalName"]?.ToString();
+                    userDataEntity.AadId = jObject["objectId"].ToString();
+                    userDataEntity.TenantId = jObject["tenantId"].ToString();
+                    userDataEntity.ConversationId = null;
+                    userDataEntity.ServiceUrl = teamDataEntity.ServiceUrl;
+                }
+
+                return userDataEntity;
+            });
+        }
+
         private async Task<IEnumerable<ChannelAccount>> GetBotConversationMembersAsync(TeamDataEntity teamDataEntity)
         {
-            IList<ChannelAccount> members = null;
+            try
+            {
+                IList<ChannelAccount> members = null;
 
-            async Task BotCallbackHandler(ITurnContext turnContext, CancellationToken cancellationToken) =>
-                members = await this.companyCommunicatorBotAdapter.GetConversationMembersAsync(
-                    turnContext,
-                    CancellationToken.None);
+                async Task BotCallbackHandler(ITurnContext turnContext, CancellationToken cancellationToken) =>
+                    members = await this.companyCommunicatorBotAdapter.GetConversationMembersAsync(
+                        turnContext,
+                        CancellationToken.None);
 
-            await this.continueBotConversationService.ContinueBotConversationAsync(
-                teamDataEntity,
-                BotCallbackHandler);
+                await this.continueBotConversationService.ContinueBotConversationAsync(
+                    teamDataEntity,
+                    BotCallbackHandler);
 
-            return members ?? new List<ChannelAccount>();
+                return members ?? new List<ChannelAccount>();
+            }
+            catch (Exception ex)
+            {
+                var errorMessageStringBuilder = new StringBuilder();
+                errorMessageStringBuilder.AppendLine($"Fail to get roster for the team {teamDataEntity.TeamId}");
+                errorMessageStringBuilder.AppendLine(ex.ToString());
+                Console.WriteLine(errorMessageStringBuilder.ToString());
+
+                return new List<ChannelAccount>();
+            }
+        }
+
+        private void AddRosterToUserDataEntityDictionary(
+            IEnumerable<UserDataEntity> roster,
+            IDictionary<string, UserDataEntity> rosterUserDataEntityDictionary)
+        {
+            foreach (var userDataEntity in roster)
+            {
+                if (!rosterUserDataEntityDictionary.ContainsKey(userDataEntity.AadId))
+                {
+                    rosterUserDataEntityDictionary.Add(userDataEntity.AadId, userDataEntity);
+                }
+            }
         }
     }
 }
