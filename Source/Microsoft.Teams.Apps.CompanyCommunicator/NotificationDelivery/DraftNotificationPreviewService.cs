@@ -27,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationPreviewService"/> class.
         /// </summary>
-        /// <param name="continueBotConversationService">Continue bot conversateion service.</param>
+        /// <param name="continueBotConversationService">Continue bot conversation service.</param>
         /// <param name="adaptiveCardCreator">Adaptive card creator service.</param>
         public DraftNotificationPreviewService(
             ContinueBotConversationService continueBotConversationService,
@@ -52,13 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         {
             if (draftNotificationEntity == null)
             {
-                throw new ArgumentException("Null draft notification entity.");
-            }
-
-            async Task BotCallbackHandler(ITurnContext turnContext, CancellationToken cancellationToken)
-            {
-                var reply = this.CreateReply(draftNotificationEntity);
-                await turnContext.SendActivityAsync(reply);
+                throw new ArgumentNullException(nameof(draftNotificationEntity));
             }
 
             try
@@ -66,7 +60,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
                 await this.continueBotConversationService.ContinueBotConversationAsync(
                     teamDataEntity,
                     teamsChannelId,
-                    BotCallbackHandler);
+                    async (turnContext, cancellationToken) =>
+                    {
+                        var reply = this.CreateReply(draftNotificationEntity);
+                        await turnContext.SendActivityAsync(reply);
+                    });
 
                 return HttpStatusCode.OK;
             }

@@ -70,9 +70,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         {
             var teamDataEntities = await this.teamDataRepository.GetAllAsync();
 
-            var rosterUserDataEntityDictionary = await this.GetTeamsRosterAsync(teamDataEntities);
+            var aadIdToUserDataEntityMap = await this.GetTeamsRosterAsync(teamDataEntities);
 
-            return rosterUserDataEntityDictionary;
+            return aadIdToUserDataEntityMap;
         }
 
         /// <summary>
@@ -84,9 +84,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         {
             var teamDataEntities = await this.teamDataRepository.GetTeamDataEntitiesByIdsAsync(teamIds);
 
-            var rosterUserDataEntityDictionary = await this.GetTeamsRosterAsync(teamDataEntities);
+            var aadIdToUserDataEntityMap = await this.GetTeamsRosterAsync(teamDataEntities);
 
-            return rosterUserDataEntityDictionary;
+            return aadIdToUserDataEntityMap;
         }
 
         /// <summary>

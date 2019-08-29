@@ -15,7 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
 
     /// <summary>
-    /// Draft notification preview service.
+    /// Continue bot conversation service.
     /// </summary>
     public class ContinueBotConversationService
     {
@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         {
             if (teamDataEntity == null)
             {
-                throw new ArgumentException("Null team data entity.");
+                throw new ArgumentNullException(nameof(teamDataEntity));
             }
 
             await this.ContinueBotConversationAsync(teamDataEntity, teamDataEntity.TeamId, botCallbackHandler);
@@ -75,16 +75,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         {
             if (teamDataEntity == null)
             {
-                throw new ArgumentException("Null team data entity.");
+                throw new ArgumentNullException(nameof(teamDataEntity));
             }
 
             if (string.IsNullOrWhiteSpace(teamsChannelId))
             {
-                throw new ArgumentException("Null channel id.");
+                throw new ArgumentNullException(nameof(teamsChannelId));
             }
 
             // Create bot conversation reference.
-            var conversationReference = this.PrepareConversationReferenceAsync(teamDataEntity, teamsChannelId);
+            var conversationReference = this.PrepareConversationReference(teamDataEntity, teamsChannelId);
 
             // Ensure the bot service URL is trusted.
             if (!MicrosoftAppCredentials.IsTrustedServiceUrl(conversationReference.ServiceUrl))
@@ -99,7 +99,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
                 CancellationToken.None);
         }
 
-        private ConversationReference PrepareConversationReferenceAsync(
+        private ConversationReference PrepareConversationReference(
             TeamDataEntity teamDataEntity,
             string teamsChannelId)
         {
