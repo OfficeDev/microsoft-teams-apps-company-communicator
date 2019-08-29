@@ -6,7 +6,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
 {
     using System;
     using System.Net;
-    using System.Threading;
     using System.Threading.Tasks;
     using AdaptiveCards;
     using Microsoft.Bot.Builder;

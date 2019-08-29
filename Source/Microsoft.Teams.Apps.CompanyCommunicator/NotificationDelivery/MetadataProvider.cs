@@ -10,7 +10,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Bot.Builder;
     using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -185,14 +184,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
             {
                 IList<ChannelAccount> members = null;
 
-                async Task BotCallbackHandler(ITurnContext turnContext, CancellationToken cancellationToken) =>
-                    members = await this.companyCommunicatorBotAdapter.GetConversationMembersAsync(
-                        turnContext,
-                        CancellationToken.None);
-
                 await this.continueBotConversationService.ContinueBotConversationAsync(
                     teamDataEntity,
-                    BotCallbackHandler);
+                    async (turnContext, cancellationToken) =>
+                    {
+                        members = await this.companyCommunicatorBotAdapter.GetConversationMembersAsync(
+                            turnContext,
+                            CancellationToken.None);
+                    });
 
                 return members ?? new List<ChannelAccount>();
             }
