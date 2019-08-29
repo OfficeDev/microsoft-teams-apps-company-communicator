@@ -184,19 +184,23 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
           <div>
             <TooltipHost content="Success" calloutProps={{ gapSpace: 0 }}>
-              <Icon name="stardust-checkmark" xSpacing="after" className="succeeded" outline />{message.succeeded}
+              <Icon name="stardust-checkmark" xSpacing="after" className="succeeded" outline />
+              <span className="semiBold">{message.succeeded}</span>
             </TooltipHost>
             <TooltipHost content="Failure" calloutProps={{ gapSpace: 0 }}>
-              <Icon name="stardust-close" xSpacing="both" className="failed" outline />{message.failed}
+              <Icon name="stardust-close" xSpacing="both" className="failed" outline />
+              <span className="semiBold">{message.failed}</span>
             </TooltipHost>
             <TooltipHost content="Throttled" calloutProps={{ gapSpace: 0 }}>
-              <Icon name="exclamation-circle" xSpacing="both" className="throttled" outline />{message.throttled}
+              <Icon name="exclamation-circle" xSpacing="both" className="throttled" outline />
+              <span className="semiBold">{message.throttled}</span>
             </TooltipHost>
           </div>
         </Flex.Item>
         <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
           <Text
             truncated
+            className="semiBold"
             content={message.sentDate}
           />
         </Flex.Item>
