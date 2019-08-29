@@ -23,10 +23,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     /// The caller shall provide a callback method to the service. BotAdapapter.ContinueBotConversationAsync will send a TurnContext instance via the callback function to the caller.
     ///
     /// What is the service useful for:
-    /// This service can help to get hold of the bot's TurnContext.
+    /// This service can help to get a hold of the bot's TurnContext.
     /// So it's useful when you implement such requirements as sending a proactive message, and retrieving team roster.
     /// It can be done by calling TurnContext.SendActivityAsync to send a proactive message.
-    /// It can be done by calling BotAdapter.GetConversationMembersAsync to retrieving a team roster. TurnContext is required as a parameter.
+    /// It can be done by calling BotAdapter.GetConversationMembersAsync to retrieve a team roster. TurnContext is required as a parameter.
     /// </summary>
     public class ContinueBotConversationService
     {
