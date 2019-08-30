@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
@@ -81,6 +82,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     Throttled = notificationEntity.Throttled,
                     TotalMessageCount = notificationEntity.TotalMessageCount,
                     IsCompleted = notificationEntity.IsCompleted,
+                    SendingStartedDateTime = notificationEntity.SendingStartedDateTime.HasValue
+                        ? notificationEntity.SendingStartedDateTime.Value
+                        : DateTime.MinValue,
                 };
 
                 result.Add(summary);

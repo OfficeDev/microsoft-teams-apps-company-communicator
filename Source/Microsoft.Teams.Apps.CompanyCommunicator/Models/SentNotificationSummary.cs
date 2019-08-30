@@ -55,5 +55,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets a value indicating whether the sending process is completed or not.
         /// </summary>
         public bool IsCompleted { get; set; }
+
+        /// <summary>
+        /// Gets or sets the sending started date time.
+        /// </summary>
+        public DateTime SendingStartedDateTime { get; set; }
+
+        /// <summary>
+        /// Gets the value of sending duration in string format.
+        /// </summary>
+        public string SendingDuration
+        {
+            get
+            {
+                var canCalculateDuration =
+                    this.IsCompleted
+                    && this.SentDate.HasValue
+                    && (this.SentDate.Value != DateTime.MinValue && this.SentDate.Value != DateTime.MaxValue)
+                    && this.SendingStartedDateTime != DateTime.MinValue;
+
+                var timeSpan =
+                    canCalculateDuration
+                    ? this.SentDate.Value - this.SendingStartedDateTime
+                    : TimeSpan.MinValue;
+
+                return timeSpan > TimeSpan.MinValue
+                    ? timeSpan.ToString(@"dd\.hh\:mm\:ss")
+                    : string.Empty;
+            }
+        }
     }
 }

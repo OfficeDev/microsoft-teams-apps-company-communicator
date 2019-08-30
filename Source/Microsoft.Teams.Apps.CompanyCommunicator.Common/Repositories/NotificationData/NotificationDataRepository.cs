@@ -99,7 +99,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 Throttled = 0,
                 TotalMessageCount = draftNotificationEntity.TotalMessageCount,
                 IsCompleted = false,
-                SendingStartedDate = DateTime.UtcNow,
+                SendingStartedDateTime = DateTime.UtcNow,
             };
             await this.CreateOrUpdateAsync(sentNotificationEntity);
 

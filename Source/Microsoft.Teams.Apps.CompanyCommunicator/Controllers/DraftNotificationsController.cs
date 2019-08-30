@@ -50,9 +50,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notification">A new Draft Notification to be created.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [HttpPost]
-        public async Task CreateDraftNotificationAsync([FromBody]DraftNotification notification)
+        public async Task<DraftNotification> CreateDraftNotificationAsync([FromBody]DraftNotification notification)
         {
-            await this.notificationDataRepository.CreateDraftNotificationAsync(
+            return await this.notificationDataRepository.CreateDraftNotificationAsync(
                 notification,
                 this.HttpContext.User?.Identity?.Name);
         }
