@@ -6,6 +6,7 @@ type Notification = {
     id: string,
     isCompleted: boolean,
     sentDate: string,
+    sendingStartedDateTime: string,
     succeeded: number,
     throttled: number,
     title: string,
@@ -23,6 +24,7 @@ export const getMessagesList = () => async (dispatch: any) => {
     const response = await getSentNotifications();
     const notificationList: Notification[] = response.data;
     notificationList.forEach(notification => {
+        notification.sendingStartedDateTime = formatNotificationDate(notification.sendingStartedDateTime);
         notification.sentDate = formatNotificationDate(notification.sentDate);
     });
     dispatch({ type: 'FETCH_MESSAGES', payload: notificationList });
