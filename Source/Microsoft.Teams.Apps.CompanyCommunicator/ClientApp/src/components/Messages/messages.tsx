@@ -116,7 +116,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
       key: "labels",
       content: (
         <Flex vAlign="center" fill gap="gap.small">
-          <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} grow={1} >
+          <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} grow={1} >
             <Text
               truncated
               weight="bold"
@@ -124,10 +124,10 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             >
             </Text>
           </Flex.Item>
-          <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
+          <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }}>
             <Text></Text>
           </Flex.Item>
-          <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
+          <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} shrink={false}>
             <Text
               truncated
               content="Recipients"
@@ -135,13 +135,27 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             >
             </Text>
           </Flex.Item>
-          <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
+          <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} >
+            <Text
+              truncated
+              content="Sending started"
+              weight="bold"
+            />
+          </Flex.Item>
+          <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} >
             <Text
               truncated
               content="Sent"
               weight="bold"
             >
             </Text>
+          </Flex.Item>
+          <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} >
+            <Text
+              truncated
+              content="Duration"
+              weight="bold"
+            />
           </Flex.Item>
           <Flex.Item shrink={0} >
             <Overflow title="" />
@@ -171,17 +185,17 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
   private messageContent = (message: any) => {
     return (
       <Flex className="listContainer" vAlign="center" fill gap="gap.small">
-        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} grow={1}>
+        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} grow={1}>
           <Text
             truncated
             content={message.title}
           >
           </Text>
         </Flex.Item>
-        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
+        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }}>
           {this.renderSendingNumbersText(message)}
         </Flex.Item>
-        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
+        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} shrink={false}>
           <div>
             <TooltipHost content="Success" calloutProps={{ gapSpace: 0 }}>
               <Icon name="stardust-checkmark" xSpacing="after" className="succeeded" outline />
@@ -197,7 +211,21 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             </TooltipHost>
           </div>
         </Flex.Item>
-        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
+        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} >
+          <Text
+            truncated
+            className="semiBold"
+            content={message.sentDate}
+          />
+        </Flex.Item>
+        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} >
+          <Text
+            truncated
+            className="semiBold"
+            content={message.sentDate}
+          />
+        </Flex.Item>
+        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} >
           <Text
             truncated
             className="semiBold"
