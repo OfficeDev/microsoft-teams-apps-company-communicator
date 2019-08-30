@@ -13,12 +13,25 @@ import {
 } from '../AdaptiveCard/adaptiveCard';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getBaseUrl } from '../../configVariables';
+import SendConfirmationTaskModule from '../SendConfirmationTaskModule/sendConfirmationTaskModule';
+import { getDraftMessagesList } from '../../actions';
+import { connect } from 'react-redux';
 
 type dropdownItem = {
     header: string,
     team: {
         id: string,
     },
+}
+
+export interface IMessage {
+    id: string;
+    title: string;
+    date: string;
+    recipients: string;
+    acknowledgements?: string;
+    reactions?: string;
+    responses?: string;
 }
 
 export interface IDraftMessage {
@@ -57,13 +70,16 @@ export interface formState {
     selectedRosters: dropdownItem[],
     errorImageUrlMessage: string,
     errorButtonUrlMessage: string,
+    message: IMessage[];
+    newDraftMessageId: string;
 }
 
 export interface INewMessageProps extends RouteComponentProps {
     getDraftMessagesList?: any;
+    messages: IMessage[];
 }
 
-export default class NewMessage extends React.Component<INewMessageProps, formState> {
+class NewMessage extends React.Component<INewMessageProps, formState> {
     private card: any;
 
     constructor(props: INewMessageProps) {
@@ -93,6 +109,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             selectedRosters: [],
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
+            message: props.messages,
+            newDraftMessageId: ""
         }
     }
 
@@ -132,6 +150,12 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         });
     }
 
+    public componentWillReceiveProps(nextProps: any) {
+        this.setState({
+            message: nextProps.messages,
+        })
+    }
+
     private makeDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
         const dropdownItemList: dropdownItem[] = [];
         items.forEach(element =>
@@ -166,7 +190,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
     }
 
-    private getItem = async (id: number) => {
+    private getItem = async (id: string) => {
         try {
             const response = await getDraftNotification(id);
             const draftMessageDetail = response.data;
@@ -339,15 +363,48 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                         <div className="footerContainer">
                             <div className="buttonContainer">
                                 <Button content="Back" onClick={this.onBack} secondary />
-                                <Button content="Save as draft" disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
+                                <Button content="Save as draft" disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={() => { this.onSave(false) }} primary />
+                                <Button content="Save and Send" disabled={this.isSaveBtnDisabled()} id="sendBtn" onClick={() => { this.onSave(true) }} primary />
                             </div>
                         </div>
                     </div>
                 );
-            } else {
+            } else if (this.state.page === "SendConfirmation") {
+                return (
+                    <SendConfirmationTaskModule {...this.props} edit={this.editItem} btn={true} id={this.state.newDraftMessageId}></SendConfirmationTaskModule>
+                );
+            }
+            else {
                 return (<div>Error</div>);
             }
         }
+    }
+
+    private editItem = () => {
+        // if (this.state.exists) {
+        //     console.log("edit");
+        // } else {
+
+        //     let id = this.state.newDraftMessageId;
+        //     console.log("new", id);
+        //     if (id) {
+        //         this.getItem(id).then(() => {
+        //             const selectedTeams = this.makeDropdownItemList(this.state.selectedTeams, this.state.teams);
+        //             const selectedRosters = this.makeDropdownItemList(this.state.selectedRosters, this.state.teams);
+        //             this.setState({
+        //                 exists: true,
+        //                 messageId: id,
+        //                 selectedTeams: selectedTeams,
+        //                 selectedRosters: selectedRosters,
+        //             })
+        //         });
+        //     }
+        // }
+        this.setState({
+            page: "AudienceSelection"
+        }, () => {
+            this.updateCard();
+        });
     }
 
     private onGroupSelected = (value: any) => {
@@ -415,7 +472,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         })
     }
 
-    private onSave = () => {
+    private onSave = async (send: boolean) => {
         const selectedTeams: string[] = [];
         const selctedRosters: string[] = [];
         this.state.selectedTeams.forEach(x => selectedTeams.push(x.team.id));
@@ -436,11 +493,27 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
         if (this.state.exists) {
             this.editDraftMessage(draftMessage).then(() => {
-                microsoftTeams.tasks.submitTask();
+                if (!send) {
+                    microsoftTeams.tasks.submitTask();
+                } else {
+                    this.setState({
+                        page: "SendConfirmation"
+                    });
+                }
             });
         } else {
             this.postDraftMessage(draftMessage).then(() => {
-                microsoftTeams.tasks.submitTask();
+                if (!send) {
+                    microsoftTeams.tasks.submitTask();
+                } else {
+                    this.props.getDraftMessagesList().then(() => {
+                        console.log("idd", this.state.message[this.state.message.length - 1].id);
+                        this.setState({
+                            newDraftMessageId: this.state.message[this.state.message.length - 1].id,
+                            page: "SendConfirmation"
+                        });
+                    });
+                }
             });
         }
     }
@@ -650,3 +723,9 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
     }
 }
+
+const mapStateToProps = (state: any) => {
+    return { messages: state.draftMessagesList, };
+}
+
+export default connect(mapStateToProps, { getDraftMessagesList })(NewMessage);
