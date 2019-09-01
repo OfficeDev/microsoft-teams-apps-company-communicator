@@ -27,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
         /// </summary>
-        /// <param name="notificationDataRepository">Notification data respository service that deals with the table storage in azure.</param>
+        /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
         /// <param name="notificationDelivery">Notification delivery service instance.</param>
         public SentNotificationsController(
             NotificationDataRepository notificationDataRepository,

@@ -56,7 +56,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             // Register bot services in DI container
             services.AddBot();
 
-            // Register respository services in DI container
+            // Register repository services in DI container
             services.AddRepositories();
 
             services.AddNotificationDelivery();

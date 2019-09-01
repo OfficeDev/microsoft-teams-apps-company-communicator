@@ -12,7 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
-    /// Extension class for registering respository services in DI container.
+    /// Extension class for registering repository services in DI container.
     /// </summary>
     public static class RepositoriesServiceCollectionExtensions
     {
