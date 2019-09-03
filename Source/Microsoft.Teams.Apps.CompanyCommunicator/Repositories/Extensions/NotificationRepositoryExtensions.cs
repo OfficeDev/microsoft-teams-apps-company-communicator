@@ -21,7 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
         /// <param name="notificationRepository">The notification respository.</param>
         /// <param name="notification">Draft Notification model class instance passed in from Web API.</param>
         /// <param name="userName">Name of the user who is running the application.</param>
-        /// <returns>The newly created notificatition's id.</returns>
+        /// <returns>The newly created notification's id.</returns>
         public static async Task<string> CreateDraftNotificationAsync(
             this NotificationDataRepository notificationRepository,
             DraftNotification notification,
