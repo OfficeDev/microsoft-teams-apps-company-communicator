@@ -49,7 +49,7 @@ const formatNotificationSendingDuration = (SendingStartedDate: string, SentDate:
     let sendingDuration: string = "";
     if (SendingStartedDate && SentDate) {
         let timeDifference: number = new Date(SentDate).valueOf() - new Date(SendingStartedDate).valueOf();
-        sendingDuration = new Date(timeDifference).toISOString().substr(11, 8);;
+        sendingDuration = new Date(timeDifference).toISOString().substr(11, 8);
     }
     return sendingDuration;
 }
