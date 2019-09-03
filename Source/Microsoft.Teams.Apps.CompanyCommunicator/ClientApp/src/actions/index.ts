@@ -45,10 +45,10 @@ const formatNotificationDate = (notificationDate: string) => {
     return notificationDate;
 }
 
-const formatNotificationSendingDuration = (SendingStartedDate: string, SentDate: string) => {
-    let sendingDuration: string = "";
-    if (SendingStartedDate && SentDate) {
-        let timeDifference: number = new Date(SentDate).valueOf() - new Date(SendingStartedDate).valueOf();
+const formatNotificationSendingDuration = (sendingStartedDate: string, sentDate: string) => {
+    let sendingDuration = "";
+    if (sendingStartedDate && sentDate) {
+        let timeDifference = new Date(sentDate).getTime() - new Date(sendingStartedDate).getTime();
         sendingDuration = new Date(timeDifference).toISOString().substr(11, 8);
     }
     return sendingDuration;
