@@ -42,11 +42,11 @@ export interface IMessageState {
 
 class Messages extends React.Component<IMessageProps, IMessageState> {
   private interval: any;
-
+  private isOpenTaskModuleAllowed: boolean;
   constructor(props: IMessageProps) {
     super(props);
     initializeIcons();
-
+    this.isOpenTaskModuleAllowed = true;
     this.state = {
       message: this.props.messagesList,
       loader: true,
@@ -218,18 +218,22 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
   }
 
   public onOpenTaskModule = (event: any, url: string, title: string) => {
-    let taskInfo: ITaskInfo = {
-      url: url,
-      title: title,
-      height: 530,
-      width: 1000,
-      fallbackUrl: url
+    if (this.isOpenTaskModuleAllowed) {
+      this.isOpenTaskModuleAllowed = false;
+      let taskInfo: ITaskInfo = {
+        url: url,
+        title: title,
+        height: 530,
+        width: 1000,
+        fallbackUrl: url,
+      }
+
+      let submitHandler = (err: any, result: any) => {
+        this.isOpenTaskModuleAllowed = true;
+      };
+
+      microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     }
-
-    let submitHandler = (err: any, result: any) => {
-    };
-
-    microsoftTeams.tasks.startTask(taskInfo, submitHandler);
   }
 }
 
