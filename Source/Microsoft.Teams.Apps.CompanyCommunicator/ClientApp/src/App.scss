@@ -39,6 +39,7 @@
         .ui-list__item {
             background-color: white;
             color: black;
+            padding: 0rem 1.6rem !important;
 
             &:hover {
                 color: rgb(255, 255, 255);
@@ -141,6 +142,7 @@
         .ui-list__item {
             background-color: #2d2c2c;
             color: #fff;
+            padding: 0rem 1.6rem !important;
 
             &:hover {
                 color: rgb(255, 255, 255);
@@ -246,6 +248,7 @@
             border: solid #fff;
             border-width: 0.1rem;
             margin-top: 0rem;
+            padding: 0rem 1.6rem !important;
 
             &:hover {
                 color: #000;
