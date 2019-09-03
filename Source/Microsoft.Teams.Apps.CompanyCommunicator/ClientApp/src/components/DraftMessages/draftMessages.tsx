@@ -46,12 +46,12 @@ export interface IMessageState {
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   private interval: any;
-  private openTaskModule: boolean;
+  private isOpenTaskModuleAllowed: boolean;
 
   constructor(props: IMessageProps) {
     super(props);
     initializeIcons();
-    this.openTaskModule = true;
+    this.isOpenTaskModuleAllowed = true;
     this.state = {
       message: props.messages,
       itemsAccount: this.props.messages.length,
@@ -151,20 +151,20 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   }
 
   private onOpenTaskModule = (event: any, url: string, title: string) => {
-    if (this.openTaskModule) {
-      this.openTaskModule = false;
+    if (this.isOpenTaskModuleAllowed) {
+      this.isOpenTaskModuleAllowed = false;
       let taskInfo: ITaskInfo = {
         url: url,
         title: title,
         height: 530,
         width: 1000,
-        fallbackUrl: url
+        fallbackUrl: url,
       }
 
       let submitHandler = (err: any, result: any) => {
         this.props.getDraftMessagesList().then(() => {
           this.props.getMessagesList();
-          this.openTaskModule = true;
+          this.isOpenTaskModuleAllowed = true;
         });
       };
 
