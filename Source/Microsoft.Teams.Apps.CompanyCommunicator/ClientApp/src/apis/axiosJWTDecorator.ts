@@ -93,6 +93,7 @@ export class AxiosJWTDecorator {
           // it means Azure AD needs the user's consent before issuing a token to the app. 
           // The following code redirects the user to the "Sign in" page where the user can grant the consent. 
           // Right now, the app redirects to the consent page for any error.
+          console.error("Error from getAuthToken: ", error);
           window.location.href = "/signin";
         },
         resources: []
