@@ -6,7 +6,8 @@ type Notification = {
     id: string,
     isCompleted: boolean,
     sentDate: string,
-    sendingStartedDateTime: string,
+    sendingStartedDate: string,
+    sendingDuration: string,
     succeeded: number,
     throttled: number,
     title: string,
@@ -24,7 +25,8 @@ export const getMessagesList = () => async (dispatch: any) => {
     const response = await getSentNotifications();
     const notificationList: Notification[] = response.data;
     notificationList.forEach(notification => {
-        notification.sendingStartedDateTime = formatNotificationDate(notification.sendingStartedDateTime);
+        notification.sendingDuration = formatNotificationSendingDuration(notification.sendingStartedDate, notification.sentDate);
+        notification.sendingStartedDate = formatNotificationDate(notification.sendingStartedDate);
         notification.sentDate = formatNotificationDate(notification.sentDate);
     });
     dispatch({ type: 'FETCH_MESSAGES', payload: notificationList });
@@ -41,4 +43,13 @@ const formatNotificationDate = (notificationDate: string) => {
         notificationDate = notificationDate.replace(',', '\xa0\xa0');
     }
     return notificationDate;
+}
+
+const formatNotificationSendingDuration = (SendingStartedDate: string, SentDate: string) => {
+    let sendingDuration: string = "";
+    if (SendingStartedDate && SentDate) {
+        let timeDifference: number = new Date(SentDate).valueOf() - new Date(SendingStartedDate).valueOf();
+        sendingDuration = new Date(timeDifference).toISOString().substr(11, 8);;
+    }
+    return sendingDuration;
 }
