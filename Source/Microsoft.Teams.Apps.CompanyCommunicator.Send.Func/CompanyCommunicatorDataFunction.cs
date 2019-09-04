@@ -27,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     {
         private static readonly int MaxMinutesOfRetrying = 35;
 
-        private static SentNotificationDataRepository sentNotificationDataRepository = null;
+        private static SentNotificationStatusDataRepository sentNotificationStatusDataRepository = null;
 
         private static NotificationDataRepository notificationDataRepository = null;
 
@@ -64,8 +64,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 
             var messageContent = JsonConvert.DeserializeObject<ServiceBusDataQueueMessageContent>(myQueueItem);
 
-            CompanyCommunicatorDataFunction.sentNotificationDataRepository = CompanyCommunicatorDataFunction.sentNotificationDataRepository
-                ?? new SentNotificationDataRepository(configuration, isFromAzureFunction: true);
+            CompanyCommunicatorDataFunction.sentNotificationStatusDataRepository = CompanyCommunicatorDataFunction.sentNotificationStatusDataRepository
+                ?? new SentNotificationStatusDataRepository(configuration, isFromAzureFunction: true);
 
             CompanyCommunicatorDataFunction.notificationDataRepository = CompanyCommunicatorDataFunction.notificationDataRepository
                 ?? this.CreateNotificationRepository(configuration);
@@ -74,7 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 ?? new SendingNotificationDataRepository(configuration, isFromAzureFunction: true);
 
             CompanyCommunicatorDataFunction.notificationDeliveryStatusHelper = CompanyCommunicatorDataFunction.notificationDeliveryStatusHelper
-                ?? new NotificationDeliveryStatusHelper(CompanyCommunicatorDataFunction.sentNotificationDataRepository);
+                ?? new NotificationDeliveryStatusHelper(CompanyCommunicatorDataFunction.sentNotificationStatusDataRepository);
 
             var notificationDeliveryStatusDTO =
                 await CompanyCommunicatorDataFunction.notificationDeliveryStatusHelper.GetNotificationDeliveryStatusAsync(

@@ -128,15 +128,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// <param name="partition">Partition key value.</param>
         /// <param name="count">The max number of desired entities.</param>
         /// <param name="onProgress">An optional callback method to call as query results are coming in.</param>
+        /// <param name="selectedColumns">Selected columns.</param>
         /// <returns>All data entities.</returns>
         public async Task<IEnumerable<T>> GetAllAsync(
             string partition = null,
             int? count = null,
-            Action<IList<T>> onProgress = null)
+            Action<IList<T>> onProgress = null,
+            IList<string> selectedColumns = null)
         {
             var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
 
-            var query = new TableQuery<T>().Where(partitionKeyFilter);
+            var query = selectedColumns == null
+                ? new TableQuery<T>().Where(partitionKeyFilter)
+                : new TableQuery<T>().Where(partitionKeyFilter).Select(selectedColumns);
 
             var entities = await this.ExecuteQueryAsync(
                 query,

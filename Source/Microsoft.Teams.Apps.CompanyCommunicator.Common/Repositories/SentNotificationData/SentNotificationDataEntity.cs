@@ -5,9 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData
 {
     using System;
-    using System.Collections.Generic;
     using Microsoft.Azure.Cosmos.Table;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// Sent notification entity class.

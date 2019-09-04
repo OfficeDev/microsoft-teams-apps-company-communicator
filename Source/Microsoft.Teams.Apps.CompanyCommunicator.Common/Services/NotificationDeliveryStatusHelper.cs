@@ -5,10 +5,10 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Helpers;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
 
     /// <summary>
@@ -17,16 +17,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
     /// </summary>
     public class NotificationDeliveryStatusHelper
     {
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
+        private readonly SentNotificationStatusDataRepository sentNotificationStatusDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationDeliveryStatusHelper"/> class.
         /// </summary>
-        /// <param name="sentNotificationDataRepository">Sent notification data repository service.</param>
+        /// <param name="sentNotificationStatusDataRepository">Sent notification status data repository service.</param>
         public NotificationDeliveryStatusHelper(
-            SentNotificationDataRepository sentNotificationDataRepository)
+            SentNotificationStatusDataRepository sentNotificationStatusDataRepository)
         {
-            this.sentNotificationDataRepository = sentNotificationDataRepository;
+            this.sentNotificationStatusDataRepository = sentNotificationStatusDataRepository;
         }
 
         /// <summary>
@@ -38,8 +38,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
         public async Task<NotificationDeliveryStatusDTO> GetNotificationDeliveryStatusAsync(string notificationId)
         {
             NotificationDeliveryStatusDTO notificationDeliveryStatusDTO = null;
+            var selectedColumns = new List<string>
+            {
+                nameof(SentNotificationStatusDataEntity.StatusCode),
+                nameof(SentNotificationStatusDataEntity.SentDate),
+            };
 
-            await this.sentNotificationDataRepository.GetAllAsync(
+            await this.sentNotificationStatusDataRepository.GetAllAsync(
                 notificationId,
                 null,
                 sentNotificationDataEntities =>
@@ -59,7 +64,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
                     notificationDeliveryStatusDTO.Failed += sentNotificationDataEntities.Count(p => p.StatusCode.IsFailed());
                     notificationDeliveryStatusDTO.Unknown += sentNotificationDataEntities.Count(p => p.StatusCode.IsUnknown());
                     notificationDeliveryStatusDTO.LastSentDate = sentNotificationDataEntities.Max(p => p.SentDate != null ? p.SentDate : DateTime.MinValue);
-                });
+                },
+                selectedColumns);
 
             return notificationDeliveryStatusDTO;
         }
