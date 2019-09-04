@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
-    /// Respository of the user data stored in the table storage.
+    /// Repository of the user data stored in the table storage.
     /// </summary>
     public class UserDataRepository : BaseRepository<UserDataEntity>
     {

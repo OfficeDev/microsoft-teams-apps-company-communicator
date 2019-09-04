@@ -15,7 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationCredentialProvider"/> class.
         /// </summary>
-        /// <param name="configuration">IConfiguraion instance.</param>
+        /// <param name="configuration">IConfiguration instance.</param>
         public ConfigurationCredentialProvider(IConfiguration configuration)
             : base(configuration["MicrosoftAppId"], configuration["MicrosoftAppPassword"])
         {

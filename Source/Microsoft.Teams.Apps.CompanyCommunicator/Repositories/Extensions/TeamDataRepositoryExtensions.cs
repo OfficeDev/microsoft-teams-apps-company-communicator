@@ -11,7 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
 
     /// <summary>
-    /// Extensions for the respository of the team data stored in the table storage.
+    /// Extensions for the repository of the team data stored in the table storage.
     /// </summary>
     public static class TeamDataRepositoryExtensions
     {

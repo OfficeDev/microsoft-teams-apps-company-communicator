@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public int StatusCode { get; set; }
 
         /// <summary>
-        /// Gets or sets the deliverty status
+        /// Gets or sets the delivery status
         /// </summary>
         public string DeliveryStatus { get; set; }
     }

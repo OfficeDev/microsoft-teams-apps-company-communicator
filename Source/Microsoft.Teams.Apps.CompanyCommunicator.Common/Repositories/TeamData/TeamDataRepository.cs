@@ -11,7 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
-    /// Respository of the team data stored in the table storage.
+    /// Repository of the team data stored in the table storage.
     /// </summary>
     public class TeamDataRepository : BaseRepository<TeamDataEntity>
     {
@@ -95,7 +95,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         /// <summary>
         /// Get all team data entities, and sort the result alphabetically by name.
         /// </summary>
-        /// <returns>The team data entites sorted alphabetically by name.</returns>
+        /// <returns>The team data entities sorted alphabetically by name.</returns>
         public async Task<IEnumerable<TeamDataEntity>> GetAllSortedAlphabeticallyByNameAsync()
         {
             var teamDataEntities = await this.GetAllAsync();
