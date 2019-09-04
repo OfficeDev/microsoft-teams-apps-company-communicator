@@ -69,8 +69,8 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
             this.getItem(id).then(() => {
                 getConsentSummaries(id).then((response) => {
                     this.setState({
-                        teamNames: response.data.teamNames,
-                        rosterNames: response.data.rosterNames,
+                        teamNames: response.data.teamNames.sort(),
+                        rosterNames: response.data.rosterNames.sort(),
                         allUsers: response.data.allUsers,
                         messageId: id,
                     }, () => {
