@@ -55,5 +55,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets a value indicating whether the sending process is completed or not.
         /// </summary>
         public bool IsCompleted { get; set; }
+
+        /// <summary>
+        /// Gets or sets the sending started date time.
+        /// </summary>
+        public DateTime? SendingStartedDate { get; set; }
     }
 }

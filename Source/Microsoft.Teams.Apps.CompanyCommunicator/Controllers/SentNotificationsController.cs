@@ -81,6 +81,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     Throttled = notificationEntity.Throttled,
                     TotalMessageCount = notificationEntity.TotalMessageCount,
                     IsCompleted = notificationEntity.IsCompleted,
+                    SendingStartedDate = notificationEntity.SendingStartedDate,
                 };
 
                 result.Add(summary);
