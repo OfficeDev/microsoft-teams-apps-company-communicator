@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
 
@@ -23,18 +24,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly NotificationDelivery notificationDelivery;
+        private readonly TeamDataRepository teamDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
         /// <param name="notificationDelivery">Notification delivery service instance.</param>
+        /// <param name="teamDataRepository">Team data repository instance.</param>
         public SentNotificationsController(
             NotificationDataRepository notificationDataRepository,
-            NotificationDelivery notificationDelivery)
+            NotificationDelivery notificationDelivery,
+            TeamDataRepository teamDataRepository)
         {
             this.notificationDataRepository = notificationDataRepository;
             this.notificationDelivery = notificationDelivery;
+            this.teamDataRepository = teamDataRepository;
         }
 
         /// <summary>
@@ -120,6 +125,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Succeeded = notificationEntity.Succeeded,
                 Failed = notificationEntity.Failed,
                 Throttled = notificationEntity.Throttled,
+                TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),
+                RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
+                AllUsers = notificationEntity.AllUsers,
             };
 
             return this.Ok(result);

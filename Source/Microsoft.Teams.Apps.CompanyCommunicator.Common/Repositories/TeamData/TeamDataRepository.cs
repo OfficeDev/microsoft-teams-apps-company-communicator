@@ -89,7 +89,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
 
             var teamDataEntities = await this.GetWithFilterAsync(rowKeysFilter);
 
-            return teamDataEntities.Select(p => p.Name);
+            return teamDataEntities.Select(p => p.Name).OrderBy(p => p);
         }
 
         /// <summary>
