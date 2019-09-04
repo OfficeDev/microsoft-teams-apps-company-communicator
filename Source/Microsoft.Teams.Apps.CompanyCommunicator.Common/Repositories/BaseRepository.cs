@@ -127,14 +127,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// </summary>
         /// <param name="partition">Partition key value.</param>
         /// <param name="count">The max number of desired entities.</param>
+        /// <param name="onProgress">An optional callback method to call as query results are coming in.</param>
         /// <returns>All data entities.</returns>
-        public async Task<IEnumerable<T>> GetAllAsync(string partition = null, int? count = null)
+        public async Task<IEnumerable<T>> GetAllAsync(
+            string partition = null,
+            int? count = null,
+            Action<IList<T>> onProgress = null)
         {
             var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
 
             var query = new TableQuery<T>().Where(partitionKeyFilter);
 
-            var entities = await this.ExecuteQueryAsync(query, count);
+            var entities = await this.ExecuteQueryAsync(
+                query,
+                count,
+                onProgress);
 
             return entities;
         }
@@ -169,6 +176,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         private async Task<IList<T>> ExecuteQueryAsync(
             TableQuery<T> query,
             int? count = null,
+            Action<IList<T>> onProgress = null,
             CancellationToken ct = default)
         {
             query.TakeCount = count;
@@ -182,7 +190,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
                 {
                     TableQuerySegment<T> seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, token);
                     token = seg.ContinuationToken;
-                    result.AddRange(seg);
+                    if (onProgress != null)
+                    {
+                        onProgress(seg.Results);
+                    }
+                    else
+                    {
+                        result.AddRange(seg.Results);
+                    }
                 }
                 while (token != null
                     && !ct.IsCancellationRequested

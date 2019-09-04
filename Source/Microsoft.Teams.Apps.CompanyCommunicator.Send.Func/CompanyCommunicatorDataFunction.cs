@@ -5,7 +5,6 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 {
     using System;
-    using System.Net;
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
@@ -17,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -32,6 +32,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
         private static NotificationDataRepository notificationDataRepository = null;
 
         private static SendingNotificationDataRepository sendingNotificationDataRepository = null;
+
+        private static NotificationDeliveryStatusHelper notificationDeliveryStatusHelper = null;
 
         /// <summary>
         /// Azure Function App triggered by messages from a Service Bus queue
@@ -71,10 +73,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             CompanyCommunicatorDataFunction.sendingNotificationDataRepository = CompanyCommunicatorDataFunction.sendingNotificationDataRepository
                 ?? new SendingNotificationDataRepository(configuration, isFromAzureFunction: true);
 
-            var sentNotificationDataEntities = await CompanyCommunicatorDataFunction.sentNotificationDataRepository.GetAllAsync(
-                messageContent.NotificationId);
+            CompanyCommunicatorDataFunction.notificationDeliveryStatusHelper = CompanyCommunicatorDataFunction.notificationDeliveryStatusHelper
+                ?? new NotificationDeliveryStatusHelper(CompanyCommunicatorDataFunction.sentNotificationDataRepository);
 
-            if (sentNotificationDataEntities == null)
+            var notificationDeliveryStatusDTO =
+                await CompanyCommunicatorDataFunction.notificationDeliveryStatusHelper.GetNotificationDeliveryStatusAsync(
+                    messageContent.NotificationId);
+            if (notificationDeliveryStatusDTO == null)
             {
                 if (DateTime.UtcNow >= messageContent.InitialSendDate + TimeSpan.FromMinutes(
                     CompanyCommunicatorDataFunction.MaxMinutesOfRetrying))
@@ -87,62 +92,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 return;
             }
 
-            var succeededCount = 0;
-            var failedCount = 0;
-            var throttledCount = 0;
-            var unknownCount = 0;
-
-            DateTime lastSentDateTime = DateTime.MinValue;
-
-            foreach (var sentNotificationDataEntity in sentNotificationDataEntities)
-            {
-                if (sentNotificationDataEntity.StatusCode == (int)HttpStatusCode.Created)
-                {
-                    succeededCount++;
-                }
-                else if (sentNotificationDataEntity.StatusCode == (int)HttpStatusCode.TooManyRequests)
-                {
-                    throttledCount++;
-                }
-                else if (sentNotificationDataEntity.StatusCode == 0)
-                {
-                    unknownCount++;
-                }
-                else
-                {
-                    failedCount++;
-                }
-
-                if (sentNotificationDataEntity.SentDate != null
-                    && sentNotificationDataEntity.SentDate > lastSentDateTime)
-                {
-                    lastSentDateTime = sentNotificationDataEntity.SentDate;
-                }
-            }
-
             var notificationDataEntityUpdate = new UpdateNotificationDataEntity
             {
                 PartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
                 RowKey = messageContent.NotificationId,
-                Succeeded = succeededCount,
-                Failed = failedCount,
-                Throttled = throttledCount,
-                Unknown = unknownCount,
+                Succeeded = notificationDeliveryStatusDTO.Succeeded,
+                Failed = notificationDeliveryStatusDTO.Failed,
+                Throttled = notificationDeliveryStatusDTO.Throttled,
+                Unknown = notificationDeliveryStatusDTO.Unknown,
             };
 
-            // Purposefully exclude the unknown count because those messages may be sent later
-            var currentMessageCount = succeededCount
-                + failedCount
-                + throttledCount;
-
+            var currentMessageCount = notificationDeliveryStatusDTO.CurrentMessageCount;
             if (currentMessageCount == messageContent.TotalMessageCount
                 || DateTime.UtcNow >= messageContent.InitialSendDate + TimeSpan.FromMinutes(
                     CompanyCommunicatorDataFunction.MaxMinutesOfRetrying))
             {
                 notificationDataEntityUpdate.IsCompleted = true;
-                notificationDataEntityUpdate.SentDate = lastSentDateTime != DateTime.MinValue
-                    ? lastSentDateTime
-                    : DateTime.UtcNow;
+
+                notificationDeliveryStatusDTO.SetLastSentDateIfNotSetYet();
+                notificationDataEntityUpdate.SentDate = notificationDeliveryStatusDTO.LastSentDate;
             }
             else
             {
