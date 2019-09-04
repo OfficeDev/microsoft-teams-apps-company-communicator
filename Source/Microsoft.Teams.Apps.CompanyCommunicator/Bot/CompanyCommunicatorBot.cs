@@ -31,19 +31,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         }
 
         /// <summary>
-        /// The bot framework calls the method when receiving a message from an user.
-        /// </summary>
-        /// <param name="turnContext">ITurnContext instance.</param>
-        /// <param name="cancellationToken">CancellationToken instance.</param>
-        /// <returns>A task that represents the work queued to execute.</returns>
-        protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
-        {
-            await base.OnMessageActivityAsync(turnContext, cancellationToken);
-
-            await turnContext.SendActivityAsync(MessageFactory.Text($"Echo: {turnContext.Activity.Text}"), cancellationToken);
-        }
-
-        /// <summary>
         /// Invoked when a conversation update activity is received from the channel.
         /// </summary>
         /// <param name="turnContext">The context object for this turn.</param>
