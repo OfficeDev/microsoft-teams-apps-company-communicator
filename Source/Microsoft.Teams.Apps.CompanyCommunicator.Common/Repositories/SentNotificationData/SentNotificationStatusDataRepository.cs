@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
-    /// Respository of the notification data in the table storage.
+    /// Respository of the sent notification status data in the table storage.
     /// </summary>
     public class SentNotificationStatusDataRepository : BaseRepository<SentNotificationStatusDataEntity>
     {

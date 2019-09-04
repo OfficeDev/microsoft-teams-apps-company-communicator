@@ -12,8 +12,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
 
     /// <summary>
-    /// This class helps callers to get, set, and reset a notification's delivery status in the table storage.
-    /// e.g. succeeded, throttled, failed, unknown repcipient counts, and etc.
+    /// This class helps callers to get a notification's delivery status from the table storage.
+    /// e.g. succeeded, throttled, failed, unknown recipient counts, and etc.
     /// </summary>
     public class NotificationDeliveryStatusHelper
     {
@@ -31,7 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
 
         /// <summary>
         /// This method gets a notification's delivery status.
-        /// e.g. succeeded, throttled, failed, unknown repcipient counts, and etc.
+        /// e.g. succeeded, throttled, failed, unknown recipient counts, and etc.
         /// </summary>
         /// <param name="notificationId">Notification id.</param>
         /// <returns>It returns the notification delivery status DTO object.</returns>
