@@ -175,7 +175,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
       return (
         <Text
           truncated
-          content={`Sending...  ${currentNum} of ${message.totalMessageCount}`}
+          content={`Sending... ${currentNum} of ${message.totalMessageCount}`}
         >
         </Text>
       );
