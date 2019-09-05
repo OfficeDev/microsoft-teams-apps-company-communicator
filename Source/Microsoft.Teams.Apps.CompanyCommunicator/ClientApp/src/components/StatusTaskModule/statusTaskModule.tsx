@@ -24,6 +24,9 @@ export interface IMessage {
     author?: string;
     buttonLink?: string;
     buttonTitle?: string;
+    teamNames?: string[];
+    rosterNames?: string[];
+    allUsers?: boolean;
 }
 
 export interface IStatusState {
@@ -129,6 +132,9 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                                 <label>Throttled : </label>
                                 <span>{this.state.message.throttled}</span>
                             </div>
+                            <div className="contentField">
+                                {this.audienceSelection()}
+                            </div>
                         </div>
                         <div className="adaptiveCardContainer">
                         </div>
@@ -140,6 +146,43 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                     </div>
                 </div>
             );
+        }
+    }
+
+    private audienceSelection = () => {
+        if (this.state.message.teamNames) {
+            let length = this.state.message.teamNames.length;
+            return (
+                <div>
+                    <h3>Sent to General channel in teams</h3>
+                    {this.state.message.teamNames.sort().map((team, index) => {
+                        if (length === index + 1) {
+                            return (<span key={`teamName${index}`} >{team}</span>);
+                        } else {
+                            return (<span key={`teamName${index}`} >{team}, </span>);
+                        }
+                    })}
+                </div>);
+        } else if (this.state.message.rosterNames) {
+            let length = this.state.message.rosterNames.length;
+            return (
+                <div>
+                    <h3>Sent to General channel in teams</h3>
+                    {this.state.message.rosterNames.sort().map((team, index) => {
+                        if (length === index + 1) {
+                            return (<span key={`teamName${index}`} >{team}</span>);
+                        } else {
+                            return (<span key={`teamName${index}`} >{team}, </span>);
+                        }
+                    })}
+                </div>);
+        } else if (this.state.message.allUsers) {
+            return (
+                <div>
+                    <h3>Sent in chat to everyone</h3>
+                </div>);
+        } else {
+            return (<div></div>);
         }
     }
 }
