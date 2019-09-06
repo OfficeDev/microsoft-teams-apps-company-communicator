@@ -41,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             IServiceCollection services,
             IConfiguration configuration)
         {
-            AuthenticationServiceCollectionExtensions.ValidateAuthenticationConfigurationSettings(configuration);
+            ValidateAuthenticationConfigurationSettings(configuration);
 
             services.AddAuthentication(options => { options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; })
                 .AddJwtBearer(options =>
@@ -51,34 +51,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                     options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(configuration),
-                        ValidIssuers = AuthenticationServiceCollectionExtensions.GetValidIssuers(configuration),
-                        AudienceValidator = AuthenticationServiceCollectionExtensions.AudienceValidator,
+                        ValidAudiences = GetValidAudiences(configuration),
+                        ValidIssuers = GetValidIssuers(configuration),
+                        AudienceValidator = AudienceValidator,
                     };
                 });
         }
 
         private static void ValidateAuthenticationConfigurationSettings(IConfiguration configuration)
         {
-            var clientId = configuration[AuthenticationServiceCollectionExtensions.ClientIdConfigurationSettingsKey];
+            var clientId = configuration[ClientIdConfigurationSettingsKey];
             if (string.IsNullOrWhiteSpace(clientId))
             {
                 throw new ApplicationException("AzureAD ClientId is missing in the configuration file.");
             }
 
-            var tenantId = configuration[AuthenticationServiceCollectionExtensions.TenantIdConfigurationSettingsKey];
+            var tenantId = configuration[TenantIdConfigurationSettingsKey];
             if (string.IsNullOrWhiteSpace(tenantId))
             {
                 throw new ApplicationException("AzureAD TenantId is missing in the configuration file.");
             }
 
-            var applicationIdURI = configuration[AuthenticationServiceCollectionExtensions.ApplicationIdURIConfigurationSettingsKey];
+            var applicationIdURI = configuration[ApplicationIdURIConfigurationSettingsKey];
             if (string.IsNullOrWhiteSpace(applicationIdURI))
             {
                 throw new ApplicationException("AzureAD ApplicationIdURI is missing in the configuration file.");
             }
 
-            var validIssuers = configuration[AuthenticationServiceCollectionExtensions.ValidIssuersConfigurationSettingsKey];
+            var validIssuers = configuration[ValidIssuersConfigurationSettingsKey];
             if (string.IsNullOrWhiteSpace(validIssuers))
             {
                 throw new ApplicationException("AzureAD ValidIssuers is missing in the configuration file.");
@@ -101,9 +101,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 
         private static IEnumerable<string> GetValidAudiences(IConfiguration configuration)
         {
-            var clientId = configuration[AuthenticationServiceCollectionExtensions.ClientIdConfigurationSettingsKey];
+            var clientId = configuration[ClientIdConfigurationSettingsKey];
 
-            var applicationIdURI = configuration[AuthenticationServiceCollectionExtensions.ApplicationIdURIConfigurationSettingsKey];
+            var applicationIdURI = configuration[ApplicationIdURIConfigurationSettingsKey];
 
             var validAudiences = new List<string> { clientId, applicationIdURI.ToLower() };
 
@@ -112,12 +112,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 
         private static IEnumerable<string> GetValidIssuers(IConfiguration configuration)
         {
-            var tenantId = configuration[AuthenticationServiceCollectionExtensions.TenantIdConfigurationSettingsKey];
+            var tenantId = configuration[TenantIdConfigurationSettingsKey];
 
-            var validIssuers =
-                AuthenticationServiceCollectionExtensions.GetSettings(
-                    configuration,
-                    AuthenticationServiceCollectionExtensions.ValidIssuersConfigurationSettingsKey);
+            var validIssuers = GetSettings(configuration, ValidIssuersConfigurationSettingsKey);
 
             validIssuers = validIssuers.Select(validIssuer => validIssuer.Replace("TENANT_ID", tenantId));
 

@@ -96,7 +96,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 return false;
             }
 
-            return CompanyCommunicatorBot.TeamRenamedEventType.Equals(channelData.EventType, StringComparison.OrdinalIgnoreCase);
+            return TeamRenamedEventType.Equals(channelData.EventType, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

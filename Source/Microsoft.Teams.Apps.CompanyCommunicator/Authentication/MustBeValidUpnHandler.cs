@@ -26,8 +26,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// <param name="configuration">ASP.NET Core <see cref="IConfiguration"/> instance.</param>
         public MustBeValidUpnHandler(IConfiguration configuration)
         {
-            this.disableAuthentication = configuration.GetValue<bool>("DisableAuthentication", false);
-            var validUpns = configuration.GetValue<string>("ValidUpns", string.Empty);
+            this.disableAuthentication = configuration.GetValue("DisableAuthentication", false);
+            var validUpns = configuration.GetValue("ValidUpns", string.Empty);
             this.validUpnSet = validUpns
                 ?.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
                 ?.Select(p => p.Trim())
