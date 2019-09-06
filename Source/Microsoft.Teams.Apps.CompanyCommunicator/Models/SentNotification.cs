@@ -33,17 +33,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public int Throttled { get; set; }
 
         /// <summary>
-        /// Gets or sets Teams audience id collection.
+        /// Gets or sets Teams audience name collection.
         /// </summary>
         public IEnumerable<string> TeamNames { get; set; }
 
         /// <summary>
-        /// Gets or sets Rosters audience id collection.
+        /// Gets or sets Rosters audience name collection.
         /// </summary>
         public IEnumerable<string> RosterNames { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether a notification should be sent to all the users.
+        /// Gets or sets a value indicating whether a notification was sent to all.
         /// </summary>
         public bool AllUsers { get; set; }
     }
