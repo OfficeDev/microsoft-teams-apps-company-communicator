@@ -171,7 +171,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
     }
 
     private renderAudienceSelection = () => {
-        if (this.state.message.teamNames) {
+        if (this.state.message.teamNames && this.state.message.teamNames.length > 0) {
             let length = this.state.message.teamNames.length;
             return (
                 <div>
@@ -184,7 +184,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                         }
                     })}
                 </div>);
-        } else if (this.state.message.rosterNames) {
+        } else if (this.state.message.rosterNames && this.state.message.rosterNames.length > 0) {
             let length = this.state.message.rosterNames.length;
             return (
                 <div>
