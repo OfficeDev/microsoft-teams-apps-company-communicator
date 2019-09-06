@@ -120,6 +120,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Succeeded = notificationEntity.Succeeded,
                 Failed = notificationEntity.Failed,
                 Throttled = notificationEntity.Throttled,
+                SendingStartedDate = notificationEntity.SendingStartedDate,
             };
 
             return this.Ok(result);
