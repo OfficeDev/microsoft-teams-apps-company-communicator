@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Sent notification model class.
@@ -35,5 +36,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets the number of recipients who were throttled out.
         /// </summary>
         public int Throttled { get; set; }
+
+        /// <summary>
+        /// Gets or sets Teams audience name collection.
+        /// </summary>
+        public IEnumerable<string> TeamNames { get; set; }
+
+        /// <summary>
+        /// Gets or sets Rosters audience name collection.
+        /// </summary>
+        public IEnumerable<string> RosterNames { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a notification was sent to all users.
+        /// </summary>
+        public bool AllUsers { get; set; }
     }
 }
