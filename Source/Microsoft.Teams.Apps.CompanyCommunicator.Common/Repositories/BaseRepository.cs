@@ -13,7 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
-    /// Base respository for the data stored in the Azure Table Storage.
+    /// Base repository for the data stored in the Azure Table Storage.
     /// </summary>
     /// <typeparam name="T">Entity class type.</typeparam>
     public class BaseRepository<T>
