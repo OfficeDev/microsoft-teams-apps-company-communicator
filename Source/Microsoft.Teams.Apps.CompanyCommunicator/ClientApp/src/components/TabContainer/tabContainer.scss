@@ -42,13 +42,17 @@
             .adaptiveCardContainer {
                 width: 45%;
                 display: inline;
-                float: right;
+                float: left;
+
+                .ac-container {
+                    margin-left: 0rem !important;
+                }
             }
         }
     }
 }
 
-@media only screen and (min-width : 780px) and (max-width : 999px) {
+@media only screen and (min-width : 826px) and (max-width : 999px) {
     .taskModule {
         .formContainer {
             .formContentContainer {
@@ -60,14 +64,17 @@
             .adaptiveCardContainer {
                 width: 45%;
                 display: inline;
-                float: right;
-                margin-right: 3rem;
+                float: left;
+
+                .ac-container {
+                    margin-left: 0rem !important;
+                }
             }
         }
     }
 }
 
-@media screen and (min-width : 0px) and (max-width: 779px) {
+@media screen and (min-width : 0px) and (max-width: 825px) {
     .taskModule {
         .formContainer {
             .formContentContainer {
@@ -79,6 +86,10 @@
                 width: 100% !important;
                 display: block !important;
                 margin: 2rem auto;
+
+                .ac-container {
+                    margin: 0rem auto !important;
+                }
             }
         }
     }

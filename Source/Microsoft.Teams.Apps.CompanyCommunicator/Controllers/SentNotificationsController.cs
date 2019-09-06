@@ -128,6 +128,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),
                 RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
                 AllUsers = notificationEntity.AllUsers,
+                SendingStartedDate = notificationEntity.SendingStartedDate,
             };
 
             return this.Ok(result);

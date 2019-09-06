@@ -24,6 +24,8 @@ export interface IMessage {
     author?: string;
     buttonLink?: string;
     buttonTitle?: string;
+    sendingStartedDate?: string;
+    sendingDuration?: string;
 }
 
 export interface IStatusState {
@@ -81,6 +83,8 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
     private getItem = async (id: number) => {
         try {
             const response = await getSentNotification(id);
+            response.data.sendingDuration = this.formatNotificationSendingDuration(response.data.sendingStartedDate, response.data.sentDate);
+            response.data.sendingStartedDate = this.formatNotificationDate(response.data.sendingStartedDate);
             response.data.sentDate = this.formatNotificationDate(response.data.sentDate);
             this.setState({
                 message: response.data
@@ -88,6 +92,15 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         } catch (error) {
             return error;
         }
+    }
+
+    private formatNotificationSendingDuration = (sendingStartedDate: string, sentDate: string) => {
+        let sendingDuration = "";
+        if (sendingStartedDate && sentDate) {
+            let timeDifference = new Date(sentDate).getTime() - new Date(sendingStartedDate).getTime();
+            sendingDuration = new Date(timeDifference).toISOString().substr(11, 8);
+        }
+        return sendingDuration;
     }
 
     private formatNotificationDate = (notificationDate: string) => {
@@ -115,8 +128,16 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                                 <span>{this.state.message.title}</span>
                             </div>
                             <div className="contentField">
-                                <h3>Date sent</h3>
+                                <h3>Sending started</h3>
+                                <span>{this.state.message.sendingStartedDate}</span>
+                            </div>
+                            <div className="contentField">
+                                <h3>Completed</h3>
                                 <span>{this.state.message.sentDate}</span>
+                            </div>
+                            <div className="contentField">
+                                <h3>Duration</h3>
+                                <span>{this.state.message.sendingDuration}</span>
                             </div>
                             <div className="contentField">
                                 <h3>Results</h3>
