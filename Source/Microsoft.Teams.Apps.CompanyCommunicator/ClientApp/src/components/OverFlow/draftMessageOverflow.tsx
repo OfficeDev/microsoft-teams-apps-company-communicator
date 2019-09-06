@@ -72,7 +72,8 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                                 this.setState({
                                     menuOpen: false,
                                 });
-                                let url = getBaseUrl() + "/sendconfirmation/" + this.props.message.id;
+                                //let url = getBaseUrl() + "/sendconfirmation/" + this.props.message.id;
+                                let url = getBaseUrl() + "/newmessage/" + this.props.message.id + "/send";
                                 this.onOpenTaskModule(null, url, "Send confirmation");
                             }
                         },

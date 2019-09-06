@@ -5,7 +5,7 @@ import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../../configVariables';
 import { Accordion, Button } from '@stardust-ui/react';
-import { getDraftMessagesList } from '../../actions';
+import { getMessagesList, getDraftMessagesList } from '../../actions';
 import { connect } from 'react-redux';
 
 interface ITaskInfo {
@@ -20,6 +20,7 @@ interface ITaskInfo {
 
 export interface ITaskInfoProps {
     getDraftMessagesList?: any;
+    getMessagesList?: any;
 }
 
 export interface ITabContainerState {
@@ -98,7 +99,9 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
         }
 
         let submitHandler = (err: any, result: any) => {
-            this.props.getDraftMessagesList();
+            this.props.getDraftMessagesList().then(() => {
+                this.props.getMessagesList();
+            });
         };
 
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
@@ -109,4 +112,4 @@ const mapStateToProps = (state: any) => {
     return { messages: state.draftMessagesList };
 }
 
-export default connect(mapStateToProps, { getDraftMessagesList })(TabContainer);
+export default connect(mapStateToProps, { getDraftMessagesList, getMessagesList })(TabContainer);

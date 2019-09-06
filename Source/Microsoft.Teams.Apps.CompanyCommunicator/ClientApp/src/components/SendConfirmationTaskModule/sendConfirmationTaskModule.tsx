@@ -27,6 +27,11 @@ export interface IMessage {
     buttonTitle?: string;
 }
 
+export interface IMessageProps extends RouteComponentProps {
+    edit?: any;
+    id?: string;
+}
+
 export interface IStatusState {
     message: IMessage;
     loader: boolean;
@@ -36,7 +41,7 @@ export interface IStatusState {
     messageId: number;
 }
 
-class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IStatusState> {
+class SendConfirmationTaskModule extends React.Component<IMessageProps, IStatusState> {
     private initMessage = {
         id: "",
         title: ""
@@ -44,7 +49,7 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
 
     private card: any;
 
-    constructor(props: RouteComponentProps) {
+    constructor(props: IMessageProps) {
         super(props);
 
         this.card = getInitAdaptiveCard();
@@ -64,8 +69,13 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
 
         let params = this.props.match.params;
 
-        if ('id' in params) {
-            let id = params['id'];
+        if ('id' in params || this.props.id) {
+            let id: any;
+            if ('id' in params) {
+                id = params['id'];
+            } else if (this.props.id) {
+                id = this.props.id;
+            }
             this.getItem(id).then(() => {
                 getConsentSummaries(id).then((response) => {
                     this.setState({
@@ -100,7 +110,7 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
         }
     }
 
-    private getItem = async (id: number) => {
+    private getItem = async (id: string) => {
         try {
             const response = await getDraftNotification(id);
             this.setState({
@@ -141,6 +151,7 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
                     <div className="footerContainer">
                         <div className="buttonContainer">
                             <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="Preparing message" labelPosition="end" />
+                            <Button content="edit" id="editBtn" onClick={this.props.edit} secondary />
                             <Button content="Send" id="sendBtn" onClick={this.onSendMessage} primary />
                         </div>
                     </div>
