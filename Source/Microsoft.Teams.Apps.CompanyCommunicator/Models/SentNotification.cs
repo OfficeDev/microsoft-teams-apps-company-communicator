@@ -12,6 +12,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
     public class SentNotification : BaseNotification
     {
         /// <summary>
+        /// Gets or sets the sending started date time.
+        /// </summary>
+        public DateTime? SendingStartedDate { get; set; }
+
+        /// <summary>
         /// Gets or sets the Sent DateTime value.
         /// </summary>
         public DateTime? SentDate { get; set; }
