@@ -48,7 +48,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public IEnumerable<string> RosterNames { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether a notification was sent to all.
+        /// Gets or sets a value indicating whether a notification was sent to all users.
         /// </summary>
         public bool AllUsers { get; set; }
     }
