@@ -11,8 +11,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Helpers
     /// </summary>
     public static class HttpStatusCodeExtensions
     {
+        private static readonly int Unknown = 0;
+        private static readonly int TooManyRequest = 429;
+
         /// <summary>
-        /// Check if an integer value identifies succeeded.
+        /// Check if an integer value identifies created status.
         /// </summary>
         /// <param name="httpStatusCode">Http status code value.</param>
         /// <returns>Returns true if the http status code is 201.</returns>
@@ -22,13 +25,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Helpers
         }
 
         /// <summary>
-        /// Check if an integer value identifies throttled.
+        /// Check if an integer value identifies too many request status.
         /// </summary>
         /// <param name="httpStatusCode">Http status code value.</param>
-        /// <returns>Returns true if the http status code is 500.</returns>
+        /// <returns>Returns true if the http status code is 429.</returns>
         public static bool IsThrottled(this int httpStatusCode)
         {
-            return httpStatusCode == 429;
+            return httpStatusCode == HttpStatusCodeExtensions.TooManyRequest;
         }
 
         /// <summary>
@@ -38,17 +41,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Helpers
         /// <returns>Returns true if the http status code is 0.</returns>
         public static bool IsUnknown(this int httpStatusCode)
         {
-            return httpStatusCode == 0;
+            return httpStatusCode == HttpStatusCodeExtensions.Unknown;
         }
 
         /// <summary>
-        /// Check if an integer value identifies unknown status.
+        /// Check if an integer value identifies internal server error status.
         /// </summary>
         /// <param name="httpStatusCode">Http status code value.</param>
-        /// <returns>Returns true if the http status code is 0.</returns>
+        /// <returns>Returns true if the http status code is 500.</returns>
         public static bool IsFailed(this int httpStatusCode)
         {
-            return httpStatusCode == (int)HttpStatusCode.InternalServerError;
+            return httpStatusCode != (int)HttpStatusCode.Created
+                && httpStatusCode != HttpStatusCodeExtensions.TooManyRequest
+                && httpStatusCode != HttpStatusCodeExtensions.Unknown;
         }
     }
 }
