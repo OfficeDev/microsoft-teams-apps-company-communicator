@@ -87,10 +87,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     ?? new HttpClient();
 
                 CompanyCommunicatorSendFunction.userDataRepository = CompanyCommunicatorSendFunction.userDataRepository
-                    ?? new UserDataRepository(configuration);
+                    ?? new UserDataRepository(configuration, isFromAzureFunction: true);
 
                 CompanyCommunicatorSendFunction.sendingNotificationDataRepository = CompanyCommunicatorSendFunction.sendingNotificationDataRepository
-                    ?? new SendingNotificationDataRepository(configuration);
+                    ?? new SendingNotificationDataRepository(configuration, isFromAzureFunction: true);
 
                 CompanyCommunicatorSendFunction.sentNotificationDataRepository = CompanyCommunicatorSendFunction.sentNotificationDataRepository
                     ?? new SentNotificationDataRepository(configuration, isFromAzureFunction: true);
