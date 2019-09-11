@@ -69,7 +69,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 ?? this.CreateNotificationRepository(configuration);
 
             CompanyCommunicatorDataFunction.sendingNotificationDataRepository = CompanyCommunicatorDataFunction.sendingNotificationDataRepository
-                ?? new SendingNotificationDataRepository(configuration, isFromAzureFunction: true);
+                ?? new SendingNotificationDataRepository(configuration);
 
             var sentNotificationDataEntities = await CompanyCommunicatorDataFunction.sentNotificationDataRepository.GetAllAsync(
                 messageContent.NotificationId);
@@ -172,7 +172,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
         private NotificationDataRepository CreateNotificationRepository(IConfiguration configuration)
         {
             var tableRowKeyGenerator = new TableRowKeyGenerator();
-            return new NotificationDataRepository(configuration, tableRowKeyGenerator, isFromAzureFunction: true);
+            return new NotificationDataRepository(configuration, tableRowKeyGenerator);
         }
 
         private async Task SetEmptyNotificationDataEntity(string notificationId)

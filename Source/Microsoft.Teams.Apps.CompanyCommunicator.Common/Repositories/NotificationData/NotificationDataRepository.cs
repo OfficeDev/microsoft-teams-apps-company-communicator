@@ -19,6 +19,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
+        public NotificationDataRepository(IConfiguration configuration, TableRowKeyGenerator tableRowKeyGenerator)
+            : this(configuration, tableRowKeyGenerator, false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NotificationDataRepository"/> class.
+        /// </summary>
+        /// <param name="configuration">Represents the application configuration.</param>
+        /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
         /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
         public NotificationDataRepository(
             IConfiguration configuration,

@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.NotificationDelivery
 {
     using System;
     using System.Collections.Generic;

@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
 {
     using System;
     using AdaptiveCards;

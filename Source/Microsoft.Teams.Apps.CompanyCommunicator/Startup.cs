@@ -12,7 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
-    using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
+    using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
 
     /// <summary>
@@ -59,7 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             // Register repository services in DI container
             services.AddRepositories();
 
-            services.AddNotificationDelivery();
+            services.AddDraftNotificationPreview();
         }
 
         /// <summary>

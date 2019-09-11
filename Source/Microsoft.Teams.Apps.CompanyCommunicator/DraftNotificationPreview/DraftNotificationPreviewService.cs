@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
+namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
 {
     using System;
     using System.Net;
@@ -16,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
 
     /// <summary>
     /// Draft notification preview service.

@@ -4,16 +4,21 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
+    using System;
     using System.Collections.Generic;
+    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Azure.ServiceBus;
+    using Microsoft.Azure.ServiceBus.Core;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
-    using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Controller for the sent notification data.
@@ -22,23 +27,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Route("api/sentNotifications")]
     public class SentNotificationsController : ControllerBase
     {
+        private readonly IConfiguration configuration;
         private readonly NotificationDataRepository notificationDataRepository;
-        private readonly NotificationDelivery notificationDelivery;
         private readonly TeamDataRepository teamDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
         /// </summary>
+        /// <param name="configuration">ASP.NET Core <see cref="IConfiguration"/> instance.</param>
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
-        /// <param name="notificationDelivery">Notification delivery service instance.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
         public SentNotificationsController(
+            IConfiguration configuration,
             NotificationDataRepository notificationDataRepository,
-            NotificationDelivery notificationDelivery,
             TeamDataRepository teamDataRepository)
         {
+            this.configuration = configuration;
             this.notificationDataRepository = notificationDataRepository;
-            this.notificationDelivery = notificationDelivery;
             this.teamDataRepository = teamDataRepository;
         }
 
@@ -50,15 +55,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateSentNotificationAsync([FromBody]DraftNotification draftNotification)
         {
-            var draftNotificationEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
-                draftNotification.Id);
-            if (draftNotificationEntity == null)
-            {
-                return this.NotFound();
-            }
+            var serializedDraftNotification = JsonConvert.SerializeObject(draftNotification.Id);
+            var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(serializedDraftNotification));
 
-            await this.notificationDelivery.SendAsync(draftNotificationEntity);
+            string serviceBusConnectionString = this.configuration["ServiceBusConnection"];
+            string queueName = "company-communicator-pretreat";
+            var messageSender = new MessageSender(serviceBusConnectionString, queueName);
+            serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(1);
+
+            await messageSender.SendAsync(serviceBusMessage);
 
             return this.Ok();
         }

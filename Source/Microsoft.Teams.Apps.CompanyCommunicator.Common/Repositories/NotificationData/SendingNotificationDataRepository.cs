@@ -15,6 +15,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Initializes a new instance of the <see cref="SendingNotificationDataRepository"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
+        public SendingNotificationDataRepository(IConfiguration configuration)
+            : this(configuration, false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SendingNotificationDataRepository"/> class.
+        /// </summary>
+        /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
         public SendingNotificationDataRepository(IConfiguration configuration, bool isFromAzureFunction = false)
             : base(

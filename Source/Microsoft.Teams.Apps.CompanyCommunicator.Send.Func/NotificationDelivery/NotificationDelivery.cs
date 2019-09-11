@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.NotificationDelivery
 {
     using System;
     using System.Collections.Generic;
@@ -12,8 +12,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Core;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Newtonsoft.Json;
 
@@ -26,7 +26,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly MetadataProvider metadataProvider;
         private readonly SendingNotificationCreator sendingNotificationCreator;
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationDelivery"/> class.
@@ -35,67 +34,51 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// <param name="notificationDataRepository">Notification repository service.</param>
         /// <param name="metadataProvider">Metadata Provider instance.</param>
         /// <param name="sendingNotificationCreator">SendingNotification creator.</param>
-        /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         public NotificationDelivery(
             IConfiguration configuration,
             NotificationDataRepository notificationDataRepository,
             MetadataProvider metadataProvider,
-            SendingNotificationCreator sendingNotificationCreator,
-            SentNotificationDataRepository sentNotificationDataRepository)
+            SendingNotificationCreator sendingNotificationCreator)
         {
             this.configuration = configuration;
             this.notificationDataRepository = notificationDataRepository;
             this.metadataProvider = metadataProvider;
             this.sendingNotificationCreator = sendingNotificationCreator;
-            this.sentNotificationDataRepository = sentNotificationDataRepository;
         }
 
         /// <summary>
         /// Send a notification to target users.
         /// </summary>
         /// <param name="draftNotificationEntity">The draft notification to be sent.</param>
+        /// <param name="log">The logger instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        public async Task SendAsync(NotificationDataEntity draftNotificationEntity)
+        public async Task SendAsync(
+            NotificationDataEntity draftNotificationEntity,
+            ILogger log)
         {
             if (draftNotificationEntity == null || !draftNotificationEntity.IsDraft)
             {
                 return;
             }
 
-            List<UserDataEntity> deDuplicatedReceiverEntities = new List<UserDataEntity>();
+            var deduplicatedReceiverEntities = await this.GetDeduplicatedReceiverEntititesAsync(draftNotificationEntity, log);
 
-            if (draftNotificationEntity.AllUsers)
-            {
-                // Get all users
-                var usersUserDataEntityDictionary = await this.metadataProvider.GetUserDataDictionaryAsync();
-                deDuplicatedReceiverEntities.AddRange(usersUserDataEntityDictionary.Select(kvp => kvp.Value));
-            }
-            else
-            {
-                if (draftNotificationEntity.Rosters.Count() != 0)
-                {
-                    var rosterUserDataEntityDictionary = await this.metadataProvider.GetTeamsRostersAsync(draftNotificationEntity.Rosters);
-
-                    deDuplicatedReceiverEntities.AddRange(rosterUserDataEntityDictionary.Select(kvp => kvp.Value));
-                }
-
-                if (draftNotificationEntity.Teams.Count() != 0)
-                {
-                    var teamsReceiverEntities = await this.metadataProvider.GetTeamsReceiverEntities(draftNotificationEntity.Teams);
-
-                    deDuplicatedReceiverEntities.AddRange(teamsReceiverEntities);
-                }
-            }
-
-            var totalMessageCount = deDuplicatedReceiverEntities.Count;
-            draftNotificationEntity.TotalMessageCount = totalMessageCount;
-
+            draftNotificationEntity.TotalMessageCount = deduplicatedReceiverEntities.Count;
             var newSentNotificationId = await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationEntity);
 
             // Set in SendingNotification data
             await this.sendingNotificationCreator.CreateAsync(newSentNotificationId, draftNotificationEntity);
 
-            var allServiceBusMessages = deDuplicatedReceiverEntities
+            await this.SendTriggersToSendFunctionAsync(newSentNotificationId, deduplicatedReceiverEntities);
+
+            await this.SendTriggerToDataFunction(newSentNotificationId, deduplicatedReceiverEntities.Count);
+        }
+
+        private async Task SendTriggersToSendFunctionAsync(
+            string newSentNotificationId,
+            IList<UserDataEntity> deduplicatedReceiverEntities)
+        {
+            var allServiceBusMessages = deduplicatedReceiverEntities
                 .Select(userDataEntity =>
                 {
                     var queueMessageContent = new ServiceBusSendQueueMessageContent
@@ -141,15 +124,58 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
             {
                 await messageSender.SendAsync(batch);
             }
+        }
 
-            await this.SendTriggerToDataFunction(
-                this.configuration,
-                newSentNotificationId,
-                totalMessageCount);
+        private async Task<IList<UserDataEntity>> GetDeduplicatedReceiverEntititesAsync(
+            NotificationDataEntity draftNotificationEntity,
+            ILogger log)
+        {
+            List<UserDataEntity> deduplicatedReceiverEntities = new List<UserDataEntity>();
+
+            if (draftNotificationEntity.AllUsers)
+            {
+                var usersUserDataEntityDictionary = await this.metadataProvider.GetUserDataDictionaryAsync();
+                deduplicatedReceiverEntities.AddRange(usersUserDataEntityDictionary.Select(kvp => kvp.Value));
+                this.Log(log, draftNotificationEntity.Id, "All users");
+            }
+            else if (draftNotificationEntity.Rosters.Count() != 0)
+            {
+                var rosterUserDataEntityDictionary = await this.metadataProvider.GetTeamsRostersAsync(draftNotificationEntity.Rosters);
+                deduplicatedReceiverEntities.AddRange(rosterUserDataEntityDictionary.Select(kvp => kvp.Value));
+                this.Log(log, draftNotificationEntity.Id, "Rosters", deduplicatedReceiverEntities.Count);
+            }
+            else if (draftNotificationEntity.Teams.Count() != 0)
+            {
+                var teamsReceiverEntities = await this.metadataProvider.GetTeamsReceiverEntities(draftNotificationEntity.Teams);
+                deduplicatedReceiverEntities.AddRange(teamsReceiverEntities);
+                this.Log(log, draftNotificationEntity.Id, "General channels", deduplicatedReceiverEntities.Count);
+            }
+            else
+            {
+                this.Log(log, draftNotificationEntity.Id, "No audience was selected");
+            }
+
+            return deduplicatedReceiverEntities;
+        }
+
+        private void Log(ILogger log, string draftNotificationEntityId, string audienceOption)
+        {
+            log.LogInformation(
+                "Notification id:{0}. Audience option: {1}",
+                draftNotificationEntityId,
+                audienceOption);
+        }
+
+        private void Log(ILogger log, string draftNotificationEntityId, string audienceOption, int count)
+        {
+            log.LogInformation(
+                "Notification id:{0}. Audience option: {1}. Count: {2}",
+                draftNotificationEntityId,
+                audienceOption,
+                count);
         }
 
         private async Task SendTriggerToDataFunction(
-            IConfiguration configuration,
             string notificationId,
             int totalMessageCount)
         {
@@ -163,7 +189,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
             var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));
             serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(30);
 
-            string serviceBusConnectionString = configuration["ServiceBusConnection"];
+            string serviceBusConnectionString = this.configuration["ServiceBusConnection"];
             string queueName = "company-communicator-data";
             var messageSender = new MessageSender(serviceBusConnectionString, queueName);
 

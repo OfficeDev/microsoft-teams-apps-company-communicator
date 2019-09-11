@@ -15,6 +15,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
         /// Initializes a new instance of the <see cref="UserDataRepository"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
+        public UserDataRepository(IConfiguration configuration)
+            : this(configuration, false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserDataRepository"/> class.
+        /// </summary>
+        /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
         public UserDataRepository(IConfiguration configuration, bool isFromAzureFunction = false)
             : base(

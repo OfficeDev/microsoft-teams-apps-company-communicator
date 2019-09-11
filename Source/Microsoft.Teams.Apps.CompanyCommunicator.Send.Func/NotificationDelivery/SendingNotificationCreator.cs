@@ -2,12 +2,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.NotificationDelivery
 {
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
 
     /// <summary>
     /// Sending notification creator.
@@ -26,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
         /// <param name="configuration">The configuration.</param>
         /// <param name="notificationDataRepository">Notification Repository instance.</param>
         /// <param name="sendingNotificationDataRepository">Sending notification data repository.</param>
-        /// <param name="adaptiveCardCreator">The adaptive card creator</param>
+        /// <param name="adaptiveCardCreator">The adaptive card creator.</param>
         public SendingNotificationCreator(
             IConfiguration configuration,
             NotificationDataRepository notificationDataRepository,
