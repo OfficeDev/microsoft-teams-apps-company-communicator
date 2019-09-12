@@ -4,7 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
-    using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;

@@ -15,6 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.NotificationDeliver
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -26,6 +27,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.NotificationDeliver
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly MetadataProvider metadataProvider;
         private readonly SendingNotificationCreator sendingNotificationCreator;
+        private readonly SendQueue sendMessageQueue;
+        private readonly DataQueue dataMessageQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationDelivery"/> class.
@@ -34,16 +37,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.NotificationDeliver
         /// <param name="notificationDataRepository">Notification repository service.</param>
         /// <param name="metadataProvider">Metadata Provider instance.</param>
         /// <param name="sendingNotificationCreator">SendingNotification creator.</param>
+        /// <param name="sendMessageQueue">The message queue service connected to the queue 'company-communicator-send'.</param>
+        /// <param name="dataMessageQueue">The message queue service connected to the queue 'company-communicator-data'.</param>
         public NotificationDelivery(
             IConfiguration configuration,
             NotificationDataRepository notificationDataRepository,
             MetadataProvider metadataProvider,
-            SendingNotificationCreator sendingNotificationCreator)
+            SendingNotificationCreator sendingNotificationCreator,
+            SendQueue sendMessageQueue,
+            DataQueue dataMessageQueue)
         {
             this.configuration = configuration;
             this.notificationDataRepository = notificationDataRepository;
             this.metadataProvider = metadataProvider;
             this.sendingNotificationCreator = sendingNotificationCreator;
+            this.sendMessageQueue = sendMessageQueue;
+            this.dataMessageQueue = dataMessageQueue;
         }
 
         /// <summary>
@@ -72,58 +81,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.NotificationDeliver
             await this.SendTriggersToSendFunctionAsync(newSentNotificationId, deduplicatedReceiverEntities);
 
             await this.SendTriggerToDataFunction(newSentNotificationId, deduplicatedReceiverEntities.Count);
-        }
-
-        private async Task SendTriggersToSendFunctionAsync(
-            string newSentNotificationId,
-            IList<UserDataEntity> deduplicatedReceiverEntities)
-        {
-            var allServiceBusMessages = deduplicatedReceiverEntities
-                .Select(userDataEntity =>
-                {
-                    var queueMessageContent = new ServiceBusSendQueueMessageContent
-                    {
-                        NotificationId = newSentNotificationId,
-                        UserDataEntity = userDataEntity,
-                    };
-                    var messageBody = JsonConvert.SerializeObject(queueMessageContent);
-                    return new Message(Encoding.UTF8.GetBytes(messageBody));
-                })
-                .ToList();
-
-            // Create batches to send to the service bus
-            var serviceBusBatches = new List<List<Message>>();
-
-            var totalNumberMessages = allServiceBusMessages.Count;
-            var batchSize = 100;
-            var numberOfCompleteBatches = totalNumberMessages / batchSize;
-            var numberMessagesInIncompleteBatch = totalNumberMessages % batchSize;
-
-            for (var i = 0; i < numberOfCompleteBatches; i++)
-            {
-                var startingIndex = i * batchSize;
-                var batch = allServiceBusMessages.GetRange(startingIndex, batchSize);
-                serviceBusBatches.Add(batch);
-            }
-
-            if (numberMessagesInIncompleteBatch != 0)
-            {
-                var incompleteBatchStartingIndex = numberOfCompleteBatches * batchSize;
-                var incompleteBatch = allServiceBusMessages.GetRange(
-                    incompleteBatchStartingIndex,
-                    numberMessagesInIncompleteBatch);
-                serviceBusBatches.Add(incompleteBatch);
-            }
-
-            string serviceBusConnectionString = this.configuration["ServiceBusConnection"];
-            string queueName = "company-communicator-send";
-            var messageSender = new MessageSender(serviceBusConnectionString, queueName);
-
-            // Send batches of messages to the service bus
-            foreach (var batch in serviceBusBatches)
-            {
-                await messageSender.SendAsync(batch);
-            }
         }
 
         private async Task<IList<UserDataEntity>> GetDeduplicatedReceiverEntititesAsync(
@@ -175,11 +132,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.NotificationDeliver
                 count);
         }
 
+        private async Task SendTriggersToSendFunctionAsync(
+            string newSentNotificationId,
+            IList<UserDataEntity> deduplicatedReceiverEntities)
+        {
+            var allServiceBusMessages = deduplicatedReceiverEntities
+                .Select(userDataEntity =>
+                {
+                    var queueMessageContent = new SendQueueMessageContent
+                    {
+                        NotificationId = newSentNotificationId,
+                        UserDataEntity = userDataEntity,
+                    };
+                    var messageBody = JsonConvert.SerializeObject(queueMessageContent);
+                    return new Message(Encoding.UTF8.GetBytes(messageBody));
+                })
+                .ToList();
+
+            await this.sendMessageQueue.SendAsync(allServiceBusMessages);
+        }
+
         private async Task SendTriggerToDataFunction(
             string notificationId,
             int totalMessageCount)
         {
-            var queueMessageContent = new ServiceBusDataQueueMessageContent
+            var queueMessageContent = new DataQueueMessageContent
             {
                 NotificationId = notificationId,
                 InitialSendDate = DateTime.UtcNow,
@@ -189,28 +166,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.NotificationDeliver
             var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));
             serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(30);
 
-            string serviceBusConnectionString = this.configuration["ServiceBusConnection"];
-            string queueName = "company-communicator-data";
-            var messageSender = new MessageSender(serviceBusConnectionString, queueName);
-
-            await messageSender.SendAsync(serviceBusMessage);
-        }
-
-        private class ServiceBusSendQueueMessageContent
-        {
-            public string NotificationId { get; set; }
-
-            // This can be a team.id
-            public UserDataEntity UserDataEntity { get; set; }
-        }
-
-        private class ServiceBusDataQueueMessageContent
-        {
-            public string NotificationId { get; set; }
-
-            public DateTime InitialSendDate { get; set; }
-
-            public int TotalMessageCount { get; set; }
+            await this.dataMessageQueue.SendAsync(serviceBusMessage);
         }
     }
 }

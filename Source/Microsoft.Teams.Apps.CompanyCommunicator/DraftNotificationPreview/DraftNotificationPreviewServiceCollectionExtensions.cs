@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
 {
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
 
     /// <summary>
     /// Extension class for registering notification delivery services in DI container.

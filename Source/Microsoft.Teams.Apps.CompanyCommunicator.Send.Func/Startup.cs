@@ -15,7 +15,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.NotificationDelivery;
 
     /// <summary>
@@ -43,6 +44,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<SendingNotificationDataRepository>();
 
             builder.Services.AddTransient<TableRowKeyGenerator>();
+
+            builder.Services.AddTransient<SendQueue>();
+
+            builder.Services.AddTransient<DataQueue>();
 
             var configuration = this.BuildLocalConfiguration();
             builder.Services.AddSingleton(configuration);
