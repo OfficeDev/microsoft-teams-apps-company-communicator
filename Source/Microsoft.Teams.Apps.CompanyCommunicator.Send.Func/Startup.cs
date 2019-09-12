@@ -17,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.NotificationDelivery;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment;
 
     /// <summary>
     /// Register services in DI container of the Azure functions system.
@@ -27,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <inheritdoc/>
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            builder.Services.AddTransient<NotificationDelivery.NotificationDelivery>();
+            builder.Services.AddTransient<DeliveryPretreatment.DeliveryPretreatment>();
 
             builder.Services.AddTransient<SendingNotificationCreator>();
 

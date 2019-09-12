@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.NotificationDelivery
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment
 {
     using System;
     using System.Collections.Generic;
