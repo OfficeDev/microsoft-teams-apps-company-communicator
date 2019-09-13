@@ -7,9 +7,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -18,20 +18,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     /// </summary>
     public class CompanyCommunicatorPretreatFunction
     {
+        private const string QueueName = "company-communicator-pretreat";
+        private const string ConnectionName = "ServiceBusConnection";
         private readonly NotificationDataRepository notificationDataRepository;
-        private readonly DeliveryPretreatment.DeliveryPretreatment deliveryPretreatment;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorPretreatFunction"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
-        /// <param name="deliveryPretreatment">Notification delivery service instance.</param>
         public CompanyCommunicatorPretreatFunction(
-            NotificationDataRepository notificationDataRepository,
-            DeliveryPretreatment.DeliveryPretreatment deliveryPretreatment)
+            NotificationDataRepository notificationDataRepository)
         {
             this.notificationDataRepository = notificationDataRepository;
-            this.deliveryPretreatment = deliveryPretreatment;
         }
 
         /// <summary>
@@ -39,13 +37,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// Used for kicking off the notificaiton pretreatment.
         /// </summary>
         /// <param name="myQueueItem">The Service Bus queue item.</param>
-        /// <param name="log">The logger.</param>
+        /// <param name="starter">Durable orchestration client.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName("CompanyCommunicatorPretreatFunction")]
         public async Task Run(
-            [ServiceBusTrigger("company-communicator-pretreat", Connection = "ServiceBusConnection")]
+            [ServiceBusTrigger(
+                CompanyCommunicatorPretreatFunction.QueueName,
+                Connection = CompanyCommunicatorPretreatFunction.ConnectionName)]
             string myQueueItem,
-            ILogger log)
+            [OrchestrationClient]
+            DurableOrchestrationClient starter)
         {
             var draftNotificationId = JsonConvert.DeserializeObject<string>(myQueueItem);
             var draftNotificationEntity = await this.notificationDataRepository.GetAsync(
@@ -53,7 +54,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 draftNotificationId);
             if (draftNotificationEntity != null)
             {
-                await this.deliveryPretreatment.SendAsync(draftNotificationEntity, log);
+                string instanceId = await starter.StartNewAsync(
+                    nameof(DeliveryPretreatmentOrchestration.PretreatAsync),
+                    draftNotificationEntity);
             }
         }
     }
