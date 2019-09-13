@@ -48,15 +48,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             [OrchestrationClient]
             DurableOrchestrationClient starter)
         {
+            var partitionKey = PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition;
             var draftNotificationId = JsonConvert.DeserializeObject<string>(myQueueItem);
-            var draftNotificationEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
-                draftNotificationId);
-            if (draftNotificationEntity != null)
+            var draftNotificationEntity =
+                await this.notificationDataRepository.GetAsync(partitionKey, draftNotificationId);
+            if (draftNotificationEntity != null && draftNotificationEntity.IsDraft)
             {
                 string instanceId = await starter.StartNewAsync(
                     nameof(DeliveryPretreatmentOrchestration.PretreatAsync),
                     draftNotificationEntity);
+
+                draftNotificationEntity.IsDraft = false;
+                await this.notificationDataRepository.CreateOrUpdateAsync(draftNotificationEntity);
             }
         }
     }
