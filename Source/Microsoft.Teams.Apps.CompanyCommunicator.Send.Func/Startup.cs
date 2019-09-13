@@ -27,9 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <inheritdoc/>
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            builder.Services.AddTransient<DeliveryPretreatment.DeliveryPretreatment>();
-
-            builder.Services.AddTransient<SendingNotificationCreator>();
+            builder.Services.AddTransient<DeliveryPretreatment.DeliveryPretreatmentOrchestration>();
 
             builder.Services.AddTransient<MetadataProvider>();
 
@@ -37,11 +35,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             builder.Services.AddTransient<NotificationDataRepository>();
 
+            builder.Services.AddTransient<SendingNotificationDataRepository>();
+
             builder.Services.AddTransient<UserDataRepository>();
 
             builder.Services.AddTransient<TeamDataRepository>();
-
-            builder.Services.AddTransient<SendingNotificationDataRepository>();
 
             builder.Services.AddTransient<TableRowKeyGenerator>();
 
@@ -49,17 +47,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             builder.Services.AddTransient<DataQueue>();
 
-            var configuration = this.BuildLocalConfiguration();
-            builder.Services.AddSingleton(configuration);
-        }
+            builder.Services.AddTransient<GetAudienceDataListActivity>();
 
-        private IConfiguration BuildLocalConfiguration()
-        {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-                .Build();
-            return configuration;
+            builder.Services.AddTransient<MoveDraftToSentNotificationPartitionActivity>();
+
+            builder.Services.AddTransient<CreateSendingNotificationActivity>();
+
+            builder.Services.AddTransient<SendTriggerToDataFunctionActivity>();
+
+            builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
         }
     }
 }
