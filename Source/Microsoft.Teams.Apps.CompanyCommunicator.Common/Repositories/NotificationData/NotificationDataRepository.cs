@@ -41,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <summary>
         /// Get all draft notification entities from the table storage.
         /// </summary>
-        /// <returns>All draft notitification entities.</returns>
+        /// <returns>All draft notification entities.</returns>
         public async Task<IEnumerable<NotificationDataEntity>> GetAllDraftNotificationsAsync()
         {
             var result = await this.GetAllAsync(PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition);
@@ -52,7 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <summary>
         /// Get the top 25 most recently sent notification entities from the table storage.
         /// </summary>
-        /// <returns>The top 25 most recently sent notitification entities.</returns>
+        /// <returns>The top 25 most recently sent notification entities.</returns>
         public async Task<IEnumerable<NotificationDataEntity>> GetMostRecentSentNotificationsAsync()
         {
             var result = await this.GetAllAsync(PartitionKeyNames.NotificationDataTable.SentNotificationsPartition, 25);

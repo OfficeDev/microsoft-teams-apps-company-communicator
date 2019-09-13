@@ -68,15 +68,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery
             {
                 // Get all users
                 var usersUserDataEntityDictionary = await this.metadataProvider.GetUserDataDictionaryAsync();
-
-                // Get all teams
-                var rosterUserDataEntityDictionary = await this.metadataProvider.GetAllTeamsRostersAsync();
-
-                // Deduplicate users
-                this.metadataProvider.AddRosterDictionaryToUserDictionary(
-                    rosterUserDataEntityDictionary,
-                    usersUserDataEntityDictionary);
-
                 deDuplicatedReceiverEntities.AddRange(usersUserDataEntityDictionary.Select(kvp => kvp.Value));
             }
             else
