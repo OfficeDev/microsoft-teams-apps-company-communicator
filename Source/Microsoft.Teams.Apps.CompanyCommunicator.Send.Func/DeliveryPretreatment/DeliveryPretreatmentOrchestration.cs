@@ -17,6 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
     {
         /// <summary>
         /// Pretreat notification delivery for target users.
+        /// TODO: To retry in case of failure.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
@@ -26,6 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         {
             var draftNotificationEntity = context.GetInput<NotificationDataEntity>();
 
+            // TODO: To add exception handling.
             var deduplicatedReceiverEntities = await this.GetAudienceDataListAsync(context, draftNotificationEntity);
 
             var newSentNotificationId = await this.MoveDraftToSentPartitionAsync(
@@ -35,6 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
 
             await this.CreateSendingNotificationAsync(context, draftNotificationEntity, newSentNotificationId);
 
+            // TODO: To use TPL to send multiple messages to service bus.
             await this.SendTriggersToSendFunctionAsync(context, deduplicatedReceiverEntities, newSentNotificationId);
 
             await this.SendTriggerToDataFunctionAsync(context, deduplicatedReceiverEntities, newSentNotificationId);
