@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
 
@@ -60,6 +61,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddRepositories();
 
             services.AddDraftNotificationPreview();
+
+            services.AddMessageQueue();
         }
 
         /// <summary>

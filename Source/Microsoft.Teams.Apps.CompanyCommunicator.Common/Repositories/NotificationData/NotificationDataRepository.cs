@@ -79,7 +79,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         {
             if (draftNotificationEntity == null)
             {
-                return string.Empty;
+                throw new ArgumentNullException(nameof(draftNotificationEntity));
             }
 
             var newId = this.TableRowKeyGenerator.CreateNewKeyOrderingMostRecentToOldest();
@@ -114,9 +114,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             await this.CreateOrUpdateAsync(sentNotificationEntity);
 
             // Delete the draft notification.
-            draftNotificationEntity = await this.GetAsync(
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
-                draftNotificationEntity.RowKey);
             await this.DeleteAsync(draftNotificationEntity);
 
             return newId;

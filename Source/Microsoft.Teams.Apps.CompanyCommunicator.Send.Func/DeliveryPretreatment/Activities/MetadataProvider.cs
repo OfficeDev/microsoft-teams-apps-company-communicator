@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment.Activities
 {
     using System;
     using System.Collections.Generic;
@@ -11,6 +11,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
     using Microsoft.Bot.Connector;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Newtonsoft.Json.Linq;
@@ -212,6 +214,61 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
             }
 
             return teamReceiverEntities;
+        }
+
+        /// <summary>
+        /// Get deduplicated receiver entities.
+        /// </summary>
+        /// <param name="draftNotificationEntity">Draft notification entity.</param>
+        /// <param name="log">Log service.</param>
+        /// <returns>It returns the deduplicated user data entities.</returns>
+        public async Task<List<UserDataEntity>> GetDeduplicatedReceiverEntitiesAsync(
+            NotificationDataEntity draftNotificationEntity,
+            ILogger log)
+        {
+            var deduplicatedReceiverEntities = new List<UserDataEntity>();
+
+            if (draftNotificationEntity.AllUsers)
+            {
+                var usersUserDataEntityDictionary = await this.GetUserDataDictionaryAsync();
+                deduplicatedReceiverEntities.AddRange(usersUserDataEntityDictionary.Select(kvp => kvp.Value));
+                this.Log(log, draftNotificationEntity.Id, "All users");
+            }
+            else if (draftNotificationEntity.Rosters.Count() != 0)
+            {
+                var rosterUserDataEntityDictionary = await this.GetTeamsRostersAsync(draftNotificationEntity.Rosters);
+                deduplicatedReceiverEntities.AddRange(rosterUserDataEntityDictionary.Select(kvp => kvp.Value));
+                this.Log(log, draftNotificationEntity.Id, "Rosters", deduplicatedReceiverEntities.Count);
+            }
+            else if (draftNotificationEntity.Teams.Count() != 0)
+            {
+                var teamsReceiverEntities = await this.GetTeamsReceiverEntities(draftNotificationEntity.Teams);
+                deduplicatedReceiverEntities.AddRange(teamsReceiverEntities);
+                this.Log(log, draftNotificationEntity.Id, "General channels", deduplicatedReceiverEntities.Count);
+            }
+            else
+            {
+                this.Log(log, draftNotificationEntity.Id, "No audience was selected");
+            }
+
+            return deduplicatedReceiverEntities;
+        }
+
+        private void Log(ILogger log, string draftNotificationEntityId, string audienceOption)
+        {
+            log.LogInformation(
+                "Notification id:{0}. Audience option: {1}",
+                draftNotificationEntityId,
+                audienceOption);
+        }
+
+        private void Log(ILogger log, string draftNotificationEntityId, string audienceOption, int count)
+        {
+            log.LogInformation(
+                "Notification id:{0}. Audience option: {1}. Count: {2}",
+                draftNotificationEntityId,
+                audienceOption,
+                count);
         }
     }
 }

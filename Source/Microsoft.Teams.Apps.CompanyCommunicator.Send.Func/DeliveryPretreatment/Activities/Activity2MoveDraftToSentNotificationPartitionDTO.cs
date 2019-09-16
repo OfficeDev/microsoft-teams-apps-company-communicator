@@ -1,22 +1,20 @@
-﻿// <copyright file="MoveDraftToSentNotificationPartitionActivityDTO.cs" company="Microsoft">
+﻿// <copyright file="Activity2MoveDraftToSentNotificationPartitionDTO.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment.Activities
 {
-    using System.Collections.Generic;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
     /// DTO class used by the MoveDraftToSentNotificationPartitionActivity as parameter type.
     /// </summary>
-    public class MoveDraftToSentNotificationPartitionActivityDTO
+    public class Activity2MoveDraftToSentNotificationPartitionDTO
     {
         /// <summary>
         /// Gets or sets total audience count.
         /// </summary>
-        public int TotalAudienceCount { get; set; }
+        public int TotalMessagesToBeSentToServiceBusCount { get; set; }
 
         /// <summary>
         /// Gets or sets draft notification entity.

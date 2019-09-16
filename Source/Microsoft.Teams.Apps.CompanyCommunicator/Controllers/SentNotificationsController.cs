@@ -11,12 +11,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Newtonsoft.Json;
 
@@ -30,6 +30,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly IConfiguration configuration;
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly TeamDataRepository teamDataRepository;
+        private readonly PretreatQueue pretreatQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
@@ -37,14 +38,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="configuration">ASP.NET Core <see cref="IConfiguration"/> instance.</param>
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
+        /// <param name="pretreatQueue">Pretreat queue in Azure service bus.</param>
         public SentNotificationsController(
             IConfiguration configuration,
             NotificationDataRepository notificationDataRepository,
-            TeamDataRepository teamDataRepository)
+            TeamDataRepository teamDataRepository,
+            PretreatQueue pretreatQueue)
         {
             this.configuration = configuration;
             this.notificationDataRepository = notificationDataRepository;
             this.teamDataRepository = teamDataRepository;
+            this.pretreatQueue = pretreatQueue;
         }
 
         /// <summary>
@@ -55,15 +59,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateSentNotificationAsync([FromBody]DraftNotification draftNotification)
         {
-            var serializedDraftNotification = JsonConvert.SerializeObject(draftNotification.Id);
-            var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(serializedDraftNotification));
-
-            string serviceBusConnectionString = this.configuration["ServiceBusConnection"];
-            string queueName = "company-communicator-pretreat";
-            var messageSender = new MessageSender(serviceBusConnectionString, queueName);
-            serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(1);
-
-            await messageSender.SendAsync(serviceBusMessage);
+            var serializedDraftNotificationId = JsonConvert.SerializeObject(draftNotification.Id);
+            var message = new Message(Encoding.UTF8.GetBytes(serializedDraftNotificationId));
+            message.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(1);
+            await this.pretreatQueue.SendAsync(message);
 
             return this.Ok();
         }

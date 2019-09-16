@@ -82,6 +82,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// <returns>A task that represents the work queued to execute.</returns>
         public async Task DeleteAsync(T entity)
         {
+            var partitionKey = entity.PartitionKey;
+            var rowKey = entity.RowKey;
+            entity = await this.GetAsync(partitionKey, rowKey);
+            if (entity == null)
+            {
+                throw new KeyNotFoundException(
+                    $"Not found in table storage. PartitionKey = {partitionKey}, RowKey = {rowKey}");
+            }
+
             var operation = TableOperation.Delete(entity);
 
             await this.Table.ExecuteAsync(operation);

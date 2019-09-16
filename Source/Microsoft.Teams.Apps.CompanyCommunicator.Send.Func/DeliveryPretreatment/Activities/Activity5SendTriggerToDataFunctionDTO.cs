@@ -1,13 +1,13 @@
-﻿// <copyright file="SendTriggerToDataFunctionActivityDTO.cs" company="Microsoft">
+﻿// <copyright file="Activity5SendTriggerToDataFunctionDTO.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment.Activities
 {
     /// <summary>
     /// DTO class used by the SendTriggerToDataFunctionActivity as parameter type.
     /// </summary>
-    public class SendTriggerToDataFunctionActivityDTO
+    public class Activity5SendTriggerToDataFunctionDTO
     {
         /// <summary>
         /// Gets or sets notification id.
@@ -17,6 +17,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         /// <summary>
         /// Gets or sets total message count.
         /// </summary>
-        public int TotalMessageCount { get; set; }
+        public int TotalMessagesToBeSentToServiceBusCount { get; set; }
     }
 }

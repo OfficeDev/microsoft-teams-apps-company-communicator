@@ -156,5 +156,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets or sets the sending started DateTime value.
         /// </summary>
         public DateTime? SendingStartedDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the exception message.
+        /// </summary>
+        public string ExceptionMessage { get; set; }
     }
 }
