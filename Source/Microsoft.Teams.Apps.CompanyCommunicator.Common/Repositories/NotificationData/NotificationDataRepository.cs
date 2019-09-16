@@ -104,9 +104,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             await this.CreateOrUpdateAsync(sentNotificationEntity);
 
             // Delete the draft notification.
-            draftNotificationEntity = await this.GetAsync(
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
-                draftNotificationEntity.RowKey);
             await this.DeleteAsync(draftNotificationEntity);
 
             return newId;

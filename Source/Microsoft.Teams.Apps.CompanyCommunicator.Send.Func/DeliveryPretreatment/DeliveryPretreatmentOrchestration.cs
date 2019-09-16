@@ -4,20 +4,51 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment
 {
-    using System.Collections.Generic;
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment.Activities;
 
     /// <summary>
     /// Notification delivery pretreatment service.
     /// </summary>
     public class DeliveryPretreatmentOrchestration
     {
+        private readonly Activity1GetReceiverBatches getReceiverBatchesActivity;
+        private readonly Activity2MoveDraftToSentNotificationPartition moveDraftToSentPartitionActivity;
+        private readonly Activity3CreateSendingNotification createSendingNotificationActivity;
+        private readonly Activity4SendTriggersToSendFunction sendTriggersToSendFunctionActivity;
+        private readonly Activity5SendTriggerToDataFunction sendTriggerToDataFunctionActivity;
+        private readonly Activity6CleanUp cleanUpActivity;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeliveryPretreatmentOrchestration"/> class.
+        /// </summary>
+        /// <param name="getReceiverBatchesActivity">Get receiver batches activity.</param>
+        /// <param name="moveDraftToSentPartitionActivity">Move draft to sent notification partition.</param>
+        /// <param name="createSendingNotificationActivity">Create sending notification activity.</param>
+        /// <param name="sendTriggersToSendFunctionActivity">Send triggers to send function activity.</param>
+        /// <param name="sendTriggerToDataFunctionActivity">Send trigger to data function activity.</param>
+        /// <param name="cleanUpActivity">Clean up activity.</param>
+        public DeliveryPretreatmentOrchestration(
+            Activity1GetReceiverBatches getReceiverBatchesActivity,
+            Activity2MoveDraftToSentNotificationPartition moveDraftToSentPartitionActivity,
+            Activity3CreateSendingNotification createSendingNotificationActivity,
+            Activity4SendTriggersToSendFunction sendTriggersToSendFunctionActivity,
+            Activity5SendTriggerToDataFunction sendTriggerToDataFunctionActivity,
+            Activity6CleanUp cleanUpActivity)
+        {
+            this.getReceiverBatchesActivity = getReceiverBatchesActivity;
+            this.moveDraftToSentPartitionActivity = moveDraftToSentPartitionActivity;
+            this.createSendingNotificationActivity = createSendingNotificationActivity;
+            this.sendTriggersToSendFunctionActivity = sendTriggersToSendFunctionActivity;
+            this.sendTriggerToDataFunctionActivity = sendTriggerToDataFunctionActivity;
+            this.cleanUpActivity = cleanUpActivity;
+        }
+
         /// <summary>
         /// Pretreat notification delivery for target users.
-        /// TODO: To retry in case of failure.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
@@ -27,82 +58,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         {
             var draftNotificationEntity = context.GetInput<NotificationDataEntity>();
 
-            // TODO: To add exception handling.
-            var deduplicatedReceiverEntities = await this.GetAudienceDataListAsync(context, draftNotificationEntity);
+            var newSentNotificationId = string.Empty;
 
-            var newSentNotificationId = await this.MoveDraftToSentPartitionAsync(
-                context,
-                draftNotificationEntity,
-                deduplicatedReceiverEntities);
+            try
+            {
+                var receiverBatches =
+                    await this.getReceiverBatchesActivity.RunAsync(context, draftNotificationEntity);
 
-            await this.CreateSendingNotificationAsync(context, draftNotificationEntity, newSentNotificationId);
+                newSentNotificationId =
+                    await this.moveDraftToSentPartitionActivity.RunAsync(context, draftNotificationEntity, receiverBatches);
 
-            // TODO: To use TPL to send multiple messages to service bus.
-            await this.SendTriggersToSendFunctionAsync(context, deduplicatedReceiverEntities, newSentNotificationId);
+                await this.createSendingNotificationActivity.RunAsync(context, draftNotificationEntity, newSentNotificationId);
 
-            await this.SendTriggerToDataFunctionAsync(context, deduplicatedReceiverEntities, newSentNotificationId);
-        }
+                await this.sendTriggersToSendFunctionActivity.RunAsync(context, receiverBatches, newSentNotificationId);
 
-        private async Task SendTriggerToDataFunctionAsync(
-            DurableOrchestrationContext context,
-            IList<UserDataEntity> deduplicatedReceiverEntities,
-            string newSentNotificationId)
-        {
-            await context.CallActivityAsync(
-                nameof(SendTriggerToDataFunctionActivity.SendTriggerToDataFunctionAsync),
-                new SendTriggerToDataFunctionActivityDTO
-                {
-                    NotificationId = newSentNotificationId,
-                    TotalMessageCount = deduplicatedReceiverEntities.Count,
-                });
-        }
-
-        private async Task SendTriggersToSendFunctionAsync(
-            DurableOrchestrationContext context,
-            IList<UserDataEntity> deduplicatedReceiverEntities,
-            string newSentNotificationId)
-        {
-            await context.CallActivityAsync(
-                nameof(SendTriggersToSendFunctionActivity.SendTriggersToSendFunctionAsync),
-                new SendTriggersToSendFunctionActivityDTO
-                {
-                    DeduplicatedReceiverEntities = deduplicatedReceiverEntities,
-                    NewSentNotificationId = newSentNotificationId,
-                });
-        }
-
-        private async Task CreateSendingNotificationAsync(
-            DurableOrchestrationContext context,
-            NotificationDataEntity draftNotificationEntity,
-            string newSentNotificationId)
-        {
-            draftNotificationEntity.RowKey = newSentNotificationId;
-            await context.CallActivityAsync(
-                nameof(CreateSendingNotificationActivity.CreateSendingNotificationAsync),
-                draftNotificationEntity);
-        }
-
-        private async Task<string> MoveDraftToSentPartitionAsync(
-            DurableOrchestrationContext context,
-            NotificationDataEntity draftNotificationEntity,
-            IList<UserDataEntity> deduplicatedReceiverEntities)
-        {
-            return await context.CallActivityAsync<string>(
-                nameof(MoveDraftToSentNotificationPartitionActivity.MoveDraftToSentNotificationPartitionAsync),
-                new MoveDraftToSentNotificationPartitionActivityDTO
-                {
-                    DraftNotificationEntity = draftNotificationEntity,
-                    TotalAudienceCount = deduplicatedReceiverEntities.Count,
-                });
-        }
-
-        private async Task<IList<UserDataEntity>> GetAudienceDataListAsync(
-            DurableOrchestrationContext context,
-            NotificationDataEntity draftNotificationEntity)
-        {
-            return await context.CallActivityAsync<IList<UserDataEntity>>(
-                nameof(GetAudienceDataListActivity.GetAudienceDataListAsync),
-                draftNotificationEntity);
+                await this.sendTriggerToDataFunctionActivity.RunAsync(context, newSentNotificationId, receiverBatches);
+            }
+            catch (Exception ex)
+            {
+                await this.cleanUpActivity.RunAsync(context, draftNotificationEntity, newSentNotificationId, ex);
+            }
         }
     }
 }
