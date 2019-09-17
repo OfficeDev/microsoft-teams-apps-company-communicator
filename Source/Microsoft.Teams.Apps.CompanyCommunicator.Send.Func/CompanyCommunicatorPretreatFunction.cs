@@ -13,7 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
     /// <summary>
     /// Azure Function App triggered by messages from a Service Bus queue
-    /// Used for aggregating results for a sent notification.
+    /// Used for preparing to send a notification.
     /// </summary>
     public class CompanyCommunicatorPretreatFunction
     {
@@ -24,7 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorPretreatFunction"/> class.
         /// </summary>
-        /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
+        /// <param name="notificationDataRepository">Notification data repository service.</param>
         public CompanyCommunicatorPretreatFunction(
             NotificationDataRepository notificationDataRepository)
         {
@@ -48,17 +48,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             DurableOrchestrationClient starter)
         {
             var partitionKey = PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition;
-            var draftNotificationId = JsonConvert.DeserializeObject<string>(myQueueItem);
-            var draftNotificationEntity =
-                await this.notificationDataRepository.GetAsync(partitionKey, draftNotificationId);
-            if (draftNotificationEntity != null && draftNotificationEntity.IsDraft)
+            var notificationDataEntityId = JsonConvert.DeserializeObject<string>(myQueueItem);
+            var notificationDataEntity =
+                await this.notificationDataRepository.GetAsync(partitionKey, notificationDataEntityId);
+            if (notificationDataEntity != null)
             {
                 string instanceId = await starter.StartNewAsync(
-                    nameof(DeliveryPretreatmentOrchestration.PretreatAsync),
-                    draftNotificationEntity);
-
-                draftNotificationEntity.IsDraft = false;
-                await this.notificationDataRepository.CreateOrUpdateAsync(draftNotificationEntity);
+                    nameof(DeliveryPretreatmentOrchestration.StartOrchestrationAsync),
+                    notificationDataEntity);
             }
         }
     }

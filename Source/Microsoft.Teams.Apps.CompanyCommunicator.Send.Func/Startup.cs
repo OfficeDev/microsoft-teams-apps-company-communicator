@@ -36,12 +36,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<TableRowKeyGenerator>();
             builder.Services.AddTransient<SendQueue>();
             builder.Services.AddTransient<DataQueue>();
-            builder.Services.AddTransient<Activity1GetReceiverBatches>();
-            builder.Services.AddTransient<Activity2MoveDraftToSentNotificationPartition>();
-            builder.Services.AddTransient<Activity3CreateSendingNotification>();
-            builder.Services.AddTransient<Activity4SendTriggersToSendFunction>();
-            builder.Services.AddTransient<Activity5SendTriggerToDataFunction>();
-            builder.Services.AddTransient<Activity6CleanUp>();
+            builder.Services.AddTransient<Activity1GetRecipientDataBatches>();
+            builder.Services.AddTransient<Activity2CreateSendingNotification>();
+            builder.Services.AddTransient<Activity3SendTriggersToSendFunction>();
+            builder.Services.AddTransient<Activity4SendTriggerToDataFunction>();
+            builder.Services.AddTransient<Activity5CleanUp>();
         }
     }
 }

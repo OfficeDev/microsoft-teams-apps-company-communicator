@@ -4,6 +4,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData
 {
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
 
     /// <summary>

@@ -1,4 +1,4 @@
-﻿// <copyright file="Activity6CleanUpDTO.cs" company="Microsoft">
+﻿// <copyright file="Activity5CleanUpDTO.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -10,17 +10,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
     /// <summary>
     /// DTO class used by the Activity7CleanUp as parameter type.
     /// </summary>
-    public class Activity6CleanUpDTO
+    public class Activity5CleanUpDTO
     {
         /// <summary>
-        /// Gets or sets new sent notification id.
+        /// Gets or sets new sent notification data entity.
         /// </summary>
-        public string NewSentNotificationId { get; set; }
-
-        /// <summary>
-        /// Gets or sets draft notification entity.
-        /// </summary>
-        public NotificationDataEntity DraftNotificationEntity { get; set; }
+        public NotificationDataEntity NotificationDataEntity { get; set; }
 
         /// <summary>
         /// Gets or sets Exception.

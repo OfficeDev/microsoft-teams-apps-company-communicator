@@ -11,8 +11,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
     using Microsoft.Bot.Connector;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Logging;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Newtonsoft.Json.Linq;
@@ -25,6 +26,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         private readonly IConfiguration configuration;
         private readonly UserDataRepository userDataRepository;
         private readonly TeamDataRepository teamDataRepository;
+        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly SentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataProvider"/> class.
@@ -32,30 +35,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         /// <param name="configuration">The configuration.</param>
         /// <param name="userDataRepository">User Data repository service.</param>
         /// <param name="teamDataRepository">Team Data repository service.</param>
+        /// <param name="notificationDataRepository">Notification data repository service.</param>
+        /// <param name="sentNotificationDataRepository">Sent notificaion data repository service.</param>
         public MetadataProvider(
             IConfiguration configuration,
             UserDataRepository userDataRepository,
-            TeamDataRepository teamDataRepository)
+            TeamDataRepository teamDataRepository,
+            NotificationDataRepository notificationDataRepository,
+            SentNotificationDataRepository sentNotificationDataRepository)
         {
             this.configuration = configuration;
             this.userDataRepository = userDataRepository;
             this.teamDataRepository = teamDataRepository;
+            this.notificationDataRepository = notificationDataRepository;
+            this.sentNotificationDataRepository = sentNotificationDataRepository;
         }
 
         /// <summary>
-        /// Get all user data.
+        /// Get all user data entity list.
         /// </summary>
         /// <returns>User data dictionary.</returns>
-        public async Task<Dictionary<string, UserDataEntity>> GetUserDataDictionaryAsync()
+        public async Task<List<UserDataEntity>> GetUserDataEntityListAsync()
         {
             var userDataEntities = await this.userDataRepository.GetAllAsync();
-            var result = new Dictionary<string, UserDataEntity>();
-            foreach (var userDataEntity in userDataEntities)
-            {
-                result.Add(userDataEntity.AadId, userDataEntity);
-            }
 
-            return result;
+            return userDataEntities.ToList();
         }
 
         /// <summary>
@@ -77,24 +81,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         }
 
         /// <summary>
+        /// GEt team data entities by team ids.
+        /// </summary>
+        /// <param name="teamIds">Team ids.</param>
+        /// <returns>It returns the team data entities matching the incoming ids.</returns>
+        public async Task<IEnumerable<TeamDataEntity>> GetTeamDataEntityListByIdsAsync(IEnumerable<string> teamIds)
+        {
+            var teamDataEntities = await this.teamDataRepository.GetTeamDataEntitiesByIdsAsync(teamIds);
+            return teamDataEntities;
+        }
+
+        /// <summary>
         /// Get multiple teams' roster.
         /// </summary>
         /// <param name="teamIds">List of team ids.</param>
         /// <returns>Roster of the multiple teams.</returns>
-        public async Task<IDictionary<string, UserDataEntity>> GetTeamsRostersAsync(IEnumerable<string> teamIds)
+        public async Task<List<UserDataEntity>> GetTeamsRostersAsync(IEnumerable<string> teamIds)
         {
             var teamDataEntities = await this.teamDataRepository.GetTeamDataEntitiesByIdsAsync(teamIds);
 
-            var rosterUserDataEntityDictionary = new Dictionary<string, UserDataEntity>();
+            var rosterUserDataEntities = new List<UserDataEntity>();
 
             foreach (var teamDataEntity in teamDataEntities)
             {
                 var roster = await this.GetTeamRosterAsync(teamDataEntity.ServiceUrl, teamDataEntity.TeamId);
 
-                this.AddRosterToUserDataEntityDictionary(roster, rosterUserDataEntityDictionary);
+                rosterUserDataEntities.AddRange(roster);
             }
 
-            return rosterUserDataEntityDictionary;
+            return rosterUserDataEntities;
         }
 
         /// <summary>
@@ -196,11 +211,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         /// </summary>
         /// <param name="teamIds">Team IDs.</param>
         /// <returns>List of user data entities.</returns>
-        public async Task<IEnumerable<UserDataEntity>> GetTeamsReceiverEntities(IEnumerable<string> teamIds)
+        public async Task<List<UserDataEntity>> GetTeamsRecipientDataEntityList(IEnumerable<string> teamIds)
         {
             var teamDataEntities = await this.teamDataRepository.GetTeamDataEntitiesByIdsAsync(teamIds);
 
-            IList<UserDataEntity> teamReceiverEntities = new List<UserDataEntity>();
+            var teamReceiverEntities = new List<UserDataEntity>();
 
             foreach (var teamDataEntity in teamDataEntities)
             {
@@ -217,58 +232,89 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         }
 
         /// <summary>
-        /// Get deduplicated receiver entities.
+        /// Initialize sent notification data for all recipient batches.
         /// </summary>
-        /// <param name="draftNotificationEntity">Draft notification entity.</param>
-        /// <param name="log">Log service.</param>
-        /// <returns>It returns the deduplicated user data entities.</returns>
-        public async Task<List<UserDataEntity>> GetDeduplicatedReceiverEntitiesAsync(
-            NotificationDataEntity draftNotificationEntity,
-            ILogger log)
+        /// <param name="sentNotificationDataEntityId">Sent notification data entity id.</param>
+        /// <param name="recipientDataBatches">Recipient data batches.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task InitializeSentNotificationDataAsync(
+            string sentNotificationDataEntityId,
+            List<List<UserDataEntity>> recipientDataBatches)
         {
-            var deduplicatedReceiverEntities = new List<UserDataEntity>();
-
-            if (draftNotificationEntity.AllUsers)
+            foreach (var batch in recipientDataBatches)
             {
-                var usersUserDataEntityDictionary = await this.GetUserDataDictionaryAsync();
-                deduplicatedReceiverEntities.AddRange(usersUserDataEntityDictionary.Select(kvp => kvp.Value));
-                this.Log(log, draftNotificationEntity.Id, "All users");
-            }
-            else if (draftNotificationEntity.Rosters.Count() != 0)
-            {
-                var rosterUserDataEntityDictionary = await this.GetTeamsRostersAsync(draftNotificationEntity.Rosters);
-                deduplicatedReceiverEntities.AddRange(rosterUserDataEntityDictionary.Select(kvp => kvp.Value));
-                this.Log(log, draftNotificationEntity.Id, "Rosters", deduplicatedReceiverEntities.Count);
-            }
-            else if (draftNotificationEntity.Teams.Count() != 0)
-            {
-                var teamsReceiverEntities = await this.GetTeamsReceiverEntities(draftNotificationEntity.Teams);
-                deduplicatedReceiverEntities.AddRange(teamsReceiverEntities);
-                this.Log(log, draftNotificationEntity.Id, "General channels", deduplicatedReceiverEntities.Count);
-            }
-            else
-            {
-                this.Log(log, draftNotificationEntity.Id, "No audience was selected");
+                await this.SetStatusInSentNotificationDataAsync(sentNotificationDataEntityId, batch);
             }
 
-            return deduplicatedReceiverEntities;
+            var notificationDataEntity = await this.notificationDataRepository.GetAsync(
+                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                sentNotificationDataEntityId);
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.TotalMessageCount = recipientDataBatches.SelectMany(p => p).Count();
+            }
         }
 
-        private void Log(ILogger log, string draftNotificationEntityId, string audienceOption)
+        /// <summary>
+        /// Set sent notification data for a recipient batch.
+        /// Set the status in sent notification data.
+        /// Status 0 means initial.
+        /// Status 1 means the send message is already enqued in Azure service bus.
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="recipientDataBatch">A recipient data batch.</param>
+        /// <param name="status">Status code.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task SetStatusInSentNotificationDataAsync(
+            string notificationDataEntityId,
+            List<UserDataEntity> recipientDataBatch,
+            int status = 0)
         {
-            log.LogInformation(
-                "Notification id:{0}. Audience option: {1}",
-                draftNotificationEntityId,
-                audienceOption);
+            var sentNotificationDataEntities = recipientDataBatch.Select(p =>
+            {
+                return new SentNotificationDataEntity
+                {
+                    PartitionKey = notificationDataEntityId,
+                    RowKey = p.AadId,
+                    AadId = p.AadId,
+                    StatusCode = status,
+                };
+            });
+
+            await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(sentNotificationDataEntities);
         }
 
-        private void Log(ILogger log, string draftNotificationEntityId, string audienceOption, int count)
+        /// <summary>
+        /// Get sent notification data entity list by partition key.
+        /// The partition key is a notification's id.
+        /// </summary>
+        /// <param name="sentNotificationDataEntityPartitionKey">Sent notification data entity partition key.</param>
+        /// <returns>A sent notifiation data entity list.</returns>
+        public async Task<IEnumerable<SentNotificationDataEntity>> GetSentNotificationDataEntityListAsync(
+            string sentNotificationDataEntityPartitionKey)
         {
-            log.LogInformation(
-                "Notification id:{0}. Audience option: {1}. Count: {2}",
-                draftNotificationEntityId,
-                audienceOption,
-                count);
+            return await this.sentNotificationDataRepository.GetAllAsync(
+                sentNotificationDataEntityPartitionKey);
+        }
+
+        /// <summary>
+        /// Save exception error message in a notification data entity.
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="errorMessage">Error message.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task SaveExceptionInNotificationDataEntityAsync(
+            string notificationDataEntityId,
+            string errorMessage)
+        {
+            var notificationDataEntity = await this.notificationDataRepository.GetAsync(
+                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                notificationDataEntityId);
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.ExceptionErrorMessage = errorMessage;
+                await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
+            }
         }
     }
 }

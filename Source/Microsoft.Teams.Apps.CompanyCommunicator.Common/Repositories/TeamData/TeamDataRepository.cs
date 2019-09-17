@@ -78,24 +78,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
                 return new List<string>();
             }
 
-            var rowKeysFilter = string.Empty;
-            foreach (var id in ids)
-            {
-                var singleRowKeyFilter = TableQuery.GenerateFilterCondition(
-                    nameof(TableEntity.RowKey),
-                    QueryComparisons.Equal,
-                    id);
-
-                if (string.IsNullOrWhiteSpace(rowKeysFilter))
-                {
-                    rowKeysFilter = singleRowKeyFilter;
-                }
-                else
-                {
-                    rowKeysFilter = TableQuery.CombineFilters(rowKeysFilter, TableOperators.Or, singleRowKeyFilter);
-                }
-            }
-
+            var rowKeysFilter = this.GetRowKeysFilter(ids);
             var teamDataEntities = await this.GetWithFilterAsync(rowKeysFilter);
 
             return teamDataEntities.Select(p => p.Name).OrderBy(p => p);

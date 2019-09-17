@@ -5,7 +5,9 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
@@ -145,6 +147,62 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             var entities = await this.ExecuteQueryAsync(query, count);
 
             return entities;
+        }
+
+        /// <summary>
+        /// Insert a batch of entities.
+        /// The table storage can take up to 100 entities in a batch.
+        /// </summary>
+        /// <param name="entities">Entities to be inserted or merged</param>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task BatchInsertOrMergeAsync(IEnumerable<T> entities)
+        {
+            var array = entities.ToArray();
+            for (var i = 0; i <= array.Length / 100; i++)
+            {
+                var lowerBound = i * 100;
+                var upperBound = Math.Min(lowerBound + 99, array.Length - 1);
+                if (lowerBound > upperBound)
+                {
+                    break;
+                }
+
+                var batchOperation = new TableBatchOperation();
+                for (var j = lowerBound; j <= upperBound; j++)
+                {
+                    batchOperation.InsertOrMerge(array[j]);
+                }
+
+                await this.Table.ExecuteBatchAsync(batchOperation);
+            }
+        }
+
+        /// <summary>
+        /// Get a combined filter with multiple row keys.
+        /// </summary>
+        /// <param name="rowKeys">Multiple row keys.</param>
+        /// <returns>A combined filter.</returns>
+        protected string GetRowKeysFilter(IEnumerable<string> rowKeys)
+        {
+            var rowKeysFilter = string.Empty;
+            foreach (var rowKey in rowKeys)
+            {
+                var singleRowKeyFilter = TableQuery.GenerateFilterCondition(
+                    nameof(TableEntity.RowKey),
+                    QueryComparisons.Equal,
+                    rowKey);
+
+                if (string.IsNullOrWhiteSpace(rowKeysFilter))
+                {
+                    rowKeysFilter = singleRowKeyFilter;
+                }
+                else
+                {
+                    rowKeysFilter = TableQuery.CombineFilters(rowKeysFilter, TableOperators.Or, singleRowKeyFilter);
+                }
+            }
+
+            return rowKeysFilter;
         }
 
         private string CombineFilters(string filter1, string filter2)

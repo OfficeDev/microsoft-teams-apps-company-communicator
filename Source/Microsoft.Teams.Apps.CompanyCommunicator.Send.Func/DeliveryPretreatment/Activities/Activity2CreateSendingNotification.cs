@@ -1,4 +1,4 @@
-﻿// <copyright file="Activity3CreateSendingNotification.cs" company="Microsoft">
+﻿// <copyright file="Activity2CreateSendingNotification.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -12,20 +12,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
 
     /// <summary>
-    /// Create sending notification activity.
+    /// Create sending notification data entity activity.
     /// It's used by the durable function framework.
     /// </summary>
-    public class Activity3CreateSendingNotification
+    public class Activity2CreateSendingNotification
     {
         private readonly SendingNotificationDataRepository sendingNotificationDataRepository;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Activity3CreateSendingNotification"/> class.
+        /// Initializes a new instance of the <see cref="Activity2CreateSendingNotification"/> class.
         /// </summary>
         /// <param name="sendingNotificationDataRepository">Sending notification data repository.</param>
         /// <param name="adaptiveCardCreator">The adaptive card creator.</param>
-        public Activity3CreateSendingNotification(
+        public Activity2CreateSendingNotification(
             SendingNotificationDataRepository sendingNotificationDataRepository,
             AdaptiveCardCreator adaptiveCardCreator)
         {
@@ -37,41 +37,38 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         /// Run the activity.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
-        /// <param name="draftNotificationEntity">Draft notification entity.</param>
-        /// <param name="newSentNotificationId">New sent notification id.</param>
+        /// <param name="notificationDataEntity">Notification data entity.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
             DurableOrchestrationContext context,
-            NotificationDataEntity draftNotificationEntity,
-            string newSentNotificationId)
+            NotificationDataEntity notificationDataEntity)
         {
             var retryOptions = new RetryOptions(TimeSpan.FromSeconds(5), 3);
 
-            draftNotificationEntity.RowKey = newSentNotificationId;
             await context.CallActivityWithRetryAsync(
-                nameof(Activity3CreateSendingNotification.CreateSendingNotificationAsync),
+                nameof(Activity2CreateSendingNotification.CreateSendingNotificationAsync),
                 retryOptions,
-                draftNotificationEntity);
+                notificationDataEntity);
 
-            context.SetCustomStatus(nameof(Activity3CreateSendingNotification.CreateSendingNotificationAsync));
+            context.SetCustomStatus(nameof(Activity2CreateSendingNotification.CreateSendingNotificationAsync));
         }
 
         /// <summary>
         /// Generate an adaptive card in json.
         /// </summary>
-        /// <param name="draftNotificationEntity">The draft notification to be sent to audiences.</param>
+        /// <param name="notificationDataEntity">The notification to be sent to audiences.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(nameof(CreateSendingNotificationAsync))]
         public async Task CreateSendingNotificationAsync(
-            [ActivityTrigger] NotificationDataEntity draftNotificationEntity)
+            [ActivityTrigger] NotificationDataEntity notificationDataEntity)
         {
-            var cardString = this.adaptiveCardCreator.CreateAdaptiveCard(draftNotificationEntity).ToJson();
+            var cardString = this.adaptiveCardCreator.CreateAdaptiveCard(notificationDataEntity).ToJson();
 
             var sendingNotification = new SendingNotificationDataEntity
             {
                 PartitionKey = PartitionKeyNames.NotificationDataTable.SendingNotificationsPartition,
-                RowKey = draftNotificationEntity.RowKey,
-                NotificationId = draftNotificationEntity.RowKey,
+                RowKey = notificationDataEntity.RowKey,
+                NotificationId = notificationDataEntity.RowKey,
                 Content = cardString,
             };
 

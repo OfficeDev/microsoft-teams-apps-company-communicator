@@ -160,6 +160,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <summary>
         /// Gets or sets the exception message.
         /// </summary>
-        public string ExceptionMessage { get; set; }
+        public string ExceptionErrorMessage { get; set; }
     }
 }

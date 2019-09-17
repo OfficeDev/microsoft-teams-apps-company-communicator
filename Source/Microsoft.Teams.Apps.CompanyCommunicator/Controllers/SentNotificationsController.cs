@@ -57,9 +57,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="draftNotification">An instance of <see cref="DraftNotification"/> class.</param>
         /// <returns>The result of an action method.</returns>
         [HttpPost]
-        public async Task<IActionResult> CreateSentNotificationAsync([FromBody]DraftNotification draftNotification)
+        public async Task<IActionResult> CreateSentNotificationAsync(
+            [FromBody]DraftNotification draftNotification)
         {
-            var serializedDraftNotificationId = JsonConvert.SerializeObject(draftNotification.Id);
+            var draftNotificationDataEntity = await this.notificationDataRepository.GetAsync(
+                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                draftNotification.Id);
+            if (draftNotificationDataEntity == null)
+            {
+                return this.NotFound();
+            }
+
+            var notificationDataEntityId =
+                await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity);
+
+            var serializedDraftNotificationId = JsonConvert.SerializeObject(notificationDataEntityId);
             var message = new Message(Encoding.UTF8.GetBytes(serializedDraftNotificationId));
             message.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(1);
             await this.pretreatQueue.SendAsync(message);
