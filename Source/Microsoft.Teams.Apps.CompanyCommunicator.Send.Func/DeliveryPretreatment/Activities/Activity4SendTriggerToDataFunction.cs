@@ -1,4 +1,4 @@
-﻿// <copyright file="Activity5SendTriggerToDataFunction.cs" company="Microsoft">
+﻿// <copyright file="Activity4SendTriggerToDataFunction.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -19,15 +19,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
     /// Send trigger to the Azure data function activity.
     /// It's used by the durable function framework.
     /// </summary>
-    public class Activity5SendTriggerToDataFunction
+    public class Activity4SendTriggerToDataFunction
     {
         private readonly DataQueue dataMessageQueue;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Activity5SendTriggerToDataFunction"/> class.
+        /// Initializes a new instance of the <see cref="Activity4SendTriggerToDataFunction"/> class.
         /// </summary>
         /// <param name="dataMessageQueue">The message queue service connected to the queue 'company-communicator-data'.</param>
-        public Activity5SendTriggerToDataFunction(DataQueue dataMessageQueue)
+        public Activity4SendTriggerToDataFunction(DataQueue dataMessageQueue)
         {
             this.dataMessageQueue = dataMessageQueue;
         }
@@ -36,28 +36,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         /// Run the activity.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
-        /// <param name="newSentNotificationId">New sent notification id.</param>
-        /// <param name="messageBatchesToBeSent">Message batches to be sent to Azure service bus.</param>
+        /// <param name="notificationDataEntityId">New sent notification id.</param>
+        /// <param name="recipientDataBatches">Recipient data batches.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
             DurableOrchestrationContext context,
-            string newSentNotificationId,
-            List<List<UserDataEntity>> messageBatchesToBeSent)
+            string notificationDataEntityId,
+            List<List<UserDataEntity>> recipientDataBatches)
         {
-            var totalMessagesToBeSentToServiceBusCount = messageBatchesToBeSent.SelectMany(p => p).Count();
+            var totalRecipientCount = recipientDataBatches.SelectMany(p => p).Count();
 
             var retryOptions = new RetryOptions(TimeSpan.FromSeconds(5), 3);
 
             await context.CallActivityWithRetryAsync(
-                nameof(Activity5SendTriggerToDataFunction.SendTriggerToDataFunctionAsync),
+                nameof(Activity4SendTriggerToDataFunction.SendTriggerToDataFunctionAsync),
                 retryOptions,
-                new Activity5SendTriggerToDataFunctionDTO
+                new Activity4SendTriggerToDataFunctionDTO
                 {
-                    NotificationId = newSentNotificationId,
-                    TotalMessagesToBeSentToServiceBusCount = totalMessagesToBeSentToServiceBusCount,
+                    NotificationDataEntityId = notificationDataEntityId,
+                    TotalRecipientCount = totalRecipientCount,
                 });
 
-            context.SetCustomStatus(nameof(Activity5SendTriggerToDataFunction.SendTriggerToDataFunctionAsync));
+            context.SetCustomStatus(nameof(Activity4SendTriggerToDataFunction.SendTriggerToDataFunctionAsync));
         }
 
         /// <summary>
@@ -67,13 +67,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(nameof(SendTriggerToDataFunctionAsync))]
         public async Task SendTriggerToDataFunctionAsync(
-            [ActivityTrigger] Activity5SendTriggerToDataFunctionDTO input)
+            [ActivityTrigger] Activity4SendTriggerToDataFunctionDTO input)
         {
             var queueMessageContent = new DataQueueMessageContent
             {
-                NotificationId = input.NotificationId,
+                NotificationId = input.NotificationDataEntityId,
                 InitialSendDate = DateTime.UtcNow,
-                TotalMessageCount = input.TotalMessagesToBeSentToServiceBusCount,
+                TotalMessageCount = input.TotalRecipientCount,
             };
             var messageBody = JsonConvert.SerializeObject(queueMessageContent);
             var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));

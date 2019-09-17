@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
     using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment.Activities;
 
@@ -15,32 +16,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
     /// </summary>
     public class DeliveryPretreatmentOrchestration
     {
-        private readonly Activity1GetReceiverBatches getReceiverBatchesActivity;
-        private readonly Activity2MoveDraftToSentNotificationPartition moveDraftToSentPartitionActivity;
-        private readonly Activity3CreateSendingNotification createSendingNotificationActivity;
-        private readonly Activity4SendTriggersToSendFunction sendTriggersToSendFunctionActivity;
-        private readonly Activity5SendTriggerToDataFunction sendTriggerToDataFunctionActivity;
-        private readonly Activity6CleanUp cleanUpActivity;
+        private readonly Activity1GetRecipientDataBatches getRecipientDataBatchesActivity;
+        private readonly Activity2CreateSendingNotification createSendingNotificationActivity;
+        private readonly Activity3SendTriggersToSendFunction sendTriggersToSendFunctionActivity;
+        private readonly Activity4SendTriggerToDataFunction sendTriggerToDataFunctionActivity;
+        private readonly Activity5CleanUp cleanUpActivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DeliveryPretreatmentOrchestration"/> class.
         /// </summary>
-        /// <param name="getReceiverBatchesActivity">Get receiver batches activity.</param>
-        /// <param name="moveDraftToSentPartitionActivity">Move draft to sent notification partition.</param>
+        /// <param name="getRecipientDataBatchesActivity">Get recipient data batches activity.</param>
         /// <param name="createSendingNotificationActivity">Create sending notification activity.</param>
         /// <param name="sendTriggersToSendFunctionActivity">Send triggers to send function activity.</param>
         /// <param name="sendTriggerToDataFunctionActivity">Send trigger to data function activity.</param>
         /// <param name="cleanUpActivity">Clean up activity.</param>
         public DeliveryPretreatmentOrchestration(
-            Activity1GetReceiverBatches getReceiverBatchesActivity,
-            Activity2MoveDraftToSentNotificationPartition moveDraftToSentPartitionActivity,
-            Activity3CreateSendingNotification createSendingNotificationActivity,
-            Activity4SendTriggersToSendFunction sendTriggersToSendFunctionActivity,
-            Activity5SendTriggerToDataFunction sendTriggerToDataFunctionActivity,
-            Activity6CleanUp cleanUpActivity)
+            Activity1GetRecipientDataBatches getRecipientDataBatchesActivity,
+            Activity2CreateSendingNotification createSendingNotificationActivity,
+            Activity3SendTriggersToSendFunction sendTriggersToSendFunctionActivity,
+            Activity4SendTriggerToDataFunction sendTriggerToDataFunctionActivity,
+            Activity5CleanUp cleanUpActivity)
         {
-            this.getReceiverBatchesActivity = getReceiverBatchesActivity;
-            this.moveDraftToSentPartitionActivity = moveDraftToSentPartitionActivity;
+            this.getRecipientDataBatchesActivity = getRecipientDataBatchesActivity;
             this.createSendingNotificationActivity = createSendingNotificationActivity;
             this.sendTriggersToSendFunctionActivity = sendTriggersToSendFunctionActivity;
             this.sendTriggerToDataFunctionActivity = sendTriggerToDataFunctionActivity;
@@ -48,35 +45,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         }
 
         /// <summary>
-        /// Pretreat notification delivery for target users.
+        /// Start the delivery pretreatment orchestration..
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
+        /// <param name="log">Logging service.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        [FunctionName(nameof(PretreatAsync))]
-        public async Task PretreatAsync(
-            [OrchestrationTrigger] DurableOrchestrationContext context)
+        [FunctionName(nameof(StartOrchestrationAsync))]
+        public async Task StartOrchestrationAsync(
+            [OrchestrationTrigger] DurableOrchestrationContext context,
+            ILogger log)
         {
-            var draftNotificationEntity = context.GetInput<NotificationDataEntity>();
-
-            var newSentNotificationId = string.Empty;
+            var notificationDataEntity = context.GetInput<NotificationDataEntity>();
 
             try
             {
                 var receiverBatches =
-                    await this.getReceiverBatchesActivity.RunAsync(context, draftNotificationEntity);
+                    await this.getRecipientDataBatchesActivity.RunAsync(context, notificationDataEntity, log);
 
-                newSentNotificationId =
-                    await this.moveDraftToSentPartitionActivity.RunAsync(context, draftNotificationEntity, receiverBatches);
+                await this.createSendingNotificationActivity.RunAsync(context, notificationDataEntity);
 
-                await this.createSendingNotificationActivity.RunAsync(context, draftNotificationEntity, newSentNotificationId);
+                await this.sendTriggersToSendFunctionActivity.RunAsync(context, receiverBatches, notificationDataEntity.Id);
 
-                await this.sendTriggersToSendFunctionActivity.RunAsync(context, receiverBatches, newSentNotificationId);
-
-                await this.sendTriggerToDataFunctionActivity.RunAsync(context, newSentNotificationId, receiverBatches);
+                await this.sendTriggerToDataFunctionActivity.RunAsync(context, notificationDataEntity.Id, receiverBatches);
             }
             catch (Exception ex)
             {
-                await this.cleanUpActivity.RunAsync(context, draftNotificationEntity, newSentNotificationId, ex);
+                await this.cleanUpActivity.RunAsync(context, notificationDataEntity, ex);
             }
         }
     }
