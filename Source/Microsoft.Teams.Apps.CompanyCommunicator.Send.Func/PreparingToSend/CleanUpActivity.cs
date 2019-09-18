@@ -1,8 +1,8 @@
-﻿// <copyright file="Activity5CleanUp.cs" company="Microsoft">
+﻿// <copyright file="CleanUpActivity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment.Activities
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
 {
     using System;
     using System.Threading.Tasks;
@@ -13,15 +13,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
     /// Send triggers to the Azure send function activity.
     /// It's used by the durable function framework.
     /// </summary>
-    public class Activity5CleanUp
+    public class CleanUpActivity
     {
         private readonly MetadataProvider metadataProvider;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Activity5CleanUp"/> class.
+        /// Initializes a new instance of the <see cref="CleanUpActivity"/> class.
         /// </summary>
         /// <param name="metadataProvider">Metadata Provider instance.</param>
-        public Activity5CleanUp(MetadataProvider metadataProvider)
+        public CleanUpActivity(MetadataProvider metadataProvider)
         {
             this.metadataProvider = metadataProvider;
         }
@@ -39,8 +39,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
             Exception ex)
         {
             await context.CallActivityAsync(
-                nameof(Activity5CleanUp.CleanUp),
-                new Activity5CleanUpDTO
+                nameof(CleanUpActivity.CleanUp),
+                new CleanUpActivityDTO
                 {
                     NotificationDataEntity = notificationDataEntity,
                     Exception = ex,
@@ -53,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         /// <param name="input">Input value.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(nameof(CleanUp))]
-        public async Task CleanUp([ActivityTrigger] Activity5CleanUpDTO input)
+        public async Task CleanUp([ActivityTrigger] CleanUpActivityDTO input)
         {
             await this.metadataProvider.SaveExceptionInNotificationDataEntityAsync(
                 input.NotificationDataEntity.Id,

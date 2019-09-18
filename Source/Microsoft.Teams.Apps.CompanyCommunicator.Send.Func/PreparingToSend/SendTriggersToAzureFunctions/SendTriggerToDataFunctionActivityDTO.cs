@@ -1,13 +1,13 @@
-﻿// <copyright file="Activity4SendTriggerToDataFunctionDTO.cs" company="Microsoft">
+﻿// <copyright file="SendTriggerToDataFunctionActivityDTO.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment.Activities
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.SendTriggersToAzureFunctions
 {
     /// <summary>
     /// DTO class used by the SendTriggerToDataFunctionActivity as parameter type.
     /// </summary>
-    public class Activity4SendTriggerToDataFunctionDTO
+    public class SendTriggerToDataFunctionActivityDTO
     {
         /// <summary>
         /// Gets or sets notification data entity id.
