@@ -1,8 +1,8 @@
-﻿// <copyright file="Activity2CreateSendingNotification.cs" company="Microsoft">
+﻿// <copyright file="CreateSendingNotificationActivity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment.Activities
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.SendTriggersToAzureFunctions
 {
     using System;
     using System.Threading.Tasks;
@@ -15,17 +15,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
     /// Create sending notification data entity activity.
     /// It's used by the durable function framework.
     /// </summary>
-    public class Activity2CreateSendingNotification
+    public class CreateSendingNotificationActivity
     {
         private readonly SendingNotificationDataRepository sendingNotificationDataRepository;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Activity2CreateSendingNotification"/> class.
+        /// Initializes a new instance of the <see cref="CreateSendingNotificationActivity"/> class.
         /// </summary>
         /// <param name="sendingNotificationDataRepository">Sending notification data repository.</param>
         /// <param name="adaptiveCardCreator">The adaptive card creator.</param>
-        public Activity2CreateSendingNotification(
+        public CreateSendingNotificationActivity(
             SendingNotificationDataRepository sendingNotificationDataRepository,
             AdaptiveCardCreator adaptiveCardCreator)
         {
@@ -46,11 +46,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
             var retryOptions = new RetryOptions(TimeSpan.FromSeconds(5), 3);
 
             await context.CallActivityWithRetryAsync(
-                nameof(Activity2CreateSendingNotification.CreateSendingNotificationAsync),
+                nameof(CreateSendingNotificationActivity.CreateSendingNotificationAsync),
                 retryOptions,
                 notificationDataEntity);
-
-            context.SetCustomStatus(nameof(Activity2CreateSendingNotification.CreateSendingNotificationAsync));
         }
 
         /// <summary>

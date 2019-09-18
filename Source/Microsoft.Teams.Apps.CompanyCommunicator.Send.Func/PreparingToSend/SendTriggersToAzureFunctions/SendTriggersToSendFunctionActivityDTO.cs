@@ -1,8 +1,8 @@
-﻿// <copyright file="Activity3SendTriggersToSendFunctionDTO.cs" company="Microsoft">
+﻿// <copyright file="SendTriggersToSendFunctionActivityDTO.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment.Activities
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.SendTriggersToAzureFunctions
 {
     using System.Collections.Generic;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
@@ -10,7 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
     /// <summary>
     /// DTO class used by the SendTriggerToDataFunctionActivity as parameter type.
     /// </summary>
-    public class Activity3SendTriggersToSendFunctionDTO
+    public class SendTriggersToSendFunctionActivityDTO
     {
         /// <summary>
         /// Gets or sets notification data entity id.
@@ -20,7 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         /// <summary>
         /// Gets or sets recipient data batch.
         /// </summary>
-        public List<UserDataEntity> RecipientDataBatch { get; set; }
+        public IEnumerable<UserDataEntity> RecipientDataBatch { get; set; }
 
         /// <summary>
         /// Gets or sets recipient status dictionary.

@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment.Activities
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
 {
     using System;
     using System.Collections.Generic;
@@ -55,11 +55,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         /// Get all user data entity list.
         /// </summary>
         /// <returns>User data dictionary.</returns>
-        public async Task<List<UserDataEntity>> GetUserDataEntityListAsync()
+        public async Task<IEnumerable<UserDataEntity>> GetUserDataEntityListAsync()
         {
             var userDataEntities = await this.userDataRepository.GetAllAsync();
 
-            return userDataEntities.ToList();
+            return userDataEntities;
         }
 
         /// <summary>
@@ -232,26 +232,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         }
 
         /// <summary>
-        /// Initialize sent notification data for all recipient batches.
+        /// Set total recipient count in notification data entity.
         /// </summary>
-        /// <param name="sentNotificationDataEntityId">Sent notification data entity id.</param>
-        /// <param name="recipientDataBatches">Recipient data batches.</param>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="recipientDataList">Recipient data list.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task InitializeSentNotificationDataAsync(
-            string sentNotificationDataEntityId,
-            List<List<UserDataEntity>> recipientDataBatches)
+        public async Task SetTotalRecipientCountInNotificationDataAsync(
+            string notificationDataEntityId,
+            IEnumerable<UserDataEntity> recipientDataList)
         {
-            foreach (var batch in recipientDataBatches)
-            {
-                await this.SetStatusInSentNotificationDataAsync(sentNotificationDataEntityId, batch);
-            }
-
             var notificationDataEntity = await this.notificationDataRepository.GetAsync(
                 PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
-                sentNotificationDataEntityId);
+                notificationDataEntityId);
             if (notificationDataEntity != null)
             {
-                notificationDataEntity.TotalMessageCount = recipientDataBatches.SelectMany(p => p).Count();
+                notificationDataEntity.TotalMessageCount = recipientDataList.Count();
             }
         }
 
@@ -267,7 +262,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task SetStatusInSentNotificationDataAsync(
             string notificationDataEntityId,
-            List<UserDataEntity> recipientDataBatch,
+            IEnumerable<UserDataEntity> recipientDataBatch,
             int status = 0)
         {
             var sentNotificationDataEntities = recipientDataBatch.Select(p =>

@@ -27,28 +27,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Route("api/sentNotifications")]
     public class SentNotificationsController : ControllerBase
     {
-        private readonly IConfiguration configuration;
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly TeamDataRepository teamDataRepository;
-        private readonly PretreatQueue pretreatQueue;
+        private readonly PrepareToSendQueue prepareToSendQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
         /// </summary>
-        /// <param name="configuration">ASP.NET Core <see cref="IConfiguration"/> instance.</param>
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
-        /// <param name="pretreatQueue">Pretreat queue in Azure service bus.</param>
+        /// <param name="prepareToSendQueue">The service bus queue for preparing to send notifications.</param>
         public SentNotificationsController(
-            IConfiguration configuration,
             NotificationDataRepository notificationDataRepository,
             TeamDataRepository teamDataRepository,
-            PretreatQueue pretreatQueue)
+            PrepareToSendQueue prepareToSendQueue)
         {
-            this.configuration = configuration;
             this.notificationDataRepository = notificationDataRepository;
             this.teamDataRepository = teamDataRepository;
-            this.pretreatQueue = pretreatQueue;
+            this.prepareToSendQueue = prepareToSendQueue;
         }
 
         /// <summary>
@@ -74,7 +70,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var serializedDraftNotificationId = JsonConvert.SerializeObject(notificationDataEntityId);
             var message = new Message(Encoding.UTF8.GetBytes(serializedDraftNotificationId));
             message.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(1);
-            await this.pretreatQueue.SendAsync(message);
+            await this.prepareToSendQueue.SendAsync(message);
 
             return this.Ok();
         }

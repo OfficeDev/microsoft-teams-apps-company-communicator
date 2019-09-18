@@ -1,8 +1,8 @@
-﻿// <copyright file="Activity4SendTriggerToDataFunction.cs" company="Microsoft">
+﻿// <copyright file="SendTriggerToDataFunctionActivity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatment.Activities
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.SendTriggersToAzureFunctions
 {
     using System;
     using System.Collections.Generic;
@@ -19,15 +19,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
     /// Send trigger to the Azure data function activity.
     /// It's used by the durable function framework.
     /// </summary>
-    public class Activity4SendTriggerToDataFunction
+    public class SendTriggerToDataFunctionActivity
     {
         private readonly DataQueue dataMessageQueue;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Activity4SendTriggerToDataFunction"/> class.
+        /// Initializes a new instance of the <see cref="SendTriggerToDataFunctionActivity"/> class.
         /// </summary>
         /// <param name="dataMessageQueue">The message queue service connected to the queue 'company-communicator-data'.</param>
-        public Activity4SendTriggerToDataFunction(DataQueue dataMessageQueue)
+        public SendTriggerToDataFunctionActivity(DataQueue dataMessageQueue)
         {
             this.dataMessageQueue = dataMessageQueue;
         }
@@ -42,22 +42,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         public async Task RunAsync(
             DurableOrchestrationContext context,
             string notificationDataEntityId,
-            List<List<UserDataEntity>> recipientDataBatches)
+            IEnumerable<IEnumerable<UserDataEntity>> recipientDataBatches)
         {
             var totalRecipientCount = recipientDataBatches.SelectMany(p => p).Count();
 
             var retryOptions = new RetryOptions(TimeSpan.FromSeconds(5), 3);
 
             await context.CallActivityWithRetryAsync(
-                nameof(Activity4SendTriggerToDataFunction.SendTriggerToDataFunctionAsync),
+                nameof(SendTriggerToDataFunctionActivity.SendTriggerToDataFunctionAsync),
                 retryOptions,
-                new Activity4SendTriggerToDataFunctionDTO
+                new SendTriggerToDataFunctionActivityDTO
                 {
                     NotificationDataEntityId = notificationDataEntityId,
                     TotalRecipientCount = totalRecipientCount,
                 });
-
-            context.SetCustomStatus(nameof(Activity4SendTriggerToDataFunction.SendTriggerToDataFunctionAsync));
         }
 
         /// <summary>
@@ -67,7 +65,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.DeliveryPretreatmen
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(nameof(SendTriggerToDataFunctionAsync))]
         public async Task SendTriggerToDataFunctionAsync(
-            [ActivityTrigger] Activity4SendTriggerToDataFunctionDTO input)
+            [ActivityTrigger] SendTriggerToDataFunctionActivityDTO input)
         {
             var queueMessageContent = new DataQueueMessageContent
             {

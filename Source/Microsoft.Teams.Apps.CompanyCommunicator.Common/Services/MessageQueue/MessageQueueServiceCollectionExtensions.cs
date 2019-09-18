@@ -21,7 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
 
             services.AddTransient<SendQueue>();
 
-            services.AddTransient<PretreatQueue>();
+            services.AddTransient<PrepareToSendQueue>();
         }
     }
 }
