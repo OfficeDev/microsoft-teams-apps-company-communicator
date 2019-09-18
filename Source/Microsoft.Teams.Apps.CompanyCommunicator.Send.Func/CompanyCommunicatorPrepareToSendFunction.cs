@@ -47,7 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             [OrchestrationClient]
             DurableOrchestrationClient starter)
         {
-            var partitionKey = PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition;
+            var partitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition;
             var notificationDataEntityId = JsonConvert.DeserializeObject<string>(myQueueItem);
             var notificationDataEntity =
                 await this.notificationDataRepository.GetAsync(partitionKey, notificationDataEntityId);
