@@ -50,14 +50,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
             string notificationDataEntityId)
         {
             var recipientStatusDictionary =
-                await this.GetRecipientStatusDictionaryAsync(notificationDataEntityId);
+                this.GetRecipientStatusDictionary(notificationDataEntityId);
 
             var tasks = new List<Task>();
             foreach (var batch in recipientDataBatches)
             {
-                var task = context.CallActivityWithRetryAsync(
-                    nameof(SendTriggersToSendFunctionActivity.SendTriggersToSendFunctionAsync),
-                    new RetryOptions(TimeSpan.FromSeconds(5), 3),
+                var task = context.CallSubOrchestratorAsync(
+                    nameof(SendTriggersToSendFunctionActivity.ProcessRecipientBatchAsync),
                     new SendTriggersToSendFunctionActivityDTO
                     {
                         NotificationDataEntityId = notificationDataEntityId,
@@ -71,9 +70,41 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         }
 
         /// <summary>
-        /// Send trigger to the Azure send function.
+        /// Process a recipient batch in a durable orchestration.
         /// 1). Send trigger for recipients whose status is 0 only.
-        /// 2). Set recipients' status to 1 after sending triggers for them.
+        /// 2). Set recipients' status to 1 after sending triggers to the send queue.
+        /// </summary>
+        /// <param name="context">Durable orchestration context.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [FunctionName(nameof(ProcessRecipientBatchAsync))]
+        public async Task ProcessRecipientBatchAsync(
+            [OrchestrationTrigger] DurableOrchestrationContext context)
+        {
+            var input = context.GetInput<SendTriggersToSendFunctionActivityDTO>();
+
+            try
+            {
+                await context.CallActivityWithRetryAsync(
+                    nameof(SendTriggersToSendFunctionActivity.SendTriggersToSendFunctionAsync),
+                    new RetryOptions(TimeSpan.FromSeconds(5), 3),
+                    input);
+
+                await context.CallActivityWithRetryAsync(
+                    nameof(SendTriggersToSendFunctionActivity.SetRecipientBatchSatusAsync),
+                    new RetryOptions(TimeSpan.FromSeconds(5), 3),
+                    input);
+            }
+            catch (Exception ex)
+            {
+                await this.metadataProvider.SaveWarningInNotificationDataEntityAsync(
+                    input.NotificationDataEntityId,
+                    ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Send trigger to the Azure send function.
+        /// Send trigger for recipients whose status is 0 only.
         /// </summary>
         /// <param name="input">Input value.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
@@ -82,54 +113,68 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
             [ActivityTrigger] SendTriggersToSendFunctionActivityDTO input)
         {
             var recipientDataBatch = input.RecipientDataBatch;
-            var recipientStatusDictionary = input.RecipientStatusDictionary;
             var notificationDataEntityId = input.NotificationDataEntityId;
+            var recipientStatusDictionary = input.RecipientStatusDictionary;
 
             var messages = recipientDataBatch
-                .Select(userDataEntity =>
+                .Select(recipientData =>
                     this.CreateServiceBusQueueMessage(
-                        userDataEntity,
+                        recipientData,
                         notificationDataEntityId,
                         recipientStatusDictionary))
                 .Where(message => message != null)
                 .ToList();
 
             await this.sendMessageQueue.SendAsync(messages);
+        }
+
+        /// <summary>
+        /// Set recipients' status to 1 after sending triggers to the send queue.
+        /// </summary>
+        /// <param name="input">Input value.</param>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [FunctionName(nameof(SetRecipientBatchSatusAsync))]
+        public async Task SetRecipientBatchSatusAsync(
+            [ActivityTrigger] SendTriggersToSendFunctionActivityDTO input)
+        {
+            var notificationDataEntityId = input.NotificationDataEntityId;
+            var recipientDataBatch = input.RecipientDataBatch;
 
             await this.metadataProvider.SetStatusInSentNotificationDataAsync(
                 notificationDataEntityId,
-                recipientDataBatch,
-                1);
+                recipientDataBatch);
         }
 
         private Message CreateServiceBusQueueMessage(
-            UserDataEntity userDataEntity,
+            UserDataEntity recipientData,
             string notificationDataEntityId,
             IDictionary<string, int> recipientStatusDictionary)
         {
-            if (recipientStatusDictionary.TryGetValue(userDataEntity.RowKey, out int status))
+            if (recipientStatusDictionary.TryGetValue(recipientData.AadId, out int status))
             {
                 if (status == 0)
                 {
                     var queueMessageContent = new SendQueueMessageContent
                     {
-                        NotificationDataEntityId = notificationDataEntityId,
-                        UserDataEntity = userDataEntity,
+                        NotificationId = notificationDataEntityId,
+                        UserDataEntity = recipientData,
                     };
                     var messageBody = JsonConvert.SerializeObject(queueMessageContent);
-                    return new Message(Encoding.UTF8.GetBytes(messageBody));
+                    var message = new Message(Encoding.UTF8.GetBytes(messageBody));
+                    return message;
                 }
             }
 
             return null;
         }
 
-        private async Task<IDictionary<string, int>> GetRecipientStatusDictionaryAsync(string notificationDataEntityId)
+        private IDictionary<string, int> GetRecipientStatusDictionary(string notificationDataEntityId)
         {
             var recipientStatusDictionary = new Dictionary<string, int>();
 
-            var sentNotificationDataEntityList =
-                await this.metadataProvider.GetSentNotificationDataEntityListAsync(notificationDataEntityId);
+            var sentNotificationDataEntityList = this.metadataProvider
+                .GetSentNotificationDataEntityListAsync(notificationDataEntityId)
+                .Result;
 
             foreach (var sentNotificationDataEntity in sentNotificationDataEntityList)
             {

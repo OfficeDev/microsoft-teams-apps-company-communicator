@@ -22,14 +22,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     public class SendTriggerToDataFunctionActivity
     {
         private readonly DataQueue dataMessageQueue;
+        private readonly MetadataProvider metadataProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SendTriggerToDataFunctionActivity"/> class.
         /// </summary>
         /// <param name="dataMessageQueue">The message queue service connected to the queue 'company-communicator-data'.</param>
-        public SendTriggerToDataFunctionActivity(DataQueue dataMessageQueue)
+        /// <param name="metadataProvider">Metadata provider.</param>
+        public SendTriggerToDataFunctionActivity(
+            DataQueue dataMessageQueue,
+            MetadataProvider metadataProvider)
         {
             this.dataMessageQueue = dataMessageQueue;
+            this.metadataProvider = metadataProvider;
         }
 
         /// <summary>
@@ -67,17 +72,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         public async Task SendTriggerToDataFunctionAsync(
             [ActivityTrigger] SendTriggerToDataFunctionActivityDTO input)
         {
-            var queueMessageContent = new DataQueueMessageContent
+            try
             {
-                NotificationId = input.NotificationDataEntityId,
-                InitialSendDate = DateTime.UtcNow,
-                TotalMessageCount = input.TotalRecipientCount,
-            };
-            var messageBody = JsonConvert.SerializeObject(queueMessageContent);
-            var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));
-            serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(30);
+                var queueMessageContent = new DataQueueMessageContent
+                {
+                    NotificationId = input.NotificationDataEntityId,
+                    InitialSendDate = DateTime.UtcNow,
+                    TotalMessageCount = input.TotalRecipientCount,
+                };
+                var messageBody = JsonConvert.SerializeObject(queueMessageContent);
+                var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));
+                serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(30);
 
-            await this.dataMessageQueue.SendAsync(serviceBusMessage);
+                await this.dataMessageQueue.SendAsync(serviceBusMessage);
+            }
+            catch (Exception ex)
+            {
+                await this.metadataProvider.SaveExceptionInNotificationDataEntityAsync(
+                    input.NotificationDataEntityId,
+                    ex.Message);
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// <copyright file="NotificationDataEntity.cs" company="Microsoft">
+// <copyright file="NotificationDataEntity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 

@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             if (notificationDataEntity != null)
             {
                 string instanceId = await starter.StartNewAsync(
-                    nameof(PreparingToSendOrchestration.StartOrchestrationAsync),
+                    nameof(PreparingToSendOrchestration.PrepareToSendAsync),
                     notificationDataEntity);
             }
         }

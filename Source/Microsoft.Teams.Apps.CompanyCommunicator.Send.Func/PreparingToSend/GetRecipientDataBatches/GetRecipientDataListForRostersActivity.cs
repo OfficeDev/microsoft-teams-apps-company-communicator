@@ -17,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     /// Get a notification's recipient (team roster) data list.
     /// It's used by the durable function framework.
     /// </summary>
-    public partial class GetRecipientDataListForRostersActivity
+    public class GetRecipientDataListForRostersActivity
     {
         private readonly MetadataProvider metadataProvider;
 
@@ -54,7 +54,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
             {
                 var task = context.CallActivityAsync<IEnumerable<UserDataEntity>>(
                     nameof(GetRecipientDataListForRostersActivity.GetTeamRosterDataAsync),
-                    teamDataEntity);
+                    new GetRecipientDataListForRostersActivityDTO
+                    {
+                        NotificationDataEntityId = notificationDataEntity.Id,
+                        TeamDataEntity = teamDataEntity,
+                    });
 
                 tasks.Add(task);
             }
@@ -83,17 +87,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// <summary>
         /// Get recipient (team roster) batch list.
         /// </summary>
-        /// <param name="teamDataEntity">Team data entity.</param>
+        /// <param name="input">Input data.</param>
         /// <returns>It returns the notification's audience data list.</returns>
         [FunctionName(nameof(GetTeamRosterDataAsync))]
         public async Task<IEnumerable<UserDataEntity>> GetTeamRosterDataAsync(
-            [ActivityTrigger] TeamDataEntity teamDataEntity)
+            [ActivityTrigger] GetRecipientDataListForRostersActivityDTO input)
         {
-            var roster = await this.metadataProvider.GetTeamRosterAsync(
-                teamDataEntity.ServiceUrl,
-                teamDataEntity.TeamId);
+            try
+            {
+                var roster = await this.metadataProvider.GetTeamRosterRecipientDataEntityListAsync(
+                    input.TeamDataEntity.ServiceUrl,
+                    input.TeamDataEntity.TeamId);
 
-            return roster.ToList();
+                return roster.ToList();
+            }
+            catch (Exception ex)
+            {
+                await this.metadataProvider.SaveWarningInNotificationDataEntityAsync(
+                    input.NotificationDataEntityId,
+                    ex.Message);
+
+                return new List<UserDataEntity>();
+            }
         }
     }
 }

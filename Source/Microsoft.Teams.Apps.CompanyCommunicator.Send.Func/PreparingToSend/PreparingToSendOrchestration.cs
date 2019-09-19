@@ -41,8 +41,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        [FunctionName(nameof(StartOrchestrationAsync))]
-        public async Task StartOrchestrationAsync(
+        [FunctionName(nameof(PrepareToSendAsync))]
+        public async Task PrepareToSendAsync(
             [OrchestrationTrigger] DurableOrchestrationContext context)
         {
             var notificationDataEntity = context.GetInput<NotificationDataEntity>();

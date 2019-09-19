@@ -16,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     /// Get a notification's recipient (team general channel) data list.
     /// It's used by the durable function framework.
     /// </summary>
-    public partial class GetRecipientDataListForTeamsActivity
+    public class GetRecipientDataListForTeamsActivity
     {
         private readonly MetadataProvider metadataProvider;
 
@@ -60,10 +60,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         public async Task<IEnumerable<UserDataEntity>> GetTeamRecipientDataListAsync(
             [ActivityTrigger] NotificationDataEntity notificationDataEntity)
         {
-            var teamsRecipientDataList =
-                await this.metadataProvider.GetTeamsRecipientDataEntityList(notificationDataEntity.Teams);
+            try
+            {
+                var teamsRecipientDataList =
+                    await this.metadataProvider.GetTeamsRecipientDataEntityListAsync(notificationDataEntity.Teams);
 
-            return teamsRecipientDataList;
+                return teamsRecipientDataList;
+            }
+            catch (Exception ex)
+            {
+                await this.metadataProvider.SaveWarningInNotificationDataEntityAsync(
+                    notificationDataEntity.Id,
+                    ex.Message);
+
+                return new List<UserDataEntity>();
+            }
         }
     }
 }

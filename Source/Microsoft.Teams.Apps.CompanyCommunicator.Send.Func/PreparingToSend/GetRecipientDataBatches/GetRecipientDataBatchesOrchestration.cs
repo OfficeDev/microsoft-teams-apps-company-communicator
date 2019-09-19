@@ -16,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     /// Get the recipient data batches for sending a notification.
     /// It's a durable framework sub-orchestration.
     /// </summary>
-    public partial class GetRecipientDataBatchesOrchestration
+    public class GetRecipientDataBatchesOrchestration
     {
         private readonly GetRecipientDataListForAllUsersActivity getRecipientDataListForAllUsersActivity;
         private readonly GetRecipientDataListForRostersActivity getRecipientDataListForRostersActivity;
