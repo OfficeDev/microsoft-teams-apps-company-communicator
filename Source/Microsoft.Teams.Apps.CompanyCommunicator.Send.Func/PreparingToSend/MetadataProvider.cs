@@ -266,15 +266,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             int status = 0)
         {
             var sentNotificationDataEntities = recipientDataBatch.Select(p =>
-            {
-                return new SentNotificationDataEntity
+                new SentNotificationDataEntity
                 {
                     PartitionKey = notificationDataEntityId,
                     RowKey = p.AadId,
                     AadId = p.AadId,
                     StatusCode = status,
-                };
-            });
+                }).ToList();
 
             await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(sentNotificationDataEntities);
         }

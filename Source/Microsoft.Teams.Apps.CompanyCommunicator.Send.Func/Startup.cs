@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
@@ -27,11 +28,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <inheritdoc/>
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            builder.Services.AddTransient<PreparingToSendOrchestration>();
             builder.Services.AddTransient<MetadataProvider>();
             builder.Services.AddTransient<AdaptiveCardCreator>();
             builder.Services.AddTransient<NotificationDataRepository>();
             builder.Services.AddTransient<SendingNotificationDataRepository>();
+            builder.Services.AddTransient<SentNotificationDataRepository>();
             builder.Services.AddTransient<UserDataRepository>();
             builder.Services.AddTransient<TeamDataRepository>();
             builder.Services.AddTransient<TableRowKeyGenerator>();
@@ -48,6 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
             builder.Services.AddTransient<SendTriggerToDataFunctionActivity>();
             builder.Services.AddTransient<ProcessRecipientDataListActivity>();
+            builder.Services.AddTransient<CleanUpActivity>();
         }
     }
 }
