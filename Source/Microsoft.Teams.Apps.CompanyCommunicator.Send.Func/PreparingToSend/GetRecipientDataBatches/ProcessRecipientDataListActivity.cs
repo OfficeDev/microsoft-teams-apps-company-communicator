@@ -41,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
             var recipientDataBatches =
                 await context.CallActivityAsync<IEnumerable<IEnumerable<UserDataEntity>>>(
                     nameof(ProcessRecipientDataListActivity.ProcessRecipientDataListAsync),
-                    new GetRecipientDataBatchesActivityDTO
+                    new ProcessRecipientDataListActivityDTO
                     {
                         NotificationDataEntityId = notificationDataEntityId,
                         RecipientDataList = recipientDataList,
@@ -53,8 +53,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// <summary>
         /// Initialize sent notification data entities in Azure table storage.
         /// This function includes the following actions:
-        /// 1). Set status in sent notification data in the table storage.
-        /// 2). Deduplicate recipient data.
+        /// 1). Deduplicate recipient data.
+        /// 2). Set status in sent notification data in the table storage.
         /// 3). Update total recipient count in notification data entity.
         /// 4). Page the recipient data list.
         /// </summary>
@@ -62,14 +62,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(ProcessRecipientDataListAsync))]
         public async Task<IEnumerable<IEnumerable<UserDataEntity>>> ProcessRecipientDataListAsync(
-            [ActivityTrigger] GetRecipientDataBatchesActivityDTO input)
+            [ActivityTrigger] ProcessRecipientDataListActivityDTO input)
         {
-            await this.metadataProvider.SetStatusInSentNotificationDataAsync(
-                input.NotificationDataEntityId,
-                input.RecipientDataList,
-                0);
-
             var deduplicated = new RecipientDataEntityHashSet(input.RecipientDataList);
+
+            await this.metadataProvider.InitializeStatusInSentNotificationDataAsync(
+                input.NotificationDataEntityId,
+                deduplicated);
 
             await this.metadataProvider.SetTotalRecipientCountInNotificationDataAsync(
                 input.NotificationDataEntityId,

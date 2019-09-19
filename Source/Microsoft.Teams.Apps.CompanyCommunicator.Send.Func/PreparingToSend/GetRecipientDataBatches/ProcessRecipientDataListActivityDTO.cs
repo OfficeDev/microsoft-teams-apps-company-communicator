@@ -1,4 +1,4 @@
-﻿// <copyright file="GetRecipientDataBatchesActivityDTO.cs" company="Microsoft">
+﻿// <copyright file="ProcessRecipientDataListActivityDTO.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -10,7 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     /// <summary>
     /// DTO class used by the GetRecipientDataBatchesActivity as parameter type.
     /// </summary>
-    public class GetRecipientDataBatchesActivityDTO
+    public class ProcessRecipientDataListActivityDTO
     {
         /// <summary>
         /// Gets or sets recipient data batches.
