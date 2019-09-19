@@ -52,9 +52,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
             DurableOrchestrationContext context,
             NotificationDataEntity notificationDataEntity)
         {
-            var recipientDataBatches = await context.CallSubOrchestratorAsync<IEnumerable<IEnumerable<UserDataEntity>>>(
-                nameof(GetRecipientDataBatchesOrchestration.GetRecipientDataBatchesAsync),
-                notificationDataEntity);
+            var recipientDataBatches =
+                await context.CallSubOrchestratorAsync<IEnumerable<IEnumerable<UserDataEntity>>>(
+                    nameof(GetRecipientDataBatchesOrchestration.GetRecipientDataBatchesAsync),
+                    notificationDataEntity);
 
             return recipientDataBatches;
         }
