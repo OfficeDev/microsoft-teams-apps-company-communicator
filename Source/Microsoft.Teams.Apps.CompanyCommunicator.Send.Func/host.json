@@ -12,6 +12,13 @@
       "samplingSettings": {
         "isEnabled": false
       }
+    },
+    "fileLoggingMode": "always",
+    "logLevel": {
+      "default": "Information",
+      "Host": "Error",
+      "Function": "Information",
+      "Host.Aggregator": "Information"
     }
   }
 }

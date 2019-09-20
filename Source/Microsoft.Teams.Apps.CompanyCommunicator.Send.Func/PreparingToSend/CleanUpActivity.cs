@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
     /// <summary>
@@ -51,10 +52,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         /// Send trigger to the Azure send function.
         /// </summary>
         /// <param name="input">Input value.</param>
+        /// <param name="log">Logging service.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(nameof(CleanUp))]
-        public async Task CleanUp([ActivityTrigger] CleanUpActivityDTO input)
+        public async Task CleanUp(
+            [ActivityTrigger] CleanUpActivityDTO input,
+            ILogger log)
         {
+            log.LogError(input.Exception.Message);
+
             await this.metadataProvider.SaveExceptionInNotificationDataEntityAsync(
                 input.NotificationDataEntity.Id,
                 input.Exception.Message);

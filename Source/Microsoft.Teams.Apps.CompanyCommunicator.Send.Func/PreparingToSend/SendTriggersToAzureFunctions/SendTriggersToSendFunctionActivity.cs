@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     using System.Threading.Tasks;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Newtonsoft.Json;
@@ -75,10 +76,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         /// 2). Set recipients' status to 1 after sending triggers to the send queue.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
+        /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [FunctionName(nameof(ProcessRecipientBatchAsync))]
         public async Task ProcessRecipientBatchAsync(
-            [OrchestrationTrigger] DurableOrchestrationContext context)
+            [OrchestrationTrigger] DurableOrchestrationContext context,
+            ILogger log)
         {
             var input = context.GetInput<SendTriggersToSendFunctionActivityDTO>();
 
@@ -96,6 +99,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
             }
             catch (Exception ex)
             {
+                log.LogError(ex.Message);
+
                 await this.metadataProvider.SaveWarningInNotificationDataEntityAsync(
                     input.NotificationDataEntityId,
                     ex.Message);
