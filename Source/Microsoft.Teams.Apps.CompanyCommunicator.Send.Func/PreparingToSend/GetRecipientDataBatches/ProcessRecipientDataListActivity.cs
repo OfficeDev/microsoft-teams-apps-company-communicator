@@ -11,7 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
-    /// Initialize sent notification data entities in Azure table storage.
+    /// This class contains the "process recipient data list" durable activity.
     /// </summary>
     public class ProcessRecipientDataListActivity
     {
@@ -51,8 +51,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         }
 
         /// <summary>
-        /// Initialize sent notification data entities in Azure table storage.
-        /// This function includes the following actions:
+        /// This method represents the "process recipient data list" activity.
+        /// It processes incoming "recipient data list" as follows.
         /// 1). Deduplicate recipient data.
         /// 2). Set status in sent notification data in the table storage.
         /// 3). Update total recipient count in notification data entity.

@@ -13,8 +13,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Azure Function App triggered by messages from a Service Bus queue
-    /// Used for preparing to send a notification.
+    /// Azure Function App triggered by messages from a Service Bus queue.
+    /// It prepares to send a notification to target recipients.
     /// </summary>
     public class CompanyCommunicatorPrepareToSendFunction
     {
@@ -34,7 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
         /// <summary>
         /// Azure Function App triggered by messages from a Service Bus queue
-        /// Used for kicking off the durable orchestration for preparing to send notifications.
+        /// It kicks off the durable orchestration for preparing to send notifications.
         /// </summary>
         /// <param name="myQueueItem">The Service Bus queue item.</param>
         /// <param name="starter">Durable orchestration client.</param>

@@ -15,8 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
-    /// Get a notification's recipient (team roster) data list.
-    /// It's used by the durable function framework.
+    /// This class contains the "get recipient data list for rosters" durable activity.
     /// </summary>
     public class GetRecipientDataListForRostersActivity
     {
@@ -33,6 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
 
         /// <summary>
         /// Run the activity.
+        /// It uses Fan-out / Fan-in pattern to get recipient data list (team rosters) parallely.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="notificationDataEntity">Notification data entity.</param>
@@ -71,7 +71,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         }
 
         /// <summary>
-        /// Get recipient (team roster) recipient data list.
+        /// This method represents the "get team data entity list by id" durable activity.
+        /// It gets team data list by ids.
         /// </summary>
         /// <param name="notificationDataEntity">Notification data entity.</param>
         /// <returns>It returns the notification's audience data list.</returns>
@@ -86,7 +87,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         }
 
         /// <summary>
-        /// Get recipient (team roster) batch list.
+        /// This method represents the "get team's roster" durable activity.
+        /// It gets recipient data list for a team's roster.
         /// </summary>
         /// <param name="input">Input data.</param>
         /// <param name="log">Logging service.</param>

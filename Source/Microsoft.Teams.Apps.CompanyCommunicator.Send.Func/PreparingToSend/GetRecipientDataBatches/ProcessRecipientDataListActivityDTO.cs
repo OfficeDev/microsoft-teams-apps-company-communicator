@@ -8,7 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
-    /// DTO class used by the GetRecipientDataBatchesActivity as parameter type.
+    /// DTO class used by the durable framework to pass parameter to the GetRecipientDataBatchesActivity.
     /// </summary>
     public class ProcessRecipientDataListActivityDTO
     {

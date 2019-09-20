@@ -13,8 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
-    /// Get a notification's recipient (all users) data list.
-    /// It's used by the durable function framework.
+    /// This class contains the "get recipient data list for all users" durable activity.
     /// </summary>
     public class GetRecipientDataListForAllUsersActivity
     {
@@ -47,7 +46,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         }
 
         /// <summary>
-        /// Get recipient (all users) data list.
+        /// This method represents the "get recipient data list for all users" durable activity.
+        /// It gets recipient data list for all users.
         /// </summary>
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
         /// <param name="log">Logging service.</param>

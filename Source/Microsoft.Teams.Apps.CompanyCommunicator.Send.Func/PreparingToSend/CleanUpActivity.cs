@@ -11,8 +11,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
     /// <summary>
-    /// Send triggers to the Azure send function activity.
-    /// It's used by the durable function framework.
+    /// This class contains the "clean up" durable activity.
+    /// If exceptions happen in the "prepare to send" operation, this method is called to log the exception.
     /// </summary>
     public class CleanUpActivity
     {
@@ -49,7 +49,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         }
 
         /// <summary>
-        /// Send trigger to the Azure send function.
+        /// This method represents the "clean up" durable activity.
+        /// If exceptions happen in the "prepare to send" operation,
+        /// this method is called to do the clean up work, e.g. log the exception and etc.
         /// </summary>
         /// <param name="input">Input value.</param>
         /// <param name="log">Logging service.</param>
