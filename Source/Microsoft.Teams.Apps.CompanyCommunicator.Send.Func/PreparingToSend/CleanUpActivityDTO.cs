@@ -8,7 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
     /// <summary>
-    /// DTO class used by the Activity7CleanUp as parameter type.
+    /// DTO class used by the durable framework to pass parameter to the CleanUpActivity.
     /// </summary>
     public class CleanUpActivityDTO
     {

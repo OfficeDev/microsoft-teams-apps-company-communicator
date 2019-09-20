@@ -12,8 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
-    /// Base message queue service.
-    /// It uses Azure service bus queue to store data.
+    /// Base Azure service bus queue service.
     /// </summary>
     public class BaseQueue
     {
@@ -51,7 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
         {
             if (messageBatch.Count > 100)
             {
-                throw new InvalidOperationException("Exceeded maximum message batch size.");
+                throw new InvalidOperationException("Exceeded maximum Azure service bus message batch size.");
             }
 
             await this.messageSender.SendAsync(messageBatch);

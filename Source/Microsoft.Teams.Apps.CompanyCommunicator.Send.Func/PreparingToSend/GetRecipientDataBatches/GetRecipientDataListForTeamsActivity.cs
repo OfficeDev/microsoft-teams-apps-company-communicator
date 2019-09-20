@@ -14,8 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
-    /// Get a notification's recipient (team general channel) data list.
-    /// It's used by the durable function framework.
+    /// This class contains the "get recipient data list for teams" durable activity.
     /// </summary>
     public class GetRecipientDataListForTeamsActivity
     {
@@ -53,7 +52,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         }
 
         /// <summary>
-        /// Get recipient (team general channel) batch list.
+        /// This method represents the "get recipient data list for teams" durable activity.
+        /// It gets recipient data list for teams ("team general channels").
         /// </summary>
         /// <param name="notificationDataEntity">Notification data entity.</param>
         /// <param name="log">Logging service.</param>

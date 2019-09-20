@@ -61,7 +61,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         }
 
         /// <summary>
-        /// This method starts the durable framework orchestration for preparing to send notifications.
+        /// This is the durable orchestration method,
+        /// which kicks of the preparing to send process.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="log">Logging service.</param>

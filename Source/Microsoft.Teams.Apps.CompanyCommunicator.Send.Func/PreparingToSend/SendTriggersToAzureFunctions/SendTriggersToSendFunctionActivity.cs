@@ -17,8 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Send triggers to the Azure send function activity.
-    /// It's used by the durable function framework.
+    /// This class contains the "send triggers to Azure send function" durable activity.
     /// </summary>
     public class SendTriggersToSendFunctionActivity
     {
@@ -40,6 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
 
         /// <summary>
         /// Run the activity.
+        /// It uses Fan-out / Fan-in pattern to send batch triggers parallely to Azure send function.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="recipientDataBatches">Receiver batches.</param>
@@ -71,9 +71,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         }
 
         /// <summary>
-        /// Process a recipient batch in a durable orchestration.
-        /// 1). Send trigger for recipients whose status is 0 only.
-        /// 2). Set recipients' status to 1 after sending triggers to the send queue.
+        /// This class represents a durable sub-orchestration that processes a recipient batch as follows.
+        /// 1). Send triggers for recipients whose "send notification status" equal to 0.
+        /// 2). Set recipients' "send notification status" to 1 after queued triggers for them.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="log">Logging service.</param>
@@ -108,8 +108,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         }
 
         /// <summary>
-        /// Send trigger to the Azure send function.
-        /// Send trigger for recipients whose status is 0 only.
+        /// This method represents the  "send triggers to Azure send function" activity.
+        /// It sends trigger to the Azure send function.
+        /// It sends trigger for recipients whose status is 0 only.
         /// </summary>
         /// <param name="input">Input value.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
@@ -134,7 +135,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         }
 
         /// <summary>
-        /// Set recipients' status to 1 after sending triggers to the send queue.
+        /// This method represents the "set recipient batch status" durable activity.
+        /// It sets recipients' status to 1 after sending triggers to the send queue.
         /// </summary>
         /// <param name="input">Input value.</param>
         /// <returns>A task that represents the work queued to execute.</returns>

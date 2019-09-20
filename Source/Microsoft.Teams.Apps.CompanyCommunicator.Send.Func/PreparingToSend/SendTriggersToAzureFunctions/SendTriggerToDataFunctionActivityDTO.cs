@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.SendTriggersToAzureFunctions
 {
     /// <summary>
-    /// DTO class used by the SendTriggerToDataFunctionActivity as parameter type.
+    /// DTO class used by the durable framework to pass parameter to SendTriggerToDataFunctionActivity.
     /// </summary>
     public class SendTriggerToDataFunctionActivityDTO
     {

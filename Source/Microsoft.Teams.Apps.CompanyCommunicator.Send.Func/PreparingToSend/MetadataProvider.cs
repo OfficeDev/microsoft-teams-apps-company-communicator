@@ -8,11 +8,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Dynamitey.DynamicObjects;
     using Microsoft.Bot.Connector;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.OData.UriParser;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -21,7 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     using Newtonsoft.Json.Linq;
 
     /// <summary>
-    /// The class is the data provider for "prepare to send" durable orchestration.
+    /// This class is the data provider for "prepare to send" durable orchestration.
     /// </summary>
     public class MetadataProvider
     {
@@ -187,8 +185,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         }
 
         /// <summary>
-        /// Set the sent notification data status to be 1,
-        /// which means a service bus message is already enqued for a recipient in Azure service bus queue.
+        /// Set "sent notification data status" to be 1 for recipients.
+        /// It marks that messages are already queued for the recipients in Azure service bus.
         /// </summary>
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
         /// <param name="recipientDataBatch">A recipient data batch.</param>
@@ -218,7 +216,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         }
 
         /// <summary>
-        /// Get all the sent notification data entities of a notification.
+        /// Get all the "sent notification data" entities of a notification.
         /// The partition key is a notification's id.
         /// </summary>
         /// <param name="sentNotificationDataEntityPartitionKey">Sent notification data entity partition key.</param>

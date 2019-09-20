@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
 
     /// <summary>
-    /// DTO class used by the GetRecipientDataListForRostersActivity as parameter type.
+    /// DTO class used by the durable framework to pass parameter to the GetRecipientDataListForRostersActivity.
     /// </summary>
     public class GetRecipientDataListForRostersActivityDTO
     {

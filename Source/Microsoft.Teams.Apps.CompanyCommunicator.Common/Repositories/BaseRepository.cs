@@ -150,10 +150,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         }
 
         /// <summary>
-        /// Insert a batch of entities.
-        /// The table storage can take up to 100 entities in a batch.
+        /// Insert or merge a batch of entities in Azure table storage.
+        /// A batch can contains up to 100 entities.
         /// </summary>
-        /// <param name="entities">Entities to be inserted or merged</param>
+        /// <param name="entities">Entities to be inserted or merged in Azure table storage.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         public async Task BatchInsertOrMergeAsync(IEnumerable<T> entities)
         {
@@ -178,10 +178,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         }
 
         /// <summary>
-        /// Get a combined filter with multiple row keys.
+        /// Get a filter that filters in the entities matching the incoming row keys.
         /// </summary>
-        /// <param name="rowKeys">Multiple row keys.</param>
-        /// <returns>A combined filter.</returns>
+        /// <param name="rowKeys">Row keys.</param>
+        /// <returns>A filter that filters in the enities matching the incoming row keys.</returns>
         protected string GetRowKeysFilter(IEnumerable<string> rowKeys)
         {
             var rowKeysFilter = string.Empty;

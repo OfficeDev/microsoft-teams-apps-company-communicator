@@ -45,23 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         /// <returns>Team data entities.</returns>
         public async Task<IEnumerable<TeamDataEntity>> GetTeamDataEntitiesByIdsAsync(IEnumerable<string> teamIds)
         {
-            var rowKeysFilter = string.Empty;
-            foreach (var teamId in teamIds)
-            {
-                var singleRowKeyFilter = TableQuery.GenerateFilterCondition(
-                    nameof(TableEntity.RowKey),
-                    QueryComparisons.Equal,
-                    teamId);
-
-                if (string.IsNullOrWhiteSpace(rowKeysFilter))
-                {
-                    rowKeysFilter = singleRowKeyFilter;
-                }
-                else
-                {
-                    rowKeysFilter = TableQuery.CombineFilters(rowKeysFilter, TableOperators.Or, singleRowKeyFilter);
-                }
-            }
+            var rowKeysFilter = this.GetRowKeysFilter(teamIds);
 
             return await this.GetWithFilterAsync(rowKeysFilter);
         }

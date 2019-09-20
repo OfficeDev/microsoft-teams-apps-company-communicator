@@ -17,8 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Send trigger to the Azure data function activity.
-    /// It's used by the durable function framework.
+    /// This class contains the "send triggers to Azure data function" durable activity.
     /// </summary>
     public class SendTriggerToDataFunctionActivity
     {
@@ -65,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         }
 
         /// <summary>
-        /// Send trigger to the Azure data function.
+        /// This method represents the "send trigger to data function" durable activity.
         /// </summary>
         /// <param name="input">Input value.</param>
         /// <param name="log">Logging service.</param>

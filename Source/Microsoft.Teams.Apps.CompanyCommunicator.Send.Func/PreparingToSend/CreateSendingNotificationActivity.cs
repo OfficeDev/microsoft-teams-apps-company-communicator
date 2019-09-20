@@ -12,8 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
 
     /// <summary>
-    /// Create sending notification data entity activity.
-    /// It's used by the durable function framework.
+    /// This class contains the "create sending notification data entity" durable activity.
     /// </summary>
     public class CreateSendingNotificationActivity
     {
@@ -52,9 +51,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         }
 
         /// <summary>
-        /// Generate an adaptive card in json.
+        /// This method represents the "create sending notification" duralbe activity.
         /// </summary>
-        /// <param name="notificationDataEntity">The notification to be sent to audiences.</param>
+        /// <param name="notificationDataEntity">A notification to be sent to reipients.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(nameof(CreateSendingNotificationAsync))]
         public async Task CreateSendingNotificationAsync(
