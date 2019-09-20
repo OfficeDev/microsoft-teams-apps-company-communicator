@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
@@ -49,10 +50,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// Get recipient (all users) data list.
         /// </summary>
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="log">Logging service.</param>
         /// <returns>It returns the notification's audience data list.</returns>
         [FunctionName(nameof(GetAllUsersRecipientDataListAsync))]
         public async Task<IEnumerable<UserDataEntity>> GetAllUsersRecipientDataListAsync(
-            [ActivityTrigger] string notificationDataEntityId)
+            [ActivityTrigger] string notificationDataEntityId,
+            ILogger log)
         {
             try
             {
@@ -62,6 +65,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
             }
             catch (Exception ex)
             {
+                log.LogError(ex.Message);
+
                 await this.metadataProvider.SaveWarningInNotificationDataEntityAsync(
                     notificationDataEntityId,
                     ex.Message);

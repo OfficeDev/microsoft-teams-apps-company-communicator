@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.SendTriggersToAzureFunctions
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
 {
     using System;
     using System.Threading.Tasks;

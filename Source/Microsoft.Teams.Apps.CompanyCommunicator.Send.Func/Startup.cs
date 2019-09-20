@@ -42,11 +42,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<DataQueue>();
 
             builder.Services.AddTransient<PreparingToSendOrchestration>();
-            builder.Services.AddTransient<GetRecipientDataBatchesOrchestration>();
             builder.Services.AddTransient<GetRecipientDataListForAllUsersActivity>();
             builder.Services.AddTransient<GetRecipientDataListForRostersActivity>();
             builder.Services.AddTransient<GetRecipientDataListForTeamsActivity>();
-            builder.Services.AddTransient<SendTriggersToAzureFunctionsOrchestration>();
             builder.Services.AddTransient<CreateSendingNotificationActivity>();
             builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
             builder.Services.AddTransient<SendTriggerToDataFunctionActivity>();

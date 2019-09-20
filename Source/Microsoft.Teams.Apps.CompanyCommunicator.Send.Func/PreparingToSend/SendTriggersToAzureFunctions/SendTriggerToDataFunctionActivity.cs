@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     using System.Threading.Tasks;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Newtonsoft.Json;
@@ -67,10 +68,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         /// Send trigger to the Azure data function.
         /// </summary>
         /// <param name="input">Input value.</param>
+        /// <param name="log">Logging service.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(nameof(SendTriggerToDataFunctionAsync))]
         public async Task SendTriggerToDataFunctionAsync(
-            [ActivityTrigger] SendTriggerToDataFunctionActivityDTO input)
+            [ActivityTrigger] SendTriggerToDataFunctionActivityDTO input,
+            ILogger log)
         {
             try
             {
@@ -88,6 +91,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
             }
             catch (Exception ex)
             {
+                log.LogError(ex.Message);
+
                 await this.metadataProvider.SaveExceptionInNotificationDataEntityAsync(
                     input.NotificationDataEntityId,
                     ex.Message);
