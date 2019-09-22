@@ -20,7 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// <summary>
         /// Initializes a new instance of the <see cref="ProcessRecipientDataListActivity"/> class.
         /// </summary>
-        /// <param name="metadataProvider">Metadata Provider instance.</param>
+        /// <param name="metadataProvider">Meta-data Provider instance.</param>
         public ProcessRecipientDataListActivity(MetadataProvider metadataProvider)
         {
             this.metadataProvider = metadataProvider;
@@ -53,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// <summary>
         /// This method represents the "process recipient data list" activity.
         /// It processes incoming "recipient data list" as follows.
-        /// 1). Deduplicate recipient data.
+        /// 1). De-duplicate recipient data.
         /// 2). Set status in sent notification data in the table storage.
         /// 3). Update total recipient count in notification data entity.
         /// 4). Page the recipient data list.

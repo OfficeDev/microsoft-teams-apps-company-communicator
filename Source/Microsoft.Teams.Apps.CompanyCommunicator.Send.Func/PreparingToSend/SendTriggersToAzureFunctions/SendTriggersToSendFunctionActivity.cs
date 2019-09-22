@@ -28,7 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         /// Initializes a new instance of the <see cref="SendTriggersToSendFunctionActivity"/> class.
         /// </summary>
         /// <param name="sendMessageQueue">Send message queue service.</param>
-        /// <param name="metadataProvider">Metadata provider.</param>
+        /// <param name="metadataProvider">Meta-data provider.</param>
         public SendTriggersToSendFunctionActivity(
             SendQueue sendMessageQueue,
             MetadataProvider metadataProvider)
@@ -39,7 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
 
         /// <summary>
         /// Run the activity.
-        /// It uses Fan-out / Fan-in pattern to send batch triggers parallely to Azure send function.
+        /// It uses Fan-out / Fan-in pattern to send batch triggers in parallel to Azure send function.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="recipientDataBatches">Receiver batches.</param>
