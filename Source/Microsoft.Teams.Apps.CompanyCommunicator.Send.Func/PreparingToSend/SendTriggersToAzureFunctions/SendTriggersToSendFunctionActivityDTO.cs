@@ -8,7 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
-    /// DTO class used by the duralbe framework to pass parameter to the SendTriggerToDataFunctionActivity.
+    /// DTO class used by the durable framework to pass parameter to the SendTriggerToDataFunctionActivity.
     /// </summary>
     public class SendTriggersToSendFunctionActivityDTO
     {

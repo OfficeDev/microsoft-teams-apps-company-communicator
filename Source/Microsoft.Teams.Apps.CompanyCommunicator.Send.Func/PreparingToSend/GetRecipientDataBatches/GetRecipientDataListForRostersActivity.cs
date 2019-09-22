@@ -24,7 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientDataListForRostersActivity"/> class.
         /// </summary>
-        /// <param name="metadataProvider">Metadata Provider instance.</param>
+        /// <param name="metadataProvider">Meta-data Provider instance.</param>
         public GetRecipientDataListForRostersActivity(MetadataProvider metadataProvider)
         {
             this.metadataProvider = metadataProvider;
@@ -32,7 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
 
         /// <summary>
         /// Run the activity.
-        /// It uses Fan-out / Fan-in pattern to get recipient data list (team rosters) parallely.
+        /// It uses Fan-out / Fan-in pattern to get recipient data list (team rosters) in parallel.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="notificationDataEntity">Notification data entity.</param>

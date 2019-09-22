@@ -16,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.SendTriggersToAzureFunctions;
 
     /// <summary>
-    /// This class is the duralbe framework orchestration for preparing to send notifications.
+    /// This class is the durable framework orchestration for preparing to send notifications.
     /// </summary>
     public class PreparingToSendOrchestration
     {

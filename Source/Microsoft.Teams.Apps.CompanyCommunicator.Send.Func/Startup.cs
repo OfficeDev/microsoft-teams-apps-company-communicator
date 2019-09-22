@@ -7,9 +7,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
-    using System.IO;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -50,20 +48,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<SendTriggerToDataFunctionActivity>();
             builder.Services.AddTransient<ProcessRecipientDataListActivity>();
             builder.Services.AddTransient<CleanUpActivity>();
-
-            var configuration = this.BuildConfiguration();
-            builder.Services.AddSingleton(configuration);
-        }
-
-        private IConfiguration BuildConfiguration()
-        {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
-
-            return configuration;
         }
     }
 }

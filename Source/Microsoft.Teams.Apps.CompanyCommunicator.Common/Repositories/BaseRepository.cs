@@ -5,7 +5,6 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -102,7 +101,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// Get an entity by the keys in the table storage.
         /// </summary>
         /// <param name="partitionKey">The partition key of the entity.</param>
-        /// <param name="rowKey">The row key fo the entity.</param>
+        /// <param name="rowKey">The row key for the entity.</param>
         /// <returns>The entity matching the keys.</returns>
         public async Task<T> GetAsync(string partitionKey, string rowKey)
         {
@@ -181,7 +180,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// Get a filter that filters in the entities matching the incoming row keys.
         /// </summary>
         /// <param name="rowKeys">Row keys.</param>
-        /// <returns>A filter that filters in the enities matching the incoming row keys.</returns>
+        /// <returns>A filter that filters in the entities matching the incoming row keys.</returns>
         protected string GetRowKeysFilter(IEnumerable<string> rowKeys)
         {
             var rowKeysFilter = string.Empty;

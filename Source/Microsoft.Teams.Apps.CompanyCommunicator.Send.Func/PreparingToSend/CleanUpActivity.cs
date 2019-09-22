@@ -21,7 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         /// <summary>
         /// Initializes a new instance of the <see cref="CleanUpActivity"/> class.
         /// </summary>
-        /// <param name="metadataProvider">Metadata Provider instance.</param>
+        /// <param name="metadataProvider">Meta-data Provider instance.</param>
         public CleanUpActivity(MetadataProvider metadataProvider)
         {
             this.metadataProvider = metadataProvider;

@@ -23,7 +23,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientDataListForTeamsActivity"/> class.
         /// </summary>
-        /// <param name="metadataProvider">Metadata Provider instance.</param>
+        /// <param name="metadataProvider">Meta-data Provider instance.</param>
         public GetRecipientDataListForTeamsActivity(MetadataProvider metadataProvider)
         {
             this.metadataProvider = metadataProvider;

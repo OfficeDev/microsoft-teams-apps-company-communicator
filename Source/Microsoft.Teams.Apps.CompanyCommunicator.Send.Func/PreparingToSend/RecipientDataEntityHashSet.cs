@@ -9,7 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
 
     /// <summary>
     /// Recipient data entity hash set.
-    /// This class helps to get rid of duplicte records in a recipient data list.
+    /// This class helps to get rid of duplicate records in a recipient data list.
     /// </summary>
     public class RecipientDataEntityHashSet : HashSet<UserDataEntity>
     {

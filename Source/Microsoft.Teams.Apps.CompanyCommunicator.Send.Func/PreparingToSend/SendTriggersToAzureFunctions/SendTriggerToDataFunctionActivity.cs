@@ -28,7 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         /// Initializes a new instance of the <see cref="SendTriggerToDataFunctionActivity"/> class.
         /// </summary>
         /// <param name="dataMessageQueue">The message queue service connected to the queue 'company-communicator-data'.</param>
-        /// <param name="metadataProvider">Metadata provider.</param>
+        /// <param name="metadataProvider">Meta-data provider.</param>
         public SendTriggerToDataFunctionActivity(
             DataQueue dataMessageQueue,
             MetadataProvider metadataProvider)

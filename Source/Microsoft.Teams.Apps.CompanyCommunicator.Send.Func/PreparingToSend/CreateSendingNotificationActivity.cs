@@ -51,9 +51,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         }
 
         /// <summary>
-        /// This method represents the "create sending notification" duralbe activity.
+        /// This method represents the "create sending notification" durable activity.
         /// </summary>
-        /// <param name="notificationDataEntity">A notification to be sent to reipients.</param>
+        /// <param name="notificationDataEntity">A notification to be sent to recipients.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(nameof(CreateSendingNotificationAsync))]
         public async Task CreateSendingNotificationAsync(

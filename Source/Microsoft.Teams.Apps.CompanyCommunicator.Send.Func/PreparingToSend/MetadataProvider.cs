@@ -10,7 +10,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     using System.Threading.Tasks;
     using Microsoft.Bot.Connector;
     using Microsoft.Bot.Connector.Authentication;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -23,7 +22,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     /// </summary>
     public class MetadataProvider
     {
-        private readonly IConfiguration configuration;
         private readonly UserDataRepository userDataRepository;
         private readonly TeamDataRepository teamDataRepository;
         private readonly NotificationDataRepository notificationDataRepository;
@@ -32,23 +30,30 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         /// <summary>
         /// Initializes a new instance of the <see cref="MetadataProvider"/> class.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
         /// <param name="userDataRepository">User Data repository service.</param>
         /// <param name="teamDataRepository">Team Data repository service.</param>
         /// <param name="notificationDataRepository">Notification data repository service.</param>
-        /// <param name="sentNotificationDataRepository">Sent notificaion data repository service.</param>
+        /// <param name="sentNotificationDataRepository">Sent notification data repository service.</param>
         public MetadataProvider(
-            IConfiguration configuration,
             UserDataRepository userDataRepository,
             TeamDataRepository teamDataRepository,
             NotificationDataRepository notificationDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository)
         {
-            this.configuration = configuration;
             this.userDataRepository = userDataRepository;
             this.teamDataRepository = teamDataRepository;
             this.notificationDataRepository = notificationDataRepository;
             this.sentNotificationDataRepository = sentNotificationDataRepository;
+        }
+
+        /// <summary>
+        /// Get environment variable by name.
+        /// </summary>
+        /// <param name="name">Environment variable name.</param>
+        /// <returns>Environment variable value.</returns>
+        internal static string GetEnvironmentVariable(string name)
+        {
+            return Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process);
         }
 
         /// <summary>
@@ -83,8 +88,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         {
             MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
 
-            var botAppId = this.configuration.GetValue<string>("MicrosoftAppId");
-            var botAppPassword = this.configuration.GetValue<string>("MicrosoftAppPassword");
+            // Please see the following link for how to retrieve configuration settings in Azure functions.
+            // https://docs.microsoft.com/en-us/azure/azure-functions/functions-dotnet-class-library#environment-variables
+            var botAppId = MetadataProvider.GetEnvironmentVariable("MicrosoftAppId");
+            var botAppPassword = MetadataProvider.GetEnvironmentVariable("MicrosoftAppPassword");
 
             var connectorClient = new ConnectorClient(
                 new Uri(serviceUrl),
@@ -220,7 +227,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         /// The partition key is a notification's id.
         /// </summary>
         /// <param name="sentNotificationDataEntityPartitionKey">Sent notification data entity partition key.</param>
-        /// <returns>A sent notifiation data entity list.</returns>
+        /// <returns>A sent notification data entity list.</returns>
         internal async Task<IEnumerable<SentNotificationDataEntity>> GetSentNotificationDataEntityListAsync(
             string sentNotificationDataEntityPartitionKey)
         {
