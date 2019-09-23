@@ -25,8 +25,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     /// </summary>
     public class CompanyCommunicatorDataFunction
     {
-        private static readonly int MaxMinutesOfRetrying = 35;
-
         private static SentNotificationDataRepository sentNotificationDataRepository = null;
 
         private static NotificationDataRepository notificationDataRepository = null;
@@ -60,6 +58,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 .AddEnvironmentVariables()
                 .Build();
 
+            // Simply initialize the variable for certain build environments and versions
+            var maxMinutesOfRetryingDataFunction = 0;
+
+            // If parsing fails, out variable is set to 0, so need to set the default
+            if (!int.TryParse(configuration["MaxMinutesOfRetryingDataFunction"], out maxMinutesOfRetryingDataFunction))
+            {
+                maxMinutesOfRetryingDataFunction = 1440;
+            }
+
             var messageContent = JsonConvert.DeserializeObject<ServiceBusDataQueueMessageContent>(myQueueItem);
 
             CompanyCommunicatorDataFunction.sentNotificationDataRepository = CompanyCommunicatorDataFunction.sentNotificationDataRepository
@@ -76,8 +83,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 
             if (sentNotificationDataEntities == null)
             {
-                if (DateTime.UtcNow >= messageContent.InitialSendDate + TimeSpan.FromMinutes(
-                    CompanyCommunicatorDataFunction.MaxMinutesOfRetrying))
+                if (DateTime.UtcNow >= messageContent.InitialSendDate + TimeSpan.FromMinutes(maxMinutesOfRetryingDataFunction))
                 {
                     await this.SetEmptyNotificationDataEntity(messageContent.NotificationId);
                     return;
@@ -136,8 +142,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 + throttledCount;
 
             if (currentMessageCount == messageContent.TotalMessageCount
-                || DateTime.UtcNow >= messageContent.InitialSendDate + TimeSpan.FromMinutes(
-                    CompanyCommunicatorDataFunction.MaxMinutesOfRetrying))
+                || DateTime.UtcNow >= messageContent.InitialSendDate + TimeSpan.FromMinutes(maxMinutesOfRetryingDataFunction))
             {
                 notificationDataEntityUpdate.IsCompleted = true;
                 notificationDataEntityUpdate.SentDate = lastSentDateTime != DateTime.MinValue
