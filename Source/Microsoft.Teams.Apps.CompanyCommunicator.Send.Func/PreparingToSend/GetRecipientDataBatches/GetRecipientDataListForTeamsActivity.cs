@@ -44,8 +44,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
                 throw new InvalidOperationException("NotificationDataEntity's Teams property value is null or empty!");
             }
 
-            await context.CallActivityAsync<IEnumerable<UserDataEntity>>(
+            await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
                 nameof(GetRecipientDataListForTeamsActivity.GetTeamRecipientDataListAsync),
+                new RetryOptions(TimeSpan.FromSeconds(5), 3),
                 notificationDataEntity);
         }
 

@@ -46,15 +46,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
                 throw new InvalidOperationException("NotificationDataEntity's Rosters property value is null or empty!");
             }
 
-            var teamDataEntityList = await context.CallActivityAsync<IEnumerable<TeamDataEntity>>(
+            var teamDataEntityList = await context.CallActivityWithRetryAsync<IEnumerable<TeamDataEntity>>(
                 nameof(GetRecipientDataListForRostersActivity.GetTeamDataEntitiesByIdsAsync),
+                new RetryOptions(TimeSpan.FromSeconds(5), 3),
                 notificationDataEntity);
 
             var tasks = new List<Task>();
             foreach (var teamDataEntity in teamDataEntityList)
             {
-                var task = context.CallActivityAsync<IEnumerable<UserDataEntity>>(
+                var task = context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
                     nameof(GetRecipientDataListForRostersActivity.GetTeamRosterDataAsync),
+                    new RetryOptions(TimeSpan.FromSeconds(5), 3),
                     new GetRecipientDataListForRostersActivityDTO
                     {
                         NotificationDataEntityId = notificationDataEntity.Id,

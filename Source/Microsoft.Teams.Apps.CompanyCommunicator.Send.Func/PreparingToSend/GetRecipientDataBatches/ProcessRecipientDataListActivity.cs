@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.GetRecipientDataBatches
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -37,8 +38,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
             string notificationDataEntityId)
         {
             var recipientDataBatches =
-                await context.CallActivityAsync<IEnumerable<IEnumerable<UserDataEntity>>>(
+                await context.CallActivityWithRetryAsync<IEnumerable<IEnumerable<UserDataEntity>>>(
                     nameof(ProcessRecipientDataListActivity.ProcessRecipientDataListAsync),
+                    new RetryOptions(TimeSpan.FromSeconds(5), 3),
                     notificationDataEntityId);
 
             return recipientDataBatches;

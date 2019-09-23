@@ -39,8 +39,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             NotificationDataEntity notificationDataEntity,
             Exception ex)
         {
-            await context.CallActivityAsync(
+            await context.CallActivityWithRetryAsync(
                 nameof(CleanUpActivity.CleanUp),
+                new RetryOptions(TimeSpan.FromSeconds(5), 3),
                 new CleanUpActivityDTO
                 {
                     NotificationDataEntity = notificationDataEntity,

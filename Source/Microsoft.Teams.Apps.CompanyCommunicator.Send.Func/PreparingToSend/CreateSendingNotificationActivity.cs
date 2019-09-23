@@ -42,11 +42,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             DurableOrchestrationContext context,
             NotificationDataEntity notificationDataEntity)
         {
-            var retryOptions = new RetryOptions(TimeSpan.FromSeconds(5), 3);
-
             await context.CallActivityWithRetryAsync(
                 nameof(CreateSendingNotificationActivity.CreateSendingNotificationAsync),
-                retryOptions,
+                new RetryOptions(TimeSpan.FromSeconds(5), 3),
                 notificationDataEntity);
         }
 
