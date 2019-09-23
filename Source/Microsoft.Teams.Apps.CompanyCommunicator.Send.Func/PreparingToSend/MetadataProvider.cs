@@ -186,7 +186,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
                         RowKey = p.AadId,
                         AadId = p.AadId,
                         StatusCode = 0,
-                        SentDate = DateTime.UtcNow,
+                        ConversationId = p.ConversationId,
+                        ServiceUrl = p.ServiceUrl,
                     });
 
             await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(sentNotificationDataEntities);
@@ -203,7 +204,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             string notificationDataEntityId,
             IEnumerable<UserDataEntity> recipientDataBatch)
         {
-            // Retrieve AadIds whose StatusCode equal to 0 (from SentNotificationDataRepository).
+            // Retrieve AadIds whose StatusCode equal to 0 (in SentNotificationDataRepository).
             var filter =
                 TableQuery.GenerateFilterCondition(nameof(SentNotificationDataEntity.StatusCode), QueryComparisons.Equal, "0");
             var filteredSentNotificationDataList =

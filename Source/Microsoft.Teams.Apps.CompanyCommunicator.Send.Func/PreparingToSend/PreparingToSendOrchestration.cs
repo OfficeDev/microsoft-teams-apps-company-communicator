@@ -101,29 +101,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             NotificationDataEntity notificationDataEntity,
             ILogger log)
         {
-            IEnumerable<UserDataEntity> recipientDataList;
+            var recipientType = string.Empty;
             if (notificationDataEntity.AllUsers)
             {
-                recipientDataList = await this.getRecipientDataListForAllUsersActivity.RunAsync(context, notificationDataEntity);
-                this.Log(context, log, notificationDataEntity.Id, "All users");
+                recipientType = "All users";
+                await this.getRecipientDataListForAllUsersActivity.RunAsync(context, notificationDataEntity);
             }
             else if (notificationDataEntity.Rosters.Count() != 0)
             {
-                recipientDataList = await this.getRecipientDataListForRostersActivity.RunAsync(context, notificationDataEntity);
-                this.Log(context, log, notificationDataEntity.Id, "Rosters", recipientDataList);
+                recipientType = "Rosters";
+                await this.getRecipientDataListForRostersActivity.RunAsync(context, notificationDataEntity);
             }
             else if (notificationDataEntity.Teams.Count() != 0)
             {
-                recipientDataList = await this.getRecipientDataListForTeamsActivity.RunAsync(context, notificationDataEntity);
-                this.Log(context, log, notificationDataEntity.Id, "General channels", recipientDataList);
+                recipientType = "General channels";
+                await this.getRecipientDataListForTeamsActivity.RunAsync(context, notificationDataEntity);
             }
             else
             {
-                this.Log(context, log, notificationDataEntity.Id, "No audience was selected");
+                recipientType = "No recipient type was defined";
+                this.Log(context, log, notificationDataEntity.Id, recipientType);
                 return null;
             }
 
-            return await this.processRecipientDataListActivity.RunAsync(context, notificationDataEntity.Id, recipientDataList);
+            var recipientDataBatches = await this.processRecipientDataListActivity.RunAsync(context, notificationDataEntity.Id);
+
+            this.Log(context, log, notificationDataEntity.Id, recipientType, recipientDataBatches.SelectMany(p => p));
+
+            return recipientDataBatches;
         }
 
         private async Task SendTriggerToAzureFunctionsAsync(
@@ -146,7 +151,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             DurableOrchestrationContext context,
             ILogger log,
             string notificationDataEntityId,
-            string audienceOption)
+            string recipientType)
         {
             if (context.IsReplaying)
             {
@@ -156,14 +161,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             log.LogInformation(
                 "Notification id:{0}. Audience option: {1}",
                 notificationDataEntityId,
-                audienceOption);
+                recipientType);
         }
 
         private void Log(
             DurableOrchestrationContext context,
             ILogger log,
             string notificationDataEntityId,
-            string audienceOption,
+            string recipientType,
             IEnumerable<UserDataEntity> recipientDataList)
         {
             if (context.IsReplaying)
@@ -174,7 +179,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             log.LogInformation(
                 "Notification id:{0}. Audience option: {1}. Count: {2}",
                 notificationDataEntityId,
-                audienceOption,
+                recipientType,
                 recipientDataList.Count());
         }
     }
