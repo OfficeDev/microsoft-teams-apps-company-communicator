@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Bot.Connector;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
@@ -202,24 +203,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             string notificationDataEntityId,
             IEnumerable<UserDataEntity> recipientDataBatch)
         {
-            foreach (var recipientData in recipientDataBatch)
-            {
-                var existing = await this.sentNotificationDataRepository.GetAsync(
-                    notificationDataEntityId,
-                    recipientData.AadId);
-                if (existing == null || existing.StatusCode == 0)
-                {
-                    await this.sentNotificationDataRepository.CreateOrUpdateAsync(
-                        new SentNotificationDataEntity
-                        {
-                            PartitionKey = notificationDataEntityId,
-                            RowKey = recipientData.AadId,
-                            AadId = recipientData.AadId,
-                            StatusCode = 1,
-                            SentDate = DateTime.UtcNow,
-                        });
-                }
-            }
+            // Retrieve AadIds whose StatusCode equal to 0 (from SentNotificationDataRepository).
+            var filter =
+                TableQuery.GenerateFilterCondition(nameof(SentNotificationDataEntity.StatusCode), QueryComparisons.Equal, "0");
+            var filteredSentNotificationDataList =
+                await this.sentNotificationDataRepository.GetWithFilterAsync(filter, notificationDataEntityId);
+            var aadIdList = filteredSentNotificationDataList.Select(p => p.AadId);
+            var aadIdHashSet = new HashSet<string>(aadIdList);
+
+            // Set the StatusCode to be 1 for the above AadIds (in SentNotificationDataRepository).
+            var sentNotificationDataEntities = recipientDataBatch
+                .Where(p => aadIdHashSet.Contains(p.AadId))
+                .Select(p =>
+                    new SentNotificationDataEntity
+                    {
+                        PartitionKey = notificationDataEntityId,
+                        RowKey = p.AadId,
+                        AadId = p.AadId,
+                        StatusCode = 1,
+                    })
+                .ToList();
+            await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(sentNotificationDataEntities);
         }
 
         /// <summary>

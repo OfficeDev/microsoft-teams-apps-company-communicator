@@ -168,6 +168,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
                     };
                     var messageBody = JsonConvert.SerializeObject(queueMessageContent);
                     var message = new Message(Encoding.UTF8.GetBytes(messageBody));
+                    message.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(2);
                     return message;
                 }
             }
