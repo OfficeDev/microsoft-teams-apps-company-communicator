@@ -38,8 +38,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
             DurableOrchestrationContext context,
             NotificationDataEntity notificationDataEntity)
         {
-            await context.CallActivityAsync<IEnumerable<UserDataEntity>>(
+            await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
                 nameof(GetRecipientDataListForAllUsersActivity.GetAllUsersRecipientDataListAsync),
+                new RetryOptions(TimeSpan.FromSeconds(5), 3),
                 notificationDataEntity.Id);
         }
 
