@@ -31,21 +31,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
-        /// <param name="recipientDataList">Recipient data list.</param>
         /// <returns>Recipient data batches.</returns>
         public async Task<IEnumerable<IEnumerable<UserDataEntity>>> RunAsync(
             DurableOrchestrationContext context,
-            string notificationDataEntityId,
-            IEnumerable<UserDataEntity> recipientDataList)
+            string notificationDataEntityId)
         {
             var recipientDataBatches =
                 await context.CallActivityAsync<IEnumerable<IEnumerable<UserDataEntity>>>(
                     nameof(ProcessRecipientDataListActivity.ProcessRecipientDataListAsync),
-                    new ProcessRecipientDataListActivityDTO
-                    {
-                        NotificationDataEntityId = notificationDataEntityId,
-                        RecipientDataList = recipientDataList,
-                    });
+                    notificationDataEntityId);
 
             return recipientDataBatches;
         }
@@ -53,28 +47,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// <summary>
         /// This method represents the "process recipient data list" activity.
         /// It processes incoming "recipient data list" as follows.
-        /// 1). De-duplicate recipient data.
-        /// 2). Set status in sent notification data in the table storage.
-        /// 3). Update total recipient count in notification data entity.
-        /// 4). Page the recipient data list.
+        /// 1). Load sent notification data.
+        /// 2). Update total recipient count in notification data entity.
+        /// 3). Page the recipient data list.
         /// </summary>
-        /// <param name="input">Input data.</param>
+        /// <param name="notificationDataEntityId">Notification id.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(ProcessRecipientDataListAsync))]
         public async Task<IEnumerable<IEnumerable<UserDataEntity>>> ProcessRecipientDataListAsync(
-            [ActivityTrigger] ProcessRecipientDataListActivityDTO input)
+            [ActivityTrigger] string notificationDataEntityId)
         {
-            var deduplicated = new RecipientDataEntityHashSet(input.RecipientDataList);
-
-            await this.metadataProvider.InitializeStatusInSentNotificationDataAsync(
-                input.NotificationDataEntityId,
-                deduplicated);
+            var sentNotificationDataEntityList =
+                await this.metadataProvider.GetSentNotificationDataEntityListAsync(notificationDataEntityId);
+            var recipientDataList = sentNotificationDataEntityList.Select(p =>
+                new UserDataEntity
+                {
+                    AadId = p.AadId,
+                    ConversationId = p.ConversationId,
+                    ServiceUrl = p.ServiceUrl,
+                });
 
             await this.metadataProvider.SetTotalRecipientCountInNotificationDataAsync(
-                input.NotificationDataEntityId,
-                deduplicated);
+                notificationDataEntityId,
+                recipientDataList);
 
-            var paged = this.CreateRecipientDataBatches(deduplicated.ToList());
+            var paged = this.CreateRecipientDataBatches(recipientDataList.ToList());
             return paged;
         }
 

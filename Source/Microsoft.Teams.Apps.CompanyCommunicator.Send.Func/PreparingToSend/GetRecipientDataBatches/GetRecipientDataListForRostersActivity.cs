@@ -36,8 +36,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="notificationDataEntity">Notification data entity.</param>
-        /// <returns>It returns recipient data list.</returns>
-        public async Task<IEnumerable<UserDataEntity>> RunAsync(
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task RunAsync(
             DurableOrchestrationContext context,
             NotificationDataEntity notificationDataEntity)
         {
@@ -50,7 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
                 nameof(GetRecipientDataListForRostersActivity.GetTeamDataEntitiesByIdsAsync),
                 notificationDataEntity);
 
-            var tasks = new List<Task<IEnumerable<UserDataEntity>>>();
+            var tasks = new List<Task>();
             foreach (var teamDataEntity in teamDataEntityList)
             {
                 var task = context.CallActivityAsync<IEnumerable<UserDataEntity>>(
@@ -65,9 +65,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
             }
 
             await Task.WhenAll(tasks);
-            var recipientDataList = tasks.SelectMany(p => p.Result).ToList();
-
-            return recipientDataList;
         }
 
         /// <summary>
@@ -88,13 +85,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
 
         /// <summary>
         /// This method represents the "get team's roster" durable activity.
-        /// It gets recipient data list for a team's roster.
+        /// 1). It gets recipient data list for a team's roster.
+        /// 2). Initialize sent notification data in the table storage.
         /// </summary>
         /// <param name="input">Input data.</param>
         /// <param name="log">Logging service.</param>
-        /// <returns>It returns the notification's audience data list.</returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(GetTeamRosterDataAsync))]
-        public async Task<IEnumerable<UserDataEntity>> GetTeamRosterDataAsync(
+        public async Task GetTeamRosterDataAsync(
             [ActivityTrigger] GetRecipientDataListForRostersActivityDTO input,
             ILogger log)
         {
@@ -104,7 +102,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
                     input.TeamDataEntity.ServiceUrl,
                     input.TeamDataEntity.TeamId);
 
-                return roster.ToList();
+                await this.metadataProvider.InitializeStatusInSentNotificationDataAsync(
+                    input.NotificationDataEntityId,
+                    roster);
             }
             catch (Exception ex)
             {
@@ -113,8 +113,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
                 await this.metadataProvider.SaveWarningInNotificationDataEntityAsync(
                     input.NotificationDataEntityId,
                     ex.Message);
-
-                return new List<UserDataEntity>();
             }
         }
     }

@@ -123,7 +123,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 if (sentNotificationDataEntity.SentDate != null
                     && sentNotificationDataEntity.SentDate > lastSentDateTime)
                 {
-                    lastSentDateTime = sentNotificationDataEntity.SentDate;
+                    lastSentDateTime = sentNotificationDataEntity.SentDate ?? DateTime.MinValue;
                 }
             }
 
