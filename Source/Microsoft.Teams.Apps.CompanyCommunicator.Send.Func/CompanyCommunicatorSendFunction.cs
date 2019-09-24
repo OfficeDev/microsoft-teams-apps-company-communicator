@@ -45,6 +45,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
         private static DateTime? botAccessTokenExpiration = null;
 
+        private static MessageSender sendQueueServiceBusMessageSender = null;
+
         /// <summary>
         /// Azure Function App triggered by messages from a Service Bus queue
         /// Used for sending messages from the bot.
@@ -110,6 +112,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 {
                     await this.FetchTokenAsync(configuration, CompanyCommunicatorSendFunction.httpClient);
                 }
+
+                CompanyCommunicatorSendFunction.sendQueueServiceBusMessageSender = CompanyCommunicatorSendFunction.sendQueueServiceBusMessageSender
+                    ?? new MessageSender(configuration["ServiceBusConnection"], CompanyCommunicatorSendFunction.SendQueueName);
 
                 var getActiveNotificationEntityTask = CompanyCommunicatorSendFunction.sendingNotificationDataRepository.GetAsync(
                     PartitionKeyNames.NotificationDataTable.SendingNotificationsPartition,
@@ -450,10 +455,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));
             serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromMinutes(sendRetryDelayNumberOfMinutes);
 
-            string serviceBusConnectionString = configuration["ServiceBusConnection"];
-            var messageSender = new MessageSender(serviceBusConnectionString, CompanyCommunicatorSendFunction.SendQueueName);
-
-            await messageSender.SendAsync(serviceBusMessage);
+            await CompanyCommunicatorSendFunction.sendQueueServiceBusMessageSender.SendAsync(serviceBusMessage);
         }
 
         private class ServiceBusSendQueueMessageContent
