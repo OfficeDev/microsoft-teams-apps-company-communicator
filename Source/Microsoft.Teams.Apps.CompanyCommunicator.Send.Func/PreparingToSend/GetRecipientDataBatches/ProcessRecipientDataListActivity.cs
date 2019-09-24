@@ -61,13 +61,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         {
             var sentNotificationDataEntityList =
                 await this.metadataProvider.GetSentNotificationDataEntityListAsync(notificationDataEntityId);
-            var recipientDataList = sentNotificationDataEntityList.Select(p =>
-                new UserDataEntity
-                {
-                    AadId = p.AadId,
-                    ConversationId = p.ConversationId,
-                    ServiceUrl = p.ServiceUrl,
-                });
+            var recipientDataList = sentNotificationDataEntityList
+                .Where(p => p.StatusCode == 0)
+                .Select(p =>
+                    new UserDataEntity
+                    {
+                        AadId = p.AadId,
+                        ConversationId = p.ConversationId,
+                        ServiceUrl = p.ServiceUrl,
+                    });
 
             await this.metadataProvider.SetTotalRecipientCountInNotificationDataAsync(
                 notificationDataEntityId,
