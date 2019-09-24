@@ -83,10 +83,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
 
                 await this.createSendingNotificationActivity.RunAsync(context, notificationDataEntity);
 
-                await this.SendTriggerToAzureFunctionsAsync(
+                await this.sendTriggersToSendFunctionActivity.RunAsync(
                     context,
                     recipientDataBatches,
                     notificationDataEntity.Id);
+
+                await this.sendTriggerToDataFunctionActivity.RunAsync(
+                    context,
+                    notificationDataEntity.Id,
+                    recipientDataBatches);
 
                 log.LogInformation($"\"PREPARE TO SEND\" IS DONE SUCCESSFULLY FOR NOTIFICATION {notificationDataEntity.Id}!");
             }
@@ -129,22 +134,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             this.Log(context, log, notificationDataEntity.Id, recipientType, recipientDataBatches.SelectMany(p => p));
 
             return recipientDataBatches;
-        }
-
-        private async Task SendTriggerToAzureFunctionsAsync(
-            DurableOrchestrationContext context,
-            IEnumerable<IEnumerable<UserDataEntity>> recipientDataBatches,
-            string notificationDataEntityId)
-        {
-            await this.sendTriggersToSendFunctionActivity.RunAsync(
-                context,
-                recipientDataBatches,
-                notificationDataEntityId);
-
-            await this.sendTriggerToDataFunctionActivity.RunAsync(
-                context,
-                notificationDataEntityId,
-                recipientDataBatches);
         }
 
         private void Log(

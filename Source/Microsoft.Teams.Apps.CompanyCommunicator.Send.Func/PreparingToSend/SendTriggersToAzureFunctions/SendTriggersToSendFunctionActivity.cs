@@ -17,7 +17,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     using Newtonsoft.Json;
 
     /// <summary>
-    /// This class contains the "send triggers to Azure send function" durable activity.
+    /// This class contains the following durable components:
+    /// 1). The durable sub-orchestration ProcessRecipientBatchSubOrchestration.
+    /// 2). And two durable activities, SendTriggersToSendFunctionAsync and SetRecipientBatchSatusAsync.
+    /// The components work together to send triggers to the Azure send function.
     /// </summary>
     public class SendTriggersToSendFunctionActivity
     {
@@ -57,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
             foreach (var batch in recipientDataBatches)
             {
                 var task = context.CallSubOrchestratorAsync(
-                    nameof(SendTriggersToSendFunctionActivity.ProcessRecipientBatchAsync),
+                    nameof(SendTriggersToSendFunctionActivity.ProcessRecipientBatchSubOrchestrationAsync),
                     new SendTriggersToSendFunctionActivityDTO
                     {
                         NotificationDataEntityId = notificationDataEntityId,
@@ -72,14 +75,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
 
         /// <summary>
         /// This class represents a durable sub-orchestration that processes a recipient batch as follows.
-        /// 1). Send triggers for recipients whose "send notification status" equal to 0.
+        /// 1). Send triggers for recipients with "send notification status" equal to 0.
         /// 2). Set recipients' "send notification status" to 1 after queued triggers for them.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        [FunctionName(nameof(ProcessRecipientBatchAsync))]
-        public async Task ProcessRecipientBatchAsync(
+        [FunctionName(nameof(ProcessRecipientBatchSubOrchestrationAsync))]
+        public async Task ProcessRecipientBatchSubOrchestrationAsync(
             [OrchestrationTrigger] DurableOrchestrationContext context,
             ILogger log)
         {
