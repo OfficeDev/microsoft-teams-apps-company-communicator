@@ -1,4 +1,4 @@
-﻿// <copyright file="GetRecipientDataListForRostersActivityDTO.cs" company="Microsoft">
+﻿// <copyright file="GetRecipientDataListForRosterActivityDTO.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -7,9 +7,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
 
     /// <summary>
-    /// DTO class used by the durable framework to pass parameter to the GetRecipientDataListForRostersActivity.
+    /// DTO class used by the durable framework to pass parameter to the GetRecipientDataListForRosterActivity.
     /// </summary>
-    public class GetRecipientDataListForRostersActivityDTO
+    public class GetRecipientDataListForRosterActivityDTO
     {
         /// <summary>
         /// Gets or sets notification data entity id.

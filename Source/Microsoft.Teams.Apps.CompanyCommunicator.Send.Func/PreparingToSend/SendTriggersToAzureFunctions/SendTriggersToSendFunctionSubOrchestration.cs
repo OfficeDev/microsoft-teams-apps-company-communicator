@@ -1,4 +1,4 @@
-﻿// <copyright file="SendTriggersToSendFunctionActivity.cs" company="Microsoft">
+﻿// <copyright file="SendTriggersToSendFunctionSubOrchestration.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -25,19 +25,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     /// 2). And two durable activities, SendTriggersToSendFunctionAsync and SetRecipientBatchSatusAsync.
     /// The components work together to send triggers to the Azure send function.
     /// </summary>
-    public class SendTriggersToSendFunctionActivity
+    public class SendTriggersToSendFunctionSubOrchestration
     {
         private readonly SendQueue sendMessageQueue;
         private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
         private readonly SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SendTriggersToSendFunctionActivity"/> class.
+        /// Initializes a new instance of the <see cref="SendTriggersToSendFunctionSubOrchestration"/> class.
         /// </summary>
         /// <param name="sendMessageQueue">Send message queue service.</param>
         /// <param name="notificationDataRepositoryFactory">Notification data repository factory.</param>
         /// <param name="sentNotificationDataRepositoryFactory">Sent notification data repository service.</param>
-        public SendTriggersToSendFunctionActivity(
+        public SendTriggersToSendFunctionSubOrchestration(
             SendQueue sendMessageQueue,
             NotificationDataRepositoryFactory notificationDataRepositoryFactory,
             SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory)
@@ -48,48 +48,42 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         }
 
         /// <summary>
-        /// Run the activity.
-        /// It uses Fan-out / Fan-in pattern to send batch triggers in parallel to Azure send function.
+        /// Run the sub-orchestration.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
-        /// <param name="recipientDataBatches">Receiver batches.</param>
         /// <param name="notificationDataEntityId">New sent notification id.</param>
+        /// <param name="recipientDataBatch">A recipient data batch.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
             DurableOrchestrationContext context,
-            IEnumerable<IEnumerable<UserDataEntity>> recipientDataBatches,
-            string notificationDataEntityId)
+            string notificationDataEntityId,
+            IEnumerable<UserDataEntity> recipientDataBatch)
         {
             var recipientStatusDictionary =
                 this.GetRecipientStatusDictionary(notificationDataEntityId);
 
-            var tasks = new List<Task>();
-            foreach (var batch in recipientDataBatches)
-            {
-                var task = context.CallSubOrchestratorAsync(
-                    nameof(SendTriggersToSendFunctionActivity.ProcessRecipientBatchSubOrchestrationAsync),
-                    new SendTriggersToSendFunctionActivityDTO
-                    {
-                        NotificationDataEntityId = notificationDataEntityId,
-                        RecipientDataBatch = batch,
-                        RecipientStatusDictionary = recipientStatusDictionary,
-                    });
-                tasks.Add(task);
-            }
-
-            await Task.WhenAll(tasks);
+            await context.CallSubOrchestratorAsync(
+                nameof(SendTriggersToSendFunctionSubOrchestration.SendTriggersToSendFunctionAsync),
+                new SendTriggersToSendFunctionActivityDTO
+                {
+                    NotificationDataEntityId = notificationDataEntityId,
+                    RecipientDataBatch = recipientDataBatch,
+                    RecipientStatusDictionary = recipientStatusDictionary,
+                });
         }
 
         /// <summary>
-        /// This class represents a durable sub-orchestration that processes a recipient batch as follows.
+        /// This method represents a durable sub-orchestration that processes a recipient batch as follows.
         /// 1). Send triggers for recipients with "send notification status" equal to 0.
         /// 2). Set recipients' "send notification status" to 1 after queued triggers for them.
+        /// The above two steps need to be executed as an unit in Fan-out / Fan-in pattern.
+        /// That is why they are grouped in a sub-orchestration.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        [FunctionName(nameof(ProcessRecipientBatchSubOrchestrationAsync))]
-        public async Task ProcessRecipientBatchSubOrchestrationAsync(
+        [FunctionName(nameof(SendTriggersToSendFunctionAsync))]
+        public async Task SendTriggersToSendFunctionAsync(
             [OrchestrationTrigger] DurableOrchestrationContext context,
             ILogger log)
         {
@@ -98,12 +92,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
             try
             {
                 await context.CallActivityWithRetryAsync(
-                    nameof(SendTriggersToSendFunctionActivity.SendTriggersToSendFunctionAsync),
+                    nameof(SendTriggersToSendFunctionSubOrchestration.SendTriggersToAzureServiceBusAsync),
                     new RetryOptions(TimeSpan.FromSeconds(5), 3),
                     input);
 
                 await context.CallActivityWithRetryAsync(
-                    nameof(SendTriggersToSendFunctionActivity.SetRecipientBatchSatusAsync),
+                    nameof(SendTriggersToSendFunctionSubOrchestration.SetRecipientBatchSatusAsync),
                     new RetryOptions(TimeSpan.FromSeconds(5), 3),
                     input);
             }
@@ -117,14 +111,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         }
 
         /// <summary>
-        /// This method represents the  "send triggers to Azure send function" activity.
+        /// This method represents the  "send triggers to Azure service bus" activity.
         /// It sends trigger to the Azure send function.
         /// It sends trigger for recipients whose status is 0 only.
         /// </summary>
         /// <param name="input">Input value.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        [FunctionName(nameof(SendTriggersToSendFunctionAsync))]
-        public async Task SendTriggersToSendFunctionAsync(
+        [FunctionName(nameof(SendTriggersToAzureServiceBusAsync))]
+        public async Task SendTriggersToAzureServiceBusAsync(
             [ActivityTrigger] SendTriggersToSendFunctionActivityDTO input)
         {
             var recipientDataBatch = input.RecipientDataBatch;

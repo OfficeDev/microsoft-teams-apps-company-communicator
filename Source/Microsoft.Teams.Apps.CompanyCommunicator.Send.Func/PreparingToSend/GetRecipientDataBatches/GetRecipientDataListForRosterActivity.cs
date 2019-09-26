@@ -1,4 +1,4 @@
-﻿// <copyright file="GetRecipientDataListForRostersActivity.cs" company="Microsoft">
+﻿// <copyright file="GetRecipientDataListForRosterActivity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -20,31 +20,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using Newtonsoft.Json.Linq;
 
     /// <summary>
-    /// This class contains the "get recipient data list for rosters" durable activity.
+    /// This class contains the "get recipient data list for roster" durable activity.
     /// </summary>
-    public class GetRecipientDataListForRostersActivity
+    public class GetRecipientDataListForRosterActivity
     {
         private readonly BotConnectorClientFactory botConnectorClientFactory;
         private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
-        private readonly TeamDataRepositoryFactory teamDataRepositoryFactory;
         private readonly SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GetRecipientDataListForRostersActivity"/> class.
+        /// Initializes a new instance of the <see cref="GetRecipientDataListForRosterActivity"/> class.
         /// </summary>
         /// <param name="botConnectorClientFactory">Bot connector client factory.</param>
         /// <param name="notificationDataRepositoryFactory">Notification data repository factory.</param>
-        /// <param name="teamDataRepositoryFactory">Team Data repository service.</param>
         /// <param name="sentNotificationDataRepositoryFactory">Sent notification data repository factory.</param>
-        public GetRecipientDataListForRostersActivity(
+        public GetRecipientDataListForRosterActivity(
             BotConnectorClientFactory botConnectorClientFactory,
             NotificationDataRepositoryFactory notificationDataRepositoryFactory,
-            TeamDataRepositoryFactory teamDataRepositoryFactory,
             SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory)
         {
             this.botConnectorClientFactory = botConnectorClientFactory;
             this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
-            this.teamDataRepositoryFactory = teamDataRepositoryFactory;
             this.sentNotificationDataRepositoryFactory = sentNotificationDataRepositoryFactory;
         }
 
@@ -53,74 +49,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// It uses Fan-out / Fan-in pattern to get recipient data list (team rosters) in parallel.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
-        /// <param name="notificationDataEntity">Notification data entity.</param>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="teamDataEntity">Team data entity.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
             DurableOrchestrationContext context,
-            NotificationDataEntity notificationDataEntity)
+            string notificationDataEntityId,
+            TeamDataEntity teamDataEntity)
         {
-            if (notificationDataEntity.Rosters == null || notificationDataEntity.Rosters.Count() == 0)
-            {
-                throw new InvalidOperationException("NotificationDataEntity's Rosters property value is null or empty!");
-            }
-
-            var teamDataEntityList = await context.CallActivityWithRetryAsync<IEnumerable<TeamDataEntity>>(
-                nameof(GetRecipientDataListForRostersActivity.GetTeamDataEntitiesByIdsAsync),
+            await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
+                nameof(GetRecipientDataListForRosterActivity.GetRecipientDataListForRosterAsync),
                 new RetryOptions(TimeSpan.FromSeconds(5), 3),
-                notificationDataEntity);
-
-            var tasks = new List<Task>();
-            foreach (var teamDataEntity in teamDataEntityList)
-            {
-                var task = context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
-                    nameof(GetRecipientDataListForRostersActivity.GetTeamRosterDataAsync),
-                    new RetryOptions(TimeSpan.FromSeconds(5), 3),
-                    new GetRecipientDataListForRostersActivityDTO
-                    {
-                        NotificationDataEntityId = notificationDataEntity.Id,
-                        TeamDataEntity = teamDataEntity,
-                    });
-
-                tasks.Add(task);
-            }
-
-            await Task.WhenAll(tasks);
+                new GetRecipientDataListForRosterActivityDTO
+                {
+                    NotificationDataEntityId = notificationDataEntityId,
+                    TeamDataEntity = teamDataEntity,
+                });
         }
 
         /// <summary>
-        /// This method represents the "get team data entity list by id" durable activity.
-        /// It gets team data list by ids.
-        /// </summary>
-        /// <param name="notificationDataEntity">Notification data entity.</param>
-        /// <returns>It returns the notification's audience data list.</returns>
-        [FunctionName(nameof(GetTeamDataEntitiesByIdsAsync))]
-        public async Task<IEnumerable<TeamDataEntity>> GetTeamDataEntitiesByIdsAsync(
-            [ActivityTrigger] NotificationDataEntity notificationDataEntity)
-        {
-            if (notificationDataEntity.Rosters == null || notificationDataEntity.Rosters.Count() == 0)
-            {
-                throw new InvalidOperationException("NotificationDataEntity's Rosters property value is null or empty!");
-            }
-
-            var teamIds = notificationDataEntity.Rosters;
-
-            var teamDataEntities =
-                await this.teamDataRepositoryFactory.CreateRepository(true).GetTeamDataEntitiesByIdsAsync(teamIds);
-
-            return teamDataEntities;
-        }
-
-        /// <summary>
-        /// This method represents the "get team's roster" durable activity.
+        /// This method represents the "get recipient data list for roster" durable activity.
         /// 1). It gets recipient data list for a team's roster.
         /// 2). Initialize sent notification data in the table storage.
         /// </summary>
         /// <param name="input">Input data.</param>
         /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [FunctionName(nameof(GetTeamRosterDataAsync))]
-        public async Task GetTeamRosterDataAsync(
-            [ActivityTrigger] GetRecipientDataListForRostersActivityDTO input,
+        [FunctionName(nameof(GetRecipientDataListForRosterAsync))]
+        public async Task GetRecipientDataListForRosterAsync(
+            [ActivityTrigger] GetRecipientDataListForRosterActivityDTO input,
             ILogger log)
         {
             try
