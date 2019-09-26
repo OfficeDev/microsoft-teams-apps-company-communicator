@@ -98,6 +98,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     TotalMessageCount = notificationEntity.TotalMessageCount,
                     IsCompleted = notificationEntity.IsCompleted,
                     SendingStartedDate = notificationEntity.SendingStartedDate,
+                    IsPreparingToSend = notificationEntity.IsPreparingToSend,
                 };
 
                 result.Add(summary);
