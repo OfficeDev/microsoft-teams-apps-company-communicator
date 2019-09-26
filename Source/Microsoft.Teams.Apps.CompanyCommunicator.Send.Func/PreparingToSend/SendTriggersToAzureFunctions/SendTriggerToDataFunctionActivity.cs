@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
@@ -88,6 +89,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
                 serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(30);
 
                 await this.dataMessageQueue.SendAsync(serviceBusMessage);
+
+                await this.MarkPreparingToSendIsDone(input.NotificationDataEntityId);
             }
             catch (Exception ex)
             {
@@ -95,6 +98,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
 
                 await this.notificationDataRepositoryFactory.CreateRepository(true)
                     .SaveExceptionInNotificationDataEntityAsync(input.NotificationDataEntityId, ex.Message);
+            }
+        }
+
+        private async Task MarkPreparingToSendIsDone(string notificationDataEntityId)
+        {
+            var repository = this.notificationDataRepositoryFactory.CreateRepository(true);
+
+            var notificationDataEntity = await repository.GetAsync(
+                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                notificationDataEntityId);
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.IsPreparingToSend = false;
+
+                await repository.CreateOrUpdateAsync(notificationDataEntity);
             }
         }
     }

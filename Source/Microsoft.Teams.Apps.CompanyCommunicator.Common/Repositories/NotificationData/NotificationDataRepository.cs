@@ -100,6 +100,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 TotalMessageCount = draftNotificationEntity.TotalMessageCount,
                 IsCompleted = false,
                 SendingStartedDate = DateTime.UtcNow,
+                IsPreparingToSend = true,
             };
             await this.CreateOrUpdateAsync(sentNotificationEntity);
 

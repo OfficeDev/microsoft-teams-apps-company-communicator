@@ -15,8 +15,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorC
     /// </summary>
     public class BotConnectorClientFactory
     {
-        private static string microsoftAppIdKeyName = "MicrosoftAppId";
-        private static string microsoftAppPasswordKeyName = "MicrosoftAppPassword";
+        private const string MicrosoftAppIdKeyName = "MicrosoftAppId";
+        private const string MicrosoftAppPasswordKeyName = "MicrosoftAppPassword";
         private readonly IConfiguration configuration;
         private readonly IDictionary<string, ConnectorClient> serviceUrlToConnectorClientMap =
             new Dictionary<string, ConnectorClient>();
@@ -41,8 +41,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorC
             {
                 MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
 
-                var botAppId = this.configuration[BotConnectorClientFactory.microsoftAppIdKeyName];
-                var botAppPassword = this.configuration[BotConnectorClientFactory.microsoftAppPasswordKeyName];
+                var botAppId = this.configuration[BotConnectorClientFactory.MicrosoftAppIdKeyName];
+                var botAppPassword = this.configuration[BotConnectorClientFactory.MicrosoftAppPasswordKeyName];
 
                 var connectorClient = new ConnectorClient(
                     new Uri(serviceUrl),

@@ -166,5 +166,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets or sets the warning message.
         /// </summary>
         public string WarningMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the notification is in the "preparing to send" state.
+        /// </summary>
+        public bool IsPreparingToSend { get; set; }
     }
 }
