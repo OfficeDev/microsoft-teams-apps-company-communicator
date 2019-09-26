@@ -32,6 +32,9 @@ export interface ITaskInfo {
 }
 
 class Overflow extends React.Component<OverflowProps, OverflowState> {
+    private interval: any;
+    private timeout: any;
+
     constructor(props: OverflowProps) {
         super(props);
         this.state = {
@@ -164,6 +167,14 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
             this.props.getDraftMessagesList().then(() => {
                 this.props.getMessagesList();
             });
+            this.interval = setInterval(() => {
+                this.props.getDraftMessagesList().then(() => {
+                    this.props.getMessagesList();
+                });
+            }, 10000);
+            this.timeout = setTimeout(() => {
+                clearInterval(this.interval);
+            }, 60000);
         };
 
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
