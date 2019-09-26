@@ -27,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         private readonly CreateSendingNotificationActivity createSendingNotificationActivity;
         private readonly SendTriggersToSendFunctionActivity sendTriggersToSendFunctionActivity;
         private readonly SendTriggerToDataFunctionActivity sendTriggerToDataFunctionActivity;
-        private readonly CleanUpActivity cleanUpActivity;
+        private readonly HandleFailureActivity handleFailureActivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PreparingToSendOrchestration"/> class.
@@ -39,7 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         /// <param name="createSendingNotificationActivity">Create sending notification activity.</param>
         /// <param name="sendTriggersToSendFunctionActivity">Send triggers to send function activity.</param>
         /// <param name="sendTriggerToDataFunctionActivity">Send trigger to data function activity.</param>
-        /// <param name="cleanUpActivity">Clean up activity.</param>
+        /// <param name="handleFailureActivity">Clean up activity.</param>
         public PreparingToSendOrchestration(
             GetRecipientDataListForAllUsersActivity getRecipientDataListForAllUsersActivity,
             GetRecipientDataListForRostersActivity getRecipientDataListForRostersActivity,
@@ -48,7 +48,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             CreateSendingNotificationActivity createSendingNotificationActivity,
             SendTriggersToSendFunctionActivity sendTriggersToSendFunctionActivity,
             SendTriggerToDataFunctionActivity sendTriggerToDataFunctionActivity,
-            CleanUpActivity cleanUpActivity)
+            HandleFailureActivity handleFailureActivity)
         {
             this.getRecipientDataListForAllUsersActivity = getRecipientDataListForAllUsersActivity;
             this.getRecipientDataListForRostersActivity = getRecipientDataListForRostersActivity;
@@ -57,7 +57,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             this.createSendingNotificationActivity = createSendingNotificationActivity;
             this.sendTriggersToSendFunctionActivity = sendTriggersToSendFunctionActivity;
             this.sendTriggerToDataFunctionActivity = sendTriggerToDataFunctionActivity;
-            this.cleanUpActivity = cleanUpActivity;
+            this.handleFailureActivity = handleFailureActivity;
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             }
             catch (Exception ex)
             {
-                await this.cleanUpActivity.RunAsync(context, notificationDataEntity, ex);
+                await this.handleFailureActivity.RunAsync(context, notificationDataEntity, ex);
             }
         }
 

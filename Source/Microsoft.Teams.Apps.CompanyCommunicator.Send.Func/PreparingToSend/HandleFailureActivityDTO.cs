@@ -1,4 +1,4 @@
-﻿// <copyright file="CleanUpActivityDTO.cs" company="Microsoft">
+﻿// <copyright file="HandleFailureActivityDTO.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -10,7 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     /// <summary>
     /// DTO class used by the durable framework to pass parameter to the CleanUpActivity.
     /// </summary>
-    public class CleanUpActivityDTO
+    public class HandleFailureActivityDTO
     {
         /// <summary>
         /// Gets or sets new sent notification data entity.

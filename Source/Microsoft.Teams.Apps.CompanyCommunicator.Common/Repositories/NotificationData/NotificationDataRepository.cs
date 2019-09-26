@@ -19,16 +19,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
-        public NotificationDataRepository(IConfiguration configuration, TableRowKeyGenerator tableRowKeyGenerator)
-            : this(configuration, tableRowKeyGenerator, false)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NotificationDataRepository"/> class.
-        /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
-        /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
         /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
         public NotificationDataRepository(
             IConfiguration configuration,
@@ -151,6 +141,57 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             };
 
             await this.CreateOrUpdateAsync(newNotificationEntity);
+        }
+
+        /// <summary>
+        /// Save exception error message in a notification data entity.
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="errorMessage">Error message.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task SaveExceptionInNotificationDataEntityAsync(
+            string notificationDataEntityId,
+            string errorMessage)
+        {
+            var notificationDataEntity = await this.GetAsync(
+                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                notificationDataEntityId);
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.ExceptionMessage =
+                    this.AppendNewLine(notificationDataEntity.ExceptionMessage, errorMessage);
+
+                await this.CreateOrUpdateAsync(notificationDataEntity);
+            }
+        }
+
+        /// <summary>
+        /// Save warning message in a notification data entity.
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="warningMessage">Warning message to be saved.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task SaveWarningInNotificationDataEntityAsync(
+            string notificationDataEntityId,
+            string warningMessage)
+        {
+            var notificationDataEntity = await this.GetAsync(
+                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                notificationDataEntityId);
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.WarningMessage =
+                    this.AppendNewLine(notificationDataEntity.WarningMessage, warningMessage);
+
+                await this.CreateOrUpdateAsync(notificationDataEntity);
+            }
+        }
+
+        private string AppendNewLine(string originalString, string newString)
+        {
+            return string.IsNullOrWhiteSpace(originalString)
+                ? newString
+                : $"{originalString}{Environment.NewLine}{newString}";
         }
     }
 }

@@ -11,6 +11,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
@@ -18,15 +20,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     /// </summary>
     public class GetRecipientDataListForTeamsActivity
     {
-        private readonly MetadataProvider metadataProvider;
+        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
+        private readonly TeamDataRepositoryFactory teamDataRepositoryFactory;
+        private readonly SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientDataListForTeamsActivity"/> class.
         /// </summary>
-        /// <param name="metadataProvider">Meta-data Provider instance.</param>
-        public GetRecipientDataListForTeamsActivity(MetadataProvider metadataProvider)
+        /// <param name="notificationDataRepositoryFactory">Notification data repository factory.</param>
+        /// <param name="teamDataRepositoryFactory">Team Data repository service.</param>
+        /// <param name="sentNotificationDataRepositoryFactory">Sent notification data repository factory.</param>
+        public GetRecipientDataListForTeamsActivity(
+            NotificationDataRepositoryFactory notificationDataRepositoryFactory,
+            TeamDataRepositoryFactory teamDataRepositoryFactory,
+            SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory)
         {
-            this.metadataProvider = metadataProvider;
+            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
+            this.teamDataRepositoryFactory = teamDataRepositoryFactory;
+            this.sentNotificationDataRepositoryFactory = sentNotificationDataRepositoryFactory;
         }
 
         /// <summary>
@@ -66,20 +77,43 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
             try
             {
                 var teamsRecipientDataList =
-                    await this.metadataProvider.GetTeamsRecipientDataEntityListAsync(notificationDataEntity.Teams);
+                    await this.GetTeamsRecipientDataEntityListAsync(notificationDataEntity.Teams);
 
-                await this.metadataProvider.InitializeStatusInSentNotificationDataAsync(
-                    notificationDataEntity.Id,
-                    teamsRecipientDataList);
+                await this.sentNotificationDataRepositoryFactory.CreateRepository(true)
+                    .InitializeSentNotificationDataForRecipientBatchAsync(notificationDataEntity.Id, teamsRecipientDataList);
             }
             catch (Exception ex)
             {
                 log.LogError(ex.Message);
 
-                await this.metadataProvider.SaveWarningInNotificationDataEntityAsync(
-                    notificationDataEntity.Id,
-                    ex.Message);
+                await this.notificationDataRepositoryFactory.CreateRepository(true)
+                    .SaveWarningInNotificationDataEntityAsync(notificationDataEntity.Id, ex.Message);
             }
+        }
+
+        /// <summary>
+        /// Get teams' recipient data entity list.
+        /// </summary>
+        /// <param name="teamIds">Team IDs.</param>
+        /// <returns>List of recipient data entity (user data entities).</returns>
+        private async Task<List<UserDataEntity>> GetTeamsRecipientDataEntityListAsync(IEnumerable<string> teamIds)
+        {
+            var teamDataEntities = await this.teamDataRepositoryFactory.CreateRepository(true).GetTeamDataEntitiesByIdsAsync(teamIds);
+
+            var teamReceiverEntities = new List<UserDataEntity>();
+
+            foreach (var teamDataEntity in teamDataEntities)
+            {
+                teamReceiverEntities.Add(
+                    new UserDataEntity
+                    {
+                        AadId = teamDataEntity.TeamId,
+                        ConversationId = teamDataEntity.TeamId,
+                        ServiceUrl = teamDataEntity.ServiceUrl,
+                    });
+            }
+
+            return teamReceiverEntities;
         }
     }
 }

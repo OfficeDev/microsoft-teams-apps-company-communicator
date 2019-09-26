@@ -9,9 +9,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Newtonsoft.Json;
@@ -25,19 +28,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     public class SendTriggersToSendFunctionActivity
     {
         private readonly SendQueue sendMessageQueue;
-        private readonly MetadataProvider metadataProvider;
+        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
+        private readonly SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SendTriggersToSendFunctionActivity"/> class.
         /// </summary>
         /// <param name="sendMessageQueue">Send message queue service.</param>
-        /// <param name="metadataProvider">Meta-data provider.</param>
+        /// <param name="notificationDataRepositoryFactory">Notification data repository factory.</param>
+        /// <param name="sentNotificationDataRepositoryFactory">Sent notification data repository service.</param>
         public SendTriggersToSendFunctionActivity(
             SendQueue sendMessageQueue,
-            MetadataProvider metadataProvider)
+            NotificationDataRepositoryFactory notificationDataRepositoryFactory,
+            SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory)
         {
             this.sendMessageQueue = sendMessageQueue;
-            this.metadataProvider = metadataProvider;
+            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
+            this.sentNotificationDataRepositoryFactory = sentNotificationDataRepositoryFactory;
         }
 
         /// <summary>
@@ -104,9 +111,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
             {
                 log.LogError(ex.Message);
 
-                await this.metadataProvider.SaveWarningInNotificationDataEntityAsync(
-                    input.NotificationDataEntityId,
-                    ex.Message);
+                await this.notificationDataRepositoryFactory.CreateRepository(true)
+                    .SaveWarningInNotificationDataEntityAsync(input.NotificationDataEntityId, ex.Message);
             }
         }
 
@@ -150,9 +156,43 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
             var notificationDataEntityId = input.NotificationDataEntityId;
             var recipientDataBatch = input.RecipientDataBatch;
 
-            await this.metadataProvider.SetStatusInSentNotificationDataAsync(
+            await this.SetStatusInSentNotificationDataAsync(
                 notificationDataEntityId,
                 recipientDataBatch);
+        }
+
+        /// <summary>
+        /// Set "sent notification data status" to be 1 for recipients.
+        /// It marks that messages are already queued for the recipients in Azure service bus.
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="recipientDataBatch">A recipient data batch.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        private async Task SetStatusInSentNotificationDataAsync(
+            string notificationDataEntityId,
+            IEnumerable<UserDataEntity> recipientDataBatch)
+        {
+            // Retrieve AadIds whose StatusCode equal to 0 (in SentNotificationDataRepository).
+            var filter =
+                TableQuery.GenerateFilterCondition(nameof(SentNotificationDataEntity.StatusCode), QueryComparisons.Equal, "0");
+            var filteredSentNotificationDataList =
+                await this.sentNotificationDataRepositoryFactory.CreateRepository(true).GetWithFilterAsync(filter, notificationDataEntityId);
+            var aadIdList = filteredSentNotificationDataList.Select(p => p.AadId);
+            var aadIdHashSet = new HashSet<string>(aadIdList);
+
+            // Set the StatusCode to be 1 for the above AadIds (in SentNotificationDataRepository).
+            var sentNotificationDataEntities = recipientDataBatch
+                .Where(p => aadIdHashSet.Contains(p.AadId))
+                .Select(p =>
+                    new SentNotificationDataEntity
+                    {
+                        PartitionKey = notificationDataEntityId,
+                        RowKey = p.AadId,
+                        AadId = p.AadId,
+                        StatusCode = 1,
+                    })
+                .ToList();
+            await this.sentNotificationDataRepositoryFactory.CreateRepository(true).BatchInsertOrMergeAsync(sentNotificationDataEntities);
         }
 
         private Message CreateServiceBusQueueMessage(
@@ -183,9 +223,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         {
             var recipientStatusDictionary = new Dictionary<string, int>();
 
-            var sentNotificationDataEntityList = this.metadataProvider
-                .GetSentNotificationDataEntityListAsync(notificationDataEntityId)
-                .Result;
+            var sentNotificationDataEntityList =
+                this.sentNotificationDataRepositoryFactory.CreateRepository(true).GetAllAsync(notificationDataEntityId).Result;
 
             foreach (var sentNotificationDataEntity in sentNotificationDataEntityList)
             {

@@ -15,6 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorClient;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.GetRecipientDataBatches;
@@ -28,14 +29,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <inheritdoc/>
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            builder.Services.AddTransient<MetadataProvider>();
+            builder.Services.AddSingleton<BotConnectorClientFactory>();
+
             builder.Services.AddTransient<AdaptiveCardCreator>();
-            builder.Services.AddTransient<NotificationDataRepository>();
-            builder.Services.AddTransient<SendingNotificationDataRepository>();
-            builder.Services.AddTransient<SentNotificationDataRepository>();
-            builder.Services.AddTransient<UserDataRepository>();
-            builder.Services.AddTransient<TeamDataRepository>();
+
             builder.Services.AddTransient<TableRowKeyGenerator>();
+            builder.Services.AddTransient<NotificationDataRepositoryFactory>();
+            builder.Services.AddTransient<SendingNotificationDataRepositoryFactory>();
+            builder.Services.AddTransient<SentNotificationDataRepositoryFactory>();
+            builder.Services.AddTransient<UserDataRepositoryFactory>();
+            builder.Services.AddTransient<TeamDataRepositoryFactory>();
+
             builder.Services.AddTransient<SendQueue>();
             builder.Services.AddTransient<DataQueue>();
 
@@ -47,7 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
             builder.Services.AddTransient<SendTriggerToDataFunctionActivity>();
             builder.Services.AddTransient<ProcessRecipientDataListActivity>();
-            builder.Services.AddTransient<CleanUpActivity>();
+            builder.Services.AddTransient<HandleFailureActivity>();
         }
     }
 }
