@@ -9,6 +9,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
@@ -16,15 +19,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     /// </summary>
     public class ProcessRecipientDataListActivity
     {
-        private readonly MetadataProvider metadataProvider;
+        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
+        private readonly SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProcessRecipientDataListActivity"/> class.
         /// </summary>
-        /// <param name="metadataProvider">Meta-data Provider instance.</param>
-        public ProcessRecipientDataListActivity(MetadataProvider metadataProvider)
+        /// <param name="notificationDataRepositoryFactory">Notification data repository service.</param>
+        /// <param name="sentNotificationDataRepositoryFactory">Sent notification data repository service.</param>
+        public ProcessRecipientDataListActivity(
+            NotificationDataRepositoryFactory notificationDataRepositoryFactory,
+            SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory)
         {
-            this.metadataProvider = metadataProvider;
+            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
+            this.sentNotificationDataRepositoryFactory = sentNotificationDataRepositoryFactory;
         }
 
         /// <summary>
@@ -60,7 +68,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
             [ActivityTrigger] string notificationDataEntityId)
         {
             var sentNotificationDataEntityList =
-                await this.metadataProvider.GetSentNotificationDataEntityListAsync(notificationDataEntityId);
+                await this.sentNotificationDataRepositoryFactory.CreateRepository(true).GetAllAsync(
+                    notificationDataEntityId);
             var recipientDataList = sentNotificationDataEntityList
                 .Where(p => p.StatusCode == 0)
                 .Select(p =>
@@ -71,12 +80,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
                         ServiceUrl = p.ServiceUrl,
                     });
 
-            await this.metadataProvider.SetTotalRecipientCountInNotificationDataAsync(
+            await this.SetTotalRecipientCountInNotificationDataAsync(
                 notificationDataEntityId,
                 recipientDataList);
 
             var paged = this.CreateRecipientDataBatches(recipientDataList.ToList());
             return paged;
+        }
+
+        /// <summary>
+        /// Set total recipient count in notification data entity.
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="recipientDataList">Recipient data list.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        internal async Task SetTotalRecipientCountInNotificationDataAsync(
+            string notificationDataEntityId,
+            IEnumerable<UserDataEntity> recipientDataList)
+        {
+            var notificationDataEntity = await this.notificationDataRepositoryFactory.CreateRepository(true).GetAsync(
+                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                notificationDataEntityId);
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.TotalMessageCount = recipientDataList.Count();
+            }
         }
 
         private IEnumerable<IEnumerable<UserDataEntity>> CreateRecipientDataBatches(

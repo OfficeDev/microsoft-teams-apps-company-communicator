@@ -20,16 +20,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     {
         private const string QueueName = "company-communicator-preparetosend";
         private const string ConnectionName = "ServiceBusConnection";
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorPrepareToSendFunction"/> class.
         /// </summary>
-        /// <param name="notificationDataRepository">Notification data repository service.</param>
+        /// <param name="notificationDataRepositoryFactory">Notification data repository factory service.</param>
         public CompanyCommunicatorPrepareToSendFunction(
-            NotificationDataRepository notificationDataRepository)
+            NotificationDataRepositoryFactory notificationDataRepositoryFactory)
         {
-            this.notificationDataRepository = notificationDataRepository;
+            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
         }
 
         /// <summary>
@@ -50,8 +50,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         {
             var partitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition;
             var notificationDataEntityId = JsonConvert.DeserializeObject<string>(myQueueItem);
-            var notificationDataEntity =
-                await this.notificationDataRepository.GetAsync(partitionKey, notificationDataEntityId);
+            var notificationDataRepository = this.notificationDataRepositoryFactory.CreateRepository(true);
+            var notificationDataEntity = await notificationDataRepository.GetAsync(partitionKey, notificationDataEntityId);
             if (notificationDataEntity != null)
             {
                 string instanceId = await starter.StartNewAsync(

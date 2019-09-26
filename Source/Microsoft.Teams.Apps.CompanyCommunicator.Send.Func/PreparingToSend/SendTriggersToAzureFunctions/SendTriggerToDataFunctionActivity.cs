@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Newtonsoft.Json;
@@ -22,19 +23,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
     public class SendTriggerToDataFunctionActivity
     {
         private readonly DataQueue dataMessageQueue;
-        private readonly MetadataProvider metadataProvider;
+        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SendTriggerToDataFunctionActivity"/> class.
         /// </summary>
         /// <param name="dataMessageQueue">The message queue service connected to the queue 'company-communicator-data'.</param>
-        /// <param name="metadataProvider">Meta-data provider.</param>
+        /// <param name="notificationDataRepositoryFactory">Notification data repository factory.</param>
         public SendTriggerToDataFunctionActivity(
             DataQueue dataMessageQueue,
-            MetadataProvider metadataProvider)
+            NotificationDataRepositoryFactory notificationDataRepositoryFactory)
         {
             this.dataMessageQueue = dataMessageQueue;
-            this.metadataProvider = metadataProvider;
+            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
         }
 
         /// <summary>
@@ -92,9 +93,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
             {
                 log.LogError(ex.Message);
 
-                await this.metadataProvider.SaveExceptionInNotificationDataEntityAsync(
-                    input.NotificationDataEntityId,
-                    ex.Message);
+                await this.notificationDataRepositoryFactory.CreateRepository(true)
+                    .SaveExceptionInNotificationDataEntityAsync(input.NotificationDataEntityId, ex.Message);
             }
         }
     }

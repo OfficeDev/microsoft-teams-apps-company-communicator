@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
@@ -17,15 +18,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     /// </summary>
     public class GetRecipientDataListForAllUsersActivity
     {
-        private readonly MetadataProvider metadataProvider;
+        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
+        private readonly UserDataRepositoryFactory userDataRepositoryFactory;
+        private readonly SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientDataListForAllUsersActivity"/> class.
         /// </summary>
-        /// <param name="metadataProvider">Meta-data Provider instance.</param>
-        public GetRecipientDataListForAllUsersActivity(MetadataProvider metadataProvider)
+        /// <param name="notificationDataRepositoryFactory">Notification data repository factory.</param>
+        /// <param name="userDataRepositoryFactory">User Data repository service.</param>
+        /// <param name="sentNotificationDataRepositoryFactory">Sent notification data repository factory.</param>
+        public GetRecipientDataListForAllUsersActivity(
+            NotificationDataRepositoryFactory notificationDataRepositoryFactory,
+            UserDataRepositoryFactory userDataRepositoryFactory,
+            SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory)
         {
-            this.metadataProvider = metadataProvider;
+            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
+            this.userDataRepositoryFactory = userDataRepositoryFactory;
+            this.sentNotificationDataRepositoryFactory = sentNotificationDataRepositoryFactory;
         }
 
         /// <summary>
@@ -59,19 +69,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         {
             try
             {
-                var allUersRecipientDataList = await this.metadataProvider.GetUserDataEntityListAsync();
+                var allUersRecipientDataList = await this.userDataRepositoryFactory.CreateRepository(true).GetAllAsync();
 
-                await this.metadataProvider.InitializeStatusInSentNotificationDataAsync(
-                    notificationDataEntityId,
-                    allUersRecipientDataList);
+                await this.sentNotificationDataRepositoryFactory.CreateRepository(true)
+                    .InitializeSentNotificationDataForRecipientBatchAsync(notificationDataEntityId, allUersRecipientDataList);
             }
             catch (Exception ex)
             {
                 log.LogError(ex.Message);
 
-                await this.metadataProvider.SaveWarningInNotificationDataEntityAsync(
-                    notificationDataEntityId,
-                    ex.Message);
+                await this.notificationDataRepositoryFactory.CreateRepository(true)
+                    .SaveWarningInNotificationDataEntityAsync(notificationDataEntityId, ex.Message);
             }
         }
     }

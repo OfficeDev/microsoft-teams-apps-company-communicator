@@ -1,4 +1,4 @@
-﻿// <copyright file="CleanUpActivity.cs" company="Microsoft">
+﻿// <copyright file="HandleFailureActivity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -14,17 +14,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     /// This class contains the "clean up" durable activity.
     /// If exceptions happen in the "prepare to send" operation, this method is called to log the exception.
     /// </summary>
-    public class CleanUpActivity
+    public class HandleFailureActivity
     {
-        private readonly MetadataProvider metadataProvider;
+        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CleanUpActivity"/> class.
+        /// Initializes a new instance of the <see cref="HandleFailureActivity"/> class.
         /// </summary>
-        /// <param name="metadataProvider">Meta-data Provider instance.</param>
-        public CleanUpActivity(MetadataProvider metadataProvider)
+        /// <param name="notificationDataRepositoryFactory">Notification data repository factory.</param>
+        public HandleFailureActivity(NotificationDataRepositoryFactory notificationDataRepositoryFactory)
         {
-            this.metadataProvider = metadataProvider;
+            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
         }
 
         /// <summary>
@@ -40,9 +40,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             Exception ex)
         {
             await context.CallActivityWithRetryAsync(
-                nameof(CleanUpActivity.CleanUp),
+                nameof(HandleFailureActivity.HandleFailureAsync),
                 new RetryOptions(TimeSpan.FromSeconds(5), 3),
-                new CleanUpActivityDTO
+                new HandleFailureActivityDTO
                 {
                     NotificationDataEntity = notificationDataEntity,
                     Exception = ex,
@@ -57,16 +57,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         /// <param name="input">Input value.</param>
         /// <param name="log">Logging service.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        [FunctionName(nameof(CleanUp))]
-        public async Task CleanUp(
-            [ActivityTrigger] CleanUpActivityDTO input,
+        [FunctionName(nameof(HandleFailureAsync))]
+        public async Task HandleFailureAsync(
+            [ActivityTrigger] HandleFailureActivityDTO input,
             ILogger log)
         {
             log.LogError(input.Exception.Message);
 
-            await this.metadataProvider.SaveExceptionInNotificationDataEntityAsync(
-                input.NotificationDataEntity.Id,
-                input.Exception.Message);
+            await this.notificationDataRepositoryFactory.CreateRepository(true)
+                .SaveExceptionInNotificationDataEntityAsync(input.NotificationDataEntity.Id, input.Exception.Message);
         }
     }
 }
