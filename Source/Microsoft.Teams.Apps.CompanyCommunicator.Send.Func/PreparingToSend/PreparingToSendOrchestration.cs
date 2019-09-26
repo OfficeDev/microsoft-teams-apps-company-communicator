@@ -21,41 +21,45 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
     public class PreparingToSendOrchestration
     {
         private readonly GetRecipientDataListForAllUsersActivity getRecipientDataListForAllUsersActivity;
-        private readonly GetRecipientDataListForRostersActivity getRecipientDataListForRostersActivity;
+        private readonly GetTeamDataEntitiesByIdsActivity getTeamDataEntitiesByIdsActivity;
+        private readonly GetRecipientDataListForRosterActivity getRecipientDataListForRosterActivity;
         private readonly GetRecipientDataListForTeamsActivity getRecipientDataListForTeamsActivity;
         private readonly ProcessRecipientDataListActivity processRecipientDataListActivity;
         private readonly CreateSendingNotificationActivity createSendingNotificationActivity;
-        private readonly SendTriggersToSendFunctionActivity sendTriggersToSendFunctionActivity;
+        private readonly SendTriggersToSendFunctionSubOrchestration sendTriggersToSendFunctionSubOrchestration;
         private readonly SendTriggerToDataFunctionActivity sendTriggerToDataFunctionActivity;
         private readonly HandleFailureActivity handleFailureActivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PreparingToSendOrchestration"/> class.
         /// </summary>
-        /// <param name="getRecipientDataListForAllUsersActivity">Get all users recipient data batches activity.</param>
-        /// <param name="getRecipientDataListForRostersActivity">Get rosters recipient data batches activity.</param>
-        /// <param name="getRecipientDataListForTeamsActivity">Get teams recipient data batches activity.</param>
+        /// <param name="getRecipientDataListForAllUsersActivity">Get recipient data for all users activity.</param>
+        /// <param name="getTeamDataEntitiesByIdsActivity">Get team data entities by ids activity.</param>
+        /// <param name="getRecipientDataListForRosterActivity">Get recipient data for roster activity.</param>
+        /// <param name="getRecipientDataListForTeamsActivity">Get recipient data for teams activity.</param>
         /// <param name="processRecipientDataListActivity">Process recipient data list activity.</param>
         /// <param name="createSendingNotificationActivity">Create sending notification activity.</param>
-        /// <param name="sendTriggersToSendFunctionActivity">Send triggers to send function activity.</param>
+        /// <param name="sendTriggersToSendFunctionSubOrchestration">Send triggers to send function sub-orchestration.</param>
         /// <param name="sendTriggerToDataFunctionActivity">Send trigger to data function activity.</param>
         /// <param name="handleFailureActivity">Clean up activity.</param>
         public PreparingToSendOrchestration(
             GetRecipientDataListForAllUsersActivity getRecipientDataListForAllUsersActivity,
-            GetRecipientDataListForRostersActivity getRecipientDataListForRostersActivity,
+            GetTeamDataEntitiesByIdsActivity getTeamDataEntitiesByIdsActivity,
+            GetRecipientDataListForRosterActivity getRecipientDataListForRosterActivity,
             GetRecipientDataListForTeamsActivity getRecipientDataListForTeamsActivity,
             ProcessRecipientDataListActivity processRecipientDataListActivity,
             CreateSendingNotificationActivity createSendingNotificationActivity,
-            SendTriggersToSendFunctionActivity sendTriggersToSendFunctionActivity,
+            SendTriggersToSendFunctionSubOrchestration sendTriggersToSendFunctionSubOrchestration,
             SendTriggerToDataFunctionActivity sendTriggerToDataFunctionActivity,
             HandleFailureActivity handleFailureActivity)
         {
             this.getRecipientDataListForAllUsersActivity = getRecipientDataListForAllUsersActivity;
-            this.getRecipientDataListForRostersActivity = getRecipientDataListForRostersActivity;
+            this.getTeamDataEntitiesByIdsActivity = getTeamDataEntitiesByIdsActivity;
+            this.getRecipientDataListForRosterActivity = getRecipientDataListForRosterActivity;
             this.getRecipientDataListForTeamsActivity = getRecipientDataListForTeamsActivity;
             this.processRecipientDataListActivity = processRecipientDataListActivity;
             this.createSendingNotificationActivity = createSendingNotificationActivity;
-            this.sendTriggersToSendFunctionActivity = sendTriggersToSendFunctionActivity;
+            this.sendTriggersToSendFunctionSubOrchestration = sendTriggersToSendFunctionSubOrchestration;
             this.sendTriggerToDataFunctionActivity = sendTriggerToDataFunctionActivity;
             this.handleFailureActivity = handleFailureActivity;
         }
@@ -76,22 +80,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
 
             try
             {
-                var recipientDataBatches = await this.GetRecipientDataBatchesAsync(
-                    context,
-                    notificationDataEntity,
-                    log);
+                var recipientDataBatches =
+                    await this.GetRecipientDataBatchesAsync(context, notificationDataEntity, log);
 
                 await this.createSendingNotificationActivity.RunAsync(context, notificationDataEntity);
 
-                await this.sendTriggersToSendFunctionActivity.RunAsync(
-                    context,
-                    recipientDataBatches,
-                    notificationDataEntity.Id);
+                await this.SendTriggersToSendFunctionAsync(context, notificationDataEntity.Id, recipientDataBatches);
 
-                await this.sendTriggerToDataFunctionActivity.RunAsync(
-                    context,
-                    notificationDataEntity.Id,
-                    recipientDataBatches);
+                await this.sendTriggerToDataFunctionActivity.RunAsync(context, notificationDataEntity.Id, recipientDataBatches);
 
                 log.LogInformation($"\"PREPARE TO SEND\" IS DONE SUCCESSFULLY FOR NOTIFICATION {notificationDataEntity.Id}!");
             }
@@ -115,7 +111,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             else if (notificationDataEntity.Rosters.Count() != 0)
             {
                 recipientType = "Rosters";
-                await this.getRecipientDataListForRostersActivity.RunAsync(context, notificationDataEntity);
+                await this.GetRecipientDataListForRostersAsync(context, notificationDataEntity);
             }
             else if (notificationDataEntity.Teams.Count() != 0)
             {
@@ -136,21 +132,56 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             return recipientDataBatches;
         }
 
-        private void Log(
+        /// <summary>
+        /// Get recipient data list for rosters.
+        /// It uses Fan-out / Fan-in pattern to get recipient data list (team rosters) in parallel.
+        /// </summary>
+        /// <param name="context">Durable orchestration context.</param>
+        /// <param name="notificationDataEntity">Notification data entity.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        private async Task GetRecipientDataListForRostersAsync(
             DurableOrchestrationContext context,
-            ILogger log,
-            string notificationDataEntityId,
-            string recipientType)
+            NotificationDataEntity notificationDataEntity)
         {
-            if (context.IsReplaying)
+            var teamDataEntityList =
+                await this.getTeamDataEntitiesByIdsActivity.RunAsync(context, notificationDataEntity);
+
+            var tasks = new List<Task>();
+            foreach (var teamDataEntity in teamDataEntityList)
             {
-                return;
+                var task = this.getRecipientDataListForRosterActivity.RunAsync(
+                    context,
+                    notificationDataEntity.Id,
+                    teamDataEntity);
+
+                tasks.Add(task);
             }
 
-            log.LogInformation(
-                "Notification id:{0}. Audience option: {1}",
-                notificationDataEntityId,
-                recipientType);
+            await Task.WhenAll(tasks);
+        }
+
+        /// <summary>
+        /// Send triggers to Azure send function.
+        /// It uses Fan-out / Fan-in pattern to send batch triggers in parallel to Azure send function.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        private async Task SendTriggersToSendFunctionAsync(
+            DurableOrchestrationContext context,
+            string notificationDataEntityId,
+            IEnumerable<IEnumerable<UserDataEntity>> recipientDataBatches)
+        {
+            var tasks = new List<Task>();
+            foreach (var batch in recipientDataBatches)
+            {
+                var task = this.sendTriggersToSendFunctionSubOrchestration.RunAsync(
+                    context,
+                    notificationDataEntityId,
+                    batch);
+
+                tasks.Add(task);
+            }
+
+            await Task.WhenAll(tasks);
         }
 
         private void Log(
@@ -158,18 +189,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             ILogger log,
             string notificationDataEntityId,
             string recipientType,
-            IEnumerable<UserDataEntity> recipientDataList)
+            IEnumerable<UserDataEntity> recipientDataList = null)
         {
             if (context.IsReplaying)
             {
                 return;
             }
 
-            log.LogInformation(
-                "Notification id:{0}. Audience option: {1}. Count: {2}",
-                notificationDataEntityId,
-                recipientType,
-                recipientDataList.Count());
+            var countMessage = recipientDataList != null ? $"Count: {recipientDataList.Count()}" : string.Empty;
+            var message = $"Notification id:{notificationDataEntityId}. Recipient option: {recipientType}. {countMessage}";
+            log.LogInformation(message);
         }
     }
 }

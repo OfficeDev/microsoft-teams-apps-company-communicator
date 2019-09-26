@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorC
     using System.Collections.Generic;
     using Microsoft.Bot.Connector;
     using Microsoft.Bot.Connector.Authentication;
+    using Microsoft.Extensions.Configuration;
 
     /// <summary>
     /// Bot connector client factory.
@@ -16,8 +17,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorC
     {
         private static string microsoftAppIdKeyName = "MicrosoftAppId";
         private static string microsoftAppPasswordKeyName = "MicrosoftAppPassword";
+        private readonly IConfiguration configuration;
         private readonly IDictionary<string, ConnectorClient> serviceUrlToConnectorClientMap =
             new Dictionary<string, ConnectorClient>();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BotConnectorClientFactory"/> class.
+        /// </summary>
+        /// <param name="configuration">Configuration service.</param>
+        public BotConnectorClientFactory(IConfiguration configuration)
+        {
+            this.configuration = configuration;
+        }
 
         /// <summary>
         /// This method create a bot connector client per service URL.
@@ -30,10 +41,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorC
             {
                 MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
 
-                // Please see the following link for how to retrieve configuration settings in Azure functions.
-                // https://docs.microsoft.com/en-us/azure/azure-functions/functions-dotnet-class-library#environment-variables
-                var botAppId = BotConnectorClientFactory.GetEnvironmentVariable(BotConnectorClientFactory.microsoftAppIdKeyName);
-                var botAppPassword = BotConnectorClientFactory.GetEnvironmentVariable(BotConnectorClientFactory.microsoftAppPasswordKeyName);
+                var botAppId = this.configuration[BotConnectorClientFactory.microsoftAppIdKeyName];
+                var botAppPassword = this.configuration[BotConnectorClientFactory.microsoftAppPasswordKeyName];
 
                 var connectorClient = new ConnectorClient(
                     new Uri(serviceUrl),
@@ -44,11 +53,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorC
             }
 
             return this.serviceUrlToConnectorClientMap[serviceUrl];
-        }
-
-        private static string GetEnvironmentVariable(string name)
-        {
-            return Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process);
         }
     }
 }
