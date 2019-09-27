@@ -8,7 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     using Microsoft.Extensions.Configuration;
 
     /// <summary>
-    /// Repository for the entity that holds meta-data for all sending operations in the table storage.
+    /// Repository for the entity that holds metadata for all sending operations in the table storage.
     /// </summary>
     public class GlobalSendingNotificationDataRepository : BaseRepository<GlobalSendingNotificationDataEntity>
     {
@@ -29,7 +29,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <summary>
-        /// Gets the entity that holds meta-data for all sending operations.
+        /// Gets the entity that holds metadata for all sending operations.
         /// </summary>
         /// <returns>The Global Sending Notification Data Entity</returns>
         public async Task<GlobalSendingNotificationDataEntity> GetGlobalSendingNotificationDataEntity()
@@ -40,10 +40,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <summary>
-        /// Insert or merges the entity that holds meta-data for all sending operations. Partition Key and Row Key do not need to be
+        /// Insert or merges the entity that holds metadata for all sending operations. Partition Key and Row Key do not need to be
         /// set on the incoming entity.
         /// </summary>
-        /// <param name="globalSendingNotificationDataEntity">Entity that holds meta-data for all sending operations. Partition Key and
+        /// <param name="globalSendingNotificationDataEntity">Entity that holds metadata for all sending operations. Partition Key and
         /// Row Key do not need to be set.</param>
         /// <returns>The Task</returns>
         public async Task SetGlobalSendingNotificationDataEntity(GlobalSendingNotificationDataEntity globalSendingNotificationDataEntity)

@@ -134,12 +134,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                 await Task.WhenAll(getActiveNotificationEntityTask, getGlobalSendingNotificationDataEntityTask, getUserDataEntityTask);
 
-                var activeNotificationEntity = getActiveNotificationEntityTask.Result;
-
-                var globalSendingNotificationDataEntity = getGlobalSendingNotificationDataEntityTask.Result;
+                var activeNotificationEntity = await getActiveNotificationEntityTask;
+                var globalSendingNotificationDataEntity = await getGlobalSendingNotificationDataEntityTask;
+                var userDataEntity = await getUserDataEntityTask;
 
                 var conversationId = string.IsNullOrWhiteSpace(incomingConversationId)
-                    ? getUserDataEntityTask.Result?.ConversationId
+                    ? userDataEntity?.ConversationId
                     : incomingConversationId;
 
                 Task saveUserDataEntityTask = Task.CompletedTask;
