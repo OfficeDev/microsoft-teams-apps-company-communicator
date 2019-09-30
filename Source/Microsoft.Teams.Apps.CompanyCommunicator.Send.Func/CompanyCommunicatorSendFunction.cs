@@ -31,6 +31,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     {
         private const string SendQueueName = "company-communicator-send";
 
+        private static readonly int MaxDeliveryCountForDeadLetter = 10;
+
         private static HttpClient httpClient = null;
 
         private static SendingNotificationDataRepository sendingNotificationDataRepository = null;
@@ -324,13 +326,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             {
                 log.LogError(e, $"ERROR: {e.Message}, {e.GetType()}");
 
+                var statusCodeToStore = HttpStatusCode.Continue;
+                if (deliveryCount >= CompanyCommunicatorSendFunction.MaxDeliveryCountForDeadLetter)
+                {
+                    statusCodeToStore = HttpStatusCode.InternalServerError;
+                }
+
                 await this.SaveSentNotificationData(
-                    configuration,
-                    messageContent.NotificationId,
-                    messageContent.UserDataEntity.AadId,
-                    totalNumberOfThrottles,
-                    isStatusCodeFromCreateConversation: false,
-                    statusCode: HttpStatusCode.InternalServerError);
+                        configuration,
+                        messageContent.NotificationId,
+                        messageContent.UserDataEntity.AadId,
+                        totalNumberOfThrottles,
+                        isStatusCodeFromCreateConversation: false,
+                        statusCode: statusCodeToStore);
+
+                throw e;
             }
         }
 
