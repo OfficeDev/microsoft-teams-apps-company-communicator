@@ -170,7 +170,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
             var filter =
                 TableQuery.GenerateFilterCondition(nameof(SentNotificationDataEntity.StatusCode), QueryComparisons.Equal, "0");
             var filteredSentNotificationDataList =
-                await this.sentNotificationDataRepositoryFactory.CreateRepository(false).GetWithFilterAsync(filter, notificationDataEntityId);
+                await this.sentNotificationDataRepositoryFactory.CreateRepository(true).GetWithFilterAsync(filter, notificationDataEntityId);
             var aadIdList = filteredSentNotificationDataList.Select(p => p.AadId);
             var aadIdHashSet = new HashSet<string>(aadIdList);
 

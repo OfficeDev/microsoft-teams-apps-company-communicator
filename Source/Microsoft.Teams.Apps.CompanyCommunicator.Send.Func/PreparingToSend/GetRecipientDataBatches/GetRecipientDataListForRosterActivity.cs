@@ -51,20 +51,37 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
         /// <param name="teamDataEntity">Team data entity.</param>
+        /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
             DurableOrchestrationContext context,
             string notificationDataEntityId,
-            TeamDataEntity teamDataEntity)
+            TeamDataEntity teamDataEntity,
+            ILogger log)
         {
-            await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
-                nameof(GetRecipientDataListForRosterActivity.GetRecipientDataListForRosterAsync),
-                new RetryOptions(TimeSpan.FromSeconds(5), 3),
-                new GetRecipientDataListForRosterActivityDTO
-                {
-                    NotificationDataEntityId = notificationDataEntityId,
-                    TeamDataEntity = teamDataEntity,
-                });
+            try
+            {
+                await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
+                    nameof(GetRecipientDataListForRosterActivity.GetRecipientDataListForRosterAsync),
+                    new RetryOptions(TimeSpan.FromSeconds(5), 3),
+                    new GetRecipientDataListForRosterActivityDTO
+                    {
+                        NotificationDataEntityId = notificationDataEntityId,
+                        TeamDataEntity = teamDataEntity,
+                    });
+            }
+            catch (Exception ex)
+            {
+                var stringBuilder = new StringBuilder();
+                stringBuilder.AppendLine($"Failed to load roster for team {teamDataEntity.TeamId}.");
+                stringBuilder.AppendLine(ex.Message);
+                var errorMessage = stringBuilder.ToString();
+
+                log.LogError(errorMessage);
+
+                await this.notificationDataRepositoryFactory.CreateRepository(true)
+                    .SaveWarningInNotificationDataEntityAsync(notificationDataEntityId, errorMessage);
+            }
         }
 
         /// <summary>
@@ -73,34 +90,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// 2). Initialize sent notification data in the table storage.
         /// </summary>
         /// <param name="input">Input data.</param>
-        /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(GetRecipientDataListForRosterAsync))]
         public async Task GetRecipientDataListForRosterAsync(
-            [ActivityTrigger] GetRecipientDataListForRosterActivityDTO input,
-            ILogger log)
+                    [ActivityTrigger] GetRecipientDataListForRosterActivityDTO input)
         {
-            try
-            {
-                var roster = await this.GetTeamRosterRecipientDataEntityListAsync(
-                    input.TeamDataEntity.ServiceUrl,
-                    input.TeamDataEntity.TeamId);
+            var roster = await this.GetTeamRosterRecipientDataEntityListAsync(
+                input.TeamDataEntity.ServiceUrl,
+                input.TeamDataEntity.TeamId);
 
-                await this.sentNotificationDataRepositoryFactory.CreateRepository(true)
-                    .InitializeSentNotificationDataForRecipientBatchAsync(input.NotificationDataEntityId, roster);
-            }
-            catch (Exception ex)
-            {
-                var stringBuilder = new StringBuilder();
-                stringBuilder.AppendLine($"Failed to load roster for team {input.TeamDataEntity.TeamId}.");
-                stringBuilder.AppendLine(ex.Message);
-                var errorMessage = stringBuilder.ToString();
-
-                log.LogError(errorMessage);
-
-                await this.notificationDataRepositoryFactory.CreateRepository(true)
-                    .SaveWarningInNotificationDataEntityAsync(input.NotificationDataEntityId, errorMessage);
-            }
+            await this.sentNotificationDataRepositoryFactory.CreateRepository(true)
+                .InitializeSentNotificationDataForRecipientBatchAsync(input.NotificationDataEntityId, roster);
         }
 
         /// <summary>

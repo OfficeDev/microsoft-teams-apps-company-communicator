@@ -111,7 +111,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             else if (notificationDataEntity.Rosters.Count() != 0)
             {
                 recipientType = "Rosters";
-                await this.GetRecipientDataListForRostersAsync(context, notificationDataEntity);
+                await this.GetRecipientDataListForRostersAsync(context, notificationDataEntity, log);
             }
             else if (notificationDataEntity.Teams.Count() != 0)
             {
@@ -138,10 +138,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="notificationDataEntity">Notification data entity.</param>
+        /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task GetRecipientDataListForRostersAsync(
             DurableOrchestrationContext context,
-            NotificationDataEntity notificationDataEntity)
+            NotificationDataEntity notificationDataEntity,
+            ILogger log)
         {
             var teamDataEntityList =
                 await this.getTeamDataEntitiesByIdsActivity.RunAsync(context, notificationDataEntity);
@@ -152,7 +154,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
                 var task = this.getRecipientDataListForRosterActivity.RunAsync(
                     context,
                     notificationDataEntity.Id,
-                    teamDataEntity);
+                    teamDataEntity,
+                    log);
 
                 tasks.Add(task);
             }

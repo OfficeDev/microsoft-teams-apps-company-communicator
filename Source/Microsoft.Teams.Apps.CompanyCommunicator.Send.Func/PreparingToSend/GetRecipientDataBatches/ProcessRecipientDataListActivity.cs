@@ -100,12 +100,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
             string notificationDataEntityId,
             IEnumerable<UserDataEntity> recipientDataList)
         {
-            var notificationDataEntity = await this.notificationDataRepositoryFactory.CreateRepository(true).GetAsync(
+            var notificationDataRepository =
+                this.notificationDataRepositoryFactory.CreateRepository(true);
+
+            var notificationDataEntity = await notificationDataRepository.GetAsync(
                 PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
                 notificationDataEntityId);
             if (notificationDataEntity != null)
             {
                 notificationDataEntity.TotalMessageCount = recipientDataList.Count();
+
+                await notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
             }
         }
 
