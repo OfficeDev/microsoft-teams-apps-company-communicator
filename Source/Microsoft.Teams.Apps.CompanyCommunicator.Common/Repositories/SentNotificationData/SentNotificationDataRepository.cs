@@ -49,6 +49,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
                         AadId = p.AadId,
                         StatusCode = 0,
                         ConversationId = p.ConversationId,
+                        TenantId = p.TenantId,
+                        UserId = p.UserId,
                         ServiceUrl = p.ServiceUrl,
                     });
 

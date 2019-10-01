@@ -66,5 +66,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// Gets or sets ServiceUrl.
         /// </summary>
         public string ServiceUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets TenantId.
+        /// </summary>
+        public string TenantId { get; set; }
+
+        /// <summary>
+        /// Gets or sets UserId.
+        /// </summary>
+        public string UserId { get; set; }
     }
 }

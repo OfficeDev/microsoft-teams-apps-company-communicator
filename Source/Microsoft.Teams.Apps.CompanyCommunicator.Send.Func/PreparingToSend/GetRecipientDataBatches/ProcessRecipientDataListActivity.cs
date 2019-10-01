@@ -76,8 +76,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
                     new UserDataEntity
                     {
                         AadId = p.AadId,
+                        UserId = p.UserId,
                         ConversationId = p.ConversationId,
                         ServiceUrl = p.ServiceUrl,
+                        TenantId = p.TenantId,
                     });
 
             await this.SetTotalRecipientCountInNotificationDataAsync(
