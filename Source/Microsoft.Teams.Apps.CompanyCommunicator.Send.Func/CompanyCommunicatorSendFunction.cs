@@ -333,12 +333,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 }
 
                 await this.SaveSentNotificationData(
-                        configuration,
-                        messageContent.NotificationId,
-                        messageContent.UserDataEntity.AadId,
-                        totalNumberOfThrottles,
-                        isStatusCodeFromCreateConversation: false,
-                        statusCode: statusCodeToStore);
+                    configuration,
+                    messageContent.NotificationId,
+                    messageContent.UserDataEntity.AadId,
+                    totalNumberOfThrottles,
+                    isStatusCodeFromCreateConversation: false,
+                    statusCode: statusCodeToStore);
 
                 throw e;
             }
