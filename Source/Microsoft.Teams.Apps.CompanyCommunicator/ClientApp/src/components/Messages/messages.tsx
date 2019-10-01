@@ -173,7 +173,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
       return (
         <Text
           truncated
-          content="preparing to send"
+          content="Preparing to send..."
         >
         </Text>
       );
