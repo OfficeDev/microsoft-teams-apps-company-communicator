@@ -4,8 +4,10 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
@@ -27,6 +29,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
                 PartitionKeyNames.SentNotificationDataTable.DefaultPartition,
                 isFromAzureFunction)
         {
+        }
+
+        /// <summary>
+        /// This method ensures the SentNotificationData table is create in the storage.
+        /// This method should be called before kicking off an Azure function that uses the SentNotificationData table.
+        /// Otherwise the app will crash.
+        /// By design, Azure functions (in this app) does not create a table if it's absent.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task EnsureSentNotificationDataTableExistingAsync()
+        {
+            var exists = await this.Table.ExistsAsync();
+            if (!exists)
+            {
+                await this.Table.CreateAsync();
+            }
         }
 
         /// <summary>

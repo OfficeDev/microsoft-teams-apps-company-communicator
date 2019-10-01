@@ -14,6 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
@@ -27,6 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     public class SentNotificationsController : ControllerBase
     {
         private readonly NotificationDataRepository notificationDataRepository;
+        private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly TeamDataRepository teamDataRepository;
         private readonly PrepareToSendQueue prepareToSendQueue;
 
@@ -34,14 +36,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
+        /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
         /// <param name="prepareToSendQueue">The service bus queue for preparing to send notifications.</param>
         public SentNotificationsController(
             NotificationDataRepository notificationDataRepository,
+            SentNotificationDataRepository sentNotificationDataRepository,
             TeamDataRepository teamDataRepository,
             PrepareToSendQueue prepareToSendQueue)
         {
             this.notificationDataRepository = notificationDataRepository;
+            this.sentNotificationDataRepository = sentNotificationDataRepository;
             this.teamDataRepository = teamDataRepository;
             this.prepareToSendQueue = prepareToSendQueue;
         }
@@ -65,6 +70,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             var notificationDataEntityId =
                 await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity);
+
+            // Ensure the SentNotificationData table exists in Azure storage.
+            await this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistingAsync();
 
             var serializedDraftNotificationId = JsonConvert.SerializeObject(notificationDataEntityId);
             var message = new Message(Encoding.UTF8.GetBytes(serializedDraftNotificationId));
