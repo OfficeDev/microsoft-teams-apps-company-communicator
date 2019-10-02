@@ -93,7 +93,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(GetRecipientDataListForRosterAsync))]
         public async Task GetRecipientDataListForRosterAsync(
-                    [ActivityTrigger] GetRecipientDataListForRosterActivityDTO input)
+            [ActivityTrigger] GetRecipientDataListForRosterActivityDTO input)
         {
             var roster = await this.GetTeamRosterRecipientDataEntityListAsync(
                 input.TeamDataEntity.ServiceUrl,

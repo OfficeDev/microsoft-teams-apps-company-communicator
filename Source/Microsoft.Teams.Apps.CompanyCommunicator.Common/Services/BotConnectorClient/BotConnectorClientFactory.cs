@@ -18,8 +18,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorC
         private const string MicrosoftAppIdKeyName = "MicrosoftAppId";
         private const string MicrosoftAppPasswordKeyName = "MicrosoftAppPassword";
         private readonly IConfiguration configuration;
-        private readonly IDictionary<string, ConnectorClient> serviceUrlToConnectorClientMap =
-            new Dictionary<string, ConnectorClient>();
+        private readonly object serviceUrlToConnectorClientMapLock;
+        private readonly IDictionary<string, ConnectorClient> serviceUrlToConnectorClientMap;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BotConnectorClientFactory"/> class.
@@ -28,6 +28,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorC
         public BotConnectorClientFactory(IConfiguration configuration)
         {
             this.configuration = configuration;
+            this.serviceUrlToConnectorClientMapLock = new object();
+            this.serviceUrlToConnectorClientMap = new Dictionary<string, ConnectorClient>();
         }
 
         /// <summary>
@@ -37,22 +39,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorC
         /// <returns>It returns a bot connector client.</returns>
         public ConnectorClient Create(string serviceUrl)
         {
-            if (!this.serviceUrlToConnectorClientMap.ContainsKey(serviceUrl))
+            lock (this.serviceUrlToConnectorClientMapLock)
             {
-                MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
+                if (!this.serviceUrlToConnectorClientMap.ContainsKey(serviceUrl))
+                {
+                    MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
 
-                var botAppId = this.configuration[BotConnectorClientFactory.MicrosoftAppIdKeyName];
-                var botAppPassword = this.configuration[BotConnectorClientFactory.MicrosoftAppPasswordKeyName];
+                    var botAppId = this.configuration[BotConnectorClientFactory.MicrosoftAppIdKeyName];
+                    var botAppPassword = this.configuration[BotConnectorClientFactory.MicrosoftAppPasswordKeyName];
 
-                var connectorClient = new ConnectorClient(
-                    new Uri(serviceUrl),
-                    botAppId,
-                    botAppPassword);
+                    var connectorClient = new ConnectorClient(
+                        new Uri(serviceUrl),
+                        botAppId,
+                        botAppPassword);
 
-                this.serviceUrlToConnectorClientMap.Add(serviceUrl, connectorClient);
+                    this.serviceUrlToConnectorClientMap.Add(serviceUrl, connectorClient);
+                }
+
+                return this.serviceUrlToConnectorClientMap[serviceUrl];
             }
-
-            return this.serviceUrlToConnectorClientMap[serviceUrl];
         }
     }
 }
