@@ -74,21 +74,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
             [ActivityTrigger] NotificationDataEntity notificationDataEntity,
             ILogger log)
         {
-            try
-            {
-                var teamsRecipientDataList =
-                    await this.GetTeamsRecipientDataEntityListAsync(notificationDataEntity.Teams);
+            var teamsRecipientDataList =
+                await this.GetTeamsRecipientDataEntityListAsync(notificationDataEntity.Teams);
 
-                await this.sentNotificationDataRepositoryFactory.CreateRepository(true)
-                    .InitializeSentNotificationDataForRecipientBatchAsync(notificationDataEntity.Id, teamsRecipientDataList);
-            }
-            catch (Exception ex)
-            {
-                log.LogError(ex.Message);
-
-                await this.notificationDataRepositoryFactory.CreateRepository(true)
-                    .SaveWarningInNotificationDataEntityAsync(notificationDataEntity.Id, ex.Message);
-            }
+            await this.sentNotificationDataRepositoryFactory.CreateRepository(true)
+                .InitializeSentNotificationDataForRecipientBatchAsync(notificationDataEntity.Id, teamsRecipientDataList);
         }
 
         /// <summary>

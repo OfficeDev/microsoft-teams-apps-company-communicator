@@ -162,6 +162,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 notificationDataEntity.ExceptionMessage =
                     this.AppendNewLine(notificationDataEntity.ExceptionMessage, errorMessage);
 
+                notificationDataEntity.IsCompleted = true;
+
                 await this.CreateOrUpdateAsync(notificationDataEntity);
             }
         }
