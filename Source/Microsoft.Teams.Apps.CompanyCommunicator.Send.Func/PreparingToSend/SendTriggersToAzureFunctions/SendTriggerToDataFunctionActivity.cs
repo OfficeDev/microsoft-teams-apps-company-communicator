@@ -76,29 +76,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
             [ActivityTrigger] SendTriggerToDataFunctionActivityDTO input,
             ILogger log)
         {
-            try
+            var queueMessageContent = new DataQueueMessageContent
             {
-                var queueMessageContent = new DataQueueMessageContent
-                {
-                    NotificationId = input.NotificationDataEntityId,
-                    InitialSendDate = DateTime.UtcNow,
-                    TotalMessageCount = input.TotalRecipientCount,
-                };
-                var messageBody = JsonConvert.SerializeObject(queueMessageContent);
-                var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));
-                serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(30);
+                NotificationId = input.NotificationDataEntityId,
+                InitialSendDate = DateTime.UtcNow,
+                TotalMessageCount = input.TotalRecipientCount,
+            };
+            var messageBody = JsonConvert.SerializeObject(queueMessageContent);
+            var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));
+            serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(30);
 
-                await this.dataMessageQueue.SendAsync(serviceBusMessage);
+            await this.dataMessageQueue.SendAsync(serviceBusMessage);
 
-                await this.MarkPreparingToSendIsDone(input.NotificationDataEntityId);
-            }
-            catch (Exception ex)
-            {
-                log.LogError(ex.Message);
-
-                await this.notificationDataRepositoryFactory.CreateRepository(true)
-                    .SaveExceptionInNotificationDataEntityAsync(input.NotificationDataEntityId, ex.Message);
-            }
+            await this.MarkPreparingToSendIsDone(input.NotificationDataEntityId);
         }
 
         private async Task MarkPreparingToSendIsDone(string notificationDataEntityId)
