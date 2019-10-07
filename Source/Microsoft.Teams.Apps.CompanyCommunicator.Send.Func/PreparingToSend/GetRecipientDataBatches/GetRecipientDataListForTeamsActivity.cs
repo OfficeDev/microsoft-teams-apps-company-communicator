@@ -67,12 +67,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
         /// 2). Initialize sent notification data in the table storage.
         /// </summary>
         /// <param name="notificationDataEntity">Notification data entity.</param>
-        /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(GetTeamRecipientDataListAsync))]
         public async Task GetTeamRecipientDataListAsync(
-            [ActivityTrigger] NotificationDataEntity notificationDataEntity,
-            ILogger log)
+            [ActivityTrigger] NotificationDataEntity notificationDataEntity)
         {
             var teamsRecipientDataList =
                 await this.GetTeamsRecipientDataEntityListAsync(notificationDataEntity.Teams);
