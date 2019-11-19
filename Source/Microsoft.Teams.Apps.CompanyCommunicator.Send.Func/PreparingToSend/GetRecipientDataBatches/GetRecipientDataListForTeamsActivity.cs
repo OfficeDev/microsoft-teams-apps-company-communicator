@@ -20,22 +20,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     /// </summary>
     public class GetRecipientDataListForTeamsActivity
     {
-        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
         private readonly TeamDataRepositoryFactory teamDataRepositoryFactory;
         private readonly SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientDataListForTeamsActivity"/> class.
         /// </summary>
-        /// <param name="notificationDataRepositoryFactory">Notification data repository factory.</param>
         /// <param name="teamDataRepositoryFactory">Team Data repository service.</param>
         /// <param name="sentNotificationDataRepositoryFactory">Sent notification data repository factory.</param>
         public GetRecipientDataListForTeamsActivity(
-            NotificationDataRepositoryFactory notificationDataRepositoryFactory,
             TeamDataRepositoryFactory teamDataRepositoryFactory,
             SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory)
         {
-            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
             this.teamDataRepositoryFactory = teamDataRepositoryFactory;
             this.sentNotificationDataRepositoryFactory = sentNotificationDataRepositoryFactory;
         }

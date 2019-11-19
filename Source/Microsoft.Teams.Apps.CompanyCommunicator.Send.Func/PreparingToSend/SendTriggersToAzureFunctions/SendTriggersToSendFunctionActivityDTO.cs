@@ -21,10 +21,5 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Sen
         /// Gets or sets recipient data batch.
         /// </summary>
         public IEnumerable<UserDataEntity> RecipientDataBatch { get; set; }
-
-        /// <summary>
-        /// Gets or sets recipient status dictionary.
-        /// </summary>
-        public IDictionary<string, int> RecipientStatusDictionary { get; set; }
     }
 }

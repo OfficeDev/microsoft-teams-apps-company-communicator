@@ -8,7 +8,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
@@ -18,22 +17,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.Get
     /// </summary>
     public class GetRecipientDataListForAllUsersActivity
     {
-        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
         private readonly UserDataRepositoryFactory userDataRepositoryFactory;
         private readonly SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientDataListForAllUsersActivity"/> class.
         /// </summary>
-        /// <param name="notificationDataRepositoryFactory">Notification data repository factory.</param>
         /// <param name="userDataRepositoryFactory">User Data repository service.</param>
         /// <param name="sentNotificationDataRepositoryFactory">Sent notification data repository factory.</param>
         public GetRecipientDataListForAllUsersActivity(
-            NotificationDataRepositoryFactory notificationDataRepositoryFactory,
             UserDataRepositoryFactory userDataRepositoryFactory,
             SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory)
         {
-            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
             this.userDataRepositoryFactory = userDataRepositoryFactory;
             this.sentNotificationDataRepositoryFactory = sentNotificationDataRepositoryFactory;
         }

@@ -26,7 +26,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         private readonly GetRecipientDataListForTeamsActivity getRecipientDataListForTeamsActivity;
         private readonly ProcessRecipientDataListActivity processRecipientDataListActivity;
         private readonly CreateSendingNotificationActivity createSendingNotificationActivity;
-        private readonly SendTriggersToSendFunctionSubOrchestration sendTriggersToSendFunctionSubOrchestration;
+        private readonly SendTriggersToSendFunctionActivity sendTriggersToSendFunctionActivity;
         private readonly SendTriggerToDataFunctionActivity sendTriggerToDataFunctionActivity;
         private readonly HandleFailureActivity handleFailureActivity;
 
@@ -39,7 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         /// <param name="getRecipientDataListForTeamsActivity">Get recipient data for teams activity.</param>
         /// <param name="processRecipientDataListActivity">Process recipient data list activity.</param>
         /// <param name="createSendingNotificationActivity">Create sending notification activity.</param>
-        /// <param name="sendTriggersToSendFunctionSubOrchestration">Send triggers to send function sub-orchestration.</param>
+        /// <param name="sendTriggersToSendFunctionActivity">Send triggers to send function sub-orchestration.</param>
         /// <param name="sendTriggerToDataFunctionActivity">Send trigger to data function activity.</param>
         /// <param name="handleFailureActivity">Clean up activity.</param>
         public PreparingToSendOrchestration(
@@ -49,7 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             GetRecipientDataListForTeamsActivity getRecipientDataListForTeamsActivity,
             ProcessRecipientDataListActivity processRecipientDataListActivity,
             CreateSendingNotificationActivity createSendingNotificationActivity,
-            SendTriggersToSendFunctionSubOrchestration sendTriggersToSendFunctionSubOrchestration,
+            SendTriggersToSendFunctionActivity sendTriggersToSendFunctionActivity,
             SendTriggerToDataFunctionActivity sendTriggerToDataFunctionActivity,
             HandleFailureActivity handleFailureActivity)
         {
@@ -59,7 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
             this.getRecipientDataListForTeamsActivity = getRecipientDataListForTeamsActivity;
             this.processRecipientDataListActivity = processRecipientDataListActivity;
             this.createSendingNotificationActivity = createSendingNotificationActivity;
-            this.sendTriggersToSendFunctionSubOrchestration = sendTriggersToSendFunctionSubOrchestration;
+            this.sendTriggersToSendFunctionActivity = sendTriggersToSendFunctionActivity;
             this.sendTriggerToDataFunctionActivity = sendTriggerToDataFunctionActivity;
             this.handleFailureActivity = handleFailureActivity;
         }
@@ -69,27 +69,55 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         /// which kicks of the preparing to send process.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
-        /// <param name="log">Logging service.</param>
+        /// <param name="logger">Logging service.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(nameof(PrepareToSendOrchestrationAsync))]
         public async Task PrepareToSendOrchestrationAsync(
             [OrchestrationTrigger] DurableOrchestrationContext context,
-            ILogger log)
+            ILogger logger)
         {
             var notificationDataEntity = context.GetInput<NotificationDataEntity>();
 
+            if (!context.IsReplaying)
+            {
+                logger.LogCritical($"Start to prepare to send the notification {notificationDataEntity.Id}!");
+            }
+
             try
             {
+                if (!context.IsReplaying)
+                {
+                    logger.LogCritical("Get recipient batches.");
+                }
+
                 var recipientDataBatches =
-                    await this.GetRecipientDataBatchesAsync(context, notificationDataEntity, log);
+                    await this.GetRecipientDataBatchesAsync(context, notificationDataEntity, logger);
+
+                if (!context.IsReplaying)
+                {
+                    logger.LogCritical("Prepare adaptive card.");
+                }
 
                 await this.createSendingNotificationActivity.RunAsync(context, notificationDataEntity);
 
-                await this.SendTriggersToSendFunctionAsync(context, notificationDataEntity.Id, recipientDataBatches);
+                if (!context.IsReplaying)
+                {
+                    logger.LogCritical("Send triggers to the send function.");
+                }
 
-                await this.sendTriggerToDataFunctionActivity.RunAsync(context, notificationDataEntity.Id, recipientDataBatches);
+                await this.SendTriggersToSendFunctionAsync(context, notificationDataEntity.Id, recipientDataBatches, logger);
 
-                log.LogInformation($"\"PREPARE TO SEND\" IS DONE SUCCESSFULLY FOR NOTIFICATION {notificationDataEntity.Id}!");
+                if (!context.IsReplaying)
+                {
+                    logger.LogCritical("Send triggers to the data function.");
+                }
+
+                if (!context.IsReplaying)
+                {
+                    await this.sendTriggerToDataFunctionActivity.RunAsync(context, notificationDataEntity.Id, recipientDataBatches);
+                }
+
+                logger.LogCritical($"\"PREPARE TO SEND\" IS DONE SUCCESSFULLY FOR NOTIFICATION {notificationDataEntity.Id}!");
             }
             catch (Exception ex)
             {
@@ -171,12 +199,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend
         private async Task SendTriggersToSendFunctionAsync(
             DurableOrchestrationContext context,
             string notificationDataEntityId,
-            IEnumerable<IEnumerable<UserDataEntity>> recipientDataBatches)
+            IEnumerable<IEnumerable<UserDataEntity>> recipientDataBatches,
+            ILogger logger)
         {
+            var totalBatches = recipientDataBatches.Count();
+            var processedBatches = 0;
+
             var tasks = new List<Task>();
             foreach (var batch in recipientDataBatches)
             {
-                var task = this.sendTriggersToSendFunctionSubOrchestration.RunAsync(
+                if (!context.IsReplaying)
+                {
+                    logger.LogCritical($"{++processedBatches} / {totalBatches}");
+                }
+
+                var task = this.sendTriggersToSendFunctionActivity.RunAsync(
                     context,
                     notificationDataEntityId,
                     batch);
