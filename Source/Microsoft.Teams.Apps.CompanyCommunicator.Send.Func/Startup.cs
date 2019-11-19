@@ -49,7 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<GetRecipientDataListForRosterActivity>();
             builder.Services.AddTransient<GetRecipientDataListForTeamsActivity>();
             builder.Services.AddTransient<CreateSendingNotificationActivity>();
-            builder.Services.AddTransient<SendTriggersToSendFunctionSubOrchestration>();
+            builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
             builder.Services.AddTransient<SendTriggerToDataFunctionActivity>();
             builder.Services.AddTransient<ProcessRecipientDataListActivity>();
             builder.Services.AddTransient<HandleFailureActivity>();
