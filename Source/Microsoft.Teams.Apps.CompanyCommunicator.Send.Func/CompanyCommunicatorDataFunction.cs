@@ -31,6 +31,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 
         private static SendingNotificationDataRepository sendingNotificationDataRepository = null;
 
+        private static IConfiguration configuration = null;
+
         /// <summary>
         /// Azure Function App triggered by messages from a Service Bus queue
         /// Used for aggregating results for a sent notification.
@@ -52,17 +54,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             ILogger log,
             ExecutionContext context)
         {
-            IConfiguration configuration = new ConfigurationBuilder()
-                .SetBasePath(context.FunctionAppDirectory)
-                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
+            CompanyCommunicatorDataFunction.configuration = CompanyCommunicatorDataFunction.configuration ??
+                new ConfigurationBuilder()
+                    .AddEnvironmentVariables()
+                    .Build();
 
             // Simply initialize the variable for certain build environments and versions
             var maxMinutesOfRetryingDataFunction = 0;
 
             // If parsing fails, out variable is set to 0, so need to set the default
-            if (!int.TryParse(configuration["MaxMinutesOfRetryingDataFunction"], out maxMinutesOfRetryingDataFunction))
+            if (!int.TryParse(CompanyCommunicatorDataFunction.configuration["MaxMinutesOfRetryingDataFunction"], out maxMinutesOfRetryingDataFunction))
             {
                 maxMinutesOfRetryingDataFunction = 1440;
             }
@@ -70,13 +71,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             var messageContent = JsonConvert.DeserializeObject<ServiceBusDataQueueMessageContent>(myQueueItem);
 
             CompanyCommunicatorDataFunction.sentNotificationDataRepository = CompanyCommunicatorDataFunction.sentNotificationDataRepository
-                ?? new SentNotificationDataRepository(configuration, isFromAzureFunction: true);
+                ?? new SentNotificationDataRepository(CompanyCommunicatorDataFunction.configuration, isFromAzureFunction: true);
 
             CompanyCommunicatorDataFunction.notificationDataRepository = CompanyCommunicatorDataFunction.notificationDataRepository
-                ?? this.CreateNotificationRepository(configuration);
+                ?? this.CreateNotificationRepository(CompanyCommunicatorDataFunction.configuration);
 
             CompanyCommunicatorDataFunction.sendingNotificationDataRepository = CompanyCommunicatorDataFunction.sendingNotificationDataRepository
-                ?? new SendingNotificationDataRepository(configuration, isFromAzureFunction: true);
+                ?? new SendingNotificationDataRepository(CompanyCommunicatorDataFunction.configuration, isFromAzureFunction: true);
 
             var sentNotificationDataEntities = await CompanyCommunicatorDataFunction.sentNotificationDataRepository.GetAllAsync(
                 messageContent.NotificationId);
@@ -89,7 +90,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                     return;
                 }
 
-                await this.SendTriggerToDataFunction(configuration, messageContent);
+                await this.SendTriggerToDataFunction(CompanyCommunicatorDataFunction.configuration, messageContent);
                 return;
             }
 
@@ -151,7 +152,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             }
             else
             {
-                await this.SendTriggerToDataFunction(configuration, messageContent);
+                await this.SendTriggerToDataFunction(CompanyCommunicatorDataFunction.configuration, messageContent);
             }
 
             var operation = TableOperation.InsertOrMerge(notificationDataEntityUpdate);
