@@ -25,13 +25,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     /// </summary>
     public class CompanyCommunicatorDataFunction
     {
-        private static readonly int MaxMinutesOfRetrying = 35;
-
         private static SentNotificationDataRepository sentNotificationDataRepository = null;
 
         private static NotificationDataRepository notificationDataRepository = null;
 
         private static SendingNotificationDataRepository sendingNotificationDataRepository = null;
+
+        private static IConfiguration configuration = null;
 
         /// <summary>
         /// Azure Function App triggered by messages from a Service Bus queue
@@ -54,36 +54,43 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             ILogger log,
             ExecutionContext context)
         {
-            IConfiguration configuration = new ConfigurationBuilder()
-                .SetBasePath(context.FunctionAppDirectory)
-                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
+            CompanyCommunicatorDataFunction.configuration = CompanyCommunicatorDataFunction.configuration ??
+                new ConfigurationBuilder()
+                    .AddEnvironmentVariables()
+                    .Build();
+
+            // Simply initialize the variable for certain build environments and versions
+            var maxMinutesOfRetryingDataFunction = 0;
+
+            // If parsing fails, out variable is set to 0, so need to set the default
+            if (!int.TryParse(CompanyCommunicatorDataFunction.configuration["MaxMinutesOfRetryingDataFunction"], out maxMinutesOfRetryingDataFunction))
+            {
+                maxMinutesOfRetryingDataFunction = 1440;
+            }
 
             var messageContent = JsonConvert.DeserializeObject<ServiceBusDataQueueMessageContent>(myQueueItem);
 
             CompanyCommunicatorDataFunction.sentNotificationDataRepository = CompanyCommunicatorDataFunction.sentNotificationDataRepository
-                ?? new SentNotificationDataRepository(configuration, new RepositoryOptions { IsAzureFunction = true });
+                ?? new SentNotificationDataRepository(CompanyCommunicatorDataFunction.configuration, new RepositoryOptions { IsAzureFunction = true });
 
             CompanyCommunicatorDataFunction.notificationDataRepository = CompanyCommunicatorDataFunction.notificationDataRepository
-                ?? this.CreateNotificationRepository(configuration);
+                ?? this.CreateNotificationRepository(CompanyCommunicatorDataFunction.configuration, new RepositoryOptions { IsAzureFunction = true });
 
             CompanyCommunicatorDataFunction.sendingNotificationDataRepository = CompanyCommunicatorDataFunction.sendingNotificationDataRepository
-                ?? new SendingNotificationDataRepository(configuration, new RepositoryOptions { IsAzureFunction = true });
+                ?? new SendingNotificationDataRepository(CompanyCommunicatorDataFunction.configuration, new RepositoryOptions { IsAzureFunction = true });
 
             var sentNotificationDataEntities = await CompanyCommunicatorDataFunction.sentNotificationDataRepository.GetAllAsync(
                 messageContent.NotificationId);
 
             if (sentNotificationDataEntities == null)
             {
-                if (DateTime.UtcNow >= messageContent.InitialSendDate + TimeSpan.FromMinutes(
-                    CompanyCommunicatorDataFunction.MaxMinutesOfRetrying))
+                if (DateTime.UtcNow >= messageContent.InitialSendDate + TimeSpan.FromMinutes(maxMinutesOfRetryingDataFunction))
                 {
                     await this.SetEmptyNotificationDataEntity(messageContent.NotificationId);
                     return;
                 }
 
-                await this.SendTriggerToDataFunction(configuration, messageContent);
+                await this.SendTriggerToDataFunction(CompanyCommunicatorDataFunction.configuration, messageContent);
                 return;
             }
 
@@ -136,8 +143,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 + throttledCount;
 
             if (currentMessageCount == messageContent.TotalMessageCount
-                || DateTime.UtcNow >= messageContent.InitialSendDate + TimeSpan.FromMinutes(
-                    CompanyCommunicatorDataFunction.MaxMinutesOfRetrying))
+                || DateTime.UtcNow >= messageContent.InitialSendDate + TimeSpan.FromMinutes(maxMinutesOfRetryingDataFunction))
             {
                 notificationDataEntityUpdate.IsCompleted = true;
                 notificationDataEntityUpdate.SentDate = lastSentDateTime != DateTime.MinValue
@@ -146,7 +152,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             }
             else
             {
-                await this.SendTriggerToDataFunction(configuration, messageContent);
+                await this.SendTriggerToDataFunction(CompanyCommunicatorDataFunction.configuration, messageContent);
             }
 
             var operation = TableOperation.InsertOrMerge(notificationDataEntityUpdate);

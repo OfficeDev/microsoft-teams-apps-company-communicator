@@ -12,6 +12,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
+    using Microsoft.Azure.ServiceBus;
+    using Microsoft.Azure.ServiceBus.Core;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
@@ -27,9 +29,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     /// </summary>
     public class CompanyCommunicatorSendFunction
     {
+        private const string SendQueueName = "company-communicator-send";
+
+        private static readonly int MaxDeliveryCountForDeadLetter = 10;
+
         private static HttpClient httpClient = null;
 
         private static SendingNotificationDataRepository sendingNotificationDataRepository = null;
+
+        private static GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository = null;
 
         private static UserDataRepository userDataRepository = null;
 
@@ -38,6 +46,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private static string botAccessToken = null;
 
         private static DateTime? botAccessTokenExpiration = null;
+
+        private static MessageSender sendQueueServiceBusMessageSender = null;
+
+        private static IConfiguration configuration = null;
 
         /// <summary>
         /// Azure Function App triggered by messages from a Service Bus queue
@@ -52,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName("CompanyCommunicatorSendFunction")]
         public async Task Run(
-            [ServiceBusTrigger("company-communicator-send", Connection = "ServiceBusConnection")]
+            [ServiceBusTrigger(CompanyCommunicatorSendFunction.SendQueueName, Connection = "ServiceBusConnection")]
             string myQueueItem,
             int deliveryCount,
             DateTime enqueuedTimeUtc,
@@ -62,11 +74,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         {
             log.LogInformation($"C# ServiceBus queue trigger function processed message: {myQueueItem}");
 
-            IConfiguration configuration = new ConfigurationBuilder()
-                .SetBasePath(context.FunctionAppDirectory)
-                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
+            CompanyCommunicatorSendFunction.configuration = CompanyCommunicatorSendFunction.configuration ??
+                new ConfigurationBuilder()
+                    .AddEnvironmentVariables()
+                    .Build();
 
             var messageContent = JsonConvert.DeserializeObject<ServiceBusSendQueueMessageContent>(myQueueItem);
 
@@ -78,7 +89,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 var maxNumberOfAttempts = 0;
 
                 // If parsing fails, out variable is set to 0, so need to set the default
-                if (!int.TryParse(configuration["MaxNumberOfAttempts"], out maxNumberOfAttempts))
+                if (!int.TryParse(CompanyCommunicatorSendFunction.configuration["MaxNumberOfAttempts"], out maxNumberOfAttempts))
                 {
                     maxNumberOfAttempts = 1;
                 }
@@ -87,24 +98,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     ?? new HttpClient();
 
                 CompanyCommunicatorSendFunction.userDataRepository = CompanyCommunicatorSendFunction.userDataRepository
-                    ?? new UserDataRepository(configuration, new RepositoryOptions { IsAzureFunction = true });
+                    ?? new UserDataRepository(CompanyCommunicatorSendFunction.configuration, new RepositoryOptions { IsAzureFunction = true });
 
                 CompanyCommunicatorSendFunction.sendingNotificationDataRepository = CompanyCommunicatorSendFunction.sendingNotificationDataRepository
-                    ?? new SendingNotificationDataRepository(configuration, new RepositoryOptions { IsAzureFunction = true });
+                    ?? new SendingNotificationDataRepository(CompanyCommunicatorSendFunction.configuration, new RepositoryOptions { IsAzureFunction = true });
+
+                CompanyCommunicatorSendFunction.globalSendingNotificationDataRepository = CompanyCommunicatorSendFunction.globalSendingNotificationDataRepository
+                    ?? new GlobalSendingNotificationDataRepository(CompanyCommunicatorSendFunction.configuration, isFromAzureFunction: true);
 
                 CompanyCommunicatorSendFunction.sentNotificationDataRepository = CompanyCommunicatorSendFunction.sentNotificationDataRepository
-                    ?? new SentNotificationDataRepository(configuration, new RepositoryOptions { IsAzureFunction = true });
+                    ?? new SentNotificationDataRepository(CompanyCommunicatorSendFunction.configuration, new RepositoryOptions { IsAzureFunction = true });
 
                 if (CompanyCommunicatorSendFunction.botAccessToken == null
                     || CompanyCommunicatorSendFunction.botAccessTokenExpiration == null
                     || DateTime.UtcNow > CompanyCommunicatorSendFunction.botAccessTokenExpiration)
                 {
-                    await this.FetchTokenAsync(configuration, CompanyCommunicatorSendFunction.httpClient);
+                    await this.FetchTokenAsync(CompanyCommunicatorSendFunction.configuration, CompanyCommunicatorSendFunction.httpClient);
                 }
+
+                CompanyCommunicatorSendFunction.sendQueueServiceBusMessageSender = CompanyCommunicatorSendFunction.sendQueueServiceBusMessageSender
+                    ?? new MessageSender(CompanyCommunicatorSendFunction.configuration["ServiceBusConnection"], CompanyCommunicatorSendFunction.SendQueueName);
 
                 var getActiveNotificationEntityTask = CompanyCommunicatorSendFunction.sendingNotificationDataRepository.GetAsync(
                     PartitionKeyNames.NotificationDataTable.SendingNotificationsPartition,
                     messageContent.NotificationId);
+
+                var getGlobalSendingNotificationDataEntityTask = CompanyCommunicatorSendFunction.globalSendingNotificationDataRepository
+                    .GetGlobalSendingNotificationDataEntity();
 
                 var incomingUserDataEntity = messageContent.UserDataEntity;
                 var incomingConversationId = incomingUserDataEntity.ConversationId;
@@ -115,16 +135,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         incomingUserDataEntity.AadId)
                     : Task.FromResult<UserDataEntity>(null);
 
-                await Task.WhenAll(getActiveNotificationEntityTask, getUserDataEntityTask);
+                await Task.WhenAll(getActiveNotificationEntityTask, getGlobalSendingNotificationDataEntityTask, getUserDataEntityTask);
 
-                var activeNotificationEntity = getActiveNotificationEntityTask.Result;
+                var activeNotificationEntity = await getActiveNotificationEntityTask;
+                var globalSendingNotificationDataEntity = await getGlobalSendingNotificationDataEntityTask;
+                var userDataEntity = await getUserDataEntityTask;
 
                 var conversationId = string.IsNullOrWhiteSpace(incomingConversationId)
-                    ? getUserDataEntityTask.Result?.ConversationId
+                    ? userDataEntity?.ConversationId
                     : incomingConversationId;
 
                 Task saveUserDataEntityTask = Task.CompletedTask;
-                Task saveSaveSentNotificationDataTask = Task.CompletedTask;
+                Task saveSentNotificationDataTask = Task.CompletedTask;
+                Task setDelayTimeAndSendDelayedRetryTask = Task.CompletedTask;
+
+                if (globalSendingNotificationDataEntity?.SendRetryDelayTime != null
+                    && DateTime.UtcNow < globalSendingNotificationDataEntity.SendRetryDelayTime)
+                {
+                    await this.SendDelayedRetryOfMessageToSendFunction(CompanyCommunicatorSendFunction.configuration, messageContent);
+
+                    return;
+                }
 
                 if (!string.IsNullOrWhiteSpace(conversationId))
                 {
@@ -154,7 +185,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                                 "Bearer",
                                 CompanyCommunicatorSendFunction.botAccessToken);
 
-                            var payloadString = "{\"bot\": { \"id\": \"28:" + configuration["MicrosoftAppId"] + "\"},\"isGroup\": false, \"tenantId\": \"" + incomingUserDataEntity.TenantId + "\", \"members\": [{\"id\": \"" + incomingUserDataEntity.UserId + "\"}]}";
+                            var payloadString = "{\"bot\": { \"id\": \"28:" + CompanyCommunicatorSendFunction.configuration["MicrosoftAppId"] + "\"},\"isGroup\": false, \"tenantId\": \"" + incomingUserDataEntity.TenantId + "\", \"members\": [{\"id\": \"" + incomingUserDataEntity.UserId + "\"}]}";
                             requestMessage.Content = new StringContent(payloadString, Encoding.UTF8, "application/json");
 
                             using (var sendResponse = await CompanyCommunicatorSendFunction.httpClient.SendAsync(requestMessage))
@@ -192,7 +223,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                                 else
                                 {
                                     await this.SaveSentNotificationData(
-                                        configuration,
                                         messageContent.NotificationId,
                                         incomingUserDataEntity.AadId,
                                         totalNumberOfThrottles,
@@ -207,13 +237,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                     if (isCreateConversationThrottled)
                     {
-                        await this.SaveSentNotificationData(
-                            configuration,
-                            messageContent.NotificationId,
-                            incomingUserDataEntity.AadId,
-                            totalNumberOfThrottles,
-                            isStatusCodeFromCreateConversation: true,
-                            statusCode: HttpStatusCode.TooManyRequests);
+                        await this.SetDelayTimeAndSendDelayedRetry(CompanyCommunicatorSendFunction.configuration, messageContent);
 
                         return;
                     }
@@ -240,8 +264,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                             {
                                 log.LogInformation("MESSAGE SENT SUCCESSFULLY");
 
-                                saveSaveSentNotificationDataTask = this.SaveSentNotificationData(
-                                    configuration,
+                                saveSentNotificationDataTask = this.SaveSentNotificationData(
                                     messageContent.NotificationId,
                                     incomingUserDataEntity.AadId,
                                     totalNumberOfThrottles,
@@ -271,15 +294,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                             {
                                 log.LogError($"MESSAGE FAILED: {sendResponse.StatusCode}");
 
-                                saveSaveSentNotificationDataTask = this.SaveSentNotificationData(
-                                    configuration,
+                                saveSentNotificationDataTask = this.SaveSentNotificationData(
                                     messageContent.NotificationId,
                                     incomingUserDataEntity.AadId,
                                     totalNumberOfThrottles,
                                     isStatusCodeFromCreateConversation: false,
                                     statusCode: sendResponse.StatusCode);
 
-                                await Task.WhenAll(saveUserDataEntityTask, saveSaveSentNotificationDataTask);
+                                await Task.WhenAll(saveUserDataEntityTask, saveSentNotificationDataTask);
 
                                 return;
                             }
@@ -289,33 +311,37 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                 if (isSendMessageThrottled)
                 {
-                    saveSaveSentNotificationDataTask = this.SaveSentNotificationData(
-                        configuration,
-                        messageContent.NotificationId,
-                        incomingUserDataEntity.AadId,
-                        totalNumberOfThrottles,
-                        isStatusCodeFromCreateConversation: false,
-                        statusCode: HttpStatusCode.TooManyRequests);
+                    setDelayTimeAndSendDelayedRetryTask =
+                        this.SetDelayTimeAndSendDelayedRetry(CompanyCommunicatorSendFunction.configuration, messageContent);
                 }
 
-                await Task.WhenAll(saveUserDataEntityTask, saveSaveSentNotificationDataTask);
+                await Task.WhenAll(
+                    saveUserDataEntityTask,
+                    saveSentNotificationDataTask,
+                    setDelayTimeAndSendDelayedRetryTask);
             }
             catch (Exception e)
             {
                 log.LogError(e, $"ERROR: {e.Message}, {e.GetType()}");
 
+                var statusCodeToStore = HttpStatusCode.Continue;
+                if (deliveryCount >= CompanyCommunicatorSendFunction.MaxDeliveryCountForDeadLetter)
+                {
+                    statusCodeToStore = HttpStatusCode.InternalServerError;
+                }
+
                 await this.SaveSentNotificationData(
-                    configuration,
                     messageContent.NotificationId,
                     messageContent.UserDataEntity.AadId,
                     totalNumberOfThrottles,
                     isStatusCodeFromCreateConversation: false,
-                    statusCode: HttpStatusCode.InternalServerError);
+                    statusCode: statusCodeToStore);
+
+                throw e;
             }
         }
 
         private async Task SaveSentNotificationData(
-            IConfiguration configuration,
             string notificationId,
             string aadId,
             int totalNumberOfThrottles,
@@ -388,6 +414,54 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     throw new Exception("Error fetching bot access token.");
                 }
             }
+        }
+
+        private async Task SetDelayTimeAndSendDelayedRetry(
+            IConfiguration configuration,
+            ServiceBusSendQueueMessageContent queueMessageContent)
+        {
+            // Simply initialize the variable for certain build environments and versions
+            var sendRetryDelayNumberOfMinutes = 0;
+
+            // If parsing fails, out variable is set to 0, so need to set the default
+            if (!int.TryParse(configuration["SendRetryDelayNumberOfMinutes"], out sendRetryDelayNumberOfMinutes))
+            {
+                sendRetryDelayNumberOfMinutes = 11;
+            }
+
+            // Shorten this time by 15 seconds to ensure that when the delayed retry message is taken off of the queue
+            // the Send Retry Delay Time will be earlier and will not block it
+            var sendRetryDelayTime = DateTime.UtcNow + TimeSpan.FromMinutes(sendRetryDelayNumberOfMinutes - 0.25);
+
+            var globalSendingNotificationDataEntity = new GlobalSendingNotificationDataEntity
+            {
+                SendRetryDelayTime = sendRetryDelayTime,
+            };
+
+            await CompanyCommunicatorSendFunction.globalSendingNotificationDataRepository
+                .SetGlobalSendingNotificationDataEntity(globalSendingNotificationDataEntity);
+
+            await this.SendDelayedRetryOfMessageToSendFunction(configuration, queueMessageContent);
+        }
+
+        private async Task SendDelayedRetryOfMessageToSendFunction(
+            IConfiguration configuration,
+            ServiceBusSendQueueMessageContent queueMessageContent)
+        {
+            // Simply initialize the variable for certain build environments and versions
+            var sendRetryDelayNumberOfMinutes = 0;
+
+            // If parsing fails, out variable is set to 0, so need to set the default
+            if (!int.TryParse(configuration["SendRetryDelayNumberOfMinutes"], out sendRetryDelayNumberOfMinutes))
+            {
+                sendRetryDelayNumberOfMinutes = 11;
+            }
+
+            var messageBody = JsonConvert.SerializeObject(queueMessageContent);
+            var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));
+            serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromMinutes(sendRetryDelayNumberOfMinutes);
+
+            await CompanyCommunicatorSendFunction.sendQueueServiceBusMessageSender.SendAsync(serviceBusMessage);
         }
 
         private class ServiceBusSendQueueMessageContent

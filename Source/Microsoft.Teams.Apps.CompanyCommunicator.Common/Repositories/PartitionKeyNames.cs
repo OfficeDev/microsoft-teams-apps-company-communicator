@@ -62,6 +62,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             public static readonly string SendingNotificationsPartition = "SendingNotifications";
 
             /// <summary>
+            /// Global sending notification data partition key name.
+            /// </summary>
+            public static readonly string GlobalSendingNotificationDataPartition = "GlobalSendingNotificationData";
+
+            /// <summary>
             /// Sent notifications partition key name.
             /// </summary>
             public static readonly string SentNotificationsPartition = "SentNotifications";
