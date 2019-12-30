@@ -19,13 +19,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         /// Initializes a new instance of the <see cref="TeamDataRepository"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
-        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
-        public TeamDataRepository(IConfiguration configuration, bool isFromAzureFunction = false)
+        /// <param name="repositoryOptions">Options used to create the repository.</param>
+        public TeamDataRepository(IConfiguration configuration, RepositoryOptions repositoryOptions)
             : base(
                   configuration,
                   PartitionKeyNames.TeamDataTable.TableName,
                   PartitionKeyNames.TeamDataTable.TeamDataPartition,
-                  isFromAzureFunction)
+                  repositoryOptions.IsAzureFunction)
         {
         }
 

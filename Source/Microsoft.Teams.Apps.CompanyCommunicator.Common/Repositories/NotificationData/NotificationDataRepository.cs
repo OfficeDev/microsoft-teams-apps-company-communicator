@@ -19,16 +19,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
-        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
+        /// <param name="repositoryOptions">Options used to create the repository.</param>
         public NotificationDataRepository(
             IConfiguration configuration,
             TableRowKeyGenerator tableRowKeyGenerator,
-            bool isFromAzureFunction = false)
+            RepositoryOptions repositoryOptions)
             : base(
                 configuration,
                 PartitionKeyNames.NotificationDataTable.TableName,
                 PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
-                isFromAzureFunction)
+                repositoryOptions.IsAzureFunction)
         {
             this.TableRowKeyGenerator = tableRowKeyGenerator;
         }
@@ -72,14 +72,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 throw new ArgumentNullException(nameof(draftNotificationEntity));
             }
 
-            var newId = this.TableRowKeyGenerator.CreateNewKeyOrderingMostRecentToOldest();
+            var newSentNotificationId = this.TableRowKeyGenerator.CreateNewKeyOrderingMostRecentToOldest();
 
             // Create a sent notification based on the draft notification.
             var sentNotificationEntity = new NotificationDataEntity
             {
                 PartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
-                RowKey = newId,
-                Id = newId,
+                RowKey = newSentNotificationId,
+                Id = newSentNotificationId,
                 Title = draftNotificationEntity.Title,
                 ImageLink = draftNotificationEntity.ImageLink,
                 Summary = draftNotificationEntity.Summary,
@@ -107,7 +107,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             // Delete the draft notification.
             await this.DeleteAsync(draftNotificationEntity);
 
-            return newId;
+            return newSentNotificationId;
         }
 
         /// <summary>

@@ -17,11 +17,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
         /// <param name="services">IServiceCollection instance.</param>
         public static void AddMessageQueue(this IServiceCollection services)
         {
-            services.AddTransient<DataQueue>();
+            services.AddSingleton<DataQueue>();
 
-            services.AddTransient<SendQueue>();
+            services.AddSingleton<SendQueue>();
 
-            services.AddTransient<PrepareToSendQueue>();
+            services.AddSingleton<PrepareToSendQueue>();
         }
     }
 }

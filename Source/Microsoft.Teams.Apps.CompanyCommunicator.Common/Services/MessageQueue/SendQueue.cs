@@ -9,7 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
     /// <summary>
     /// The message queue service connected to the "company-communicator-send" queue in Azure service bus.
     /// </summary>
-    public class SendQueue : BaseQueue
+    public class SendQueue : BaseQueue<SendQueueMessageContent>
     {
         private static readonly string SendQueueName = "company-communicator-send";
 

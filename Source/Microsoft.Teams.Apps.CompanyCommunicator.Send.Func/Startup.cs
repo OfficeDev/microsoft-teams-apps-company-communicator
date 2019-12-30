@@ -30,13 +30,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             builder.Services.AddTransient<AdaptiveCardCreator>();
 
-            builder.Services.AddTransient<TableRowKeyGenerator>();
-            builder.Services.AddTransient<NotificationDataRepositoryFactory>();
-            builder.Services.AddTransient<SendingNotificationDataRepositoryFactory>();
-            builder.Services.AddTransient<SentNotificationDataRepositoryFactory>();
-            builder.Services.AddTransient<UserDataRepositoryFactory>();
-            builder.Services.AddTransient<TeamDataRepositoryFactory>();
-
             builder.Services.AddTransient<SendQueue>();
             builder.Services.AddTransient<DataQueue>();
         }

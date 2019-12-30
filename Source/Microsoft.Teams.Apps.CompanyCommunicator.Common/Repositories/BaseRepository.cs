@@ -27,19 +27,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="tableName">The name of the table in Azure Table Storage.</param>
         /// <param name="defaultPartitionKey">Default partition key value.</param>
-        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
+        /// <param name="isAzureFunction">Flag to show if created from Azure Function.</param>
         public BaseRepository(
             IConfiguration configuration,
             string tableName,
             string defaultPartitionKey,
-            bool isFromAzureFunction)
+            bool isAzureFunction)
         {
             var storageAccountConnectionString = configuration["StorageAccountConnectionString"];
             var storageAccount = CloudStorageAccount.Parse(storageAccountConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
             this.Table = tableClient.GetTableReference(tableName);
 
-            if (!isFromAzureFunction)
+            if (!isAzureFunction)
             {
                 this.Table.CreateIfNotExists();
             }

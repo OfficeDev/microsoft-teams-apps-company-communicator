@@ -31,17 +31,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
         {
             builder.Services.AddSingleton<BotConnectorClientFactory>();
 
-            builder.Services.AddTransient<AdaptiveCardCreator>();
-
+            builder.Services.Configure<RepositoryOptions>(repositoryOptions =>
+            {
+                repositoryOptions.IsAzureFunction = true;
+            });
+            builder.Services.AddSingleton<NotificationDataRepository>();
+            builder.Services.AddSingleton<SendingNotificationDataRepository>();
+            builder.Services.AddSingleton<SentNotificationDataRepository>();
+            builder.Services.AddSingleton<UserDataRepository>();
+            builder.Services.AddSingleton<TeamDataRepository>();
             builder.Services.AddTransient<TableRowKeyGenerator>();
-            builder.Services.AddTransient<NotificationDataRepositoryFactory>();
-            builder.Services.AddTransient<SendingNotificationDataRepositoryFactory>();
-            builder.Services.AddTransient<SentNotificationDataRepositoryFactory>();
-            builder.Services.AddTransient<UserDataRepositoryFactory>();
-            builder.Services.AddTransient<TeamDataRepositoryFactory>();
 
-            builder.Services.AddTransient<SendQueue>();
-            builder.Services.AddTransient<DataQueue>();
+            builder.Services.AddSingleton<SendQueue>();
+            builder.Services.AddSingleton<DataQueue>();
+
+            builder.Services.AddTransient<AdaptiveCardCreator>();
 
             builder.Services.AddTransient<PreparingToSendOrchestration>();
             builder.Services.AddTransient<GetRecipientDataListForAllUsersActivity>();

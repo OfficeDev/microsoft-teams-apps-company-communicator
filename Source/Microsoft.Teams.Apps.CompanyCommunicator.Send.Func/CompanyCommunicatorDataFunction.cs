@@ -63,13 +63,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             var messageContent = JsonConvert.DeserializeObject<ServiceBusDataQueueMessageContent>(myQueueItem);
 
             CompanyCommunicatorDataFunction.sentNotificationDataRepository = CompanyCommunicatorDataFunction.sentNotificationDataRepository
-                ?? new SentNotificationDataRepository(configuration, isFromAzureFunction: true);
+                ?? new SentNotificationDataRepository(configuration, new RepositoryOptions { IsAzureFunction = true });
 
             CompanyCommunicatorDataFunction.notificationDataRepository = CompanyCommunicatorDataFunction.notificationDataRepository
                 ?? this.CreateNotificationRepository(configuration);
 
             CompanyCommunicatorDataFunction.sendingNotificationDataRepository = CompanyCommunicatorDataFunction.sendingNotificationDataRepository
-                ?? new SendingNotificationDataRepository(configuration, isFromAzureFunction: true);
+                ?? new SendingNotificationDataRepository(configuration, new RepositoryOptions { IsAzureFunction = true });
 
             var sentNotificationDataEntities = await CompanyCommunicatorDataFunction.sentNotificationDataRepository.GetAllAsync(
                 messageContent.NotificationId);
@@ -172,7 +172,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
         private NotificationDataRepository CreateNotificationRepository(IConfiguration configuration)
         {
             var tableRowKeyGenerator = new TableRowKeyGenerator();
-            return new NotificationDataRepository(configuration, tableRowKeyGenerator, isFromAzureFunction: true);
+            return new NotificationDataRepository(configuration, tableRowKeyGenerator, new RepositoryOptions { IsAzureFunction = true });
         }
 
         private async Task SetEmptyNotificationDataEntity(string notificationId)

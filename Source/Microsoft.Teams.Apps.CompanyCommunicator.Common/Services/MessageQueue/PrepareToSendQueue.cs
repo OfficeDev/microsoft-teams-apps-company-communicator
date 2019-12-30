@@ -9,7 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
     /// <summary>
     /// The message queue service connected to the "company-communicator-preapretosend" queue in Azure service bus.
     /// </summary>
-    public class PrepareToSendQueue : BaseQueue
+    public class PrepareToSendQueue : BaseQueue<PrepareToSendQueueMessageContent>
     {
         private static readonly string PreparToSendQueueName = "company-communicator-preparetosend";
 

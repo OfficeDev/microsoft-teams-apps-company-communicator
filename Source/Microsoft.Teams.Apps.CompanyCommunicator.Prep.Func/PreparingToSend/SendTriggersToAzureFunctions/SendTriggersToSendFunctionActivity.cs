@@ -71,27 +71,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
             var recipientDataBatch = input.RecipientDataBatch;
             var notificationDataEntityId = input.NotificationDataEntityId;
 
-            var messages = recipientDataBatch
+            var sendQueueMessageContentBatch = recipientDataBatch
                 .Select(recipientData =>
-                    this.CreateServiceBusQueueMessage(recipientData, notificationDataEntityId))
-                .Where(message => message != null)
-                .ToList();
-            var stopwatch = Stopwatch.StartNew();
-            await this.sendMessageQueue.SendAsync(messages);
-            stopwatch.Stop();
-        }
+                    new SendQueueMessageContent
+                    {
+                        NotificationId = notificationDataEntityId,
+                        UserDataEntity = recipientData,
+                    })
+                .Where(sendQueueMessageContent => sendQueueMessageContent != null);
 
-        private Message CreateServiceBusQueueMessage(UserDataEntity recipientData, string notificationDataEntityId)
-        {
-            var queueMessageContent = new SendQueueMessageContent
-            {
-                NotificationId = notificationDataEntityId,
-                UserDataEntity = recipientData,
-            };
-            var messageBody = JsonConvert.SerializeObject(queueMessageContent);
-            var message = new Message(Encoding.UTF8.GetBytes(messageBody));
-            message.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(2);
-            return message;
+            var stopwatch = Stopwatch.StartNew();
+            await this.sendMessageQueue.SendAsync(sendQueueMessageContentBatch);
+            stopwatch.Stop();
         }
     }
 }

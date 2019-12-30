@@ -19,20 +19,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     /// </summary>
     public class ProcessRecipientDataListActivity
     {
-        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
-        private readonly SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory;
+        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly SentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProcessRecipientDataListActivity"/> class.
         /// </summary>
-        /// <param name="notificationDataRepositoryFactory">Notification data repository service.</param>
-        /// <param name="sentNotificationDataRepositoryFactory">Sent notification data repository service.</param>
+        /// <param name="notificationDataRepository">Notification data repository.</param>
+        /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         public ProcessRecipientDataListActivity(
-            NotificationDataRepositoryFactory notificationDataRepositoryFactory,
-            SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory)
+            NotificationDataRepository notificationDataRepository,
+            SentNotificationDataRepository sentNotificationDataRepository)
         {
-            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
-            this.sentNotificationDataRepositoryFactory = sentNotificationDataRepositoryFactory;
+            this.notificationDataRepository = notificationDataRepository;
+            this.sentNotificationDataRepository = sentNotificationDataRepository;
         }
 
         /// <summary>
@@ -68,8 +68,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             [ActivityTrigger] string notificationDataEntityId)
         {
             var sentNotificationDataEntityList =
-                await this.sentNotificationDataRepositoryFactory.CreateRepository(true).GetAllAsync(
-                    notificationDataEntityId);
+                await this.sentNotificationDataRepository.GetAllAsync(notificationDataEntityId);
             var recipientDataList = sentNotificationDataEntityList
                 .Where(p => p.StatusCode == 0)
                 .Select(p =>
@@ -100,17 +99,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             string notificationDataEntityId,
             IEnumerable<UserDataEntity> recipientDataList)
         {
-            var notificationDataRepository =
-                this.notificationDataRepositoryFactory.CreateRepository(true);
-
-            var notificationDataEntity = await notificationDataRepository.GetAsync(
+            var notificationDataEntity = await this.notificationDataRepository.GetAsync(
                 PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
                 notificationDataEntityId);
             if (notificationDataEntity != null)
             {
                 notificationDataEntity.TotalMessageCount = recipientDataList.Count();
 
-                await notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
+                await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
             }
         }
 

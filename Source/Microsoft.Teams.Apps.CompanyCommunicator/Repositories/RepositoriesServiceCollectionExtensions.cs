@@ -22,12 +22,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories
         /// <param name="services">IServiceCollection instance.</param>
         public static void AddRepositories(this IServiceCollection services)
         {
+            services.Configure<RepositoryOptions>(repositoryOptions =>
+            {
+                repositoryOptions.IsAzureFunction = false;
+            });
+
             services.AddSingleton<SendingNotificationDataRepository>();
             services.AddSingleton<SentNotificationDataRepository>();
             services.AddSingleton<NotificationDataRepository>();
             services.AddSingleton<UserDataRepository>();
             services.AddSingleton<TeamDataRepository>();
-            services.AddSingleton<TableRowKeyGenerator>();
+
+            services.AddTransient<TableRowKeyGenerator>();
         }
     }
 }

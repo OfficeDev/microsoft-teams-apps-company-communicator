@@ -68,16 +68,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var notificationDataEntityId =
+            var newSentNotificationId =
                 await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity);
 
             // Ensure the SentNotificationData table exists in Azure storage.
             await this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistingAsync();
 
-            var serializedDraftNotificationId = JsonConvert.SerializeObject(notificationDataEntityId);
-            var message = new Message(Encoding.UTF8.GetBytes(serializedDraftNotificationId));
-            message.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(1);
-            await this.prepareToSendQueue.SendAsync(message);
+            var queueMessageContent = new PrepareToSendQueueMessageContent
+            {
+                SentNotificationId = newSentNotificationId,
+            };
+            await this.prepareToSendQueue.SendAsync(queueMessageContent);
 
             return this.Ok();
         }

@@ -16,19 +16,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class CreateSendingNotificationActivity
     {
-        private readonly SendingNotificationDataRepositoryFactory sendingNotificationDataRepositoryFactory;
+        private readonly SendingNotificationDataRepository sendingNotificationDataRepository;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateSendingNotificationActivity"/> class.
         /// </summary>
-        /// <param name="sendingNotificationDataRepositoryFactory">Sending notification data repository factory.</param>
+        /// <param name="sendingNotificationDataRepository">Sending notification data repository.</param>
         /// <param name="adaptiveCardCreator">The adaptive card creator.</param>
         public CreateSendingNotificationActivity(
-            SendingNotificationDataRepositoryFactory sendingNotificationDataRepositoryFactory,
+            SendingNotificationDataRepository sendingNotificationDataRepository,
             AdaptiveCardCreator adaptiveCardCreator)
         {
-            this.sendingNotificationDataRepositoryFactory = sendingNotificationDataRepositoryFactory;
+            this.sendingNotificationDataRepository = sendingNotificationDataRepository;
             this.adaptiveCardCreator = adaptiveCardCreator;
         }
 
@@ -67,7 +67,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 Content = cardString,
             };
 
-            await this.sendingNotificationDataRepositoryFactory.CreateRepository(true).CreateOrUpdateAsync(sendingNotification);
+            await this.sendingNotificationDataRepository.CreateOrUpdateAsync(sendingNotification);
         }
     }
 }

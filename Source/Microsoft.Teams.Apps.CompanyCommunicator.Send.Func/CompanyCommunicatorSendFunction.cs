@@ -87,13 +87,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     ?? new HttpClient();
 
                 CompanyCommunicatorSendFunction.userDataRepository = CompanyCommunicatorSendFunction.userDataRepository
-                    ?? new UserDataRepository(configuration, isFromAzureFunction: true);
+                    ?? new UserDataRepository(configuration, new RepositoryOptions { IsAzureFunction = true });
 
                 CompanyCommunicatorSendFunction.sendingNotificationDataRepository = CompanyCommunicatorSendFunction.sendingNotificationDataRepository
-                    ?? new SendingNotificationDataRepository(configuration, isFromAzureFunction: true);
+                    ?? new SendingNotificationDataRepository(configuration, new RepositoryOptions { IsAzureFunction = true });
 
                 CompanyCommunicatorSendFunction.sentNotificationDataRepository = CompanyCommunicatorSendFunction.sentNotificationDataRepository
-                    ?? new SentNotificationDataRepository(configuration, isFromAzureFunction: true);
+                    ?? new SentNotificationDataRepository(configuration, new RepositoryOptions { IsAzureFunction = true });
 
                 if (CompanyCommunicatorSendFunction.botAccessToken == null
                     || CompanyCommunicatorSendFunction.botAccessTokenExpiration == null
