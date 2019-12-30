@@ -17,9 +17,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorClient;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.GetRecipientDataBatches;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.PreparingToSend.SendTriggersToAzureFunctions;
 
     /// <summary>
     /// Register services in DI container of the Azure functions system.
@@ -42,17 +39,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             builder.Services.AddTransient<SendQueue>();
             builder.Services.AddTransient<DataQueue>();
-
-            builder.Services.AddTransient<PreparingToSendOrchestration>();
-            builder.Services.AddTransient<GetRecipientDataListForAllUsersActivity>();
-            builder.Services.AddTransient<GetTeamDataEntitiesByIdsActivity>();
-            builder.Services.AddTransient<GetRecipientDataListForRosterActivity>();
-            builder.Services.AddTransient<GetRecipientDataListForTeamsActivity>();
-            builder.Services.AddTransient<CreateSendingNotificationActivity>();
-            builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
-            builder.Services.AddTransient<SendTriggerToDataFunctionActivity>();
-            builder.Services.AddTransient<ProcessRecipientDataListActivity>();
-            builder.Services.AddTransient<HandleFailureActivity>();
         }
     }
 }
