@@ -25,23 +25,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     public class GetRecipientDataListForRosterActivity
     {
         private readonly BotConnectorClientFactory botConnectorClientFactory;
-        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
-        private readonly SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory;
+        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly SentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientDataListForRosterActivity"/> class.
         /// </summary>
         /// <param name="botConnectorClientFactory">Bot connector client factory.</param>
-        /// <param name="notificationDataRepositoryFactory">Notification data repository factory.</param>
-        /// <param name="sentNotificationDataRepositoryFactory">Sent notification data repository factory.</param>
+        /// <param name="notificationDataRepository">Notification data repository.</param>
+        /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         public GetRecipientDataListForRosterActivity(
             BotConnectorClientFactory botConnectorClientFactory,
-            NotificationDataRepositoryFactory notificationDataRepositoryFactory,
-            SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory)
+            NotificationDataRepository notificationDataRepository,
+            SentNotificationDataRepository sentNotificationDataRepository)
         {
             this.botConnectorClientFactory = botConnectorClientFactory;
-            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
-            this.sentNotificationDataRepositoryFactory = sentNotificationDataRepositoryFactory;
+            this.notificationDataRepository = notificationDataRepository;
+            this.sentNotificationDataRepository = sentNotificationDataRepository;
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
                 log.LogError(errorMessage);
 
-                await this.notificationDataRepositoryFactory.CreateRepository(true)
+                await this.notificationDataRepository
                     .SaveWarningInNotificationDataEntityAsync(notificationDataEntityId, errorMessage);
             }
         }
@@ -99,7 +99,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                 input.TeamDataEntity.ServiceUrl,
                 input.TeamDataEntity.TeamId);
 
-            await this.sentNotificationDataRepositoryFactory.CreateRepository(true)
+            await this.sentNotificationDataRepository
                 .InitializeSentNotificationDataForRecipientBatchAsync(input.NotificationDataEntityId, roster);
         }
 

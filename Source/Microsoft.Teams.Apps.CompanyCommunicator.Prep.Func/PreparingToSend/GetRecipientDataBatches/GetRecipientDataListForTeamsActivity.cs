@@ -19,20 +19,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     /// </summary>
     public class GetRecipientDataListForTeamsActivity
     {
-        private readonly TeamDataRepositoryFactory teamDataRepositoryFactory;
-        private readonly SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory;
+        private readonly TeamDataRepository teamDataRepository;
+        private readonly SentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientDataListForTeamsActivity"/> class.
         /// </summary>
-        /// <param name="teamDataRepositoryFactory">Team Data repository service.</param>
-        /// <param name="sentNotificationDataRepositoryFactory">Sent notification data repository factory.</param>
+        /// <param name="teamDataRepository">Team Data repository.</param>
+        /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         public GetRecipientDataListForTeamsActivity(
-            TeamDataRepositoryFactory teamDataRepositoryFactory,
-            SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory)
+            TeamDataRepository teamDataRepository,
+            SentNotificationDataRepository sentNotificationDataRepository)
         {
-            this.teamDataRepositoryFactory = teamDataRepositoryFactory;
-            this.sentNotificationDataRepositoryFactory = sentNotificationDataRepositoryFactory;
+            this.teamDataRepository = teamDataRepository;
+            this.sentNotificationDataRepository = sentNotificationDataRepository;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             var teamsRecipientDataList =
                 await this.GetTeamsRecipientDataEntityListAsync(notificationDataEntity.Teams);
 
-            await this.sentNotificationDataRepositoryFactory.CreateRepository(true)
+            await this.sentNotificationDataRepository
                 .InitializeSentNotificationDataForRecipientBatchAsync(notificationDataEntity.Id, teamsRecipientDataList);
         }
 
@@ -81,7 +81,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <returns>List of recipient data entity (user data entities).</returns>
         private async Task<List<UserDataEntity>> GetTeamsRecipientDataEntityListAsync(IEnumerable<string> teamIds)
         {
-            var teamDataEntities = await this.teamDataRepositoryFactory.CreateRepository(true).GetTeamDataEntitiesByIdsAsync(teamIds);
+            var teamDataEntities = await this.teamDataRepository.GetTeamDataEntitiesByIdsAsync(teamIds);
 
             var teamReceiverEntities = new List<UserDataEntity>();
 

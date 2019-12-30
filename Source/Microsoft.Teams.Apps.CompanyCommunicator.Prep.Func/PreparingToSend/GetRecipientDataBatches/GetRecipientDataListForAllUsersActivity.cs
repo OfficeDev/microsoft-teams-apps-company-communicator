@@ -17,20 +17,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     /// </summary>
     public class GetRecipientDataListForAllUsersActivity
     {
-        private readonly UserDataRepositoryFactory userDataRepositoryFactory;
-        private readonly SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory;
+        private readonly UserDataRepository userDataRepository;
+        private readonly SentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientDataListForAllUsersActivity"/> class.
         /// </summary>
-        /// <param name="userDataRepositoryFactory">User Data repository service.</param>
-        /// <param name="sentNotificationDataRepositoryFactory">Sent notification data repository factory.</param>
+        /// <param name="userDataRepository">User Data repository.</param>
+        /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         public GetRecipientDataListForAllUsersActivity(
-            UserDataRepositoryFactory userDataRepositoryFactory,
-            SentNotificationDataRepositoryFactory sentNotificationDataRepositoryFactory)
+            UserDataRepository userDataRepository,
+            SentNotificationDataRepository sentNotificationDataRepository)
         {
-            this.userDataRepositoryFactory = userDataRepositoryFactory;
-            this.sentNotificationDataRepositoryFactory = sentNotificationDataRepositoryFactory;
+            this.userDataRepository = userDataRepository;
+            this.sentNotificationDataRepository = sentNotificationDataRepository;
         }
 
         /// <summary>
@@ -60,9 +60,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         public async Task GetAllUsersRecipientDataListAsync(
             [ActivityTrigger] string notificationDataEntityId)
         {
-            var allUsersRecipientDataList = await this.userDataRepositoryFactory.CreateRepository(true).GetAllAsync();
+            var allUsersRecipientDataList = await this.userDataRepository.GetAllAsync();
 
-            await this.sentNotificationDataRepositoryFactory.CreateRepository(true)
+            await this.sentNotificationDataRepository
                 .InitializeSentNotificationDataForRecipientBatchAsync(notificationDataEntityId, allUsersRecipientDataList);
         }
     }

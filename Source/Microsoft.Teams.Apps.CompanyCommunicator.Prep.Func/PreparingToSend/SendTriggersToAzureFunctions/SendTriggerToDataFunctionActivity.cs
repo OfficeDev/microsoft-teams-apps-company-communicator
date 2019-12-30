@@ -24,19 +24,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
     public class SendTriggerToDataFunctionActivity
     {
         private readonly DataQueue dataMessageQueue;
-        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
+        private readonly NotificationDataRepository notificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SendTriggerToDataFunctionActivity"/> class.
         /// </summary>
         /// <param name="dataMessageQueue">The message queue service connected to the queue 'company-communicator-data'.</param>
-        /// <param name="notificationDataRepositoryFactory">Notification data repository factory.</param>
+        /// <param name="notificationDataRepository">Notification data repository.</param>
         public SendTriggerToDataFunctionActivity(
             DataQueue dataMessageQueue,
-            NotificationDataRepositoryFactory notificationDataRepositoryFactory)
+            NotificationDataRepository notificationDataRepository)
         {
             this.dataMessageQueue = dataMessageQueue;
-            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
+            this.notificationDataRepository = notificationDataRepository;
         }
 
         /// <summary>
@@ -82,27 +82,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
                 InitialSendDate = DateTime.UtcNow,
                 TotalMessageCount = input.TotalRecipientCount,
             };
-            var messageBody = JsonConvert.SerializeObject(queueMessageContent);
-            var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));
-            serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(30);
 
-            await this.dataMessageQueue.SendAsync(serviceBusMessage);
+            await this.dataMessageQueue.SendAsync(queueMessageContent);
 
             await this.MarkPreparingToSendIsDone(input.NotificationDataEntityId);
         }
 
         private async Task MarkPreparingToSendIsDone(string notificationDataEntityId)
         {
-            var repository = this.notificationDataRepositoryFactory.CreateRepository(true);
-
-            var notificationDataEntity = await repository.GetAsync(
+            var notificationDataEntity = await this.notificationDataRepository.GetAsync(
                 PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
                 notificationDataEntityId);
             if (notificationDataEntity != null)
             {
                 notificationDataEntity.IsPreparingToSend = false;
 
-                await repository.CreateOrUpdateAsync(notificationDataEntity);
+                await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
             }
         }
     }

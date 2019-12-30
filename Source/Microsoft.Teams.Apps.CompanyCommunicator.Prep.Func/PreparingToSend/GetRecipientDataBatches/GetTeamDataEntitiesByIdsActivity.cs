@@ -18,16 +18,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     /// </summary>
     public class GetTeamDataEntitiesByIdsActivity
     {
-        private readonly TeamDataRepositoryFactory teamDataRepositoryFactory;
+        private readonly TeamDataRepository teamDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetTeamDataEntitiesByIdsActivity"/> class.
         /// </summary>
-        /// <param name="teamDataRepositoryFactory">Team Data repository service.</param>
+        /// <param name="teamDataRepository">Team Data repository.</param>
         public GetTeamDataEntitiesByIdsActivity(
-            TeamDataRepositoryFactory teamDataRepositoryFactory)
+            TeamDataRepository teamDataRepository)
         {
-            this.teamDataRepositoryFactory = teamDataRepositoryFactory;
+            this.teamDataRepository = teamDataRepository;
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             var teamIds = notificationDataEntity.Rosters;
 
             var teamDataEntities =
-                await this.teamDataRepositoryFactory.CreateRepository(true).GetTeamDataEntitiesByIdsAsync(teamIds);
+                await this.teamDataRepository.GetTeamDataEntitiesByIdsAsync(teamIds);
 
             return teamDataEntities;
         }

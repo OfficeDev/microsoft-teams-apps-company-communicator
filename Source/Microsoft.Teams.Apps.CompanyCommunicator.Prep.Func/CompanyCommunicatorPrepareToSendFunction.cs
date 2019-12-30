@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Azure.WebJobs;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Newtonsoft.Json;
 
@@ -19,20 +20,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     {
         private const string QueueName = "company-communicator-preparetosend";
         private const string ConnectionName = "ServiceBusConnection";
-        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
+        private readonly NotificationDataRepository notificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorPrepareToSendFunction"/> class.
         /// </summary>
-        /// <param name="notificationDataRepositoryFactory">Notification data repository factory service.</param>
+        /// <param name="notificationDataRepository">Notification data repository.</param>
         public CompanyCommunicatorPrepareToSendFunction(
-            NotificationDataRepositoryFactory notificationDataRepositoryFactory)
+            NotificationDataRepository notificationDataRepository)
         {
-            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
+            this.notificationDataRepository = notificationDataRepository;
         }
 
         /// <summary>
-        /// Azure Function App triggered by messages from a Service Bus queue
+        /// Azure Function App triggered by messages from a Service Bus queue.
         /// It kicks off the durable orchestration for preparing to send notifications.
         /// </summary>
         /// <param name="myQueueItem">The Service Bus queue item.</param>
@@ -47,15 +48,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             [OrchestrationClient]
             DurableOrchestrationClient starter)
         {
-            var partitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition;
-            var notificationDataEntityId = JsonConvert.DeserializeObject<string>(myQueueItem);
-            var notificationDataRepository = this.notificationDataRepositoryFactory.CreateRepository(true);
-            var notificationDataEntity = await notificationDataRepository.GetAsync(partitionKey, notificationDataEntityId);
-            if (notificationDataEntity != null)
+            var sentNotificationsPartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition;
+            var queueMessageContent = JsonConvert.DeserializeObject<PrepareToSendQueueMessageContent>(myQueueItem);
+            var sentNotificationId = queueMessageContent.SentNotificationId;
+
+            var sentNotificationDataEntity = await this.notificationDataRepository.GetAsync(sentNotificationsPartitionKey, sentNotificationId);
+            if (sentNotificationDataEntity != null)
             {
                 string instanceId = await starter.StartNewAsync(
                     nameof(PreparingToSendOrchestration.PrepareToSendOrchestrationAsync),
-                    notificationDataEntity);
+                    sentNotificationDataEntity);
             }
         }
     }

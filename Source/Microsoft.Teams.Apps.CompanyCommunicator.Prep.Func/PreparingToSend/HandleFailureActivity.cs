@@ -16,15 +16,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class HandleFailureActivity
     {
-        private readonly NotificationDataRepositoryFactory notificationDataRepositoryFactory;
+        private readonly NotificationDataRepository notificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HandleFailureActivity"/> class.
         /// </summary>
-        /// <param name="notificationDataRepositoryFactory">Notification data repository factory.</param>
-        public HandleFailureActivity(NotificationDataRepositoryFactory notificationDataRepositoryFactory)
+        /// <param name="notificationDataRepository">Notification data repository.</param>
+        public HandleFailureActivity(NotificationDataRepository notificationDataRepository)
         {
-            this.notificationDataRepositoryFactory = notificationDataRepositoryFactory;
+            this.notificationDataRepository = notificationDataRepository;
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         {
             log.LogError(input.Exception.Message);
 
-            await this.notificationDataRepositoryFactory.CreateRepository(true)
+            await this.notificationDataRepository
                 .SaveExceptionInNotificationDataEntityAsync(input.NotificationDataEntity.Id, input.Exception.Message);
         }
     }
