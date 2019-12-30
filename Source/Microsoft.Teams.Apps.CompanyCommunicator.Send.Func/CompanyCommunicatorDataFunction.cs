@@ -74,7 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 ?? new SentNotificationDataRepository(CompanyCommunicatorDataFunction.configuration, new RepositoryOptions { IsAzureFunction = true });
 
             CompanyCommunicatorDataFunction.notificationDataRepository = CompanyCommunicatorDataFunction.notificationDataRepository
-                ?? this.CreateNotificationRepository(CompanyCommunicatorDataFunction.configuration, new RepositoryOptions { IsAzureFunction = true });
+                ?? this.CreateNotificationRepository(CompanyCommunicatorDataFunction.configuration);
 
             CompanyCommunicatorDataFunction.sendingNotificationDataRepository = CompanyCommunicatorDataFunction.sendingNotificationDataRepository
                 ?? new SendingNotificationDataRepository(CompanyCommunicatorDataFunction.configuration, new RepositoryOptions { IsAzureFunction = true });
