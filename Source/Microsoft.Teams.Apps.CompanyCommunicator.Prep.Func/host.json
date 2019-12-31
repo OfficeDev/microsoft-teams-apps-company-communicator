@@ -3,7 +3,8 @@
   "extensions": {
     "serviceBus": {
       "messageHandlerOptions": {
-        "maxConcurrentCalls": 1
+        "maxConcurrentCalls": 1,
+        "autoComplete": false
       }
     },
     "durableTask": {
@@ -17,13 +18,6 @@
       "samplingSettings": {
         "isEnabled": false
       }
-    },
-    "fileLoggingMode": "always",
-    "logLevel": {
-      "default": "Information",
-      "Host": "Error",
-      "Function": "Information",
-      "Host.Aggregator": "Information"
     }
   }
 }
