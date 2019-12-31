@@ -19,13 +19,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         /// Initializes a new instance of the <see cref="TeamDataRepository"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
-        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
-        public TeamDataRepository(IConfiguration configuration, bool isFromAzureFunction = false)
+        /// <param name="repositoryOptions">Options used to create the repository.</param>
+        public TeamDataRepository(IConfiguration configuration, RepositoryOptions repositoryOptions)
             : base(
                   configuration,
                   PartitionKeyNames.TeamDataTable.TableName,
                   PartitionKeyNames.TeamDataTable.TeamDataPartition,
-                  isFromAzureFunction)
+                  repositoryOptions.IsAzureFunction)
         {
         }
 
@@ -36,23 +36,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         /// <returns>Team data entities.</returns>
         public async Task<IEnumerable<TeamDataEntity>> GetTeamDataEntitiesByIdsAsync(IEnumerable<string> teamIds)
         {
-            var rowKeysFilter = string.Empty;
-            foreach (var teamId in teamIds)
-            {
-                var singleRowKeyFilter = TableQuery.GenerateFilterCondition(
-                    nameof(TableEntity.RowKey),
-                    QueryComparisons.Equal,
-                    teamId);
-
-                if (string.IsNullOrWhiteSpace(rowKeysFilter))
-                {
-                    rowKeysFilter = singleRowKeyFilter;
-                }
-                else
-                {
-                    rowKeysFilter = TableQuery.CombineFilters(rowKeysFilter, TableOperators.Or, singleRowKeyFilter);
-                }
-            }
+            var rowKeysFilter = this.GetRowKeysFilter(teamIds);
 
             return await this.GetWithFilterAsync(rowKeysFilter);
         }
@@ -69,24 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
                 return new List<string>();
             }
 
-            var rowKeysFilter = string.Empty;
-            foreach (var id in ids)
-            {
-                var singleRowKeyFilter = TableQuery.GenerateFilterCondition(
-                    nameof(TableEntity.RowKey),
-                    QueryComparisons.Equal,
-                    id);
-
-                if (string.IsNullOrWhiteSpace(rowKeysFilter))
-                {
-                    rowKeysFilter = singleRowKeyFilter;
-                }
-                else
-                {
-                    rowKeysFilter = TableQuery.CombineFilters(rowKeysFilter, TableOperators.Or, singleRowKeyFilter);
-                }
-            }
-
+            var rowKeysFilter = this.GetRowKeysFilter(ids);
             var teamDataEntities = await this.GetWithFilterAsync(rowKeysFilter);
 
             return teamDataEntities.Select(p => p.Name).OrderBy(p => p);

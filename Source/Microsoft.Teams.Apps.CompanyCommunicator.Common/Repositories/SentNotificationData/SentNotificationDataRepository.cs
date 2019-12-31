@@ -4,7 +4,13 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
     /// Repository of the notification data in the table storage.
@@ -15,14 +21,58 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// Initializes a new instance of the <see cref="SentNotificationDataRepository"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
-        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
-        public SentNotificationDataRepository(IConfiguration configuration, bool isFromAzureFunction = false)
+        /// <param name="repositoryOptions">Options used to create the repository.</param>
+        public SentNotificationDataRepository(IConfiguration configuration, RepositoryOptions repositoryOptions)
             : base(
                 configuration,
                 PartitionKeyNames.SentNotificationDataTable.TableName,
                 PartitionKeyNames.SentNotificationDataTable.DefaultPartition,
-                isFromAzureFunction)
+                repositoryOptions.IsAzureFunction)
         {
+        }
+
+        /// <summary>
+        /// This method ensures the SentNotificationData table is create in the storage.
+        /// This method should be called before kicking off an Azure function that uses the SentNotificationData table.
+        /// Otherwise the app will crash.
+        /// By design, Azure functions (in this app) does not create a table if it's absent.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task EnsureSentNotificationDataTableExistingAsync()
+        {
+            var exists = await this.Table.ExistsAsync();
+            if (!exists)
+            {
+                await this.Table.CreateAsync();
+            }
+        }
+
+        /// <summary>
+        /// Initialize sent notification data for a recipient batch.
+        /// Set status to be 0 (initial).
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="recipientDataBatch">A recipient data batch.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task InitializeSentNotificationDataForRecipientBatchAsync(
+            string notificationDataEntityId,
+            IEnumerable<UserDataEntity> recipientDataBatch)
+        {
+            var sentNotificationDataEntities = recipientDataBatch
+                .Select(p =>
+                    new SentNotificationDataEntity
+                    {
+                        PartitionKey = notificationDataEntityId,
+                        RowKey = p.AadId,
+                        AadId = p.AadId,
+                        StatusCode = 0,
+                        ConversationId = p.ConversationId,
+                        TenantId = p.TenantId,
+                        UserId = p.UserId,
+                        ServiceUrl = p.ServiceUrl,
+                    });
+
+            await this.BatchInsertOrMergeAsync(sentNotificationDataEntities);
         }
     }
 }

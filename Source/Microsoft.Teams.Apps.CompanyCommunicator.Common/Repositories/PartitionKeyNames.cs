@@ -83,7 +83,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             public static readonly string TableName = "SentNotificationData";
 
             /// <summary>
-            /// Default partion - should not be used.
+            /// Default partition - should not be used.
             /// </summary>
             public static readonly string DefaultPartition = "Default";
         }

@@ -19,16 +19,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
-        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
+        /// <param name="repositoryOptions">Options used to create the repository.</param>
         public NotificationDataRepository(
             IConfiguration configuration,
             TableRowKeyGenerator tableRowKeyGenerator,
-            bool isFromAzureFunction = false)
+            RepositoryOptions repositoryOptions)
             : base(
                 configuration,
                 PartitionKeyNames.NotificationDataTable.TableName,
                 PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
-                isFromAzureFunction)
+                repositoryOptions.IsAzureFunction)
         {
             this.TableRowKeyGenerator = tableRowKeyGenerator;
         }
@@ -69,17 +69,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         {
             if (draftNotificationEntity == null)
             {
-                return string.Empty;
+                throw new ArgumentNullException(nameof(draftNotificationEntity));
             }
 
-            var newId = this.TableRowKeyGenerator.CreateNewKeyOrderingMostRecentToOldest();
+            var newSentNotificationId = this.TableRowKeyGenerator.CreateNewKeyOrderingMostRecentToOldest();
 
             // Create a sent notification based on the draft notification.
             var sentNotificationEntity = new NotificationDataEntity
             {
                 PartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
-                RowKey = newId,
-                Id = newId,
+                RowKey = newSentNotificationId,
+                Id = newSentNotificationId,
                 Title = draftNotificationEntity.Title,
                 ImageLink = draftNotificationEntity.ImageLink,
                 Summary = draftNotificationEntity.Summary,
@@ -100,13 +100,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 TotalMessageCount = draftNotificationEntity.TotalMessageCount,
                 IsCompleted = false,
                 SendingStartedDate = DateTime.UtcNow,
+                IsPreparingToSend = true,
             };
             await this.CreateOrUpdateAsync(sentNotificationEntity);
 
             // Delete the draft notification.
             await this.DeleteAsync(draftNotificationEntity);
 
-            return newId;
+            return newSentNotificationId;
         }
 
         /// <summary>
@@ -141,6 +142,59 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             };
 
             await this.CreateOrUpdateAsync(newNotificationEntity);
+        }
+
+        /// <summary>
+        /// Save exception error message in a notification data entity.
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="errorMessage">Error message.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task SaveExceptionInNotificationDataEntityAsync(
+            string notificationDataEntityId,
+            string errorMessage)
+        {
+            var notificationDataEntity = await this.GetAsync(
+                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                notificationDataEntityId);
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.ExceptionMessage =
+                    this.AppendNewLine(notificationDataEntity.ExceptionMessage, errorMessage);
+
+                notificationDataEntity.IsCompleted = true;
+
+                await this.CreateOrUpdateAsync(notificationDataEntity);
+            }
+        }
+
+        /// <summary>
+        /// Save warning message in a notification data entity.
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="warningMessage">Warning message to be saved.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task SaveWarningInNotificationDataEntityAsync(
+            string notificationDataEntityId,
+            string warningMessage)
+        {
+            var notificationDataEntity = await this.GetAsync(
+                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                notificationDataEntityId);
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.WarningMessage =
+                    this.AppendNewLine(notificationDataEntity.WarningMessage, warningMessage);
+
+                await this.CreateOrUpdateAsync(notificationDataEntity);
+            }
+        }
+
+        private string AppendNewLine(string originalString, string newString)
+        {
+            return string.IsNullOrWhiteSpace(originalString)
+                ? newString
+                : $"{originalString}{Environment.NewLine}{newString}";
         }
     }
 }

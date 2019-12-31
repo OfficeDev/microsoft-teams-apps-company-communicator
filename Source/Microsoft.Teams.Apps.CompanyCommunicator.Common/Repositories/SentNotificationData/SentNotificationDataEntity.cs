@@ -40,7 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// <summary>
         /// Gets or sets the sent DateTime.
         /// </summary>
-        public DateTime SentDate { get; set; }
+        public DateTime? SentDate { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the status code is from the create conversation call.
@@ -56,5 +56,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// Gets or sets the delivery status
         /// </summary>
         public string DeliveryStatus { get; set; }
+
+        /// <summary>
+        /// Gets or sets ConversationId.
+        /// </summary>
+        public string ConversationId { get; set; }
+
+        /// <summary>
+        /// Gets or sets ServiceUrl.
+        /// </summary>
+        public string ServiceUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets TenantId.
+        /// </summary>
+        public string TenantId { get; set; }
+
+        /// <summary>
+        /// Gets or sets UserId.
+        /// </summary>
+        public string UserId { get; set; }
     }
 }

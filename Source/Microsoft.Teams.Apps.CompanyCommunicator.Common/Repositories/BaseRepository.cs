@@ -27,19 +27,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="tableName">The name of the table in Azure Table Storage.</param>
         /// <param name="defaultPartitionKey">Default partition key value.</param>
-        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
+        /// <param name="isAzureFunction">Flag to show if created from Azure Function.</param>
         public BaseRepository(
             IConfiguration configuration,
             string tableName,
             string defaultPartitionKey,
-            bool isFromAzureFunction)
+            bool isAzureFunction)
         {
             var storageAccountConnectionString = configuration["StorageAccountConnectionString"];
             var storageAccount = CloudStorageAccount.Parse(storageAccountConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
             this.Table = tableClient.GetTableReference(tableName);
 
-            if (!isFromAzureFunction)
+            if (!isAzureFunction)
             {
                 this.Table.CreateIfNotExists();
             }
@@ -83,6 +83,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// <returns>A task that represents the work queued to execute.</returns>
         public async Task DeleteAsync(T entity)
         {
+            var partitionKey = entity.PartitionKey;
+            var rowKey = entity.RowKey;
+            entity = await this.GetAsync(partitionKey, rowKey);
+            if (entity == null)
+            {
+                throw new KeyNotFoundException(
+                    $"Not found in table storage. PartitionKey = {partitionKey}, RowKey = {rowKey}");
+            }
+
             var operation = TableOperation.Delete(entity);
 
             await this.Table.ExecuteAsync(operation);
@@ -92,7 +101,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// Get an entity by the keys in the table storage.
         /// </summary>
         /// <param name="partitionKey">The partition key of the entity.</param>
-        /// <param name="rowKey">The row key fo the entity.</param>
+        /// <param name="rowKey">The row key for the entity.</param>
         /// <returns>The entity matching the keys.</returns>
         public async Task<T> GetAsync(string partitionKey, string rowKey)
         {
@@ -137,6 +146,62 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             var entities = await this.ExecuteQueryAsync(query, count);
 
             return entities;
+        }
+
+        /// <summary>
+        /// Insert or merge a batch of entities in Azure table storage.
+        /// A batch can contains up to 100 entities.
+        /// </summary>
+        /// <param name="entities">Entities to be inserted or merged in Azure table storage.</param>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task BatchInsertOrMergeAsync(IEnumerable<T> entities)
+        {
+            var array = entities.ToArray();
+            for (var i = 0; i <= array.Length / 100; i++)
+            {
+                var lowerBound = i * 100;
+                var upperBound = Math.Min(lowerBound + 99, array.Length - 1);
+                if (lowerBound > upperBound)
+                {
+                    break;
+                }
+
+                var batchOperation = new TableBatchOperation();
+                for (var j = lowerBound; j <= upperBound; j++)
+                {
+                    batchOperation.InsertOrMerge(array[j]);
+                }
+
+                await this.Table.ExecuteBatchAsync(batchOperation);
+            }
+        }
+
+        /// <summary>
+        /// Get a filter that filters in the entities matching the incoming row keys.
+        /// </summary>
+        /// <param name="rowKeys">Row keys.</param>
+        /// <returns>A filter that filters in the entities matching the incoming row keys.</returns>
+        protected string GetRowKeysFilter(IEnumerable<string> rowKeys)
+        {
+            var rowKeysFilter = string.Empty;
+            foreach (var rowKey in rowKeys)
+            {
+                var singleRowKeyFilter = TableQuery.GenerateFilterCondition(
+                    nameof(TableEntity.RowKey),
+                    QueryComparisons.Equal,
+                    rowKey);
+
+                if (string.IsNullOrWhiteSpace(rowKeysFilter))
+                {
+                    rowKeysFilter = singleRowKeyFilter;
+                }
+                else
+                {
+                    rowKeysFilter = TableQuery.CombineFilters(rowKeysFilter, TableOperators.Or, singleRowKeyFilter);
+                }
+            }
+
+            return rowKeysFilter;
         }
 
         private string CombineFilters(string filter1, string filter2)
