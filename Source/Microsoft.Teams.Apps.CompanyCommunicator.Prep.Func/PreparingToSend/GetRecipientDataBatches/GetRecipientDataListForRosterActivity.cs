@@ -51,13 +51,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
         /// <param name="teamDataEntity">Team data entity.</param>
-        /// <param name="logger">Logging service.</param>
+        /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
             DurableOrchestrationContext context,
             string notificationDataEntityId,
             TeamDataEntity teamDataEntity,
-            ILogger logger)
+            ILogger log)
         {
             try
             {
@@ -77,7 +77,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                 stringBuilder.AppendLine(ex.Message);
                 var errorMessage = stringBuilder.ToString();
 
-                logger.LogError(errorMessage);
+                log.LogError(errorMessage);
 
                 await this.notificationDataRepository
                     .SaveWarningInNotificationDataEntityAsync(notificationDataEntityId, errorMessage);
