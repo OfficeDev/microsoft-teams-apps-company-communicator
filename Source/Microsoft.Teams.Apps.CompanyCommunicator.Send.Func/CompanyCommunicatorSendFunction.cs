@@ -31,6 +31,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     {
         private const string SendQueueName = "company-communicator-send";
 
+        /// <summary>
+        /// This is set to 10 because the default maximum delivery count from the service bus
+        /// message queue before the service bus will automatically put the message in the Dead Letter
+        /// Queue is 10.
+        /// </summary>
         private static readonly int MaxDeliveryCountForDeadLetter = 10;
 
         private static HttpClient httpClient = null;

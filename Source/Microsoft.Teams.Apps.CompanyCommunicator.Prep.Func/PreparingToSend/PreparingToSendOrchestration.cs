@@ -70,47 +70,47 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// which kicks of the preparing to send process.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
-        /// <param name="logger">Logging service.</param>
+        /// <param name="log">Logging service.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(nameof(PrepareToSendOrchestrationAsync))]
         public async Task PrepareToSendOrchestrationAsync(
             [OrchestrationTrigger] DurableOrchestrationContext context,
-            ILogger logger)
+            ILogger log)
         {
             var notificationDataEntity = context.GetInput<NotificationDataEntity>();
 
             if (!context.IsReplaying)
             {
-                logger.LogCritical($"Start to prepare to send the notification {notificationDataEntity.Id}!");
+                log.LogCritical($"Start to prepare to send the notification {notificationDataEntity.Id}!");
             }
 
             try
             {
                 if (!context.IsReplaying)
                 {
-                    logger.LogCritical("Get recipient batches.");
+                    log.LogCritical("Get recipient batches.");
                 }
 
                 var recipientDataBatches =
-                    await this.GetRecipientDataBatchesAsync(context, notificationDataEntity, logger);
+                    await this.GetRecipientDataBatchesAsync(context, notificationDataEntity, log);
 
                 if (!context.IsReplaying)
                 {
-                    logger.LogCritical("Prepare adaptive card.");
+                    log.LogCritical("Prepare adaptive card.");
                 }
 
                 await this.createSendingNotificationActivity.RunAsync(context, notificationDataEntity);
 
                 if (!context.IsReplaying)
                 {
-                    logger.LogCritical("Send triggers to the send function.");
+                    log.LogCritical("Send triggers to the send function.");
                 }
 
-                await this.SendTriggersToSendFunctionAsync(context, notificationDataEntity.Id, recipientDataBatches, logger);
+                await this.SendTriggersToSendFunctionAsync(context, notificationDataEntity.Id, recipientDataBatches, log);
 
                 if (!context.IsReplaying)
                 {
-                    logger.LogCritical("Send triggers to the data function.");
+                    log.LogCritical("Send triggers to the data function.");
                 }
 
                 if (!context.IsReplaying)
@@ -118,7 +118,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     await this.SetNotificationIsPreparingToSendAsComplete(notificationDataEntity.Id);
                 }
 
-                logger.LogCritical($"\"PREPARE TO SEND\" IS DONE SUCCESSFULLY FOR NOTIFICATION {notificationDataEntity.Id}!");
+                log.LogCritical($"\"PREPARE TO SEND\" IS DONE SUCCESSFULLY FOR NOTIFICATION {notificationDataEntity.Id}!");
             }
             catch (Exception ex)
             {
@@ -136,12 +136,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// </summary>
         /// <param name="context">Orchestration context.</param>
         /// <param name="notificationDataEntity">A notification data entity.</param>
-        /// <param name="logger">The logger.</param>
+        /// <param name="log">The logging service.</param>
         /// <returns>The batches of recipients to be added to the send queue.</returns>
         private async Task<IEnumerable<IEnumerable<UserDataEntity>>> GetRecipientDataBatchesAsync(
             DurableOrchestrationContext context,
             NotificationDataEntity notificationDataEntity,
-            ILogger logger)
+            ILogger log)
         {
             var recipientType = string.Empty;
             if (notificationDataEntity.AllUsers)
@@ -152,7 +152,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             else if (notificationDataEntity.Rosters.Count() != 0)
             {
                 recipientType = "Rosters";
-                await this.GetRecipientDataListForRostersAsync(context, notificationDataEntity, logger);
+                await this.GetRecipientDataListForRostersAsync(context, notificationDataEntity, log);
             }
             else if (notificationDataEntity.Teams.Count() != 0)
             {
@@ -162,13 +162,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             else
             {
                 recipientType = "No recipient type was defined";
-                this.Log(context, logger, notificationDataEntity.Id, recipientType);
+                this.Log(context, log, notificationDataEntity.Id, recipientType);
                 return null;
             }
 
             var recipientDataBatches = await this.processRecipientDataListActivity.RunAsync(context, notificationDataEntity.Id);
 
-            this.Log(context, logger, notificationDataEntity.Id, recipientType, recipientDataBatches.SelectMany(p => p));
+            this.Log(context, log, notificationDataEntity.Id, recipientType, recipientDataBatches.SelectMany(p => p));
 
             return recipientDataBatches;
         }
@@ -179,12 +179,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="notificationDataEntity">Notification data entity.</param>
-        /// <param name="logger">Logging service.</param>
+        /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task GetRecipientDataListForRostersAsync(
             DurableOrchestrationContext context,
             NotificationDataEntity notificationDataEntity,
-            ILogger logger)
+            ILogger log)
         {
             var teamDataEntityList =
                 await this.getTeamDataEntitiesByIdsActivity.RunAsync(context, notificationDataEntity);
@@ -196,7 +196,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     context,
                     notificationDataEntity.Id,
                     teamDataEntity,
-                    logger);
+                    log);
 
                 tasks.Add(task);
             }
@@ -205,15 +205,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         }
 
         /// <summary>
-        /// Send triggers to Azure send function.
-        /// It uses Fan-out / Fan-in pattern to send batch triggers in parallel to Azure send function.
+        /// Sends triggers to the Azure send function.
+        /// It uses Fan-out / Fan-in pattern to send batch triggers in parallel to the Azure send function.
         /// </summary>
+        /// <param name="context">Orchestration context.</param>
+        /// <param name="notificationDataEntityId">Notification data entity ID.</param>
+        /// <param name="recipientDataBatches">Recipient data batches.</param>
+        /// <param name="log">The logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendTriggersToSendFunctionAsync(
             DurableOrchestrationContext context,
             string notificationDataEntityId,
             IEnumerable<IEnumerable<UserDataEntity>> recipientDataBatches,
-            ILogger logger)
+            ILogger log)
         {
             var totalBatches = recipientDataBatches.Count();
             var processedBatches = 0;
@@ -223,7 +227,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             {
                 if (!context.IsReplaying)
                 {
-                    logger.LogCritical($"{++processedBatches} / {totalBatches}");
+                    log.LogCritical($"{++processedBatches} / {totalBatches}");
                 }
 
                 var task = this.sendTriggersToSendFunctionActivity.RunAsync(
@@ -260,13 +264,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// Log information if the context is not replaying.
         /// </summary>
         /// <param name="context">Orchestration context.</param>
-        /// <param name="logger">The logger.</param>
+        /// <param name="log">The logging service.</param>
         /// <param name="notificationDataEntityId">A notification data entity's ID.</param>
         /// <param name="recipientType">The recipient type.</param>
         /// <param name="recipientDataList">The recipient data list.</param>
         private void Log(
             DurableOrchestrationContext context,
-            ILogger logger,
+            ILogger log,
             string notificationDataEntityId,
             string recipientType,
             IEnumerable<UserDataEntity> recipientDataList = null)
@@ -278,7 +282,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
             var countMessage = recipientDataList != null ? $"Count: {recipientDataList.Count()}" : string.Empty;
             var message = $"Notification id:{notificationDataEntityId}. Recipient option: {recipientType}. {countMessage}";
-            logger.LogInformation(message);
+            log.LogInformation(message);
         }
     }
 }
