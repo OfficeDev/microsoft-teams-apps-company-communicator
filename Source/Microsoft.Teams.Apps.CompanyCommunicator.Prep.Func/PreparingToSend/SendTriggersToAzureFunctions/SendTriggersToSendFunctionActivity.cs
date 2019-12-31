@@ -58,9 +58,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
         }
 
         /// <summary>
-        /// This method represents the  "send triggers to Azure service bus" activity.
-        /// It sends trigger to the Azure send function.
-        /// It sends trigger for recipients whose status is 0 only.
+        /// This method represents the "send triggers to Azure service bus" activity.
+        /// It sends triggers to the Azure send function.
         /// </summary>
         /// <param name="input">Input value.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
@@ -80,9 +79,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
                     })
                 .Where(sendQueueMessageContent => sendQueueMessageContent != null);
 
-            var stopwatch = Stopwatch.StartNew();
             await this.sendMessageQueue.SendAsync(sendQueueMessageContentBatch);
-            stopwatch.Stop();
         }
     }
 }

@@ -54,7 +54,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<GetRecipientDataListForTeamsActivity>();
             builder.Services.AddTransient<CreateSendingNotificationActivity>();
             builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
-            builder.Services.AddTransient<SendTriggerToDataFunctionActivity>();
             builder.Services.AddTransient<ProcessRecipientDataListActivity>();
             builder.Services.AddTransient<HandleFailureActivity>();
         }

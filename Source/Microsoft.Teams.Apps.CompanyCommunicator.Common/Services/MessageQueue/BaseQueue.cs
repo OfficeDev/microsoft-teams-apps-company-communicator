@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
 {
     using System;
     using System.Collections.Generic;
@@ -20,8 +20,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
     /// <typeparam name="T">Queue message class type.</typeparam>
     public class BaseQueue<T>
     {
+        /// <summary>
+        /// The maximum number of messages that can be in one batch request to the service bus queue.
+        /// </summary>
+        public static readonly int MaxNumberOfMessagesInBatchRequest = 100;
+
         private static readonly string ServiceBusConnectionConfigurationSettingKey = "ServiceBusConnection";
         private static readonly string SendDelayedRetryNumberOfMinutesConfigurationSettingKey = "SendDelayedRetryNumberOfMinutes";
+        private static readonly int DefaultDelayedRetryNumberOfMinutes = 11;
         private readonly IConfiguration configuration;
         private readonly MessageSender messageSender;
 
@@ -58,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task SendAsync(IEnumerable<T> queueMessageContentBatch)
         {
-            if (queueMessageContentBatch.Count() > 100)
+            if (queueMessageContentBatch.Count() > BaseQueue<T>.MaxNumberOfMessagesInBatchRequest)
             {
                 throw new InvalidOperationException("Exceeded maximum Azure service bus message batch size.");
             }
@@ -91,7 +97,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
                 this.configuration[BaseQueue<T>.SendDelayedRetryNumberOfMinutesConfigurationSettingKey],
                 out sendDelayedRetryNumberOfMinutes))
             {
-                sendDelayedRetryNumberOfMinutes = 11;
+                sendDelayedRetryNumberOfMinutes = BaseQueue<T>.DefaultDelayedRetryNumberOfMinutes;
             }
 
             var messageBody = JsonConvert.SerializeObject(queueMessageContent);
