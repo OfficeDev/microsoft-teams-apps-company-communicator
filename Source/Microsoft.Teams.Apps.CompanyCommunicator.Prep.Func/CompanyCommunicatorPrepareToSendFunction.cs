@@ -20,8 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     /// </summary>
     public class CompanyCommunicatorPrepareToSendFunction
     {
-        private const string QueueName = "company-communicator-preparetosend";
-        private const string ConnectionName = "ServiceBusConnection";
+        private const string ServiceBusConnectionConfigKey = "ServiceBusConnection";
         private readonly NotificationDataRepository notificationDataRepository;
 
         /// <summary>
@@ -46,8 +45,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
         [FunctionName("CompanyCommunicatorPrepareToSendFunction")]
         public async Task Run(
             [ServiceBusTrigger(
-                CompanyCommunicatorPrepareToSendFunction.QueueName,
-                Connection = CompanyCommunicatorPrepareToSendFunction.ConnectionName)]
+                PrepareToSendQueue.QueueName,
+                Connection = CompanyCommunicatorPrepareToSendFunction.ServiceBusConnectionConfigKey)]
             string myQueueItem,
             Message message,
             MessageReceiver messageReceiver,

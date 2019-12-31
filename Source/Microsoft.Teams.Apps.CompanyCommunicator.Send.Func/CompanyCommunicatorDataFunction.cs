@@ -25,6 +25,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     /// </summary>
     public class CompanyCommunicatorDataFunction
     {
+        private const string ServiceBusConnectionConfigKey = "ServiceBusConnection";
+
         private static SentNotificationDataRepository sentNotificationDataRepository = null;
 
         private static NotificationDataRepository notificationDataRepository = null;
