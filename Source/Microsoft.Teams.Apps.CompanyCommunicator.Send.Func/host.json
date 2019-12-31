@@ -5,11 +5,6 @@
       "messageHandlerOptions": {
         "maxConcurrentCalls": 40
       }
-    },
-    "durableTask": {
-      "hubName": "MyTaskHub",
-      "controlQueueVisibilityTimeout": "00:02:00",
-      "workItemQueueVisibilityTimeout": "00:02:00"
     }
   },
   "logging": {
@@ -17,13 +12,6 @@
       "samplingSettings": {
         "isEnabled": false
       }
-    },
-    "fileLoggingMode": "always",
-    "logLevel": {
-      "default": "Information",
-      "Host": "Error",
-      "Function": "Information",
-      "Host.Aggregator": "Information"
     }
   }
 }
