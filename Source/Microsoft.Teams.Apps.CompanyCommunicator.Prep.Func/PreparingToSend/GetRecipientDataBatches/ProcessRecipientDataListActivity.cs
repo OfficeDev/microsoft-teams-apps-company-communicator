@@ -13,6 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
 
     /// <summary>
     /// This class contains the "process recipient data list" durable activity.
@@ -116,7 +117,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             var recipientDataBatches = new List<List<UserDataEntity>>();
 
             var totalNumberOfRecipients = recipientDataList.Count;
-            var batchSize = 100;
+
+            // Use the SendQueue's maximum number of messages in a batch request number because
+            // the list is being broken into batches in order to be added to that queue.
+            var batchSize = SendQueue.MaxNumberOfMessagesInBatchRequest;
             var numberOfCompleteBatches = totalNumberOfRecipients / batchSize;
             var numberRecipientsInIncompleteBatch = totalNumberOfRecipients % batchSize;
 
