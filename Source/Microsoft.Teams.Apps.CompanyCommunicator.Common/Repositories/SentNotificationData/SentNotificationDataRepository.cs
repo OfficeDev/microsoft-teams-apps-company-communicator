@@ -58,6 +58,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
             string notificationDataEntityId,
             IEnumerable<UserDataEntity> recipientDataBatch)
         {
+            // Create the SentNotificationDataEntity from the incoming UserDataEntity.
             var sentNotificationDataEntities = recipientDataBatch
                 .Select(p =>
                     new SentNotificationDataEntity
