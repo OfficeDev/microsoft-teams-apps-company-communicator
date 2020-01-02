@@ -64,6 +64,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public async Task SendAsync(IEnumerable<T> queueMessageContentBatch)
         {
+            // Check that the number of messages to add to the queue in the batch request is not
+            // more than the maximum allowed.
             if (queueMessageContentBatch.Count() > BaseQueue<T>.MaxNumberOfMessagesInBatchRequest)
             {
                 throw new InvalidOperationException("Exceeded maximum Azure service bus message batch size.");
