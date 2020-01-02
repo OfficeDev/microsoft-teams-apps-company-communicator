@@ -21,6 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -29,8 +30,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     /// </summary>
     public class CompanyCommunicatorSendFunction
     {
-        private const string SendQueueName = "company-communicator-send";
-
+        /// <summary>
+        /// This is set to 10 because the default maximum delivery count from the service bus
+        /// message queue before the service bus will automatically put the message in the Dead Letter
+        /// Queue is 10.
+        /// </summary>
         private static readonly int MaxDeliveryCountForDeadLetter = 10;
 
         private static HttpClient httpClient = null;
@@ -64,7 +68,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName("CompanyCommunicatorSendFunction")]
         public async Task Run(
-            [ServiceBusTrigger(CompanyCommunicatorSendFunction.SendQueueName, Connection = "ServiceBusConnection")]
+            [ServiceBusTrigger(
+                SendQueue.QueueName,
+                Connection = SendQueue.ServiceBusConnectionConfigurationKey)]
             string myQueueItem,
             int deliveryCount,
             DateTime enqueuedTimeUtc,
@@ -98,16 +104,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     ?? new HttpClient();
 
                 CompanyCommunicatorSendFunction.userDataRepository = CompanyCommunicatorSendFunction.userDataRepository
-                    ?? new UserDataRepository(CompanyCommunicatorSendFunction.configuration, isFromAzureFunction: true);
+                    ?? new UserDataRepository(CompanyCommunicatorSendFunction.configuration, new RepositoryOptions { IsAzureFunction = true });
 
                 CompanyCommunicatorSendFunction.sendingNotificationDataRepository = CompanyCommunicatorSendFunction.sendingNotificationDataRepository
-                    ?? new SendingNotificationDataRepository(CompanyCommunicatorSendFunction.configuration, isFromAzureFunction: true);
+                    ?? new SendingNotificationDataRepository(CompanyCommunicatorSendFunction.configuration, new RepositoryOptions { IsAzureFunction = true });
 
                 CompanyCommunicatorSendFunction.globalSendingNotificationDataRepository = CompanyCommunicatorSendFunction.globalSendingNotificationDataRepository
                     ?? new GlobalSendingNotificationDataRepository(CompanyCommunicatorSendFunction.configuration, isFromAzureFunction: true);
 
                 CompanyCommunicatorSendFunction.sentNotificationDataRepository = CompanyCommunicatorSendFunction.sentNotificationDataRepository
-                    ?? new SentNotificationDataRepository(CompanyCommunicatorSendFunction.configuration, isFromAzureFunction: true);
+                    ?? new SentNotificationDataRepository(CompanyCommunicatorSendFunction.configuration, new RepositoryOptions { IsAzureFunction = true });
 
                 if (CompanyCommunicatorSendFunction.botAccessToken == null
                     || CompanyCommunicatorSendFunction.botAccessTokenExpiration == null
@@ -117,7 +123,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 }
 
                 CompanyCommunicatorSendFunction.sendQueueServiceBusMessageSender = CompanyCommunicatorSendFunction.sendQueueServiceBusMessageSender
-                    ?? new MessageSender(CompanyCommunicatorSendFunction.configuration["ServiceBusConnection"], CompanyCommunicatorSendFunction.SendQueueName);
+                    ?? new MessageSender(
+                        CompanyCommunicatorSendFunction.configuration[SendQueue.ServiceBusConnectionConfigurationKey],
+                        SendQueue.QueueName);
 
                 var getActiveNotificationEntityTask = CompanyCommunicatorSendFunction.sendingNotificationDataRepository.GetAsync(
                     PartitionKeyNames.NotificationDataTable.SendingNotificationsPartition,
