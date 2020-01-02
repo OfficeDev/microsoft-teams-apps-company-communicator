@@ -21,13 +21,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
     public class BaseQueue<T>
     {
         /// <summary>
+        /// Constant for the service bus connection configuration key.
+        /// </summary>
+        public const string ServiceBusConnectionConfigurationKey = "ServiceBusConnection";
+
+        /// <summary>
         /// The maximum number of messages that can be in one batch request to the service bus queue.
         /// </summary>
         public static readonly int MaxNumberOfMessagesInBatchRequest = 100;
 
-        private static readonly string ServiceBusConnectionConfigurationSettingKey = "ServiceBusConnection";
-        private static readonly string SendDelayedRetryNumberOfMinutesConfigurationSettingKey = "SendDelayedRetryNumberOfMinutes";
-        private static readonly int DefaultDelayedRetryNumberOfMinutes = 11;
         private readonly IConfiguration configuration;
         private readonly MessageSender messageSender;
 
@@ -40,7 +42,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
         {
             this.configuration = configuration;
             var serviceBusConnectionString =
-                configuration[BaseQueue<T>.ServiceBusConnectionConfigurationSettingKey];
+                configuration[BaseQueue<T>.ServiceBusConnectionConfigurationKey];
             this.messageSender = new MessageSender(serviceBusConnectionString, queueName);
         }
 
@@ -85,27 +87,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
         }
 
         /// <summary>
-        /// Send a delayed message to the Azure service bus queue. Delay time is configured in
-        /// the configuration settings.
+        /// Send a delayed message to the Azure service bus queue.
         /// </summary>
         /// <param name="queueMessageContent">Content of the message to be sent.</param>
+        /// <param name="delayNumberOfMinues">Number of minutes to delay the sending of the message.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task SendDelayedRetryAsync(T queueMessageContent)
+        public async Task SendDelayedAsync(T queueMessageContent, int delayNumberOfMinues)
         {
-            // Simply initialize the variable for certain build environments and versions
-            var sendDelayedRetryNumberOfMinutes = 0;
-
-            // If parsing fails, out variable is set to 0, so need to set the default
-            if (!int.TryParse(
-                this.configuration[BaseQueue<T>.SendDelayedRetryNumberOfMinutesConfigurationSettingKey],
-                out sendDelayedRetryNumberOfMinutes))
-            {
-                sendDelayedRetryNumberOfMinutes = BaseQueue<T>.DefaultDelayedRetryNumberOfMinutes;
-            }
-
             var messageBody = JsonConvert.SerializeObject(queueMessageContent);
             var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));
-            serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromMinutes(sendDelayedRetryNumberOfMinutes);
+            serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromMinutes(delayNumberOfMinues);
 
             await this.messageSender.SendAsync(serviceBusMessage);
         }
