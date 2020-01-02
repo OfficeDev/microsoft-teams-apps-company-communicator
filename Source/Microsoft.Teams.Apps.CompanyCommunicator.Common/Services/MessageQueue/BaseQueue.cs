@@ -71,6 +71,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
                 throw new InvalidOperationException("Exceeded maximum Azure service bus message batch size.");
             }
 
+            // Create batch list of messages to add to the queue.
             var serviceBusMessages = queueMessageContentBatch
                 .Select(queueMessageContent =>
                     {
