@@ -15,6 +15,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenService;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationService;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationService;
 
     /// <summary>
     /// Register services in DI container of the Azure functions system.
@@ -45,6 +48,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             builder.Services.AddSingleton<SendQueue>();
             builder.Services.AddSingleton<DataQueue>();
+
+            builder.Services.AddTransient<BotAccessTokenService>();
+            builder.Services.AddTransient<ConversationService>();
+            builder.Services.AddTransient<NotificationService>();
         }
     }
 }
