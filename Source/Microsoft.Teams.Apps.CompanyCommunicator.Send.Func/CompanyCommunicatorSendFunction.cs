@@ -5,13 +5,10 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
     using System;
-    using System.Collections.Generic;
     using System.Net;
     using System.Net.Http;
-    using System.Net.Http.Headers;
     using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Configuration;
@@ -21,6 +18,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenService;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationService;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationService;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -48,6 +48,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly SendQueue sendQueue;
         private readonly DataQueue dataQueue;
+        private readonly BotAccessTokenService botAccessTokenService;
+        private readonly ConversationService conversationService;
+        private readonly NotificationService notificationService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorSendFunction"/> class.
@@ -60,6 +63,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
         /// <param name="sendQueue">The send queue.</param>
         /// <param name="dataQueue">The data queue.</param>
+        /// <param name="botAccessTokenService">The bot access token service.</param>
+        /// <param name="conversationService">The conversation service.</param>
+        /// <param name="notificationService">The notification service.</param>
         public CompanyCommunicatorSendFunction(
             IConfiguration configuration,
             HttpClient httpClient,
@@ -68,7 +74,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             UserDataRepository userDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository,
             SendQueue sendQueue,
-            DataQueue dataQueue)
+            DataQueue dataQueue,
+            BotAccessTokenService botAccessTokenService,
+            ConversationService conversationService,
+            NotificationService notificationService)
         {
             this.configuration = configuration;
             this.httpClient = httpClient;
@@ -78,6 +87,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.sentNotificationDataRepository = sentNotificationDataRepository;
             this.sendQueue = sendQueue;
             this.dataQueue = dataQueue;
+            this.botAccessTokenService = botAccessTokenService;
+            this.conversationService = conversationService;
+            this.notificationService = notificationService;
         }
 
         /// <summary>
@@ -119,7 +131,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     || CompanyCommunicatorSendFunction.botAccessTokenExpiration == null
                     || DateTime.UtcNow > CompanyCommunicatorSendFunction.botAccessTokenExpiration)
                 {
-                    await this.FetchTokenAsync(this.configuration, this.httpClient);
+                    var botAccessTokenServiceResponse = await this.botAccessTokenService.FetchBotAccessTokenAsync();
+                    CompanyCommunicatorSendFunction.botAccessToken = botAccessTokenServiceResponse.BotAccessToken;
+                    CompanyCommunicatorSendFunction.botAccessTokenExpiration = botAccessTokenServiceResponse.BotAccessTokenExpiration;
                 }
 
                 // Fetch the current sending notification. This is where data about what is being sent is stored.
@@ -188,9 +202,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         incomingUserDataEntity.PartitionKey = PartitionKeyNames.UserDataTable.UserDataPartition;
                         incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
 
-                        var operation = TableOperation.InsertOrMerge(incomingUserDataEntity);
-
-                        saveUserDataEntityTask = this.userDataRepository.Table.ExecuteAsync(operation);
+                        // It is possible that the incoming user data has more information than what is currently
+                        // stored in the user data repository, so save/update that user's information.
+                        saveUserDataEntityTask = this.userDataRepository.InsertOrMergeAsync(incomingUserDataEntity);
                     }
                 }
                 else
@@ -202,177 +216,96 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                      * conversationId needs to be stored for that user.
                      */
 
-                    var isCreateConversationThrottled = false;
+                    var createConversationResponse = await this.conversationService.CreateUserConversationAsync(
+                        incomingUserDataEntity,
+                        CompanyCommunicatorSendFunction.botAccessToken,
+                        maxNumberOfAttempts);
 
-                    // Loop through attempts to try and create the conversation for the user.
-                    for (int i = 0; i < maxNumberOfAttempts; i++)
+                    totalNumberOfThrottles += createConversationResponse.NumberOfThrottleResponses;
+
+                    if (createConversationResponse.ResultType == CreateConversationResultType.Succeeded)
                     {
-                        // Send a POST request to the correct URL with a valid access token and the
-                        // correct message body.
-                        var createConversationUrl = $"{incomingUserDataEntity.ServiceUrl}v3/conversations";
-                        using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, createConversationUrl))
-                        {
-                            requestMessage.Headers.Authorization = new AuthenticationHeaderValue(
-                                "Bearer",
-                                CompanyCommunicatorSendFunction.botAccessToken);
+                        conversationId = createConversationResponse.ConversationId;
 
-                            var payloadString = "{\"bot\": { \"id\": \"28:" + this.configuration["MicrosoftAppId"] + "\"},\"isGroup\": false, \"tenantId\": \"" + incomingUserDataEntity.TenantId + "\", \"members\": [{\"id\": \"" + incomingUserDataEntity.UserId + "\"}]}";
-                            requestMessage.Content = new StringContent(payloadString, Encoding.UTF8, "application/json");
+                        incomingUserDataEntity.PartitionKey = PartitionKeyNames.UserDataTable.UserDataPartition;
+                        incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
+                        incomingUserDataEntity.ConversationId = conversationId;
 
-                            using (var sendResponse = await this.httpClient.SendAsync(requestMessage))
-                            {
-                                // If the conversation was created successfully, parse out the conversationId,
-                                // store it for that user in the user data repository and place that
-                                // conversationId for use when sending the notification to the user.
-                                if (sendResponse.StatusCode == HttpStatusCode.Created)
-                                {
-                                    var jsonResponseString = await sendResponse.Content.ReadAsStringAsync();
-                                    dynamic resp = JsonConvert.DeserializeObject(jsonResponseString);
-
-                                    incomingUserDataEntity.PartitionKey = PartitionKeyNames.UserDataTable.UserDataPartition;
-                                    incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
-                                    incomingUserDataEntity.ConversationId = resp.id;
-
-                                    var operation = TableOperation.InsertOrMerge(incomingUserDataEntity);
-
-                                    saveUserDataEntityTask = this.userDataRepository.Table.ExecuteAsync(operation);
-
-                                    isCreateConversationThrottled = false;
-
-                                    break;
-                                }
-                                else if (sendResponse.StatusCode == HttpStatusCode.TooManyRequests)
-                                {
-                                    // If the request was throttled, set the flag for if the maximum number of attempts
-                                    // is reached, increment the count of the number of throttles to be stored
-                                    // later, and if the maximum number of throttles has not been reached, delay
-                                    // for a bit of time to attempt the request again.
-                                    isCreateConversationThrottled = true;
-
-                                    totalNumberOfThrottles++;
-
-                                    // Do not delay if already attempted the maximum number of attempts.
-                                    if (i != maxNumberOfAttempts - 1)
-                                    {
-                                        var random = new Random();
-                                        await Task.Delay(random.Next(500, 1500));
-                                    }
-                                }
-                                else
-                                {
-                                    // If in this block, then an error has occurred with the service.
-                                    // Save the relevant information and do not attempt the request again.
-                                    await this.SaveSentNotificationData(
-                                        messageContent.NotificationId,
-                                        incomingUserDataEntity.AadId,
-                                        totalNumberOfThrottles,
-                                        isStatusCodeFromCreateConversation: true,
-                                        statusCode: sendResponse.StatusCode);
-
-                                    return;
-                                }
-                            }
-                        }
+                        saveUserDataEntityTask = this.userDataRepository.InsertOrMergeAsync(incomingUserDataEntity);
                     }
-
-                    // If the request was attempted the maximum number of attempts and received
-                    // all throttling responses, then set the overall delay time for the system so all
-                    // other calls will be delayed and add the message back to the queue with a delay to be
-                    // attempted later.
-                    if (isCreateConversationThrottled)
+                    else if (createConversationResponse.ResultType == CreateConversationResultType.Throttled)
                     {
+                        // If the request was attempted the maximum number of attempts and received
+                        // all throttling responses, then set the overall delay time for the system so all
+                        // other calls will be delayed and add the message back to the queue with a delay to be
+                        // attempted later.
                         await this.SetDelayTimeAndSendDelayedRetry(this.configuration, messageContent);
+
+                        return;
+                    }
+                    else if (createConversationResponse.ResultType == CreateConversationResultType.Failed)
+                    {
+                        // If the create conversation call failed, save the result, do not attempt the
+                        // request again, and end the function.
+                        await this.SaveSentNotificationData(
+                            messageContent.NotificationId,
+                            incomingUserDataEntity.AadId,
+                            totalNumberOfThrottles,
+                            isStatusCodeFromCreateConversation: true,
+                            statusCode: createConversationResponse.StatusCode);
 
                         return;
                     }
                 }
 
-                var isSendMessageThrottled = false;
+                // Now that all of the necessary information is known, send the notification.
+                var sendNotificationResponse = await this.notificationService.SendNotificationAsync(
+                    activeNotificationEntity.Content,
+                    incomingUserDataEntity.ServiceUrl,
+                    conversationId,
+                    CompanyCommunicatorSendFunction.botAccessToken,
+                    maxNumberOfAttempts);
 
-                // At this point, the conversationId of where to send the message should be known.
-                // Loop through attempts to try and send the notification.
-                for (int i = 0; i < maxNumberOfAttempts; i++)
+                totalNumberOfThrottles += sendNotificationResponse.NumberOfThrottleResponses;
+
+                if (sendNotificationResponse.ResultType == SendNotificationResultType.Succeeded)
                 {
-                    // Send a POST request to the correct URL with a valid access token and the
-                    // correct message body.
-                    var conversationUrl = $"{incomingUserDataEntity.ServiceUrl}v3/conversations/{incomingUserDataEntity.ConversationId}/activities";
-                    using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, conversationUrl))
-                    {
-                        requestMessage.Headers.Authorization = new AuthenticationHeaderValue(
-                            "Bearer",
-                            CompanyCommunicatorSendFunction.botAccessToken);
+                    log.LogInformation("MESSAGE SENT SUCCESSFULLY");
 
-                        var attachmentJsonString = JsonConvert.DeserializeObject(activeNotificationEntity.Content);
-                        var messageString = "{ \"type\": \"message\", \"attachments\": [ { \"contentType\": \"application/vnd.microsoft.card.adaptive\", \"content\": " + attachmentJsonString + " } ] }";
-                        requestMessage.Content = new StringContent(messageString, Encoding.UTF8, "application/json");
-
-                        using (var sendResponse = await this.httpClient.SendAsync(requestMessage))
-                        {
-                            // If the notification was sent successfully, store the data about the
-                            // successful request.
-                            if (sendResponse.StatusCode == HttpStatusCode.Created)
-                            {
-                                log.LogInformation("MESSAGE SENT SUCCESSFULLY");
-
-                                saveSentNotificationDataTask = this.SaveSentNotificationData(
-                                    messageContent.NotificationId,
-                                    incomingUserDataEntity.AadId,
-                                    totalNumberOfThrottles,
-                                    isStatusCodeFromCreateConversation: false,
-                                    statusCode: sendResponse.StatusCode);
-
-                                isSendMessageThrottled = false;
-
-                                break;
-                            }
-                            else if (sendResponse.StatusCode == HttpStatusCode.TooManyRequests)
-                            {
-                                // If the request was throttled, set the flag for if the maximum number of attempts
-                                // is reached, increment the count of the number of throttles to be stored
-                                // later, and if the maximum number of throttles has not been reached, delay
-                                // for a bit of time to attempt the request again.
-                                log.LogError("MESSAGE THROTTLED");
-
-                                isSendMessageThrottled = true;
-
-                                totalNumberOfThrottles++;
-
-                                // Do not delay if already attempted the maximum number of attempts.
-                                if (i != maxNumberOfAttempts - 1)
-                                {
-                                    var random = new Random();
-                                    await Task.Delay(random.Next(500, 1500));
-                                }
-                            }
-                            else
-                            {
-                                // If in this block, then an error has occurred with the service.
-                                // Save the relevant information and do not attempt the request again.
-                                log.LogError($"MESSAGE FAILED: {sendResponse.StatusCode}");
-
-                                saveSentNotificationDataTask = this.SaveSentNotificationData(
-                                    messageContent.NotificationId,
-                                    incomingUserDataEntity.AadId,
-                                    totalNumberOfThrottles,
-                                    isStatusCodeFromCreateConversation: false,
-                                    statusCode: sendResponse.StatusCode);
-
-                                await Task.WhenAll(saveUserDataEntityTask, saveSentNotificationDataTask);
-
-                                return;
-                            }
-                        }
-                    }
+                    saveSentNotificationDataTask = this.SaveSentNotificationData(
+                        messageContent.NotificationId,
+                        incomingUserDataEntity.AadId,
+                        totalNumberOfThrottles,
+                        isStatusCodeFromCreateConversation: false,
+                        statusCode: sendNotificationResponse.StatusCode);
                 }
-
-                // If the request was attempted the maximum number of attempts and received
-                // all throttling responses, then set the overall delay time for the system so all
-                // other calls will be delayed and add the message back to the queue with a delay to be
-                // attempted later.
-                if (isSendMessageThrottled)
+                else if (sendNotificationResponse.ResultType == SendNotificationResultType.Throttled)
                 {
+                    // If the request was attempted the maximum number of attempts and received
+                    // all throttling responses, then set the overall delay time for the system so all
+                    // other calls will be delayed and add the message back to the queue with a delay to be
+                    // attempted later.
+                    log.LogError("MESSAGE THROTTLED");
+
+                    // NOTE: Here it does not immediately await this task and exit the function because a task
+                    // of saving updated user data with a newly created conversation ID may need to be awaited.
                     setDelayTimeAndSendDelayedRetryTask =
                         this.SetDelayTimeAndSendDelayedRetry(this.configuration, messageContent);
+                }
+                else if (sendNotificationResponse.ResultType == SendNotificationResultType.Failed)
+                {
+                    // If in this block, then an error has occurred with the service.
+                    // Save the relevant information and do not attempt the request again.
+                    log.LogError($"MESSAGE FAILED: {sendNotificationResponse.StatusCode}");
+
+                    // NOTE: Here it does not immediately await this task and exit the function because a task
+                    // of saving updated user data with a newly created conversation ID may need to be awaited.
+                    saveSentNotificationDataTask = this.SaveSentNotificationData(
+                        messageContent.NotificationId,
+                        incomingUserDataEntity.AadId,
+                        totalNumberOfThrottles,
+                        isStatusCodeFromCreateConversation: false,
+                        statusCode: sendNotificationResponse.StatusCode);
                 }
 
                 await Task.WhenAll(
@@ -443,48 +376,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Failed;
             }
 
-            var operation = TableOperation.InsertOrMerge(updatedSentNotificationDataEntity);
-
-            await this.sentNotificationDataRepository.Table.ExecuteAsync(operation);
-        }
-
-        private async Task FetchTokenAsync(
-            IConfiguration configuration,
-            HttpClient httpClient)
-        {
-            var values = new Dictionary<string, string>
-                {
-                    { "grant_type", "client_credentials" },
-                    { "client_id", configuration["MicrosoftAppId"] },
-                    { "client_secret", configuration["MicrosoftAppPassword"] },
-                    { "scope", "https://api.botframework.com/.default" },
-                };
-            var content = new FormUrlEncodedContent(values);
-
-            using (var tokenResponse = await httpClient.PostAsync("https://login.microsoftonline.com/botframework.com/oauth2/v2.0/token", content))
-            {
-                if (tokenResponse.StatusCode == HttpStatusCode.OK)
-                {
-                    var accessTokenContent = await tokenResponse.Content.ReadAsAsync<AccessTokenResponse>();
-
-                    CompanyCommunicatorSendFunction.botAccessToken = accessTokenContent.AccessToken;
-
-                    var expiresInSeconds = 121;
-
-                    // If parsing fails, out variable is set to 0, so need to set the default
-                    if (!int.TryParse(accessTokenContent.ExpiresIn, out expiresInSeconds))
-                    {
-                        expiresInSeconds = 121;
-                    }
-
-                    // Remove two minutes in order to have a buffer amount of time.
-                    CompanyCommunicatorSendFunction.botAccessTokenExpiration = DateTime.UtcNow + TimeSpan.FromSeconds(expiresInSeconds - 120);
-                }
-                else
-                {
-                    throw new Exception("Error fetching bot access token.");
-                }
-            }
+            await this.sentNotificationDataRepository.InsertOrMergeAsync(updatedSentNotificationDataEntity);
         }
 
         private async Task SetDelayTimeAndSendDelayedRetry(
@@ -529,21 +421,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             // This can be a team.id
             public UserDataEntity UserDataEntity { get; set; }
-        }
-
-        private class AccessTokenResponse
-        {
-            [JsonProperty("token_type")]
-            public string TokenType { get; set; }
-
-            [JsonProperty("expires_in")]
-            public string ExpiresIn { get; set; }
-
-            [JsonProperty("ext_expires_in")]
-            public string ExtExpiresIn { get; set; }
-
-            [JsonProperty("access_token")]
-            public string AccessToken { get; set; }
         }
     }
 }
