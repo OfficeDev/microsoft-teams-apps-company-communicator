@@ -354,39 +354,5 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 throw e;
             }
         }
-
-        private async Task SaveSentNotificationData(
-            string notificationId,
-            string aadId,
-            int totalNumberOfThrottles,
-            bool isStatusCodeFromCreateConversation,
-            HttpStatusCode statusCode)
-        {
-            var updatedSentNotificationDataEntity = new SentNotificationDataEntity
-            {
-                PartitionKey = notificationId,
-                RowKey = aadId,
-                AadId = aadId,
-                TotalNumberOfThrottles = totalNumberOfThrottles,
-                SentDate = DateTime.UtcNow,
-                IsStatusCodeFromCreateConversation = isStatusCodeFromCreateConversation,
-                StatusCode = (int)statusCode,
-            };
-
-            if (statusCode == HttpStatusCode.Created)
-            {
-                updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Succeeded;
-            }
-            else if (statusCode == HttpStatusCode.TooManyRequests)
-            {
-                updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Throttled;
-            }
-            else
-            {
-                updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Failed;
-            }
-
-            await this.sentNotificationDataRepository.InsertOrMergeAsync(updatedSentNotificationDataEntity);
-        }
     }
 }
