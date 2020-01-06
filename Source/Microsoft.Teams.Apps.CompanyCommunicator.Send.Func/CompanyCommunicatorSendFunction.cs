@@ -7,9 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using System;
     using System.Net;
     using System.Net.Http;
-    using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
@@ -20,6 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationService;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DelayedNotificationService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationService;
     using Newtonsoft.Json;
 
@@ -51,6 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly BotAccessTokenService botAccessTokenService;
         private readonly ConversationService conversationService;
         private readonly NotificationService notificationService;
+        private readonly DelayedNotificationService delayedNotificationService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorSendFunction"/> class.
@@ -66,6 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="botAccessTokenService">The bot access token service.</param>
         /// <param name="conversationService">The conversation service.</param>
         /// <param name="notificationService">The notification service.</param>
+        /// <param name="delayedNotificationService">The delayed notification service.</param>
         public CompanyCommunicatorSendFunction(
             IConfiguration configuration,
             HttpClient httpClient,
@@ -77,7 +78,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             DataQueue dataQueue,
             BotAccessTokenService botAccessTokenService,
             ConversationService conversationService,
-            NotificationService notificationService)
+            NotificationService notificationService,
+            DelayedNotificationService delayedNotificationService)
         {
             this.configuration = configuration;
             this.httpClient = httpClient;
@@ -90,6 +92,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.botAccessTokenService = botAccessTokenService;
             this.conversationService = conversationService;
             this.notificationService = notificationService;
+            this.delayedNotificationService = delayedNotificationService;
         }
 
         /// <summary>
@@ -117,7 +120,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         {
             log.LogInformation($"C# ServiceBus queue trigger function processed message: {myQueueItem}");
 
-            var messageContent = JsonConvert.DeserializeObject<ServiceBusSendQueueMessageContent>(myQueueItem);
+            var messageContent = JsonConvert.DeserializeObject<SendQueueMessageContent>(myQueueItem);
 
             var totalNumberOfThrottles = 0;
 
@@ -125,6 +128,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             {
                 // If the configuration value is not set, set the default to 1.
                 var maxNumberOfAttempts = this.configuration.GetValue<int>("MaxNumberOfAttempts", 1);
+
+                // If the configuration value is not set, set the default to 11.
+                var sendRetryDelayNumberOfMinutes = this.configuration.GetValue<int>("SendRetryDelayNumberOfMinutes", 11);
 
                 // Check the shared access token. If it is not present or is invalid, then fetch a new one.
                 if (CompanyCommunicatorSendFunction.botAccessToken == null
@@ -173,14 +179,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 // Initiate tasks that will be run in parallel if the step is required.
                 Task saveUserDataEntityTask = Task.CompletedTask;
                 Task saveSentNotificationDataTask = Task.CompletedTask;
-                Task setDelayTimeAndSendDelayedRetryTask = Task.CompletedTask;
+                Task setGlobalDelayTimeAndSendDelayedRetryTask = Task.CompletedTask;
 
                 // If the overall system is in a throttled state and needs to be delayed,
                 // add the message back on the queue with a delay.
                 if (globalSendingNotificationDataEntity?.SendRetryDelayTime != null
                     && DateTime.UtcNow < globalSendingNotificationDataEntity.SendRetryDelayTime)
                 {
-                    await this.SendDelayedRetryOfMessageToSendFunction(this.configuration, messageContent);
+                    await this.sendQueue.SendDelayedAsync(messageContent, sendRetryDelayNumberOfMinutes);
 
                     return;
                 }
@@ -239,7 +245,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         // all throttling responses, then set the overall delay time for the system so all
                         // other calls will be delayed and add the message back to the queue with a delay to be
                         // attempted later.
-                        await this.SetDelayTimeAndSendDelayedRetry(this.configuration, messageContent);
+                        await this.delayedNotificationService.SetGlobalDelayTimeAndSendDelayedRetryAsync(
+                            sendRetryDelayNumberOfMinutes,
+                            messageContent);
 
                         return;
                     }
@@ -289,8 +297,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                     // NOTE: Here it does not immediately await this task and exit the function because a task
                     // of saving updated user data with a newly created conversation ID may need to be awaited.
-                    setDelayTimeAndSendDelayedRetryTask =
-                        this.SetDelayTimeAndSendDelayedRetry(this.configuration, messageContent);
+                    setGlobalDelayTimeAndSendDelayedRetryTask = this.delayedNotificationService
+                        .SetGlobalDelayTimeAndSendDelayedRetryAsync(
+                            sendRetryDelayNumberOfMinutes,
+                            messageContent);
                 }
                 else if (sendNotificationResponse.ResultType == SendNotificationResultType.Failed)
                 {
@@ -311,7 +321,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 await Task.WhenAll(
                     saveUserDataEntityTask,
                     saveSentNotificationDataTask,
-                    setDelayTimeAndSendDelayedRetryTask);
+                    setGlobalDelayTimeAndSendDelayedRetryTask);
             }
             catch (Exception e)
             {
@@ -377,50 +387,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             }
 
             await this.sentNotificationDataRepository.InsertOrMergeAsync(updatedSentNotificationDataEntity);
-        }
-
-        private async Task SetDelayTimeAndSendDelayedRetry(
-            IConfiguration configuration,
-            ServiceBusSendQueueMessageContent queueMessageContent)
-        {
-            // If the configuration value is not set, set the default to 11.
-            var sendRetryDelayNumberOfMinutes = configuration.GetValue<int>("SendRetryDelayNumberOfMinutes", 11);
-
-            // Shorten this time by 15 seconds to ensure that when the delayed retry message is taken off of the queue
-            // the Send Retry Delay Time will be earlier and will not block it
-            var sendRetryDelayTime = DateTime.UtcNow + TimeSpan.FromMinutes(sendRetryDelayNumberOfMinutes - 0.25);
-
-            var globalSendingNotificationDataEntity = new GlobalSendingNotificationDataEntity
-            {
-                SendRetryDelayTime = sendRetryDelayTime,
-            };
-
-            await this.globalSendingNotificationDataRepository
-                .SetGlobalSendingNotificationDataEntity(globalSendingNotificationDataEntity);
-
-            await this.SendDelayedRetryOfMessageToSendFunction(configuration, queueMessageContent);
-        }
-
-        private async Task SendDelayedRetryOfMessageToSendFunction(
-            IConfiguration configuration,
-            ServiceBusSendQueueMessageContent queueMessageContent)
-        {
-            // If the configuration value is not set, set the default to 11.
-            var sendRetryDelayNumberOfMinutes = configuration.GetValue<int>("SendRetryDelayNumberOfMinutes", 11);
-
-            var messageBody = JsonConvert.SerializeObject(queueMessageContent);
-            var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));
-            serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromMinutes(sendRetryDelayNumberOfMinutes);
-
-            await this.sendQueueServiceBusMessageSender.SendAsync(serviceBusMessage);
-        }
-
-        private class ServiceBusSendQueueMessageContent
-        {
-            public string NotificationId { get; set; }
-
-            // This can be a team.id
-            public UserDataEntity UserDataEntity { get; set; }
         }
     }
 }

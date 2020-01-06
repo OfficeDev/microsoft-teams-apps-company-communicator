@@ -35,16 +35,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DelayedNot
         /// This method sets the globally accessible delay time indicating to all other functions that the system is currently in a
         /// throttled state and all messages need to be delayed and sends the queue message back to the queue with a delayed wait time.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
+        /// <param name="sendRetryDelayNumberOfMinutes">The number of minutes for the system and message to be delayed.</param>
         /// <param name="sendQueueMessageContent">The send queue message content to be sent back to the send queue for a delayed retry.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task SetGlobalDelayTimeAndSendDelayedRetryAsync(
-            IConfiguration configuration,
+            int sendRetryDelayNumberOfMinutes,
             SendQueueMessageContent sendQueueMessageContent)
         {
-            // If the configuration value is not set, set the default to 11.
-            var sendRetryDelayNumberOfMinutes = configuration.GetValue<int>("SendRetryDelayNumberOfMinutes", 11);
-
             // Shorten this time by 15 seconds to ensure that when the delayed retry message is taken off of the queue
             // the Send Retry Delay Time will be earlier and will not block it
             var sendRetryDelayTime = DateTime.UtcNow + TimeSpan.FromMinutes(sendRetryDelayNumberOfMinutes - 0.25);
