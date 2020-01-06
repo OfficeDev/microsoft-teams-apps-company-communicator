@@ -150,7 +150,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 // Fetch the current global sending notification data. This is where data about the overall systems
                 // status is stored e.g. is everything in a delayed state because the bot is being throttled.
                 var getGlobalSendingNotificationDataEntityTask = this.globalSendingNotificationDataRepository
-                    .GetGlobalSendingNotificationDataEntity();
+                    .GetGlobalSendingNotificationDataEntityAsync();
 
                 var incomingUserDataEntity = messageContent.UserDataEntity;
                 var incomingConversationId = incomingUserDataEntity.ConversationId;
