@@ -32,7 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets the entity that holds metadata for all sending operations.
         /// </summary>
         /// <returns>The Global Sending Notification Data Entity</returns>
-        public async Task<GlobalSendingNotificationDataEntity> GetGlobalSendingNotificationDataEntity()
+        public async Task<GlobalSendingNotificationDataEntity> GetGlobalSendingNotificationDataEntityAsync()
         {
             return await this.GetAsync(
                 PartitionKeyNames.NotificationDataTable.GlobalSendingNotificationDataPartition,
@@ -46,7 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <param name="globalSendingNotificationDataEntity">Entity that holds metadata for all sending operations. Partition Key and
         /// Row Key do not need to be set.</param>
         /// <returns>The Task</returns>
-        public async Task SetGlobalSendingNotificationDataEntity(GlobalSendingNotificationDataEntity globalSendingNotificationDataEntity)
+        public async Task SetGlobalSendingNotificationDataEntityAsync(GlobalSendingNotificationDataEntity globalSendingNotificationDataEntity)
         {
             globalSendingNotificationDataEntity.PartitionKey = PartitionKeyNames.NotificationDataTable.GlobalSendingNotificationDataPartition;
             globalSendingNotificationDataEntity.RowKey = GlobalSendingNotificationDataRepository.GlobalSendingNotificationDataRowKey;
