@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessT
         /// Fetches an access token for the bot.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<GetBotAccessTokenServiceResponse> GetTokenAsync()
+        public async Task<GetBotAccessTokenResponse> GetTokenAsync()
         {
             var values = new Dictionary<string, string>
                 {
@@ -62,7 +62,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessT
                         expiresInSeconds = 121;
                     }
 
-                    return new GetBotAccessTokenServiceResponse
+                    return new GetBotAccessTokenResponse
                     {
                         BotAccessToken = accessTokenContent.AccessToken,
 
