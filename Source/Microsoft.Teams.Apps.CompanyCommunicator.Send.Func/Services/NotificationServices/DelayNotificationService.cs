@@ -1,29 +1,28 @@
-﻿// <copyright file="DelayedNotificationService.cs" company="Microsoft">
+﻿// <copyright file="DelayNotificationService.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DelayedNotificationService
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
 
     /// <summary>
     /// A service for handling messages that need to be delayed and retried due to the system being throttled.
     /// </summary>
-    public class DelayedNotificationService
+    public class DelayNotificationService
     {
         private readonly GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository;
         private readonly SendQueue sendQueue;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DelayedNotificationService"/> class.
+        /// Initializes a new instance of the <see cref="DelayNotificationService"/> class.
         /// </summary>
         /// <param name="globalSendingNotificationDataRepository">The global sending notification data repository.</param>
         /// <param name="sendQueue">The send queue.</param>
-        public DelayedNotificationService(
+        public DelayNotificationService(
             GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository,
             SendQueue sendQueue)
         {
@@ -38,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DelayedNot
         /// <param name="sendRetryDelayNumberOfMinutes">The number of minutes for the system and message to be delayed.</param>
         /// <param name="sendQueueMessageContent">The send queue message content to be sent back to the send queue for a delayed retry.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task SetGlobalDelayTimeAndSendDelayedRetryAsync(
+        public async Task DelaySendingNotificationAsync(
             int sendRetryDelayNumberOfMinutes,
             SendQueueMessageContent sendQueueMessageContent)
         {

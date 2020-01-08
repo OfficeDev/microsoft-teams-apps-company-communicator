@@ -17,9 +17,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DelayedNotificationService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationResultService;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationService;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices;
 
     /// <summary>
     /// Register services in DI container of the Azure functions system.
@@ -54,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<GetBotAccessTokenService>();
             builder.Services.AddTransient<CreateUserConversationService>();
             builder.Services.AddTransient<NotificationService>();
-            builder.Services.AddTransient<DelayedNotificationService>();
+            builder.Services.AddTransient<DelayNotificationService>();
             builder.Services.AddTransient<NotificationResultService>();
         }
     }

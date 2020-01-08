@@ -18,9 +18,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DelayedNotificationService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationResultService;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationService;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -51,7 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly GetBotAccessTokenService getBotAccessTokenService;
         private readonly CreateUserConversationService createUserConversationService;
         private readonly NotificationService notificationService;
-        private readonly DelayedNotificationService delayedNotificationService;
+        private readonly DelayNotificationService delayNotificationService;
         private readonly NotificationResultService notificationResultService;
 
         /// <summary>
@@ -68,7 +67,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="getBotAccessTokenService">The get bot access token service.</param>
         /// <param name="createUserConversationService">The create user conversation service.</param>
         /// <param name="notificationService">The notification service.</param>
-        /// <param name="delayedNotificationService">The delayed notification service.</param>
+        /// <param name="delayNotificationService">The delay notification service.</param>
         /// <param name="notificationResultService">The notification result service.</param>
         public CompanyCommunicatorSendFunction(
             IConfiguration configuration,
@@ -82,7 +81,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             GetBotAccessTokenService getBotAccessTokenService,
             CreateUserConversationService createUserConversationService,
             NotificationService notificationService,
-            DelayedNotificationService delayedNotificationService,
+            DelayNotificationService delayNotificationService,
             NotificationResultService notificationResultService)
         {
             this.configuration = configuration;
@@ -96,7 +95,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.getBotAccessTokenService = getBotAccessTokenService;
             this.createUserConversationService = createUserConversationService;
             this.notificationService = notificationService;
-            this.delayedNotificationService = delayedNotificationService;
+            this.delayNotificationService = delayNotificationService;
             this.notificationResultService = notificationResultService;
         }
 
@@ -250,7 +249,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         // all throttling responses, then set the overall delay time for the system so all
                         // other calls will be delayed and add the message back to the queue with a delay to be
                         // attempted later.
-                        await this.delayedNotificationService.SetGlobalDelayTimeAndSendDelayedRetryAsync(
+                        await this.delayNotificationService.DelaySendingNotificationAsync(
                             sendRetryDelayNumberOfMinutes,
                             messageContent);
 
@@ -302,10 +301,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                     // NOTE: Here it does not immediately await this task and exit the function because a task
                     // of saving updated user data with a newly created conversation ID may need to be awaited.
-                    setGlobalDelayTimeAndSendDelayedRetryTask = this.delayedNotificationService
-                        .SetGlobalDelayTimeAndSendDelayedRetryAsync(
-                            sendRetryDelayNumberOfMinutes,
-                            messageContent);
+                    setGlobalDelayTimeAndSendDelayedRetryTask = this.delayNotificationService
+                        .DelaySendingNotificationAsync(sendRetryDelayNumberOfMinutes, messageContent);
                 }
                 else if (sendNotificationResponse.ResultType == SendNotificationResultType.Failed)
                 {
