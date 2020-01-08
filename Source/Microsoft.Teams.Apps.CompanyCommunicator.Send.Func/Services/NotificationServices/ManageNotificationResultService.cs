@@ -1,8 +1,8 @@
-﻿// <copyright file="NotificationResultService.cs" company="Microsoft">
+﻿// <copyright file="ManageNotificationResultService.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationResultService
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices
 {
     using System;
     using System.Net;
@@ -10,17 +10,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
 
     /// <summary>
-    /// The notification result service.
+    /// The manage notification result service.
     /// </summary>
-    public class NotificationResultService
+    public class ManageNotificationResultService
     {
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NotificationResultService"/> class.
+        /// Initializes a new instance of the <see cref="ManageNotificationResultService"/> class.
         /// </summary>
         /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
-        public NotificationResultService(SentNotificationDataRepository sentNotificationDataRepository)
+        public ManageNotificationResultService(SentNotificationDataRepository sentNotificationDataRepository)
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository;
         }
