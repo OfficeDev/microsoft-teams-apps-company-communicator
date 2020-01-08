@@ -19,6 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DelayedNotificationService;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationResultService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationService;
     using Newtonsoft.Json;
 
@@ -51,6 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly ConversationService conversationService;
         private readonly NotificationService notificationService;
         private readonly DelayedNotificationService delayedNotificationService;
+        private readonly NotificationResultService notificationResultService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorSendFunction"/> class.
@@ -67,6 +69,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="conversationService">The conversation service.</param>
         /// <param name="notificationService">The notification service.</param>
         /// <param name="delayedNotificationService">The delayed notification service.</param>
+        /// <param name="notificationResultService">The notification result service.</param>
         public CompanyCommunicatorSendFunction(
             IConfiguration configuration,
             HttpClient httpClient,
@@ -79,7 +82,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             BotAccessTokenService botAccessTokenService,
             ConversationService conversationService,
             NotificationService notificationService,
-            DelayedNotificationService delayedNotificationService)
+            DelayedNotificationService delayedNotificationService,
+            NotificationResultService notificationResultService)
         {
             this.configuration = configuration;
             this.httpClient = httpClient;
@@ -93,6 +97,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.conversationService = conversationService;
             this.notificationService = notificationService;
             this.delayedNotificationService = delayedNotificationService;
+            this.notificationResultService = notificationResultService;
         }
 
         /// <summary>
@@ -255,7 +260,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     {
                         // If the create conversation call failed, save the result, do not attempt the
                         // request again, and end the function.
-                        await this.SaveSentNotificationData(
+                        await this.notificationResultService.SaveSentNotificationDataAsync(
                             messageContent.NotificationId,
                             incomingUserDataEntity.AadId,
                             totalNumberOfThrottles,
@@ -280,7 +285,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 {
                     log.LogInformation("MESSAGE SENT SUCCESSFULLY");
 
-                    saveSentNotificationDataTask = this.SaveSentNotificationData(
+                    saveSentNotificationDataTask = this.notificationResultService.SaveSentNotificationDataAsync(
                         messageContent.NotificationId,
                         incomingUserDataEntity.AadId,
                         totalNumberOfThrottles,
@@ -310,7 +315,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                     // NOTE: Here it does not immediately await this task and exit the function because a task
                     // of saving updated user data with a newly created conversation ID may need to be awaited.
-                    saveSentNotificationDataTask = this.SaveSentNotificationData(
+                    saveSentNotificationDataTask = this.notificationResultService.SaveSentNotificationDataAsync(
                         messageContent.NotificationId,
                         incomingUserDataEntity.AadId,
                         totalNumberOfThrottles,
@@ -344,7 +349,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     statusCodeToStore = HttpStatusCode.InternalServerError;
                 }
 
-                await this.SaveSentNotificationData(
+                await this.notificationResultService.SaveSentNotificationDataAsync(
                     messageContent.NotificationId,
                     messageContent.UserDataEntity.AadId,
                     totalNumberOfThrottles,

@@ -18,6 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DelayedNotificationService;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationResultService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationService;
 
     /// <summary>
@@ -54,6 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<ConversationService>();
             builder.Services.AddTransient<NotificationService>();
             builder.Services.AddTransient<DelayedNotificationService>();
+            builder.Services.AddTransient<NotificationResultService>();
         }
     }
 }
