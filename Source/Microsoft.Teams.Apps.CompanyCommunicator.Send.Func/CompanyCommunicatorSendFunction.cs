@@ -17,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenServices;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationService;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DelayedNotificationService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationResultService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationService;
@@ -49,7 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly SendQueue sendQueue;
         private readonly DataQueue dataQueue;
         private readonly GetBotAccessTokenService getBotAccessTokenService;
-        private readonly ConversationService conversationService;
+        private readonly CreateUserConversationService createUserConversationService;
         private readonly NotificationService notificationService;
         private readonly DelayedNotificationService delayedNotificationService;
         private readonly NotificationResultService notificationResultService;
@@ -66,7 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="sendQueue">The send queue.</param>
         /// <param name="dataQueue">The data queue.</param>
         /// <param name="getBotAccessTokenService">The get bot access token service.</param>
-        /// <param name="conversationService">The conversation service.</param>
+        /// <param name="createUserConversationService">The create user conversation service.</param>
         /// <param name="notificationService">The notification service.</param>
         /// <param name="delayedNotificationService">The delayed notification service.</param>
         /// <param name="notificationResultService">The notification result service.</param>
@@ -80,7 +80,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             SendQueue sendQueue,
             DataQueue dataQueue,
             GetBotAccessTokenService getBotAccessTokenService,
-            ConversationService conversationService,
+            CreateUserConversationService createUserConversationService,
             NotificationService notificationService,
             DelayedNotificationService delayedNotificationService,
             NotificationResultService notificationResultService)
@@ -94,7 +94,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.sendQueue = sendQueue;
             this.dataQueue = dataQueue;
             this.getBotAccessTokenService = getBotAccessTokenService;
-            this.conversationService = conversationService;
+            this.createUserConversationService = createUserConversationService;
             this.notificationService = notificationService;
             this.delayedNotificationService = delayedNotificationService;
             this.notificationResultService = notificationResultService;
@@ -227,14 +227,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                      * conversationId needs to be stored for that user.
                      */
 
-                    var createConversationResponse = await this.conversationService.CreateUserConversationAsync(
+                    var createConversationResponse = await this.createUserConversationService.CreateConversationAsync(
                         incomingUserDataEntity,
                         CompanyCommunicatorSendFunction.botAccessToken,
                         maxNumberOfAttempts);
 
                     totalNumberOfThrottles += createConversationResponse.NumberOfThrottleResponses;
 
-                    if (createConversationResponse.ResultType == CreateConversationResultType.Succeeded)
+                    if (createConversationResponse.ResultType == CreateUserConversationResultType.Succeeded)
                     {
                         conversationId = createConversationResponse.ConversationId;
 
@@ -244,7 +244,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                         saveUserDataEntityTask = this.userDataRepository.InsertOrMergeAsync(incomingUserDataEntity);
                     }
-                    else if (createConversationResponse.ResultType == CreateConversationResultType.Throttled)
+                    else if (createConversationResponse.ResultType == CreateUserConversationResultType.Throttled)
                     {
                         // If the request was attempted the maximum number of attempts and received
                         // all throttling responses, then set the overall delay time for the system so all
@@ -256,7 +256,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                         return;
                     }
-                    else if (createConversationResponse.ResultType == CreateConversationResultType.Failed)
+                    else if (createConversationResponse.ResultType == CreateUserConversationResultType.Failed)
                     {
                         // If the create conversation call failed, save the result, do not attempt the
                         // request again, and end the function.

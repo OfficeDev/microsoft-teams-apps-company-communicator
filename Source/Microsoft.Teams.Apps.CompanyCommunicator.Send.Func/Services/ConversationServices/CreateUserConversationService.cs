@@ -1,8 +1,8 @@
-﻿// <copyright file="ConversationService.cs" company="Microsoft">
+﻿// <copyright file="CreateUserConversationService.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationService
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices
 {
     using System;
     using System.Net;
@@ -15,19 +15,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Service for the bot to manage conversations.
+    /// Service for the bot to create user conversations.
     /// </summary>
-    public class ConversationService
+    public class CreateUserConversationService
     {
         private readonly IConfiguration configuration;
         private readonly HttpClient httpClient;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConversationService"/> class.
+        /// Initializes a new instance of the <see cref="CreateUserConversationService"/> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <param name="httpClient">The http client.</param>
-        public ConversationService(
+        public CreateUserConversationService(
             IConfiguration configuration,
             HttpClient httpClient)
         {
@@ -42,7 +42,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
         /// <param name="botAccessToken">The bot access token.</param>
         /// <param name="maxNumberOfAttempts">The maximum number of request attempts to create the conversation.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<CreateUserConversationResponse> CreateUserConversationAsync(
+        public async Task<CreateUserConversationResponse> CreateConversationAsync(
             UserDataEntity userDataEntity,
             string botAccessToken,
             int maxNumberOfAttempts)
@@ -78,7 +78,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                             dynamic resp = JsonConvert.DeserializeObject(jsonResponseString);
                             var conversationId = resp.id;
 
-                            createConversationResponse.ResultType = CreateConversationResultType.Succeeded;
+                            createConversationResponse.ResultType = CreateUserConversationResultType.Succeeded;
                             createConversationResponse.ConversationId = conversationId;
 
                             break;
@@ -89,7 +89,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                             // is reached, increment the count of the number of throttles to be stored
                             // later, and if the maximum number of throttles has not been reached, delay
                             // for a bit of time to attempt the request again.
-                            createConversationResponse.ResultType = CreateConversationResultType.Throttled;
+                            createConversationResponse.ResultType = CreateUserConversationResultType.Throttled;
                             createConversationResponse.NumberOfThrottleResponses++;
 
                             // Do not delay if already attempted the maximum number of attempts.
@@ -103,7 +103,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                         {
                             // If in this block, then an error has occurred with the service.
                             // Return the failure and do not attempt the request again.
-                            createConversationResponse.ResultType = CreateConversationResultType.Failed;
+                            createConversationResponse.ResultType = CreateUserConversationResultType.Failed;
 
                             break;
                         }

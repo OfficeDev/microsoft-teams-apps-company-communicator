@@ -1,13 +1,13 @@
-﻿// <copyright file="CreateConversationResultType.cs" company="Microsoft">
+﻿// <copyright file="CreateUserConversationResultType.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationService
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices
 {
     /// <summary>
-    /// An enum indicating the different create conversation result types.
+    /// An enum indicating the different create user conversation result types.
     /// </summary>
-    public enum CreateConversationResultType
+    public enum CreateUserConversationResultType
     {
         /// <summary>
         /// Type indicating creating the conversation succeeded.

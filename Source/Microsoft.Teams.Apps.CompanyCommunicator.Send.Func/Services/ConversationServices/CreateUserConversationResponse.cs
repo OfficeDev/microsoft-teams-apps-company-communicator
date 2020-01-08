@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationService
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices
 {
     using System.Net;
 
@@ -19,7 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
         /// <summary>
         /// Gets or sets the result type.
         /// </summary>
-        public CreateConversationResultType ResultType { get; set; }
+        public CreateUserConversationResultType ResultType { get; set; }
 
         /// <summary>
         /// Gets or sets the conversation ID.
