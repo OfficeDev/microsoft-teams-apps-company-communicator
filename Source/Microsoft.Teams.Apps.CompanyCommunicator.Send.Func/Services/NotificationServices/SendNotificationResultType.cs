@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationService
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices
 {
     /// <summary>
     /// An enum indicating the different send notification result types.

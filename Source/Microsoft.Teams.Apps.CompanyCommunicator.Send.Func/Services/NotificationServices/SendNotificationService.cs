@@ -1,8 +1,8 @@
-﻿// <copyright file="NotificationService.cs" company="Microsoft">
+﻿// <copyright file="SendNotificationService.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationService
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices
 {
     using System;
     using System.Net;
@@ -10,21 +10,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     using System.Net.Http.Headers;
     using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Newtonsoft.Json;
 
     /// <summary>
     /// Service for the bot to manage sending notifications.
     /// </summary>
-    public class NotificationService
+    public class SendNotificationService
     {
         private readonly HttpClient httpClient;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NotificationService"/> class.
+        /// Initializes a new instance of the <see cref="SendNotificationService"/> class.
         /// </summary>
         /// <param name="httpClient">The http client.</param>
-        public NotificationService(HttpClient httpClient)
+        public SendNotificationService(HttpClient httpClient)
         {
             this.httpClient = httpClient;
         }
@@ -38,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         /// <param name="botAccessToken">The bot access token.</param>
         /// <param name="maxNumberOfAttempts">The maximum number of request attempts to send the notification.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<SendNotificationResponse> SendNotificationAsync(
+        public async Task<SendNotificationResponse> SendAsync(
             string notificationContent,
             string serviceUrl,
             string conversationId,

@@ -49,7 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly DataQueue dataQueue;
         private readonly GetBotAccessTokenService getBotAccessTokenService;
         private readonly CreateUserConversationService createUserConversationService;
-        private readonly NotificationService notificationService;
+        private readonly SendNotificationService sendNotificationService;
         private readonly DelayNotificationService delayNotificationService;
         private readonly NotificationResultService notificationResultService;
 
@@ -66,7 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="dataQueue">The data queue.</param>
         /// <param name="getBotAccessTokenService">The get bot access token service.</param>
         /// <param name="createUserConversationService">The create user conversation service.</param>
-        /// <param name="notificationService">The notification service.</param>
+        /// <param name="sendNotificationService">The send notification service.</param>
         /// <param name="delayNotificationService">The delay notification service.</param>
         /// <param name="notificationResultService">The notification result service.</param>
         public CompanyCommunicatorSendFunction(
@@ -80,7 +80,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             DataQueue dataQueue,
             GetBotAccessTokenService getBotAccessTokenService,
             CreateUserConversationService createUserConversationService,
-            NotificationService notificationService,
+            SendNotificationService sendNotificationService,
             DelayNotificationService delayNotificationService,
             NotificationResultService notificationResultService)
         {
@@ -94,7 +94,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.dataQueue = dataQueue;
             this.getBotAccessTokenService = getBotAccessTokenService;
             this.createUserConversationService = createUserConversationService;
-            this.notificationService = notificationService;
+            this.sendNotificationService = sendNotificationService;
             this.delayNotificationService = delayNotificationService;
             this.notificationResultService = notificationResultService;
         }
@@ -271,7 +271,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 }
 
                 // Now that all of the necessary information is known, send the notification.
-                var sendNotificationResponse = await this.notificationService.SendNotificationAsync(
+                var sendNotificationResponse = await this.sendNotificationService.SendAsync(
                     activeNotificationEntity.Content,
                     incomingUserDataEntity.ServiceUrl,
                     conversationId,

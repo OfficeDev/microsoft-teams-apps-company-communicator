@@ -52,7 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             builder.Services.AddTransient<GetBotAccessTokenService>();
             builder.Services.AddTransient<CreateUserConversationService>();
-            builder.Services.AddTransient<NotificationService>();
+            builder.Services.AddTransient<SendNotificationService>();
             builder.Services.AddTransient<DelayNotificationService>();
             builder.Services.AddTransient<NotificationResultService>();
         }
