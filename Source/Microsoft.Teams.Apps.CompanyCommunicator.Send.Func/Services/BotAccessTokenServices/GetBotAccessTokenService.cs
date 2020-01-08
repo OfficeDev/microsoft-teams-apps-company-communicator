@@ -1,8 +1,8 @@
-﻿// <copyright file="BotAccessTokenService.cs" company="Microsoft">
+﻿// <copyright file="GetBotAccessTokenService.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenService
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenServices
 {
     using System;
     using System.Collections.Generic;
@@ -15,17 +15,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessT
     /// <summary>
     /// Service to fetch access tokens for the bot.
     /// </summary>
-    public class BotAccessTokenService
+    public class GetBotAccessTokenService
     {
         private readonly IConfiguration configuration;
         private readonly HttpClient httpClient;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BotAccessTokenService"/> class.
+        /// Initializes a new instance of the <see cref="GetBotAccessTokenService"/> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <param name="httpClient">The http client.</param>
-        public BotAccessTokenService(
+        public GetBotAccessTokenService(
             IConfiguration configuration,
             HttpClient httpClient)
         {
@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessT
         /// Fetches an access token for the bot.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<BotAccessTokenServiceResponse> FetchBotAccessTokenAsync()
+        public async Task<GetBotAccessTokenServiceResponse> GetTokenAsync()
         {
             var values = new Dictionary<string, string>
                 {
@@ -62,7 +62,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessT
                         expiresInSeconds = 121;
                     }
 
-                    return new BotAccessTokenServiceResponse
+                    return new GetBotAccessTokenServiceResponse
                     {
                         BotAccessToken = accessTokenContent.AccessToken,
 

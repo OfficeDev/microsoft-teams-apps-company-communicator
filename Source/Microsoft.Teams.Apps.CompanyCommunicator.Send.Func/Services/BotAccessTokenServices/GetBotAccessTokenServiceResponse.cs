@@ -1,15 +1,15 @@
-﻿// <copyright file="BotAccessTokenServiceResponse.cs" company="Microsoft">
+﻿// <copyright file="GetBotAccessTokenServiceResponse.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenService
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenServices
 {
     using System;
 
     /// <summary>
     /// A class for the bot access token service response.
     /// </summary>
-    public class BotAccessTokenServiceResponse
+    public class GetBotAccessTokenServiceResponse
     {
         /// <summary>
         /// Gets or sets the bot access token.

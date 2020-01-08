@@ -16,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenService;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DelayedNotificationService;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationResultService;
@@ -48,7 +48,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly SendQueue sendQueue;
         private readonly DataQueue dataQueue;
-        private readonly BotAccessTokenService botAccessTokenService;
+        private readonly GetBotAccessTokenService getBotAccessTokenService;
         private readonly ConversationService conversationService;
         private readonly NotificationService notificationService;
         private readonly DelayedNotificationService delayedNotificationService;
@@ -65,7 +65,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
         /// <param name="sendQueue">The send queue.</param>
         /// <param name="dataQueue">The data queue.</param>
-        /// <param name="botAccessTokenService">The bot access token service.</param>
+        /// <param name="getBotAccessTokenService">The get bot access token service.</param>
         /// <param name="conversationService">The conversation service.</param>
         /// <param name="notificationService">The notification service.</param>
         /// <param name="delayedNotificationService">The delayed notification service.</param>
@@ -79,7 +79,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             SentNotificationDataRepository sentNotificationDataRepository,
             SendQueue sendQueue,
             DataQueue dataQueue,
-            BotAccessTokenService botAccessTokenService,
+            GetBotAccessTokenService getBotAccessTokenService,
             ConversationService conversationService,
             NotificationService notificationService,
             DelayedNotificationService delayedNotificationService,
@@ -93,7 +93,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.sentNotificationDataRepository = sentNotificationDataRepository;
             this.sendQueue = sendQueue;
             this.dataQueue = dataQueue;
-            this.botAccessTokenService = botAccessTokenService;
+            this.getBotAccessTokenService = getBotAccessTokenService;
             this.conversationService = conversationService;
             this.notificationService = notificationService;
             this.delayedNotificationService = delayedNotificationService;
@@ -142,7 +142,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     || CompanyCommunicatorSendFunction.botAccessTokenExpiration == null
                     || DateTime.UtcNow > CompanyCommunicatorSendFunction.botAccessTokenExpiration)
                 {
-                    var botAccessTokenServiceResponse = await this.botAccessTokenService.FetchBotAccessTokenAsync();
+                    var botAccessTokenServiceResponse = await this.getBotAccessTokenService.GetTokenAsync();
                     CompanyCommunicatorSendFunction.botAccessToken = botAccessTokenServiceResponse.BotAccessToken;
                     CompanyCommunicatorSendFunction.botAccessTokenExpiration = botAccessTokenServiceResponse.BotAccessTokenExpiration;
                 }
