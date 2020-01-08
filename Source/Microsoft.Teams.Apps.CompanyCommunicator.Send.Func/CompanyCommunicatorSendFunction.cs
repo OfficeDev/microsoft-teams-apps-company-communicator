@@ -49,7 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly GetBotAccessTokenService getBotAccessTokenService;
         private readonly CreateUserConversationService createUserConversationService;
         private readonly SendNotificationService sendNotificationService;
-        private readonly DelayNotificationService delayNotificationService;
+        private readonly DelaySendingNotificationService delaySendingNotificationService;
         private readonly ManageNotificationResultService manageNotificationResultService;
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="getBotAccessTokenService">The get bot access token service.</param>
         /// <param name="createUserConversationService">The create user conversation service.</param>
         /// <param name="sendNotificationService">The send notification service.</param>
-        /// <param name="delayNotificationService">The delay notification service.</param>
+        /// <param name="delaySendingNotificationService">The delay sending notification service.</param>
         /// <param name="manageNotificationResultService">The manage notification result service.</param>
         public CompanyCommunicatorSendFunction(
             IConfiguration configuration,
@@ -80,7 +80,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             GetBotAccessTokenService getBotAccessTokenService,
             CreateUserConversationService createUserConversationService,
             SendNotificationService sendNotificationService,
-            DelayNotificationService delayNotificationService,
+            DelaySendingNotificationService delaySendingNotificationService,
             ManageNotificationResultService manageNotificationResultService)
         {
             this.configuration = configuration;
@@ -94,7 +94,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.getBotAccessTokenService = getBotAccessTokenService;
             this.createUserConversationService = createUserConversationService;
             this.sendNotificationService = sendNotificationService;
-            this.delayNotificationService = delayNotificationService;
+            this.delaySendingNotificationService = delaySendingNotificationService;
             this.manageNotificationResultService = manageNotificationResultService;
         }
 
@@ -248,7 +248,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         // all throttling responses, then set the overall delay time for the system so all
                         // other calls will be delayed and add the message back to the queue with a delay to be
                         // attempted later.
-                        await this.delayNotificationService.DelaySendingNotificationAsync(
+                        await this.delaySendingNotificationService.DelaySendingNotificationAsync(
                             sendRetryDelayNumberOfMinutes,
                             messageContent);
 
@@ -300,7 +300,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                     // NOTE: Here it does not immediately await this task and exit the function because a task
                     // of saving updated user data with a newly created conversation ID may need to be awaited.
-                    setGlobalDelayTimeAndSendDelayedRetryTask = this.delayNotificationService
+                    setGlobalDelayTimeAndSendDelayedRetryTask = this.delaySendingNotificationService
                         .DelaySendingNotificationAsync(sendRetryDelayNumberOfMinutes, messageContent);
                 }
                 else if (sendNotificationResponse.ResultType == SendNotificationResultType.Failed)

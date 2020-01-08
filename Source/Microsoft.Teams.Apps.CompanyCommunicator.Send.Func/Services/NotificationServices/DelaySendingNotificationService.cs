@@ -1,4 +1,4 @@
-﻿// <copyright file="DelayNotificationService.cs" company="Microsoft">
+﻿// <copyright file="DelaySendingNotificationService.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -12,17 +12,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     /// <summary>
     /// A service for handling messages that need to be delayed and retried due to the system being throttled.
     /// </summary>
-    public class DelayNotificationService
+    public class DelaySendingNotificationService
     {
         private readonly GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository;
         private readonly SendQueue sendQueue;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DelayNotificationService"/> class.
+        /// Initializes a new instance of the <see cref="DelaySendingNotificationService"/> class.
         /// </summary>
         /// <param name="globalSendingNotificationDataRepository">The global sending notification data repository.</param>
         /// <param name="sendQueue">The send queue.</param>
-        public DelayNotificationService(
+        public DelaySendingNotificationService(
             GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository,
             SendQueue sendQueue)
         {
