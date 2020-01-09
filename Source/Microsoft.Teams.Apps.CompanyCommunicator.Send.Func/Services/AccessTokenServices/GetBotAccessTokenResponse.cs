@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.BotAccessTokenServices
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.AccessTokenServices
 {
     using System;
 
