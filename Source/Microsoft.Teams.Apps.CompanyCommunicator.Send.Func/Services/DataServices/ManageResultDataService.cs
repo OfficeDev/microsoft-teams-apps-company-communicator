@@ -1,8 +1,8 @@
-﻿// <copyright file="ManageNotificationResultService.cs" company="Microsoft">
+﻿// <copyright file="ManageResultDataService.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices
 {
     using System;
     using System.Net;
@@ -10,23 +10,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
 
     /// <summary>
-    /// The manage notification result service.
+    /// The manage result data service.
     /// </summary>
-    public class ManageNotificationResultService
+    public class ManageResultDataService
     {
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ManageNotificationResultService"/> class.
+        /// Initializes a new instance of the <see cref="ManageResultDataService"/> class.
         /// </summary>
         /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
-        public ManageNotificationResultService(SentNotificationDataRepository sentNotificationDataRepository)
+        public ManageResultDataService(SentNotificationDataRepository sentNotificationDataRepository)
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository;
         }
 
         /// <summary>
-        /// Saves a sent notification piece of data.
+        /// Processes the notification's result data.
         /// </summary>
         /// <param name="notificationId">The notification ID.</param>
         /// <param name="aadId">The AAD ID.</param>
@@ -34,7 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         /// <param name="isStatusCodeFromCreateConversation">A flag indicating if the status code is from a create conversation request.</param>
         /// <param name="statusCode">The final status code.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task SaveSentNotificationDataAsync(
+        public async Task ProccessResultDataAsync(
             string notificationId,
             string aadId,
             int totalNumberOfThrottles,

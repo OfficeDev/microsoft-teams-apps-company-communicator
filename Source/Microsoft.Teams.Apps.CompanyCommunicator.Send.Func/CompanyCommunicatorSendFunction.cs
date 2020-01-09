@@ -18,6 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.AccessTokenServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices;
     using Newtonsoft.Json;
 
@@ -50,7 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly CreateUserConversationService createUserConversationService;
         private readonly SendNotificationService sendNotificationService;
         private readonly DelaySendingNotificationService delaySendingNotificationService;
-        private readonly ManageNotificationResultService manageNotificationResultService;
+        private readonly ManageResultDataService manageResultDataService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorSendFunction"/> class.
@@ -67,7 +68,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="createUserConversationService">The create user conversation service.</param>
         /// <param name="sendNotificationService">The send notification service.</param>
         /// <param name="delaySendingNotificationService">The delay sending notification service.</param>
-        /// <param name="manageNotificationResultService">The manage notification result service.</param>
+        /// <param name="manageResultDataService">The manage result data service.</param>
         public CompanyCommunicatorSendFunction(
             IConfiguration configuration,
             HttpClient httpClient,
@@ -81,7 +82,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             CreateUserConversationService createUserConversationService,
             SendNotificationService sendNotificationService,
             DelaySendingNotificationService delaySendingNotificationService,
-            ManageNotificationResultService manageNotificationResultService)
+            ManageResultDataService manageResultDataService)
         {
             this.configuration = configuration;
             this.httpClient = httpClient;
@@ -95,7 +96,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.createUserConversationService = createUserConversationService;
             this.sendNotificationService = sendNotificationService;
             this.delaySendingNotificationService = delaySendingNotificationService;
-            this.manageNotificationResultService = manageNotificationResultService;
+            this.manageResultDataService = manageResultDataService;
         }
 
         /// <summary>
@@ -181,7 +182,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                 // Initiate tasks that will be run in parallel if the step is required.
                 Task saveUserDataEntityTask = Task.CompletedTask;
-                Task saveSentNotificationDataTask = Task.CompletedTask;
+                Task proccessResultDataTask = Task.CompletedTask;
                 Task setGlobalDelayTimeAndSendDelayedRetryTask = Task.CompletedTask;
 
                 // If the overall system is in a throttled state and needs to be delayed,
@@ -258,7 +259,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     {
                         // If the create conversation call failed, save the result, do not attempt the
                         // request again, and end the function.
-                        await this.manageNotificationResultService.SaveSentNotificationDataAsync(
+                        await this.manageResultDataService.ProccessResultDataAsync(
                             messageContent.NotificationId,
                             incomingUserDataEntity.AadId,
                             totalNumberOfThrottles,
@@ -283,7 +284,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 {
                     log.LogInformation("MESSAGE SENT SUCCESSFULLY");
 
-                    saveSentNotificationDataTask = this.manageNotificationResultService.SaveSentNotificationDataAsync(
+                    proccessResultDataTask = this.manageResultDataService.ProccessResultDataAsync(
                         messageContent.NotificationId,
                         incomingUserDataEntity.AadId,
                         totalNumberOfThrottles,
@@ -311,7 +312,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                     // NOTE: Here it does not immediately await this task and exit the function because a task
                     // of saving updated user data with a newly created conversation ID may need to be awaited.
-                    saveSentNotificationDataTask = this.manageNotificationResultService.SaveSentNotificationDataAsync(
+                    proccessResultDataTask = this.manageResultDataService.ProccessResultDataAsync(
                         messageContent.NotificationId,
                         incomingUserDataEntity.AadId,
                         totalNumberOfThrottles,
@@ -321,7 +322,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                 await Task.WhenAll(
                     saveUserDataEntityTask,
-                    saveSentNotificationDataTask,
+                    proccessResultDataTask,
                     setGlobalDelayTimeAndSendDelayedRetryTask);
             }
             catch (Exception e)
@@ -345,7 +346,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     statusCodeToStore = HttpStatusCode.InternalServerError;
                 }
 
-                await this.manageNotificationResultService.SaveSentNotificationDataAsync(
+                await this.manageResultDataService.ProccessResultDataAsync(
                     messageContent.NotificationId,
                     messageContent.UserDataEntity.AadId,
                     totalNumberOfThrottles,
