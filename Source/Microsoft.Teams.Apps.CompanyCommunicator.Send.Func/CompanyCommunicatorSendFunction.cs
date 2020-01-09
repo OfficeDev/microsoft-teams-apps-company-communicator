@@ -181,9 +181,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     : incomingConversationId;
 
                 // Initiate tasks that will be run in parallel if the step is required.
-                Task saveUserDataEntityTask = Task.CompletedTask;
-                Task proccessResultDataTask = Task.CompletedTask;
-                Task setGlobalDelayTimeAndSendDelayedRetryTask = Task.CompletedTask;
+                var saveUserDataEntityTask = Task.CompletedTask;
+                var proccessResultDataTask = Task.CompletedTask;
+                var delaySendingNotificationTask = Task.CompletedTask;
 
                 // If the overall system is in a throttled state and needs to be delayed,
                 // add the message back on the queue with a delay.
@@ -301,7 +301,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                     // NOTE: Here it does not immediately await this task and exit the function because a task
                     // of saving updated user data with a newly created conversation ID may need to be awaited.
-                    setGlobalDelayTimeAndSendDelayedRetryTask = this.delaySendingNotificationService
+                    delaySendingNotificationTask = this.delaySendingNotificationService
                         .DelaySendingNotificationAsync(sendRetryDelayNumberOfMinutes, messageContent);
                 }
                 else if (sendNotificationResponse.ResultType == SendNotificationResultType.Failed)
@@ -323,7 +323,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 await Task.WhenAll(
                     saveUserDataEntityTask,
                     proccessResultDataTask,
-                    setGlobalDelayTimeAndSendDelayedRetryTask);
+                    delaySendingNotificationTask);
             }
             catch (Exception e)
             {
