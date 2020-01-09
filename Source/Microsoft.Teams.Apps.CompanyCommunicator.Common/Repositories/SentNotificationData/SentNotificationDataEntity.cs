@@ -28,6 +28,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public static readonly string Throttled = "Throttled";
 
         /// <summary>
+        /// Continued string - this is a state where sending the current notification resulted
+        /// in an exception. Because of this, this string will be stored in the repository
+        /// until a more final state is reached and the notification will be attempted to be
+        /// sent again.
+        /// </summary>
+        public static readonly string Continued = "Continued";
+
+        /// <summary>
         /// Gets or sets Aad Id.
         /// </summary>
         public string AadId { get; set; }
@@ -51,6 +59,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// Gets or sets the response status code.
         /// </summary>
         public int StatusCode { get; set; }
+
+        /// <summary>
+        /// Gets or sets a string representing all of the status code responses for this recipient.
+        /// </summary>
+        public string AllStatusCodeResults { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of attempts it took to send a notification to this recipient.
+        /// </summary>
+        public int NumberOfAttemptsToSend { get; set; }
 
         /// <summary>
         /// Gets or sets the delivery status
