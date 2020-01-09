@@ -14,6 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// </summary>
         public RepositoryOptions()
         {
+            // Default this option to false.
             this.IsAzureFunction = false;
         }
 

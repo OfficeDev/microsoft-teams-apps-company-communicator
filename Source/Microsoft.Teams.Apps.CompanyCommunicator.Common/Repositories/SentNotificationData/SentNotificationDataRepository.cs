@@ -4,12 +4,11 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
@@ -22,12 +21,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public SentNotificationDataRepository(IConfiguration configuration, RepositoryOptions repositoryOptions)
+        public SentNotificationDataRepository(IConfiguration configuration, IOptions<RepositoryOptions> repositoryOptions)
             : base(
                 configuration,
                 PartitionKeyNames.SentNotificationDataTable.TableName,
                 PartitionKeyNames.SentNotificationDataTable.DefaultPartition,
-                repositoryOptions.IsAzureFunction)
+                repositoryOptions.Value.IsAzureFunction)
         {
         }
 

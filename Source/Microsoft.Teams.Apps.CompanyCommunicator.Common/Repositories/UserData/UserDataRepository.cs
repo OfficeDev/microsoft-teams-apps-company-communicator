@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
 {
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Repository of the user data stored in the table storage.
@@ -16,12 +17,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public UserDataRepository(IConfiguration configuration, RepositoryOptions repositoryOptions)
+        public UserDataRepository(IConfiguration configuration, IOptions<RepositoryOptions> repositoryOptions)
             : base(
                 configuration,
                 PartitionKeyNames.UserDataTable.TableName,
                 PartitionKeyNames.UserDataTable.UserDataPartition,
-                repositoryOptions.IsAzureFunction)
+                repositoryOptions.Value.IsAzureFunction)
         {
         }
     }

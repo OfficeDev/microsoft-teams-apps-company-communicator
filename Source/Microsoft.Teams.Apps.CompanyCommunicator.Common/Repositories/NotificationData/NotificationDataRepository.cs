@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Repository of the notification data in the table storage.
@@ -23,12 +24,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public NotificationDataRepository(
             IConfiguration configuration,
             TableRowKeyGenerator tableRowKeyGenerator,
-            RepositoryOptions repositoryOptions)
+            IOptions<RepositoryOptions> repositoryOptions)
             : base(
                 configuration,
                 PartitionKeyNames.NotificationDataTable.TableName,
                 PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
-                repositoryOptions.IsAzureFunction)
+                repositoryOptions.Value.IsAzureFunction)
         {
             this.TableRowKeyGenerator = tableRowKeyGenerator;
         }

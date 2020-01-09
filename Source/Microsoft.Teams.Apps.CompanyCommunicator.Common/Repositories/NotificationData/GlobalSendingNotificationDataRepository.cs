@@ -6,6 +6,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
 {
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Repository for the entity that holds metadata for all sending operations in the table storage.
@@ -18,13 +19,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Initializes a new instance of the <see cref="GlobalSendingNotificationDataRepository"/> class.
         /// </summary>
         /// <param name="configuration">Represents the application configuration.</param>
-        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
-        public GlobalSendingNotificationDataRepository(IConfiguration configuration, bool isFromAzureFunction = false)
+        /// <param name="repositoryOptions">Options used to create the repository.</param>
+        public GlobalSendingNotificationDataRepository(IConfiguration configuration, IOptions<RepositoryOptions> repositoryOptions)
             : base(
                   configuration,
                   PartitionKeyNames.NotificationDataTable.TableName,
                   PartitionKeyNames.NotificationDataTable.GlobalSendingNotificationDataPartition,
-                  isFromAzureFunction)
+                  repositoryOptions.Value.IsAzureFunction)
         {
         }
 
