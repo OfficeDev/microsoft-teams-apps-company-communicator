@@ -6,13 +6,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -21,20 +20,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     /// </summary>
     public class CompanyCommunicatorDataFunction
     {
-        private readonly IConfiguration configuration;
         private readonly NotificationDataRepository notificationDataRepository;
+        private readonly ForceCompleteNotificationDataService forceCompleteNotificationDataService;
+        private readonly UpdateCountsInNotificationDataService updateCountsInNotificationDataService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorDataFunction"/> class.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
         /// <param name="notificationDataRepository">The notification data repository.</param>
+        /// <param name="forceCompleteNotificationDataService">The force complete notification data service.</param>
+        /// <param name="updateCountsInNotificationDataService">The update counts in notification data service.</param>
         public CompanyCommunicatorDataFunction(
-            IConfiguration configuration,
-            NotificationDataRepository notificationDataRepository)
+            NotificationDataRepository notificationDataRepository,
+            ForceCompleteNotificationDataService forceCompleteNotificationDataService,
+            UpdateCountsInNotificationDataService updateCountsInNotificationDataService)
         {
-            this.configuration = configuration;
             this.notificationDataRepository = notificationDataRepository;
+            this.forceCompleteNotificationDataService = forceCompleteNotificationDataService;
+            this.updateCountsInNotificationDataService = updateCountsInNotificationDataService;
         }
 
         /// <summary>
@@ -70,79 +73,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             // notification will eventually be marked as complete.
             if (messageContent.ForceMessageComplete)
             {
-                // If the notification is already marked complete, then nothing needs to be done.
-                if (!notificationDataEntity.IsCompleted)
-                {
-                    var incompleteTotalMessageCount = notificationDataEntity.Succeeded
-                        + notificationDataEntity.Throttled
-                        + notificationDataEntity.Failed;
-
-                    var unknownCount = notificationDataEntity.TotalMessageCount - incompleteTotalMessageCount;
-
-                    var forcedNotificationDataEntityUpdate = new UpdateNotificationDataEntity
-                    {
-                        PartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
-                        RowKey = messageContent.NotificationId,
-                        Unknown = unknownCount,
-                        IsCompleted = true,
-                        SentDate = DateTime.UtcNow,
-                    };
-
-                    var forcedOperation = TableOperation.InsertOrMerge(forcedNotificationDataEntityUpdate);
-                    await CompanyCommunicatorDataFunction.notificationDataRepository.Table.ExecuteAsync(forcedOperation);
-                }
+                await this.forceCompleteNotificationDataService.ForceCompleteAsync(notificationDataEntity);
 
                 return;
             }
 
-            var succeededCount = notificationDataEntity.Succeeded;
-            var throttledCount = notificationDataEntity.Throttled;
-            var failedCount = notificationDataEntity.Failed;
-
-            if (messageContent.ResultType == DataQueueResultType.Succeeded)
-            {
-                succeededCount++;
-            }
-            else if (messageContent.ResultType == DataQueueResultType.Throttled)
-            {
-                throttledCount++;
-            }
-            else
-            {
-                failedCount++;
-            }
-
-            // Purposefully exclude the unknown count because those messages may be sent later
-            var currentTotalMessageCount = succeededCount
-                + throttledCount
-                + failedCount;
-
-            var notificationDataEntityUpdate = new UpdateNotificationDataEntity
-            {
-                PartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
-                RowKey = messageContent.NotificationId,
-                Succeeded = succeededCount,
-                Failed = failedCount,
-                Throttled = throttledCount,
-            };
-
-            if (currentTotalMessageCount >= notificationDataEntity.TotalMessageCount)
-            {
-                notificationDataEntityUpdate.IsCompleted = true;
-                notificationDataEntityUpdate.SentDate = messageContent.SentDate ?? DateTime.UtcNow;
-            }
-
-            var operation = TableOperation.InsertOrMerge(notificationDataEntityUpdate);
-            await CompanyCommunicatorDataFunction.notificationDataRepository.Table.ExecuteAsync(operation);
+            await this.updateCountsInNotificationDataService.UpdateCountsAsync(
+                notificationDataEntity,
+                messageContent.ResultType,
+                messageContent.SentDate);
         }
-
-        ////CompanyCommunicatorDataFunction.notificationDataRepository = CompanyCommunicatorDataFunction.notificationDataRepository
-        ////        ?? this.CreateNotificationRepository(CompanyCommunicatorDataFunction.configuration);
-
-        ////private NotificationDataRepository CreateNotificationRepository(IConfiguration configuration)
-        ////{
-        ////    var tableRowKeyGenerator = new TableRowKeyGenerator();
-        ////    return new NotificationDataRepository(configuration, tableRowKeyGenerator, isFromAzureFunction: true);
-        ////}
     }
 }

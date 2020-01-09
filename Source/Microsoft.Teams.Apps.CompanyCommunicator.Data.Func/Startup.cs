@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices;
 
     /// <summary>
     /// Register services in DI container of the Azure functions system.
@@ -34,7 +35,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                     configuration.Bind(repositoryOptions);
                 });
 
+            // Needed for the NotificationDataRepository
+            builder.Services.AddSingleton<TableRowKeyGenerator>();
+
             builder.Services.AddSingleton<NotificationDataRepository>();
+
+            builder.Services.AddTransient<ForceCompleteNotificationDataService>();
+            builder.Services.AddTransient<UpdateCountsInNotificationDataService>();
         }
     }
 }
