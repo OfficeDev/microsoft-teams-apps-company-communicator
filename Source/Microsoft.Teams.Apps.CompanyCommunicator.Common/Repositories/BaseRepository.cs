@@ -39,6 +39,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             var tableClient = storageAccount.CreateCloudTableClient();
             this.Table = tableClient.GetTableReference(tableName);
 
+            // If the repository object is created for an Azure Function, by that point in the process
+            // the table is expected to have already been created, so ensuring it is created does not need
+            // to be done. This cuts down on unnecessary failure calls in the request logs.
             if (!isAzureFunction)
             {
                 this.Table.CreateIfNotExists();
