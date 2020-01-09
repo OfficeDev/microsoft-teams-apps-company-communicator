@@ -6,14 +6,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
     using System;
     using System.Net;
-    using System.Net.Http;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.AccessTokenServices;
@@ -40,13 +38,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private static DateTime? botAccessTokenExpiration = null;
 
         private readonly IConfiguration configuration;
-        private readonly HttpClient httpClient;
         private readonly SendingNotificationDataRepository sendingNotificationDataRepository;
         private readonly GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository;
         private readonly UserDataRepository userDataRepository;
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly SendQueue sendQueue;
-        private readonly DataQueue dataQueue;
         private readonly GetBotAccessTokenService getBotAccessTokenService;
         private readonly CreateUserConversationService createUserConversationService;
         private readonly SendNotificationService sendNotificationService;
@@ -57,13 +52,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// Initializes a new instance of the <see cref="CompanyCommunicatorSendFunction"/> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        /// <param name="httpClient">The http client.</param>
         /// <param name="sendingNotificationDataRepository">The sending notification data repository.</param>
         /// <param name="globalSendingNotificationDataRepository">The global sending notification data repository.</param>
         /// <param name="userDataRepository">The user data repository.</param>
-        /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
         /// <param name="sendQueue">The send queue.</param>
-        /// <param name="dataQueue">The data queue.</param>
         /// <param name="getBotAccessTokenService">The get bot access token service.</param>
         /// <param name="createUserConversationService">The create user conversation service.</param>
         /// <param name="sendNotificationService">The send notification service.</param>
@@ -71,13 +63,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="manageResultDataService">The manage result data service.</param>
         public CompanyCommunicatorSendFunction(
             IConfiguration configuration,
-            HttpClient httpClient,
             SendingNotificationDataRepository sendingNotificationDataRepository,
             GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository,
             UserDataRepository userDataRepository,
-            SentNotificationDataRepository sentNotificationDataRepository,
             SendQueue sendQueue,
-            DataQueue dataQueue,
             GetBotAccessTokenService getBotAccessTokenService,
             CreateUserConversationService createUserConversationService,
             SendNotificationService sendNotificationService,
@@ -85,13 +74,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             ManageResultDataService manageResultDataService)
         {
             this.configuration = configuration;
-            this.httpClient = httpClient;
             this.sendingNotificationDataRepository = sendingNotificationDataRepository;
             this.globalSendingNotificationDataRepository = globalSendingNotificationDataRepository;
             this.userDataRepository = userDataRepository;
-            this.sentNotificationDataRepository = sentNotificationDataRepository;
             this.sendQueue = sendQueue;
-            this.dataQueue = dataQueue;
             this.getBotAccessTokenService = getBotAccessTokenService;
             this.createUserConversationService = createUserConversationService;
             this.sendNotificationService = sendNotificationService;
