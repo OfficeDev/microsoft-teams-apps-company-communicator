@@ -30,7 +30,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         {
             builder.Services.AddHttpClient();
 
-            // This option is injected as IOptions<RepositoryOptions>.
+            // This option is injected as IOptions<RepositoryOptions> and is used for setting
+            // up the repository dependencies.
             builder.Services.AddOptions<RepositoryOptions>()
                 .Configure<IConfiguration>((repositoryOptions, configuration) =>
                 {
