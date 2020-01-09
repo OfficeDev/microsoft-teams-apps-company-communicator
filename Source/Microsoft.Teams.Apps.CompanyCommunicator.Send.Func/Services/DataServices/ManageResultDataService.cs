@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
     using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
 
     /// <summary>
     /// The manage result data service.
@@ -15,14 +16,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
     public class ManageResultDataService
     {
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
+        private readonly DataQueue dataQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ManageResultDataService"/> class.
         /// </summary>
         /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
-        public ManageResultDataService(SentNotificationDataRepository sentNotificationDataRepository)
+        /// <param name="dataQueue">The data queue.</param>
+        public ManageResultDataService(
+            SentNotificationDataRepository sentNotificationDataRepository,
+            DataQueue dataQueue)
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository;
+            this.dataQueue = dataQueue;
         }
 
         /// <summary>
@@ -41,31 +47,93 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             bool isStatusCodeFromCreateConversation,
             HttpStatusCode statusCode)
         {
+            var currentDateTimeUtc = DateTime.UtcNow;
+
+            var sendDataQueueMessage = true;
+            var dataQueueMessageContent = new DataQueueMessageContent
+            {
+                NotificationId = notificationId,
+                SentDate = currentDateTimeUtc,
+                ResultType = DataQueueResultType.Failed, // Default in case it doesn't get set
+                ForceMessageComplete = false,
+            };
+
+            var existingSentNotificationDataEntity = await this.sentNotificationDataRepository
+                .GetAsync(partitionKey: notificationId, rowKey: aadId);
+
+            // Set initial values.
+            var allStatusCodeResults = $"{statusCode.ToString()},";
+            var numberOfAttemptsToSend = 1;
+
+            // Replace the initial values if, for some reason, the message has already been sent.
+            // This would be an unexpected case.
+            // NOTE: When the initial row is set up, the status code is set to 0. By verifying that the
+            // status code is no longer 0, it is checking to see if a message result has already been stored
+            // for this recipient.
+            if (existingSentNotificationDataEntity != null
+                && existingSentNotificationDataEntity.StatusCode != 0)
+            {
+                allStatusCodeResults = $"{existingSentNotificationDataEntity.AllStatusCodeResults}{statusCode.ToString()},";
+                numberOfAttemptsToSend = existingSentNotificationDataEntity.NumberOfAttemptsToSend + 1;
+
+                // Do not send message to data queue in order to not multi-count messages to users
+                sendDataQueueMessage = false;
+            }
+
             var updatedSentNotificationDataEntity = new SentNotificationDataEntity
             {
                 PartitionKey = notificationId,
                 RowKey = aadId,
                 AadId = aadId,
                 TotalNumberOfThrottles = totalNumberOfThrottles,
-                SentDate = DateTime.UtcNow,
+                SentDate = currentDateTimeUtc,
                 IsStatusCodeFromCreateConversation = isStatusCodeFromCreateConversation,
                 StatusCode = (int)statusCode,
+                AllStatusCodeResults = allStatusCodeResults,
+                NumberOfAttemptsToSend = numberOfAttemptsToSend,
             };
 
             if (statusCode == HttpStatusCode.Created)
             {
                 updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Succeeded;
+                dataQueueMessageContent.ResultType = DataQueueResultType.Succeeded;
             }
             else if (statusCode == HttpStatusCode.TooManyRequests)
             {
                 updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Throttled;
+                dataQueueMessageContent.ResultType = DataQueueResultType.Throttled;
+            }
+            else if (statusCode == HttpStatusCode.Continue)
+            {
+                // This is a special case where an exception was thrown in the function.
+                // The system will try to add the service bus message back to the queue and will try to
+                // send the notification again. For now, we will store the current state as "Failed" in
+                // the respository, but it should not send a message to the data queue because we do not
+                // want to count a failure when the next attempt may succeed. If the system tries to send
+                // the notification repeatedly and reaches the dead letter maximum number of attempts,
+                // then the system should send a "Failed" message to the data queue. In this case, the
+                // the status code will not be Continue.
+                updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Continued;
+                sendDataQueueMessage = false;
             }
             else
             {
                 updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Failed;
+                dataQueueMessageContent.ResultType = DataQueueResultType.Failed;
             }
 
-            await this.sentNotificationDataRepository.InsertOrMergeAsync(updatedSentNotificationDataEntity);
+            var sendDataQueueMessageTask = Task.CompletedTask;
+
+            if (sendDataQueueMessage)
+            {
+                sendDataQueueMessageTask = this.dataQueue.SendAsync(dataQueueMessageContent);
+            }
+
+            var saveSentNotificationDataEntityTask = this.sentNotificationDataRepository.InsertOrMergeAsync(updatedSentNotificationDataEntity);
+
+            await Task.WhenAll(
+                sendDataQueueMessageTask,
+                saveSentNotificationDataEntityTask);
         }
     }
 }
