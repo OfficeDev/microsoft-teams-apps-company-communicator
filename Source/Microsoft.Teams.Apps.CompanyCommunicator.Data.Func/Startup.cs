@@ -21,7 +21,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
         /// <inheritdoc/>
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            // This option is injected as IOptions<RepositoryOptions>.
+            // This option is injected as IOptions<RepositoryOptions> and is used for setting
+            // up the repository dependencies.
             builder.Services.AddOptions<RepositoryOptions>()
                 .Configure<IConfiguration>((repositoryOptions, configuration) =>
                 {
@@ -33,7 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                     configuration.Bind(repositoryOptions);
                 });
 
-            builder.Services.AddSingleton<SendingNotificationDataRepository>();
+            builder.Services.AddSingleton<NotificationDataRepository>();
         }
     }
 }

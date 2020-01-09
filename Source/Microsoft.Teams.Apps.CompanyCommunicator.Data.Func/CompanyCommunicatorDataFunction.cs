@@ -20,15 +20,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     /// </summary>
     public class CompanyCommunicatorDataFunction
     {
-        private static NotificationDataRepository notificationDataRepository = null;
+        private readonly IConfiguration configuration;
+        private readonly NotificationDataRepository notificationDataRepository;
 
-        private static IConfiguration configuration = null;
-
-        private enum DataQueueResultType
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CompanyCommunicatorDataFunction"/> class.
+        /// </summary>
+        /// <param name="configuration">The configuration.</param>
+        /// <param name="notificationDataRepository">The notification data repository.</param>
+        public CompanyCommunicatorDataFunction(
+            IConfiguration configuration,
+            NotificationDataRepository notificationDataRepository)
         {
-            Succeeded,
-            Throttled,
-            Failed,
+            this.configuration = configuration;
+            this.notificationDataRepository = notificationDataRepository;
         }
 
         /// <summary>
