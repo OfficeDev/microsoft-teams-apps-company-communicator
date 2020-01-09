@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -49,7 +50,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName("CompanyCommunicatorDataFunction")]
         public async Task Run(
-            [ServiceBusTrigger("company-communicator-data", Connection = "ServiceBusConnection")]
+            [ServiceBusTrigger(
+                DataQueue.QueueName,
+                Connection = DataQueue.ServiceBusConnectionConfigurationKey)]
             string myQueueItem,
             int deliveryCount,
             DateTime enqueuedTimeUtc,
@@ -57,25 +60,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             ILogger log,
             ExecutionContext context)
         {
-            CompanyCommunicatorDataFunction.configuration = CompanyCommunicatorDataFunction.configuration ??
-                new ConfigurationBuilder()
-                    .AddEnvironmentVariables()
-                    .Build();
+            var messageContent = JsonConvert.DeserializeObject<DataQueueMessageContent>(myQueueItem);
 
-            var messageContent = JsonConvert.DeserializeObject<ServiceBusDataQueueMessageContent>(myQueueItem);
-
-            CompanyCommunicatorDataFunction.notificationDataRepository = CompanyCommunicatorDataFunction.notificationDataRepository
-                ?? this.CreateNotificationRepository(CompanyCommunicatorDataFunction.configuration);
-
-            var notificationDataEntity = await CompanyCommunicatorDataFunction.notificationDataRepository.GetAsync(
+            var notificationDataEntity = await this.notificationDataRepository.GetAsync(
                 partitionKey: PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
                 rowKey: messageContent.NotificationId);
 
             // This is true if it is the delayed service bus message that ensures that the
-            // notification will eventually be marked complete
+            // notification will eventually be marked as complete.
             if (messageContent.ForceMessageComplete)
             {
-                // If the notification is already marked complete, then nothing needs to be done
+                // If the notification is already marked complete, then nothing needs to be done.
                 if (!notificationDataEntity.IsCompleted)
                 {
                     var incompleteTotalMessageCount = notificationDataEntity.Succeeded
@@ -141,54 +136,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             await CompanyCommunicatorDataFunction.notificationDataRepository.Table.ExecuteAsync(operation);
         }
 
-        private NotificationDataRepository CreateNotificationRepository(IConfiguration configuration)
-        {
-            var tableRowKeyGenerator = new TableRowKeyGenerator();
-            return new NotificationDataRepository(configuration, tableRowKeyGenerator, isFromAzureFunction: true);
-        }
+        ////CompanyCommunicatorDataFunction.notificationDataRepository = CompanyCommunicatorDataFunction.notificationDataRepository
+        ////        ?? this.CreateNotificationRepository(CompanyCommunicatorDataFunction.configuration);
 
-        private class ServiceBusDataQueueMessageContent
-        {
-            public string NotificationId { get; set; }
-
-            public DateTime? SentDate { get; set; }
-
-            public DataQueueResultType ResultType { get; set; }
-
-            public bool ForceMessageComplete { get; set; }
-        }
-
-        private class UpdateNotificationDataEntity : TableEntity
-        {
-            /// <summary>
-            /// Gets or sets the number of recipients who have received the notification successfully.
-            /// </summary>
-            public int? Succeeded { get; set; }
-
-            /// <summary>
-            /// Gets or sets the number of recipients who failed in receiving the notification.
-            /// </summary>
-            public int? Failed { get; set; }
-
-            /// <summary>
-            /// Gets or sets the number of recipients who were throttled out.
-            /// </summary>
-            public int? Throttled { get; set; }
-
-            /// <summary>
-            /// Gets or sets the number or recipients who have an unknown status.
-            /// </summary>
-            public int? Unknown { get; set; }
-
-            /// <summary>
-            /// Gets or sets a value indicating whether the sending process is completed or not.
-            /// </summary>
-            public bool? IsCompleted { get; set; }
-
-            /// <summary>
-            /// Gets or sets the Sent DateTime value.
-            /// </summary>
-            public DateTime? SentDate { get; set; }
-        }
+        ////private NotificationDataRepository CreateNotificationRepository(IConfiguration configuration)
+        ////{
+        ////    var tableRowKeyGenerator = new TableRowKeyGenerator();
+        ////    return new NotificationDataRepository(configuration, tableRowKeyGenerator, isFromAzureFunction: true);
+        ////}
     }
 }
