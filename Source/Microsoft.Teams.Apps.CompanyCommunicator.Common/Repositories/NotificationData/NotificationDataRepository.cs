@@ -7,7 +7,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Options;
 
     /// <summary>
@@ -18,18 +17,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationDataRepository"/> class.
         /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
-        /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
+        /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
         public NotificationDataRepository(
-            IConfiguration configuration,
-            TableRowKeyGenerator tableRowKeyGenerator,
-            IOptions<RepositoryOptions> repositoryOptions)
+            IOptions<RepositoryOptions> repositoryOptions,
+            TableRowKeyGenerator tableRowKeyGenerator)
             : base(
-                configuration,
-                PartitionKeyNames.NotificationDataTable.TableName,
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
-                repositoryOptions.Value.IsAzureFunction)
+                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                tableName: PartitionKeyNames.NotificationDataTable.TableName,
+                defaultPartitionKey: PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                isExpectedTableAlreadyExist: repositoryOptions.Value.IsExpectedTableAlreadyExist)
         {
             this.TableRowKeyGenerator = tableRowKeyGenerator;
         }

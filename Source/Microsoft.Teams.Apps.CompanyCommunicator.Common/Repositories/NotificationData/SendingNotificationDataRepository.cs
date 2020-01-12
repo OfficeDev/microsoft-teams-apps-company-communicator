@@ -4,7 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData
 {
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Options;
 
     /// <summary>
@@ -15,14 +14,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <summary>
         /// Initializes a new instance of the <see cref="SendingNotificationDataRepository"/> class.
         /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public SendingNotificationDataRepository(IConfiguration configuration, IOptions<RepositoryOptions> repositoryOptions)
+        public SendingNotificationDataRepository(IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                  configuration,
-                  PartitionKeyNames.NotificationDataTable.TableName,
-                  PartitionKeyNames.NotificationDataTable.SendingNotificationsPartition,
-                  repositoryOptions.Value.IsAzureFunction)
+                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                tableName: PartitionKeyNames.NotificationDataTable.TableName,
+                defaultPartitionKey: PartitionKeyNames.NotificationDataTable.SendingNotificationsPartition,
+                isExpectedTableAlreadyExist: repositoryOptions.Value.IsExpectedTableAlreadyExist)
         {
         }
     }

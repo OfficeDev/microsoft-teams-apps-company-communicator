@@ -7,7 +7,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Options;
 
     /// <summary>
@@ -18,14 +17,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamDataRepository"/> class.
         /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public TeamDataRepository(IConfiguration configuration, IOptions<RepositoryOptions> repositoryOptions)
+        public TeamDataRepository(IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                  configuration,
-                  PartitionKeyNames.TeamDataTable.TableName,
-                  PartitionKeyNames.TeamDataTable.TeamDataPartition,
-                  repositoryOptions.Value.IsAzureFunction)
+                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                tableName: PartitionKeyNames.TeamDataTable.TableName,
+                defaultPartitionKey: PartitionKeyNames.TeamDataTable.TeamDataPartition,
+                isExpectedTableAlreadyExist: repositoryOptions.Value.IsExpectedTableAlreadyExist)
         {
         }
 

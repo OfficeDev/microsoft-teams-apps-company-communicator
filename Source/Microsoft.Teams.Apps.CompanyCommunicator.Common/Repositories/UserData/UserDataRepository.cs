@@ -4,7 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
 {
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Options;
 
     /// <summary>
@@ -15,14 +14,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
         /// <summary>
         /// Initializes a new instance of the <see cref="UserDataRepository"/> class.
         /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public UserDataRepository(IConfiguration configuration, IOptions<RepositoryOptions> repositoryOptions)
+        public UserDataRepository(IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                configuration,
-                PartitionKeyNames.UserDataTable.TableName,
-                PartitionKeyNames.UserDataTable.UserDataPartition,
-                repositoryOptions.Value.IsAzureFunction)
+                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                tableName: PartitionKeyNames.UserDataTable.TableName,
+                defaultPartitionKey: PartitionKeyNames.UserDataTable.UserDataPartition,
+                isExpectedTableAlreadyExist: repositoryOptions.Value.IsExpectedTableAlreadyExist)
         {
         }
     }

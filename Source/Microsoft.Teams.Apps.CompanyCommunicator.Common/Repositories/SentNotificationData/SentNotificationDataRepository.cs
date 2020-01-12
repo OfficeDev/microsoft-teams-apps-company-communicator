@@ -7,7 +7,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
@@ -19,14 +18,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationDataRepository"/> class.
         /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public SentNotificationDataRepository(IConfiguration configuration, IOptions<RepositoryOptions> repositoryOptions)
+        public SentNotificationDataRepository(IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                configuration,
-                PartitionKeyNames.SentNotificationDataTable.TableName,
-                PartitionKeyNames.SentNotificationDataTable.DefaultPartition,
-                repositoryOptions.Value.IsAzureFunction)
+                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                tableName: PartitionKeyNames.SentNotificationDataTable.TableName,
+                defaultPartitionKey: PartitionKeyNames.SentNotificationDataTable.DefaultPartition,
+                isExpectedTableAlreadyExist: repositoryOptions.Value.IsExpectedTableAlreadyExist)
         {
         }
 

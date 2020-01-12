@@ -10,7 +10,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
-    using Microsoft.Extensions.Configuration;
 
     /// <summary>
     /// Base repository for the data stored in the Azure Table Storage.
@@ -24,25 +23,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseRepository{T}"/> class.
         /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
+        /// <param name="storageAccountConnectionString">The storage account connection string.</param>
         /// <param name="tableName">The name of the table in Azure Table Storage.</param>
         /// <param name="defaultPartitionKey">Default partition key value.</param>
-        /// <param name="isAzureFunction">Flag to show if created from Azure Function.</param>
+        /// <param name="isExpectedTableAlreadyExist">Flag to indicate if it is expected that the table already exists.</param>
         public BaseRepository(
-            IConfiguration configuration,
+            string storageAccountConnectionString,
             string tableName,
             string defaultPartitionKey,
-            bool isAzureFunction)
+            bool isExpectedTableAlreadyExist)
         {
-            var storageAccountConnectionString = configuration["StorageAccountConnectionString"];
             var storageAccount = CloudStorageAccount.Parse(storageAccountConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
             this.Table = tableClient.GetTableReference(tableName);
 
-            // If the repository object is created for an Azure Function, by that point in the process
+            // There are certain scenarios (e.g. Azure Functions), that by that point in the process
             // the table is expected to have already been created, so ensuring it is created does not need
-            // to be done. This cuts down on unnecessary failure calls in the request logs.
-            if (!isAzureFunction)
+            // to be done. Because ensuring it is created results in an error request in the logs if the table
+            // already exists (does not hurt anything, just clutters the failure logs), this check cuts down on
+            // unnecessary failure calls in the request logs.
+            if (!isExpectedTableAlreadyExist)
             {
                 this.Table.CreateIfNotExists();
             }

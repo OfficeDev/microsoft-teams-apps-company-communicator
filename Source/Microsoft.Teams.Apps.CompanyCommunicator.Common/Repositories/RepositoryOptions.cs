@@ -15,12 +15,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         public RepositoryOptions()
         {
             // Default this option to false.
-            this.IsAzureFunction = false;
+            this.IsExpectedTableAlreadyExist = false;
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the repository is for an Azure Function.
+        /// Gets or sets the storage account connection string.
         /// </summary>
-        public bool IsAzureFunction { get; set; }
+        public string StorageAccountConnectionString { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether it is expected that the table already exists.
+        /// </summary>
+        public bool IsExpectedTableAlreadyExist { get; set; }
     }
 }
