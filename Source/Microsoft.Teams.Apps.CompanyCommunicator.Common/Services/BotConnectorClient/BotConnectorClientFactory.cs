@@ -6,28 +6,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorC
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using Microsoft.Bot.Connector;
     using Microsoft.Bot.Connector.Authentication;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Bot connector client factory.
     /// </summary>
     public class BotConnectorClientFactory
     {
-        private const string MicrosoftAppIdKeyName = "MicrosoftAppId";
-        private const string MicrosoftAppPasswordKeyName = "MicrosoftAppPassword";
-        private readonly IConfiguration configuration;
+        private readonly string microsoftAppId;
+        private readonly string microsoftAppPassword;
         private readonly ConcurrentDictionary<string, ConnectorClient> serviceUrlToConnectorClientMap;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BotConnectorClientFactory"/> class.
         /// </summary>
-        /// <param name="configuration">Configuration service.</param>
-        public BotConnectorClientFactory(IConfiguration configuration)
+        /// <param name="botOptions">The bot options.</param>
+        public BotConnectorClientFactory(IOptions<BotOptions> botOptions)
         {
-            this.configuration = configuration;
+            this.microsoftAppId = botOptions.Value.MicrosoftAppId;
+            this.microsoftAppPassword = botOptions.Value.MicrosoftAppPassword;
             this.serviceUrlToConnectorClientMap = new ConcurrentDictionary<string, ConnectorClient>();
         }
 
@@ -42,13 +41,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorC
             {
                 MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
 
-                var botAppId = this.configuration[BotConnectorClientFactory.MicrosoftAppIdKeyName];
-                var botAppPassword = this.configuration[BotConnectorClientFactory.MicrosoftAppPasswordKeyName];
-
                 var connectorClient = new ConnectorClient(
                     new Uri(serviceUrl),
-                    botAppId,
-                    botAppPassword);
+                    this.microsoftAppId,
+                    this.microsoftAppPassword);
 
                 this.serviceUrlToConnectorClientMap.TryAdd(serviceUrl, connectorClient);
             }
