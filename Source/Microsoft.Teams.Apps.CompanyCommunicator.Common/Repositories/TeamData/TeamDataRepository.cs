@@ -23,7 +23,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
                 storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
                 tableName: PartitionKeyNames.TeamDataTable.TableName,
                 defaultPartitionKey: PartitionKeyNames.TeamDataTable.TeamDataPartition,
-                isExpectedTableAlreadyExist: repositoryOptions.Value.IsExpectedTableAlreadyExist)
+                isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }
 

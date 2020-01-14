@@ -26,12 +26,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// <param name="storageAccountConnectionString">The storage account connection string.</param>
         /// <param name="tableName">The name of the table in Azure Table Storage.</param>
         /// <param name="defaultPartitionKey">Default partition key value.</param>
-        /// <param name="isExpectedTableAlreadyExist">Flag to indicate if it is expected that the table already exists.</param>
+        /// <param name="isItExpectedThatTableAlreadyExists">Flag to indicate if it is expected that the table already exists.</param>
         public BaseRepository(
             string storageAccountConnectionString,
             string tableName,
             string defaultPartitionKey,
-            bool isExpectedTableAlreadyExist)
+            bool isItExpectedThatTableAlreadyExists)
         {
             var storageAccount = CloudStorageAccount.Parse(storageAccountConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
@@ -42,8 +42,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             // to be done. Because ensuring it is created results in an error request in the logs if the table
             // already exists (does not hurt anything, just clutters the failure logs), this check cuts down on
             // unnecessary failure calls in the request logs.
-            if (!isExpectedTableAlreadyExist)
+            if (!isItExpectedThatTableAlreadyExists)
             {
+                // Ensure table exists.
                 this.Table.CreateIfNotExists();
             }
 
