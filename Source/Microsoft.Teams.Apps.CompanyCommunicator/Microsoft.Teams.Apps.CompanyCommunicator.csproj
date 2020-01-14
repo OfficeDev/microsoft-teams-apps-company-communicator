@@ -10,13 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AdaptiveCards" Version="1.0.6" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.1" />
-    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="3.4.0" />
     <PackageReference Include="Microsoft.Bot.Builder.Integration.AspNet.Core" Version="4.4.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.AzureAD.UI" Version="2.1.1" />
     <PackageReference Include="Microsoft.Bot.Builder.Teams" Version="4.3.0-beta1" />
@@ -30,10 +27,6 @@
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
     <Content Remove="$(SpaRoot)**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="..\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
   </ItemGroup>
 
   <ItemGroup>

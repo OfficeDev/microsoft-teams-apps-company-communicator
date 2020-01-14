@@ -60,5 +60,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets the sending started date time.
         /// </summary>
         public DateTime? SendingStartedDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the notification is in the "preparing to send" state.
+        /// </summary>
+        public bool IsPreparingToSend { get; set; }
     }
 }

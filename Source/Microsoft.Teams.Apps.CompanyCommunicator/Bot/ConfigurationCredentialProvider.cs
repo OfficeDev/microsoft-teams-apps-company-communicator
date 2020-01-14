@@ -5,7 +5,8 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
     using Microsoft.Bot.Connector.Authentication;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
 
     /// <summary>
     /// This class implements ICredentialProvider, which is used by the bot framework to retrieve credential info.
@@ -15,9 +16,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationCredentialProvider"/> class.
         /// </summary>
-        /// <param name="configuration">IConfiguration instance.</param>
-        public ConfigurationCredentialProvider(IConfiguration configuration)
-            : base(configuration["MicrosoftAppId"], configuration["MicrosoftAppPassword"])
+        /// <param name="botOptions">The bot options.</param>
+        public ConfigurationCredentialProvider(IOptions<BotOptions> botOptions)
+            : base(
+                  appId: botOptions.Value.MicrosoftAppId,
+                  password: botOptions.Value.MicrosoftAppPassword)
         {
         }
     }

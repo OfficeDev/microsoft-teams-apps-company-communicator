@@ -8,12 +8,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+    using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
-    using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
 
     /// <summary>
     /// Register services in DI container, and set up middlewares in the pipeline.
@@ -42,8 +50,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         {
             services.AddApplicationInsightsTelemetry();
 
-            // Register auth services in DI container.
-            services.AddAuthentication(this.Configuration);
+            // Register authentication services.
+            var authenticationOptions = new AuthenticationOptions
+            {
+                AzureAd_ClientId = null,
+            };
+            services.AddAuthentication(authenticationOptions);
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -53,13 +65,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                 configuration.RootPath = "ClientApp/build";
             });
 
-            // Register bot services in DI container
-            services.AddBot();
+            // Register bot services.
+            services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
+            services.AddSingleton<CompanyCommunicatorBotAdapter>();
+            services.AddSingleton<CompanyCommunicatorBotFilterMiddleware>();
+            services.AddTransient<IBot, CompanyCommunicatorBot>();
+            services.AddTransient<TeamsDataCapture>();
 
-            // Register repository services in DI container
-            services.AddRepositories();
+            // Register repository services.
+            services.Configure<RepositoryOptions>(repositoryOptions =>
+            {
+                repositoryOptions.IsExpectedTableAlreadyExist = false;
+            });
+            services.AddSingleton<SendingNotificationDataRepository>();
+            services.AddSingleton<SentNotificationDataRepository>();
+            services.AddSingleton<NotificationDataRepository>();
+            services.AddSingleton<UserDataRepository>();
+            services.AddSingleton<TeamDataRepository>();
+            services.AddTransient<TableRowKeyGenerator>();
 
-            services.AddNotificationDelivery();
+            // Register draft notification preview services.
+            services.AddTransient<DraftNotificationPreviewService>();
+            services.AddTransient<AdaptiveCardCreator>();
+
+            // Register dependencies for sending a notification.
+            services.AddSingleton<PrepareToSendQueue>();
         }
 
         /// <summary>

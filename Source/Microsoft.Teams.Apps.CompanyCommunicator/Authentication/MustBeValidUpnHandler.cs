@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 
         /// <summary>
         /// Check whether a upn is valid or not.
-        /// This is where we should check against the valid list of UPNs
+        /// This is where we should check against the valid list of UPNs.
         /// </summary>
         /// <param name="context">Authorization handler context instance.</param>
         /// <returns>Indicate if a upn is valid or not.</returns>

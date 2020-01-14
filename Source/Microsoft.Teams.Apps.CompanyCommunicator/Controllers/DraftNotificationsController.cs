@@ -13,8 +13,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
-    using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
 
     /// <summary>

@@ -10,7 +10,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     using Microsoft.AspNetCore.Authentication.AzureAD.UI;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.IdentityModel.Tokens;
 
@@ -19,105 +18,98 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     /// </summary>
     public static class AuthenticationServiceCollectionExtensions
     {
-        private static readonly string ClientIdConfigurationSettingsKey = "AzureAd:ClientId";
-        private static readonly string TenantIdConfigurationSettingsKey = "AzureAd:TenantId";
-        private static readonly string ApplicationIdURIConfigurationSettingsKey = "AzureAd:ApplicationIdURI";
-        private static readonly string ValidIssuersConfigurationSettingsKey = "AzureAd:ValidIssuers";
-
         /// <summary>
         /// Extension method to register the authentication services.
         /// </summary>
         /// <param name="services">IServiceCollection instance.</param>
-        /// <param name="configuration">IConfiguration instance.</param>
-        public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+        /// <param name="authenticationOptions">The authentication options.</param>
+        public static void AddAuthentication(
+            this IServiceCollection services,
+            AuthenticationOptions authenticationOptions)
         {
-            RegisterAuthenticationServices(services, configuration);
+            AuthenticationServiceCollectionExtensions.RegisterAuthenticationServices(services, authenticationOptions);
 
-            RegisterAuthorizationPolicy(services);
+            AuthenticationServiceCollectionExtensions.RegisterAuthorizationPolicy(services);
         }
 
         // This method works specifically for single tenant application.
         private static void RegisterAuthenticationServices(
             IServiceCollection services,
-            IConfiguration configuration)
+            AuthenticationOptions authenticationOptions)
         {
-            AuthenticationServiceCollectionExtensions.ValidateAuthenticationConfigurationSettings(configuration);
+            AuthenticationServiceCollectionExtensions.ValidateAuthenticationOptions(authenticationOptions);
 
             services.AddAuthentication(options => { options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; })
                 .AddJwtBearer(options =>
                 {
                     var azureADOptions = new AzureADOptions();
-                    configuration.Bind("AzureAd", azureADOptions);
+                    azureADOptions.ClientId = authenticationOptions.AzureAd_ClientId;
+                    azureADOptions.TenantId = authenticationOptions.AzureAd_TenantId;
+
                     options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(configuration),
-                        ValidIssuers = AuthenticationServiceCollectionExtensions.GetValidIssuers(configuration),
+                        ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(authenticationOptions),
+                        ValidIssuers = AuthenticationServiceCollectionExtensions.GetValidIssuers(authenticationOptions),
                         AudienceValidator = AuthenticationServiceCollectionExtensions.AudienceValidator,
                     };
                 });
         }
 
-        private static void ValidateAuthenticationConfigurationSettings(IConfiguration configuration)
+        private static void ValidateAuthenticationOptions(AuthenticationOptions authenticationOptions)
         {
-            var clientId = configuration[AuthenticationServiceCollectionExtensions.ClientIdConfigurationSettingsKey];
-            if (string.IsNullOrWhiteSpace(clientId))
+            if (string.IsNullOrWhiteSpace(authenticationOptions?.AzureAd_ClientId))
             {
-                throw new ApplicationException("AzureAD ClientId is missing in the configuration file.");
+                throw new ApplicationException("AzureAd ClientId is missing in the configuration file.");
             }
 
-            var tenantId = configuration[AuthenticationServiceCollectionExtensions.TenantIdConfigurationSettingsKey];
-            if (string.IsNullOrWhiteSpace(tenantId))
+            if (string.IsNullOrWhiteSpace(authenticationOptions?.AzureAd_TenantId))
             {
-                throw new ApplicationException("AzureAD TenantId is missing in the configuration file.");
+                throw new ApplicationException("AzureAd TenantId is missing in the configuration file.");
             }
 
-            var applicationIdURI = configuration[AuthenticationServiceCollectionExtensions.ApplicationIdURIConfigurationSettingsKey];
-            if (string.IsNullOrWhiteSpace(applicationIdURI))
+            if (string.IsNullOrWhiteSpace(authenticationOptions?.AzureAd_ApplicationIdURI))
             {
-                throw new ApplicationException("AzureAD ApplicationIdURI is missing in the configuration file.");
+                throw new ApplicationException("AzureAd ApplicationIdURI is missing in the configuration file.");
             }
 
-            var validIssuers = configuration[AuthenticationServiceCollectionExtensions.ValidIssuersConfigurationSettingsKey];
-            if (string.IsNullOrWhiteSpace(validIssuers))
+            if (string.IsNullOrWhiteSpace(authenticationOptions?.AzureAd_ValidIssuers))
             {
-                throw new ApplicationException("AzureAD ValidIssuers is missing in the configuration file.");
+                throw new ApplicationException("AzureAd ValidIssuers is missing in the configuration file.");
             }
         }
 
-        private static IEnumerable<string> GetSettings(IConfiguration configuration, string configurationSettingsKey)
+        private static IEnumerable<string> SplitAuthenticationOptionsList(string stringInAuthenticationOptions)
         {
-            var configurationSettingsValue = configuration[configurationSettingsKey];
-            var settings = configurationSettingsValue
+            var settings = stringInAuthenticationOptions
                 ?.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
                 ?.Select(p => p.Trim());
             if (settings == null)
             {
-                throw new ApplicationException($"{configurationSettingsKey} does not contain a valid value in the configuration file.");
+                throw new ApplicationException($"Invalid list of settings in authenticaiton options.");
             }
 
             return settings;
         }
 
-        private static IEnumerable<string> GetValidAudiences(IConfiguration configuration)
+        private static IEnumerable<string> GetValidAudiences(AuthenticationOptions authenticationOptions)
         {
-            var clientId = configuration[AuthenticationServiceCollectionExtensions.ClientIdConfigurationSettingsKey];
-
-            var applicationIdURI = configuration[AuthenticationServiceCollectionExtensions.ApplicationIdURIConfigurationSettingsKey];
-
-            var validAudiences = new List<string> { clientId, applicationIdURI.ToLower() };
+            var validAudiences = new List<string>
+            {
+                authenticationOptions.AzureAd_ClientId,
+                authenticationOptions.AzureAd_ApplicationIdURI.ToLower(),
+            };
 
             return validAudiences;
         }
 
-        private static IEnumerable<string> GetValidIssuers(IConfiguration configuration)
+        private static IEnumerable<string> GetValidIssuers(AuthenticationOptions authenticationOptions)
         {
-            var tenantId = configuration[AuthenticationServiceCollectionExtensions.TenantIdConfigurationSettingsKey];
+            var tenantId = authenticationOptions.AzureAd_TenantId;
 
             var validIssuers =
-                AuthenticationServiceCollectionExtensions.GetSettings(
-                    configuration,
-                    AuthenticationServiceCollectionExtensions.ValidIssuersConfigurationSettingsKey);
+                AuthenticationServiceCollectionExtensions.SplitAuthenticationOptionsList(
+                    authenticationOptions.AzureAd_ValidIssuers);
 
             validIssuers = validIssuers.Select(validIssuer => validIssuer.Replace("TENANT_ID", tenantId));
 
