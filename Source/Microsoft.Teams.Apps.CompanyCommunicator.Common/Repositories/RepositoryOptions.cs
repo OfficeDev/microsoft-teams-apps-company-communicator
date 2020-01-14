@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 {
     /// <summary>
-    /// Options class used for creating repositories.
+    /// Options used for creating repositories.
     /// </summary>
     public class RepositoryOptions
     {

@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
 {
     /// <summary>
-    /// Options class used for holding metadata for the bot.
+    /// Options used for holding metadata for the bot.
     /// </summary>
     public class BotOptions
     {

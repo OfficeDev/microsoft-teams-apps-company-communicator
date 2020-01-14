@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
 {
     /// <summary>
-    /// Options class used for creating service bus message queues.
+    /// Options used for creating service bus message queues.
     /// </summary>
     public class MessageQueueOptions
     {
