@@ -17,8 +17,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
         public string NotificationId { get; set; }
 
         /// <summary>
-        /// Gets or sets the user data entity value
-        /// This can be a team.id
+        /// Gets or sets the user data entity value.
+        /// This can hold data for a team and contain a team.id.
         /// </summary>
         public UserDataEntity UserDataEntity { get; set; }
     }

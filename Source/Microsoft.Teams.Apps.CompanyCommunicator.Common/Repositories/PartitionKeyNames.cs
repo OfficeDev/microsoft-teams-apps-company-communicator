@@ -15,7 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         public static class UserDataTable
         {
             /// <summary>
-            /// Table name for user data table
+            /// Table name for user data table.
             /// </summary>
             public static readonly string TableName = "UserData";
 
@@ -31,7 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         public static class TeamDataTable
         {
             /// <summary>
-            /// Table name for team data table
+            /// Table name for team data table.
             /// </summary>
             public static readonly string TableName = "TeamData";
 
@@ -47,7 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         public static class NotificationDataTable
         {
             /// <summary>
-            /// Table name for notification data table
+            /// Table name for notification data table.
             /// </summary>
             public static readonly string TableName = "NotificationData";
 
@@ -78,7 +78,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         public static class SentNotificationDataTable
         {
             /// <summary>
-            /// Table name for sent notification data table
+            /// Table name for sent notification data table.
             /// </summary>
             public static readonly string TableName = "SentNotificationData";
 

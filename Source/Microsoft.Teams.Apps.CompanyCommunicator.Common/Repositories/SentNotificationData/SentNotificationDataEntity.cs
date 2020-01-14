@@ -71,7 +71,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public int NumberOfAttemptsToSend { get; set; }
 
         /// <summary>
-        /// Gets or sets the delivery status
+        /// Gets or sets the delivery status.
         /// </summary>
         public string DeliveryStatus { get; set; }
 

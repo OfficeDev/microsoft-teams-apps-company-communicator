@@ -70,7 +70,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// <summary>
         /// Insert or merge an entity in the table storage.
         /// </summary>
-        /// <param name="entity">Entity to be inserted or merged</param>
+        /// <param name="entity">Entity to be inserted or merged.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         public async Task InsertOrMergeAsync(T entity)
         {
