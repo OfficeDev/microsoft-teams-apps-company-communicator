@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 {
     /// <summary>
-    /// Options used for creating the authentication.
+    /// Options used for setting up the authentication.
     /// </summary>
     public class AuthenticationOptions
     {
