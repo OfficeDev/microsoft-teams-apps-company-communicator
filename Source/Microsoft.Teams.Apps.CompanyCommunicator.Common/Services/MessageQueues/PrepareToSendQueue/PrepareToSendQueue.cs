@@ -2,9 +2,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue
 {
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// The message queue service connected to the "company-communicator-preapretosend" queue in Azure service bus.
@@ -19,9 +19,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
         /// <summary>
         /// Initializes a new instance of the <see cref="PrepareToSendQueue"/> class.
         /// </summary>
-        /// <param name="configuration">ASP.NET Core <see cref="IConfiguration"/> instance.</param>
-        public PrepareToSendQueue(IConfiguration configuration)
-            : base(configuration, PrepareToSendQueue.QueueName)
+        /// <param name="messageQueueOptions">The message queue options.</param>
+        public PrepareToSendQueue(IOptions<MessageQueueOptions> messageQueueOptions)
+            : base(
+                  serviceBusConnectionString: messageQueueOptions.Value.ServiceBusConnection,
+                  queueName: PrepareToSendQueue.QueueName)
         {
         }
     }

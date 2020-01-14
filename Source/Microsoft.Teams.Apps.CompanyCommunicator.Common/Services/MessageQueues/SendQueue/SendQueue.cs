@@ -2,9 +2,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue
 {
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// The message queue service connected to the "company-communicator-send" queue in Azure service bus.
@@ -19,9 +19,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
         /// <summary>
         /// Initializes a new instance of the <see cref="SendQueue"/> class.
         /// </summary>
-        /// <param name="configuration">ASP.NET Core <see cref="IConfiguration"/> instance.</param>
-        public SendQueue(IConfiguration configuration)
-            : base(configuration, SendQueue.QueueName)
+        /// <param name="messageQueueOptions">The message queue options.</param>
+        public SendQueue(IOptions<MessageQueueOptions> messageQueueOptions)
+            : base(
+                  serviceBusConnectionString: messageQueueOptions.Value.ServiceBusConnection,
+                  queueName: SendQueue.QueueName)
         {
         }
     }

@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
 {
     using System;
     using System.Collections.Generic;
@@ -30,19 +30,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue
         /// </summary>
         public static readonly int MaxNumberOfMessagesInBatchRequest = 100;
 
-        private readonly IConfiguration configuration;
         private readonly MessageSender messageSender;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseQueue{T}"/> class.
         /// </summary>
-        /// <param name="configuration">ASP.NET Core <see cref="IConfiguration"/> instance.</param>
+        /// <param name="serviceBusConnectionString">The service bus connection string.</param>
         /// <param name="queueName">Azure service bus queue's name.</param>
-        public BaseQueue(IConfiguration configuration, string queueName)
+        public BaseQueue(string serviceBusConnectionString, string queueName)
         {
-            this.configuration = configuration;
-            var serviceBusConnectionString =
-                configuration[BaseQueue<T>.ServiceBusConnectionConfigurationKey];
             this.messageSender = new MessageSender(serviceBusConnectionString, queueName);
         }
 
