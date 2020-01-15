@@ -60,11 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<SendQueue>();
             builder.Services.AddSingleton<DataQueue>();
 
-
-
             builder.Services.AddTransient<AdaptiveCardCreator>();
-
-
 
             builder.Services.AddTransient<PreparingToSendOrchestration>();
             builder.Services.AddTransient<GetRecipientDataListForAllUsersActivity>();

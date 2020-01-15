@@ -141,7 +141,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
             return null;
 
-
             ////var connectorClient = this.botConnectorClientFactory.Create(serviceUrl);
 
             ////var members = await connectorClient.Conversations.GetConversationMembersAsync(teamId);
