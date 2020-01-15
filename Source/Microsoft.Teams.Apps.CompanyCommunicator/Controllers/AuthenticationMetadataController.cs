@@ -9,7 +9,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using System.Linq;
     using System.Web;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
 
     /// <summary>
     /// Controller for the authentication sign in data.
@@ -23,11 +24,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticationMetadataController"/> class.
         /// </summary>
-        /// <param name="configuration">IConfiguration instance.</param>
-        public AuthenticationMetadataController(IConfiguration configuration)
+        /// <param name="authenticationOptions">The authentication options.</param>
+        public AuthenticationMetadataController(IOptions<AuthenticationOptions> authenticationOptions)
         {
-            this.tenantId = configuration["AzureAd:TenantId"];
-            this.clientId = configuration["AzureAd:ClientId"];
+            this.tenantId = authenticationOptions.Value.AzureAd_TenantId;
+            this.clientId = authenticationOptions.Value.AzureAd_ClientId;
         }
 
         /// <summary>

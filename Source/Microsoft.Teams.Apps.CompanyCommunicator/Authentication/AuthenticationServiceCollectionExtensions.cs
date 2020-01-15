@@ -43,8 +43,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                 .AddJwtBearer(options =>
                 {
                     var azureADOptions = new AzureADOptions();
-                    azureADOptions.ClientId = authenticationOptions.AzureAd_ClientId;
+                    azureADOptions.Instance = authenticationOptions.AzureAd_Instance;
                     azureADOptions.TenantId = authenticationOptions.AzureAd_TenantId;
+                    azureADOptions.ClientId = authenticationOptions.AzureAd_ClientId;
 
                     options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
                     options.TokenValidationParameters = new TokenValidationParameters

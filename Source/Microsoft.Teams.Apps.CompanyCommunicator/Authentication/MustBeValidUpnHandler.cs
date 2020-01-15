@@ -10,24 +10,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     using System.Security.Claims;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// This class is an authorization handler, which handles the authorization requirement.
     /// </summary>
     public class MustBeValidUpnHandler : AuthorizationHandler<MustBeValidUpnRequirement>
     {
-        private readonly bool disableAuthentication;
+        private readonly bool disableMustBeValidUpnCheck;
         private readonly HashSet<string> validUpnSet;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MustBeValidUpnHandler"/> class.
         /// </summary>
-        /// <param name="configuration">ASP.NET Core <see cref="IConfiguration"/> instance.</param>
-        public MustBeValidUpnHandler(IConfiguration configuration)
+        /// <param name="authenticationOptions">The authentication options.</param>
+        public MustBeValidUpnHandler(IOptions<AuthenticationOptions> authenticationOptions)
         {
-            this.disableAuthentication = configuration.GetValue<bool>("DisableAuthentication", false);
-            var validUpns = configuration.GetValue<string>("ValidUpns", string.Empty);
+            this.disableMustBeValidUpnCheck = authenticationOptions.Value.DisableMustBeValidUpnCheck;
+            var validUpns = authenticationOptions.Value.ValidUpns;
             this.validUpnSet = validUpns
                 ?.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
                 ?.Select(p => p.Trim())
@@ -45,7 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             AuthorizationHandlerContext context,
             MustBeValidUpnRequirement requirement)
         {
-            if (this.disableAuthentication || this.IsValidUpn(context))
+            if (this.disableMustBeValidUpnCheck || this.IsValidUpn(context))
             {
                 context.Succeed(requirement);
             }

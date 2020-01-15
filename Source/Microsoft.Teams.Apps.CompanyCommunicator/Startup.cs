@@ -19,7 +19,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
 
@@ -53,12 +55,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             // Register authentication services.
             var authenticationOptions = new AuthenticationOptions
             {
-                AzureAd_ClientId = null,
+                // NOTE: This AzureAd:Instance configuration setting does not need to be
+                // overridden by any deployment specific value. It can stay the default value
+                // that is set in the project's configuration.
+                AzureAd_Instance = this.Configuration.GetValue<string>("AzureAd:Instance"),
+
+                AzureAd_TenantId = this.Configuration.GetValue<string>("AzureAd:TenantId"),
+                AzureAd_ClientId = this.Configuration.GetValue<string>("AzureAd:ClientId"),
+                AzureAd_ApplicationIdURI = this.Configuration.GetValue<string>("AzureAd:ApplicationIdURI"),
+
+                // NOTE: This AzureAd:ValidIssuers configuration setting does not need to be
+                // overridden by any deployment specific value. It can stay the default value
+                // that is set in the project's configuration.
+                AzureAd_ValidIssuers = this.Configuration.GetValue<string>("AzureAd:ValidIssuers"),
+
+                DisableMustBeValidUpnCheck = this.Configuration.GetValue<bool>("DisableMustBeValidUpnCheck", false),
+                ValidUpns = this.Configuration.GetValue<string>("ValidUpns"),
             };
+            services.AddOptions<AuthenticationOptions>().Configure(authenticationOptionsToConfigure =>
+            {
+                authenticationOptionsToConfigure = authenticationOptions;
+            });
             services.AddAuthentication(authenticationOptions);
 
+            // Setup MVC.
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            // Setup SPA static files.
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
@@ -66,29 +89,54 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             });
 
             // Register bot services.
+            services.AddOptions<BotOptions>()
+                .Configure<IConfiguration>((botOptions, configuration) =>
+                {
+                    botOptions.MicrosoftAppId = this.Configuration.GetValue<string>("MicrosoftAppId");
+                    botOptions.MicrosoftAppPassword = this.Configuration.GetValue<string>("MicrosoftAppPassword");
+                });
             services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
-            services.AddSingleton<CompanyCommunicatorBotAdapter>();
+            services.AddOptions<BotFilterMiddlewareOptions>()
+                .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>
+                {
+                    botFilterMiddlewareOptions.DisableTenantFilter =
+                        this.Configuration.GetValue<bool>("DisableTenantFilter", false);
+                    botFilterMiddlewareOptions.AllowedTenants =
+                        this.Configuration.GetValue<string>("AllowedTenants");
+                });
             services.AddSingleton<CompanyCommunicatorBotFilterMiddleware>();
-            services.AddTransient<IBot, CompanyCommunicatorBot>();
+            services.AddSingleton<CompanyCommunicatorBotAdapter>();
             services.AddTransient<TeamsDataCapture>();
+            services.AddTransient<IBot, CompanyCommunicatorBot>();
 
             // Register repository services.
-            services.Configure<RepositoryOptions>(repositoryOptions =>
-            {
-                repositoryOptions.IsExpectedTableAlreadyExist = false;
-            });
-            services.AddSingleton<SendingNotificationDataRepository>();
-            services.AddSingleton<SentNotificationDataRepository>();
-            services.AddSingleton<NotificationDataRepository>();
-            services.AddSingleton<UserDataRepository>();
+            services.AddOptions<RepositoryOptions>()
+                .Configure<IConfiguration>((repositoryOptions, configuration) =>
+                {
+                    repositoryOptions.StorageAccountConnectionString =
+                        this.Configuration.GetValue<string>("StorageAccountConnectionString");
+
+                    // Setting this to false because the main app should ensure that all
+                    // tables exist.
+                    repositoryOptions.IsItExpectedThatTableAlreadyExists = false;
+                });
             services.AddSingleton<TeamDataRepository>();
+            services.AddSingleton<UserDataRepository>();
+            services.AddSingleton<SentNotificationDataRepository>();
             services.AddTransient<TableRowKeyGenerator>();
+            services.AddSingleton<NotificationDataRepository>();
 
             // Register draft notification preview services.
-            services.AddTransient<DraftNotificationPreviewService>();
             services.AddTransient<AdaptiveCardCreator>();
+            services.AddTransient<DraftNotificationPreviewService>();
 
             // Register dependencies for sending a notification.
+            services.AddOptions<MessageQueueOptions>()
+                .Configure<IConfiguration>((messageQueueOptions, configuration) =>
+                {
+                    messageQueueOptions.ServiceBusConnection =
+                        this.Configuration.GetValue<string>("ServiceBusConnection");
+                });
             services.AddSingleton<PrepareToSendQueue>();
         }
 
