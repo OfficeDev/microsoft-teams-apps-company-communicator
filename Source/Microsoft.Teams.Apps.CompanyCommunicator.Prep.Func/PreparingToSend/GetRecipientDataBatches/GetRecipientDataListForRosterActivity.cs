@@ -6,12 +6,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Bot.Connector;
+    using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -22,7 +21,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorClient;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
-    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// This class contains the "get recipient data list for roster" durable activity.
@@ -132,14 +130,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                     Id = teamId,
                 },
             };
-            await this.commonBotAdapter.ContinueConversationAsync(this.microsoftAppId, conversationReference,
+            await this.commonBotAdapter.ContinueConversationAsync(
+                this.microsoftAppId,
+                conversationReference,
                 async (turnContext, cancellationToken) =>
                 {
                     var members = await TeamsInfo.GetMembersAsync(turnContext, cancellationToken);
                 },
                 CancellationToken.None);
 
-
+            return null;
 
 
             ////var connectorClient = this.botConnectorClientFactory.Create(serviceUrl);
