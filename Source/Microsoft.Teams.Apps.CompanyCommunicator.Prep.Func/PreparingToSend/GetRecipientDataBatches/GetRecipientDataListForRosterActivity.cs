@@ -6,6 +6,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -19,15 +20,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.BotConnectorClient;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// This class contains the "get recipient data list for roster" durable activity.
     /// </summary>
     public class GetRecipientDataListForRosterActivity
     {
-        private readonly BotConnectorClientFactory botConnectorClientFactory;
         private readonly CommonBotAdapter commonBotAdapter;
         private readonly string microsoftAppId;
         private readonly NotificationDataRepository notificationDataRepository;
@@ -36,19 +36,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientDataListForRosterActivity"/> class.
         /// </summary>
-        /// <param name="botConnectorClientFactory">Bot connector client factory.</param>
         /// <param name="commonBotAdapter">The common bot adapter.</param>
         /// <param name="botOptions">The bot options.</param>
         /// <param name="notificationDataRepository">Notification data repository.</param>
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         public GetRecipientDataListForRosterActivity(
-            BotConnectorClientFactory botConnectorClientFactory,
             CommonBotAdapter commonBotAdapter,
             IOptions<BotOptions> botOptions,
             NotificationDataRepository notificationDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository)
         {
-            this.botConnectorClientFactory = botConnectorClientFactory;
             this.commonBotAdapter = commonBotAdapter;
             this.microsoftAppId = botOptions.Value.MicrosoftAppId;
             this.notificationDataRepository = notificationDataRepository;
@@ -130,41 +127,43 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                     Id = teamId,
                 },
             };
+
+            IEnumerable<UserDataEntity> userDataEntitiesResult = null;
+
             await this.commonBotAdapter.ContinueConversationAsync(
                 this.microsoftAppId,
                 conversationReference,
                 async (turnContext, cancellationToken) =>
                 {
                     var members = await TeamsInfo.GetMembersAsync(turnContext, cancellationToken);
+
+                    userDataEntitiesResult = members.Select(member =>
+                    {
+                        var userDataEntity = new UserDataEntity
+                        {
+                            UserId = member.Id,
+                            Name = member.Name,
+                        };
+
+                        // Set the conversation ID to null because it is not known at this time and
+                        // may not have been created yet.
+                        userDataEntity.ConversationId = null;
+                        userDataEntity.ServiceUrl = serviceUrl;
+                        userDataEntity.Email = member.Email;
+                        userDataEntity.Upn = member.UserPrincipalName;
+                        userDataEntity.AadId = member.AadObjectId;
+
+                        if (member.Properties is JObject jObject)
+                        {
+                            userDataEntity.TenantId = jObject["tenantId"].ToString();
+                        }
+
+                        return userDataEntity;
+                    });
                 },
                 CancellationToken.None);
 
-            return null;
-
-            ////var connectorClient = this.botConnectorClientFactory.Create(serviceUrl);
-
-            ////var members = await connectorClient.Conversations.GetConversationMembersAsync(teamId);
-
-            ////return members.Select(member =>
-            ////{
-            ////    var userDataEntity = new UserDataEntity
-            ////    {
-            ////        UserId = member.Id,
-            ////        Name = member.Name,
-            ////    };
-
-            ////    if (member.Properties is JObject jObject)
-            ////    {
-            ////        userDataEntity.Email = jObject["email"]?.ToString();
-            ////        userDataEntity.Upn = jObject["userPrincipalName"]?.ToString();
-            ////        userDataEntity.AadId = jObject["objectId"].ToString();
-            ////        userDataEntity.TenantId = jObject["tenantId"].ToString();
-            ////        userDataEntity.ConversationId = null;
-            ////        userDataEntity.ServiceUrl = serviceUrl;
-            ////    }
-
-            ////    return userDataEntity;
-            ////});
+            return userDataEntitiesResult;
         }
     }
 }
