@@ -22,26 +22,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
         /// <inheritdoc/>
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            // This option is injected as IOptions<RepositoryOptions> and is used for setting
-            // up the repository dependencies.
+            // Add all options set from configuration values.
             builder.Services.AddOptions<RepositoryOptions>()
                 .Configure<IConfiguration>((repositoryOptions, configuration) =>
                 {
-                    // Set the default to indicate this is an Azure Function.
-                    repositoryOptions.IsAzureFunction = true;
+                    repositoryOptions.StorageAccountConnectionString =
+                        configuration.GetValue<string>("StorageAccountConnectionString");
 
-                    // Bind any matching configuration settings to corresponding
-                    // values in the options.
-                    configuration.Bind(repositoryOptions);
+                    // Defaulting this value to true because the main app should ensure all
+                    // tables exist. It is here as a possible configuration setting in
+                    // case it needs to be set differently.
+                    repositoryOptions.IsItExpectedThatTableAlreadyExists =
+                        configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
                 });
 
-            // Needed for the NotificationDataRepository
-            builder.Services.AddSingleton<TableRowKeyGenerator>();
+            // Add notification data services.
+            builder.Services.AddTransient<UpdateCountsInNotificationDataService>();
+            builder.Services.AddTransient<ForceCompleteNotificationDataService>();
 
+            // Add repositories.
             builder.Services.AddSingleton<NotificationDataRepository>();
 
-            builder.Services.AddTransient<ForceCompleteNotificationDataService>();
-            builder.Services.AddTransient<UpdateCountsInNotificationDataService>();
+            // Add miscellaneous dependencies.
+            builder.Services.AddSingleton<TableRowKeyGenerator>();
         }
     }
 }
