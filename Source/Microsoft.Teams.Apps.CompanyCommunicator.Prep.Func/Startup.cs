@@ -74,6 +74,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
             builder.Services.AddTransient<HandleFailureActivity>();
 
+            // Add bot services.
+            builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
+            builder.Services.AddSingleton<CommonBotAdapter>();
+
             // Add repositories.
             builder.Services.AddSingleton<NotificationDataRepository>();
             builder.Services.AddSingleton<SendingNotificationDataRepository>();
@@ -83,10 +87,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 
             // Add service bus message queues.
             builder.Services.AddSingleton<SendQueue>();
-
-            // Add bot dependencies.
-            builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
-            builder.Services.AddSingleton<CommonBotAdapter>();
 
             // Add miscellaneous dependencies.
             builder.Services.AddTransient<TableRowKeyGenerator>();
