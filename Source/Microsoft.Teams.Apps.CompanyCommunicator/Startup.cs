@@ -50,9 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         /// <param name="services">IServiceCollection instance.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddApplicationInsightsTelemetry();
-
-            // Register authentication services.
+            // Add all options set from configuration values.
             var authenticationOptions = new AuthenticationOptions
             {
                 // NOTE: This AzureAd:Instance configuration setting does not need to be
@@ -76,26 +74,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             {
                 authenticationOptionsToConfigure = authenticationOptions;
             });
-            services.AddAuthentication(authenticationOptions);
-
-            // Setup MVC.
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
-            // Setup SPA static files.
-            // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
-
-            // Register bot services.
             services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
                     botOptions.MicrosoftAppId = this.Configuration.GetValue<string>("MicrosoftAppId");
                     botOptions.MicrosoftAppPassword = this.Configuration.GetValue<string>("MicrosoftAppPassword");
                 });
-            services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>
                 {
@@ -104,12 +88,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     botFilterMiddlewareOptions.AllowedTenants =
                         this.Configuration.GetValue<string>("AllowedTenants");
                 });
-            services.AddSingleton<CompanyCommunicatorBotFilterMiddleware>();
-            services.AddSingleton<CompanyCommunicatorBotAdapter>();
-            services.AddTransient<TeamsDataCapture>();
-            services.AddTransient<IBot, CompanyCommunicatorBot>();
-
-            // Register repository services.
             services.AddOptions<RepositoryOptions>()
                 .Configure<IConfiguration>((repositoryOptions, configuration) =>
                 {
@@ -120,24 +98,51 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     // tables exist.
                     repositoryOptions.IsItExpectedThatTableAlreadyExists = false;
                 });
-            services.AddSingleton<TeamDataRepository>();
-            services.AddSingleton<UserDataRepository>();
-            services.AddSingleton<SentNotificationDataRepository>();
-            services.AddTransient<TableRowKeyGenerator>();
-            services.AddSingleton<NotificationDataRepository>();
-
-            // Register draft notification preview services.
-            services.AddTransient<AdaptiveCardCreator>();
-            services.AddTransient<DraftNotificationPreviewService>();
-
-            // Register dependencies for sending a notification.
             services.AddOptions<MessageQueueOptions>()
                 .Configure<IConfiguration>((messageQueueOptions, configuration) =>
                 {
                     messageQueueOptions.ServiceBusConnection =
                         this.Configuration.GetValue<string>("ServiceBusConnection");
                 });
+
+            // Add authentication services.
+            services.AddAuthentication(authenticationOptions);
+
+            // Setup MVC.
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            // Setup SPA static files.
+            // In production, the React files will be served from this directory.
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "ClientApp/build";
+            });
+
+            // Add bot services.
+            services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
+            services.AddSingleton<CompanyCommunicatorBotFilterMiddleware>();
+            services.AddSingleton<CompanyCommunicatorBotAdapter>();
+            services.AddTransient<TeamsDataCapture>();
+            services.AddTransient<IBot, CompanyCommunicatorBot>();
+
+            // Add repositories.
+            services.AddSingleton<TeamDataRepository>();
+            services.AddSingleton<UserDataRepository>();
+            services.AddSingleton<SentNotificationDataRepository>();
+            services.AddSingleton<NotificationDataRepository>();
+
+            // Add service bus message queues.
             services.AddSingleton<PrepareToSendQueue>();
+
+            // Add draft notification preview services.
+            services.AddTransient<DraftNotificationPreviewService>();
+
+            // Add Application Insights telemetry.
+            services.AddApplicationInsightsTelemetry();
+
+            // Add miscellaneous dependencies.
+            services.AddTransient<TableRowKeyGenerator>();
+            services.AddTransient<AdaptiveCardCreator>();
         }
 
         /// <summary>
