@@ -33,7 +33,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
         /// <inheritdoc/>
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            // Add repositories.
+            // Add all options set from configuration values.
             builder.Services.AddOptions<RepositoryOptions>()
                 .Configure<IConfiguration>((repositoryOptions, configuration) =>
                 {
@@ -46,25 +46,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                     repositoryOptions.IsItExpectedThatTableAlreadyExists =
                         configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
                 });
-            builder.Services.AddTransient<TableRowKeyGenerator>();
-            builder.Services.AddSingleton<NotificationDataRepository>();
-            builder.Services.AddSingleton<SendingNotificationDataRepository>();
-            builder.Services.AddSingleton<SentNotificationDataRepository>();
-            builder.Services.AddSingleton<UserDataRepository>();
-            builder.Services.AddSingleton<TeamDataRepository>();
-
-            // Add service bus message queues.
             builder.Services.AddOptions<MessageQueueOptions>()
                 .Configure<IConfiguration>((messageQueueOptions, configuration) =>
                 {
                     messageQueueOptions.ServiceBusConnection =
                         configuration.GetValue<string>("ServiceBusConnection");
                 });
-            builder.Services.AddSingleton<SendQueue>();
-
-            // Add activities.
-            builder.Services.AddTransient<GetRecipientDataListForAllUsersActivity>();
-            builder.Services.AddTransient<GetTeamDataEntitiesByIdsActivity>();
             builder.Services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
@@ -73,18 +60,37 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                     botOptions.MicrosoftAppPassword =
                         configuration.GetValue<string>("MicrosoftAppPassword");
                 });
-            builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
-            builder.Services.AddSingleton<CommonBotAdapter>();
+
+            // Add orchestration.
+            builder.Services.AddTransient<PreparingToSendOrchestration>();
+
+            // Add activities.
+            builder.Services.AddTransient<GetRecipientDataListForAllUsersActivity>();
+            builder.Services.AddTransient<GetTeamDataEntitiesByIdsActivity>();
             builder.Services.AddTransient<GetRecipientDataListForRosterActivity>();
             builder.Services.AddTransient<GetRecipientDataListForTeamsActivity>();
             builder.Services.AddTransient<ProcessRecipientDataListActivity>();
-            builder.Services.AddTransient<AdaptiveCardCreator>();
             builder.Services.AddTransient<CreateSendingNotificationActivity>();
             builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
             builder.Services.AddTransient<HandleFailureActivity>();
 
-            // Add orchestration.
-            builder.Services.AddTransient<PreparingToSendOrchestration>();
+            // Add repositories.
+            builder.Services.AddSingleton<NotificationDataRepository>();
+            builder.Services.AddSingleton<SendingNotificationDataRepository>();
+            builder.Services.AddSingleton<SentNotificationDataRepository>();
+            builder.Services.AddSingleton<UserDataRepository>();
+            builder.Services.AddSingleton<TeamDataRepository>();
+
+            // Add service bus message queues.
+            builder.Services.AddSingleton<SendQueue>();
+
+            // Add bot dependencies.
+            builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
+            builder.Services.AddSingleton<CommonBotAdapter>();
+
+            // Add miscellaneous dependencies.
+            builder.Services.AddTransient<TableRowKeyGenerator>();
+            builder.Services.AddTransient<AdaptiveCardCreator>();
         }
     }
 }
