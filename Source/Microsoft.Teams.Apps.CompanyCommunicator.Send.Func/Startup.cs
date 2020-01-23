@@ -61,9 +61,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
                 });
 
-            // Add Http client.
-            builder.Services.AddHttpClient();
-
             // Add the create user conversation service.
             builder.Services.AddTransient<CreateUserConversationService>();
 
