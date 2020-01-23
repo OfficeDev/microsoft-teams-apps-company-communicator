@@ -74,6 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<ManageResultDataService>();
 
             // Add bot services.
+            builder.Services.AddSingleton<CommonMicrosoftAppCredentials>();
             builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
             builder.Services.AddSingleton<CommonBotAdapter>();
 
