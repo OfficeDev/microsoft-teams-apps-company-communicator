@@ -8,7 +8,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
