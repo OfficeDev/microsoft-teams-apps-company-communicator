@@ -13,7 +13,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.AccessTokenServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices;
@@ -32,17 +31,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// </summary>
         private static readonly int MaxDeliveryCountForDeadLetter = 10;
 
-        // Set as static so all instances can share the same access token.
-        private static string botAccessToken = null;
-        private static DateTime? botAccessTokenExpiration = null;
-
         private readonly int maxNumberOfAttempts;
         private readonly int sendRetryDelayNumberOfMinutes;
         private readonly SendingNotificationDataRepository sendingNotificationDataRepository;
         private readonly GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository;
         private readonly UserDataRepository userDataRepository;
         private readonly SendQueue sendQueue;
-        private readonly GetBotAccessTokenService getBotAccessTokenService;
         private readonly CreateUserConversationService createUserConversationService;
         private readonly SendNotificationService sendNotificationService;
         private readonly DelaySendingNotificationService delaySendingNotificationService;
@@ -56,7 +50,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="globalSendingNotificationDataRepository">The global sending notification data repository.</param>
         /// <param name="userDataRepository">The user data repository.</param>
         /// <param name="sendQueue">The send queue.</param>
-        /// <param name="getBotAccessTokenService">The get bot access token service.</param>
         /// <param name="createUserConversationService">The create user conversation service.</param>
         /// <param name="sendNotificationService">The send notification service.</param>
         /// <param name="delaySendingNotificationService">The delay sending notification service.</param>
@@ -67,7 +60,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository,
             UserDataRepository userDataRepository,
             SendQueue sendQueue,
-            GetBotAccessTokenService getBotAccessTokenService,
             CreateUserConversationService createUserConversationService,
             SendNotificationService sendNotificationService,
             DelaySendingNotificationService delaySendingNotificationService,
@@ -79,7 +71,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.globalSendingNotificationDataRepository = globalSendingNotificationDataRepository;
             this.userDataRepository = userDataRepository;
             this.sendQueue = sendQueue;
-            this.getBotAccessTokenService = getBotAccessTokenService;
             this.createUserConversationService = createUserConversationService;
             this.sendNotificationService = sendNotificationService;
             this.delaySendingNotificationService = delaySendingNotificationService;
@@ -117,16 +108,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             try
             {
-                // Check the shared access token. If it is not present or is invalid, then fetch a new one.
-                if (CompanyCommunicatorSendFunction.botAccessToken == null
-                    || CompanyCommunicatorSendFunction.botAccessTokenExpiration == null
-                    || DateTime.UtcNow > CompanyCommunicatorSendFunction.botAccessTokenExpiration)
-                {
-                    var botAccessTokenServiceResponse = await this.getBotAccessTokenService.GetTokenAsync();
-                    CompanyCommunicatorSendFunction.botAccessToken = botAccessTokenServiceResponse.BotAccessToken;
-                    CompanyCommunicatorSendFunction.botAccessTokenExpiration = botAccessTokenServiceResponse.BotAccessTokenExpiration;
-                }
-
                 // Fetch the current sending notification. This is where data about what is being sent is stored.
                 var getActiveNotificationEntityTask = this.sendingNotificationDataRepository.GetAsync(
                     NotificationDataTableNames.SendingNotificationsPartition,
@@ -212,7 +193,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                     var createConversationResponse = await this.createUserConversationService.CreateConversationAsync(
                         userDataEntity: incomingUserDataEntity,
-                        botAccessToken: CompanyCommunicatorSendFunction.botAccessToken,
                         maxNumberOfAttempts: this.maxNumberOfAttempts);
 
                     totalNumberOfThrottles += createConversationResponse.NumberOfThrottleResponses;
@@ -263,7 +243,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     notificationContent: activeNotificationEntity.Content,
                     serviceUrl: incomingUserDataEntity.ServiceUrl,
                     conversationId: conversationId,
-                    botAccessToken: CompanyCommunicatorSendFunction.botAccessToken,
                     maxNumberOfAttempts: this.maxNumberOfAttempts);
 
                 totalNumberOfThrottles += sendNotificationResponse.NumberOfThrottleResponses;
