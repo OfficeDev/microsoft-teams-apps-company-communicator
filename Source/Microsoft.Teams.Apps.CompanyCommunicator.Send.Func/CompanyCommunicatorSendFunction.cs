@@ -10,10 +10,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.AccessTokenServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
@@ -37,7 +38,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private static string botAccessToken = null;
         private static DateTime? botAccessTokenExpiration = null;
 
-        private readonly IConfiguration configuration;
+        private readonly int maxNumberOfAttempts;
+        private readonly int sendRetryDelayNumberOfMinutes;
         private readonly SendingNotificationDataRepository sendingNotificationDataRepository;
         private readonly GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository;
         private readonly UserDataRepository userDataRepository;
@@ -51,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorSendFunction"/> class.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
+        /// <param name="companyCommunicatorSendFunctionOptions">The Company Communicator send function options.</param>
         /// <param name="sendingNotificationDataRepository">The sending notification data repository.</param>
         /// <param name="globalSendingNotificationDataRepository">The global sending notification data repository.</param>
         /// <param name="userDataRepository">The user data repository.</param>
@@ -62,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="delaySendingNotificationService">The delay sending notification service.</param>
         /// <param name="manageResultDataService">The manage result data service.</param>
         public CompanyCommunicatorSendFunction(
-            IConfiguration configuration,
+            IOptions<CompanyCommunicatorSendFunctionOptions> companyCommunicatorSendFunctionOptions,
             SendingNotificationDataRepository sendingNotificationDataRepository,
             GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository,
             UserDataRepository userDataRepository,
@@ -73,7 +75,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             DelaySendingNotificationService delaySendingNotificationService,
             ManageResultDataService manageResultDataService)
         {
-            this.configuration = configuration;
+            this.maxNumberOfAttempts = companyCommunicatorSendFunctionOptions.Value.MaxNumberOfAttempts;
+            this.sendRetryDelayNumberOfMinutes = companyCommunicatorSendFunctionOptions.Value.SendRetryDelayNumberOfMinutes;
             this.sendingNotificationDataRepository = sendingNotificationDataRepository;
             this.globalSendingNotificationDataRepository = globalSendingNotificationDataRepository;
             this.userDataRepository = userDataRepository;
@@ -116,12 +119,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             try
             {
-                // If the configuration value is not set, set the default to 1.
-                var maxNumberOfAttempts = this.configuration.GetValue<int>("MaxNumberOfAttempts", 1);
-
-                // If the configuration value is not set, set the default to 11.
-                var sendRetryDelayNumberOfMinutes = this.configuration.GetValue<int>("SendRetryDelayNumberOfMinutes", 11);
-
                 // Check the shared access token. If it is not present or is invalid, then fetch a new one.
                 if (CompanyCommunicatorSendFunction.botAccessToken == null
                     || CompanyCommunicatorSendFunction.botAccessTokenExpiration == null
@@ -176,7 +173,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 if (globalSendingNotificationDataEntity?.SendRetryDelayTime != null
                     && DateTime.UtcNow < globalSendingNotificationDataEntity.SendRetryDelayTime)
                 {
-                    await this.sendQueue.SendDelayedAsync(messageContent, sendRetryDelayNumberOfMinutes);
+                    await this.sendQueue.SendDelayedAsync(messageContent, this.sendRetryDelayNumberOfMinutes);
 
                     return;
                 }
@@ -215,7 +212,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     var createConversationResponse = await this.createUserConversationService.CreateConversationAsync(
                         incomingUserDataEntity,
                         CompanyCommunicatorSendFunction.botAccessToken,
-                        maxNumberOfAttempts);
+                        this.maxNumberOfAttempts);
 
                     totalNumberOfThrottles += createConversationResponse.NumberOfThrottleResponses;
 
@@ -236,7 +233,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         // other calls will be delayed and add the message back to the queue with a delay to be
                         // attempted later.
                         await this.delaySendingNotificationService.DelaySendingNotificationAsync(
-                            sendRetryDelayNumberOfMinutes,
+                            this.sendRetryDelayNumberOfMinutes,
                             messageContent);
 
                         return;
@@ -262,7 +259,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     incomingUserDataEntity.ServiceUrl,
                     conversationId,
                     CompanyCommunicatorSendFunction.botAccessToken,
-                    maxNumberOfAttempts);
+                    this.maxNumberOfAttempts);
 
                 totalNumberOfThrottles += sendNotificationResponse.NumberOfThrottleResponses;
 
@@ -288,7 +285,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     // NOTE: Here it does not immediately await this task and exit the function because a task
                     // of saving updated user data with a newly created conversation ID may need to be awaited.
                     delaySendingNotificationTask = this.delaySendingNotificationService
-                        .DelaySendingNotificationAsync(sendRetryDelayNumberOfMinutes, messageContent);
+                        .DelaySendingNotificationAsync(this.sendRetryDelayNumberOfMinutes, messageContent);
                 }
                 else if (sendNotificationResponse.ResultType == SendNotificationResultType.Failed)
                 {
