@@ -9,7 +9,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Schema;
+    using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -17,15 +23,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     /// </summary>
     public class SendNotificationService
     {
-        private readonly HttpClient httpClient;
+        private readonly string microsoftAppId;
+        private readonly CommonBotAdapter botAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SendNotificationService"/> class.
         /// </summary>
-        /// <param name="httpClient">The http client.</param>
-        public SendNotificationService(HttpClient httpClient)
+        /// <param name="botOptions">The bot options.</param>
+        /// <param name="commonBotAdapter">The common bot adapter.</param>
+        public SendNotificationService(
+            IOptions<BotOptions> botOptions,
+            CommonBotAdapter commonBotAdapter)
         {
-            this.httpClient = httpClient;
+            this.microsoftAppId = botOptions.Value.MicrosoftAppId;
+            this.botAdapter = commonBotAdapter;
         }
 
         /// <summary>
@@ -47,60 +58,75 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                 NumberOfThrottleResponses = 0,
             };
 
-            // Loop through attempts to try and send the notification.
-            for (int i = 0; i < maxNumberOfAttempts; i++)
+            var conversationReference = new ConversationReference
             {
-                // Send a POST request to the correct URL with a valid access token and the
-                // correct message body.
-                var conversationUrl = $"{serviceUrl}v3/conversations/{conversationId}/activities";
-                using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, conversationUrl))
+                ServiceUrl = serviceUrl,
+                Conversation = new ConversationAccount
                 {
-                    requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", botAccessToken);
+                    Id = conversationId,
+                },
+            };
 
-                    var attachmentJsonString = JsonConvert.DeserializeObject(notificationContent);
-                    var messageString = "{ \"type\": \"message\", \"attachments\": [ { \"contentType\": \"application/vnd.microsoft.card.adaptive\", \"content\": " + attachmentJsonString + " } ] }";
-                    requestMessage.Content = new StringContent(messageString, Encoding.UTF8, "application/json");
-
-                    using (var sendResponse = await this.httpClient.SendAsync(requestMessage))
+            await this.botAdapter.ContinueConversationAsync(
+                botAppId: this.microsoftAppId,
+                reference: conversationReference,
+                callback: async (turnContext, cancellationToken) =>
+                {
+                    var adaptiveCardAttachment = new Attachment()
                     {
-                        sendNotificationResponse.StatusCode = sendResponse.StatusCode;
+                        ContentType = "application/vnd.microsoft.card.adaptive",
+                        Content = JsonConvert.DeserializeObject(notificationContent),
+                    };
+                    var message = MessageFactory.Attachment(adaptiveCardAttachment);
 
-                        // If the notification was sent successfully, store the data about the
-                        // successful request.
-                        if (sendResponse.StatusCode == HttpStatusCode.Created)
+                    // Loop through attempts to try and send the notification.
+                    for (int i = 1; i <= maxNumberOfAttempts; i++)
+                    {
+                        try
                         {
+                            await turnContext.SendActivityAsync(message);
+
+                            // If made it passed the sending step, then the notification was sent successfully.
+                            // Store the data about the successful request.
+                            sendNotificationResponse.StatusCode = HttpStatusCode.Created;
                             sendNotificationResponse.ResultType = SendNotificationResultType.Succeeded;
 
                             break;
                         }
-                        else if (sendResponse.StatusCode == HttpStatusCode.TooManyRequests)
+                        catch (ErrorResponseException e)
                         {
-                            // If the request was throttled, set the flag for if the maximum number of attempts
-                            // is reached, increment the count of the number of throttles to be stored
-                            // later, and if the maximum number of throttles has not been reached, delay
-                            // for a bit of time to attempt the request again.
-                            sendNotificationResponse.ResultType = SendNotificationResultType.Throttled;
-                            sendNotificationResponse.NumberOfThrottleResponses++;
+                            var responseStatusCode = e.Response.StatusCode;
+                            sendNotificationResponse.StatusCode = responseStatusCode;
 
-                            // Do not delay if already attempted the maximum number of attempts.
-                            if (i != maxNumberOfAttempts - 1)
+                            if (responseStatusCode == HttpStatusCode.TooManyRequests)
                             {
-                                var random = new Random();
-                                await Task.Delay(random.Next(500, 1500));
+                                // If the request was throttled, set the flag for indicating the throttled state,
+                                // increment the count of the number of throttles to be stored
+                                // later, and if the maximum number of throttles has not been reached, delay
+                                // for a bit of time to attempt the request again.
+                                sendNotificationResponse.ResultType = SendNotificationResultType.Throttled;
+                                sendNotificationResponse.NumberOfThrottleResponses++;
+
+                                // Do not delay if already attempted the maximum number of attempts.
+                                if (i < maxNumberOfAttempts)
+                                {
+                                    var random = new Random();
+                                    await Task.Delay(random.Next(500, 1500));
+                                }
+                            }
+                            else
+                            {
+                                // If in this block, then an error has occurred with the service.
+                                // Return the failure and do not attempt the request again.
+                                sendNotificationResponse.ResultType = SendNotificationResultType.Failed;
+                                sendNotificationResponse.ErrorMessage = e.Response.Content;
+
+                                break;
                             }
                         }
-                        else
-                        {
-                            // If in this block, then an error has occurred with the service.
-                            // Return the failure and do not attempt the request again.
-                            sendNotificationResponse.ResultType = SendNotificationResultType.Failed;
-                            sendNotificationResponse.ErrorMessage = await sendResponse.Content.ReadAsStringAsync();
-
-                            break;
-                        }
                     }
-                }
-            }
+                },
+                cancellationToken: CancellationToken.None);
 
             return sendNotificationResponse;
         }
