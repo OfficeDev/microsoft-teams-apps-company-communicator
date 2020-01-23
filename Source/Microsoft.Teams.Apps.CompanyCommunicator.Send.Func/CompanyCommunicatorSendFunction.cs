@@ -220,8 +220,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                     if (createConversationResponse.ResultType == CreateUserConversationResultType.Succeeded)
                     {
+                        // Set the conversation ID to be used when sending the notification.
                         conversationId = createConversationResponse.ConversationId;
 
+                        // Store the newly created conversation ID so the create conversation
+                        // request will not need to be made again for the user for future notifications.
                         incomingUserDataEntity.PartitionKey = PartitionKeyNames.UserDataTable.UserDataPartition;
                         incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
                         incomingUserDataEntity.ConversationId = conversationId;
