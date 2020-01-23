@@ -14,7 +14,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.AccessTokenServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
@@ -28,34 +30,62 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <inheritdoc/>
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            builder.Services.AddHttpClient();
+            // Add all options set from configuration values.
+            builder.Services.AddOptions<CompanyCommunicatorSendFunctionOptions>()
+                .Configure<IConfiguration>((companyCommunicatorSendFunctionOptions, configuration) =>
+                {
+                    companyCommunicatorSendFunctionOptions.MaxNumberOfAttempts =
+                        configuration.GetValue<int>("MaxNumberOfAttempts", 1);
 
-            // This option is injected as IOptions<RepositoryOptions> and is used for setting
-            // up the repository dependencies.
+                    companyCommunicatorSendFunctionOptions.SendRetryDelayNumberOfMinutes =
+                        configuration.GetValue<int>("SendRetryDelayNumberOfMinutes", 11);
+                });
+            builder.Services.AddOptions<BotOptions>()
+                .Configure<IConfiguration>((botOptions, configuration) =>
+                {
+                    botOptions.MicrosoftAppId =
+                        configuration.GetValue<string>("MicrosoftAppId");
+                    botOptions.MicrosoftAppPassword =
+                        configuration.GetValue<string>("MicrosoftAppPassword");
+                });
             builder.Services.AddOptions<RepositoryOptions>()
                 .Configure<IConfiguration>((repositoryOptions, configuration) =>
                 {
-                    // Set the default to indicate this is an Azure Function.
-                    repositoryOptions.IsAzureFunction = true;
+                    repositoryOptions.StorageAccountConnectionString =
+                        configuration.GetValue<string>("StorageAccountConnectionString");
 
-                    // Bind any matching configuration settings to corresponding
-                    // values in the options.
-                    configuration.Bind(repositoryOptions);
+                    // Defaulting this value to true because the main app should ensure all
+                    // tables exist. It is here as a possible configuration setting in
+                    // case it needs to be set differently.
+                    repositoryOptions.IsItExpectedThatTableAlreadyExists =
+                        configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
                 });
 
+            // Add Http client.
+            builder.Services.AddHttpClient();
+
+            // Add bot access token service.
+            builder.Services.AddTransient<GetBotAccessTokenService>();
+
+            // Add the create user conversation service.
+            builder.Services.AddTransient<CreateUserConversationService>();
+
+            // Add the notification services.
+            builder.Services.AddTransient<SendNotificationService>();
+            builder.Services.AddTransient<DelaySendingNotificationService>();
+
+            // Add the result data service.
+            builder.Services.AddTransient<ManageResultDataService>();
+
+            // Add repositories.
             builder.Services.AddSingleton<SendingNotificationDataRepository>();
             builder.Services.AddSingleton<GlobalSendingNotificationDataRepository>();
             builder.Services.AddSingleton<UserDataRepository>();
             builder.Services.AddSingleton<SentNotificationDataRepository>();
 
+            // Add service bus message queues.
             builder.Services.AddSingleton<SendQueue>();
             builder.Services.AddSingleton<DataQueue>();
-
-            builder.Services.AddTransient<GetBotAccessTokenService>();
-            builder.Services.AddTransient<CreateUserConversationService>();
-            builder.Services.AddTransient<SendNotificationService>();
-            builder.Services.AddTransient<DelaySendingNotificationService>();
-            builder.Services.AddTransient<ManageResultDataService>();
         }
     }
 }
