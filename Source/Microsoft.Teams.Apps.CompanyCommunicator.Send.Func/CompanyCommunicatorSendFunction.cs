@@ -148,7 +148,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         incomingUserDataEntity.AadId)
                     : Task.FromResult<UserDataEntity>(null);
 
-                await Task.WhenAll(getActiveNotificationEntityTask, getGlobalSendingNotificationDataEntityTask, getUserDataEntityTask);
+                await Task.WhenAll(
+                    getActiveNotificationEntityTask,
+                    getGlobalSendingNotificationDataEntityTask,
+                    getUserDataEntityTask);
 
                 var activeNotificationEntity = await getActiveNotificationEntityTask;
                 var globalSendingNotificationDataEntity = await getGlobalSendingNotificationDataEntityTask;
@@ -209,9 +212,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                      */
 
                     var createConversationResponse = await this.createUserConversationService.CreateConversationAsync(
-                        incomingUserDataEntity,
-                        CompanyCommunicatorSendFunction.botAccessToken,
-                        this.maxNumberOfAttempts);
+                        userDataEntity: incomingUserDataEntity,
+                        botAccessToken: CompanyCommunicatorSendFunction.botAccessToken,
+                        maxNumberOfAttempts: this.maxNumberOfAttempts);
 
                     totalNumberOfThrottles += createConversationResponse.NumberOfThrottleResponses;
 
@@ -232,8 +235,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         // other calls will be delayed and add the message back to the queue with a delay to be
                         // attempted later.
                         await this.delaySendingNotificationService.DelaySendingNotificationAsync(
-                            this.sendRetryDelayNumberOfMinutes,
-                            messageContent);
+                            sendRetryDelayNumberOfMinutes: this.sendRetryDelayNumberOfMinutes,
+                            sendQueueMessageContent: messageContent);
 
                         return;
                     }
@@ -242,9 +245,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         // If the create conversation call failed, save the result, do not attempt the
                         // request again, and end the function.
                         await this.manageResultDataService.ProccessResultDataAsync(
-                            messageContent.NotificationId,
-                            incomingUserDataEntity.AadId,
-                            totalNumberOfThrottles,
+                            notificationId: messageContent.NotificationId,
+                            aadId: incomingUserDataEntity.AadId,
+                            totalNumberOfThrottles: totalNumberOfThrottles,
                             isStatusCodeFromCreateConversation: true,
                             statusCode: createConversationResponse.StatusCode);
 
@@ -254,11 +257,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                 // Now that all of the necessary information is known, send the notification.
                 var sendNotificationResponse = await this.sendNotificationService.SendAsync(
-                    activeNotificationEntity.Content,
-                    incomingUserDataEntity.ServiceUrl,
-                    conversationId,
-                    CompanyCommunicatorSendFunction.botAccessToken,
-                    this.maxNumberOfAttempts);
+                    notificationContent: activeNotificationEntity.Content,
+                    serviceUrl: incomingUserDataEntity.ServiceUrl,
+                    conversationId: conversationId,
+                    botAccessToken: CompanyCommunicatorSendFunction.botAccessToken,
+                    maxNumberOfAttempts: this.maxNumberOfAttempts);
 
                 totalNumberOfThrottles += sendNotificationResponse.NumberOfThrottleResponses;
 
@@ -267,9 +270,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     log.LogInformation("MESSAGE SENT SUCCESSFULLY");
 
                     proccessResultDataTask = this.manageResultDataService.ProccessResultDataAsync(
-                        messageContent.NotificationId,
-                        incomingUserDataEntity.AadId,
-                        totalNumberOfThrottles,
+                        notificationId: messageContent.NotificationId,
+                        aadId: incomingUserDataEntity.AadId,
+                        totalNumberOfThrottles: totalNumberOfThrottles,
                         isStatusCodeFromCreateConversation: false,
                         statusCode: sendNotificationResponse.StatusCode);
                 }
@@ -295,9 +298,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     // NOTE: Here it does not immediately await this task and exit the function because a task
                     // of saving updated user data with a newly created conversation ID may need to be awaited.
                     proccessResultDataTask = this.manageResultDataService.ProccessResultDataAsync(
-                        messageContent.NotificationId,
-                        incomingUserDataEntity.AadId,
-                        totalNumberOfThrottles,
+                        notificationId: messageContent.NotificationId,
+                        aadId: incomingUserDataEntity.AadId,
+                        totalNumberOfThrottles: totalNumberOfThrottles,
                         isStatusCodeFromCreateConversation: false,
                         statusCode: sendNotificationResponse.StatusCode);
                 }
@@ -329,9 +332,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 }
 
                 await this.manageResultDataService.ProccessResultDataAsync(
-                    messageContent.NotificationId,
-                    messageContent.UserDataEntity.AadId,
-                    totalNumberOfThrottles,
+                    notificationId: messageContent.NotificationId,
+                    aadId: messageContent.UserDataEntity.AadId,
+                    totalNumberOfThrottles: totalNumberOfThrottles,
                     isStatusCodeFromCreateConversation: false,
                     statusCode: statusCodeToStore);
 
