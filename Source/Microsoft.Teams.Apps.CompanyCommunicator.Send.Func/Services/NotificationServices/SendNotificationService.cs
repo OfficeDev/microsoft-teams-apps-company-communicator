@@ -34,14 +34,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         /// <param name="notificationContent">The content of the notification to be sent.</param>
         /// <param name="serviceUrl">The service URL to use for sending the notification.</param>
         /// <param name="conversationId">The conversation ID of the conversation to which the notification should be sent.</param>
-        /// <param name="botAccessToken">The bot access token.</param>
         /// <param name="maxNumberOfAttempts">The maximum number of request attempts to send the notification.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<SendNotificationResponse> SendAsync(
             string notificationContent,
             string serviceUrl,
             string conversationId,
-            string botAccessToken,
             int maxNumberOfAttempts)
         {
             var sendNotificationResponse = new SendNotificationResponse

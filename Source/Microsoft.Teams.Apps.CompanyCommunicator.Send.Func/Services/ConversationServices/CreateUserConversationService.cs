@@ -40,12 +40,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
         /// Creates a user conversation.
         /// </summary>
         /// <param name="userDataEntity">The data entity for the user for whom the conversation should be created.</param>
-        /// <param name="botAccessToken">The bot access token.</param>
         /// <param name="maxNumberOfAttempts">The maximum number of request attempts to create the conversation.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<CreateUserConversationResponse> CreateConversationAsync(
             UserDataEntity userDataEntity,
-            string botAccessToken,
             int maxNumberOfAttempts)
         {
             var createConversationResponse = new CreateUserConversationResponse
