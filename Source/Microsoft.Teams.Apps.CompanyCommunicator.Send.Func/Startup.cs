@@ -17,7 +17,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.AccessTokenServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices;
@@ -64,9 +63,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             // Add Http client.
             builder.Services.AddHttpClient();
-
-            // Add bot access token service.
-            builder.Services.AddTransient<GetBotAccessTokenService>();
 
             // Add the create user conversation service.
             builder.Services.AddTransient<CreateUserConversationService>();
