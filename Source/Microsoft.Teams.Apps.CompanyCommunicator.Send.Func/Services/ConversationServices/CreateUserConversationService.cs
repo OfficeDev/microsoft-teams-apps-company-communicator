@@ -11,7 +11,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -19,19 +21,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
     /// </summary>
     public class CreateUserConversationService
     {
-        private readonly IConfiguration configuration;
+        private readonly string microsoftAppId;
         private readonly HttpClient httpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateUserConversationService"/> class.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
+        /// <param name="botOptions">The bot options.</param>
         /// <param name="httpClient">The http client.</param>
         public CreateUserConversationService(
-            IConfiguration configuration,
+            IOptions<BotOptions> botOptions,
             HttpClient httpClient)
         {
-            this.configuration = configuration;
+            this.microsoftAppId = botOptions.Value.MicrosoftAppId;
             this.httpClient = httpClient;
         }
 
@@ -62,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                 {
                     requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", botAccessToken);
 
-                    var payloadString = "{\"bot\": { \"id\": \"28:" + this.configuration["MicrosoftAppId"] + "\"},\"isGroup\": false, \"tenantId\": \"" + userDataEntity.TenantId + "\", \"members\": [{\"id\": \"" + userDataEntity.UserId + "\"}]}";
+                    var payloadString = "{\"bot\": { \"id\": \"28:" + this.microsoftAppId + "\"},\"isGroup\": false, \"tenantId\": \"" + userDataEntity.TenantId + "\", \"members\": [{\"id\": \"" + userDataEntity.UserId + "\"}]}";
                     requestMessage.Content = new StringContent(payloadString, Encoding.UTF8, "application/json");
 
                     using (var sendResponse = await this.httpClient.SendAsync(requestMessage))

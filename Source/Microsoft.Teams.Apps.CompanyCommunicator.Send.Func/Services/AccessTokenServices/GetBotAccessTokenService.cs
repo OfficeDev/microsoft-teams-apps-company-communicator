@@ -10,6 +10,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.AccessToke
     using System.Net.Http;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -17,19 +19,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.AccessToke
     /// </summary>
     public class GetBotAccessTokenService
     {
-        private readonly IConfiguration configuration;
+        private readonly string microsoftAppId;
+        private readonly string microsoftAppPassword;
         private readonly HttpClient httpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetBotAccessTokenService"/> class.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
+        /// <param name="botOptions">The bot options.</param>
         /// <param name="httpClient">The http client.</param>
         public GetBotAccessTokenService(
-            IConfiguration configuration,
+            IOptions<BotOptions> botOptions,
             HttpClient httpClient)
         {
-            this.configuration = configuration;
+            this.microsoftAppId = botOptions.Value.MicrosoftAppId;
+            this.microsoftAppPassword = botOptions.Value.MicrosoftAppPassword;
             this.httpClient = httpClient;
         }
 
@@ -42,8 +46,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.AccessToke
             var values = new Dictionary<string, string>
                 {
                     { "grant_type", "client_credentials" },
-                    { "client_id", this.configuration["MicrosoftAppId"] },
-                    { "client_secret", this.configuration["MicrosoftAppPassword"] },
+                    { "client_id", this.microsoftAppId },
+                    { "client_secret", this.microsoftAppPassword },
                     { "scope", "https://api.botframework.com/.default" },
                 };
             var content = new FormUrlEncodedContent(values);
