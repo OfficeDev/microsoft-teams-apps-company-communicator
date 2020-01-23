@@ -30,5 +30,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
         /// Gets or sets the number of throttle responses.
         /// </summary>
         public int NumberOfThrottleResponses { get; set; }
+
+        /// <summary>
+        /// Gets or sets the error message when trying to create the conversation.
+        /// </summary>
+        public string ErrorMessage { get; set; }
     }
 }
