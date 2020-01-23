@@ -8,6 +8,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+    using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
@@ -15,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
@@ -70,6 +72,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             // Add the result data service.
             builder.Services.AddTransient<ManageResultDataService>();
+
+            // Add bot services.
+            builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
+            builder.Services.AddSingleton<CommonBotAdapter>();
 
             // Add repositories.
             builder.Services.AddSingleton<SendingNotificationDataRepository>();
