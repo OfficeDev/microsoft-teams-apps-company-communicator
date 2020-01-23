@@ -10,9 +10,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
     using System.Net.Http.Headers;
     using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -20,20 +19,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
     /// </summary>
     public class CreateUserConversationService
     {
-        private readonly string microsoftAppId;
-        private readonly HttpClient httpClient;
+        private readonly CommonBotAdapter botAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateUserConversationService"/> class.
         /// </summary>
-        /// <param name="botOptions">The bot options.</param>
-        /// <param name="httpClient">The http client.</param>
-        public CreateUserConversationService(
-            IOptions<BotOptions> botOptions,
-            HttpClient httpClient)
+        /// <param name="commonBotAdapter">The common bot adapter.</param>
+        public CreateUserConversationService(CommonBotAdapter commonBotAdapter)
         {
-            this.microsoftAppId = botOptions.Value.MicrosoftAppId;
-            this.httpClient = httpClient;
+            this.botAdapter = commonBotAdapter;
         }
 
         /// <summary>
