@@ -21,8 +21,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         public TeamDataRepository(IOptions<RepositoryOptions> repositoryOptions)
             : base(
                 storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: PartitionKeyNames.TeamDataTable.TableName,
-                defaultPartitionKey: PartitionKeyNames.TeamDataTable.TeamDataPartition,
+                tableName: TeamDataTableNames.TableName,
+                defaultPartitionKey: TeamDataTableNames.TeamDataPartition,
                 isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }

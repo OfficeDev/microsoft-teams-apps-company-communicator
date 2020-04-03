@@ -24,8 +24,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             TableRowKeyGenerator tableRowKeyGenerator)
             : base(
                 storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: PartitionKeyNames.NotificationDataTable.TableName,
-                defaultPartitionKey: PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                tableName: NotificationDataTableNames.TableName,
+                defaultPartitionKey: NotificationDataTableNames.DraftNotificationsPartition,
                 isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
             this.TableRowKeyGenerator = tableRowKeyGenerator;
@@ -42,7 +42,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <returns>All draft notification entities.</returns>
         public async Task<IEnumerable<NotificationDataEntity>> GetAllDraftNotificationsAsync()
         {
-            var result = await this.GetAllAsync(PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition);
+            var result = await this.GetAllAsync(NotificationDataTableNames.DraftNotificationsPartition);
 
             return result;
         }
@@ -53,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <returns>The top 25 most recently sent notification entities.</returns>
         public async Task<IEnumerable<NotificationDataEntity>> GetMostRecentSentNotificationsAsync()
         {
-            var result = await this.GetAllAsync(PartitionKeyNames.NotificationDataTable.SentNotificationsPartition, 25);
+            var result = await this.GetAllAsync(NotificationDataTableNames.SentNotificationsPartition, 25);
 
             return result;
         }
@@ -75,7 +75,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             // Create a sent notification based on the draft notification.
             var sentNotificationEntity = new NotificationDataEntity
             {
-                PartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                PartitionKey = NotificationDataTableNames.SentNotificationsPartition,
                 RowKey = newSentNotificationId,
                 Id = newSentNotificationId,
                 Title = draftNotificationEntity.Title,
@@ -122,7 +122,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
 
             var newNotificationEntity = new NotificationDataEntity
             {
-                PartitionKey = PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                PartitionKey = NotificationDataTableNames.DraftNotificationsPartition,
                 RowKey = newId,
                 Id = newId,
                 Title = notificationEntity.Title + " (copy)",
@@ -153,7 +153,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             string errorMessage)
         {
             var notificationDataEntity = await this.GetAsync(
-                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                NotificationDataTableNames.SentNotificationsPartition,
                 notificationDataEntityId);
             if (notificationDataEntity != null)
             {
@@ -177,7 +177,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             string warningMessage)
         {
             var notificationDataEntity = await this.GetAsync(
-                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                NotificationDataTableNames.SentNotificationsPartition,
                 notificationDataEntityId);
             if (notificationDataEntity != null)
             {

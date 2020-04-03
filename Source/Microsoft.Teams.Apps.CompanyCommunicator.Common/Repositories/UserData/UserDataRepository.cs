@@ -18,8 +18,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
         public UserDataRepository(IOptions<RepositoryOptions> repositoryOptions)
             : base(
                 storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: PartitionKeyNames.UserDataTable.TableName,
-                defaultPartitionKey: PartitionKeyNames.UserDataTable.UserDataPartition,
+                tableName: UserDataTableNames.TableName,
+                defaultPartitionKey: UserDataTableNames.UserDataPartition,
                 isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }

@@ -18,8 +18,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public SendingNotificationDataRepository(IOptions<RepositoryOptions> repositoryOptions)
             : base(
                 storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: PartitionKeyNames.NotificationDataTable.TableName,
-                defaultPartitionKey: PartitionKeyNames.NotificationDataTable.SendingNotificationsPartition,
+                tableName: NotificationDataTableNames.TableName,
+                defaultPartitionKey: NotificationDataTableNames.SendingNotificationsPartition,
                 isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }

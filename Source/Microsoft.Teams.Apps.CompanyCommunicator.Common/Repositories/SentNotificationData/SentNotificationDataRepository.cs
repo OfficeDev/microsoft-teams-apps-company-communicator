@@ -22,8 +22,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public SentNotificationDataRepository(IOptions<RepositoryOptions> repositoryOptions)
             : base(
                 storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: PartitionKeyNames.SentNotificationDataTable.TableName,
-                defaultPartitionKey: PartitionKeyNames.SentNotificationDataTable.DefaultPartition,
+                tableName: SentNotificationDataTableNames.TableName,
+                defaultPartitionKey: SentNotificationDataTableNames.DefaultPartition,
                 isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }

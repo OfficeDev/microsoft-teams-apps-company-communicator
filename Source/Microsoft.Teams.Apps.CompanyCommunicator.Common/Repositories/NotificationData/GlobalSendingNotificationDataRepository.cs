@@ -21,8 +21,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public GlobalSendingNotificationDataRepository(IOptions<RepositoryOptions> repositoryOptions)
             : base(
                 storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: PartitionKeyNames.NotificationDataTable.TableName,
-                defaultPartitionKey: PartitionKeyNames.NotificationDataTable.GlobalSendingNotificationDataPartition,
+                tableName: NotificationDataTableNames.TableName,
+                defaultPartitionKey: NotificationDataTableNames.GlobalSendingNotificationDataPartition,
                 isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }
@@ -34,7 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public async Task<GlobalSendingNotificationDataEntity> GetGlobalSendingNotificationDataEntityAsync()
         {
             return await this.GetAsync(
-                PartitionKeyNames.NotificationDataTable.GlobalSendingNotificationDataPartition,
+                NotificationDataTableNames.GlobalSendingNotificationDataPartition,
                 GlobalSendingNotificationDataRepository.GlobalSendingNotificationDataRowKey);
         }
 
@@ -47,7 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <returns>The Task.</returns>
         public async Task SetGlobalSendingNotificationDataEntityAsync(GlobalSendingNotificationDataEntity globalSendingNotificationDataEntity)
         {
-            globalSendingNotificationDataEntity.PartitionKey = PartitionKeyNames.NotificationDataTable.GlobalSendingNotificationDataPartition;
+            globalSendingNotificationDataEntity.PartitionKey = NotificationDataTableNames.GlobalSendingNotificationDataPartition;
             globalSendingNotificationDataEntity.RowKey = GlobalSendingNotificationDataRepository.GlobalSendingNotificationDataRowKey;
 
             await this.InsertOrMergeAsync(globalSendingNotificationDataEntity);
