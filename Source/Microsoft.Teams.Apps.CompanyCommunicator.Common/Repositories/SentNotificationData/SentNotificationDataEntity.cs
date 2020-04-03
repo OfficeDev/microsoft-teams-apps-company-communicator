@@ -94,5 +94,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// Gets or sets UserId.
         /// </summary>
         public string UserId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the error message when trying to send the notification.
+        /// </summary>
+        public string ErrorMessage { get; set; }
     }
 }
