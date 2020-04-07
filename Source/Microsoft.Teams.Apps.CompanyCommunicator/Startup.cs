@@ -120,7 +120,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
             // Add bot services.
             services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
-            services.AddSingleton<CompanyCommunicatorBotFilterMiddleware>();
+            services.AddTransient<CompanyCommunicatorBotFilterMiddleware>();
             services.AddSingleton<CompanyCommunicatorBotAdapter>();
             services.AddTransient<TeamsDataCapture>();
             services.AddTransient<IBot, CompanyCommunicatorBot>();
