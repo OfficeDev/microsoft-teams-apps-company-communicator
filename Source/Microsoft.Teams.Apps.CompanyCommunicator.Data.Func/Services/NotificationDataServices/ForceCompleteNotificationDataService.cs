@@ -7,7 +7,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
     using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
     /// <summary>
@@ -44,7 +43,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
 
                 var forceCompletedNotificationDataEntityUpdate = new UpdateNotificationDataEntity
                 {
-                    PartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                    PartitionKey = NotificationDataTableNames.SentNotificationsPartition,
                     RowKey = notificationDataEntity.RowKey,
                     Unknown = unknownCount,
                     IsCompleted = true,

@@ -8,7 +8,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices;
@@ -66,7 +65,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             var messageContent = JsonConvert.DeserializeObject<DataQueueMessageContent>(myQueueItem);
 
             var notificationDataEntity = await this.notificationDataRepository.GetAsync(
-                partitionKey: PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                partitionKey: NotificationDataTableNames.SentNotificationsPartition,
                 rowKey: messageContent.NotificationId);
 
             // This is true if it is the delayed service bus message that ensures that the
