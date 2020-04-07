@@ -7,7 +7,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
 
@@ -61,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
             var sendingNotification = new SendingNotificationDataEntity
             {
-                PartitionKey = PartitionKeyNames.NotificationDataTable.SendingNotificationsPartition,
+                PartitionKey = NotificationDataTableNames.SendingNotificationsPartition,
                 RowKey = notificationDataEntity.RowKey,
                 NotificationId = notificationDataEntity.RowKey,
                 Content = cardString,

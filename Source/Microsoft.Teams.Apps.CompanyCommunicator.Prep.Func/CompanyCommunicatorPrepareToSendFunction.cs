@@ -8,7 +8,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Core;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
@@ -52,7 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             [OrchestrationClient]
             DurableOrchestrationClient starter)
         {
-            var sentNotificationsPartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition;
+            var sentNotificationsPartitionKey = NotificationDataTableNames.SentNotificationsPartition;
             var queueMessageContent = JsonConvert.DeserializeObject<PrepareToSendQueueMessageContent>(myQueueItem);
             var sentNotificationId = queueMessageContent.SentNotificationId;
 

@@ -9,7 +9,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
@@ -101,7 +100,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             IEnumerable<UserDataEntity> recipientDataList)
         {
             var notificationDataEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                NotificationDataTableNames.SentNotificationsPartition,
                 notificationDataEntityId);
             if (notificationDataEntity != null)
             {

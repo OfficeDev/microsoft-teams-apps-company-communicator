@@ -10,7 +10,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches;
@@ -250,7 +249,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private async Task SetNotificationIsPreparingToSendAsComplete(string notificationDataEntityId)
         {
             var notificationDataEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                NotificationDataTableNames.SentNotificationsPartition,
                 notificationDataEntityId);
             if (notificationDataEntity != null)
             {
