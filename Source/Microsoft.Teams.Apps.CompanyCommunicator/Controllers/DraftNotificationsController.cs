@@ -10,7 +10,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
@@ -88,7 +87,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         {
             var notificationEntity = new NotificationDataEntity
             {
-                PartitionKey = PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                PartitionKey = NotificationDataTableNames.DraftNotificationsPartition,
                 RowKey = notification.Id,
                 Id = notification.Id,
                 Title = notification.Title,
@@ -117,7 +116,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public async Task<IActionResult> DeleteDraftNotificationAsync(string id)
         {
             var notificationEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                NotificationDataTableNames.DraftNotificationsPartition,
                 id);
             if (notificationEntity == null)
             {
@@ -163,7 +162,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public async Task<ActionResult<DraftNotification>> GetDraftNotificationByIdAsync(string id)
         {
             var notificationEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                NotificationDataTableNames.DraftNotificationsPartition,
                 id);
             if (notificationEntity == null)
             {
@@ -198,7 +197,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public async Task<ActionResult<DraftNotificationSummaryForConsent>> GetDraftNotificationSummaryForConsentByIdAsync(string notificationId)
         {
             var notificationEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                NotificationDataTableNames.DraftNotificationsPartition,
                 notificationId);
             if (notificationEntity == null)
             {
@@ -239,7 +238,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             var notificationEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                NotificationDataTableNames.DraftNotificationsPartition,
                 draftNotificationPreviewRequest.DraftNotificationId);
             if (notificationEntity == null)
             {
@@ -247,7 +246,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             var teamDataEntity = await this.teamDataRepository.GetAsync(
-                PartitionKeyNames.TeamDataTable.TeamDataPartition,
+                TeamDataTableNames.TeamDataPartition,
                 draftNotificationPreviewRequest.TeamsTeamId);
             if (teamDataEntity == null)
             {
@@ -264,12 +263,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private async Task<NotificationDataEntity> FindNotificationToDuplicate(string notificationId)
         {
             var notificationEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                NotificationDataTableNames.DraftNotificationsPartition,
                 notificationId);
             if (notificationEntity == null)
             {
                 notificationEntity = await this.notificationDataRepository.GetAsync(
-                    PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                    NotificationDataTableNames.SentNotificationsPartition,
                     notificationId);
             }
 

@@ -9,7 +9,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -57,7 +56,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             [FromBody]DraftNotification draftNotification)
         {
             var draftNotificationDataEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                NotificationDataTableNames.DraftNotificationsPartition,
                 draftNotification.Id);
             if (draftNotificationDataEntity == null)
             {
@@ -121,7 +120,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public async Task<IActionResult> GetSentNotificationByIdAsync(string id)
         {
             var notificationEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                NotificationDataTableNames.SentNotificationsPartition,
                 id);
             if (notificationEntity == null)
             {
