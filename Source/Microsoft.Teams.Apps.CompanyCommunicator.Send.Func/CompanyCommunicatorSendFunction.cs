@@ -251,7 +251,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                             aadId: incomingUserDataEntity.AadId,
                             totalNumberOfThrottles: totalNumberOfThrottles,
                             isStatusCodeFromCreateConversation: true,
-                            statusCode: createConversationResponse.StatusCode);
+                            statusCode: createConversationResponse.StatusCode,
+                            errorMessage: createConversationResponse.ErrorMessage);
 
                         return;
                     }
@@ -304,7 +305,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         aadId: incomingUserDataEntity.AadId,
                         totalNumberOfThrottles: totalNumberOfThrottles,
                         isStatusCodeFromCreateConversation: false,
-                        statusCode: sendNotificationResponse.StatusCode);
+                        statusCode: sendNotificationResponse.StatusCode,
+                        errorMessage: sendNotificationResponse.ErrorMessage);
                 }
 
                 await Task.WhenAll(
@@ -338,7 +340,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     aadId: messageContent.UserDataEntity.AadId,
                     totalNumberOfThrottles: totalNumberOfThrottles,
                     isStatusCodeFromCreateConversation: false,
-                    statusCode: statusCodeToStore);
+                    statusCode: statusCodeToStore,
+                    errorMessage: e.GetType().ToString());
 
                 throw e;
             }

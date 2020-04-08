@@ -105,6 +105,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                             // If in this block, then an error has occurred with the service.
                             // Return the failure and do not attempt the request again.
                             createConversationResponse.ResultType = CreateUserConversationResultType.Failed;
+                            createConversationResponse.ErrorMessage = await sendResponse.Content.ReadAsStringAsync();
 
                             break;
                         }

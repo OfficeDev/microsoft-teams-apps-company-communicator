@@ -96,6 +96,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                             // If in this block, then an error has occurred with the service.
                             // Return the failure and do not attempt the request again.
                             sendNotificationResponse.ResultType = SendNotificationResultType.Failed;
+                            sendNotificationResponse.ErrorMessage = await sendResponse.Content.ReadAsStringAsync();
 
                             break;
                         }

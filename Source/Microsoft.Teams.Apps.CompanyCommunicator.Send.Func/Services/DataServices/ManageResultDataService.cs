@@ -39,13 +39,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
         /// <param name="totalNumberOfThrottles">The total number of throttled requests.</param>
         /// <param name="isStatusCodeFromCreateConversation">A flag indicating if the status code is from a create conversation request.</param>
         /// <param name="statusCode">The final status code.</param>
+        /// <param name="errorMessage">The error message to store in the database.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task ProccessResultDataAsync(
             string notificationId,
             string aadId,
             int totalNumberOfThrottles,
             bool isStatusCodeFromCreateConversation,
-            HttpStatusCode statusCode)
+            HttpStatusCode statusCode,
+            string errorMessage = null)
         {
             var currentDateTimeUtc = DateTime.UtcNow;
 
@@ -65,11 +67,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             var allStatusCodeResults = $"{statusCode.ToString()},";
             var numberOfAttemptsToSend = 1;
 
-            // Replace the initial values if, for some reason, the message has already been sent.
-            // This would be an unexpected case.
-            // NOTE: When the initial row is set up, the status code is set to 0. By verifying that the
-            // status code is no longer 0, it is checking to see if a message result has already been stored
-            // for this recipient.
+            // Replace the initial values if, for some reason, the message has already been sent/attempted.
+            // When the initial row is set up, the status code is set to 0. Thus, if the status code is
+            // no longer 0, then a notification has already been sent/attempted for this user and a result
+            // has been stored. If this is the case, then append the current result to the existing results.
             if (existingSentNotificationDataEntity != null
                 && existingSentNotificationDataEntity.StatusCode != 0)
             {
@@ -89,6 +90,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
                 SentDate = currentDateTimeUtc,
                 IsStatusCodeFromCreateConversation = isStatusCodeFromCreateConversation,
                 StatusCode = (int)statusCode,
+                ErrorMessage = errorMessage,
                 AllStatusCodeResults = allStatusCodeResults,
                 NumberOfAttemptsToSend = numberOfAttemptsToSend,
             };
