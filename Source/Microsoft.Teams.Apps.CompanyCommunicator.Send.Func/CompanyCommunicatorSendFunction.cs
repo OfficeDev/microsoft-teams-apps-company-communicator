@@ -10,7 +10,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
@@ -130,7 +129,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                 // Fetch the current sending notification. This is where data about what is being sent is stored.
                 var getActiveNotificationEntityTask = this.sendingNotificationDataRepository.GetAsync(
-                    PartitionKeyNames.NotificationDataTable.SendingNotificationsPartition,
+                    NotificationDataTableNames.SendingNotificationsPartition,
                     messageContent.NotificationId);
 
                 // Fetch the current global sending notification data. This is where data about the overall systems
@@ -144,7 +143,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 // If the incoming payload does not have a conversationId, fetch the data for that user.
                 var getUserDataEntityTask = string.IsNullOrWhiteSpace(incomingConversationId)
                     ? this.userDataRepository.GetAsync(
-                        PartitionKeyNames.UserDataTable.UserDataPartition,
+                        UserDataTableNames.UserDataPartition,
                         incomingUserDataEntity.AadId)
                     : Task.FromResult<UserDataEntity>(null);
 
@@ -194,7 +193,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     // General channel).
                     if (!conversationId.StartsWith("19:"))
                     {
-                        incomingUserDataEntity.PartitionKey = PartitionKeyNames.UserDataTable.UserDataPartition;
+                        incomingUserDataEntity.PartitionKey = UserDataTableNames.UserDataPartition;
                         incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
 
                         // It is possible that the incoming user data has more information than what is currently
@@ -225,7 +224,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                         // Store the newly created conversation ID so the create conversation
                         // request will not need to be made again for the user for future notifications.
-                        incomingUserDataEntity.PartitionKey = PartitionKeyNames.UserDataTable.UserDataPartition;
+                        incomingUserDataEntity.PartitionKey = UserDataTableNames.UserDataPartition;
                         incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
                         incomingUserDataEntity.ConversationId = conversationId;
 
