@@ -11,7 +11,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
     using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// Service for the bot to create user conversations.
@@ -124,8 +123,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                         // If in this block, then an error has occurred with the service.
                         // Return the failure and do not attempt the request again.
                         createConversationResponse.ResultType = CreateUserConversationResultType.Failed;
-
-                        // Set the error message to be stored later.
                         createConversationResponse.ErrorMessage = e.Response.Content;
 
                         break;
