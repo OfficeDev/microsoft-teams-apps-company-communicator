@@ -6,9 +6,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
 {
     using System;
     using System.Net;
-    using System.Net.Http;
-    using System.Net.Http.Headers;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
@@ -23,6 +20,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     /// </summary>
     public class SendNotificationService
     {
+        private static readonly string AdaptiveCardContentType = "application/vnd.microsoft.card.adaptive";
+
         private readonly string microsoftAppId;
         private readonly CommonBotAdapter botAdapter;
 
@@ -74,7 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                 {
                     var adaptiveCardAttachment = new Attachment()
                     {
-                        ContentType = "application/vnd.microsoft.card.adaptive",
+                        ContentType = SendNotificationService.AdaptiveCardContentType,
                         Content = JsonConvert.DeserializeObject(notificationContent),
                     };
                     var message = MessageFactory.Attachment(adaptiveCardAttachment);
