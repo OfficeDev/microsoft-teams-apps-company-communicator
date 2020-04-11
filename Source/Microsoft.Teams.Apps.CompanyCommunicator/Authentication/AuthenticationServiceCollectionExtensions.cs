@@ -42,10 +42,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             services.AddAuthentication(options => { options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; })
                 .AddJwtBearer(options =>
                 {
-                    var azureADOptions = new AzureADOptions();
-                    azureADOptions.Instance = authenticationOptions.AzureAd_Instance;
-                    azureADOptions.TenantId = authenticationOptions.AzureAd_TenantId;
-                    azureADOptions.ClientId = authenticationOptions.AzureAd_ClientId;
+                    var azureADOptions = new AzureADOptions
+                    {
+                        Instance = authenticationOptions.AzureAd_Instance,
+                        TenantId = authenticationOptions.AzureAd_TenantId,
+                        ClientId = authenticationOptions.AzureAd_ClientId,
+                    };
 
                     options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
                     options.TokenValidationParameters = new TokenValidationParameters
