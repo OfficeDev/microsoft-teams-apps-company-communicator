@@ -51,48 +51,30 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         public void ConfigureServices(IServiceCollection services)
         {
             // Add all options set from configuration values.
-            var authenticationOptions = new AuthenticationOptions
-            {
-                // NOTE: This AzureAd:Instance configuration setting does not need to be
-                // overridden by any deployment specific value. It can stay the default value
-                // that is set in the project's configuration.
-                AzureAd_Instance = this.Configuration.GetValue<string>("AzureAd:Instance"),
-
-                AzureAd_TenantId = this.Configuration.GetValue<string>("AzureAd:TenantId"),
-                AzureAd_ClientId = this.Configuration.GetValue<string>("AzureAd:ClientId"),
-                AzureAd_ApplicationIdURI = this.Configuration.GetValue<string>("AzureAd:ApplicationIdURI"),
-
-                // NOTE: This AzureAd:ValidIssuers configuration setting does not need to be
-                // overridden by any deployment specific value. It can stay the default value
-                // that is set in the project's configuration.
-                AzureAd_ValidIssuers = this.Configuration.GetValue<string>("AzureAd:ValidIssuers"),
-
-                DisableMustBeValidUpnCheck = this.Configuration.GetValue<bool>("DisableMustBeValidUpnCheck", false),
-                ValidUpns = this.Configuration.GetValue<string>("ValidUpns"),
-            };
-            services.AddOptions<AuthenticationOptions>().Configure(authenticationOptionsToConfigure =>
-            {
-                authenticationOptionsToConfigure = authenticationOptions;
-            });
+            services.AddOptions<AuthenticationOptions>()
+                .Configure<IConfiguration>((authenticationOptions, configuration) =>
+                {
+                    Startup.FillAuthenticationOptionsProperties(authenticationOptions, configuration);
+                });
             services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
-                    botOptions.MicrosoftAppId = this.Configuration.GetValue<string>("MicrosoftAppId");
-                    botOptions.MicrosoftAppPassword = this.Configuration.GetValue<string>("MicrosoftAppPassword");
+                    botOptions.MicrosoftAppId = configuration.GetValue<string>("MicrosoftAppId");
+                    botOptions.MicrosoftAppPassword = configuration.GetValue<string>("MicrosoftAppPassword");
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>
                 {
                     botFilterMiddlewareOptions.DisableTenantFilter =
-                        this.Configuration.GetValue<bool>("DisableTenantFilter", false);
+                        configuration.GetValue<bool>("DisableTenantFilter", false);
                     botFilterMiddlewareOptions.AllowedTenants =
-                        this.Configuration.GetValue<string>("AllowedTenants");
+                        configuration.GetValue<string>("AllowedTenants");
                 });
             services.AddOptions<RepositoryOptions>()
                 .Configure<IConfiguration>((repositoryOptions, configuration) =>
                 {
                     repositoryOptions.StorageAccountConnectionString =
-                        this.Configuration.GetValue<string>("StorageAccountConnectionString");
+                        configuration.GetValue<string>("StorageAccountConnectionString");
 
                     // Setting this to false because the main app should ensure that all
                     // tables exist.
@@ -102,11 +84,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                 .Configure<IConfiguration>((messageQueueOptions, configuration) =>
                 {
                     messageQueueOptions.ServiceBusConnection =
-                        this.Configuration.GetValue<string>("ServiceBusConnection");
+                        configuration.GetValue<string>("ServiceBusConnection");
                 });
 
             // Add authentication services.
-            services.AddAuthentication(authenticationOptions);
+            AuthenticationOptions authenticationOptionsParameter = new AuthenticationOptions();
+            Startup.FillAuthenticationOptionsProperties(authenticationOptionsParameter, this.Configuration);
+
+            services.AddAuthentication(authenticationOptionsParameter);
 
             // Setup MVC.
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -184,6 +169,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
+        }
+
+        /// <summary>
+        /// Fills the AuthenticationOptions's properties with the correct values from the configuration.
+        /// </summary>
+        /// <param name="authenticationOptions">The AuthenticationOptions whose properties will be filled.</param>
+        /// <param name="configuration">The configuration.</param>
+        private static void FillAuthenticationOptionsProperties(AuthenticationOptions authenticationOptions, IConfiguration configuration)
+        {
+            // NOTE: This AzureAd:Instance configuration setting does not need to be
+            // overridden by any deployment specific value. It can stay the default value
+            // that is set in the project's configuration.
+            authenticationOptions.AzureAd_Instance = configuration.GetValue<string>("AzureAd:Instance");
+
+            authenticationOptions.AzureAd_TenantId = configuration.GetValue<string>("AzureAd:TenantId");
+            authenticationOptions.AzureAd_ClientId = configuration.GetValue<string>("AzureAd:ClientId");
+            authenticationOptions.AzureAd_ApplicationIdURI = configuration.GetValue<string>("AzureAd:ApplicationIdURI");
+
+            // NOTE: This AzureAd:ValidIssuers configuration setting does not need to be
+            // overridden by any deployment specific value. It can stay the default value
+            // that is set in the project's configuration.
+            authenticationOptions.AzureAd_ValidIssuers = configuration.GetValue<string>("AzureAd:ValidIssuers");
+
+            authenticationOptions.DisableMustBeValidUpnCheck = configuration.GetValue<bool>("DisableMustBeValidUpnCheck", false);
+            authenticationOptions.ValidUpns = configuration.GetValue<string>("ValidUpns");
         }
     }
 }
