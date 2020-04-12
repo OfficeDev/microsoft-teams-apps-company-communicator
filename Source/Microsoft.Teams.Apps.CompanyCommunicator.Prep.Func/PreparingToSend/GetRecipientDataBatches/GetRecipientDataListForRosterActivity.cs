@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Bot.Builder.Teams;
+    using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -105,7 +106,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         {
             var roster = await this.GetTeamRosterRecipientDataEntityListAsync(
                 input.TeamDataEntity.ServiceUrl,
-                input.TeamDataEntity.TeamId);
+                input.TeamDataEntity.TeamId,
+                input.TeamDataEntity.TenantId);
 
             await this.sentNotificationDataRepository
                 .InitializeSentNotificationDataForRecipientBatchAsync(input.NotificationDataEntityId, roster);
@@ -116,9 +118,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// </summary>
         /// <param name="serviceUrl">The service URL.</param>
         /// <param name="teamId">Team id, e.g. "19:44777361677b439281a0f0cd914cb149@thread.skype".</param>
+        /// <param name="tenantId">Tenant id for the team and user.</param>
         /// <returns>Roster of the team with the passed in id.</returns>
-        private async Task<IEnumerable<UserDataEntity>> GetTeamRosterRecipientDataEntityListAsync(string serviceUrl, string teamId)
+        private async Task<IEnumerable<UserDataEntity>> GetTeamRosterRecipientDataEntityListAsync(
+            string serviceUrl,
+            string teamId,
+            string tenantId)
         {
+            // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
+            MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
+
             var conversationReference = new ConversationReference
             {
                 ServiceUrl = serviceUrl,
@@ -143,20 +152,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                         {
                             UserId = member.Id,
                             Name = member.Name,
+
+                            // Set the conversation ID to null because it is not known at this time and
+                            // may not have been created yet.
+                            ConversationId = null,
+                            ServiceUrl = serviceUrl,
+                            Email = member.Email,
+                            Upn = member.UserPrincipalName,
+                            AadId = member.AadObjectId,
+                            TenantId = tenantId,
                         };
-
-                        // Set the conversation ID to null because it is not known at this time and
-                        // may not have been created yet.
-                        userDataEntity.ConversationId = null;
-                        userDataEntity.ServiceUrl = serviceUrl;
-                        userDataEntity.Email = member.Email;
-                        userDataEntity.Upn = member.UserPrincipalName;
-                        userDataEntity.AadId = member.AadObjectId;
-
-                        if (member.Properties is JObject jObject)
-                        {
-                            userDataEntity.TenantId = jObject["tenantId"].ToString();
-                        }
 
                         return userDataEntity;
                     });
