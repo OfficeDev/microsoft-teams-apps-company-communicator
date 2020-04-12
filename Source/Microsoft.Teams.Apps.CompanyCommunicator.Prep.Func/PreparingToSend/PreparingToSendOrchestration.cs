@@ -112,7 +112,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     log.LogCritical("Send triggers to the data function.");
                 }
 
-                await this.SetNotificationIsPreparingToSendAsComplete(notificationDataEntity.Id);
+                if (!context.IsReplaying)
+                {
+                    await this.SetNotificationIsPreparingToSendAsComplete(notificationDataEntity.Id);
+                }
 
                 log.LogCritical($"\"PREPARE TO SEND\" IS DONE SUCCESSFULLY FOR NOTIFICATION {notificationDataEntity.Id}!");
             }
