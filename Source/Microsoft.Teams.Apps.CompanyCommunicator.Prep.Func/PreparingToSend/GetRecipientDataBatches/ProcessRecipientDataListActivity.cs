@@ -79,13 +79,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                         ConversationId = p.ConversationId,
                         ServiceUrl = p.ServiceUrl,
                         TenantId = p.TenantId,
-                    });
+                    })
+                .ToList();
 
             await this.SetTotalRecipientCountInNotificationDataAsync(
                 notificationDataEntityId,
                 recipientDataList);
 
-            var paged = this.CreateRecipientDataBatches(recipientDataList.ToList());
+            var paged = this.CreateRecipientDataBatches(recipientDataList);
             return paged;
         }
 
@@ -97,14 +98,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         internal async Task SetTotalRecipientCountInNotificationDataAsync(
             string notificationDataEntityId,
-            IEnumerable<UserDataEntity> recipientDataList)
+            IList<UserDataEntity> recipientDataList)
         {
             var notificationDataEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,
                 notificationDataEntityId);
             if (notificationDataEntity != null)
             {
-                notificationDataEntity.TotalMessageCount = recipientDataList.Count();
+                notificationDataEntity.TotalMessageCount = recipientDataList.Count;
 
                 await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
             }
