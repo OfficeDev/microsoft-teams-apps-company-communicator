@@ -3,8 +3,7 @@
   "extensions": {
     "serviceBus": {
       "messageHandlerOptions": {
-        "maxConcurrentCalls": 1,
-        "autoComplete": false
+        "maxConcurrentCalls": 1
       }
     },
     "durableTask": {
