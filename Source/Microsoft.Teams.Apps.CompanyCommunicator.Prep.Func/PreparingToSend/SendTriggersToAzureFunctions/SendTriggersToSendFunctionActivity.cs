@@ -44,7 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
             IEnumerable<UserDataEntity> recipientDataBatch)
         {
             await context.CallActivityWithRetryAsync(
-                nameof(this.SendTriggersToSendFunctionAsync),
+                nameof(SendTriggersToSendFunctionActivity.SendTriggersToSendFunctionAsync),
                 new RetryOptions(TimeSpan.FromSeconds(5), 3),
                 new SendTriggersToSendFunctionActivityDTO
                 {
