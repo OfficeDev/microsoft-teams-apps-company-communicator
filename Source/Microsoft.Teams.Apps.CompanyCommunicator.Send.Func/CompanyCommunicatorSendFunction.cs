@@ -322,7 +322,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     statusCode: statusCodeToStore,
                     errorMessage: e.GetType().ToString());
 
-                throw e;
+                throw;
             }
         }
     }
