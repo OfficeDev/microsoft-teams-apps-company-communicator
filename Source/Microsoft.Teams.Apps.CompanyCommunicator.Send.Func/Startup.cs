@@ -17,6 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
@@ -61,6 +62,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     // case it needs to be set differently.
                     repositoryOptions.IsItExpectedThatTableAlreadyExists =
                         configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
+                });
+            builder.Services.AddOptions<MessageQueueOptions>()
+                .Configure<IConfiguration>((messageQueueOptions, configuration) =>
+                {
+                    messageQueueOptions.ServiceBusConnection =
+                        configuration.GetValue<string>("ServiceBusConnection");
                 });
 
             // Add the create user conversation service.
