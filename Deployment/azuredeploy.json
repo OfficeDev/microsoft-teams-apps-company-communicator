@@ -486,10 +486,6 @@
             {
               "name": "ServiceBusConnection",
               "value": "[listkeys(variables('authRuleResourceId'), '2017-04-01').primaryConnectionString]"
-            },
-            {
-              "name": "NewSetting",
-              "value":  "New Setting Value"
             }
           ]
         }
