@@ -64,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
                 .GetAsync(partitionKey: notificationId, rowKey: aadId);
 
             // Set initial values.
-            var allStatusCodeResults = $"{statusCode.ToString()},";
+            var allStatusCodeResults = $"{(int)statusCode},";
             var numberOfAttemptsToSend = 1;
 
             // Replace the initial values if, for some reason, the message has already been sent/attempted.
@@ -74,7 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             if (existingSentNotificationDataEntity != null
                 && existingSentNotificationDataEntity.StatusCode != 0)
             {
-                allStatusCodeResults = $"{existingSentNotificationDataEntity.AllStatusCodeResults}{statusCode.ToString()},";
+                allStatusCodeResults = $"{existingSentNotificationDataEntity.AllStatusCodeResults}{(int)statusCode},";
                 numberOfAttemptsToSend = existingSentNotificationDataEntity.NumberOfAttemptsToSend + 1;
 
                 // Do not send message to data queue in order to not multi-count messages to users
@@ -124,12 +124,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
                 dataQueueMessageContent.ResultType = DataQueueResultType.Failed;
             }
 
-            var sendDataQueueMessageTask = Task.CompletedTask;
-
-            if (sendDataQueueMessage)
-            {
-                sendDataQueueMessageTask = this.dataQueue.SendAsync(dataQueueMessageContent);
-            }
+            var sendDataQueueMessageTask = sendDataQueueMessage ? this.dataQueue.SendAsync(dataQueueMessageContent) : Task.CompletedTask;
 
             var saveSentNotificationDataEntityTask = this.sentNotificationDataRepository.InsertOrMergeAsync(updatedSentNotificationDataEntity);
 
