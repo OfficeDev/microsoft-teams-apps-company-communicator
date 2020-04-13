@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
@@ -49,6 +50,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
             {
                 NumberOfThrottleResponses = 0,
             };
+
+            // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
+            MicrosoftAppCredentials.TrustServiceUrl(userDataEntity.ServiceUrl);
 
             // Create the conversation parameters that will be used when
             // creating the conversation for that user.

@@ -9,6 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
@@ -56,6 +57,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
             {
                 NumberOfThrottleResponses = 0,
             };
+
+            // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
+            MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
 
             var conversationReference = new ConversationReference
             {
