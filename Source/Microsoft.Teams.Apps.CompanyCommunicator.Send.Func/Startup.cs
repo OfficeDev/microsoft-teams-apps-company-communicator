@@ -18,7 +18,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
@@ -93,7 +92,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             // Add service bus message queues.
             builder.Services.AddSingleton<SendQueue>();
-            builder.Services.AddSingleton<DataQueue>();
         }
     }
 }

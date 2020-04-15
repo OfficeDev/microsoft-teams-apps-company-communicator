@@ -8,7 +8,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
     using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
 
     /// <summary>
     /// The manage result data service.
@@ -16,19 +15,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
     public class ManageResultDataService
     {
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
-        private readonly DataQueue dataQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ManageResultDataService"/> class.
         /// </summary>
         /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
-        /// <param name="dataQueue">The data queue.</param>
         public ManageResultDataService(
-            SentNotificationDataRepository sentNotificationDataRepository,
-            DataQueue dataQueue)
+            SentNotificationDataRepository sentNotificationDataRepository)
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository;
-            this.dataQueue = dataQueue;
         }
 
         /// <summary>
@@ -51,15 +46,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
         {
             var currentDateTimeUtc = DateTime.UtcNow;
 
-            var sendDataQueueMessage = true;
-            var dataQueueMessageContent = new DataQueueMessageContent
-            {
-                NotificationId = notificationId,
-                SentDate = currentDateTimeUtc,
-                ResultType = DataQueueResultType.Failed, // Default in case it doesn't get set
-                ForceMessageComplete = false,
-            };
-
             var existingSentNotificationDataEntity = await this.sentNotificationDataRepository
                 .GetAsync(partitionKey: notificationId, rowKey: aadId);
 
@@ -76,9 +62,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             {
                 allStatusCodeResults = $"{existingSentNotificationDataEntity.AllStatusCodeResults}{(int)statusCode},";
                 numberOfAttemptsToSend = existingSentNotificationDataEntity.NumberOfAttemptsToSend + 1;
-
-                // Do not send message to data queue in order to not multi-count messages to users
-                sendDataQueueMessage = false;
             }
 
             var updatedSentNotificationDataEntity = new SentNotificationDataEntity
@@ -98,12 +81,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             if (statusCode == HttpStatusCode.Created)
             {
                 updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Succeeded;
-                dataQueueMessageContent.ResultType = DataQueueResultType.Succeeded;
             }
             else if (statusCode == HttpStatusCode.TooManyRequests)
             {
                 updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Throttled;
-                dataQueueMessageContent.ResultType = DataQueueResultType.Throttled;
             }
             else if (statusCode == HttpStatusCode.Continue)
             {
@@ -116,21 +97,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
                 // then the system should send a "Failed" message to the data queue. In this case, the
                 // the status code will not be Continue.
                 updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Continued;
-                sendDataQueueMessage = false;
             }
             else
             {
                 updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Failed;
-                dataQueueMessageContent.ResultType = DataQueueResultType.Failed;
             }
-
-            var sendDataQueueMessageTask = sendDataQueueMessage ? this.dataQueue.SendAsync(dataQueueMessageContent) : Task.CompletedTask;
 
             var saveSentNotificationDataEntityTask = this.sentNotificationDataRepository.InsertOrMergeAsync(updatedSentNotificationDataEntity);
 
-            await Task.WhenAll(
-                sendDataQueueMessageTask,
-                saveSentNotificationDataEntityTask);
+            await Task.WhenAll(saveSentNotificationDataEntityTask);
         }
     }
 }
