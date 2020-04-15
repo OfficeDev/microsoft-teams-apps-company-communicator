@@ -18,8 +18,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
         public string NotificationDataEntityId { get; set; }
 
         /// <summary>
-        /// Gets or sets recipient data batch.
+        /// Gets or sets recipient data batches.
         /// </summary>
-        public IEnumerable<UserDataEntity> RecipientDataBatch { get; set; }
+        public IEnumerable<IEnumerable<UserDataEntity>> RecipientDataBatches { get; set; }
     }
 }
