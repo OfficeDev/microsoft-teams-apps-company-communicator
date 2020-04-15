@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.SendTriggersToAzureFunctions;
 
@@ -29,6 +30,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private readonly SendTriggersToSendFunctionActivity sendTriggersToSendFunctionActivity;
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly HandleFailureActivity handleFailureActivity;
+        private readonly DataQueue dataQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PreparingToSendOrchestration"/> class.
@@ -42,6 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="sendTriggersToSendFunctionActivity">Send triggers to send function sub-orchestration.</param>
         /// <param name="notificationDataRepository">The notification data repository.</param>
         /// <param name="handleFailureActivity">Clean up activity.</param>
+        /// <param name="dataQueue">The data queue.</param>
         public PreparingToSendOrchestration(
             GetRecipientDataListForAllUsersActivity getRecipientDataListForAllUsersActivity,
             GetTeamDataEntitiesByIdsActivity getTeamDataEntitiesByIdsActivity,
@@ -51,7 +54,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             CreateSendingNotificationActivity createSendingNotificationActivity,
             SendTriggersToSendFunctionActivity sendTriggersToSendFunctionActivity,
             NotificationDataRepository notificationDataRepository,
-            HandleFailureActivity handleFailureActivity)
+            HandleFailureActivity handleFailureActivity,
+            DataQueue dataQueue)
         {
             this.getRecipientDataListForAllUsersActivity = getRecipientDataListForAllUsersActivity;
             this.getTeamDataEntitiesByIdsActivity = getTeamDataEntitiesByIdsActivity;
@@ -62,6 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             this.sendTriggersToSendFunctionActivity = sendTriggersToSendFunctionActivity;
             this.notificationDataRepository = notificationDataRepository;
             this.handleFailureActivity = handleFailureActivity;
+            this.dataQueue = dataQueue;
         }
 
         /// <summary>
@@ -105,7 +110,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     log.LogCritical("Send triggers to the send function.");
                 }
 
-                await this.SendTriggersToSendFunctionAsync(context, notificationDataEntity.Id, recipientDataBatches, log);
+                await this.sendTriggersToSendFunctionActivity.RunAsync(
+                    context,
+                    notificationDataEntity.Id,
+                    recipientDataBatches);
 
                 if (!context.IsReplaying)
                 {
@@ -114,7 +122,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
                 if (!context.IsReplaying)
                 {
-                    await this.SetNotificationIsPreparingToSendAsComplete(notificationDataEntity.Id);
+                    await this.SetNotificationIsPreparingToSendAsCompleteAsync(notificationDataEntity.Id);
+                    await this.SendDataAggregationQueueMessageAsync(notificationDataEntity.Id);
                 }
 
                 log.LogCritical($"\"PREPARE TO SEND\" IS DONE SUCCESSFULLY FOR NOTIFICATION {notificationDataEntity.Id}!");
@@ -204,49 +213,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         }
 
         /// <summary>
-        /// Sends triggers to the Azure send function.
-        /// It uses Fan-out / Fan-in pattern to send batch triggers in parallel to the Azure send function.
-        /// </summary>
-        /// <param name="context">Orchestration context.</param>
-        /// <param name="notificationDataEntityId">Notification data entity ID.</param>
-        /// <param name="recipientDataBatches">Recipient data batches.</param>
-        /// <param name="log">The logging service.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task SendTriggersToSendFunctionAsync(
-            DurableOrchestrationContext context,
-            string notificationDataEntityId,
-            IEnumerable<IEnumerable<UserDataEntity>> recipientDataBatches,
-            ILogger log)
-        {
-            var totalBatches = recipientDataBatches.Count();
-            var processedBatches = 0;
-
-            var tasks = new List<Task>();
-            foreach (var batch in recipientDataBatches)
-            {
-                if (!context.IsReplaying)
-                {
-                    log.LogCritical($"{++processedBatches} / {totalBatches}");
-                }
-
-                var task = this.sendTriggersToSendFunctionActivity.RunAsync(
-                    context,
-                    notificationDataEntityId,
-                    batch);
-
-                tasks.Add(task);
-            }
-
-            await Task.WhenAll(tasks);
-        }
-
-        /// <summary>
         /// Sets the notification entity's IsPreparingToSend flag to false in order to indicate that
         /// the the notification is no longer be prepared to be sent.
         /// </summary>
         /// <param name="notificationDataEntityId">A notification data entity's ID.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task SetNotificationIsPreparingToSendAsComplete(string notificationDataEntityId)
+        private async Task SetNotificationIsPreparingToSendAsCompleteAsync(string notificationDataEntityId)
         {
             var notificationDataEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,
@@ -257,6 +229,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
                 await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
             }
+        }
+
+        /// <summary>
+        /// Send a message to the data queue to start the aggregation of the results for the given
+        /// notification.
+        /// </summary>
+        /// <param name="notificationDataEntityId">A notification data entity's ID.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        private async Task SendDataAggregationQueueMessageAsync(string notificationDataEntityId)
+        {
+            var dataQueueMessageContent = new DataQueueMessageContent
+            {
+                NotificationId = notificationDataEntityId,
+                SentDate = DateTime.UtcNow,
+                ResultType = DataQueueResultType.Succeeded,
+                ForceMessageComplete = false,
+            };
+
+            await this.dataQueue.SendAsync(dataQueueMessageContent);
         }
 
         /// <summary>
