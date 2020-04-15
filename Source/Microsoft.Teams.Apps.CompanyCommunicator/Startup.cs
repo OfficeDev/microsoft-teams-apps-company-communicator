@@ -22,6 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
 
@@ -118,6 +119,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
             // Add service bus message queues.
             services.AddSingleton<PrepareToSendQueue>();
+            services.AddSingleton<DataQueue>();
 
             // Add draft notification preview services.
             services.AddTransient<DraftNotificationPreviewService>();

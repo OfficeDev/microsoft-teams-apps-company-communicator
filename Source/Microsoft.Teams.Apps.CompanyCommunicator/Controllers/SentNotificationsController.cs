@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
@@ -12,6 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
 
@@ -26,6 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly TeamDataRepository teamDataRepository;
         private readonly PrepareToSendQueue prepareToSendQueue;
+        private readonly DataQueue dataQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
@@ -34,16 +37,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
         /// <param name="prepareToSendQueue">The service bus queue for preparing to send notifications.</param>
+        /// <param name="dataQueue">The service bus queue for the data queue.</param>
         public SentNotificationsController(
             NotificationDataRepository notificationDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository,
             TeamDataRepository teamDataRepository,
-            PrepareToSendQueue prepareToSendQueue)
+            PrepareToSendQueue prepareToSendQueue,
+            DataQueue dataQueue)
         {
             this.notificationDataRepository = notificationDataRepository;
             this.sentNotificationDataRepository = sentNotificationDataRepository;
             this.teamDataRepository = teamDataRepository;
             this.prepareToSendQueue = prepareToSendQueue;
+            this.dataQueue = dataQueue;
         }
 
         /// <summary>
@@ -69,11 +75,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             // Ensure the SentNotificationData table exists in Azure storage.
             await this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistingAsync();
 
-            var queueMessageContent = new PrepareToSendQueueMessageContent
+            var prepareToSendQueueMessageContent = new PrepareToSendQueueMessageContent
             {
                 SentNotificationId = newSentNotificationId,
             };
-            await this.prepareToSendQueue.SendAsync(queueMessageContent);
+            await this.prepareToSendQueue.SendAsync(prepareToSendQueueMessageContent);
+
+            // Send a "force complete" message to the data queue with a delay to ensure that
+            // the notification will be marked as complete no matter the counts
+            var forceCompleteDataQueueMessageContent = new DataQueueMessageContent
+            {
+                NotificationId = newSentNotificationId,
+                SentDate = DateTime.UtcNow,
+                ResultType = DataQueueResultType.Succeeded,
+                ForceMessageComplete = true,
+            };
+            await this.dataQueue.SendDelayedAsync(forceCompleteDataQueueMessageContent, 1440); // 24 hour delay
 
             return this.Ok();
         }
