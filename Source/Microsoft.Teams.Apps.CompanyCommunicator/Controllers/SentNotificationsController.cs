@@ -24,6 +24,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Route("api/sentNotifications")]
     public class SentNotificationsController : ControllerBase
     {
+        private static readonly int ForceCompleteNotificationDelay = 1440; // 24 hour delay (delay is in minutes).
+
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly TeamDataRepository teamDataRepository;
@@ -90,7 +92,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ResultType = DataQueueResultType.Succeeded,
                 ForceMessageComplete = true,
             };
-            await this.dataQueue.SendDelayedAsync(forceCompleteDataQueueMessageContent, 1440); // 24 hour delay
+            await this.dataQueue.SendDelayedAsync(
+                forceCompleteDataQueueMessageContent,
+                SentNotificationsController.ForceCompleteNotificationDelay);
 
             return this.Ok();
         }
