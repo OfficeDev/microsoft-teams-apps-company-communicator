@@ -12,6 +12,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices;
 
     /// <summary>
@@ -35,16 +38,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                     repositoryOptions.IsItExpectedThatTableAlreadyExists =
                         configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
                 });
+            builder.Services.AddOptions<MessageQueueOptions>()
+                .Configure<IConfiguration>((messageQueueOptions, configuration) =>
+                {
+                    messageQueueOptions.ServiceBusConnection =
+                        configuration.GetValue<string>("ServiceBusConnection");
+                });
 
             // Add notification data services.
-            builder.Services.AddTransient<UpdateCountsInNotificationDataService>();
-            builder.Services.AddTransient<ForceCompleteNotificationDataService>();
+            builder.Services.AddTransient<AggregateSentNotificationDataService>();
+            builder.Services.AddTransient<UpdateNotificationDataService>();
 
             // Add repositories.
             builder.Services.AddSingleton<NotificationDataRepository>();
+            builder.Services.AddSingleton<SentNotificationDataRepository>();
 
-            // Add miscellaneous dependencies.
-            builder.Services.AddSingleton<TableRowKeyGenerator>();
+            // Add service bus message queues.
+            builder.Services.AddSingleton<DataQueue>();
         }
     }
 }
