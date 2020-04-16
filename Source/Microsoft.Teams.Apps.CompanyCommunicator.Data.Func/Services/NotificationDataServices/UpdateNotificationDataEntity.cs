@@ -37,9 +37,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
         public int? Unknown { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the notification is in the "preparing to send" state.
+        /// </summary>
+        public bool? IsPreparingToSend { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the sending process is completed or not.
         /// </summary>
-        public bool? IsCompleted { get; set; }
+        public bool IsCompleted { get; set; }
 
         /// <summary>
         /// Gets or sets the Sent DateTime value.
