@@ -63,21 +63,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
         public async Task SendTriggersToSendFunctionAsync(
             [ActivityTrigger] SendTriggersToSendFunctionActivityDTO input)
         {
-            var recipientDataBatches = input.RecipientDataBatches;
+            var userDataEntityBatches = input.RecipientDataBatches;
             var notificationDataEntityId = input.NotificationDataEntityId;
 
-            foreach (var batch in recipientDataBatches)
+            var sendTasks = new List<Task>();
+            foreach (var userDataEntityBatch in userDataEntityBatches)
             {
-                var sendQueueMessageContentBatch = batch
-                    .Select(recipientData =>
+                var sendQueueMessageContentBatch = userDataEntityBatch
+                    .Select(userDataEntity =>
                         new SendQueueMessageContent
                         {
                             NotificationId = notificationDataEntityId,
-                            UserDataEntity = recipientData,
+                            UserDataEntity = userDataEntity,
                         });
 
-                await this.sendMessageQueue.SendAsync(sendQueueMessageContentBatch);
+                sendTasks.Add(this.sendMessageQueue.SendAsync(sendQueueMessageContentBatch));
             }
+
+            await Task.WhenAll(sendTasks);
         }
     }
 }
