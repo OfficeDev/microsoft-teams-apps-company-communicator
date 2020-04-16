@@ -247,7 +247,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 ForceMessageComplete = false,
             };
 
-            await this.dataQueue.SendAsync(dataQueueMessageContent);
+            await this.dataQueue.SendDelayedAsync(dataQueueMessageContent, 3); // In minutes.
         }
 
         /// <summary>
