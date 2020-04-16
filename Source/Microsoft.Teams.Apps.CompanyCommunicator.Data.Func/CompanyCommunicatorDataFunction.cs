@@ -5,7 +5,10 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 {
     using System;
+    using System.Text;
     using System.Threading.Tasks;
+    using Microsoft.Azure.ServiceBus;
+    using Microsoft.Azure.ServiceBus.Core;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -20,30 +23,36 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     public class CompanyCommunicatorDataFunction
     {
         private readonly NotificationDataRepository notificationDataRepository;
-        private readonly ForceCompleteNotificationDataService forceCompleteNotificationDataService;
-        private readonly UpdateCountsInNotificationDataService updateCountsInNotificationDataService;
+        private readonly AggregateSentNotificationDataService aggregateSentNotificationDataService;
+        private readonly UpdateNotificationDataService updateNotificationDataService;
+        private readonly DataQueue dataQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorDataFunction"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">The notification data repository.</param>
-        /// <param name="forceCompleteNotificationDataService">The force complete notification data service.</param>
-        /// <param name="updateCountsInNotificationDataService">The update counts in notification data service.</param>
+        /// <param name="aggregateSentNotificationDataService">The service to aggregate the Sent
+        /// Notification Data results.</param>
+        /// <param name="updateNotificationDataService">The service to update the notification totals.</param>
+        /// <param name="dataQueue">The data queue.</param>
         public CompanyCommunicatorDataFunction(
             NotificationDataRepository notificationDataRepository,
-            ForceCompleteNotificationDataService forceCompleteNotificationDataService,
-            UpdateCountsInNotificationDataService updateCountsInNotificationDataService)
+            AggregateSentNotificationDataService aggregateSentNotificationDataService,
+            UpdateNotificationDataService updateNotificationDataService,
+            DataQueue dataQueue)
         {
             this.notificationDataRepository = notificationDataRepository;
-            this.forceCompleteNotificationDataService = forceCompleteNotificationDataService;
-            this.updateCountsInNotificationDataService = updateCountsInNotificationDataService;
+            this.aggregateSentNotificationDataService = aggregateSentNotificationDataService;
+            this.updateNotificationDataService = updateNotificationDataService;
+            this.dataQueue = dataQueue;
         }
 
         /// <summary>
         /// Azure Function App triggered by messages from a Service Bus queue
         /// Used for aggregating results for a sent notification.
         /// </summary>
-        /// <param name="myQueueItem">The Service Bus queue item.</param>
+        /// <param name="message">The Service Bus message.</param>
+        /// <param name="messageReceiver">The Service Bus message receiver.</param>
         /// <param name="deliveryCount">The deliver count.</param>
         /// <param name="enqueuedTimeUtc">The enqueued time.</param>
         /// <param name="messageId">The message ID.</param>
@@ -55,32 +64,60 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             [ServiceBusTrigger(
                 DataQueue.QueueName,
                 Connection = DataQueue.ServiceBusConnectionConfigurationKey)]
-            string myQueueItem,
+            Message message,
+            MessageReceiver messageReceiver,
             int deliveryCount,
             DateTime enqueuedTimeUtc,
             string messageId,
             ILogger log,
             ExecutionContext context)
         {
-            var messageContent = JsonConvert.DeserializeObject<DataQueueMessageContent>(myQueueItem);
+            //// NOTE: BECAUSE THIS AZURE FUNCTION IS MARKED TO NOT AUTOMATICALLY COMPLETE THE SERVICE BUS MESSAGE
+            //// ALL CODE PATHS MUST END WITH COMPLETING THE SERVICE BUS MESSAGE MANUALLY
+
+            var messageContent = JsonConvert.DeserializeObject<DataQueueMessageContent>(Encoding.UTF8.GetString(message.Body));
 
             var notificationDataEntity = await this.notificationDataRepository.GetAsync(
                 partitionKey: NotificationDataTableNames.SentNotificationsPartition,
                 rowKey: messageContent.NotificationId);
 
-            // This is true if it is the delayed service bus message that ensures that the
-            // notification will eventually be marked as complete.
-            if (messageContent.ForceMessageComplete)
+            // If notification is already marked complete, then there is nothing left to do for the data queue trigger.
+            if (!notificationDataEntity.IsCompleted)
             {
-                await this.forceCompleteNotificationDataService.ForceCompleteAsync(notificationDataEntity);
+                // Get all of the result counts (Successes, Failures, etc.) from the Sent Notification Data.
+                var aggregatedSentNotificationDataResults = await this.aggregateSentNotificationDataService
+                    .AggregateSentNotificationDataResultsAsync(
+                        messageReceiver,
+                        message,
+                        messageContent.NotificationId);
 
-                return;
+                // Use these counts to update the Notification Data accordingly.
+                var notificationDataEntityUpdate = await this.updateNotificationDataService
+                    .UpdateNotificationDataAsync(
+                        notificationId: messageContent.NotificationId,
+                        shouldForceCompleteNotification: messageContent.ForceMessageComplete,
+                        totalExpectedNotificationCount: notificationDataEntity.TotalMessageCount,
+                        aggregatedSentNotificationDataResults: aggregatedSentNotificationDataResults);
+
+                // If the notification is still not in a completed state, then requeue the Data Queue trigger
+                // message with a delay in order to aggregate the results again.
+                if (!notificationDataEntityUpdate.IsCompleted)
+                {
+                    // Requeue data aggregation trigger message with a delay to calculate the totals again.
+                    var dataQueueTriggerMessage = new DataQueueMessageContent
+                    {
+                        NotificationId = messageContent.NotificationId,
+                        SentDate = DateTime.UtcNow,
+                        ResultType = DataQueueResultType.Succeeded,
+                        ForceMessageComplete = false,
+                    };
+
+                    await this.dataQueue.SendDelayedAsync(dataQueueTriggerMessage, 3);
+                }
             }
 
-            await this.updateCountsInNotificationDataService.UpdateCountsAsync(
-                notificationDataEntity,
-                messageContent.ResultType,
-                messageContent.SentDate);
+            // Be sure to complete the Service Bus message manually so it is removed from the queue.
+            await messageReceiver.CompleteAsync(message.SystemProperties.LockToken);
         }
     }
 }
