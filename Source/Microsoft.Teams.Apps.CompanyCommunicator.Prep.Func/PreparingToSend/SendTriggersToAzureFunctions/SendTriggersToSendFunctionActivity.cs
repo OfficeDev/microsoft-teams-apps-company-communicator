@@ -66,7 +66,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
             var userDataEntityBatches = input.RecipientDataBatches;
             var notificationDataEntityId = input.NotificationDataEntityId;
 
-            var sendTasks = new List<Task>();
             foreach (var userDataEntityBatch in userDataEntityBatches)
             {
                 var sendQueueMessageContentBatch = userDataEntityBatch
@@ -77,10 +76,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
                             UserDataEntity = userDataEntity,
                         });
 
-                sendTasks.Add(this.sendMessageQueue.SendAsync(sendQueueMessageContentBatch));
+                await this.sendMessageQueue.SendAsync(sendQueueMessageContentBatch);
             }
-
-            await Task.WhenAll(sendTasks);
         }
     }
 }
