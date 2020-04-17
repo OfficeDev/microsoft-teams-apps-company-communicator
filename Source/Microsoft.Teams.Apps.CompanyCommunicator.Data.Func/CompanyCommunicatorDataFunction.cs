@@ -5,10 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 {
     using System;
-    using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -51,8 +48,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
         /// Azure Function App triggered by messages from a Service Bus queue
         /// Used for aggregating results for a sent notification.
         /// </summary>
-        /// <param name="message">The Service Bus message.</param>
-        /// <param name="messageReceiver">The Service Bus message receiver.</param>
+        /// <param name="myQueueItem">The Service Bus queue item.</param>
         /// <param name="deliveryCount">The deliver count.</param>
         /// <param name="enqueuedTimeUtc">The enqueued time.</param>
         /// <param name="messageId">The message ID.</param>
@@ -64,18 +60,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             [ServiceBusTrigger(
                 DataQueue.QueueName,
                 Connection = DataQueue.ServiceBusConnectionConfigurationKey)]
-            Message message,
-            MessageReceiver messageReceiver,
+            string myQueueItem,
             int deliveryCount,
             DateTime enqueuedTimeUtc,
             string messageId,
             ILogger log,
             ExecutionContext context)
         {
-            //// NOTE: BECAUSE THIS AZURE FUNCTION IS MARKED TO NOT AUTOMATICALLY COMPLETE THE SERVICE BUS MESSAGE
-            //// ALL CODE PATHS MUST END WITH COMPLETING THE SERVICE BUS MESSAGE MANUALLY
-
-            var messageContent = JsonConvert.DeserializeObject<DataQueueMessageContent>(Encoding.UTF8.GetString(message.Body));
+            var messageContent = JsonConvert.DeserializeObject<DataQueueMessageContent>(myQueueItem);
 
             var notificationDataEntity = await this.notificationDataRepository.GetAsync(
                 partitionKey: NotificationDataTableNames.SentNotificationsPartition,
@@ -86,10 +78,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             {
                 // Get all of the result counts (Successes, Failures, etc.) from the Sent Notification Data.
                 var aggregatedSentNotificationDataResults = await this.aggregateSentNotificationDataService
-                    .AggregateSentNotificationDataResultsAsync(
-                        messageReceiver,
-                        message,
-                        messageContent.NotificationId);
+                    .AggregateSentNotificationDataResultsAsync(messageContent.NotificationId);
 
                 // Use these counts to update the Notification Data accordingly.
                 var notificationDataEntityUpdate = await this.updateNotificationDataService
@@ -115,9 +104,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                     await this.dataQueue.SendDelayedAsync(dataQueueTriggerMessage, 3);
                 }
             }
-
-            // Be sure to complete the Service Bus message manually so it is removed from the queue.
-            await messageReceiver.CompleteAsync(message.SystemProperties.LockToken);
         }
     }
 }
