@@ -110,10 +110,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     log.LogCritical("Send triggers to the send function.");
                 }
 
-                await this.sendTriggersToSendFunctionActivity.RunAsync(
-                    context,
-                    notificationDataEntity.Id,
-                    recipientDataBatches);
+                await this.SendTriggersToSendFunctionAsync(context, notificationDataEntity.Id, recipientDataBatches, log);
 
                 if (!context.IsReplaying)
                 {
@@ -205,6 +202,43 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     notificationDataEntity.Id,
                     teamDataEntity,
                     log);
+
+                tasks.Add(task);
+            }
+
+            await Task.WhenAll(tasks);
+        }
+
+        /// <summary>
+        /// Sends triggers to the Azure send function.
+        /// It uses Fan-out / Fan-in pattern to send batch triggers in parallel to the Azure send function.
+        /// </summary>
+        /// <param name="context">Orchestration context.</param>
+        /// <param name="notificationDataEntityId">Notification data entity ID.</param>
+        /// <param name="recipientDataBatches">Recipient data batches.</param>
+        /// <param name="log">The logging service.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        private async Task SendTriggersToSendFunctionAsync(
+            DurableOrchestrationContext context,
+            string notificationDataEntityId,
+            IEnumerable<IEnumerable<UserDataEntity>> recipientDataBatches,
+            ILogger log)
+        {
+            var totalBatches = recipientDataBatches.Count();
+            var processedBatches = 0;
+
+            var tasks = new List<Task>();
+            foreach (var batch in recipientDataBatches)
+            {
+                if (!context.IsReplaying)
+                {
+                    log.LogCritical($"{++processedBatches} / {totalBatches}");
+                }
+
+                var task = this.sendTriggersToSendFunctionActivity.RunAsync(
+                    context,
+                    notificationDataEntityId,
+                    batch);
 
                 tasks.Add(task);
             }
