@@ -22,7 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public static readonly int InitializationStatusCode = 0;
 
         /// <summary>
-        /// String indicating the recipient type for the given notification was a person.
+        /// String indicating the recipient type for the given notification was a user.
         /// </summary>
         public static readonly string UserRecipientType = "User";
 
@@ -63,7 +63,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
 
         /// <summary>
         /// Gets or sets the recipient's unique identifier.
-        /// If the recipient is a person, this should be the AAD id.
+        /// If the recipient is a user, this should be the AAD id.
         /// If the recipient is a team, this should be the team id.
         /// </summary>
         public string RecipientId { get; set; }
