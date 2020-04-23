@@ -10,8 +10,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
     public class PrepareToSendQueueMessageContent
     {
         /// <summary>
-        /// Gets or sets the sent notification ID value.
+        /// Gets or sets the notification id value.
         /// </summary>
-        public string SentNotificationId { get; set; }
+        public string NotificationId { get; set; }
     }
 }
