@@ -19,11 +19,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
 
     /// <summary>
@@ -86,6 +87,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                 {
                     messageQueueOptions.ServiceBusConnection =
                         configuration.GetValue<string>("ServiceBusConnection");
+                });
+            services.AddOptions<DataQueueMessageOptions>()
+                .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
+                {
+                    dataQueueMessageOptions.ForceCompleteMessageDelayInSeconds =
+                        configuration.GetValue<double>("ForceCompleteMessageDelayInSeconds", 86400);
                 });
 
             // Add authentication services.

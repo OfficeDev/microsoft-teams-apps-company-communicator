@@ -4,11 +4,11 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -24,13 +24,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Route("api/sentNotifications")]
     public class SentNotificationsController : ControllerBase
     {
-        private static readonly int ForceCompleteNotificationDelay = 1440; // 24 hour delay (delay is in minutes).
-
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly TeamDataRepository teamDataRepository;
         private readonly PrepareToSendQueue prepareToSendQueue;
         private readonly DataQueue dataQueue;
+        private readonly double forceCompleteMessageDelayInSeconds;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
@@ -40,18 +39,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="teamDataRepository">Team data repository instance.</param>
         /// <param name="prepareToSendQueue">The service bus queue for preparing to send notifications.</param>
         /// <param name="dataQueue">The service bus queue for the data queue.</param>
+        /// <param name="dataQueueMessageOptions">The options for the data queue messages.</param>
         public SentNotificationsController(
             NotificationDataRepository notificationDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository,
             TeamDataRepository teamDataRepository,
             PrepareToSendQueue prepareToSendQueue,
-            DataQueue dataQueue)
+            DataQueue dataQueue,
+            IOptions<DataQueueMessageOptions> dataQueueMessageOptions)
         {
             this.notificationDataRepository = notificationDataRepository;
             this.sentNotificationDataRepository = sentNotificationDataRepository;
             this.teamDataRepository = teamDataRepository;
             this.prepareToSendQueue = prepareToSendQueue;
             this.dataQueue = dataQueue;
+            this.forceCompleteMessageDelayInSeconds = dataQueueMessageOptions.Value.ForceCompleteMessageDelayInSeconds;
         }
 
         /// <summary>
@@ -79,7 +81,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             var prepareToSendQueueMessageContent = new PrepareToSendQueueMessageContent
             {
-                SentNotificationId = newSentNotificationId,
+                NotificationId = newSentNotificationId,
             };
             await this.prepareToSendQueue.SendAsync(prepareToSendQueueMessageContent);
 
@@ -88,13 +90,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var forceCompleteDataQueueMessageContent = new DataQueueMessageContent
             {
                 NotificationId = newSentNotificationId,
-                SentDate = DateTime.UtcNow,
-                ResultType = DataQueueResultType.Succeeded,
                 ForceMessageComplete = true,
             };
             await this.dataQueue.SendDelayedAsync(
                 forceCompleteDataQueueMessageContent,
-                SentNotificationsController.ForceCompleteNotificationDelay);
+                this.forceCompleteMessageDelayInSeconds);
 
             return this.Ok();
         }
