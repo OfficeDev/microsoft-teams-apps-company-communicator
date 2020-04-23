@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
@@ -45,13 +46,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         }
 
         /// <summary>
-        /// Initialize sent notification data for a recipient batch.
-        /// Set status to be 0 (initial).
+        /// Initializes the sent notification data for a recipient batch of users.
+        /// Sets the status code to be the initialized value.
         /// </summary>
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
-        /// <param name="recipientDataBatch">A recipient data batch.</param>
+        /// <param name="recipientDataBatch">A recipient data batch of users.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task InitializeSentNotificationDataForRecipientBatchAsync(
+        public async Task InitializeSentNotificationDataForUserRecipientBatchAsync(
             string notificationDataEntityId,
             IEnumerable<UserDataEntity> recipientDataBatch)
         {
@@ -62,11 +63,41 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
                     {
                         PartitionKey = notificationDataEntityId,
                         RowKey = p.AadId,
-                        AadId = p.AadId,
-                        StatusCode = 0,
+                        RecipientType = SentNotificationDataEntity.UserRecipientType,
+                        RecipientId = p.AadId,
+                        StatusCode = SentNotificationDataEntity.InitializationStatusCode,
                         ConversationId = p.ConversationId,
                         TenantId = p.TenantId,
                         UserId = p.UserId,
+                        ServiceUrl = p.ServiceUrl,
+                    });
+
+            await this.BatchInsertOrMergeAsync(sentNotificationDataEntities);
+        }
+
+        /// <summary>
+        /// Initializes the sent notification data for a recipient batch of teams.
+        /// Sets the status code to be the initialized value.
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="recipientDataBatch">A recipient data batch of teams.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task InitializeSentNotificationDataForTeamRecipientBatchAsync(
+            string notificationDataEntityId,
+            IEnumerable<TeamDataEntity> recipientDataBatch)
+        {
+            // Create the SentNotificationDataEntity from the incoming TeamDataEntity.
+            var sentNotificationDataEntities = recipientDataBatch
+                .Select(p =>
+                    new SentNotificationDataEntity
+                    {
+                        PartitionKey = notificationDataEntityId,
+                        RowKey = p.TeamId,
+                        RecipientType = SentNotificationDataEntity.TeamRecipientType,
+                        RecipientId = p.TeamId,
+                        StatusCode = SentNotificationDataEntity.InitializationStatusCode,
+                        ConversationId = p.TeamId,
+                        TenantId = p.TenantId,
                         ServiceUrl = p.ServiceUrl,
                     });
 
