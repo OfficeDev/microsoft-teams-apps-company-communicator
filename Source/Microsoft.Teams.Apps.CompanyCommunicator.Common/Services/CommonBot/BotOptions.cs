@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
 {
     /// <summary>
     /// Options used for holding metadata for the bot.
