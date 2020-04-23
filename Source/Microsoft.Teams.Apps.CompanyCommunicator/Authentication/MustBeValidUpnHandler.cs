@@ -17,8 +17,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     /// </summary>
     public class MustBeValidUpnHandler : AuthorizationHandler<MustBeValidUpnRequirement>
     {
-        private readonly bool disableMustBeValidUpnCheck;
-        private readonly HashSet<string> validUpnSet;
+        private readonly bool disableCreatorUpnCheck;
+        private readonly HashSet<string> authorizedCreatorUpnsSet;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MustBeValidUpnHandler"/> class.
@@ -26,9 +26,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// <param name="authenticationOptions">The authentication options.</param>
         public MustBeValidUpnHandler(IOptions<AuthenticationOptions> authenticationOptions)
         {
-            this.disableMustBeValidUpnCheck = authenticationOptions.Value.DisableMustBeValidUpnCheck;
-            var validUpns = authenticationOptions.Value.ValidUpns;
-            this.validUpnSet = validUpns
+            this.disableCreatorUpnCheck = authenticationOptions.Value.DisableCreatorUpnCheck;
+            var authorizedCreatorUpns = authenticationOptions.Value.AuthorizedCreatorUpns;
+            this.authorizedCreatorUpnsSet = authorizedCreatorUpns
                 ?.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
                 ?.Select(p => p.Trim())
                 ?.ToHashSet()
@@ -45,7 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             AuthorizationHandlerContext context,
             MustBeValidUpnRequirement requirement)
         {
-            if (this.disableMustBeValidUpnCheck || this.IsValidUpn(context))
+            if (this.disableCreatorUpnCheck || this.IsValidUpn(context))
             {
                 context.Succeed(requirement);
             }
@@ -68,7 +68,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                 return false;
             }
 
-            return this.validUpnSet.Contains(upn, StringComparer.OrdinalIgnoreCase);
+            return this.authorizedCreatorUpnsSet.Contains(upn, StringComparer.OrdinalIgnoreCase);
         }
     }
 }

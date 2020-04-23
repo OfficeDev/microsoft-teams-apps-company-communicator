@@ -27,8 +27,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="authenticationOptions">The authentication options.</param>
         public AuthenticationMetadataController(IOptions<AuthenticationOptions> authenticationOptions)
         {
-            this.tenantId = authenticationOptions.Value.AzureAd_TenantId;
-            this.clientId = authenticationOptions.Value.AzureAd_ClientId;
+            this.tenantId = authenticationOptions.Value.AzureAdTenantId;
+            this.clientId = authenticationOptions.Value.AzureAdClientId;
         }
 
         /// <summary>

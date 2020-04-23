@@ -44,9 +44,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                 {
                     var azureADOptions = new AzureADOptions
                     {
-                        Instance = authenticationOptions.AzureAd_Instance,
-                        TenantId = authenticationOptions.AzureAd_TenantId,
-                        ClientId = authenticationOptions.AzureAd_ClientId,
+                        Instance = authenticationOptions.AzureAdInstance,
+                        TenantId = authenticationOptions.AzureAdTenantId,
+                        ClientId = authenticationOptions.AzureAdClientId,
                     };
 
                     options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
@@ -61,22 +61,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 
         private static void ValidateAuthenticationOptions(AuthenticationOptions authenticationOptions)
         {
-            if (string.IsNullOrWhiteSpace(authenticationOptions?.AzureAd_ClientId))
+            if (string.IsNullOrWhiteSpace(authenticationOptions?.AzureAdClientId))
             {
                 throw new ApplicationException("AzureAd ClientId is missing in the configuration file.");
             }
 
-            if (string.IsNullOrWhiteSpace(authenticationOptions?.AzureAd_TenantId))
+            if (string.IsNullOrWhiteSpace(authenticationOptions?.AzureAdTenantId))
             {
                 throw new ApplicationException("AzureAd TenantId is missing in the configuration file.");
             }
 
-            if (string.IsNullOrWhiteSpace(authenticationOptions?.AzureAd_ApplicationIdURI))
+            if (string.IsNullOrWhiteSpace(authenticationOptions?.AzureAdApplicationIdUri))
             {
-                throw new ApplicationException("AzureAd ApplicationIdURI is missing in the configuration file.");
+                throw new ApplicationException("AzureAd ApplicationIdUri is missing in the configuration file.");
             }
 
-            if (string.IsNullOrWhiteSpace(authenticationOptions?.AzureAd_ValidIssuers))
+            if (string.IsNullOrWhiteSpace(authenticationOptions?.AzureAdValidIssuers))
             {
                 throw new ApplicationException("AzureAd ValidIssuers is missing in the configuration file.");
             }
@@ -99,8 +99,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         {
             var validAudiences = new List<string>
             {
-                authenticationOptions.AzureAd_ClientId,
-                authenticationOptions.AzureAd_ApplicationIdURI.ToLower(),
+                authenticationOptions.AzureAdClientId,
+                authenticationOptions.AzureAdApplicationIdUri.ToLower(),
             };
 
             return validAudiences;
@@ -108,11 +108,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 
         private static IEnumerable<string> GetValidIssuers(AuthenticationOptions authenticationOptions)
         {
-            var tenantId = authenticationOptions.AzureAd_TenantId;
+            var tenantId = authenticationOptions.AzureAdTenantId;
 
             var validIssuers =
                 AuthenticationServiceCollectionExtensions.SplitAuthenticationOptionsList(
-                    authenticationOptions.AzureAd_ValidIssuers);
+                    authenticationOptions.AzureAdValidIssuers);
 
             validIssuers = validIssuers.Select(validIssuer => validIssuer.Replace("TENANT_ID", tenantId));
 

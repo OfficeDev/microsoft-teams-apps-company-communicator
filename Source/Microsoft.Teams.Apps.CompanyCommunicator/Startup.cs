@@ -190,19 +190,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             // NOTE: This AzureAd:Instance configuration setting does not need to be
             // overridden by any deployment specific value. It can stay the default value
             // that is set in the project's configuration.
-            authenticationOptions.AzureAd_Instance = configuration.GetValue<string>("AzureAd:Instance");
+            authenticationOptions.AzureAdInstance = configuration.GetValue<string>("AzureAd:Instance");
 
-            authenticationOptions.AzureAd_TenantId = configuration.GetValue<string>("AzureAd:TenantId");
-            authenticationOptions.AzureAd_ClientId = configuration.GetValue<string>("AzureAd:ClientId");
-            authenticationOptions.AzureAd_ApplicationIdURI = configuration.GetValue<string>("AzureAd:ApplicationIdURI");
+            authenticationOptions.AzureAdTenantId = configuration.GetValue<string>("AzureAd:TenantId");
+            authenticationOptions.AzureAdClientId = configuration.GetValue<string>("AzureAd:ClientId");
+            authenticationOptions.AzureAdApplicationIdUri = configuration.GetValue<string>("AzureAd:ApplicationIdUri");
 
             // NOTE: This AzureAd:ValidIssuers configuration setting does not need to be
             // overridden by any deployment specific value. It can stay the default value
             // that is set in the project's configuration.
-            authenticationOptions.AzureAd_ValidIssuers = configuration.GetValue<string>("AzureAd:ValidIssuers");
+            authenticationOptions.AzureAdValidIssuers = configuration.GetValue<string>("AzureAd:ValidIssuers");
 
-            authenticationOptions.DisableMustBeValidUpnCheck = configuration.GetValue<bool>("DisableMustBeValidUpnCheck", false);
-            authenticationOptions.ValidUpns = configuration.GetValue<string>("ValidUpns");
+            authenticationOptions.DisableCreatorUpnCheck = configuration.GetValue<bool>("DisableCreatorUpnCheck", false);
+            authenticationOptions.AuthorizedCreatorUpns = configuration.GetValue<string>("AuthorizedCreatorUpns");
         }
     }
 }
