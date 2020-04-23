@@ -120,6 +120,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         {
             var newId = this.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent();
 
+            // TODO: Set the string "(copy)" in a resource file for multi-language support.
             var newNotificationEntity = new NotificationDataEntity
             {
                 PartitionKey = NotificationDataTableNames.DraftNotificationsPartition,
