@@ -89,7 +89,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                 ?.Select(p => p.Trim());
             if (settings == null)
             {
-                throw new ApplicationException($"Invalid list of settings in authenticaiton options.");
+                throw new ApplicationException($"Invalid list of settings in authentication options.");
             }
 
             return settings;
