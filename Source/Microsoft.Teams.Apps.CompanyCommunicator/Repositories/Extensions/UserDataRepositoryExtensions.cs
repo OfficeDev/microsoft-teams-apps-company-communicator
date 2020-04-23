@@ -26,7 +26,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
             var userDataEntity = UserDataRepositoryExtensions.ParseUserData(activity);
             if (userDataEntity != null)
             {
-                await userDataRepository.CreateOrUpdateAsync(userDataEntity);
+                await userDataRepository.InsertOrMergeAsync(userDataEntity);
             }
         }
 
