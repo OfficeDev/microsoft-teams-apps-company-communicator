@@ -4,8 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue
 {
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
-
     /// <summary>
     /// Azure service bus send queue message content class.
     /// </summary>
@@ -17,9 +15,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
         public string NotificationId { get; set; }
 
         /// <summary>
-        /// Gets or sets the user data entity value.
-        /// This can hold data for a team and contain a team.id.
+        /// Gets or sets the information about the recipient. This
+        /// holds enough information for the Azure Function to send this
+        /// recipient a notification.
         /// </summary>
-        public UserDataEntity UserDataEntity { get; set; }
+        public RecipientData RecipientData { get; set; }
     }
 }
