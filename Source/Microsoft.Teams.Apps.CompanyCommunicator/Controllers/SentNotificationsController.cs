@@ -70,7 +70,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 draftNotification.Id);
             if (draftNotificationDataEntity == null)
             {
-                return this.NotFound();
+                return this.NotFound($"Draft notification, Id: {draftNotification.Id}, could not be found.");
             }
 
             var newSentNotificationId =
