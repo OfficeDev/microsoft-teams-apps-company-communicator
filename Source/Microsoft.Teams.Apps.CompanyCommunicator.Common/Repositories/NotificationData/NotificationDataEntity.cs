@@ -143,6 +143,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public int Throttled { get; set; }
 
         /// <summary>
+        /// Gets or sets the number or recipients who have an unknown status.
+        /// </summary>
+        public int Unknown { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the sending process is completed or not.
         /// </summary>
         public bool IsCompleted { get; set; }
