@@ -11,7 +11,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
     using System.Threading.Tasks;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Core;
-    using Microsoft.Extensions.Configuration;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -76,23 +75,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
                         var messageBody = JsonConvert.SerializeObject(queueMessageContent);
                         return new Message(Encoding.UTF8.GetBytes(messageBody));
                     })
-                .Where(message => message != null)
                 .ToList();
 
             await this.messageSender.SendAsync(serviceBusMessages);
         }
 
         /// <summary>
-        /// Send a delayed message to the Azure service bus queue.
+        /// Send message marked with a delay to the Azure service bus queue.
         /// </summary>
         /// <param name="queueMessageContent">Content of the message to be sent.</param>
-        /// <param name="delayNumberOfMinues">Number of minutes to delay the sending of the message.</param>
+        /// <param name="delayNumberOfSeconds">Number of seconds to apply as a delay to the message.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task SendDelayedAsync(T queueMessageContent, int delayNumberOfMinues)
+        public async Task SendDelayedAsync(T queueMessageContent, double delayNumberOfSeconds)
         {
             var messageBody = JsonConvert.SerializeObject(queueMessageContent);
-            var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody));
-            serviceBusMessage.ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromMinutes(delayNumberOfMinues);
+            var serviceBusMessage = new Message(Encoding.UTF8.GetBytes(messageBody))
+            {
+                ScheduledEnqueueTimeUtc = DateTime.UtcNow + TimeSpan.FromSeconds(delayNumberOfSeconds),
+            };
 
             await this.messageSender.SendAsync(serviceBusMessage);
         }
