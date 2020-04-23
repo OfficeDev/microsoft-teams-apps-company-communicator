@@ -13,6 +13,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
     public class SentNotificationDataEntity : TableEntity
     {
         /// <summary>
+        /// This value is to be used when the entity is first initialized and stored and does
+        /// not yet have a valid status code from a response to an attempt at sending the
+        /// notification.
+        /// </summary>
+        public static readonly int InitializationStatusCode = 0;
+
+        /// <summary>
         /// Succeeded string.
         /// </summary>
         public static readonly string Succeeded = "Succeeded";
