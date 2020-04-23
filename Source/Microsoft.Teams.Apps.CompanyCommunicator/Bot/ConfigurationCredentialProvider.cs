@@ -19,8 +19,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <param name="botOptions">The bot options.</param>
         public ConfigurationCredentialProvider(IOptions<BotOptions> botOptions)
             : base(
-                  appId: botOptions.Value.MicrosoftAppId,
-                  password: botOptions.Value.MicrosoftAppPassword)
+                appId: botOptions.Value.MicrosoftAppId,
+                password: botOptions.Value.MicrosoftAppPassword)
         {
         }
     }
