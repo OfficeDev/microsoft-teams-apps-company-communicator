@@ -8,6 +8,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 {
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +17,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
@@ -77,7 +77,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 
             // Add bot services.
             builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
-            builder.Services.AddSingleton<CommonBotAdapter>();
+            builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
 
             // Add repositories.
             builder.Services.AddSingleton<NotificationDataRepository>();

@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
@@ -20,16 +21,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
-    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// This class contains the "get recipient data list for roster" durable activity.
     /// </summary>
     public class GetRecipientDataListForRosterActivity
     {
-        private readonly CommonBotAdapter commonBotAdapter;
+        private readonly BotFrameworkHttpAdapter botAdapter;
         private readonly string microsoftAppId;
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
@@ -37,17 +36,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientDataListForRosterActivity"/> class.
         /// </summary>
-        /// <param name="commonBotAdapter">The common bot adapter.</param>
+        /// <param name="botAdapter">The bot adapter.</param>
         /// <param name="botOptions">The bot options.</param>
         /// <param name="notificationDataRepository">Notification data repository.</param>
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         public GetRecipientDataListForRosterActivity(
-            CommonBotAdapter commonBotAdapter,
+            BotFrameworkHttpAdapter botAdapter,
             IOptions<BotOptions> botOptions,
             NotificationDataRepository notificationDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository)
         {
-            this.commonBotAdapter = commonBotAdapter;
+            this.botAdapter = botAdapter;
             this.microsoftAppId = botOptions.Value.MicrosoftAppId;
             this.notificationDataRepository = notificationDataRepository;
             this.sentNotificationDataRepository = sentNotificationDataRepository;
@@ -139,7 +138,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
             IEnumerable<UserDataEntity> userDataEntitiesResult = null;
 
-            await this.commonBotAdapter.ContinueConversationAsync(
+            await this.botAdapter.ContinueConversationAsync(
                 this.microsoftAppId,
                 conversationReference,
                 async (turnContext, cancellationToken) =>
