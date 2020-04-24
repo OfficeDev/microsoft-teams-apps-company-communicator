@@ -67,36 +67,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         public async Task GetTeamRecipientDataListAsync(
             [ActivityTrigger] NotificationDataEntity notificationDataEntity)
         {
-            var teamsRecipientDataList =
-                await this.GetTeamsRecipientDataEntityListAsync(notificationDataEntity.Teams);
+            var teamDataEntities = await this.teamDataRepository.GetTeamDataEntitiesByIdsAsync(notificationDataEntity.Teams);
 
             await this.sentNotificationDataRepository
-                .InitializeSentNotificationDataForRecipientBatchAsync(notificationDataEntity.Id, teamsRecipientDataList);
-        }
-
-        /// <summary>
-        /// Get teams' recipient data entity list.
-        /// </summary>
-        /// <param name="teamIds">Team IDs.</param>
-        /// <returns>List of recipient data entity (user data entities).</returns>
-        private async Task<List<UserDataEntity>> GetTeamsRecipientDataEntityListAsync(IEnumerable<string> teamIds)
-        {
-            var teamDataEntities = await this.teamDataRepository.GetTeamDataEntitiesByIdsAsync(teamIds);
-
-            var teamReceiverEntities = new List<UserDataEntity>();
-
-            foreach (var teamDataEntity in teamDataEntities)
-            {
-                teamReceiverEntities.Add(
-                    new UserDataEntity
-                    {
-                        AadId = teamDataEntity.TeamId,
-                        ConversationId = teamDataEntity.TeamId,
-                        ServiceUrl = teamDataEntity.ServiceUrl,
-                    });
-            }
-
-            return teamReceiverEntities;
+                .InitializeSentNotificationDataForTeamRecipientBatchAsync(notificationDataEntity.Id, teamDataEntities);
         }
     }
 }

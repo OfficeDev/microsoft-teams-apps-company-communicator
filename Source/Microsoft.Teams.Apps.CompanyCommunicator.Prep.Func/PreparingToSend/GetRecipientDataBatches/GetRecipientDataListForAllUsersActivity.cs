@@ -63,7 +63,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             var allUsersRecipientDataList = await this.userDataRepository.GetAllAsync();
 
             await this.sentNotificationDataRepository
-                .InitializeSentNotificationDataForRecipientBatchAsync(notificationDataEntityId, allUsersRecipientDataList);
+                .InitializeSentNotificationDataForUserRecipientBatchAsync(notificationDataEntityId, allUsersRecipientDataList);
         }
     }
 }

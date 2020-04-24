@@ -109,7 +109,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                 input.TeamDataEntity.TenantId);
 
             await this.sentNotificationDataRepository
-                .InitializeSentNotificationDataForRecipientBatchAsync(input.NotificationDataEntityId, roster);
+                .InitializeSentNotificationDataForUserRecipientBatchAsync(input.NotificationDataEntityId, roster);
         }
 
         /// <summary>
