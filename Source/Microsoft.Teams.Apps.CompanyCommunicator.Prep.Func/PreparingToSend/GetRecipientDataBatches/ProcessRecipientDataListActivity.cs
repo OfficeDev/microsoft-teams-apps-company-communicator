@@ -6,11 +6,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
 
@@ -41,12 +41,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
         /// <returns>Recipient data batches.</returns>
-        public async Task<IEnumerable<IEnumerable<UserDataEntity>>> RunAsync(
+        public async Task<IEnumerable<IEnumerable<RecipientData>>> RunAsync(
             DurableOrchestrationContext context,
             string notificationDataEntityId)
         {
             var recipientDataBatches =
-                await context.CallActivityWithRetryAsync<IEnumerable<IEnumerable<UserDataEntity>>>(
+                await context.CallActivityWithRetryAsync<IEnumerable<IEnumerable<RecipientData>>>(
                     nameof(ProcessRecipientDataListActivity.ProcessRecipientDataListAsync),
                     new RetryOptions(TimeSpan.FromSeconds(5), 3),
                     notificationDataEntityId);
@@ -64,57 +64,83 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <param name="notificationDataEntityId">Notification id.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(ProcessRecipientDataListAsync))]
-        public async Task<IEnumerable<IEnumerable<UserDataEntity>>> ProcessRecipientDataListAsync(
+        public async Task<IEnumerable<IEnumerable<RecipientData>>> ProcessRecipientDataListAsync(
             [ActivityTrigger] string notificationDataEntityId)
         {
             var sentNotificationDataEntityList =
                 await this.sentNotificationDataRepository.GetAllAsync(notificationDataEntityId);
-            var recipientDataList = sentNotificationDataEntityList
-                .Where(p => p.StatusCode == 0)
-                .Select(p =>
-                    new UserDataEntity
+
+            // Fill the recipient list with recipient data based on the type of the recipient it
+            // is (as stored in the SentNotificationDataEntity) and the data stored in the
+            // SentNotificationDataEntity.
+            var recipientDataList = new List<RecipientData>();
+            foreach (var sentNotificationDataEntity in sentNotificationDataEntityList)
+            {
+                if (sentNotificationDataEntity.RecipientType
+                    == SentNotificationDataEntity.UserRecipientType)
+                {
+                    recipientDataList.Add(new RecipientData
                     {
-                        AadId = p.AadId,
-                        UserId = p.UserId,
-                        ConversationId = p.ConversationId,
-                        ServiceUrl = p.ServiceUrl,
-                        TenantId = p.TenantId,
-                    })
-                .ToList();
+                        RecipientType = RecipientDataType.User,
+                        UserData = new UserDataEntity
+                        {
+                            AadId = sentNotificationDataEntity.RecipientId,
+                            UserId = sentNotificationDataEntity.UserId,
+                            ConversationId = sentNotificationDataEntity.ConversationId,
+                            ServiceUrl = sentNotificationDataEntity.ServiceUrl,
+                            TenantId = sentNotificationDataEntity.TenantId,
+                        },
+                    });
+                }
+                else if (sentNotificationDataEntity.RecipientType
+                    == SentNotificationDataEntity.TeamRecipientType)
+                {
+                    recipientDataList.Add(new RecipientData
+                    {
+                        RecipientType = RecipientDataType.Team,
+                        TeamData = new TeamDataEntity
+                        {
+                            TeamId = sentNotificationDataEntity.RecipientId,
+                            ServiceUrl = sentNotificationDataEntity.ServiceUrl,
+                            TenantId = sentNotificationDataEntity.TenantId,
+                        },
+                    });
+                }
+            }
 
             await this.SetTotalRecipientCountInNotificationDataAsync(
                 notificationDataEntityId,
-                recipientDataList);
+                recipientDataList.Count);
 
-            var paged = this.CreateRecipientDataBatches(recipientDataList);
-            return paged;
+            var recipientDataBatches = this.CreateRecipientDataBatches(recipientDataList);
+            return recipientDataBatches;
         }
 
         /// <summary>
         /// Set total recipient count in notification data entity.
         /// </summary>
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
-        /// <param name="recipientDataList">Recipient data list.</param>
+        /// <param name="totalExpectedRecipientCount">The total number of expected recipients.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         internal async Task SetTotalRecipientCountInNotificationDataAsync(
             string notificationDataEntityId,
-            IList<UserDataEntity> recipientDataList)
+            int totalExpectedRecipientCount)
         {
             var notificationDataEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,
                 notificationDataEntityId);
             if (notificationDataEntity != null)
             {
-                notificationDataEntity.TotalMessageCount = recipientDataList.Count;
+                notificationDataEntity.TotalMessageCount = totalExpectedRecipientCount;
 
                 await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
             }
         }
 
-        private IEnumerable<IEnumerable<UserDataEntity>> CreateRecipientDataBatches(
-            List<UserDataEntity> recipientDataList)
+        private IEnumerable<IEnumerable<RecipientData>> CreateRecipientDataBatches(
+            List<RecipientData> recipientDataList)
         {
-            var recipientDataBatches = new List<List<UserDataEntity>>();
+            var recipientDataBatches = new List<List<RecipientData>>();
 
             var totalNumberOfRecipients = recipientDataList.Count;
 

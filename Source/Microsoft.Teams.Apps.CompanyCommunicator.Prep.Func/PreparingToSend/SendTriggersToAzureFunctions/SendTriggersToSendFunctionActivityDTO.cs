@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.SendTriggersToAzureFunctions
 {
     using System.Collections.Generic;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
 
     /// <summary>
     /// DTO class used by the durable framework to pass parameter to the SendTriggerToDataFunctionActivity.
@@ -20,6 +20,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
         /// <summary>
         /// Gets or sets the recipient data batch.
         /// </summary>
-        public IEnumerable<UserDataEntity> RecipientDataBatch { get; set; }
+        public IEnumerable<RecipientData> RecipientDataBatch { get; set; }
     }
 }

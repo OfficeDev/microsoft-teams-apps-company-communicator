@@ -9,7 +9,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
 
     /// <summary>
@@ -20,15 +19,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
     /// </summary>
     public class SendTriggersToSendFunctionActivity
     {
-        private readonly SendQueue sendMessageQueue;
+        private readonly SendQueue sendQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SendTriggersToSendFunctionActivity"/> class.
         /// </summary>
-        /// <param name="sendMessageQueue">Send message queue service.</param>
-        public SendTriggersToSendFunctionActivity(SendQueue sendMessageQueue)
+        /// <param name="sendQueue">Send queue service.</param>
+        public SendTriggersToSendFunctionActivity(SendQueue sendQueue)
         {
-            this.sendMessageQueue = sendMessageQueue;
+            this.sendQueue = sendQueue;
         }
 
         /// <summary>
@@ -41,7 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
         public async Task RunAsync(
             DurableOrchestrationContext context,
             string notificationDataEntityId,
-            IEnumerable<UserDataEntity> recipientDataBatch)
+            IEnumerable<RecipientData> recipientDataBatch)
         {
             await context.CallActivityWithRetryAsync(
                 nameof(SendTriggersToSendFunctionActivity.SendTriggersToSendFunctionAsync),
@@ -63,18 +62,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
         public async Task SendTriggersToSendFunctionAsync(
             [ActivityTrigger] SendTriggersToSendFunctionActivityDTO input)
         {
-            var userDataEntityBatch = input.RecipientDataBatch;
             var notificationDataEntityId = input.NotificationDataEntityId;
+            var recipientDataBatch = input.RecipientDataBatch;
 
-            var sendQueueMessageContentBatch = userDataEntityBatch
-                .Select(userDataEntity =>
+            var sendQueueMessageContentBatch = recipientDataBatch
+                .Select(recipientData =>
                     new SendQueueMessageContent
                     {
                         NotificationId = notificationDataEntityId,
-                        UserDataEntity = userDataEntity,
+                        RecipientData = recipientData,
                     });
 
-            await this.sendMessageQueue.SendAsync(sendQueueMessageContentBatch);
+            await this.sendQueue.SendAsync(sendQueueMessageContentBatch);
         }
     }
 }

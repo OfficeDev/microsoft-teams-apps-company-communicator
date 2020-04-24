@@ -11,8 +11,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.SendTriggersToAzureFunctions;
 
@@ -143,37 +143,37 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="notificationDataEntity">A notification data entity.</param>
         /// <param name="log">The logging service.</param>
         /// <returns>The batches of recipients to be added to the send queue.</returns>
-        private async Task<IEnumerable<IEnumerable<UserDataEntity>>> GetRecipientDataBatchesAsync(
+        private async Task<IEnumerable<IEnumerable<RecipientData>>> GetRecipientDataBatchesAsync(
             DurableOrchestrationContext context,
             NotificationDataEntity notificationDataEntity,
             ILogger log)
         {
-            var recipientType = string.Empty;
+            var recipientTypeForLogging = string.Empty;
             if (notificationDataEntity.AllUsers)
             {
-                recipientType = "All users";
+                recipientTypeForLogging = "All users";
                 await this.getRecipientDataListForAllUsersActivity.RunAsync(context, notificationDataEntity);
             }
             else if (notificationDataEntity.Rosters.Count() != 0)
             {
-                recipientType = "Rosters";
+                recipientTypeForLogging = "Rosters";
                 await this.GetRecipientDataListForRostersAsync(context, notificationDataEntity, log);
             }
             else if (notificationDataEntity.Teams.Count() != 0)
             {
-                recipientType = "General channels";
+                recipientTypeForLogging = "General channels";
                 await this.getRecipientDataListForTeamsActivity.RunAsync(context, notificationDataEntity);
             }
             else
             {
-                recipientType = "No recipient type was defined";
-                this.Log(context, log, notificationDataEntity.Id, recipientType);
+                recipientTypeForLogging = "No recipient type was defined";
+                this.Log(context, log, notificationDataEntity.Id, recipientTypeForLogging);
                 return null;
             }
 
             var recipientDataBatches = await this.processRecipientDataListActivity.RunAsync(context, notificationDataEntity.Id);
 
-            this.Log(context, log, notificationDataEntity.Id, recipientType, recipientDataBatches.SelectMany(p => p));
+            this.Log(context, log, notificationDataEntity.Id, recipientTypeForLogging, recipientDataBatches.SelectMany(p => p));
 
             return recipientDataBatches;
         }
@@ -221,7 +221,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private async Task SendTriggersToSendFunctionAsync(
             DurableOrchestrationContext context,
             string notificationDataEntityId,
-            IEnumerable<IEnumerable<UserDataEntity>> recipientDataBatches,
+            IEnumerable<IEnumerable<RecipientData>> recipientDataBatches,
             ILogger log)
         {
             var totalBatches = recipientDataBatches.Count();
@@ -297,7 +297,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             ILogger log,
             string notificationDataEntityId,
             string recipientType,
-            IEnumerable<UserDataEntity> recipientDataList = null)
+            IEnumerable<RecipientData> recipientDataList = null)
         {
             if (context.IsReplaying)
             {
