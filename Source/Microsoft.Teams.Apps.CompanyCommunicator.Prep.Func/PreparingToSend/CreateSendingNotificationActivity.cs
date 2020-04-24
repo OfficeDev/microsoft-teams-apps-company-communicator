@@ -4,7 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
-    using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -43,7 +42,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         {
             await context.CallActivityWithRetryAsync(
                 nameof(CreateSendingNotificationActivity.CreateSendingNotificationAsync),
-                new RetryOptions(TimeSpan.FromSeconds(5), 3),
+                ActivitySettings.CommonActivityRetryOptions,
                 notificationDataEntity);
         }
 

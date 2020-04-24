@@ -4,7 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
@@ -45,7 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         {
             await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
                 nameof(GetRecipientDataListForAllUsersActivity.GetAllUsersRecipientDataListAsync),
-                new RetryOptions(TimeSpan.FromSeconds(5), 3),
+                ActivitySettings.CommonActivityRetryOptions,
                 notificationDataEntity.Id);
         }
 

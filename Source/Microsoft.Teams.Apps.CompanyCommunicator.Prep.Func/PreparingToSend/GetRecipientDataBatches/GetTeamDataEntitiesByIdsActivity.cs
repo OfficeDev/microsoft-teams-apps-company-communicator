@@ -48,7 +48,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
             var teamDataEntityList = await context.CallActivityWithRetryAsync<IEnumerable<TeamDataEntity>>(
                 nameof(GetTeamDataEntitiesByIdsActivity.GetTeamDataEntitiesByIdsAsync),
-                new RetryOptions(TimeSpan.FromSeconds(5), 3),
+                ActivitySettings.CommonActivityRetryOptions,
                 notificationDataEntity);
 
             return teamDataEntityList;

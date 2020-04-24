@@ -52,7 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
             await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
                 nameof(GetRecipientDataListForTeamsActivity.GetTeamRecipientDataListAsync),
-                new RetryOptions(TimeSpan.FromSeconds(5), 3),
+                ActivitySettings.CommonActivityRetryOptions,
                 notificationDataEntity);
         }
 

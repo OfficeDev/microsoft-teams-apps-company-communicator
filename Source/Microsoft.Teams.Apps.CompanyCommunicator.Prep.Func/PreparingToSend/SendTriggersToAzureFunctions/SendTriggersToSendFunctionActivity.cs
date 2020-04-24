@@ -4,7 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.SendTriggersToAzureFunctions
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -44,7 +43,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
         {
             await context.CallActivityWithRetryAsync(
                 nameof(SendTriggersToSendFunctionActivity.SendTriggersToSendFunctionAsync),
-                new RetryOptions(TimeSpan.FromSeconds(5), 3),
+                ActivitySettings.CommonActivityRetryOptions,
                 new SendTriggersToSendFunctionActivityDTO
                 {
                     NotificationDataEntityId = notificationDataEntityId,

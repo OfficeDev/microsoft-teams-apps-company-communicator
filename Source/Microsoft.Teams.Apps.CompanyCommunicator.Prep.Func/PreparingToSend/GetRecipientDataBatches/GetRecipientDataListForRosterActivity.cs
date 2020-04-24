@@ -71,7 +71,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             {
                 await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
                     nameof(GetRecipientDataListForRosterActivity.GetRecipientDataListForRosterAsync),
-                    new RetryOptions(TimeSpan.FromSeconds(5), 3),
+                    ActivitySettings.CommonActivityRetryOptions,
                     new GetRecipientDataListForRosterActivityDTO
                     {
                         NotificationDataEntityId = notificationDataEntityId,

@@ -41,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         {
             await context.CallActivityWithRetryAsync(
                 nameof(HandleFailureActivity.HandleFailureAsync),
-                new RetryOptions(TimeSpan.FromSeconds(5), 3),
+                ActivitySettings.CommonActivityRetryOptions,
                 new HandleFailureActivityDTO
                 {
                     NotificationDataEntity = notificationDataEntity,
