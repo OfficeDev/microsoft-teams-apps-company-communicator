@@ -7,7 +7,7 @@
       }
     },
     "durableTask": {
-      "hubName": "MyTaskHub",
+      "hubName": "PrepareToSendFunctionTaskHub",
       "controlQueueVisibilityTimeout": "00:02:00",
       "workItemQueueVisibilityTimeout": "00:02:00"
     }
