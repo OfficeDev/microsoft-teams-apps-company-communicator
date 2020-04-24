@@ -90,14 +90,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
             if (!context.IsReplaying)
             {
-                log.LogCritical($"Start to prepare to send the notification {notificationDataEntity.Id}!");
+                log.LogInformation($"Start to prepare to send the notification {notificationDataEntity.Id}!");
             }
 
             try
             {
                 if (!context.IsReplaying)
                 {
-                    log.LogCritical("Get recipient batches.");
+                    log.LogInformation("Get recipient batches.");
                 }
 
                 var recipientDataBatches =
@@ -105,14 +105,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
                 if (!context.IsReplaying)
                 {
-                    log.LogCritical("Prepare adaptive card.");
+                    log.LogInformation("Prepare adaptive card.");
                 }
 
                 await this.createSendingNotificationActivity.RunAsync(context, notificationDataEntity);
 
                 if (!context.IsReplaying)
                 {
-                    log.LogCritical("Mark notification as no longer preparing and send trigger to the data function.");
+                    log.LogInformation("Mark notification as no longer preparing and send trigger to the data function.");
 
                     await this.SetNotificationIsPreparingToSendAsCompleteAsync(notificationDataEntity.Id);
                     await this.SendDataAggregationQueueMessageAsync(notificationDataEntity.Id);
@@ -120,12 +120,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
                 if (!context.IsReplaying)
                 {
-                    log.LogCritical("Send triggers to the send function.");
+                    log.LogInformation("Send triggers to the send function.");
                 }
 
                 await this.SendTriggersToSendFunctionAsync(context, notificationDataEntity.Id, recipientDataBatches, log);
 
-                log.LogCritical($"\"PREPARE TO SEND\" IS DONE SUCCESSFULLY FOR NOTIFICATION {notificationDataEntity.Id}!");
+                log.LogInformation($"\"PREPARE TO SEND\" IS DONE SUCCESSFULLY FOR NOTIFICATION {notificationDataEntity.Id}!");
             }
             catch (Exception ex)
             {
@@ -235,7 +235,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             {
                 if (!context.IsReplaying)
                 {
-                    log.LogCritical($"{++processedBatches} / {totalBatches}");
+                    log.LogInformation($"{++processedBatches} / {totalBatches}");
                 }
 
                 var task = this.sendTriggersToSendFunctionActivity.RunAsync(
