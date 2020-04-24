@@ -32,7 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private static readonly int MaxDeliveryCountForDeadLetter = 10;
 
         private readonly int maxNumberOfAttempts;
-        private readonly int sendRetryDelayNumberOfMinutes;
+        private readonly double sendRetryDelayNumberOfSeconds;
         private readonly SendingNotificationDataRepository sendingNotificationDataRepository;
         private readonly GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository;
         private readonly UserDataRepository userDataRepository;
@@ -66,7 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             ManageResultDataService manageResultDataService)
         {
             this.maxNumberOfAttempts = companyCommunicatorSendFunctionOptions.Value.MaxNumberOfAttempts;
-            this.sendRetryDelayNumberOfMinutes = companyCommunicatorSendFunctionOptions.Value.SendRetryDelayNumberOfMinutes;
+            this.sendRetryDelayNumberOfSeconds = companyCommunicatorSendFunctionOptions.Value.SendRetryDelayNumberOfSeconds;
             this.sendingNotificationDataRepository = sendingNotificationDataRepository;
             this.globalSendingNotificationDataRepository = globalSendingNotificationDataRepository;
             this.userDataRepository = userDataRepository;
@@ -155,7 +155,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 if (globalSendingNotificationDataEntity?.SendRetryDelayTime != null
                     && DateTime.UtcNow < globalSendingNotificationDataEntity.SendRetryDelayTime)
                 {
-                    await this.sendQueue.SendDelayedAsync(messageContent, this.sendRetryDelayNumberOfMinutes);
+                    await this.sendQueue.SendDelayedAsync(messageContent, this.sendRetryDelayNumberOfSeconds);
 
                     return;
                 }
@@ -217,7 +217,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         // other calls will be delayed and add the message back to the queue with a delay to be
                         // attempted later.
                         await this.delaySendingNotificationService.DelaySendingNotificationAsync(
-                            sendRetryDelayNumberOfMinutes: this.sendRetryDelayNumberOfMinutes,
+                            sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds,
                             sendQueueMessageContent: messageContent);
 
                         return;
@@ -269,7 +269,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     // NOTE: Here it does not immediately await this task and exit the function because a task
                     // of saving updated user data with a newly created conversation ID may need to be awaited.
                     delaySendingNotificationTask = this.delaySendingNotificationService
-                        .DelaySendingNotificationAsync(this.sendRetryDelayNumberOfMinutes, messageContent);
+                        .DelaySendingNotificationAsync(
+                            sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds,
+                            sendQueueMessageContent: messageContent);
                 }
                 else if (sendNotificationResponse.ResultType == SendNotificationResultType.Failed)
                 {

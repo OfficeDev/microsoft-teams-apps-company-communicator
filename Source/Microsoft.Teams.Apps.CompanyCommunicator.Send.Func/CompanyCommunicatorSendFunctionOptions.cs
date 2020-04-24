@@ -15,9 +15,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         public int MaxNumberOfAttempts { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of minutes to delay before
+        /// Gets or sets the number of seconds to delay before
         /// retrying to send the message.
         /// </summary>
-        public int SendRetryDelayNumberOfMinutes { get; set; }
+        public double SendRetryDelayNumberOfSeconds { get; set; }
     }
 }

@@ -34,16 +34,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         /// This method sets the globally accessible delay time indicating to all other functions that the system is currently in a
         /// throttled state and all messages need to be delayed and sends the queue message back to the queue with a delayed wait time.
         /// </summary>
-        /// <param name="sendRetryDelayNumberOfMinutes">The number of minutes for the system and message to be delayed.</param>
+        /// <param name="sendRetryDelayNumberOfSeconds">The number of seconds for the system and message to be delayed.</param>
         /// <param name="sendQueueMessageContent">The send queue message content to be sent back to the send queue for a delayed retry.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task DelaySendingNotificationAsync(
-            int sendRetryDelayNumberOfMinutes,
+            double sendRetryDelayNumberOfSeconds,
             SendQueueMessageContent sendQueueMessageContent)
         {
             // Shorten this time by 15 seconds to ensure that when the delayed retry message is taken off of the queue
             // the Send Retry Delay Time will be earlier and will not block it
-            var sendRetryDelayTime = DateTime.UtcNow + TimeSpan.FromMinutes(sendRetryDelayNumberOfMinutes - 0.25);
+            var sendRetryDelayTime = DateTime.UtcNow + TimeSpan.FromSeconds(sendRetryDelayNumberOfSeconds - 15);
 
             var globalSendingNotificationDataEntity = new GlobalSendingNotificationDataEntity
             {
@@ -53,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
             var setGlobalSendingNotificationDataEntityTask = this.globalSendingNotificationDataRepository
                 .SetGlobalSendingNotificationDataEntityAsync(globalSendingNotificationDataEntity);
 
-            var sendDelayedRetryTask = this.sendQueue.SendDelayedAsync(sendQueueMessageContent, sendRetryDelayNumberOfMinutes);
+            var sendDelayedRetryTask = this.sendQueue.SendDelayedAsync(sendQueueMessageContent, sendRetryDelayNumberOfSeconds);
 
             await Task.WhenAll(
                 setGlobalSendingNotificationDataEntityTask,
