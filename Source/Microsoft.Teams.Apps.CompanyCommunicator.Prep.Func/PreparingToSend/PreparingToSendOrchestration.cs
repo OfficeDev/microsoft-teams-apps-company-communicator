@@ -112,21 +112,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
                 if (!context.IsReplaying)
                 {
+                    log.LogCritical("Mark notification as no longer preparing and send trigger to the data function.");
+
+                    await this.SetNotificationIsPreparingToSendAsCompleteAsync(notificationDataEntity.Id);
+                    await this.SendDataAggregationQueueMessageAsync(notificationDataEntity.Id);
+                }
+
+                if (!context.IsReplaying)
+                {
                     log.LogCritical("Send triggers to the send function.");
                 }
 
                 await this.SendTriggersToSendFunctionAsync(context, notificationDataEntity.Id, recipientDataBatches, log);
-
-                if (!context.IsReplaying)
-                {
-                    log.LogCritical("Send triggers to the data function.");
-                }
-
-                if (!context.IsReplaying)
-                {
-                    await this.SetNotificationIsPreparingToSendAsCompleteAsync(notificationDataEntity.Id);
-                    await this.SendDataAggregationQueueMessageAsync(notificationDataEntity.Id);
-                }
 
                 log.LogCritical($"\"PREPARE TO SEND\" IS DONE SUCCESSFULLY FOR NOTIFICATION {notificationDataEntity.Id}!");
             }
