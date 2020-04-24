@@ -13,6 +13,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
     /// <summary>
     /// This class contains the "get recipient data list for all users" durable activity.
+    /// This activity prepares the SentNotification data table by filling it with an initialized row
+    /// for each recipient - for "all users" every user in the user data table is a recipient.
+    /// 1). It gets the recipient data list for all users stored in the user data table.
+    /// 2). It initializes the sent notification data table with a row for each recipient.
     /// </summary>
     public class GetRecipientDataListForAllUsersActivity
     {
@@ -50,8 +54,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
         /// <summary>
         /// This method represents the "get recipient data list for all users" durable activity.
-        /// 1). It gets recipient data list for all users.
-        /// 2). Initialize sent notification data in the table storage.
+        /// 1). It gets the recipient data list for all users stored in the user data table.
+        /// 2). It initializes the sent notification data table with a row for each recipient.
         /// </summary>
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

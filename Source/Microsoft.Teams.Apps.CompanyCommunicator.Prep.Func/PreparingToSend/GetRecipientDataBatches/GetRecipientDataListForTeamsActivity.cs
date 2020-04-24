@@ -16,6 +16,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
     /// <summary>
     /// This class contains the "get recipient data list for teams" durable activity.
+    /// This activity prepares the SentNotification data table by filling it with an initialized row
+    /// for each recipient - for "teams" every team in the list is a recipient.
+    /// 1). It gets the recipient data list of teams ("team general channels").
+    /// 2). It initializes the sent notification data table with a row for each team.
     /// </summary>
     public class GetRecipientDataListForTeamsActivity
     {
@@ -58,8 +62,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
         /// <summary>
         /// This method represents the "get recipient data list for teams" durable activity.
-        /// 1). It gets recipient data list for teams ("team general channels").
-        /// 2). Initialize sent notification data in the table storage.
+        /// 1). It gets the recipient data list of teams ("team general channels").
+        /// 2). It initializes the sent notification data table with a row for each team.
         /// </summary>
         /// <param name="notificationDataEntity">Notification data entity.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

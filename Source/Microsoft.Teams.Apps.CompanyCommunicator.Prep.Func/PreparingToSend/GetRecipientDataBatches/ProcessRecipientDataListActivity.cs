@@ -15,6 +15,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
     /// <summary>
     /// This class contains the "process recipient data list" durable activity.
+    /// This activity pulls all of the SentNotification data table entries, converts
+    /// them to recipient data objects, counts and stores the total number of recipients,
+    /// and breaks the total group of recipients into batches to be sent to the send queue.
     /// </summary>
     public class ProcessRecipientDataListActivity
     {

@@ -11,6 +11,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
     /// <summary>
     /// This class contains the "create sending notification data entity" durable activity.
+    /// This activity creates an entry in the notification data table that holds the
+    /// information about the notification that will be used when sending the notification,
+    /// namely the serialized JSON content for the notification.
     /// </summary>
     public class CreateSendingNotificationActivity
     {
@@ -48,6 +51,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
         /// <summary>
         /// This method represents the "create sending notification" durable activity.
+        /// It creates an entry in the notification data table that holds the
+        /// information about the notification that will be used when sending the notification,
+        /// namely the serialized JSON content for the notification.
         /// </summary>
         /// <param name="notificationDataEntity">A notification to be sent to recipients.</param>
         /// <returns>A task that represents the work queued to execute.</returns>

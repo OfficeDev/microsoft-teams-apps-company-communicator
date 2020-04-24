@@ -7,7 +7,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
@@ -25,6 +24,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
     /// <summary>
     /// This class contains the "get recipient data list for roster" durable activity.
+    /// This activity prepares the SentNotification data table by filling it with an initialized row
+    /// for each recipient - for "roster" every member of the given team is a recipient.
+    /// 1). It gets the recipient data list for a team's roster.
+    /// 2). It initializes the sent notification data table with a row for each member in that roster.
     /// </summary>
     public class GetRecipientDataListForRosterActivity
     {
@@ -91,8 +94,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
         /// <summary>
         /// This method represents the "get recipient data list for roster" durable activity.
-        /// 1). It gets recipient data list for a team's roster.
-        /// 2). Initialize sent notification data in the table storage.
+        /// 1). It gets the recipient data list for a team's roster.
+        /// 2). It initializes the sent notification data table with a row for each member in that roster.
         /// </summary>
         /// <param name="input">Input data.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

@@ -11,10 +11,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
 
     /// <summary>
-    /// This class contains the following durable components:
-    /// 1). The durable sub-orchestration ProcessRecipientBatchSubOrchestration.
-    /// 2). And two durable activities, SendTriggersToSendFunctionAsync and SetRecipientBatchSatusAsync.
-    /// The components work together to send triggers to the Azure send function.
+    /// This activity sends a batch of queue messages to the send queue.
+    /// It takes in a batch of recipient data objects, converts each recipient to a
+    /// send queue message, and sends all of the send queue messages as a batch to the send queue.
     /// </summary>
     public class SendTriggersToSendFunctionActivity
     {
