@@ -10,7 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     public class DataQueueMessageOptions
     {
         /// <summary>
-        /// Gets or sets the value for delay to be applied to the data queue message
+        /// Gets or sets the value for the delay to be applied to the data queue message
         /// used to force mark a notification as complete if it is not already
         /// complete to ensure it is not left in a "sending" state.
         /// </summary>
