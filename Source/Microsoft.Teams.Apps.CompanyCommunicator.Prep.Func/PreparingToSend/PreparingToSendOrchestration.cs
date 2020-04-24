@@ -276,12 +276,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             var dataQueueMessageContent = new DataQueueMessageContent
             {
                 NotificationId = notificationDataEntityId,
-                SentDate = DateTime.UtcNow,
-                ResultType = DataQueueResultType.Succeeded,
                 ForceMessageComplete = false,
             };
 
-            await this.dataQueue.SendDelayedAsync(dataQueueMessageContent, 3); // In minutes.
+            await this.dataQueue.SendDelayedAsync(dataQueueMessageContent, 180); // In seconds.
         }
 
         /// <summary>
