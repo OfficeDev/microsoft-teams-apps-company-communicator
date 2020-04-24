@@ -8,6 +8,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +16,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
@@ -38,8 +38,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     companyCommunicatorSendFunctionOptions.MaxNumberOfAttempts =
                         configuration.GetValue<int>("MaxNumberOfAttempts", 1);
 
-                    companyCommunicatorSendFunctionOptions.SendRetryDelayNumberOfMinutes =
-                        configuration.GetValue<int>("SendRetryDelayNumberOfMinutes", 11);
+                    companyCommunicatorSendFunctionOptions.SendRetryDelayNumberOfSeconds =
+                        configuration.GetValue<double>("SendRetryDelayNumberOfSeconds", 660);
                 });
             builder.Services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
@@ -82,7 +82,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             // Add bot services.
             builder.Services.AddSingleton<CommonMicrosoftAppCredentials>();
             builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
-            builder.Services.AddSingleton<CommonBotAdapter>();
+            builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
 
             // Add repositories.
             builder.Services.AddSingleton<SendingNotificationDataRepository>();
