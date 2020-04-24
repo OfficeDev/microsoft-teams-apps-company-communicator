@@ -322,7 +322,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     totalNumberOfThrottles: totalNumberOfThrottles,
                     isStatusCodeFromCreateConversation: false,
                     statusCode: statusCodeToStore,
-                    errorMessage: e.GetType().ToString());
+                    errorMessage: e.Message);
 
                 throw;
             }
