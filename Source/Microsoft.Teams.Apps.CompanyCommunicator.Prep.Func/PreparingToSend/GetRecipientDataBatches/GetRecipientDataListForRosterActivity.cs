@@ -80,12 +80,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             }
             catch (Exception ex)
             {
-                var stringBuilder = new StringBuilder();
-                stringBuilder.AppendLine($"Failed to load roster for team {teamDataEntity.TeamId}.");
-                stringBuilder.AppendLine(ex.Message);
-                var errorMessage = stringBuilder.ToString();
+                var errorMessage = $"Failed to load roster for team {teamDataEntity.TeamId}: {ex.Message}";
 
-                log.LogError(errorMessage);
+                log.LogError(ex, errorMessage);
 
                 await this.notificationDataRepository
                     .SaveWarningInNotificationDataEntityAsync(notificationDataEntityId, errorMessage);

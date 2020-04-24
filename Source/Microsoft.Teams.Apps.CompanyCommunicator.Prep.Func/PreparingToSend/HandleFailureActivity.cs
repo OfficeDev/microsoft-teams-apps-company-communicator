@@ -62,10 +62,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             [ActivityTrigger] HandleFailureActivityDTO input,
             ILogger log)
         {
-            log.LogError(input.Exception.Message);
+            var errorMessage = $"Failed to prepare notification {input.NotificationDataEntity.Id} for sending: {input.Exception.Message}";
+
+            log.LogError(input.Exception, errorMessage);
 
             await this.notificationDataRepository
-                .SaveExceptionInNotificationDataEntityAsync(input.NotificationDataEntity.Id, input.Exception.Message);
+                .SaveExceptionInNotificationDataEntityAsync(input.NotificationDataEntity.Id, errorMessage);
         }
     }
 }
