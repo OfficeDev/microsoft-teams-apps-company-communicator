@@ -9,10 +9,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Options;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Newtonsoft.Json;
 
@@ -24,19 +24,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         private static readonly string AdaptiveCardContentType = "application/vnd.microsoft.card.adaptive";
 
         private readonly string microsoftAppId;
-        private readonly CommonBotAdapter botAdapter;
+        private readonly BotFrameworkHttpAdapter botAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SendNotificationService"/> class.
         /// </summary>
         /// <param name="botOptions">The bot options.</param>
-        /// <param name="commonBotAdapter">The common bot adapter.</param>
+        /// <param name="botAdapter">The bot adapter.</param>
         public SendNotificationService(
             IOptions<BotOptions> botOptions,
-            CommonBotAdapter commonBotAdapter)
+            BotFrameworkHttpAdapter botAdapter)
         {
             this.microsoftAppId = botOptions.Value.MicrosoftAppId;
-            this.botAdapter = commonBotAdapter;
+            this.botAdapter = botAdapter;
         }
 
         /// <summary>

@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
@@ -20,19 +21,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
     {
         private static readonly string MicrosoftTeamsChannelId = "msteams";
 
-        private readonly CommonBotAdapter botAdapter;
+        private readonly BotFrameworkHttpAdapter botAdapter;
         private readonly CommonMicrosoftAppCredentials appCredentials;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateUserConversationService"/> class.
         /// </summary>
-        /// <param name="commonBotAdapter">The common bot adapter.</param>
+        /// <param name="botAdapter">The bot adapter.</param>
         /// <param name="commonMicrosoftAppCredentials">The common Microsoft app credentials.</param>
         public CreateUserConversationService(
-            CommonBotAdapter commonBotAdapter,
+            BotFrameworkHttpAdapter botAdapter,
             CommonMicrosoftAppCredentials commonMicrosoftAppCredentials)
         {
-            this.botAdapter = commonBotAdapter;
+            this.botAdapter = botAdapter;
             this.appCredentials = commonMicrosoftAppCredentials;
         }
 
