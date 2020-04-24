@@ -61,6 +61,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                     botOptions.MicrosoftAppPassword =
                         configuration.GetValue<string>("MicrosoftAppPassword");
                 });
+            builder.Services.AddOptions<DataQueueMessageOptions>()
+                .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
+                {
+                    dataQueueMessageOptions.FirstDataAggregationMessageDelayInSeconds =
+                        configuration.GetValue<double>("FirstDataAggregationMessageDelayInSeconds", 20);
+                });
 
             // Add orchestration.
             builder.Services.AddTransient<PreparingToSendOrchestration>();

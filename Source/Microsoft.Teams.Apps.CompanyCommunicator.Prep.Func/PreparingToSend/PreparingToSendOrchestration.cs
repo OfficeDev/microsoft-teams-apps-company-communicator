@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
@@ -31,6 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly HandleFailureActivity handleFailureActivity;
         private readonly DataQueue dataQueue;
+        private readonly double firstDataAggregationMessageDelayInSeconds;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PreparingToSendOrchestration"/> class.
@@ -45,6 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="notificationDataRepository">The notification data repository.</param>
         /// <param name="handleFailureActivity">Clean up activity.</param>
         /// <param name="dataQueue">The data queue.</param>
+        /// <param name="dataQueueMessageOptions">The data queue message options.</param>
         public PreparingToSendOrchestration(
             GetRecipientDataListForAllUsersActivity getRecipientDataListForAllUsersActivity,
             GetTeamDataEntitiesByIdsActivity getTeamDataEntitiesByIdsActivity,
@@ -55,7 +58,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             SendTriggersToSendFunctionActivity sendTriggersToSendFunctionActivity,
             NotificationDataRepository notificationDataRepository,
             HandleFailureActivity handleFailureActivity,
-            DataQueue dataQueue)
+            DataQueue dataQueue,
+            IOptions<DataQueueMessageOptions> dataQueueMessageOptions)
         {
             this.getRecipientDataListForAllUsersActivity = getRecipientDataListForAllUsersActivity;
             this.getTeamDataEntitiesByIdsActivity = getTeamDataEntitiesByIdsActivity;
@@ -67,6 +71,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             this.notificationDataRepository = notificationDataRepository;
             this.handleFailureActivity = handleFailureActivity;
             this.dataQueue = dataQueue;
+            this.firstDataAggregationMessageDelayInSeconds = dataQueueMessageOptions.Value.FirstDataAggregationMessageDelayInSeconds;
         }
 
         /// <summary>
@@ -279,7 +284,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 ForceMessageComplete = false,
             };
 
-            await this.dataQueue.SendDelayedAsync(dataQueueMessageContent, 180); // In seconds.
+            await this.dataQueue.SendDelayedAsync(
+                dataQueueMessageContent,
+                this.firstDataAggregationMessageDelayInSeconds);
         }
 
         /// <summary>
