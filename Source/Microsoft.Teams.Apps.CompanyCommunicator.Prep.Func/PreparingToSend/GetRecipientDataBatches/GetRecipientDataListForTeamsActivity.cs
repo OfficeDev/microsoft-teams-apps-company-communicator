@@ -47,7 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         {
             if (notificationDataEntity.Teams == null || notificationDataEntity.Teams.Count() == 0)
             {
-                throw new InvalidOperationException("NotificationDataEntity's Teams property value is null or empty!");
+                throw new ArgumentException("NotificationDataEntity's Teams property value is null or empty!");
             }
 
             await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(

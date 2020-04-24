@@ -43,7 +43,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         {
             if (notificationDataEntity.Rosters == null || notificationDataEntity.Rosters.Count() == 0)
             {
-                throw new InvalidOperationException("NotificationDataEntity's Rosters property value is null or empty!");
+                throw new ArgumentException("NotificationDataEntity's Rosters property value is null or empty!");
             }
 
             var teamDataEntityList = await context.CallActivityWithRetryAsync<IEnumerable<TeamDataEntity>>(
