@@ -13,7 +13,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 
     /// <summary>
     /// Azure Function App triggered by messages from a Service Bus queue.
-    /// It prepares to send a notification to target recipients.
+    /// This function prepares to send a notification to the target audience.
+    /// It prepares the notification for sending by reading the notification data,
+    /// creating initialization rows in the SentNotification data table for each recipient
+    /// to later hold the results of sending a notification to that recipient, fetching the
+    /// parameters for creating the notification's payload, creating and storing the notification's payload,
+    /// sending a data aggregation trigger to the data queue, and sending a queue message to the
+    /// send queue for each recipient.
     /// </summary>
     public class CompanyCommunicatorPrepareToSendFunction
     {
