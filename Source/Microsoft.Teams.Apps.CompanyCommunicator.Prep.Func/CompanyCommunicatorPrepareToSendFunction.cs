@@ -45,11 +45,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             [OrchestrationClient]
             DurableOrchestrationClient starter)
         {
-            var sentNotificationsPartitionKey = NotificationDataTableNames.SentNotificationsPartition;
             var queueMessageContent = JsonConvert.DeserializeObject<PrepareToSendQueueMessageContent>(myQueueItem);
-            var sentNotificationId = queueMessageContent.SentNotificationId;
+            var notificationId = queueMessageContent.NotificationId;
 
-            var sentNotificationDataEntity = await this.notificationDataRepository.GetAsync(sentNotificationsPartitionKey, sentNotificationId);
+            var sentNotificationDataEntity = await this.notificationDataRepository.GetAsync(
+                partitionKey: NotificationDataTableNames.SentNotificationsPartition,
+                rowKey: notificationId);
             if (sentNotificationDataEntity != null)
             {
                 string instanceId = await starter.StartNewAsync(
