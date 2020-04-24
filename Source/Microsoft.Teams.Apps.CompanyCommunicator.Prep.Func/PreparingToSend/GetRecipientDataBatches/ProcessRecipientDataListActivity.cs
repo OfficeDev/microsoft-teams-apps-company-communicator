@@ -122,7 +122,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
         /// <param name="totalExpectedRecipientCount">The total number of expected recipients.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        internal async Task SetTotalRecipientCountInNotificationDataAsync(
+        private async Task SetTotalRecipientCountInNotificationDataAsync(
             string notificationDataEntityId,
             int totalExpectedRecipientCount)
         {
