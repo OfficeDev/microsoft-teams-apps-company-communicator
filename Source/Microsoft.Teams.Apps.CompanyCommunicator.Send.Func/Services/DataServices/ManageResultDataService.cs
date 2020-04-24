@@ -54,11 +54,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             var numberOfAttemptsToSend = 1;
 
             // Replace the initial values if, for some reason, the message has already been sent/attempted.
-            // When the initial row is set up, the status code is set to 0. Thus, if the status code is
-            // no longer 0, then a notification has already been sent/attempted for this user and a result
-            // has been stored. If this is the case, then append the current result to the existing results.
+            // When the initial row is set up, the status code is set to the InitializationStatusCode (likely 0).
+            // Thus, if the status code is no longer the InitializationStatusCode (likely 0), then a notification
+            // has already been sent/attempted for this recipient and a result has been stored. If this is the case,
+            // then append the current result to the existing results.
             if (existingSentNotificationDataEntity != null
-                && existingSentNotificationDataEntity.StatusCode != 0)
+                && existingSentNotificationDataEntity.StatusCode != SentNotificationDataEntity.InitializationStatusCode)
             {
                 allStatusCodeResults = $"{existingSentNotificationDataEntity.AllStatusCodeResults}{(int)statusCode},";
                 numberOfAttemptsToSend = existingSentNotificationDataEntity.NumberOfAttemptsToSend + 1;
