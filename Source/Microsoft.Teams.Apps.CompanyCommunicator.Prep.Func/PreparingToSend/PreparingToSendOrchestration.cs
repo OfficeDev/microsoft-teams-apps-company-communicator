@@ -170,7 +170,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             {
                 recipientTypeForLogging = "No recipient type was defined";
                 this.Log(context, log, notificationDataEntity.Id, recipientTypeForLogging);
-                return null;
+
+                var errorMessage = $"No valid audience selected for the notification, Id: {notificationDataEntity.Id}";
+                log.LogError(errorMessage);
+
+                throw new ArgumentException(errorMessage);
             }
 
             var recipientDataBatches = await this.processRecipientDataListActivity.RunAsync(context, notificationDataEntity.Id);
