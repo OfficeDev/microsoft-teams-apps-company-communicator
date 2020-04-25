@@ -63,16 +63,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
 
         /// <summary>
         /// Gets or sets the recipient's unique identifier.
-        /// If the recipient is a user, this should be the AAD id.
-        /// If the recipient is a team, this should be the team id.
+        ///     If the recipient is a user, this should be the AAD Id.
+        ///     If the recipient is a team, this should be the team Id.
         /// </summary>
         public string RecipientId { get; set; }
 
         /// <summary>
         /// Gets or sets the total number of throttle responses the bot received when trying
         /// to send the notification to this recipient.
+        /// Note: This does not include throttle responses received when creating the conversation.
+        /// This total only represents throttle responses received when actually calling the send API.
         /// </summary>
-        public int TotalNumberOfThrottles { get; set; }
+        public int TotalNumberOfSendThrottles { get; set; }
 
         /// <summary>
         /// Gets or sets the DateTime the last recorded attempt at sending the notification to this
@@ -92,18 +94,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public int StatusCode { get; set; }
 
         /// <summary>
-        /// Gets or sets a comma separated list representing all of the final recorded status code responses the
-        /// bot received when sending the notification to this recipient.
-        /// Note: this should only ever be one status code unless the recipient incorrectly received multiple
-        /// notifications.
+        /// Gets or sets a comma separated list representing all of the status code responses received when trying
+        /// to send the notification to the recipient. These results can include success, failure, and throttle
+        /// status codes.
+        /// Note: This does not include response status codes for creating the conversation. This list only
+        /// represents status codes received when actually calling the send API.
         /// </summary>
-        public string AllStatusCodeResults { get; set; }
+        public string AllSendStatusCodes { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of attempts the bot made to send a notification to this recipient including
-        /// attempts that were throttled and attempts that received a failure status code that was retried.
+        /// Gets or sets the number of times an Azure Function instance attempted to send the notification
+        /// to the recipient and stored a final result.
+        /// Note: This should only ever be one. If it is more than one, it is possible the recipient incorrectly
+        /// received multiple, duplicate notifications.
         /// </summary>
-        public int NumberOfAttemptsToSend { get; set; }
+        public int NumberOfFunctionAttemptsToSend { get; set; }
 
         /// <summary>
         /// Gets or sets the summarized delivery status for the notification to this recipient using the
