@@ -96,6 +96,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                             sendNotificationResponse.StatusCode = HttpStatusCode.Created;
                             sendNotificationResponse.AllSendStatusCodes += $"{(int)HttpStatusCode.Created},";
 
+                            // Ensure the error message is empty if the request was successful.
+                            sendNotificationResponse.ErrorMessage = string.Empty;
+
                             break;
                         }
                         catch (ErrorResponseException e)
@@ -104,15 +107,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                             sendNotificationResponse.StatusCode = responseStatusCode;
                             sendNotificationResponse.AllSendStatusCodes += $"{(int)responseStatusCode},";
 
-                            if (responseStatusCode == HttpStatusCode.TooManyRequests)
+                            // If the response was a throttled status code or a 5xx status code,
+                            // then delay and retry the request.
+                            if (responseStatusCode == HttpStatusCode.TooManyRequests
+                                || ((int)responseStatusCode >= 500 && (int)responseStatusCode < 600))
                             {
-                                // If the request was throttled, set the flag for indicating the throttled state,
-                                // increment the count of the number of throttles to be stored
-                                // later, and if the maximum number of throttles has not been reached, delay
-                                // for a bit of time to attempt the request again.
-                                sendNotificationResponse.ResultType = SendNotificationResultType.Throttled;
-                                sendNotificationResponse.TotalNumberOfSendThrottles++;
+                                if (responseStatusCode == HttpStatusCode.TooManyRequests)
+                                {
+                                    // If the request was throttled, set the flag for indicating the throttled state and
+                                    // increment the count of the number of throttles to be stored later.
+                                    sendNotificationResponse.ResultType = SendNotificationResultType.Throttled;
+                                    sendNotificationResponse.TotalNumberOfSendThrottles++;
+                                }
+                                else
+                                {
+                                    // If the request failed with a 5xx status code, set the flag for indicating the failure
+                                    // and store the content of the error message.
+                                    sendNotificationResponse.ResultType = SendNotificationResultType.Failed;
+                                    sendNotificationResponse.ErrorMessage = e.Response.Content;
+                                }
 
+                                // If the maximum number of attempts has not been reached, delay
+                                // for a bit of time to attempt the request again.
                                 // Do not delay if already attempted the maximum number of attempts.
                                 if (i < maxNumberOfAttempts)
                                 {

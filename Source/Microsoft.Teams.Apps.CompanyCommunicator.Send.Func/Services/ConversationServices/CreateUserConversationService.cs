@@ -85,9 +85,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                             // Set the status code to indicate it was created, set that it was
                             // successfully created, and place that conversationId in the response for
                             // use when sending the notification to the user.
-                            createConversationResponse.StatusCode = HttpStatusCode.Created;
                             createConversationResponse.ResultType = CreateUserConversationResultType.Succeeded;
+                            createConversationResponse.StatusCode = HttpStatusCode.Created;
                             createConversationResponse.ConversationId = turnContext.Activity.Conversation.Id;
+
+                            // Ensure the error message is empty if the request was successful.
+                            createConversationResponse.ErrorMessage = string.Empty;
 
                             // This is used to signal the conversation was created successfully and to
                             // "break" out of the loop in order to not make multiple attempts.
@@ -104,13 +107,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                     var responseStatusCode = e.Response.StatusCode;
                     createConversationResponse.StatusCode = responseStatusCode;
 
-                    if (responseStatusCode == HttpStatusCode.TooManyRequests)
+                    // If the response was a throttled status code or a 5xx status code,
+                    // then delay and retry the request.
+                    if (responseStatusCode == HttpStatusCode.TooManyRequests
+                        || ((int)responseStatusCode >= 500 && (int)responseStatusCode < 600))
                     {
-                        // If the request was throttled, set the flag for indicating the throttled state.
-                        // If the maximum number of throttles has not been reached, delay
-                        // for a bit of time to attempt the request again.
-                        createConversationResponse.ResultType = CreateUserConversationResultType.Throttled;
+                        if (responseStatusCode == HttpStatusCode.TooManyRequests)
+                        {
+                            // If the request was throttled, set the flag for indicating the throttled state.
+                            createConversationResponse.ResultType = CreateUserConversationResultType.Throttled;
+                        }
+                        else
+                        {
+                            // If the request failed with a 5xx status code, set the flag for indicating the failure
+                            // and store the content of the error message.
+                            createConversationResponse.ResultType = CreateUserConversationResultType.Failed;
+                            createConversationResponse.ErrorMessage = e.Response.Content;
+                        }
 
+                        // If the maximum number of attempts has not been reached, delay
+                        // for a bit of time to attempt the request again.
                         // Do not delay if already attempted the maximum number of attempts.
                         if (i < maxNumberOfAttempts)
                         {
