@@ -73,6 +73,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// to send the notification to this recipient.
         /// Note: This does not include throttle responses received when creating the conversation.
         /// This total only represents throttle responses received when actually calling the send API.
+        /// Note: This value is only recorded for one instance and "run" or "attempt" of an Azure Function
+        /// to send the notification. If the queue message is added back to the queue to retry and the results
+        /// of the attempt are not stored in the Sent Notification data table, then those results are
+        /// lost e.g. if the bot is throttled - thus, this count may not include every throttled
+        /// response the bot has ever received when attempting to send the notification to this recipient.
         /// </summary>
         public int TotalNumberOfSendThrottles { get; set; }
 
@@ -99,6 +104,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// status codes.
         /// Note: This does not include response status codes for creating the conversation. This list only
         /// represents status codes received when actually calling the send API.
+        /// Note: This value is only recorded for one instance and "run" or "attempt" of an Azure Function
+        /// to send the notification. If the queue message is added back to the queue to retry and the results
+        /// of the attempt are not stored in the Sent Notification data table, then those results are
+        /// lost e.g. if the bot is throttled - thus, this value may not include every status code response
+        /// the bot has ever received when attempting to send the notification to this recipient.
         /// </summary>
         public string AllSendStatusCodes { get; set; }
 
