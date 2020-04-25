@@ -47,10 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
             UserDataEntity userDataEntity,
             int maxNumberOfAttempts)
         {
-            var createConversationResponse = new CreateUserConversationResponse
-            {
-                NumberOfThrottleResponses = 0,
-            };
+            var createConversationResponse = new CreateUserConversationResponse();
 
             // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
             MicrosoftAppCredentials.TrustServiceUrl(userDataEntity.ServiceUrl);
@@ -109,12 +106,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
 
                     if (responseStatusCode == HttpStatusCode.TooManyRequests)
                     {
-                        // If the request was throttled, set the flag for indicating the throttled state,
-                        // increment the count of the number of throttles to be stored
-                        // later, and if the maximum number of throttles has not been reached, delay
+                        // If the request was throttled, set the flag for indicating the throttled state.
+                        // If the maximum number of throttles has not been reached, delay
                         // for a bit of time to attempt the request again.
                         createConversationResponse.ResultType = CreateUserConversationResultType.Throttled;
-                        createConversationResponse.NumberOfThrottleResponses++;
 
                         // Do not delay if already attempted the maximum number of attempts.
                         if (i < maxNumberOfAttempts)

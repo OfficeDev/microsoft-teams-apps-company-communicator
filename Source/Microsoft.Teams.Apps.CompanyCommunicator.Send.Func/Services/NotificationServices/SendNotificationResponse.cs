@@ -24,7 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         /// <summary>
         /// Gets or sets the number of throttle responses.
         /// </summary>
-        public int NumberOfThrottleResponses { get; set; }
+        public int TotalNumberOfSendThrottles { get; set; }
 
         /// <summary>
         /// Gets or sets the error message when trying to send the notification.

@@ -180,10 +180,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                     userDataEntity: incomingUserDataEntity,
                     maxNumberOfAttempts: this.maxNumberOfAttempts);
 
-                // Save the total number of throttle responses the bot received in order to store these results.
-                getSendNotificationParamsResponse.TotalNumberOfThrottles
-                    = createConversationResponse.NumberOfThrottleResponses;
-
                 if (createConversationResponse.ResultType == CreateUserConversationResultType.Succeeded)
                 {
                     // Set the conversation Id to be used when sending the notification.
@@ -219,7 +215,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                     await this.manageResultDataService.ProccessResultDataAsync(
                         notificationId: messageContent.NotificationId,
                         recipientId: incomingUserDataEntity.AadId,
-                        totalNumberOfThrottles: createConversationResponse.NumberOfThrottleResponses,
+                        totalNumberOfSendThrottles: 0,
                         isStatusCodeFromCreateConversation: true,
                         statusCode: createConversationResponse.StatusCode,
                         errorMessage: createConversationResponse.ErrorMessage);

@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         {
             var sendNotificationResponse = new SendNotificationResponse
             {
-                NumberOfThrottleResponses = 0,
+                TotalNumberOfSendThrottles = 0,
             };
 
             // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
@@ -108,7 +108,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                                 // later, and if the maximum number of throttles has not been reached, delay
                                 // for a bit of time to attempt the request again.
                                 sendNotificationResponse.ResultType = SendNotificationResultType.Throttled;
-                                sendNotificationResponse.NumberOfThrottleResponses++;
+                                sendNotificationResponse.TotalNumberOfSendThrottles++;
 
                                 // Do not delay if already attempted the maximum number of attempts.
                                 if (i < maxNumberOfAttempts)

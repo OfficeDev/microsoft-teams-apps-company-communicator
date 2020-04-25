@@ -32,13 +32,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         public string ConversationId { get; set; }
 
         /// <summary>
-        /// Gets or sets the count of the total number of throttled responses the
-        /// bot received if the bot needed to create the conversation between the
-        /// bot and the user.
-        /// </summary>
-        public int TotalNumberOfThrottles { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the Azure Function should
         /// stop processing the message because something negative occurred
         /// while generating the parameters e.g. getting throttled, a failure, etc.

@@ -94,8 +94,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             var messageContent = JsonConvert.DeserializeObject<SendQueueMessageContent>(myQueueItem);
 
-            var totalNumberOfThrottles = 0;
-
             try
             {
                 /*
@@ -138,10 +136,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     return;
                 }
 
-                // Store the count of any throttle responses the bot received if it needed to create
-                // a conversation with a user in order to generate the parameters.
-                totalNumberOfThrottles += sendNotificationParams.TotalNumberOfThrottles;
-
                 /*
                  *
                  * Send the notification.
@@ -156,8 +150,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     conversationId: sendNotificationParams.ConversationId,
                     maxNumberOfAttempts: this.maxNumberOfAttempts);
 
-                totalNumberOfThrottles += sendNotificationResponse.NumberOfThrottleResponses;
-
                 if (sendNotificationResponse.ResultType == SendNotificationResultType.Succeeded)
                 {
                     log.LogInformation("MESSAGE SENT SUCCESSFULLY");
@@ -165,7 +157,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     await this.manageResultDataService.ProccessResultDataAsync(
                         notificationId: messageContent.NotificationId,
                         recipientId: sendNotificationParams.RecipientId,
-                        totalNumberOfThrottles: totalNumberOfThrottles,
+                        totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
                         isStatusCodeFromCreateConversation: false,
                         statusCode: sendNotificationResponse.StatusCode);
                 }
@@ -194,7 +186,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     await this.manageResultDataService.ProccessResultDataAsync(
                         notificationId: messageContent.NotificationId,
                         recipientId: sendNotificationParams.RecipientId,
-                        totalNumberOfThrottles: totalNumberOfThrottles,
+                        totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
                         isStatusCodeFromCreateConversation: false,
                         statusCode: sendNotificationResponse.StatusCode,
                         errorMessage: sendNotificationResponse.ErrorMessage);
@@ -228,7 +220,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 await this.manageResultDataService.ProccessResultDataAsync(
                     notificationId: messageContent.NotificationId,
                     recipientId: messageContent.RecipientData.RecipientId,
-                    totalNumberOfThrottles: totalNumberOfThrottles,
+                    totalNumberOfSendThrottles: 0,
                     isStatusCodeFromCreateConversation: false,
                     statusCode: statusCodeToStore,
                     errorMessage: e.Message);

@@ -33,7 +33,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
         /// <param name="recipientId">The recipient's unique identifier.
         ///     If the recipient is a user, this should be the AAD Id.
         ///     If the recipient is a team, this should be the team Id.</param>
-        /// <param name="totalNumberOfThrottles">The total number of throttled requests.</param>
+        /// <param name="totalNumberOfSendThrottles">The total number of throttled requests to send the notification.</param>
         /// <param name="isStatusCodeFromCreateConversation">A flag indicating if the status code is from a create conversation request.</param>
         /// <param name="statusCode">The final status code.</param>
         /// <param name="errorMessage">The error message to store in the database.</param>
@@ -41,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
         public async Task ProccessResultDataAsync(
             string notificationId,
             string recipientId,
-            int totalNumberOfThrottles,
+            int totalNumberOfSendThrottles,
             bool isStatusCodeFromCreateConversation,
             HttpStatusCode statusCode,
             string errorMessage = null)
@@ -72,7 +72,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
                 PartitionKey = notificationId,
                 RowKey = recipientId,
                 RecipientId = recipientId,
-                TotalNumberOfThrottles = totalNumberOfThrottles,
+                TotalNumberOfSendThrottles = totalNumberOfSendThrottles,
                 SentDate = currentDateTimeUtc,
                 IsStatusCodeFromCreateConversation = isStatusCodeFromCreateConversation,
                 StatusCode = (int)statusCode,
