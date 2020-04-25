@@ -44,6 +44,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                     messageQueueOptions.ServiceBusConnection =
                         configuration.GetValue<string>("ServiceBusConnection");
                 });
+            builder.Services.AddOptions<DataQueueMessageOptions>()
+                .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
+                {
+                    dataQueueMessageOptions.FirstTenMinutesRequeueMessageDelayInSeconds =
+                        configuration.GetValue<double>("FirstTenMinutesRequeueMessageDelayInSeconds", 30);
+
+                    dataQueueMessageOptions.RequeueMessageDelayInSeconds =
+                        configuration.GetValue<double>("RequeueMessageDelayInSeconds", 300);
+                });
 
             // Add notification data services.
             builder.Services.AddTransient<AggregateSentNotificationDataService>();

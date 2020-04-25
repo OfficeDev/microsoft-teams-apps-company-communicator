@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices;
@@ -19,10 +20,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     /// </summary>
     public class CompanyCommunicatorDataFunction
     {
+        private static readonly double TenMinutes = 10;
+
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly AggregateSentNotificationDataService aggregateSentNotificationDataService;
         private readonly UpdateNotificationDataService updateNotificationDataService;
         private readonly DataQueue dataQueue;
+        private readonly double firstTenMinutesRequeueMessageDelayInSeconds;
+        private readonly double requeueMessageDelayInSeconds;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorDataFunction"/> class.
@@ -32,16 +37,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
         /// Notification Data results.</param>
         /// <param name="updateNotificationDataService">The service to update the notification totals.</param>
         /// <param name="dataQueue">The data queue.</param>
+        /// <param name="dataQueueMessageOptions">The data queue message options.</param>
         public CompanyCommunicatorDataFunction(
             NotificationDataRepository notificationDataRepository,
             AggregateSentNotificationDataService aggregateSentNotificationDataService,
             UpdateNotificationDataService updateNotificationDataService,
-            DataQueue dataQueue)
+            DataQueue dataQueue,
+            IOptions<DataQueueMessageOptions> dataQueueMessageOptions)
         {
             this.notificationDataRepository = notificationDataRepository;
             this.aggregateSentNotificationDataService = aggregateSentNotificationDataService;
             this.updateNotificationDataService = updateNotificationDataService;
             this.dataQueue = dataQueue;
+            this.firstTenMinutesRequeueMessageDelayInSeconds =
+                dataQueueMessageOptions.Value.FirstTenMinutesRequeueMessageDelayInSeconds;
+            this.requeueMessageDelayInSeconds =
+                dataQueueMessageOptions.Value.RequeueMessageDelayInSeconds;
         }
 
         /// <summary>
@@ -96,12 +107,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                     var dataQueueTriggerMessage = new DataQueueMessageContent
                     {
                         NotificationId = messageContent.NotificationId,
-                        SentDate = DateTime.UtcNow,
-                        ResultType = DataQueueResultType.Succeeded,
                         ForceMessageComplete = false,
                     };
 
-                    await this.dataQueue.SendDelayedAsync(dataQueueTriggerMessage, 3);
+                    var dataQueueTriggerMessageDelayInSeconds =
+                        DateTime.UtcNow <= notificationDataEntity.SendingStartedDate + TimeSpan.FromMinutes(CompanyCommunicatorDataFunction.TenMinutes)
+                            ? this.firstTenMinutesRequeueMessageDelayInSeconds
+                            : this.requeueMessageDelayInSeconds;
+
+                    await this.dataQueue.SendDelayedAsync(dataQueueTriggerMessage, dataQueueTriggerMessageDelayInSeconds);
                 }
             }
         }
