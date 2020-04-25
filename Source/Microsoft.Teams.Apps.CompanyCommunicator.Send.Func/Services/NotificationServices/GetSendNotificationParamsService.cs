@@ -218,6 +218,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                         totalNumberOfSendThrottles: 0,
                         isStatusCodeFromCreateConversation: true,
                         statusCode: createConversationResponse.StatusCode,
+                        allSendStatusCodes: string.Empty,
                         errorMessage: createConversationResponse.ErrorMessage);
 
                     // Signal that the Azure Function should be completed.

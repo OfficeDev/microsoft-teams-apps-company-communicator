@@ -22,6 +22,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         public SendNotificationResultType ResultType { get; set; }
 
         /// <summary>
+        /// Gets or sets a comma separated list representing all of the status code responses received when trying
+        /// to send the notification to the recipient. These results can include success, failure, and throttle
+        /// status codes.
+        /// </summary>
+        public string AllSendStatusCodes { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of throttle responses.
         /// </summary>
         public int TotalNumberOfSendThrottles { get; set; }

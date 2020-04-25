@@ -36,6 +36,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
         /// <param name="totalNumberOfSendThrottles">The total number of throttled requests to send the notification.</param>
         /// <param name="isStatusCodeFromCreateConversation">A flag indicating if the status code is from a create conversation request.</param>
         /// <param name="statusCode">The final status code.</param>
+        /// <param name="allSendStatusCodes">A comma separated list representing all of the status code responses received when trying
+        /// to send the notification to the recipient.</param>
         /// <param name="errorMessage">The error message to store in the database.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task ProccessResultDataAsync(
@@ -44,6 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             int totalNumberOfSendThrottles,
             bool isStatusCodeFromCreateConversation,
             HttpStatusCode statusCode,
+            string allSendStatusCodes,
             string errorMessage = null)
         {
             var currentDateTimeUtc = DateTime.UtcNow;
@@ -52,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
                 .GetAsync(partitionKey: notificationId, rowKey: recipientId);
 
             // Set initial values.
-            var allStatusCodeResults = $"{(int)statusCode},";
+            var allSendStatusCodesToStore = allSendStatusCodes;
             var numberOfFunctionAttemptsToSend = 1;
 
             // Replace the initial values if, for some reason, the message has already been sent/attempted.
@@ -63,7 +66,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             if (existingSentNotificationDataEntity != null
                 && existingSentNotificationDataEntity.StatusCode != SentNotificationDataEntity.InitializationStatusCode)
             {
-                allStatusCodeResults = $"{existingSentNotificationDataEntity.AllStatusCodeResults}{(int)statusCode},";
+                allSendStatusCodesToStore
+                    = $"{existingSentNotificationDataEntity.AllSendStatusCodes ?? string.Empty}{allSendStatusCodes}";
                 numberOfFunctionAttemptsToSend = existingSentNotificationDataEntity.NumberOfFunctionAttemptsToSend + 1;
             }
 
@@ -77,7 +81,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
                 IsStatusCodeFromCreateConversation = isStatusCodeFromCreateConversation,
                 StatusCode = (int)statusCode,
                 ErrorMessage = errorMessage,
-                AllStatusCodeResults = allStatusCodeResults,
+                AllSendStatusCodes = allSendStatusCodesToStore,
                 NumberOfFunctionAttemptsToSend = numberOfFunctionAttemptsToSend,
             };
 

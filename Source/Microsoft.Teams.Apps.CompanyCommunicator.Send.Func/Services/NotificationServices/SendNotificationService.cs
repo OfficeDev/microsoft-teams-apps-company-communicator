@@ -56,6 +56,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
             var sendNotificationResponse = new SendNotificationResponse
             {
                 TotalNumberOfSendThrottles = 0,
+                AllSendStatusCodes = string.Empty,
             };
 
             // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
@@ -91,8 +92,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
 
                             // If made it passed the sending step, then the notification was sent successfully.
                             // Store the data about the successful request.
-                            sendNotificationResponse.StatusCode = HttpStatusCode.Created;
                             sendNotificationResponse.ResultType = SendNotificationResultType.Succeeded;
+                            sendNotificationResponse.StatusCode = HttpStatusCode.Created;
+                            sendNotificationResponse.AllSendStatusCodes += $"{(int)HttpStatusCode.Created},";
 
                             break;
                         }
@@ -100,6 +102,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                         {
                             var responseStatusCode = e.Response.StatusCode;
                             sendNotificationResponse.StatusCode = responseStatusCode;
+                            sendNotificationResponse.AllSendStatusCodes += $"{(int)responseStatusCode},";
 
                             if (responseStatusCode == HttpStatusCode.TooManyRequests)
                             {

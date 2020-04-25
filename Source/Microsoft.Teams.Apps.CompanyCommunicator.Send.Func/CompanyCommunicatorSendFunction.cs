@@ -159,7 +159,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         recipientId: sendNotificationParams.RecipientId,
                         totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
                         isStatusCodeFromCreateConversation: false,
-                        statusCode: sendNotificationResponse.StatusCode);
+                        statusCode: sendNotificationResponse.StatusCode,
+                        allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes);
                 }
                 else if (sendNotificationResponse.ResultType == SendNotificationResultType.Throttled)
                 {
@@ -189,6 +190,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
                         isStatusCodeFromCreateConversation: false,
                         statusCode: sendNotificationResponse.StatusCode,
+                        allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes,
                         errorMessage: sendNotificationResponse.ErrorMessage);
 
                     // Ensure all processing of the queue message is stopped because sending
@@ -223,6 +225,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     totalNumberOfSendThrottles: 0,
                     isStatusCodeFromCreateConversation: false,
                     statusCode: statusCodeToStore,
+                    allSendStatusCodes: string.Empty,
                     errorMessage: e.Message);
 
                 throw;
