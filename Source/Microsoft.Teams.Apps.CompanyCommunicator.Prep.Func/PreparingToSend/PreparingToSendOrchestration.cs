@@ -10,9 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.SendTriggersToAzureFunctions;
@@ -28,11 +26,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private readonly GetRecipientDataListForTeamsActivity getRecipientDataListForTeamsActivity;
         private readonly ProcessRecipientDataListActivity processRecipientDataListActivity;
         private readonly CreateSendingNotificationActivity createSendingNotificationActivity;
+        private readonly SetNotificationIsPrepCompleteActivity setNotificationIsPrepCompleteActivity;
+        private readonly SendDataAggregationMessageActivity sendDataAggregationMessageActivity;
         private readonly SendTriggersToSendFunctionActivity sendTriggersToSendFunctionActivity;
-        private readonly NotificationDataRepository notificationDataRepository;
         private readonly HandleFailureActivity handleFailureActivity;
-        private readonly DataQueue dataQueue;
-        private readonly double firstDataAggregationMessageDelayInSeconds;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PreparingToSendOrchestration"/> class.
@@ -43,11 +40,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="getRecipientDataListForTeamsActivity">Get recipient data for teams activity.</param>
         /// <param name="processRecipientDataListActivity">Process recipient data list activity.</param>
         /// <param name="createSendingNotificationActivity">Create sending notification activity.</param>
+        /// <param name="setNotificationIsPrepCompleteActivity">Set notification IsPrep complete activity.</param>
+        /// <param name="sendDataAggregationMessageActivity">Send data aggregation message activity.</param>
         /// <param name="sendTriggersToSendFunctionActivity">Send triggers to send function sub-orchestration.</param>
-        /// <param name="notificationDataRepository">The notification data repository.</param>
         /// <param name="handleFailureActivity">Clean up activity.</param>
-        /// <param name="dataQueue">The data queue.</param>
-        /// <param name="dataQueueMessageOptions">The data queue message options.</param>
         public PreparingToSendOrchestration(
             GetRecipientDataListForAllUsersActivity getRecipientDataListForAllUsersActivity,
             GetTeamDataEntitiesByIdsActivity getTeamDataEntitiesByIdsActivity,
@@ -55,11 +51,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             GetRecipientDataListForTeamsActivity getRecipientDataListForTeamsActivity,
             ProcessRecipientDataListActivity processRecipientDataListActivity,
             CreateSendingNotificationActivity createSendingNotificationActivity,
+            SetNotificationIsPrepCompleteActivity setNotificationIsPrepCompleteActivity,
+            SendDataAggregationMessageActivity sendDataAggregationMessageActivity,
             SendTriggersToSendFunctionActivity sendTriggersToSendFunctionActivity,
-            NotificationDataRepository notificationDataRepository,
-            HandleFailureActivity handleFailureActivity,
-            DataQueue dataQueue,
-            IOptions<DataQueueMessageOptions> dataQueueMessageOptions)
+            HandleFailureActivity handleFailureActivity)
         {
             this.getRecipientDataListForAllUsersActivity = getRecipientDataListForAllUsersActivity;
             this.getTeamDataEntitiesByIdsActivity = getTeamDataEntitiesByIdsActivity;
@@ -67,11 +62,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             this.getRecipientDataListForTeamsActivity = getRecipientDataListForTeamsActivity;
             this.processRecipientDataListActivity = processRecipientDataListActivity;
             this.createSendingNotificationActivity = createSendingNotificationActivity;
+            this.setNotificationIsPrepCompleteActivity = setNotificationIsPrepCompleteActivity;
+            this.sendDataAggregationMessageActivity = sendDataAggregationMessageActivity;
             this.sendTriggersToSendFunctionActivity = sendTriggersToSendFunctionActivity;
-            this.notificationDataRepository = notificationDataRepository;
             this.handleFailureActivity = handleFailureActivity;
-            this.dataQueue = dataQueue;
-            this.firstDataAggregationMessageDelayInSeconds = dataQueueMessageOptions.Value.FirstDataAggregationMessageDelayInSeconds;
         }
 
         /// <summary>
@@ -112,11 +106,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
                 if (!context.IsReplaying)
                 {
-                    log.LogInformation("Mark notification as no longer preparing and send trigger to the data function.");
-
-                    await this.SetNotificationIsPreparingToSendAsCompleteAsync(notificationDataEntity.Id);
-                    await this.SendDataAggregationQueueMessageAsync(notificationDataEntity.Id);
+                    log.LogInformation("Mark the notification as no longer preparing.");
                 }
+
+                await this.setNotificationIsPrepCompleteActivity.RunAsync(context, notificationDataEntity.Id);
+
+                if (!context.IsReplaying)
+                {
+                    log.LogInformation("Send a data aggregation trigger queue message to the data queue for the data function to process.");
+                }
+
+                await this.sendDataAggregationMessageActivity.RunAsync(context, notificationDataEntity.Id);
 
                 if (!context.IsReplaying)
                 {
@@ -247,44 +247,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             }
 
             await Task.WhenAll(tasks);
-        }
-
-        /// <summary>
-        /// Sets the notification entity's IsPreparingToSend flag to false in order to indicate that
-        /// the the notification is no longer be prepared to be sent.
-        /// </summary>
-        /// <param name="notificationDataEntityId">A notification data entity's ID.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task SetNotificationIsPreparingToSendAsCompleteAsync(string notificationDataEntityId)
-        {
-            var notificationDataEntity = await this.notificationDataRepository.GetAsync(
-                NotificationDataTableNames.SentNotificationsPartition,
-                notificationDataEntityId);
-            if (notificationDataEntity != null)
-            {
-                notificationDataEntity.IsPreparingToSend = false;
-
-                await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
-            }
-        }
-
-        /// <summary>
-        /// Send a message to the data queue to start the aggregation of the results for the given
-        /// notification.
-        /// </summary>
-        /// <param name="notificationDataEntityId">A notification data entity's ID.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task SendDataAggregationQueueMessageAsync(string notificationDataEntityId)
-        {
-            var dataQueueMessageContent = new DataQueueMessageContent
-            {
-                NotificationId = notificationDataEntityId,
-                ForceMessageComplete = false,
-            };
-
-            await this.dataQueue.SendDelayedAsync(
-                dataQueueMessageContent,
-                this.firstDataAggregationMessageDelayInSeconds);
         }
 
         /// <summary>

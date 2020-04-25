@@ -65,7 +65,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
                 {
                     dataQueueMessageOptions.FirstDataAggregationMessageDelayInSeconds =
-                        configuration.GetValue<double>("FirstDataAggregationMessageDelayInSeconds", 20);
+                        configuration.GetValue<double>("FirstDataAggregationMessageDelayInSeconds", 10);
                 });
 
             // Add orchestration.
@@ -78,6 +78,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<GetRecipientDataListForTeamsActivity>();
             builder.Services.AddTransient<ProcessRecipientDataListActivity>();
             builder.Services.AddTransient<CreateSendingNotificationActivity>();
+            builder.Services.AddTransient<SetNotificationIsPrepCompleteActivity>();
+            builder.Services.AddTransient<SendDataAggregationMessageActivity>();
             builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
             builder.Services.AddTransient<HandleFailureActivity>();
 
