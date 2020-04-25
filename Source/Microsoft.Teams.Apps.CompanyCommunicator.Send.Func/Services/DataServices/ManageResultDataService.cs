@@ -53,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
 
             // Set initial values.
             var allStatusCodeResults = $"{(int)statusCode},";
-            var numberOfAttemptsToSend = 1;
+            var numberOfFunctionAttemptsToSend = 1;
 
             // Replace the initial values if, for some reason, the message has already been sent/attempted.
             // When the initial row is set up, the status code is set to the InitializationStatusCode (likely 0).
@@ -64,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
                 && existingSentNotificationDataEntity.StatusCode != SentNotificationDataEntity.InitializationStatusCode)
             {
                 allStatusCodeResults = $"{existingSentNotificationDataEntity.AllStatusCodeResults}{(int)statusCode},";
-                numberOfAttemptsToSend = existingSentNotificationDataEntity.NumberOfAttemptsToSend + 1;
+                numberOfFunctionAttemptsToSend = existingSentNotificationDataEntity.NumberOfFunctionAttemptsToSend + 1;
             }
 
             var updatedSentNotificationDataEntity = new SentNotificationDataEntity
@@ -78,7 +78,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
                 StatusCode = (int)statusCode,
                 ErrorMessage = errorMessage,
                 AllStatusCodeResults = allStatusCodeResults,
-                NumberOfAttemptsToSend = numberOfAttemptsToSend,
+                NumberOfFunctionAttemptsToSend = numberOfFunctionAttemptsToSend,
             };
 
             if (statusCode == HttpStatusCode.Created)
