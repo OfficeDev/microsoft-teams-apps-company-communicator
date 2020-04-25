@@ -84,6 +84,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                     recipientDataList.Add(new RecipientData
                     {
                         RecipientType = RecipientDataType.User,
+                        RecipientId = sentNotificationDataEntity.RecipientId,
                         UserData = new UserDataEntity
                         {
                             AadId = sentNotificationDataEntity.RecipientId,
@@ -100,6 +101,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                     recipientDataList.Add(new RecipientData
                     {
                         RecipientType = RecipientDataType.Team,
+                        RecipientId = sentNotificationDataEntity.RecipientId,
                         TeamData = new TeamDataEntity
                         {
                             TeamId = sentNotificationDataEntity.RecipientId,
