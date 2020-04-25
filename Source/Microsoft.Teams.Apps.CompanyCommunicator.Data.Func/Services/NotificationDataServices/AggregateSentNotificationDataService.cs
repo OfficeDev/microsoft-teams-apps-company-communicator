@@ -41,11 +41,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
             var nonZeroStatusCodeFilter = TableQuery.GenerateFilterConditionForInt(
                 "StatusCode",
                 QueryComparisons.NotEqual,
-                0);
+                SentNotificationDataEntity.InitializationStatusCode);
 
             // Create the complete query where:
             // PartitionKey eq notificationId
-            // StatusCode ne Default (most likely 0)
+            // StatusCode ne Initialization Status Code value (likely 0)
             var completeFilter = TableQuery.CombineFilters(partionFilter, TableOperators.And, nonZeroStatusCodeFilter);
             var query = new TableQuery<SentNotificationDataEntity>().Where(completeFilter);
 
