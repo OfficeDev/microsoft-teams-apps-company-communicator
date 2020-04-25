@@ -73,6 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<CreateUserConversationService>();
 
             // Add the notification services.
+            builder.Services.AddTransient<GetSendNotificationParamsService>();
             builder.Services.AddTransient<SendNotificationService>();
             builder.Services.AddTransient<DelaySendingNotificationService>();
 

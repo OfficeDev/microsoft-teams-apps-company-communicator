@@ -29,8 +29,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
         /// <summary>
         /// Processes the notification's result data.
         /// </summary>
-        /// <param name="notificationId">The notification ID.</param>
-        /// <param name="aadId">The AAD ID.</param>
+        /// <param name="notificationId">The notification Id.</param>
+        /// <param name="recipientId">The recipient's unique identifier.
+        ///     If the recipient is a user, this should be the AAD Id.
+        ///     If the recipient is a team, this should be the team Id.</param>
         /// <param name="totalNumberOfThrottles">The total number of throttled requests.</param>
         /// <param name="isStatusCodeFromCreateConversation">A flag indicating if the status code is from a create conversation request.</param>
         /// <param name="statusCode">The final status code.</param>
@@ -38,7 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task ProccessResultDataAsync(
             string notificationId,
-            string aadId,
+            string recipientId,
             int totalNumberOfThrottles,
             bool isStatusCodeFromCreateConversation,
             HttpStatusCode statusCode,
@@ -47,7 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             var currentDateTimeUtc = DateTime.UtcNow;
 
             var existingSentNotificationDataEntity = await this.sentNotificationDataRepository
-                .GetAsync(partitionKey: notificationId, rowKey: aadId);
+                .GetAsync(partitionKey: notificationId, rowKey: recipientId);
 
             // Set initial values.
             var allStatusCodeResults = $"{(int)statusCode},";
@@ -68,8 +70,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             var updatedSentNotificationDataEntity = new SentNotificationDataEntity
             {
                 PartitionKey = notificationId,
-                RowKey = aadId,
-                AadId = aadId,
+                RowKey = recipientId,
+                RecipientId = recipientId,
                 TotalNumberOfThrottles = totalNumberOfThrottles,
                 SentDate = currentDateTimeUtc,
                 IsStatusCodeFromCreateConversation = isStatusCodeFromCreateConversation,

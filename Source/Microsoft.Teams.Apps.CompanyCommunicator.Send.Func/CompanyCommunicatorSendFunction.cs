@@ -11,9 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices;
     using Newtonsoft.Json;
@@ -33,11 +31,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
         private readonly int maxNumberOfAttempts;
         private readonly double sendRetryDelayNumberOfSeconds;
-        private readonly SendingNotificationDataRepository sendingNotificationDataRepository;
         private readonly GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository;
-        private readonly UserDataRepository userDataRepository;
         private readonly SendQueue sendQueue;
-        private readonly CreateUserConversationService createUserConversationService;
+        private readonly GetSendNotificationParamsService getSendNotificationParamsService;
         private readonly SendNotificationService sendNotificationService;
         private readonly DelaySendingNotificationService delaySendingNotificationService;
         private readonly ManageResultDataService manageResultDataService;
@@ -46,32 +42,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// Initializes a new instance of the <see cref="CompanyCommunicatorSendFunction"/> class.
         /// </summary>
         /// <param name="companyCommunicatorSendFunctionOptions">The Company Communicator send function options.</param>
-        /// <param name="sendingNotificationDataRepository">The sending notification data repository.</param>
         /// <param name="globalSendingNotificationDataRepository">The global sending notification data repository.</param>
-        /// <param name="userDataRepository">The user data repository.</param>
         /// <param name="sendQueue">The send queue.</param>
-        /// <param name="createUserConversationService">The create user conversation service.</param>
+        /// <param name="getSendNotificationParamsService">The service to get the parameters needed to send the notification.</param>
         /// <param name="sendNotificationService">The send notification service.</param>
         /// <param name="delaySendingNotificationService">The delay sending notification service.</param>
         /// <param name="manageResultDataService">The manage result data service.</param>
         public CompanyCommunicatorSendFunction(
             IOptions<CompanyCommunicatorSendFunctionOptions> companyCommunicatorSendFunctionOptions,
-            SendingNotificationDataRepository sendingNotificationDataRepository,
             GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository,
-            UserDataRepository userDataRepository,
             SendQueue sendQueue,
-            CreateUserConversationService createUserConversationService,
+            GetSendNotificationParamsService getSendNotificationParamsService,
             SendNotificationService sendNotificationService,
             DelaySendingNotificationService delaySendingNotificationService,
             ManageResultDataService manageResultDataService)
         {
             this.maxNumberOfAttempts = companyCommunicatorSendFunctionOptions.Value.MaxNumberOfAttempts;
             this.sendRetryDelayNumberOfSeconds = companyCommunicatorSendFunctionOptions.Value.SendRetryDelayNumberOfSeconds;
-            this.sendingNotificationDataRepository = sendingNotificationDataRepository;
             this.globalSendingNotificationDataRepository = globalSendingNotificationDataRepository;
-            this.userDataRepository = userDataRepository;
             this.sendQueue = sendQueue;
-            this.createUserConversationService = createUserConversationService;
+            this.getSendNotificationParamsService = getSendNotificationParamsService;
             this.sendNotificationService = sendNotificationService;
             this.delaySendingNotificationService = delaySendingNotificationService;
             this.manageResultDataService = manageResultDataService;
@@ -108,50 +98,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             try
             {
-                // Fetch the current sending notification. This is where data about what is being sent is stored.
-                var getActiveNotificationEntityTask = this.sendingNotificationDataRepository.GetAsync(
-                    NotificationDataTableNames.SendingNotificationsPartition,
-                    messageContent.NotificationId);
+                /*
+                 *
+                 * Check if the entire system is currently in a throttled state.
+                 *
+                 *
+                 */
 
                 // Fetch the current global sending notification data. This is where data about the overall systems
                 // status is stored e.g. is everything in a delayed state because the bot is being throttled.
-                var getGlobalSendingNotificationDataEntityTask = this.globalSendingNotificationDataRepository
+                var globalSendingNotificationDataEntity = await this.globalSendingNotificationDataRepository
                     .GetGlobalSendingNotificationDataEntityAsync();
 
-                var incomingUserDataEntity = messageContent.UserDataEntity;
-                var incomingConversationId = incomingUserDataEntity.ConversationId;
-
-                // If the incoming payload does not have a conversationId, fetch the data for that user.
-                var getUserDataEntityTask = string.IsNullOrWhiteSpace(incomingConversationId)
-                    ? this.userDataRepository.GetAsync(
-                        UserDataTableNames.UserDataPartition,
-                        incomingUserDataEntity.AadId)
-                    : Task.FromResult<UserDataEntity>(null);
-
-                await Task.WhenAll(
-                    getActiveNotificationEntityTask,
-                    getGlobalSendingNotificationDataEntityTask,
-                    getUserDataEntityTask);
-
-                var activeNotificationEntity = await getActiveNotificationEntityTask;
-                var globalSendingNotificationDataEntity = await getGlobalSendingNotificationDataEntityTask;
-                var userDataEntity = await getUserDataEntityTask;
-
-                // If the incoming conversationId was not present, attempt to use the conversationId stored for
-                // that user.
-                // NOTE: It is possible that that user's data has not been stored in the user data repository.
-                // If this is the case, then the conversation will have to be created for that user.
-                var conversationId = string.IsNullOrWhiteSpace(incomingConversationId)
-                    ? userDataEntity?.ConversationId
-                    : incomingConversationId;
-
-                // Initiate tasks that will be run in parallel if the step is required.
-                var saveUserDataEntityTask = Task.CompletedTask;
-                var proccessResultDataTask = Task.CompletedTask;
-                var delaySendingNotificationTask = Task.CompletedTask;
-
                 // If the overall system is in a throttled state and needs to be delayed,
-                // add the message back on the queue with a delay.
+                // add the message back on the queue with a delay and stop processing the queue message.
                 if (globalSendingNotificationDataEntity?.SendRetryDelayTime != null
                     && DateTime.UtcNow < globalSendingNotificationDataEntity.SendRetryDelayTime)
                 {
@@ -160,89 +120,40 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     return;
                 }
 
-                // If the conversationId is known, the conversation does not need to be created.
-                // If it a conversationId for a team, then nothing more needs to be done.
-                // If it is a conversationId for a user, it is possible that the incoming user data has
-                // more information than what is currently stored in the user data repository. Because of this,
-                // save/update that user's information.
-                if (!string.IsNullOrWhiteSpace(conversationId))
+                /*
+                 *
+                 * Use the information from the incoming message to generate the necessary parameters for
+                 * sending the notification.
+                 *
+                 *
+                 */
+
+                var sendNotificationParams = await this.getSendNotificationParamsService
+                    .GetSendNotificationParamsAsync(messageContent);
+
+                // Stop the processing of the queue message if something negative occurred while generating
+                // the parameters e.g. getting throttled, a failure, etc.
+                if (sendNotificationParams.ForceCloseAzureFunction)
                 {
-                    // Set the conversationId so it is not removed from the user data repository on the update.
-                    incomingUserDataEntity.ConversationId = conversationId;
-
-                    // Verify that the conversationId is for a user (starting with 19: means it is for a team's
-                    // General channel).
-                    if (!conversationId.StartsWith("19:"))
-                    {
-                        incomingUserDataEntity.PartitionKey = UserDataTableNames.UserDataPartition;
-                        incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
-
-                        // It is possible that the incoming user data has more information than what is currently
-                        // stored in the user data repository, so save/update that user's information.
-                        saveUserDataEntityTask = this.userDataRepository.InsertOrMergeAsync(incomingUserDataEntity);
-                    }
+                    return;
                 }
-                else
-                {
-                    /*
-                     * Falling into this block means that the message is meant for a user, but a conversationId
-                     * is not known for that user (most likely "send to a team's members" option was selected
-                     * as the audience). Because of this, the conversation needs to be created and that
-                     * conversationId needs to be stored for that user.
-                     */
 
-                    var createConversationResponse = await this.createUserConversationService.CreateConversationAsync(
-                        userDataEntity: incomingUserDataEntity,
-                        maxNumberOfAttempts: this.maxNumberOfAttempts);
+                // Store the count of any throttle responses the bot received if it needed to create
+                // a conversation with a user in order to generate the parameters.
+                totalNumberOfThrottles += sendNotificationParams.TotalNumberOfThrottles;
 
-                    totalNumberOfThrottles += createConversationResponse.NumberOfThrottleResponses;
-
-                    if (createConversationResponse.ResultType == CreateUserConversationResultType.Succeeded)
-                    {
-                        // Set the conversation ID to be used when sending the notification.
-                        conversationId = createConversationResponse.ConversationId;
-
-                        // Store the newly created conversation ID so the create conversation
-                        // request will not need to be made again for the user for future notifications.
-                        incomingUserDataEntity.PartitionKey = UserDataTableNames.UserDataPartition;
-                        incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
-                        incomingUserDataEntity.ConversationId = conversationId;
-
-                        saveUserDataEntityTask = this.userDataRepository.InsertOrMergeAsync(incomingUserDataEntity);
-                    }
-                    else if (createConversationResponse.ResultType == CreateUserConversationResultType.Throttled)
-                    {
-                        // If the request was attempted the maximum number of attempts and received
-                        // all throttling responses, then set the overall delay time for the system so all
-                        // other calls will be delayed and add the message back to the queue with a delay to be
-                        // attempted later.
-                        await this.delaySendingNotificationService.DelaySendingNotificationAsync(
-                            sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds,
-                            sendQueueMessageContent: messageContent);
-
-                        return;
-                    }
-                    else if (createConversationResponse.ResultType == CreateUserConversationResultType.Failed)
-                    {
-                        // If the create conversation call failed, save the result, do not attempt the
-                        // request again, and end the function.
-                        await this.manageResultDataService.ProccessResultDataAsync(
-                            notificationId: messageContent.NotificationId,
-                            aadId: incomingUserDataEntity.AadId,
-                            totalNumberOfThrottles: totalNumberOfThrottles,
-                            isStatusCodeFromCreateConversation: true,
-                            statusCode: createConversationResponse.StatusCode,
-                            errorMessage: createConversationResponse.ErrorMessage);
-
-                        return;
-                    }
-                }
+                /*
+                 *
+                 * Send the notification.
+                 *
+                 *
+                 */
 
                 // Now that all of the necessary information is known, send the notification.
                 var sendNotificationResponse = await this.sendNotificationService.SendAsync(
-                    notificationContent: activeNotificationEntity.Content,
-                    serviceUrl: incomingUserDataEntity.ServiceUrl,
-                    conversationId: conversationId,
+                    notificationContent: sendNotificationParams.NotificationContent,
+                    serviceUrl: sendNotificationParams.ServiceUrl,
+                    conversationId: sendNotificationParams.ConversationId,
                     maxNumberOfAttempts: this.maxNumberOfAttempts);
 
                 totalNumberOfThrottles += sendNotificationResponse.NumberOfThrottleResponses;
@@ -251,9 +162,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 {
                     log.LogInformation("MESSAGE SENT SUCCESSFULLY");
 
-                    proccessResultDataTask = this.manageResultDataService.ProccessResultDataAsync(
+                    await this.manageResultDataService.ProccessResultDataAsync(
                         notificationId: messageContent.NotificationId,
-                        aadId: incomingUserDataEntity.AadId,
+                        recipientId: sendNotificationParams.RecipientId,
                         totalNumberOfThrottles: totalNumberOfThrottles,
                         isStatusCodeFromCreateConversation: false,
                         statusCode: sendNotificationResponse.StatusCode);
@@ -266,12 +177,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     // attempted later.
                     log.LogError("MESSAGE THROTTLED");
 
-                    // NOTE: Here it does not immediately await this task and exit the function because a task
-                    // of saving updated user data with a newly created conversation ID may need to be awaited.
-                    delaySendingNotificationTask = this.delaySendingNotificationService
+                    await this.delaySendingNotificationService
                         .DelaySendingNotificationAsync(
                             sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds,
                             sendQueueMessageContent: messageContent);
+
+                    // Ensure all processing of the queue message is stopped because of being delayed.
+                    return;
                 }
                 else if (sendNotificationResponse.ResultType == SendNotificationResultType.Failed)
                 {
@@ -279,21 +191,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     // Save the relevant information and do not attempt the request again.
                     log.LogError($"MESSAGE FAILED: {sendNotificationResponse.StatusCode}");
 
-                    // NOTE: Here it does not immediately await this task and exit the function because a task
-                    // of saving updated user data with a newly created conversation ID may need to be awaited.
-                    proccessResultDataTask = this.manageResultDataService.ProccessResultDataAsync(
+                    await this.manageResultDataService.ProccessResultDataAsync(
                         notificationId: messageContent.NotificationId,
-                        aadId: incomingUserDataEntity.AadId,
+                        recipientId: sendNotificationParams.RecipientId,
                         totalNumberOfThrottles: totalNumberOfThrottles,
                         isStatusCodeFromCreateConversation: false,
                         statusCode: sendNotificationResponse.StatusCode,
                         errorMessage: sendNotificationResponse.ErrorMessage);
-                }
 
-                await Task.WhenAll(
-                    saveUserDataEntityTask,
-                    proccessResultDataTask,
-                    delaySendingNotificationTask);
+                    // Ensure all processing of the queue message is stopped because sending
+                    // the notification failed.
+                    return;
+                }
             }
             catch (Exception e)
             {
@@ -318,7 +227,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                 await this.manageResultDataService.ProccessResultDataAsync(
                     notificationId: messageContent.NotificationId,
-                    aadId: messageContent.UserDataEntity.AadId,
+                    recipientId: messageContent.RecipientData.RecipientId,
                     totalNumberOfThrottles: totalNumberOfThrottles,
                     isStatusCodeFromCreateConversation: false,
                     statusCode: statusCodeToStore,
