@@ -20,6 +20,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
         public RecipientDataType RecipientType { get; set; }
 
         /// <summary>
+        /// Gets or sets the recipient's unique identifier.
+        ///     If the recipient is a user, this should be the AAD Id.
+        ///     If the recipient is a team, this should be the team Id.
+        /// </summary>
+        public string RecipientId { get; set; }
+
+        /// <summary>
         /// Gets or sets the user data needed to send a user a notification.
         /// Note: this should be set if the recipient type indicates the recipient is a user.
         /// </summary>
