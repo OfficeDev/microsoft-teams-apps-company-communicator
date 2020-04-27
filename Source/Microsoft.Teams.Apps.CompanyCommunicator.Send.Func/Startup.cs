@@ -22,6 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.PrecheckServices;
 
     /// <summary>
     /// Register services in DI container of the Azure functions system.
@@ -68,6 +69,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     messageQueueOptions.ServiceBusConnection =
                         configuration.GetValue<string>("ServiceBusConnection");
                 });
+
+            // Add the precheck service.
+            builder.Services.AddTransient<PrecheckService>();
 
             // Add the create user conversation service.
             builder.Services.AddTransient<CreateUserConversationService>();

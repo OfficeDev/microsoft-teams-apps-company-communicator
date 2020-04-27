@@ -10,10 +10,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.PrecheckServices;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -31,8 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
         private readonly int maxNumberOfAttempts;
         private readonly double sendRetryDelayNumberOfSeconds;
-        private readonly GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository;
-        private readonly SendQueue sendQueue;
+        private readonly PrecheckService precheckService;
         private readonly GetSendNotificationParamsService getSendNotificationParamsService;
         private readonly SendNotificationService sendNotificationService;
         private readonly DelaySendingNotificationService delaySendingNotificationService;
@@ -42,16 +41,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// Initializes a new instance of the <see cref="CompanyCommunicatorSendFunction"/> class.
         /// </summary>
         /// <param name="companyCommunicatorSendFunctionOptions">The Company Communicator send function options.</param>
-        /// <param name="globalSendingNotificationDataRepository">The global sending notification data repository.</param>
-        /// <param name="sendQueue">The send queue.</param>
+        /// <param name="precheckService">The service to precheck and determine if the queue message should be processed.</param>
         /// <param name="getSendNotificationParamsService">The service to get the parameters needed to send the notification.</param>
         /// <param name="sendNotificationService">The send notification service.</param>
         /// <param name="delaySendingNotificationService">The delay sending notification service.</param>
         /// <param name="manageResultDataService">The manage result data service.</param>
         public CompanyCommunicatorSendFunction(
             IOptions<CompanyCommunicatorSendFunctionOptions> companyCommunicatorSendFunctionOptions,
-            GlobalSendingNotificationDataRepository globalSendingNotificationDataRepository,
-            SendQueue sendQueue,
+            PrecheckService precheckService,
             GetSendNotificationParamsService getSendNotificationParamsService,
             SendNotificationService sendNotificationService,
             DelaySendingNotificationService delaySendingNotificationService,
@@ -59,8 +56,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         {
             this.maxNumberOfAttempts = companyCommunicatorSendFunctionOptions.Value.MaxNumberOfAttempts;
             this.sendRetryDelayNumberOfSeconds = companyCommunicatorSendFunctionOptions.Value.SendRetryDelayNumberOfSeconds;
-            this.globalSendingNotificationDataRepository = globalSendingNotificationDataRepository;
-            this.sendQueue = sendQueue;
+            this.precheckService = precheckService;
             this.getSendNotificationParamsService = getSendNotificationParamsService;
             this.sendNotificationService = sendNotificationService;
             this.delaySendingNotificationService = delaySendingNotificationService;
@@ -98,23 +94,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             {
                 /*
                  *
-                 * Check if the entire system is currently in a throttled state.
+                 * Check if the queue message should be processed. If it should not be processed,
+                 * then complete the function.
                  *
                  *
                  */
 
-                // Fetch the current global sending notification data. This is where data about the overall systems
-                // status is stored e.g. is everything in a delayed state because the bot is being throttled.
-                var globalSendingNotificationDataEntity = await this.globalSendingNotificationDataRepository
-                    .GetGlobalSendingNotificationDataEntityAsync();
+                var shouldProceedWithProcessing = await this.precheckService.VerifyMessageShouldBeProcessedAsync(
+                    messageContent: messageContent,
+                    sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds);
 
-                // If the overall system is in a throttled state and needs to be delayed,
-                // add the message back on the queue with a delay and stop processing the queue message.
-                if (globalSendingNotificationDataEntity?.SendRetryDelayTime != null
-                    && DateTime.UtcNow < globalSendingNotificationDataEntity.SendRetryDelayTime)
+                // If it is determined processing the queue message should not proceed, then
+                // complete the function.
+                if (!shouldProceedWithProcessing)
                 {
-                    await this.sendQueue.SendDelayedAsync(messageContent, this.sendRetryDelayNumberOfSeconds);
-
                     return;
                 }
 
