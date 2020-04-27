@@ -73,11 +73,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// to send the notification to this recipient.
         /// Note: This does not include throttle responses received when creating the conversation.
         /// This total only represents throttle responses received when actually calling the send API.
-        /// Note: This value is only recorded for one instance and "run" or "attempt" of an Azure Function
-        /// to send the notification. If the queue message is added back to the queue to retry and the results
-        /// of the attempt are not stored in the Sent Notification data table, then those results are
-        /// lost e.g. if the bot is throttled - thus, this count may not include every throttled
-        /// response the bot has ever received when attempting to send the notification to this recipient.
+        /// Note: This count may not include every throttled response the bot has ever received when
+        /// attempting to send the notification to this recipient. If the queue message is added back
+        /// to the queue to retry and the results of the attempt are not stored in the Sent Notification
+        /// data table for that attempt, then those results are lost and are not stored here e.g. if
+        /// the bot is put in a throttled state.
         /// </summary>
         public int TotalNumberOfSendThrottles { get; set; }
 
@@ -102,13 +102,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// Gets or sets a comma separated list representing all of the status code responses received when trying
         /// to send the notification to the recipient. These results can include success, failure, and throttle
         /// status codes.
-        /// Note: This does not include response status codes for creating the conversation. This list only
-        /// represents status codes received when actually calling the send API.
-        /// Note: This value is only recorded for one instance and "run" or "attempt" of an Azure Function
-        /// to send the notification. If the queue message is added back to the queue to retry and the results
-        /// of the attempt are not stored in the Sent Notification data table, then those results are
-        /// lost e.g. if the bot is throttled - thus, this value may not include every status code response
-        /// the bot has ever received when attempting to send the notification to this recipient.
+        /// Note: This value may not include every status code response the bot has ever received when
+        /// attempting to send the notification to this recipient. If the queue message is added back to
+        /// the queue to retry and the results of the attempt are not stored in the Sent Notification data
+        /// table for that attempt, then those results are lost and are not stored here e.g. if the bot is put
+        /// in a throttled state (in that scenario all response codes that are missing should primarily be
+        /// throttle responses).
         /// </summary>
         public string AllSendStatusCodes { get; set; }
 
@@ -150,6 +149,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// Gets or sets the error message for the last recorded response
         /// received by the bot when the final attempt to send the notification
         /// to this recipient resulted in a failure.
+        /// Note: This would be a record for the last error received. If multiple
+        /// errors are received when attempting to send the notification to the
+        /// recipient only the final one will be stored here.
         /// </summary>
         public string ErrorMessage { get; set; }
     }
