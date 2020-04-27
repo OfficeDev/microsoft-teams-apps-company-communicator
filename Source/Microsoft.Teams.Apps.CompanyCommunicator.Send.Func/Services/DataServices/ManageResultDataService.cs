@@ -49,6 +49,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             string allSendStatusCodes,
             string errorMessage = null)
         {
+            // Storing this time before making the database call to have a timestamp closer to when the notification
+            // was sent.
             var currentDateTimeUtc = DateTime.UtcNow;
 
             var existingSentNotificationDataEntity = await this.sentNotificationDataRepository
@@ -110,9 +112,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
                 updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Failed;
             }
 
-            var saveSentNotificationDataEntityTask = this.sentNotificationDataRepository.InsertOrMergeAsync(updatedSentNotificationDataEntity);
-
-            await Task.WhenAll(saveSentNotificationDataEntityTask);
+            await this.sentNotificationDataRepository.InsertOrMergeAsync(updatedSentNotificationDataEntity);
         }
     }
 }
