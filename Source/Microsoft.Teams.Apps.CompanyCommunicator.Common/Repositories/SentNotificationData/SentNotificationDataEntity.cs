@@ -101,7 +101,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// <summary>
         /// Gets or sets a comma separated list representing all of the status code responses received when trying
         /// to send the notification to the recipient. These results can include success, failure, and throttle
-        /// status codes.
+        /// status codes. This list can also include a '-1' as a result if the function throws an overall exception
+        /// when attempting to process the queue message.
         /// Note: This value may not include every status code response the bot has ever received when
         /// attempting to send the notification to this recipient. If the queue message is added back to
         /// the queue to retry and the results of the attempt are not stored in the Sent Notification data
@@ -115,7 +116,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// Gets or sets the number of times an Azure Function instance attempted to send the notification
         /// to the recipient and stored a final result.
         /// Note: This should only ever be one. If it is more than one, it is possible the recipient incorrectly
-        /// received multiple, duplicate notifications.
+        /// received multiple, duplicate notifications - check AllSendStatusCodes.
+        /// Note: If the function is triggered by a queue message but the processing is skipped, e.g. the
+        /// system is in a throttled state or it is a duplicate message, then that is not counted as an attempt
+        /// in this count.
         /// </summary>
         public int NumberOfFunctionAttemptsToSend { get; set; }
 
@@ -146,12 +150,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public string UserId { get; set; }
 
         /// <summary>
-        /// Gets or sets the error message for the last recorded response
-        /// received by the bot when the final attempt to send the notification
-        /// to this recipient resulted in a failure.
-        /// Note: This would be a record for the last error received. If multiple
-        /// errors are received when attempting to send the notification to the
-        /// recipient only the final one will be stored here.
+        /// Gets or sets the error message for the last recorded error the bot encountered
+        /// when attempting to process the queue message. If a request
+        /// is retried and eventually is successful, this field will still be filled
+        /// with data about the last error encountered.
+        /// Note: This is a record for the last error encountered. If multiple
+        /// errors are encountered when attempting to process the queue message
+        /// only the final one will be stored here.
         /// </summary>
         public string ErrorMessage { get; set; }
     }
