@@ -154,7 +154,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 
         /// <summary>
         /// Insert or merge a batch of entities in Azure table storage.
-        /// A batch can contains up to 100 entities.
+        /// A batch can contain up to 100 entities.
         /// </summary>
         /// <param name="entities">Entities to be inserted or merged in Azure table storage.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
