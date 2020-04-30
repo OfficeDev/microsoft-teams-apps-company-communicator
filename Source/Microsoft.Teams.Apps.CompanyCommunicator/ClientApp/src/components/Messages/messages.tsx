@@ -168,6 +168,22 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
     }
   }
 
+  private renderSendingText = (message: any) => {
+    if (message.isPreparingToSend) {
+      return (
+        <Text
+          truncated
+          content="Preparing to send..."
+        >
+        </Text>
+      );
+    } else {
+      return (
+        this.renderSendingNumbersText(message)
+      );
+    }
+  }
+
   private messageContent = (message: any) => {
     return (
       <Flex className="listContainer" vAlign="center" fill gap="gap.small">
@@ -179,7 +195,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
           </Text>
         </Flex.Item>
         <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
-          {this.renderSendingNumbersText(message)}
+          {this.renderSendingText(message)}
         </Flex.Item>
         <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
           <div>
