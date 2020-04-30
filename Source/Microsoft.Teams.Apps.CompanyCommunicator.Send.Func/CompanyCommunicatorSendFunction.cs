@@ -203,7 +203,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                  * the service bus. For each attempt that did not result with the message being placed
                  * on the dead letter queue, set the status code to be stored as the FaultedAndRetryingStatusCode.
                  * If the maximum delivery count has been reached and the message will be placed on the
-                 * dead letter queue, then set the status code to be stored as the FullyFaultedStatusCode.
+                 * dead letter queue, then set the status code to be stored as the FinalFaultedStatusCode.
                  */
 
                 var errorMessage = $"{e.GetType()}: {e.Message}";
@@ -213,7 +213,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 var statusCodeToStore = SentNotificationDataEntity.FaultedAndRetryingStatusCode;
                 if (deliveryCount >= CompanyCommunicatorSendFunction.MaxDeliveryCountForDeadLetter)
                 {
-                    statusCodeToStore = -2;
+                    statusCodeToStore = SentNotificationDataEntity.FinalFaultedStatusCode;
                 }
 
                 // Set the status code in the allSendStatusCodes in order to store a record of
