@@ -22,6 +22,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public static readonly int InitializationStatusCode = 0;
 
         /// <summary>
+        /// This value indicates that the Azure Function that attempted to process the queue message
+        /// threw an exception. Because of this, this temporary status code is stored because
+        /// the function will requeue the queue message and try to process the queue message
+        /// again. If the message fails to be processed enough times, then a different status
+        /// code will be stored.
+        /// </summary>
+        public static readonly int FaultedAndRetryingStatusCode = -1;
+
+        /// <summary>
         /// String indicating the recipient type for the given notification was a user.
         /// </summary>
         public static readonly string UserRecipientType = "User";
@@ -49,11 +58,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public static readonly string Throttled = "Throttled";
 
         /// <summary>
-        /// String indicating sending the current notification resulted
-        /// in an exception. Because of this, this string will be stored in the repository
-        /// until a more final state is reached by attempting to send the notification again.
+        /// String indicating that processing the current queue message resulted in an exception so
+        /// the message is being requeued and attempted again. Because of this, this string will be
+        /// stored in the repository as the delivery status until a more final state is reached.
         /// </summary>
-        public static readonly string Continued = "Continued";
+        public static readonly string Retrying = "Retrying";
 
         /// <summary>
         /// Gets or sets a value indicating which type of recipient the notification was sent to
