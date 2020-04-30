@@ -137,7 +137,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// Uses the incoming request to determine which type of recipient list to fetch.
         /// Triggers the correct function in order to fetch the recipient list and fill the
         /// corresponding sent notification data table/partition with unknown/initial statuses.
-        /// It then triggers the function to read that entire sent notificaiton data table/partition
+        /// It then triggers the function to read that entire sent notification data table/partition
         /// in order to get all recipients and then break all those recipients down into batches in order
         /// to be added to the send queue.
         /// </summary>
