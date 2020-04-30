@@ -10,7 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
     public static class UserDataTableNames
     {
         /// <summary>
-        /// Table name for user data table.
+        /// Table name for the user data table.
         /// </summary>
         public static readonly string TableName = "UserData";
 

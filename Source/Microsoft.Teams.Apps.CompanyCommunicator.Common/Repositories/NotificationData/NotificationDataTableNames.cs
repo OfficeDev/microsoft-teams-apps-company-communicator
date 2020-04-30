@@ -10,7 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     public static class NotificationDataTableNames
     {
         /// <summary>
-        /// Table name for notification data table.
+        /// Table name for the notification data table.
         /// </summary>
         public static readonly string TableName = "NotificationData";
 

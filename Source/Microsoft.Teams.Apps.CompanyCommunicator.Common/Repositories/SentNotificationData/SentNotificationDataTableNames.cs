@@ -10,7 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
     public static class SentNotificationDataTableNames
     {
         /// <summary>
-        /// Table name for sent notification data table.
+        /// Table name for the sent notification data table.
         /// </summary>
         public static readonly string TableName = "SentNotificationData";
 
