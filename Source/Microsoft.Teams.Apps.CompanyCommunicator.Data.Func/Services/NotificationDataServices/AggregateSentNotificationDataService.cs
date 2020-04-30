@@ -33,20 +33,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
         public async Task<AggregatedSentNotificationDataResults> AggregateSentNotificationDataResultsAsync(
             string notificationId)
         {
-            var partionFilter = TableQuery.GenerateFilterCondition(
+            var partitionKeyFilter = TableQuery.GenerateFilterCondition(
                 nameof(TableEntity.PartitionKey),
                 QueryComparisons.Equal,
                 notificationId);
 
-            var nonZeroStatusCodeFilter = TableQuery.GenerateFilterConditionForInt(
-                "StatusCode",
-                QueryComparisons.NotEqual,
-                SentNotificationDataEntity.InitializationStatusCode);
+            // The query is based on the delivery status types that are currently aggregated.
+            var succeededDeliveryStatusFilter = TableQuery.GenerateFilterCondition(
+                nameof(SentNotificationDataEntity.DeliveryStatus),
+                QueryComparisons.Equal,
+                SentNotificationDataEntity.Succeeded);
+
+            var failedDeliveryStatusFilter = TableQuery.GenerateFilterCondition(
+                nameof(SentNotificationDataEntity.DeliveryStatus),
+                QueryComparisons.Equal,
+                SentNotificationDataEntity.Failed);
+
+            var throttledDeliveryStatusFilter = TableQuery.GenerateFilterCondition(
+                nameof(SentNotificationDataEntity.DeliveryStatus),
+                QueryComparisons.Equal,
+                SentNotificationDataEntity.Throttled);
 
             // Create the complete query where:
-            // PartitionKey eq notificationId
-            // StatusCode ne Initialization Status Code value (likely 0)
-            var completeFilter = TableQuery.CombineFilters(partionFilter, TableOperators.And, nonZeroStatusCodeFilter);
+            // PartitionKey eq notificationId AND
+            //      DeliveryStatus eq Succeeded OR
+            //      DeliveryStatus eq Failed OR
+            //      DeliveryStatus eq Throttled
+            var partialDeliveryStatusFilter = TableQuery.CombineFilters(succeededDeliveryStatusFilter, TableOperators.Or, failedDeliveryStatusFilter);
+            var completeDeliveryStatusFilter = TableQuery.CombineFilters(partialDeliveryStatusFilter, TableOperators.Or, throttledDeliveryStatusFilter);
+            var completeFilter = TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, completeDeliveryStatusFilter);
             var query = new TableQuery<SentNotificationDataEntity>().Where(completeFilter);
 
             try
