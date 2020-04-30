@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData
 {
+    using System.Threading.Tasks;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
 
@@ -23,6 +24,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatch
                 defaultPartitionKey: SendBatchesDataTableNames.DefaultPartition,
                 isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
+        }
+
+        /// <summary>
+        /// This method ensures the SendBatchesData table is created in the storage.
+        /// This method should be called before kicking off an Azure function that uses the SendBatchesData table.
+        /// Otherwise the app will crash.
+        /// By design, Azure functions (in this app) do not create a table if it's absent.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task EnsureSendBatchesDataTableExistsAsync()
+        {
+            var exists = await this.Table.ExistsAsync();
+            if (!exists)
+            {
+                await this.Table.CreateAsync();
+            }
         }
     }
 }
