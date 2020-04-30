@@ -31,6 +31,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public static readonly int FaultedAndRetryingStatusCode = -1;
 
         /// <summary>
+        /// This value indicates that the Azure Function that attempted to process the queue message
+        /// has failed to process the queue message enough times and thrown enough exceptions that
+        /// the queue message will be placed on the dead letter queue. In this state, the queue
+        /// message will not be attempted again. Because of this, this final faulted status code
+        /// will be stored to indicate this final faulted state.
+        /// </summary>
+        public static readonly int FinalFaultedStatusCode = -2;
+
+        /// <summary>
         /// String indicating the recipient type for the given notification was a user.
         /// </summary>
         public static readonly string UserRecipientType = "User";
