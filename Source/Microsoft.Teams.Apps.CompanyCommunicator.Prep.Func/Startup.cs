@@ -65,7 +65,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
                 {
                     dataQueueMessageOptions.FirstDataAggregationMessageDelayInSeconds =
-                        configuration.GetValue<double>("FirstDataAggregationMessageDelayInSeconds", 10);
+                        configuration.GetValue<double>("FirstDataAggregationMessageDelayInSeconds", 20);
                 });
 
             // Add orchestration.
