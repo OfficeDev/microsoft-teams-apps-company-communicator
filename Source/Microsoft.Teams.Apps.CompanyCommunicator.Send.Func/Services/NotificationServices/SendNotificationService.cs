@@ -93,18 +93,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                             // If made it passed the sending step, then the notification was sent successfully.
                             // Store the data about the successful request.
                             sendNotificationResponse.ResultType = SendNotificationResultType.Succeeded;
-                            sendNotificationResponse.StatusCode = HttpStatusCode.Created;
+                            sendNotificationResponse.StatusCode = (int)HttpStatusCode.Created;
                             sendNotificationResponse.AllSendStatusCodes += $"{(int)HttpStatusCode.Created},";
-
-                            // Ensure the error message is empty if the request was successful.
-                            sendNotificationResponse.ErrorMessage = string.Empty;
 
                             break;
                         }
                         catch (ErrorResponseException e)
                         {
                             var responseStatusCode = e.Response.StatusCode;
-                            sendNotificationResponse.StatusCode = responseStatusCode;
+                            sendNotificationResponse.StatusCode = (int)responseStatusCode;
                             sendNotificationResponse.AllSendStatusCodes += $"{(int)responseStatusCode},";
 
                             // If the response was a throttled status code or a 5xx status code,

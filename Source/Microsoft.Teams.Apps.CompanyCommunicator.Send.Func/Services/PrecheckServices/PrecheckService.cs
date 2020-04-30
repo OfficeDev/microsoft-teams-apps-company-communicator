@@ -87,14 +87,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.PrecheckSe
             // in the sent notification data is set to either:
             //      The InitializationStatusCode (likely 0) - this means the notification has not been attempted
             //          to be sent to this recipient.
-            //      The HTTP status code 100 for Continue - this means the Azure Function previously attemted
+            //      The FaultedAndRetryingStatusCode (likely -1) - this means the Azure Function previously attemted
             //          to send the notification to this recipient but threw an exception, so sending the
             //          notification should be attempted again.
             // If it is neither of these scenarios, then complete the function in order to not send a duplicate
             // notification to this recipient.
             else if (existingSentNotificationDataEntity == null
                 || (existingSentNotificationDataEntity.StatusCode != SentNotificationDataEntity.InitializationStatusCode
-                    && existingSentNotificationDataEntity.StatusCode != (int)HttpStatusCode.Continue))
+                    && existingSentNotificationDataEntity.StatusCode != SentNotificationDataEntity.FaultedAndRetryingStatusCode))
             {
                 shouldProceedWithProcessing = false;
             }

@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices;
@@ -153,7 +154,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
                         isStatusCodeFromCreateConversation: false,
                         statusCode: sendNotificationResponse.StatusCode,
-                        allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes);
+                        allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes,
+                        errorMessage: sendNotificationResponse.ErrorMessage);
                 }
                 else if (sendNotificationResponse.ResultType == SendNotificationResultType.Throttled)
                 {
@@ -199,27 +201,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                  * been done enough times and the message has been attempted to be delivered more than
                  * its allowed delivery count, then the message is placed on the dead letter queue of
                  * the service bus. For each attempt that did not result with the message being placed
-                 * on the dead letter queue, set the status to be stored as HttpStatusCode.Continue. If
-                 * the maximum delivery count has been reached and the message will be place on the
-                 * dead letter queue, then set the status to be stored as HttpStatusCode.InternalServerError.
+                 * on the dead letter queue, set the status code to be stored as the FaultedAndRetryingStatusCode.
+                 * If the maximum delivery count has been reached and the message will be placed on the
+                 * dead letter queue, then set the status code to be stored as the FullyFaultedStatusCode.
                  */
 
-                log.LogError(e, $"ERROR: {e.Message}, {e.GetType()}");
+                var errorMessage = $"{e.GetType()}: {e.Message}";
 
-                var statusCodeToStore = HttpStatusCode.Continue;
+                log.LogError(e, $"ERROR: {errorMessage}");
+
+                var statusCodeToStore = SentNotificationDataEntity.FaultedAndRetryingStatusCode;
                 if (deliveryCount >= CompanyCommunicatorSendFunction.MaxDeliveryCountForDeadLetter)
                 {
-                    statusCodeToStore = HttpStatusCode.InternalServerError;
+                    statusCodeToStore = -2;
                 }
 
+                // Set the status code in the allSendStatusCodes in order to store a record of
+                // the attempt.
                 await this.manageResultDataService.ProccessResultDataAsync(
                     notificationId: messageContent.NotificationId,
                     recipientId: messageContent.RecipientData.RecipientId,
                     totalNumberOfSendThrottles: 0,
                     isStatusCodeFromCreateConversation: false,
                     statusCode: statusCodeToStore,
-                    allSendStatusCodes: string.Empty,
-                    errorMessage: e.Message);
+                    allSendStatusCodes: $"{statusCodeToStore},",
+                    errorMessage: errorMessage);
 
                 throw;
             }

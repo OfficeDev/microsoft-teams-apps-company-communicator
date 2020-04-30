@@ -86,11 +86,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                             // successfully created, and place that conversationId in the response for
                             // use when sending the notification to the user.
                             createConversationResponse.ResultType = CreateUserConversationResultType.Succeeded;
-                            createConversationResponse.StatusCode = HttpStatusCode.Created;
+                            createConversationResponse.StatusCode = (int)HttpStatusCode.Created;
                             createConversationResponse.ConversationId = turnContext.Activity.Conversation.Id;
-
-                            // Ensure the error message is empty if the request was successful.
-                            createConversationResponse.ErrorMessage = string.Empty;
 
                             // This is used to signal the conversation was created successfully and to
                             // "break" out of the loop in order to not make multiple attempts.
@@ -105,7 +102,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                     // This exception is thrown when a failure response is received when making the request
                     // to create the conversation.
                     var responseStatusCode = e.Response.StatusCode;
-                    createConversationResponse.StatusCode = responseStatusCode;
+                    createConversationResponse.StatusCode = (int)responseStatusCode;
 
                     // If the response was a throttled status code or a 5xx status code,
                     // then delay and retry the request.

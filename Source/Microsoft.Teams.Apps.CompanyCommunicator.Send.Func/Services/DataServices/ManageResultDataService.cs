@@ -45,9 +45,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             string recipientId,
             int totalNumberOfSendThrottles,
             bool isStatusCodeFromCreateConversation,
-            HttpStatusCode statusCode,
+            int statusCode,
             string allSendStatusCodes,
-            string errorMessage = null)
+            string errorMessage)
         {
             // Storing this time before making the database call to have a timestamp closer to when the notification
             // was sent.
@@ -87,25 +87,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
                 NumberOfFunctionAttemptsToSend = numberOfFunctionAttemptsToSend,
             };
 
-            if (statusCode == HttpStatusCode.Created)
+            if (statusCode == (int)HttpStatusCode.Created)
             {
                 updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Succeeded;
             }
-            else if (statusCode == HttpStatusCode.TooManyRequests)
+            else if (statusCode == (int)HttpStatusCode.TooManyRequests)
             {
                 updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Throttled;
             }
-            else if (statusCode == HttpStatusCode.Continue)
+            else if (statusCode == SentNotificationDataEntity.FaultedAndRetryingStatusCode)
             {
                 // This is a special case where an exception was thrown in the function.
-                // The system will try to add the service bus message back to the queue and will try to
-                // send the notification again. For now, we will store the current state as "Failed" in
-                // the respository, but it should not send a message to the data queue because we do not
-                // want to count a failure when the next attempt may succeed. If the system tries to send
-                // the notification repeatedly and reaches the dead letter maximum number of attempts,
-                // then the system should send a "Failed" message to the data queue. In this case, the
-                // the status code will not be Continue.
-                updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Continued;
+                // The system will try to add the queue message back to the queue and will try to
+                // send the notification again. For now, we will store the current state as retrying in
+                // the respository. If the system tries to send the notification repeatedly and reaches
+                // the dead letter maximum number of attempts, then the system should store a status of
+                // "Failed". In that case, the status code will not be faulted and retrying.
+                updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Retrying;
             }
             else
             {

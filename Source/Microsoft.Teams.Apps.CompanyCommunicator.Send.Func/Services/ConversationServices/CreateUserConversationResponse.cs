@@ -14,7 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
         /// <summary>
         /// Gets or sets the status code.
         /// </summary>
-        public HttpStatusCode StatusCode { get; set; }
+        public int StatusCode { get; set; }
 
         /// <summary>
         /// Gets or sets the result type.
