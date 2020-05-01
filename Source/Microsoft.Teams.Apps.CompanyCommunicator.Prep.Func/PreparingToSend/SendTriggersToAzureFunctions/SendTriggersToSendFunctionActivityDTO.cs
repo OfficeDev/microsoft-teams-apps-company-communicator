@@ -8,18 +8,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
 
     /// <summary>
-    /// DTO class used by the durable framework to pass parameter to the SendTriggerToDataFunctionActivity.
+    /// DTO class used by the durable framework to pass parameters to the SendTriggersToSendFunctionActivity.
     /// </summary>
     public class SendTriggersToSendFunctionActivityDTO
     {
         /// <summary>
-        /// Gets or sets notification data entity id.
+        /// Gets or sets the notification Id.
         /// </summary>
-        public string NotificationDataEntityId { get; set; }
+        public string NotificationId { get; set; }
 
         /// <summary>
-        /// Gets or sets the recipient data batch.
+        /// Gets or sets the recipient data batch index.
         /// </summary>
-        public IEnumerable<RecipientData> RecipientDataBatch { get; set; }
+        public int RecipientDataBatchIndex { get; set; }
     }
 }
