@@ -9,7 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// The bot's general filter middleware.
@@ -17,16 +17,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     public class CompanyCommunicatorBotFilterMiddleware : IMiddleware
     {
         private static readonly string MsTeamsChannelId = "msteams";
-
-        private readonly IConfiguration configuration;
+        private readonly bool disableTenantFilter;
+        private readonly string allowedTenants;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorBotFilterMiddleware"/> class.
         /// </summary>
-        /// <param name="configuration">ASP.NET Core <see cref="IConfiguration"/> instance.</param>
-        public CompanyCommunicatorBotFilterMiddleware(IConfiguration configuration)
+        /// <param name="botFilterMiddlewareOptions">The bot filter middleware options.</param>
+        public CompanyCommunicatorBotFilterMiddleware(IOptions<BotFilterMiddlewareOptions> botFilterMiddlewareOptions)
         {
-            this.configuration = configuration;
+            this.disableTenantFilter = botFilterMiddlewareOptions.Value.DisableTenantFilter;
+            this.allowedTenants = botFilterMiddlewareOptions.Value.AllowedTenants;
         }
 
         /// <summary>
@@ -65,14 +66,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
         private bool ValidateTenant(ITurnContext turnContext)
         {
-            var disableTenantFilter = this.configuration.GetValue<bool>("DisableTenantFilter", false);
-            if (disableTenantFilter)
+            if (this.disableTenantFilter)
             {
                 return true;
             }
 
-            var allowedTenantIds = this.configuration
-                ?.GetValue<string>("AllowedTenants", string.Empty)
+            var allowedTenantIds = this.allowedTenants
                 ?.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
                 ?.Select(p => p.Trim());
             if (allowedTenantIds == null || allowedTenantIds.Count() == 0)
