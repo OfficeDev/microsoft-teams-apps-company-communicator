@@ -1,4 +1,4 @@
-﻿// <copyright file="SetNotificationIsPrepCompleteActivity.cs" company="Microsoft">
+﻿// <copyright file="SetNotificationMetadataActivity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -9,18 +9,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
     /// <summary>
-    /// This activity sets the notification entity's IsPreparingToSend flag to false in order to indicate that
-    /// the notification is no longer being prepared to be sent.
+    /// Sets the notification entity's metadata:
+    ///     IsPreparingToSend flag to false - in order to indicate that
+    ///         the notification is no longer being prepared to be sent.
+    ///     TotalMessageCount - in order for the system to know the
+    ///         expected number of notifications to be sent.
     /// </summary>
-    public class SetNotificationIsPrepCompleteActivity
+    public class SetNotificationMetadataActivity
     {
         private readonly NotificationDataRepository notificationDataRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SetNotificationIsPrepCompleteActivity"/> class.
+        /// Initializes a new instance of the <see cref="SetNotificationMetadataActivity"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">The notification data repository.</param>
-        public SetNotificationIsPrepCompleteActivity(
+        public SetNotificationMetadataActivity(
             NotificationDataRepository notificationDataRepository)
         {
             this.notificationDataRepository = notificationDataRepository;
@@ -31,34 +34,44 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="notificationId">The notification Id.</param>
+        /// <param name="totalNumberOfRecipients">The total number of recipients.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
             DurableOrchestrationContext context,
-            string notificationId)
+            string notificationId,
+            int totalNumberOfRecipients)
         {
             await context.CallActivityWithRetryAsync(
-                nameof(SetNotificationIsPrepCompleteActivity.SetNotificationIsPreparingToSendAsCompleteAsync),
+                nameof(SetNotificationMetadataActivity.SetNotificationMetadataAsync),
                 ActivitySettings.CommonActivityRetryOptions,
-                notificationId);
+                new SetNotificationMetadataActivityDTO
+                {
+                    NotificationId = notificationId,
+                    TotalNumberOfRecipients = totalNumberOfRecipients,
+                });
         }
 
         /// <summary>
-        /// Sets the notification entity's IsPreparingToSend flag to false in order to indicate that
-        /// the notification is no longer being prepared to be sent.
+        /// Sets the notification entity's metadata:
+        ///     IsPreparingToSend flag to false - in order to indicate that
+        ///         the notification is no longer being prepared to be sent.
+        ///     TotalMessageCount - in order for the system to know the
+        ///         expected number of notifications to be sent.
         /// </summary>
-        /// <param name="notificationId">The notification Id.</param>
+        /// <param name="input">The trigger DTO.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [FunctionName(nameof(SetNotificationIsPreparingToSendAsCompleteAsync))]
-        public async Task SetNotificationIsPreparingToSendAsCompleteAsync(
-            [ActivityTrigger] string notificationId)
+        [FunctionName(nameof(SetNotificationMetadataAsync))]
+        public async Task SetNotificationMetadataAsync(
+            [ActivityTrigger] SetNotificationMetadataActivityDTO input)
         {
             var notificationDataEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,
-                notificationId);
+                input.NotificationId);
 
             if (notificationDataEntity != null)
             {
                 notificationDataEntity.IsPreparingToSend = false;
+                notificationDataEntity.TotalMessageCount = input.TotalNumberOfRecipients;
 
                 await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
             }
