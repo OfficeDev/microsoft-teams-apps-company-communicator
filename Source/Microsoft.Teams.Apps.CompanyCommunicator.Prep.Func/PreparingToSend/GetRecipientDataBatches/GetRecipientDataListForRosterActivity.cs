@@ -21,6 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Extensions;
 
     /// <summary>
     /// This class contains the "get recipient data list for roster" durable activity.
@@ -108,8 +109,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                 input.TeamDataEntity.TeamId,
                 input.TeamDataEntity.TenantId);
 
-            await this.sentNotificationDataRepository
-                .InitializeSentNotificationDataForUserRecipientBatchAsync(input.NotificationDataEntityId, roster);
+            var sentNotificationDataEntities = roster
+                .Select(userDataEntity =>
+                {
+                    return userDataEntity.CreateInitialSentNotificationDataEntity(
+                        partitionKey: input.NotificationDataEntityId);
+                });
+
+            await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(sentNotificationDataEntities);
         }
 
         /// <summary>
