@@ -8,46 +8,54 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
 
     /// <summary>
     /// User data entity class.
+    /// This entity holds the information about a user.
+    /// Note: depending on how this data is filled, it is not gauranteed all
+    /// values will be filled.
+    /// If they are present in this table, it is gauranteed that the AAD id,
+    /// user id, conversation id, service url, and tenant id will be filled.
     /// </summary>
     public class UserDataEntity : TableEntity
     {
         /// <summary>
-        /// Gets or sets name.
+        /// Gets or sets the user's name.
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets email address.
+        /// Gets or sets the email address for the user.
         /// </summary>
         public string Email { get; set; }
 
         /// <summary>
-        /// Gets or sets Upn.
+        /// Gets or sets the user's upn.
         /// </summary>
         public string Upn { get; set; }
 
         /// <summary>
-        /// Gets or sets AadId.
+        /// Gets or sets the AAD id of the user.
         /// </summary>
         public string AadId { get; set; }
 
         /// <summary>
-        /// Gets or sets UserId.
+        /// Gets or sets the user id for the user as known to the
+        /// bot - typically this starts with "29:".
         /// </summary>
         public string UserId { get; set; }
 
         /// <summary>
-        /// Gets or sets ConversationId.
+        /// Gets or sets the conversation id for the chat between the
+        /// user and the bot.
         /// </summary>
         public string ConversationId { get; set; }
 
         /// <summary>
-        /// Gets or sets ServiceUrl.
+        /// Gets or sets the service url that can be used by the bot
+        /// to send this user a notification.
         /// </summary>
         public string ServiceUrl { get; set; }
 
         /// <summary>
-        /// Gets or sets TenantId.
+        /// Gets or sets the tenant id for the user.
         /// </summary>
         public string TenantId { get; set; }
     }
