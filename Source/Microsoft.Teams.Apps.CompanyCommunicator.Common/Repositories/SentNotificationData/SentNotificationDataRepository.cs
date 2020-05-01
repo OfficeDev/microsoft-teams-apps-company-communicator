@@ -4,7 +4,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData
 {
-    using Microsoft.Extensions.Configuration;
+    using System.Threading.Tasks;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Repository of the notification data in the table storage.
@@ -14,15 +15,30 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationDataRepository"/> class.
         /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
-        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
-        public SentNotificationDataRepository(IConfiguration configuration, bool isFromAzureFunction = false)
+        /// <param name="repositoryOptions">Options used to create the repository.</param>
+        public SentNotificationDataRepository(IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                configuration,
-                PartitionKeyNames.SentNotificationDataTable.TableName,
-                PartitionKeyNames.SentNotificationDataTable.DefaultPartition,
-                isFromAzureFunction)
+                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                tableName: SentNotificationDataTableNames.TableName,
+                defaultPartitionKey: SentNotificationDataTableNames.DefaultPartition,
+                isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
+        }
+
+        /// <summary>
+        /// This method ensures the SentNotificationData table is created in the storage.
+        /// This method should be called before kicking off an Azure function that uses the SentNotificationData table.
+        /// Otherwise the app will crash.
+        /// By design, Azure functions (in this app) do not create a table if it's absent.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task EnsureSentNotificationDataTableExistsAsync()
+        {
+            var exists = await this.Table.ExistsAsync();
+            if (!exists)
+            {
+                await this.Table.CreateAsync();
+            }
         }
     }
 }

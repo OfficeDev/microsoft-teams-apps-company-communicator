@@ -6,7 +6,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
 
@@ -31,7 +30,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
 
             var notificationEntity = new NotificationDataEntity
             {
-                PartitionKey = PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                PartitionKey = NotificationDataTableNames.DraftNotificationsPartition,
                 RowKey = newId,
                 Id = newId,
                 Title = notification.Title,

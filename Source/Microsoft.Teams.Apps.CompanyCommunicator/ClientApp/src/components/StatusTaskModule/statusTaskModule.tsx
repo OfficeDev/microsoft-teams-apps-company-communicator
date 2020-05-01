@@ -29,6 +29,8 @@ export interface IMessage {
     allUsers?: boolean;
     sendingStartedDate?: string;
     sendingDuration?: string;
+    errorMessage?: string;
+    warningMessage?: string;
 }
 
 export interface IStatusState {
@@ -156,6 +158,12 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                             <div className="contentField">
                                 {this.renderAudienceSelection()}
                             </div>
+                            <div className="contentField">
+                                {this.renderErrorMessage()}
+                            </div>
+                            <div className="contentField">
+                                {this.renderWarningMessage()}
+                            </div>
                         </div>
                         <div className="adaptiveCardContainer">
                         </div>
@@ -202,6 +210,32 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                 <div>
                     <h3>Sent in chat to everyone</h3>
                 </div>);
+        } else {
+            return (<div></div>);
+        }
+    }
+
+    private renderErrorMessage = () => {
+        if (this.state.message.errorMessage) {
+            return (
+                <div>
+                    <h3>Error message</h3>
+                    <span>{this.state.message.errorMessage}</span>
+                </div>
+            );
+        } else {
+            return (<div></div>);
+        }
+    }
+
+    private renderWarningMessage = () => {
+        if (this.state.message.warningMessage) {
+            return (
+                <div>
+                    <h3>Warning message</h3>
+                    <span>{this.state.message.warningMessage}</span>
+                </div>
+            );
         } else {
             return (<div></div>);
         }

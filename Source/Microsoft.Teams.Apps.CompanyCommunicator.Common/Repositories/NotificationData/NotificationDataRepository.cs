@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Repository of the notification data in the table storage.
@@ -17,18 +17,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationDataRepository"/> class.
         /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
+        /// <param name="repositoryOptions">Options used to create the repository.</param>
         /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
-        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
         public NotificationDataRepository(
-            IConfiguration configuration,
-            TableRowKeyGenerator tableRowKeyGenerator,
-            bool isFromAzureFunction = false)
+            IOptions<RepositoryOptions> repositoryOptions,
+            TableRowKeyGenerator tableRowKeyGenerator)
             : base(
-                configuration,
-                PartitionKeyNames.NotificationDataTable.TableName,
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
-                isFromAzureFunction)
+                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                tableName: NotificationDataTableNames.TableName,
+                defaultPartitionKey: NotificationDataTableNames.DraftNotificationsPartition,
+                isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
             this.TableRowKeyGenerator = tableRowKeyGenerator;
         }
@@ -44,7 +42,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <returns>All draft notification entities.</returns>
         public async Task<IEnumerable<NotificationDataEntity>> GetAllDraftNotificationsAsync()
         {
-            var result = await this.GetAllAsync(PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition);
+            var result = await this.GetAllAsync(NotificationDataTableNames.DraftNotificationsPartition);
 
             return result;
         }
@@ -55,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <returns>The top 25 most recently sent notification entities.</returns>
         public async Task<IEnumerable<NotificationDataEntity>> GetMostRecentSentNotificationsAsync()
         {
-            var result = await this.GetAllAsync(PartitionKeyNames.NotificationDataTable.SentNotificationsPartition, 25);
+            var result = await this.GetAllAsync(NotificationDataTableNames.SentNotificationsPartition, 25);
 
             return result;
         }
@@ -69,17 +67,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         {
             if (draftNotificationEntity == null)
             {
-                return string.Empty;
+                throw new ArgumentNullException(nameof(draftNotificationEntity));
             }
 
-            var newId = this.TableRowKeyGenerator.CreateNewKeyOrderingMostRecentToOldest();
+            var newSentNotificationId = this.TableRowKeyGenerator.CreateNewKeyOrderingMostRecentToOldest();
 
             // Create a sent notification based on the draft notification.
             var sentNotificationEntity = new NotificationDataEntity
             {
-                PartitionKey = PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
-                RowKey = newId,
-                Id = newId,
+                PartitionKey = NotificationDataTableNames.SentNotificationsPartition,
+                RowKey = newSentNotificationId,
+                Id = newSentNotificationId,
                 Title = draftNotificationEntity.Title,
                 ImageLink = draftNotificationEntity.ImageLink,
                 Summary = draftNotificationEntity.Summary,
@@ -100,13 +98,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 TotalMessageCount = draftNotificationEntity.TotalMessageCount,
                 IsCompleted = false,
                 SendingStartedDate = DateTime.UtcNow,
+                IsPreparingToSend = true,
             };
             await this.CreateOrUpdateAsync(sentNotificationEntity);
 
             // Delete the draft notification.
             await this.DeleteAsync(draftNotificationEntity);
 
-            return newId;
+            return newSentNotificationId;
         }
 
         /// <summary>
@@ -121,9 +120,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         {
             var newId = this.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent();
 
+            // TODO: Set the string "(copy)" in a resource file for multi-language support.
             var newNotificationEntity = new NotificationDataEntity
             {
-                PartitionKey = PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+                PartitionKey = NotificationDataTableNames.DraftNotificationsPartition,
                 RowKey = newId,
                 Id = newId,
                 Title = notificationEntity.Title + " (copy)",
@@ -141,6 +141,59 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             };
 
             await this.CreateOrUpdateAsync(newNotificationEntity);
+        }
+
+        /// <summary>
+        /// Save exception error message in a notification data entity.
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="errorMessage">Error message.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task SaveExceptionInNotificationDataEntityAsync(
+            string notificationDataEntityId,
+            string errorMessage)
+        {
+            var notificationDataEntity = await this.GetAsync(
+                NotificationDataTableNames.SentNotificationsPartition,
+                notificationDataEntityId);
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.ExceptionMessage =
+                    this.AppendNewLine(notificationDataEntity.ExceptionMessage, errorMessage);
+
+                notificationDataEntity.IsCompleted = true;
+
+                await this.CreateOrUpdateAsync(notificationDataEntity);
+            }
+        }
+
+        /// <summary>
+        /// Save warning message in a notification data entity.
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="warningMessage">Warning message to be saved.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task SaveWarningInNotificationDataEntityAsync(
+            string notificationDataEntityId,
+            string warningMessage)
+        {
+            var notificationDataEntity = await this.GetAsync(
+                NotificationDataTableNames.SentNotificationsPartition,
+                notificationDataEntityId);
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.WarningMessage =
+                    this.AppendNewLine(notificationDataEntity.WarningMessage, warningMessage);
+
+                await this.CreateOrUpdateAsync(notificationDataEntity);
+            }
+        }
+
+        private string AppendNewLine(string originalString, string newString)
+        {
+            return string.IsNullOrWhiteSpace(originalString)
+                ? newString
+                : $"{originalString}{Environment.NewLine}{newString}";
         }
     }
 }
