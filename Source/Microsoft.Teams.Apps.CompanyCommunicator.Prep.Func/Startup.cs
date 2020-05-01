@@ -14,6 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
@@ -75,10 +76,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<GetRecipientDataListForAllUsersActivity>();
             builder.Services.AddTransient<GetTeamDataEntitiesByIdsActivity>();
             builder.Services.AddTransient<GetRecipientDataListForRosterActivity>();
+            builder.Services.AddTransient<ProcessRecipientDataListForRosterActivity>();
             builder.Services.AddTransient<GetRecipientDataListForTeamsActivity>();
-            builder.Services.AddTransient<ProcessRecipientDataListActivity>();
             builder.Services.AddTransient<CreateSendingNotificationActivity>();
-            builder.Services.AddTransient<SetNotificationIsPrepCompleteActivity>();
+            builder.Services.AddTransient<SetNotificationMetadataActivity>();
             builder.Services.AddTransient<SendDataAggregationMessageActivity>();
             builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
             builder.Services.AddTransient<HandleFailureActivity>();
@@ -93,6 +94,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<SentNotificationDataRepository>();
             builder.Services.AddSingleton<UserDataRepository>();
             builder.Services.AddSingleton<TeamDataRepository>();
+            builder.Services.AddSingleton<SendBatchesDataRepository>();
 
             // Add service bus message queues.
             builder.Services.AddSingleton<SendQueue>();
