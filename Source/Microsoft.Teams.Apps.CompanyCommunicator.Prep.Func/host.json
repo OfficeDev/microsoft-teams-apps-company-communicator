@@ -8,13 +8,16 @@
     },
     "durableTask": {
       "hubName": "PrepareToSendFunctionTaskHub",
-      "controlQueueVisibilityTimeout": "00:30:00",
-      "workItemQueueVisibilityTimeout": "00:30:00",
+      "storageProvider": {
+        "controlQueueVisibilityTimeout": "01:05:00",
+        "workItemQueueVisibilityTimeout": "01:05:00"
+      },
       "extendedSessionsEnabled": true,
       "extendedSessionIdleTimeoutInSeconds": 60,
       "maxConcurrentOrchestratorFunctions": 1
     }
   },
+  "functionTimeout": "01:00:00",
   "logging": {
     "applicationInsights": {
       "samplingSettings": {
