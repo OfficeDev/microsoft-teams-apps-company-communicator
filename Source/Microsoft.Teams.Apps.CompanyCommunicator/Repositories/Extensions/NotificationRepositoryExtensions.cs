@@ -44,6 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 IsDraft = true,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,
+                Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
             };
 
