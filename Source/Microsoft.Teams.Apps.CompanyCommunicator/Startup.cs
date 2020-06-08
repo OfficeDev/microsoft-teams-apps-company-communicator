@@ -4,14 +4,16 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
+
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
@@ -25,8 +27,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Middleware;
 
     /// <summary>
     /// Register services in DI container, and set up middlewares in the pipeline.
@@ -95,15 +99,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     dataQueueMessageOptions.ForceCompleteMessageDelayInSeconds =
                         configuration.GetValue<double>("ForceCompleteMessageDelayInSeconds", 86400);
                 });
+            services.AddOptions();
 
             // Add authentication services.
             AuthenticationOptions authenticationOptionsParameter = new AuthenticationOptions();
             Startup.FillAuthenticationOptionsProperties(authenticationOptionsParameter, this.Configuration);
-
-            services.AddAuthentication(authenticationOptionsParameter);
-
-            // Setup MVC.
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddAuthentication(this.Configuration, authenticationOptionsParameter);
+            services.AddControllersWithViews();
+            services.AddRazorPages();
 
             // Setup SPA static files.
             // In production, the React files will be served from this directory.
@@ -133,6 +136,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             // Add draft notification preview services.
             services.AddTransient<DraftNotificationPreviewService>();
 
+            // Add microsoft graph services.
+            services.AddTransient<IGraphServiceClient, GraphServiceClient>();
+            services.AddTransient<IAuthenticationProvider, GraphTokenProvider>();
+            services.AddScoped<IMicrosoftGraphService, MicrosoftGraphService>();
+
             // Add Application Insights telemetry.
             services.AddApplicationInsightsTelemetry();
 
@@ -146,7 +154,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         /// </summary>
         /// <param name="app">IApplicationBuilder instance, which is a class that provides the mechanisms to configure an application's request pipeline.</param>
         /// <param name="env">IHostingEnvironment instance, which provides information about the web hosting environment an application is running in.</param>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -159,16 +167,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             }
 
             app.UseHttpsRedirection();
-            app.UseAuthentication();
-
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
-
-            app.UseMvc(routes =>
+            app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                   name: "default",
+                   pattern: "{controller}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa =>
