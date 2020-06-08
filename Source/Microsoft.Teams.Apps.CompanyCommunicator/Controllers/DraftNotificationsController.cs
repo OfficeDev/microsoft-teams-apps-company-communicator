@@ -181,6 +181,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 CreatedDateTime = notificationEntity.CreatedDate,
                 Teams = notificationEntity.Teams,
                 Rosters = notificationEntity.Rosters,
+                Groups = notificationEntity.Groups,
                 AllUsers = notificationEntity.AllUsers,
             };
 
