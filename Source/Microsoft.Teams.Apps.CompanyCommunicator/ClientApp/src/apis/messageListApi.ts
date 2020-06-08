@@ -9,7 +9,6 @@ export const getSentNotifications = async (): Promise<any> => {
 }
 
 export const getDraftNotifications = async (): Promise<any> => {
-    console.log("get draft");
     let url = baseAxiosUrl + "/draftnotifications";
     return await axios.get(url);
 }
