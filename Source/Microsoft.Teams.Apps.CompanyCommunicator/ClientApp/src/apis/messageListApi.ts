@@ -9,7 +9,23 @@ export const getSentNotifications = async (): Promise<any> => {
 }
 
 export const getDraftNotifications = async (): Promise<any> => {
+    console.log("get draft");
     let url = baseAxiosUrl + "/draftnotifications";
+    return await axios.get(url);
+}
+
+export const verifyGroupAccess = async (): Promise<any> => {
+    let url = baseAxiosUrl + "/groupdata/verifyaccess";
+    return await axios.get(url);
+}
+
+export const getGroups = async (id: number): Promise<any> => {
+    let url = baseAxiosUrl + "/groupData/" + id;
+    return await axios.get(url);
+}
+
+export const searchGroups = async (query: string): Promise<any> => {
+    let url = baseAxiosUrl + "/groupData/search/" + query;
     return await axios.get(url);
 }
 
@@ -22,6 +38,7 @@ export const getDraftNotification = async (id: number): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications/" + id;
     return await axios.get(url);
 }
+
 
 export const deleteDraftNotification = async (id: number): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications/" + id;
@@ -52,6 +69,8 @@ export const getTeams = async (): Promise<any> => {
     let url = baseAxiosUrl + "/teamdata";
     return await axios.get(url);
 }
+
+
 
 export const getConsentSummaries = async (id: number): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications/consentSummaries/" + id;

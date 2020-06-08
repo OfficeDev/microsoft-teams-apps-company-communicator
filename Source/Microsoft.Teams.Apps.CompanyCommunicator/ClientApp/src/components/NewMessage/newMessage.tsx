@@ -3,10 +3,10 @@ import './newMessage.scss';
 import './teamTheme.scss';
 import { Input, TextArea, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader, Dropdown, Text } from '@stardust-ui/react';
+import { Button, Loader, Dropdown, Text, DropdownItem } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { RouteComponentProps } from 'react-router-dom';
-import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification } from '../../apis/messageListApi';
+import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess } from '../../apis/messageListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
@@ -31,6 +31,7 @@ export interface IDraftMessage {
     buttonLink?: string,
     teams: any[],
     rosters: any[],
+    groups: any[],
     allUsers: boolean
 }
 
@@ -46,15 +47,20 @@ export interface formState {
     teamsOptionSelected: boolean,
     rostersOptionSelected: boolean,
     allUsersOptionSelected: boolean,
+    groupsOptionSelected: boolean,
     teams?: any[],
+    groups?: any[],
     exists?: boolean,
     messageId: string,
     loader: boolean,
+    groupAccess: boolean,
     selectedTeamsNum: number,
     selectedRostersNum: number,
+    selectedGroupsNum: number,
     selectedRadioBtn: string,
     selectedTeams: dropdownItem[],
     selectedRosters: dropdownItem[],
+    selectedGroups: dropdownItem[],
     errorImageUrlMessage: string,
     errorButtonUrlMessage: string,
 }
@@ -84,13 +90,17 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             teamsOptionSelected: true,
             rostersOptionSelected: false,
             allUsersOptionSelected: false,
+            groupsOptionSelected: false,
             messageId: "",
             loader: true,
+            groupAccess: false,
             selectedTeamsNum: 0,
             selectedRostersNum: 0,
+            selectedGroupsNum: 0,
             selectedRadioBtn: "teams",
             selectedTeams: [],
             selectedRosters: [],
+            selectedGroups: [],
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
         }
@@ -101,6 +111,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         //- Handle the Esc key
         document.addEventListener("keydown", this.escFunction, false);
         let params = this.props.match.params;
+        this.getGroupAccessValue();
         this.getTeamList().then(() => {
             if ('id' in params) {
                 let id = params['id'];
@@ -112,6 +123,12 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                         messageId: id,
                         selectedTeams: selectedTeams,
                         selectedRosters: selectedRosters,
+                    })
+                });
+                this.getGroupNames(id).then(() => {
+                    const selectedGroups = this.makeDropdownItems(this.state.groups);
+                    this.setState({
+                        selectedGroups: selectedGroups
                     })
                 });
             } else {
@@ -132,12 +149,27 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         });
     }
 
+    private makeDropdownItems = (items: any[] | undefined) => {
+        const resultedTeams: dropdownItem[] = [];
+        if (items) {
+            items.forEach((element) => {
+                resultedTeams.push({
+                    header: element.name,
+                    team: {
+                        id: element.id
+                    }
+                });
+            });
+        }
+        return resultedTeams;
+    }
+
     private makeDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
         const dropdownItemList: dropdownItem[] = [];
         items.forEach(element =>
             dropdownItemList.push(
                 typeof element !== "string" ? element : {
-                    header: fromItems!.find(x => x.teamId === element).name,
+                    header: fromItems!.find(x => x.Id === element).name,
                     team: {
                         id: element
                     }
@@ -145,6 +177,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         );
         return dropdownItemList;
     }
+
 
     public setDefaultCard = (card: any) => {
         setCardTitle(card, "Title");
@@ -166,20 +199,62 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         }
     }
 
+    private getGroupItems() {
+        if (this.state.groups) {
+            return this.makeDropdownItems(this.state.groups);
+        }
+        const dropdownItems: dropdownItem[] = [];
+        return dropdownItems;
+    }
+
+    private getGroupAccessValue = async () => {
+        try {
+            const response = await verifyGroupAccess();
+            this.setState({
+                groupAccess: response.data
+            });
+        } catch (error) {
+            return error;
+        }
+    }
+
+    private getGroupNames = async (id: number) => {
+        try {
+            const response = await getGroups(id);
+            this.setState({
+                groups: response.data
+            })
+        }
+        catch (error) {
+            return error;
+        }
+    }
+
     private getItem = async (id: number) => {
         try {
             const response = await getDraftNotification(id);
             const draftMessageDetail = response.data;
-            const selectedRadioButton = draftMessageDetail.rosters.length > 0 ? "rosters" : draftMessageDetail.allUsers ? "allUsers" : "teams";
-
+            let selectedRadioButton = "teams";
+            if (draftMessageDetail.rosters.length > 0) {
+                selectedRadioButton = "rosters";
+            }
+            else if (draftMessageDetail.groups.length > 0) {
+                selectedRadioButton = "groups";
+            }
+            else if (draftMessageDetail.allUsers) {
+                selectedRadioButton = "allUsers";
+            }
             this.setState({
                 teamsOptionSelected: draftMessageDetail.teams.length > 0,
                 selectedTeamsNum: draftMessageDetail.teams.length,
                 rostersOptionSelected: draftMessageDetail.rosters.length > 0,
                 selectedRostersNum: draftMessageDetail.rosters.length,
+                groupsOptionSelected: draftMessageDetail.groups.length > 0,
+                selectedGroupsNum: draftMessageDetail.groups.length,
                 selectedRadioBtn: selectedRadioButton,
                 selectedTeams: draftMessageDetail.teams,
-                selectedRosters: draftMessageDetail.rosters
+                selectedRosters: draftMessageDetail.rosters,
+                selectedGroups: draftMessageDetail.groups
             });
 
             setCardTitle(this.card, draftMessageDetail.title);
@@ -330,6 +405,24 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                             <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
                                         </div>
                                     </div>
+                                    <Radiobutton name="grouped" value="groups" label="Send to members in a M365 groups, Distribution groups or Security groups" />
+                                    <div className={this.state.groupsOptionSelected && !this.state.groupAccess ? "" : "hide"}>
+                                        <div className="noteText">
+                                            <Text error content="Please reach out to your administrator as the required permissions to enable this targeting option for your message has not been granted yet. Try again " />
+                                        </div>
+                                    </div>
+                                    <Dropdown
+                                        className="hideToggle"
+                                        hidden={!this.state.groupsOptionSelected || !this.state.groupAccess}
+                                        placeholder="Type the email address of the group(s)"
+                                        search
+                                        multiple
+                                        items={this.getGroupItems()}
+                                        value={this.state.selectedGroups}
+                                        onSearchQueryChange={this.onGroupSearchQueryChange}
+                                        onSelectedChange={this.onGroupsChange}
+                                        noResultsMessage="We couldn't find any matches."
+                                    />
                                 </RadiobuttonGroup>
                             </div>
                             <div className="adaptiveCardContainer">
@@ -355,20 +448,23 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             selectedRadioBtn: value,
             teamsOptionSelected: value === 'teams',
             rostersOptionSelected: value === 'rosters',
+            groupsOptionSelected: value === 'groups',
             allUsersOptionSelected: value === 'allUsers',
             selectedTeams: value === 'teams' ? this.state.selectedTeams : [],
             selectedTeamsNum: value === 'teams' ? this.state.selectedTeamsNum : 0,
             selectedRosters: value === 'rosters' ? this.state.selectedRosters : [],
             selectedRostersNum: value === 'rosters' ? this.state.selectedRostersNum : 0,
+            selectedGroups: value === 'groups' ? this.state.selectedGroups : [],
+            selectedGroupsNum: value === 'groups' ? this.state.selectedGroupsNum : 0,
         });
     }
 
     private isSaveBtnDisabled = () => {
         const teamsSelectionIsValid = (this.state.teamsOptionSelected && (this.state.selectedTeamsNum !== 0)) || (!this.state.teamsOptionSelected);
         const rostersSelectionIsValid = (this.state.rostersOptionSelected && (this.state.selectedRostersNum !== 0)) || (!this.state.rostersOptionSelected);
-        const nothingSelected = (!this.state.teamsOptionSelected) && (!this.state.rostersOptionSelected) && (!this.state.allUsersOptionSelected);
-
-        return (!teamsSelectionIsValid || !rostersSelectionIsValid || nothingSelected)
+        const groupsSelectionIsValid = (this.state.groupsOptionSelected && (this.state.selectedGroupsNum !== 0)) || (!this.state.groupsOptionSelected);
+        const nothingSelected = (!this.state.teamsOptionSelected) && (!this.state.rostersOptionSelected) && (!this.state.groupsOptionSelected) && (!this.state.allUsersOptionSelected);
+        return (!teamsSelectionIsValid || !rostersSelectionIsValid || !groupsSelectionIsValid || nothingSelected)
     }
 
     private isNextBtnDisabled = () => {
@@ -383,13 +479,18 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         if (this.state.teams) {
             let remainingUserTeams = this.state.teams;
             if (this.state.selectedRadioBtn !== "allUsers") {
-                remainingUserTeams = this.state.selectedRadioBtn === "teams" ? this.state.teams.filter(x => this.state.selectedTeams.findIndex(y => y.team.id === x.teamId) < 0) : this.state.teams.filter(x => this.state.selectedRosters.findIndex(y => y.team.id === x.teamId) < 0);
+                if (this.state.selectedRadioBtn === "teams") {
+                    this.state.teams.filter(x => this.state.selectedTeams.findIndex(y => y.team.id === x.Id) < 0);
+                }
+                else if (this.state.selectedRadioBtn === "rosters") {
+                    this.state.teams.filter(x => this.state.selectedRosters.findIndex(y => y.team.id === x.Id) < 0);
+                }
             }
             remainingUserTeams.forEach((element) => {
                 resultedTeams.push({
                     header: element.name,
                     team: {
-                        id: element.teamId
+                        id: element.Id
                     }
                 });
             });
@@ -402,7 +503,9 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             selectedTeams: itemsData.value,
             selectedTeamsNum: itemsData.value.length,
             selectedRosters: [],
-            selectedRostersNum: 0
+            selectedRostersNum: 0,
+            selectedGroups: [],
+            selectedGroupsNum: 0
         })
     }
 
@@ -411,15 +514,52 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             selectedRosters: itemsData.value,
             selectedRostersNum: itemsData.value.length,
             selectedTeams: [],
-            selectedTeamsNum: 0
+            selectedTeamsNum: 0,
+            selectedGroups: [],
+            selectedGroupsNum: 0
         })
     }
+
+    private onGroupsChange = (event: any, itemsData: any) => {
+        this.setState({
+            selectedGroups: itemsData.value,
+            selectedGroupsNum: itemsData.value.length,
+            selectedTeams: [],
+            selectedTeamsNum: 0,
+            selectedRosters: [],
+            selectedRostersNum: 0
+        })
+    }
+
+    private onGroupSearchQueryChange = async (event: any, itemsData: any) => {
+
+        if (!itemsData.searchQuery) {
+            this.setState({
+                groups: []
+            });
+        }
+
+        if (itemsData.searchQuery && itemsData.searchQuery.length > 1) {
+            try {
+                const response = await searchGroups(itemsData.searchQuery);
+                this.setState({
+                    groups: response.data
+                });
+            }
+            catch (error) {
+                return error;
+            }
+        }
+    }
+
 
     private onSave = () => {
         const selectedTeams: string[] = [];
         const selctedRosters: string[] = [];
+        const selectedGroups: string[] = [];
         this.state.selectedTeams.forEach(x => selectedTeams.push(x.team.id));
         this.state.selectedRosters.forEach(x => selctedRosters.push(x.team.id));
+        this.state.selectedGroups.forEach(x => selectedGroups.push(x.team.id));
 
         const draftMessage: IDraftMessage = {
             id: this.state.messageId,
@@ -431,6 +571,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             buttonLink: this.state.btnLink,
             teams: selectedTeams,
             rosters: selctedRosters,
+            groups: selectedGroups,
             allUsers: this.state.allUsersOptionSelected
         };
 
