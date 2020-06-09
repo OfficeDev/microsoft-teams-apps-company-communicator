@@ -30,7 +30,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Middleware;
 
     /// <summary>
     /// Register services in DI container, and set up middlewares in the pipeline.

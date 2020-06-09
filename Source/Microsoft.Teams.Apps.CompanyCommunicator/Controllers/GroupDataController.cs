@@ -68,14 +68,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <returns>list of audience.</returns>
         [HttpGet("search/{query}")]
         [AuthorizeForScopes(Scopes = new[] { Common.Constants.ScopeGroupReadAll })]
-        public async Task<IEnumerable<AudienceData>> Search(string query)
+        public async Task<IEnumerable<AudienceData>> SearchAsync(string query)
         {
-            this.HttpContext.VerifyUserHasAnyAcceptedScope(this.scopeRequiredByAPI);
-            var groups = await this.microsoftGraphService.SearchGroups(query);
+            var groups = await this.microsoftGraphService.SearchGroupsAsync(query);
             return groups.Select(group => new AudienceData()
             {
                 Id = group.Id,
-                Name = group.Mail,
+                Name = string.IsNullOrEmpty(group.Mail) ? group.DisplayName : group.Mail,
             });
         }
 
@@ -86,7 +85,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <returns>List of Group Names.</returns>
         [HttpGet("{id}")]
         [AuthorizeForScopes(Scopes = new[] { Common.Constants.ScopeGroupReadAll })]
-        public async Task<ActionResult<IEnumerable<AudienceData>>> GetGroups(string id)
+        public async Task<ActionResult<IEnumerable<AudienceData>>> GetGroupsAsync(string id)
         {
             var notificationEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.DraftNotificationsPartition,
@@ -96,11 +95,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var groups = await this.microsoftGraphService.GetGroupByIds(notificationEntity.Groups.ToList());
+            var groups = await this.microsoftGraphService.GetGroupByIdsAsync(notificationEntity.Groups.ToList());
             var audience = groups.Select(group => new AudienceData()
             {
                 Id = group.Id,
-                Name = group.Mail,
+                Name = string.IsNullOrEmpty(group.Mail) ? group.DisplayName : group.Mail,
             });
 
             return this.Ok(audience);

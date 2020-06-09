@@ -1,7 +1,7 @@
 ﻿// <copyright file="GraphTokenProvider.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Middleware
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 {
     using System.Net.Http;
     using System.Net.Http.Headers;

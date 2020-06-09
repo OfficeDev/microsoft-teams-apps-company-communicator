@@ -5,6 +5,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Graph;
@@ -30,7 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="groupIds">list of group ids.</param>
         /// <returns>list of groups.</returns>
-        public async Task<IEnumerable<Group>> GetGroupByIds(List<string> groupIds)
+        public async Task<IEnumerable<Group>> GetGroupByIdsAsync(List<string> groupIds)
         {
             var groups = new List<Group>();
             foreach (var id in groupIds)
@@ -38,7 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 var group = await this.graphServiceClient
                                 .Groups[id]
                                 .Request()
-                                .Select(gr => new { gr.Id, gr.Mail })
+                                .Select(gr => new { gr.Id, gr.Mail, gr.DisplayName })
                                 .GetAsync();
                 groups.Add(group);
             }
@@ -51,24 +52,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="query">query param.</param>
         /// <returns>list of group.</returns>
-        public async Task<IEnumerable<Group>> SearchGroups(string query)
+        public async Task<IEnumerable<Group>> SearchGroupsAsync(string query)
         {
-            string filter = $"mailEnabled eq true and securityEnabled eq false and startsWith(mail,'{query}')";
-            var groupsPaged = await this.graphServiceClient
-                                  .Groups
-                                  .Request()
-                                  .Filter(filter)
-                                  .Select(group => new
-                                  {
-                                      group.Id,
-                                      group.Mail,
-                                      group.GroupTypes,
-                                      group.MailEnabled,
-                                      group.SecurityEnabled,
-                                  }).
-                                  Top(4)
-                                  .GetAsync();
+            string filterforDLandO365 = $"mailEnabled eq true and securityEnabled eq false and startsWith(mail,'{query}')";
+            string filterforSG = $"mailEnabled eq false and securityEnabled eq true and startsWith(displayName,'{query}')";
+            var groups = await this.SearchGroupsAsync(filterforDLandO365, 4);
+            if (groups.Count() < 4)
+            {
+                var sgGroups = await this.SearchGroupsAsync(filterforSG, 4 - groups.Count());
+                groups.ToList().AddRange(sgGroups);
+            }
 
+            return groups;
+        }
+
+        private async Task<IEnumerable<Group>> SearchGroupsAsync(string filterQuery, int size)
+        {
+            var groupsPaged = await this.graphServiceClient
+                                   .Groups
+                                   .Request()
+                                   .Filter(filterQuery)
+                                   .Select(group => new
+                                   {
+                                       group.Id,
+                                       group.Mail,
+                                       group.DisplayName,
+                                   }).
+                                   Top(size)
+                                   .GetAsync();
             return groupsPaged.CurrentPage;
         }
     }

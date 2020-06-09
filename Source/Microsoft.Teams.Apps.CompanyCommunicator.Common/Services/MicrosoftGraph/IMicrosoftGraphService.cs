@@ -19,13 +19,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="groupIds">list of group ids.</param>
         /// <returns>list of groups.</returns>
-        Task<IEnumerable<Group>> GetGroupByIds(List<string> groupIds);
+        Task<IEnumerable<Group>> GetGroupByIdsAsync(List<string> groupIds);
 
         /// <summary>
         /// Search groups based on query.
         /// </summary>
         /// <param name="query">query param.</param>
         /// <returns>list of group.</returns>
-        Task<IEnumerable<Group>> SearchGroups(string query);
+        Task<IEnumerable<Group>> SearchGroupsAsync(string query);
     }
 }
