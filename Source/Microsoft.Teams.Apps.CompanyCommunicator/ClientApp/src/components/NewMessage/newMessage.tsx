@@ -169,7 +169,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         items.forEach(element =>
             dropdownItemList.push(
                 typeof element !== "string" ? element : {
-                    header: fromItems!.find(x => x.Id === element).name,
+                    header: fromItems!.find(x => x.id === element).name,
                     team: {
                         id: element
                     }
@@ -480,17 +480,17 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             let remainingUserTeams = this.state.teams;
             if (this.state.selectedRadioBtn !== "allUsers") {
                 if (this.state.selectedRadioBtn === "teams") {
-                    this.state.teams.filter(x => this.state.selectedTeams.findIndex(y => y.team.id === x.Id) < 0);
+                    this.state.teams.filter(x => this.state.selectedTeams.findIndex(y => y.team.id === x.id) < 0);
                 }
                 else if (this.state.selectedRadioBtn === "rosters") {
-                    this.state.teams.filter(x => this.state.selectedRosters.findIndex(y => y.team.id === x.Id) < 0);
+                    this.state.teams.filter(x => this.state.selectedRosters.findIndex(y => y.team.id === x.id) < 0);
                 }
             }
             remainingUserTeams.forEach((element) => {
                 resultedTeams.push({
                     header: element.name,
                     team: {
-                        id: element.Id
+                        id: element.id
                     }
                 });
             });

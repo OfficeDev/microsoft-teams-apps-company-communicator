@@ -35,15 +35,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <returns>A list of team data.</returns>
         [HttpGet]
-        public async Task<IEnumerable<TeamData>> GetAllTeamDataAsync()
+        public async Task<IEnumerable<AudienceData>> GetAllTeamDataAsync()
         {
             var entities = await this.teamDataRepository.GetAllSortedAlphabeticallyByNameAsync();
-            var result = new List<TeamData>();
+            var result = new List<AudienceData>();
             foreach (var entity in entities)
             {
-                var team = new TeamData
+                var team = new AudienceData
                 {
-                    TeamId = entity.TeamId,
+                    Id = entity.TeamId,
                     Name = entity.Name,
                 };
                 result.Add(team);
