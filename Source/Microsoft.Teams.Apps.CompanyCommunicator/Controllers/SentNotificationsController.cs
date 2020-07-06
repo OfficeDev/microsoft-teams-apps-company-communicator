@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
 
     /// <summary>
@@ -32,6 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly DataQueue dataQueue;
         private readonly double forceCompleteMessageDelayInSeconds;
         private readonly SendBatchesDataRepository sendBatchesDataRepository;
+        private readonly IGroupsService groupsService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
@@ -43,6 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="dataQueue">The service bus queue for the data queue.</param>
         /// <param name="dataQueueMessageOptions">The options for the data queue messages.</param>
         /// <param name="sendBatchesDataRepository">The send batches data repository.</param>
+        /// <param name="groupsService">graph service.</param>
         public SentNotificationsController(
             NotificationDataRepository notificationDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository,
@@ -50,7 +54,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             PrepareToSendQueue prepareToSendQueue,
             DataQueue dataQueue,
             IOptions<DataQueueMessageOptions> dataQueueMessageOptions,
-            SendBatchesDataRepository sendBatchesDataRepository)
+            SendBatchesDataRepository sendBatchesDataRepository,
+            IGroupsService groupsService)
         {
             this.notificationDataRepository = notificationDataRepository;
             this.sentNotificationDataRepository = sentNotificationDataRepository;
@@ -59,6 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.dataQueue = dataQueue;
             this.forceCompleteMessageDelayInSeconds = dataQueueMessageOptions.Value.ForceCompleteMessageDelayInSeconds;
             this.sendBatchesDataRepository = sendBatchesDataRepository;
+            this.groupsService = groupsService;
         }
 
         /// <summary>
@@ -155,6 +161,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
+            var groupNames = new List<string>();
+            var groupList = notificationEntity.Groups.ToList();
+            await foreach (var group in
+                this.groupsService.GetByIdsAsync(groupList))
+            {
+                groupNames.Add(group.DisplayName);
+            }
+
             var result = new SentNotification
             {
                 Id = notificationEntity.Id,
@@ -171,6 +185,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Throttled = notificationEntity.Throttled,
                 TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),
                 RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
+                GroupNames = groupNames,
                 AllUsers = notificationEntity.AllUsers,
                 SendingStartedDate = notificationEntity.SendingStartedDate,
                 ErrorMessage = notificationEntity.ExceptionMessage,

@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
@@ -35,13 +36,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <returns>A list of team data.</returns>
         [HttpGet]
-        public async Task<IEnumerable<AudienceData>> GetAllTeamDataAsync()
+        public async Task<IEnumerable<TeamData>> GetAllTeamDataAsync()
         {
             var entities = await this.teamDataRepository.GetAllSortedAlphabeticallyByNameAsync();
-            var result = new List<AudienceData>();
+            var result = new List<TeamData>();
             foreach (var entity in entities)
             {
-                var team = new AudienceData
+                var team = new TeamData
                 {
                     Id = entity.TeamId,
                     Name = entity.Name,

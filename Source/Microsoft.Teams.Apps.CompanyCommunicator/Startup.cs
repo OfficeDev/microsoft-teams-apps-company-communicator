@@ -28,6 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.Groups;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
 
@@ -138,7 +139,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             // Add microsoft graph services.
             services.AddTransient<IGraphServiceClient, GraphServiceClient>();
             services.AddTransient<IAuthenticationProvider, GraphTokenProvider>();
-            services.AddScoped<IMicrosoftGraphService, MicrosoftGraphService>();
+            services.AddScoped<IGroupsService, GroupsService>();
 
             // Add Application Insights telemetry.
             services.AddApplicationInsightsTelemetry();
