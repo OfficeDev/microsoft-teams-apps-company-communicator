@@ -1,16 +1,16 @@
-﻿// <copyright file="AudienceData.cs" company="Microsoft">
+﻿// <copyright file="GroupData.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
     /// <summary>
-    /// Audience data model class.
+    /// Group data model class.
     /// </summary>
-    public class AudienceData
+    public class GroupData
     {
         /// <summary>
-        /// Gets or sets team Id.
+        /// Gets or sets group Id.
         /// </summary>
         public string Id { get; set; }
 
@@ -18,5 +18,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets name.
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets mail.
+        /// </summary>
+        public string Mail { get; set; }
     }
 }

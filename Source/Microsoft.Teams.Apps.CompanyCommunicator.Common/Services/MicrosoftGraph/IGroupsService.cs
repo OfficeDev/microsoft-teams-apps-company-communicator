@@ -1,31 +1,37 @@
-﻿// <copyright file="IMicrosoftGraphService.cs" company="Microsoft">
+﻿// <copyright file="IGroupsService.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
+
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
-    using System;
     using System.Collections.Generic;
-    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Graph;
 
     /// <summary>
     /// Interface for Microsoft Graph Service.
     /// </summary>
-    public interface IMicrosoftGraphService
+    public interface IGroupsService
     {
         /// <summary>
         /// get the group by ids.
         /// </summary>
         /// <param name="groupIds">list of group ids.</param>
         /// <returns>list of groups.</returns>
-        Task<IEnumerable<Group>> GetGroupByIdsAsync(List<string> groupIds);
+        IAsyncEnumerable<Group> GetByIdsAsync(List<string> groupIds);
+
+        /// <summary>
+        /// check if list has hidden membership group.
+        /// </summary>
+        /// <param name="groupIds">list of group ids.</param>
+        /// <returns>boolean.</returns>
+        Task<bool> ContainsHiddenMembershipAsync(List<string> groupIds);
 
         /// <summary>
         /// Search groups based on query.
         /// </summary>
         /// <param name="query">query param.</param>
         /// <returns>list of group.</returns>
-        Task<IEnumerable<Group>> SearchGroupsAsync(string query);
+        Task<IList<Group>> SearchAsync(string query);
     }
 }

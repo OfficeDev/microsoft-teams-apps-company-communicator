@@ -1,17 +1,14 @@
 ﻿// <copyright file="GroupDataController.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
+
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
-    using System;
     using System.Collections.Generic;
-    using System.IdentityModel.Tokens.Jwt;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Identity.Web;
-    using Microsoft.Identity.Web.Resource;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
@@ -22,43 +19,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     /// </summary>
     [Route("api/groupData")]
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
+    [Authorize(PolicyNames.MSGraphGroupDataPolicy)]
     public class GroupDataController : Controller
     {
-        private readonly string[] scopeRequiredByAPI = new string[] { "access_as_user" };
-        private readonly ITokenAcquisition tokenAcquisition;
         private readonly NotificationDataRepository notificationDataRepository;
-        private readonly IMicrosoftGraphService microsoftGraphService;
+        private readonly IGroupsService groupsService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GroupDataController"/> class.
         /// </summary>
-        /// <param name="tokenAcquisition">Token acquisition from MSAL.</param>
         /// <param name="notificationDataRepository">Notification data repository instance.</param>
-        /// <param name="microsoftGraphService">Microsoft Graph service instance.</param>
+        /// <param name="groupsService">Microsoft Graph service instance.</param>
         public GroupDataController(
-            ITokenAcquisition tokenAcquisition,
             NotificationDataRepository notificationDataRepository,
-            IMicrosoftGraphService microsoftGraphService)
+            IGroupsService groupsService)
         {
-            this.tokenAcquisition = tokenAcquisition;
             this.notificationDataRepository = notificationDataRepository;
-            this.microsoftGraphService = microsoftGraphService;
+            this.groupsService = groupsService;
         }
 
         /// <summary>
-        /// Check if user has group.read.all access.
+        /// check if user has access.
         /// </summary>
-        /// <returns>boolean.</returns>
+        /// <returns>indicating if user has access.</returns>
         [HttpGet("verifyaccess")]
-        [AuthorizeForScopes(Scopes = new string[] { Common.Constants.ScopeGroupReadAll })]
-        public async Task<bool> VerifyAccess()
+        public bool VerifyAccess()
         {
-            // we use MSAL.NET to get a token to call the API On Behalf Of the current user
-            var accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new[] { Common.Constants.ScopeUserRead });
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var securityToken = tokenHandler.ReadToken(accessToken) as JwtSecurityToken;
-            var claimValue = securityToken.Claims.First(claim => claim.Type.ToLower() == Common.Constants.ClaimTypeScp).Value;
-            return claimValue.ToLower().Split(' ').Contains(Common.Constants.ScopeGroupReadAll.ToLower());
+            return true;
         }
 
         /// <summary>
@@ -67,14 +54,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="query">user input.</param>
         /// <returns>list of audience.</returns>
         [HttpGet("search/{query}")]
-        [AuthorizeForScopes(Scopes = new[] { Common.Constants.ScopeGroupReadAll })]
-        public async Task<IEnumerable<AudienceData>> SearchAsync(string query)
+        public async Task<IEnumerable<GroupData>> SearchAsync(string query)
         {
-            var groups = await this.microsoftGraphService.SearchGroupsAsync(query);
-            return groups.Select(group => new AudienceData()
+            int minQueryLength = 3;
+            if (string.IsNullOrEmpty(query) || query.Length < minQueryLength)
+            {
+                return default;
+            }
+
+            var groups = await this.groupsService.SearchAsync(query);
+            return groups.Select(group => new GroupData()
             {
                 Id = group.Id,
-                Name = string.IsNullOrEmpty(group.Mail) ? group.DisplayName : group.Mail,
+                Name = group.DisplayName,
+                Mail = group.Mail,
             });
         }
 
@@ -84,8 +77,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="id">Draft notification Id.</param>
         /// <returns>List of Group Names.</returns>
         [HttpGet("{id}")]
-        [AuthorizeForScopes(Scopes = new[] { Common.Constants.ScopeGroupReadAll })]
-        public async Task<ActionResult<IEnumerable<AudienceData>>> GetGroupsAsync(string id)
+        public async Task<ActionResult<IEnumerable<GroupData>>> GetGroupsAsync(string id)
         {
             var notificationEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.DraftNotificationsPartition,
@@ -95,14 +87,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var groups = await this.microsoftGraphService.GetGroupByIdsAsync(notificationEntity.Groups.ToList());
-            var audience = groups.Select(group => new AudienceData()
+            var groups = new List<GroupData>();
+            await foreach (var result in
+                this.groupsService.GetByIdsAsync(notificationEntity.Groups.ToList()))
             {
-                Id = group.Id,
-                Name = string.IsNullOrEmpty(group.Mail) ? group.DisplayName : group.Mail,
-            });
+                var group = new GroupData()
+                {
+                    Id = result.Id,
+                    Name = result.DisplayName,
+                    Mail = result.Mail,
+                };
+                groups.Add(group);
+            }
 
-            return this.Ok(audience);
+            return this.Ok(groups);
         }
     }
 }
