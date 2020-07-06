@@ -32,8 +32,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// <returns>asynchronous operation.</returns>
         public async Task AuthenticateRequestAsync(HttpRequestMessage request)
         {
-            // we use MSAL.NET to get a token to call the API On Behalf Of the current user
-            var accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] { Common.Constants.ScopeGroupReadAll });
+            var requestUrl = (request.RequestUri == null) ? string.Empty : request.RequestUri.ToString();
+            string accessToken;
+            if (requestUrl.ToLower().Contains(Common.Constants.GroupByIdPath))
+            {
+                // we use MSAL.NET to get a token to call the API for application
+                accessToken = await this.tokenAcquisition.GetAccessTokenForAppAsync(new string[] { "https://graph.microsoft.com/.default" });
+            }
+            else
+            {
+                // we use MSAL.NET to get a token to call the API On Behalf Of the current user
+                accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] { Common.Constants.ScopeGroupReadAll });
+            }
 
             // Append the access token to the request.
             request.Headers.Authorization = new AuthenticationHeaderValue(
