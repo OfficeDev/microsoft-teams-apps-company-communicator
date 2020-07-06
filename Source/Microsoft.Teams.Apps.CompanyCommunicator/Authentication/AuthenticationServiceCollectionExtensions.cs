@@ -138,9 +138,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                     .AddRequirements(mustContainUpnClaimRequirement)
                     .RequireAuthenticatedUser()
                     .Build());
+                options.AddPolicy(
+                    PolicyNames.MSGraphGroupDataPolicy,
+                    policyBuilder => policyBuilder
+                    .AddRequirements(new MSGraphScopeRequirement(new string[] { Common.Constants.ScopeGroupReadAll }))
+                    .RequireAuthenticatedUser()
+                    .Build());
             });
 
             services.AddSingleton<IAuthorizationHandler, MustBeValidUpnHandler>();
+            services.AddSingleton<IAuthorizationHandler, MSGraphScopeHandler>();
         }
 
         private static bool AudienceValidator(
