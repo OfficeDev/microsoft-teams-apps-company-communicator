@@ -4,10 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     /// <summary>
     /// Constants.
     /// </summary>
@@ -32,5 +28,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         /// authorization scheme.
         /// </summary>
         public const string BearerAuthorizationScheme = "Bearer";
+
+        /// <summary>
+        /// claim type user id.
+        /// </summary>
+        public const string ClaimTypeUserId = "http://schemas.microsoft.com/identity/claims/objectidentifier";
+
+        /// <summary>
+        /// blob container name.
+        /// </summary>
+        public const string BlobContainerName = "exportdatablobs";
+
+        /// <summary>
+        /// get the group type Hidden Membership.
+        /// </summary>
+        public const string HiddenMembership = "HiddenMembership";
+
+        /// <summary>
+        /// get the identifier path for group by id api.
+        /// </summary>
+        public const string GroupByIdPath = "groups/";
     }
 }
