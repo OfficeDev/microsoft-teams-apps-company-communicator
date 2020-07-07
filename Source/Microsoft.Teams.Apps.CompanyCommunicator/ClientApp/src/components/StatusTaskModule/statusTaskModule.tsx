@@ -3,11 +3,17 @@ import './statusTaskModule.scss';
 import { getSentNotification } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
-import { Loader } from '@stardust-ui/react';
+import { List, Image, Loader } from '@stardust-ui/react';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
+import ColorHash from "color-hash";
+
+type listItem = {
+    header: string,
+    media: JSX.Element,
+}
 
 export interface IMessage {
     id: string;
@@ -26,6 +32,7 @@ export interface IMessage {
     buttonTitle?: string;
     teamNames?: string[];
     rosterNames?: string[];
+    groupNames?: string[];
     allUsers?: boolean;
     sendingStartedDate?: string;
     sendingDuration?: string;
@@ -178,32 +185,75 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         }
     }
 
+    private makeInitialImage = (name: string) => {
+        var canvas = document.createElement('canvas');
+        canvas.style.display = 'none';
+        canvas.width = 32;
+        canvas.height = 32;
+        document.body.appendChild(canvas);
+        var context = canvas.getContext('2d');
+        if (context) {
+            let colorHash = new ColorHash();
+            var colorNum = colorHash.hex(name);
+            context.fillStyle = colorNum;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.font = "16px Arial";
+            context.fillStyle = "#fff";
+            var split = name.split(' ');
+            var len = split.length;
+            var first = split[0][0];
+            var last = null;
+            if (len > 1) {
+                last = split[len - 1][0];
+            }
+            if (last) {
+                var initials = first + last;
+                context.fillText(initials.toUpperCase(), 3, 23);
+            } else {
+                var initials = first;
+                context.fillText(initials.toUpperCase(), 10, 23);
+            }
+            var data = canvas.toDataURL();
+            document.body.removeChild(canvas);
+            return data;
+        } else {
+            return "";
+        }
+    }
+
+    private getItemList = (items: string[]) => {
+        const resultedTeams: listItem[] = [];
+        if (items) {
+            items.forEach((element) => {
+                resultedTeams.push({
+
+                    header: element,
+                    media: <Image src={this.makeInitialImage(element)} avatar />,
+                });
+            });
+        }
+        return resultedTeams;
+    }
+
     private renderAudienceSelection = () => {
         if (this.state.message.teamNames && this.state.message.teamNames.length > 0) {
-            let length = this.state.message.teamNames.length;
             return (
                 <div>
                     <h3>Sent to General channel in teams</h3>
-                    {this.state.message.teamNames.sort().map((team, index) => {
-                        if (length === index + 1) {
-                            return (<span key={`teamName${index}`} >{team}</span>);
-                        } else {
-                            return (<span key={`teamName${index}`} >{team}, </span>);
-                        }
-                    })}
+                    <List items={this.getItemList(this.state.message.teamNames)} />
                 </div>);
         } else if (this.state.message.rosterNames && this.state.message.rosterNames.length > 0) {
-            let length = this.state.message.rosterNames.length;
             return (
                 <div>
                     <h3>Sent in chat to people in teams</h3>
-                    {this.state.message.rosterNames.sort().map((team, index) => {
-                        if (length === index + 1) {
-                            return (<span key={`teamName${index}`} >{team}</span>);
-                        } else {
-                            return (<span key={`teamName${index}`} >{team}, </span>);
-                        }
-                    })}
+                    <List items={this.getItemList(this.state.message.rosterNames)} />
+                </div>);
+        } else if (this.state.message.groupNames && this.state.message.groupNames.length > 0) {
+            return (
+                <div>
+                    <h3>Sent in chat to everyone in below</h3>
+                    <span>M365 groups, Distribution groups or Security Groups</span>
+                    <List items={this.getItemList(this.state.message.groupNames)} />
                 </div>);
         } else if (this.state.message.allUsers) {
             return (
@@ -214,7 +264,6 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
             return (<div></div>);
         }
     }
-
     private renderErrorMessage = () => {
         if (this.state.message.errorMessage) {
             return (

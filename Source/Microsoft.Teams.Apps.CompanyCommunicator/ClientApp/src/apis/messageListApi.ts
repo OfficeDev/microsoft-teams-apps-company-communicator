@@ -15,7 +15,7 @@ export const getDraftNotifications = async (): Promise<any> => {
 
 export const verifyGroupAccess = async (): Promise<any> => {
     let url = baseAxiosUrl + "/groupdata/verifyaccess";
-    return await axios.get(url);
+    return await axios.get(url, false);
 }
 
 export const getGroups = async (id: number): Promise<any> => {

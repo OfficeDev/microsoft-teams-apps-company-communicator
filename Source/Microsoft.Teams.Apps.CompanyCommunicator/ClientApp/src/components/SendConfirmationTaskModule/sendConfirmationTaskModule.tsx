@@ -3,12 +3,18 @@ import './sendConfirmationTaskModule.scss';
 import { getDraftNotification, getConsentSummaries, sendDraftNotification } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
-import { Loader, Button, Text } from '@stardust-ui/react';
+import { Loader, Button, Text, List, Image } from '@stardust-ui/react';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
 import * as microsoftTeams from "@microsoft/teams-js";
+import ColorHash from "color-hash";
+
+type listItem = {
+    header: string,
+    media: JSX.Element,
+}
 
 export interface IMessage {
     id: string;
@@ -32,6 +38,7 @@ export interface IStatusState {
     loader: boolean;
     teamNames: string[];
     rosterNames: string[];
+    groupNames: string[];
     allUsers: boolean;
     messageId: number;
 }
@@ -54,6 +61,7 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
             loader: true,
             teamNames: [],
             rosterNames: [],
+            groupNames: [],
             allUsers: false,
             messageId: 0,
         };
@@ -71,6 +79,7 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
                     this.setState({
                         teamNames: response.data.teamNames.sort(),
                         rosterNames: response.data.rosterNames.sort(),
+                        groupNames: response.data.groupNames.sort(),
                         allUsers: response.data.allUsers,
                         messageId: id,
                     }, () => {
@@ -129,9 +138,7 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
                             </div>
 
                             <div className="results">
-                                {this.displaySelectedTeams()}
-                                {this.displaySelectedRosterTeams()}
-                                {this.displayAllUsersSelection()}
+                                {this.renderAudienceSelection()}
                             </div>
                         </div>
                         <div className="adaptiveCardContainer">
@@ -157,48 +164,83 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
         });
     }
 
-    private displaySelectedTeams = () => {
-        let length = this.state.teamNames.length;
-        if (length === 0) {
-            return (<div />);
+    private makeInitialImage = (name: string) => {
+        var canvas = document.createElement('canvas');
+        canvas.style.display = 'none';
+        canvas.width = 32;
+        canvas.height = 32;
+        document.body.appendChild(canvas);
+        var context = canvas.getContext('2d');
+        if (context) {
+            let colorHash = new ColorHash();
+            var colorNum = colorHash.hex(name);
+            context.fillStyle = colorNum;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.font = "16px Arial";
+            context.fillStyle = "#fff";
+            var split = name.split(' ');
+            var len = split.length;
+            var first = split[0][0];
+            var last = null;
+            if (len > 1) {
+                last = split[len - 1][0];
+            }
+            if (last) {
+                var initials = first + last;
+                context.fillText(initials.toUpperCase(), 3, 23);
+            } else {
+                var initials = first;
+                context.fillText(initials.toUpperCase(), 10, 23);
+            }
+            var data = canvas.toDataURL();
+            document.body.removeChild(canvas);
+            return data;
         } else {
-            return (<div key="teamNames"> <span className="label">Team(s): </span> {this.state.teamNames.map((team, index) => {
-                if (length === index + 1) {
-                    return (<span key={`teamName${index}`} >{team}</span>);
-                } else {
-                    return (<span key={`teamName${index}`} >{team}, </span>);
-                }
-            })}</div>
-            );
+            return "";
         }
     }
 
-    private displaySelectedRosterTeams = () => {
-        let length = this.state.rosterNames.length;
-        if (length === 0) {
-            return (<div />);
-        } else {
-            return (<div key="rosterNames"> <span className="label">Team(s) members: </span> {this.state.rosterNames.map((roster, index) => {
-                if (length === index + 1) {
-                    return (<span key={`rosterName${index}`}>{roster}</span>);
-                } else {
-                    return (<span key={`rosterName${index}`}>{roster}, </span>);
-                }
-            })}</div>
-            );
+    private getItemList = (items: string[]) => {
+        const resultedTeams: listItem[] = [];
+        if (items) {
+            items.forEach((element) => {
+                resultedTeams.push({
+
+                    header: element,
+                    media: <Image src={this.makeInitialImage(element)} avatar />,
+                });
+            });
         }
+        return resultedTeams;
     }
 
-    private displayAllUsersSelection = () => {
-        if (!this.state.allUsers) {
-            return (<div />);
-        } else {
-            return (<div key="allUsers">
-                <span className="label">All users</span>
-                <div className="noteText">
-                    <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
+    private renderAudienceSelection = () => {
+        if (this.state.teamNames && this.state.teamNames.length > 0) {
+            return (
+                <div>
+                    <List items={this.getItemList(this.state.teamNames)} />
                 </div>
-            </div>);
+            );
+        } else if (this.state.rosterNames && this.state.rosterNames.length > 0) {
+            return (
+                <div>
+                    <List items={this.getItemList(this.state.rosterNames)} />
+                </div>);
+        } else if (this.state.groupNames && this.state.groupNames.length > 0) {
+            return (
+                <div>
+                    <List items={this.getItemList(this.state.groupNames)} />
+                </div>);
+        } else if (this.state.allUsers) {
+            return (
+                <div key="allUsers">
+                    <span className="label">All users</span>
+                    <div className="noteText">
+                        <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
+                    </div>
+                </div>);
+        } else {
+            return (<div></div>);
         }
     }
 }

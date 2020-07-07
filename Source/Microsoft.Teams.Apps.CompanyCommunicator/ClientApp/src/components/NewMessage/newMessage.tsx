@@ -3,7 +3,7 @@ import './newMessage.scss';
 import './teamTheme.scss';
 import { Input, TextArea, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader, Dropdown, Text, DropdownItem } from '@stardust-ui/react';
+import { Button, Loader, Dropdown, Text } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { RouteComponentProps } from 'react-router-dom';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess } from '../../apis/messageListApi';
@@ -13,9 +13,12 @@ import {
 } from '../AdaptiveCard/adaptiveCard';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getBaseUrl } from '../../configVariables';
+import ColorHash from "color-hash";
 
 type dropdownItem = {
     header: string,
+    content: string,
+    image: string,
     team: {
         id: string,
     },
@@ -54,6 +57,9 @@ export interface formState {
     messageId: string,
     loader: boolean,
     groupAccess: boolean,
+    loading: boolean,
+    noResultMessage: string,
+    unstablePinned?: boolean,
     selectedTeamsNum: number,
     selectedRostersNum: number,
     selectedGroupsNum: number,
@@ -94,6 +100,9 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             messageId: "",
             loader: true,
             groupAccess: false,
+            loading: false,
+            noResultMessage: "",
+            unstablePinned: true,
             selectedTeamsNum: 0,
             selectedRostersNum: 0,
             selectedGroupsNum: 0,
@@ -111,7 +120,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         //- Handle the Esc key
         document.addEventListener("keydown", this.escFunction, false);
         let params = this.props.match.params;
-        this.getGroupAccessValue();
+        this.setGroupAccess();
         this.getTeamList().then(() => {
             if ('id' in params) {
                 let id = params['id'];
@@ -155,13 +164,51 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             items.forEach((element) => {
                 resultedTeams.push({
                     header: element.name,
+                    content: element.mail,
+                    image: this.makeInitialImage(element.name),
                     team: {
                         id: element.id
-                    }
+                    },
                 });
             });
         }
         return resultedTeams;
+    }
+
+    private makeInitialImage = (name: string) => {
+        var canvas = document.createElement('canvas');
+        canvas.style.display = 'none';
+        canvas.width = 32;
+        canvas.height = 32;
+        document.body.appendChild(canvas);
+        var context = canvas.getContext('2d');
+        if (context) {
+            let colorHash = new ColorHash();
+            var colorNum = colorHash.hex(name);
+            context.fillStyle = colorNum;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.font = "16px Arial";
+            context.fillStyle = "#fff";
+            var split = name.split(' ');
+            var len = split.length;
+            var first = split[0][0];
+            var last = null;
+            if (len > 1) {
+                last = split[len - 1][0];
+            }
+            if (last) {
+                var initials = first + last;
+                context.fillText(initials.toUpperCase(), 3, 23);
+            } else {
+                var initials = first;
+                context.fillText(initials.toUpperCase(), 10, 23);
+            }
+            var data = canvas.toDataURL();
+            document.body.removeChild(canvas);
+            return data;
+        } else {
+            return "";
+        }
     }
 
     private makeDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
@@ -170,6 +217,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             dropdownItemList.push(
                 typeof element !== "string" ? element : {
                     header: fromItems!.find(x => x.id === element).name,
+                    image: this.makeInitialImage(fromItems!.find(x => x.id === element).name),
                     team: {
                         id: element
                     }
@@ -177,7 +225,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         );
         return dropdownItemList;
     }
-
 
     public setDefaultCard = (card: any) => {
         setCardTitle(card, "Title");
@@ -207,15 +254,28 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         return dropdownItems;
     }
 
-    private getGroupAccessValue = async () => {
+    private verifyGroupAccess = async () => {
         try {
-            const response = await verifyGroupAccess();
-            this.setState({
-                groupAccess: response.data
-            });
+            await verifyGroupAccess();
         } catch (error) {
-            return error;
+            const errorStatus = error.response.status;
+            if (errorStatus === 403) {
+                this.setState({
+                    groupAccess: false
+                });
+            }
+            else {
+                return error;
+            }
         }
+    }
+
+    private setGroupAccess = async () => {
+        this.verifyGroupAccess().then(() => {
+            this.setState({
+                groupAccess: true
+            });
+        });
     }
 
     private getGroupNames = async (id: number) => {
@@ -223,7 +283,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             const response = await getGroups(id);
             this.setState({
                 groups: response.data
-            })
+            });
         }
         catch (error) {
             return error;
@@ -398,6 +458,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                         value={this.state.selectedRosters}
                                         onSelectedChange={this.onRostersChange}
                                         noResultsMessage="We couldn't find any matches."
+                                        unstable_pinned={this.state.unstablePinned}
                                     />
                                     <Radiobutton name="grouped" value="allUsers" label="Send in chat to everyone" />
                                     <div className={this.state.selectedRadioBtn === "allUsers" ? "" : "hide"}>
@@ -405,7 +466,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                             <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
                                         </div>
                                     </div>
-                                    <Radiobutton name="grouped" value="groups" label="Send to members in a M365 groups, Distribution groups or Security groups" />
+                                    <Radiobutton name="grouped" value="groups" label="Send in chat to members in a M365 groups, Distribution groups or Security groups" />
                                     <div className={this.state.groupsOptionSelected && !this.state.groupAccess ? "" : "hide"}>
                                         <div className="noteText">
                                             <Text error content="Please reach out to your administrator as the required permissions to enable this targeting option for your message has not been granted yet. Try again " />
@@ -414,15 +475,23 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     <Dropdown
                                         className="hideToggle"
                                         hidden={!this.state.groupsOptionSelected || !this.state.groupAccess}
-                                        placeholder="Type the email address of the group(s)"
+                                        placeholder="Type the name or email address of the group(s)"
                                         search
                                         multiple
+                                        loading={this.state.loading}
+                                        loadingMessage="Loading..."
                                         items={this.getGroupItems()}
                                         value={this.state.selectedGroups}
                                         onSearchQueryChange={this.onGroupSearchQueryChange}
                                         onSelectedChange={this.onGroupsChange}
-                                        noResultsMessage="We couldn't find any matches."
+                                        noResultsMessage={this.state.noResultMessage}
+                                        unstable_pinned={this.state.unstablePinned}
                                     />
+                                    <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
+                                        <div className="noteText">
+                                            <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
+                                        </div>
+                                    </div>
                                 </RadiobuttonGroup>
                             </div>
                             <div className="adaptiveCardContainer">
@@ -489,6 +558,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             remainingUserTeams.forEach((element) => {
                 resultedTeams.push({
                     header: element.name,
+                    content: element.mail,
+                    image: this.makeInitialImage(element.name),
                     team: {
                         id: element.id
                     }
@@ -532,18 +603,29 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onGroupSearchQueryChange = async (event: any, itemsData: any) => {
-
         if (!itemsData.searchQuery) {
             this.setState({
-                groups: []
+                groups: [],
+                noResultMessage: "",
             });
         }
-
-        if (itemsData.searchQuery && itemsData.searchQuery.length > 1) {
+        else if (itemsData.searchQuery && itemsData.searchQuery.length <= 2) {
+            this.setState({
+                loading: false,
+                noResultMessage: "We could'nt find any matches.",
+            });
+        }
+        else if (itemsData.searchQuery && itemsData.searchQuery.length > 2) {
+            this.setState({
+                loading: true,
+                noResultMessage: "",
+            });
             try {
                 const response = await searchGroups(itemsData.searchQuery);
                 this.setState({
-                    groups: response.data
+                    groups: response.data,
+                    loading: false,
+                    noResultMessage: "We could'nt find any matches."
                 });
             }
             catch (error) {
@@ -551,7 +633,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             }
         }
     }
-
 
     private onSave = () => {
         const selectedTeams: string[] = [];
@@ -598,7 +679,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         try {
             await createDraftNotification(draftMessage);
         } catch (error) {
-            return error;
+            throw error;
         }
     }
 
