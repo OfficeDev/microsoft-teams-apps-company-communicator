@@ -6,7 +6,7 @@ import * as AdaptiveCards from "adaptivecards";
 import { Button, Loader, Dropdown, Text } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { RouteComponentProps } from 'react-router-dom';
-import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification } from '../../apis/messageListApi';
+import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, sendPreview } from '../../apis/messageListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
@@ -57,6 +57,9 @@ export interface formState {
     selectedRosters: dropdownItem[],
     errorImageUrlMessage: string,
     errorButtonUrlMessage: string,
+    savedDraftMessageId: string,
+    teamsTeamId?: string;
+    teamsChannelId?: string;
 }
 
 export interface INewMessageProps extends RouteComponentProps {
@@ -93,11 +96,18 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             selectedRosters: [],
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
+            savedDraftMessageId: "",
         }
     }
 
     public async componentDidMount() {
         microsoftTeams.initialize();
+        microsoftTeams.getContext((context) => {
+            this.setState({
+                teamsTeamId: context.teamId,
+                teamsChannelId: context.channelId,
+            });
+        });
         //- Handle the Esc key
         document.addEventListener("keydown", this.escFunction, false);
         let params = this.props.match.params;
@@ -338,8 +348,10 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
                         <div className="footerContainer">
                             <div className="buttonContainer">
+                                <Loader id="previewLoader" className="hiddenpreviewLoader previewLoader" size="smallest" label="Sending preview" labelPosition="end" />
                                 <Button content="Back" onClick={this.onBack} secondary />
-                                <Button content="Save as draft" disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
+                                <Button content="Preview in this channel" disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={() => this.onSave(true)} secondary />
+                                <Button content="Save as draft" disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={() => this.onSave(false)} primary />
                             </div>
                         </div>
                     </div>
@@ -415,7 +427,11 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         })
     }
 
-    private onSave = () => {
+    private onSave = (preview: boolean) => {
+        if (preview) {
+            let spanner = document.getElementsByClassName("previewLoader");
+            spanner[0].classList.remove("hiddenpreviewLoader");
+        }
         const selectedTeams: string[] = [];
         const selctedRosters: string[] = [];
         this.state.selectedTeams.forEach(x => selectedTeams.push(x.team.id));
@@ -436,11 +452,39 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
         if (this.state.exists) {
             this.editDraftMessage(draftMessage).then(() => {
-                microsoftTeams.tasks.submitTask();
+                if (preview) {
+                    let payload = {
+                        draftNotificationId: this.state.messageId,
+                        teamsTeamId: this.state.teamsTeamId,
+                        teamsChannelId: this.state.teamsChannelId,
+                    }
+                    sendPreview(payload).then((response) => {
+                        microsoftTeams.tasks.submitTask();
+                        return response.status;
+                    }).catch((error) => {
+                        return error;
+                    });
+                } else {
+                    microsoftTeams.tasks.submitTask();
+                }
             });
         } else {
             this.postDraftMessage(draftMessage).then(() => {
-                microsoftTeams.tasks.submitTask();
+                if (preview) {
+                    let payload = {
+                        draftNotificationId: this.state.savedDraftMessageId,
+                        teamsTeamId: this.state.teamsTeamId,
+                        teamsChannelId: this.state.teamsChannelId,
+                    }
+                    sendPreview(payload).then((response) => {
+                        microsoftTeams.tasks.submitTask();
+                        return response.status;
+                    }).catch((error) => {
+                        return error;
+                    });
+                } else {
+                    microsoftTeams.tasks.submitTask();
+                }
             });
         }
     }
@@ -455,7 +499,10 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
     private postDraftMessage = async (draftMessage: IDraftMessage) => {
         try {
-            await createDraftNotification(draftMessage);
+            const response = await createDraftNotification(draftMessage);
+            this.setState({
+                savedDraftMessageId: response.data
+            });
         } catch (error) {
             return error;
         }
