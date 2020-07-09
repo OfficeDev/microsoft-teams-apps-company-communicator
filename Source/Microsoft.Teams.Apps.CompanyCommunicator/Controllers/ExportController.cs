@@ -47,7 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
-        /// Export a notification, which queue notification to export queue.
+        /// Initiate a export of notification.
         /// </summary>
         /// <param name="id">notification id.</param>
         /// <returns>The result of an action method.</returns>
@@ -73,7 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var exportNotification = await this.exportDataRepository.GetAsync(userId, id);
             if (exportNotification != null)
             {
-                return this.Forbid();
+                return this.Conflict();
             }
 
             await this.exportDataRepository.CreateOrUpdateAsync(new ExportDataEntity()

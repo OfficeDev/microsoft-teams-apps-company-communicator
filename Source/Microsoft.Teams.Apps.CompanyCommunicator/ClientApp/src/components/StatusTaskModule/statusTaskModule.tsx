@@ -267,7 +267,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
             await exportNotification(id);
         } catch (error) {
             const errorStatus = error.response.status;
-            if (errorStatus === 403) {
+            if (errorStatus === 409) {
                 this.setState({
                     page: "ErrorPage"
                 });

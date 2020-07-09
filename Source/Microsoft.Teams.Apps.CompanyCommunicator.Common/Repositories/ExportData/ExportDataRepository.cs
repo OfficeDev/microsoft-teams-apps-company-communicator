@@ -26,8 +26,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportDat
         }
 
         /// <summary>
-        /// This method ensures the SendBatchesData table is created in the storage.
-        /// This method should be called before kicking off an Azure function that uses the SendBatchesData table.
+        /// This method ensures the ExportData table is created in the storage.
+        /// This method should be called before kicking off an Azure function that uses the ExportData table.
         /// Otherwise the app will crash.
         /// By design, Azure functions (in this app) do not create a table if it's absent.
         /// </summary>
