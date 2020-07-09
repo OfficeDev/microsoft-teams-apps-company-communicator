@@ -135,7 +135,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                 </div>
             );
         } else {
-            const downloadIcon: IconProps = { name: 'stardust-download' };
+            const downloadIcon: IconProps = { name: 'download', size: "medium" };
             if (this.state.page === "ViewStatus") {
                 return (
                     <div className="taskModule">
@@ -198,6 +198,8 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                     <div className="taskModule">
                         <div className="formContainer">
                             <div className="displayMessageField">
+                                <br />
+                                <br />
                                 <div><span><Icon className="iconStyle" name="stardust-checkmark" xSpacing="before" size="largest" outline /></span>
                                     <h1>Success</h1></div>
                                 <span>The export has been queued.</span><br />
@@ -222,9 +224,12 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                     <div className="taskModule">
                         <div className="formContainer">
                             <div className="displayMessageField">
-                                <div><span><Icon className="iconStyle" name="stardust-cancel" xSpacing="before" size="largest" outline /></span>
-                                    <h1>Uh Oh! Something went wrong...</h1></div>
+                                <br />
+                                <br />
+                                <div><span><Icon className="iconStyle" name="stardust-close" xSpacing="before" size="largest" outline /></span>
+                                    <h1 className="light">Uh Oh! Something went wrong...</h1></div>
                                 <span>The export request could not be queued. Please try again.</span>
+                                <br />
                                 <span>If the problem persists, contact your administrator to troubleshoot.</span>
                             </div>
                         </div>
@@ -241,9 +246,12 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                     <div className="taskModule">
                         <div className="formContainer">
                             <div className="displayMessageField">
-                                <div><span><Icon className="iconStyle" name="stardust-cancel" xSpacing="before" size="largest" outline /></span>
-                                    <h1>Uh Oh! Something went wrong...</h1></div>
+                                <br />
+                                <br />
+                                <div><span><Icon className="iconStyle" name="stardust-close" xSpacing="before" size="largest" outline /></span>
+                                    <h1 className="light">Uh Oh! Something went wrong...</h1></div>
                                 <span>The export request could not be queued. Please try again.</span>
+                                <br />
                                 <span>If the problem persists, contact your administrator to troubleshoot.</span>
                             </div>
                         </div>
@@ -262,27 +270,13 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         microsoftTeams.tasks.submitTask();
     }
 
-    private exportNotifications = async (id: string) => {
-        try {
-            await exportNotification(id);
-        } catch (error) {
-            const errorStatus = error.response.status;
-            if (errorStatus === 409) {
-                this.setState({
-                    page: "ErrorPage"
-                });
-            }
-            else {
-                return error;
-            }
-        }
-    }
-
     private onExport = async () => {
         let spanner = document.getElementsByClassName("sendingLoader");
         spanner[0].classList.remove("hiddenLoader");
-        this.exportNotifications(this.state.message.id).then(() => {
-            this.setState({ page: "SuccessPage" });
+        await exportNotification(this.state.message.id).then(() => {
+            this.setState({ page: "SuccessPage" })
+        }).catch(() => {
+            this.setState({ page: "ErrorPage" })
         });
     }
 

@@ -15,7 +15,7 @@ export const getDraftNotifications = async (): Promise<any> => {
 
 export const exportNotification = async (id: string): Promise<any> => {
     let url = baseAxiosUrl + "/exportnotification/" + id;
-    return await axios.post(url, false);
+    return await axios.post(url,null,false);
 }
 
 export const getSentNotification = async (id: number): Promise<any> => {
