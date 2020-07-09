@@ -46,7 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="dataQueue">The service bus queue for the data queue.</param>
         /// <param name="dataQueueMessageOptions">The options for the data queue messages.</param>
         /// <param name="sendBatchesDataRepository">The send batches data repository.</param>
-        /// <param name="groupsService">graph service.</param>
+        /// <param name="groupsService">The groups service.</param>
         public SentNotificationsController(
             NotificationDataRepository notificationDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository,

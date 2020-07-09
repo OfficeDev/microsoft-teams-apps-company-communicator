@@ -19,7 +19,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     /// </summary>
     [Route("api/groupData")]
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
-    [Authorize(PolicyNames.MSGraphGroupDataPolicy)]
     public class GroupDataController : Controller
     {
         private readonly NotificationDataRepository notificationDataRepository;
@@ -41,8 +40,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <summary>
         /// check if user has access.
         /// </summary>
-        /// <returns>indicating if user has access.</returns>
+        /// <returns>indicating user access to group.</returns>
         [HttpGet("verifyaccess")]
+        [Authorize(PolicyNames.MSGraphGroupDataPolicy)]
         public bool VerifyAccess()
         {
             return true;
@@ -52,8 +52,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// Action method to get groups.
         /// </summary>
         /// <param name="query">user input.</param>
-        /// <returns>list of audience.</returns>
+        /// <returns>list of group data.</returns>
         [HttpGet("search/{query}")]
+        [Authorize(PolicyNames.MSGraphGroupDataPolicy)]
         public async Task<IEnumerable<GroupData>> SearchAsync(string query)
         {
             int minQueryLength = 3;
@@ -72,7 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
-        /// Get Group Names by Id.
+        /// Get Group Data by Id.
         /// </summary>
         /// <param name="id">Draft notification Id.</param>
         /// <returns>List of Group Names.</returns>

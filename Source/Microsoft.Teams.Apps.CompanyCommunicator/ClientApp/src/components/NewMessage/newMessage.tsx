@@ -13,7 +13,7 @@ import {
 } from '../AdaptiveCard/adaptiveCard';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getBaseUrl } from '../../configVariables';
-import ColorHash from "color-hash";
+import { ImageUtil } from '../../utility/imageutil';
 
 type dropdownItem = {
     header: string,
@@ -134,7 +134,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                         selectedRosters: selectedRosters,
                     })
                 });
-                this.getGroupNames(id).then(() => {
+                this.getGroupData(id).then(() => {
                     const selectedGroups = this.makeDropdownItems(this.state.groups);
                     this.setState({
                         selectedGroups: selectedGroups
@@ -165,50 +165,15 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 resultedTeams.push({
                     header: element.name,
                     content: element.mail,
-                    image: this.makeInitialImage(element.name),
+                    image: ImageUtil.makeInitialImage(element.name),
                     team: {
                         id: element.id
                     },
+
                 });
             });
         }
         return resultedTeams;
-    }
-
-    private makeInitialImage = (name: string) => {
-        var canvas = document.createElement('canvas');
-        canvas.style.display = 'none';
-        canvas.width = 32;
-        canvas.height = 32;
-        document.body.appendChild(canvas);
-        var context = canvas.getContext('2d');
-        if (context) {
-            let colorHash = new ColorHash();
-            var colorNum = colorHash.hex(name);
-            context.fillStyle = colorNum;
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            context.font = "16px Arial";
-            context.fillStyle = "#fff";
-            var split = name.split(' ');
-            var len = split.length;
-            var first = split[0][0];
-            var last = null;
-            if (len > 1) {
-                last = split[len - 1][0];
-            }
-            if (last) {
-                var initials = first + last;
-                context.fillText(initials.toUpperCase(), 3, 23);
-            } else {
-                var initials = first;
-                context.fillText(initials.toUpperCase(), 10, 23);
-            }
-            var data = canvas.toDataURL();
-            document.body.removeChild(canvas);
-            return data;
-        } else {
-            return "";
-        }
     }
 
     private makeDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
@@ -217,7 +182,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             dropdownItemList.push(
                 typeof element !== "string" ? element : {
                     header: fromItems!.find(x => x.id === element).name,
-                    image: this.makeInitialImage(fromItems!.find(x => x.id === element).name),
+                    image: ImageUtil.makeInitialImage(fromItems!.find(x => x.id === element).name),
                     team: {
                         id: element
                     }
@@ -254,10 +219,12 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         return dropdownItems;
     }
 
-    private verifyGroupAccess = async () => {
-        try {
-            await verifyGroupAccess();
-        } catch (error) {
+    private setGroupAccess = async () => {
+        await verifyGroupAccess().then(() => {
+            this.setState({
+                groupAccess: true
+            });
+        }).catch((error) => {
             const errorStatus = error.response.status;
             if (errorStatus === 403) {
                 this.setState({
@@ -267,18 +234,10 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             else {
                 return error;
             }
-        }
-    }
-
-    private setGroupAccess = async () => {
-        this.verifyGroupAccess().then(() => {
-            this.setState({
-                groupAccess: true
-            });
         });
     }
 
-    private getGroupNames = async (id: number) => {
+    private getGroupData = async (id: number) => {
         try {
             const response = await getGroups(id);
             this.setState({
@@ -559,7 +518,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 resultedTeams.push({
                     header: element.name,
                     content: element.mail,
-                    image: this.makeInitialImage(element.name),
+                    image: ImageUtil.makeInitialImage(element.name),
                     team: {
                         id: element.id
                     }
@@ -603,6 +562,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onGroupSearchQueryChange = async (event: any, itemsData: any) => {
+
         if (!itemsData.searchQuery) {
             this.setState({
                 groups: [],

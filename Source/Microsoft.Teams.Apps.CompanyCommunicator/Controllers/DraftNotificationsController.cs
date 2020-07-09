@@ -53,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// Create a new draft notification.
         /// </summary>
         /// <param name="notification">A new Draft Notification to be created.</param>
-        /// <returns>The newly created notification's id.</returns>
+        /// <returns>The created notification's id.</returns>
         [HttpPost]
         public async Task<ActionResult<string>> CreateDraftNotificationAsync([FromBody] DraftNotification notification)
         {

@@ -38,7 +38,7 @@ export class AxiosJWTDecorator {
                 throw error;
             }
             else {
-                return error;
+                throw error;
             }
         }
     }
@@ -46,14 +46,20 @@ export class AxiosJWTDecorator {
     public async post<T = any, R = AxiosResponse<T>>(
         url: string,
         data?: any,
+        handleError: boolean = true,
         config?: AxiosRequestConfig
     ): Promise<R> {
         try {
             config = await this.setupAuthorizationHeader(config);
             return await axios.post(url, data, config);
         } catch (error) {
-            this.handleError(error);
-            throw error;
+            if (handleError) {
+                this.handleError(error);
+                throw error;
+            }
+            else {
+                throw error;
+            }
         }
     }
 

@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// Extension method to register the authentication services.
         /// </summary>
         /// <param name="services">IServiceCollection instance.</param>
-        /// <param name="configuration"> configuration.</param>
+        /// <param name="configuration">The configuration instance.</param>
         /// <param name="authenticationOptions">The authentication options.</param>
         public static void AddAuthentication(
             this IServiceCollection services,

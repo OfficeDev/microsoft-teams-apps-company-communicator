@@ -19,12 +19,12 @@ export const verifyGroupAccess = async (): Promise<any> => {
 }
 
 export const getGroups = async (id: number): Promise<any> => {
-    let url = baseAxiosUrl + "/groupData/" + id;
+    let url = baseAxiosUrl + "/groupdata/" + id;
     return await axios.get(url);
 }
 
 export const searchGroups = async (query: string): Promise<any> => {
-    let url = baseAxiosUrl + "/groupData/search/" + query;
+    let url = baseAxiosUrl + "/groupdata/search/" + query;
     return await axios.get(url);
 }
 
@@ -69,15 +69,13 @@ export const getTeams = async (): Promise<any> => {
     return await axios.get(url);
 }
 
-
-
 export const getConsentSummaries = async (id: number): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications/consentSummaries/" + id;
     return await axios.get(url);
 }
 
 export const sendPreview = async (payload: {}): Promise<any> => {
-    let url = baseAxiosUrl + "/draftNotifications/previews";
+    let url = baseAxiosUrl + "/draftnotifications/previews";
     return await axios.post(url, payload);
 }
 

@@ -9,7 +9,7 @@ import {
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
 import * as microsoftTeams from "@microsoft/teams-js";
-import ColorHash from "color-hash";
+import { ImageUtil } from '../../utility/imageutil';
 
 type listItem = {
     header: string,
@@ -164,42 +164,6 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
         });
     }
 
-    private makeInitialImage = (name: string) => {
-        var canvas = document.createElement('canvas');
-        canvas.style.display = 'none';
-        canvas.width = 32;
-        canvas.height = 32;
-        document.body.appendChild(canvas);
-        var context = canvas.getContext('2d');
-        if (context) {
-            let colorHash = new ColorHash();
-            var colorNum = colorHash.hex(name);
-            context.fillStyle = colorNum;
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            context.font = "16px Arial";
-            context.fillStyle = "#fff";
-            var split = name.split(' ');
-            var len = split.length;
-            var first = split[0][0];
-            var last = null;
-            if (len > 1) {
-                last = split[len - 1][0];
-            }
-            if (last) {
-                var initials = first + last;
-                context.fillText(initials.toUpperCase(), 3, 23);
-            } else {
-                var initials = first;
-                context.fillText(initials.toUpperCase(), 10, 23);
-            }
-            var data = canvas.toDataURL();
-            document.body.removeChild(canvas);
-            return data;
-        } else {
-            return "";
-        }
-    }
-
     private getItemList = (items: string[]) => {
         const resultedTeams: listItem[] = [];
         if (items) {
@@ -207,7 +171,7 @@ class SendConfirmationTaskModule extends React.Component<RouteComponentProps, IS
                 resultedTeams.push({
 
                     header: element,
-                    media: <Image src={this.makeInitialImage(element)} avatar />,
+                    media: <Image src={ImageUtil.makeInitialImage(element)} avatar />,
                 });
             });
         }

@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
+using System.Data;
+
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
 {
     /// <summary>
@@ -18,6 +20,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         /// get the user read scope.
         /// </summary>
         public const string ScopeUserRead = "User.Read";
+
+        /// <summary>
+        /// get the default graph scope.
+        /// </summary>
+        public const string ScopeDefault = "https://graph.microsoft.com/.default";
 
         /// <summary>
         /// scope claim type.
@@ -45,8 +52,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         public const string HiddenMembership = "HiddenMembership";
 
         /// <summary>
-        /// get the identifier path for group by id api.
+        /// get the header key for graph permission type.
         /// </summary>
-        public const string GroupByIdPath = "groups/";
+        public const string PermissionTypeKey = "x-api-permission";
+
     }
 }

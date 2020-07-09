@@ -9,7 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     using Microsoft.Graph;
 
     /// <summary>
-    /// Interface for Microsoft Graph Service.
+    /// Interface for Groups Service.
     /// </summary>
     public interface IGroupsService
     {
