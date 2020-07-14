@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Connector.Authentication;
@@ -66,7 +67,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
-            DurableOrchestrationContext context,
+            IDurableOrchestrationContext context,
             string notificationDataEntityId,
             TeamDataEntity teamDataEntity,
             ILogger log)

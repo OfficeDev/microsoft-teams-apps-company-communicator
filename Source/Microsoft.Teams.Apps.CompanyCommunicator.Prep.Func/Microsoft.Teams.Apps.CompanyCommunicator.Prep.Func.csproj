@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AzureFunctionsVersion>v2</AzureFunctionsVersion>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AzureFunctionsVersion>v3</AzureFunctionsVersion>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -10,17 +11,24 @@
     <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
   </ItemGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="1.8.3" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="2.2.2" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="3.0.3" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Host.Storage" Version="3.0.14" />
     <PackageReference Include="Microsoft.Bot.Builder.Integration.AspNet.Core" Version="4.7.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.31" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Graph" Version="3.6.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.15.0" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.7" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="System.Linq.Async" Version="4.1.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Teams.Apps.CompanyCommunicator.Common\Microsoft.Teams.Apps.CompanyCommunicator.Common.csproj" />
