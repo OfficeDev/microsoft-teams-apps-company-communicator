@@ -220,9 +220,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             var groupNames = new List<string>();
-            var groupList = notificationEntity.Groups.ToList();
             await foreach (var group in
-                this.groupsService.GetByIdsAsync(groupList))
+                this.groupsService.GetByIdsAsync(notificationEntity.Groups))
             {
                 groupNames.Add(group.DisplayName);
             }

@@ -33,15 +33,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// <param name="context">AuthorizationHandlerContext instance.</param>
         /// <param name="requirement">IAuthorizationRequirement instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, MSGraphScopeRequirement requirement)
+        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, MSGraphScopeRequirement requirement)
         {
-            var hasScope = this.HasScopesAsync(requirement.Scopes).GetAwaiter().GetResult();
+            var hasScope = await this.HasScopesAsync(requirement.Scopes);
             if (hasScope)
             {
                 context.Succeed(requirement);
             }
-
-            return Task.CompletedTask;
         }
 
         /// <summary>

@@ -5,7 +5,6 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -162,9 +161,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             var groupNames = new List<string>();
-            var groupList = notificationEntity.Groups.ToList();
             await foreach (var group in
-                this.groupsService.GetByIdsAsync(groupList))
+                this.groupsService.GetByIdsAsync(notificationEntity.Groups))
             {
                 groupNames.Add(group.DisplayName);
             }

@@ -90,7 +90,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             var groups = new List<GroupData>();
             await foreach (var result in
-                this.groupsService.GetByIdsAsync(notificationEntity.Groups.ToList()))
+                this.groupsService.GetByIdsAsync(notificationEntity.Groups))
             {
                 var group = new GroupData()
                 {
