@@ -219,28 +219,6 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
 
                 );
             }
-            else if (this.state.page === "ErrorPage") {
-                return (
-                    <div className="taskModule">
-                        <div className="formContainer">
-                            <div className="displayMessageField">
-                                <br />
-                                <br />
-                                <div><span><Icon className="iconStyle" name="stardust-close" xSpacing="before" size="largest" outline /></span>
-                                    <h1 className="light">Uh Oh! Something went wrong...</h1></div>
-                                <span>The export request could not be queued. Please try again.</span>
-                                <br />
-                                <span>If the problem persists, contact your administrator to troubleshoot.</span>
-                            </div>
-                        </div>
-                        <div className="footerContainer">
-                            <div className="buttonContainer">
-                                <Button content="Close" id="closeBtn" onClick={this.onClose} primary />
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
             else {
                 return (
                     <div className="taskModule">

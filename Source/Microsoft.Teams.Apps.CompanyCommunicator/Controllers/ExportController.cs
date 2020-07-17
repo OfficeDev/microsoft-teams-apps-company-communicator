@@ -51,7 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <param name="id">notification id.</param>
         /// <returns>The result of an action method.</returns>
-        [HttpPost("{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> ExportNotificationAsync(string id)
         {
             var userId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeUserId);
