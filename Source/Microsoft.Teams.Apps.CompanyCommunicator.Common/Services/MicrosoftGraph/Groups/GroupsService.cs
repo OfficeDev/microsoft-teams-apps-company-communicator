@@ -35,7 +35,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="groupIds">list of group ids.</param>
         /// <returns>list of groups.</returns>
-        public async IAsyncEnumerable<Group> GetByIdsAsync(List<string> groupIds)
+        public async IAsyncEnumerable<Group> GetByIdsAsync(IEnumerable<string> groupIds)
         {
             foreach (var id in groupIds)
             {
@@ -44,7 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                                 .Request()
                                 .WithMaxRetry(this.MaxRetry)
                                 .Select(gr => new { gr.Id, gr.Mail, gr.DisplayName, gr.Visibility, })
-                                .Header(Common.Constants.PermissionTypeKey, GraphPermissionType.Application.ToString())
+                                .Header(Common.Constants.PermissionTypeKey, GraphPermissionType.Delegate.ToString())
                                 .GetAsync();
                 yield return group;
             }
@@ -55,12 +55,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="groupIds">list of group ids.</param>
         /// <returns>boolean.</returns>
-        public async Task<bool> ContainsHiddenMembershipAsync(List<string> groupIds)
+        public async Task<bool> ContainsHiddenMembershipAsync(IEnumerable<string> groupIds)
         {
             await foreach (var group in
                this.GetByIdsAsync(groupIds))
             {
-                if (group.Visibility.IsHiddenMemberShip())
+                if (group.Visibility.IsHiddenMembership())
                 {
                     return true;
                 }
@@ -98,16 +98,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
 
             string filterforDL = $"mailEnabled eq true and securityEnabled eq false and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))";
             var distributionGroups = await this.SearchAsync(filterforDL, resultCount);
-            var distributionGroupList = distributionGroups.CurrentPage.ToList();
 
             // Filtering the result only for distribution groups.
-            distributionGroupList = distributionGroupList.Where(dg => dg.GroupTypes == null).ToList();
-
+            var distributionGroupList = distributionGroups.CurrentPage.
+                                                           Where(dg => dg.GroupTypes == null).ToList();
             while (distributionGroups.NextPageRequest != null && distributionGroupList.Count() < resultCount)
             {
                 distributionGroups = await distributionGroups.NextPageRequest.GetAsync();
-                distributionGroupList.AddRange(distributionGroups.CurrentPage);
-                distributionGroupList = distributionGroupList.Where(dg => dg.GroupTypes == null).ToList();
+                distributionGroupList.AddRange(distributionGroups.CurrentPage.Where(dg => dg.GroupTypes == null));
             }
 
             return distributionGroupList.Take(resultCount);
@@ -140,21 +138,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <returns>list of group.</returns>
         private async Task<List<Group>> SearchAsync(string filterQuery, string visibility, int resultCount)
         {
-            var groupList = new List<Group>();
             var groupsPaged = await this.SearchAsync(filterQuery, resultCount);
-            groupList = groupsPaged.CurrentPage.ToList();
-
             if (string.IsNullOrEmpty(visibility))
             {
-                return groupList;
+                return groupsPaged.CurrentPage.ToList();
             }
 
-            groupList = groupList.Where(group => !group.Visibility.IsHiddenMemberShip()).ToList();
+            var groupList = groupsPaged.CurrentPage.
+                                        Where(group => !group.Visibility.IsHiddenMembership()).
+                                        ToList();
             while (groupsPaged.NextPageRequest != null && groupList.Count() < resultCount)
             {
                 groupsPaged = await groupsPaged.NextPageRequest.GetAsync();
-                groupList.AddRange(groupsPaged.CurrentPage);
-                groupList = groupList.Where(group => !group.Visibility.IsHiddenMemberShip()).ToList();
+                groupList.AddRange(groupsPaged.CurrentPage.
+                          Where(group => !group.Visibility.IsHiddenMembership()));
             }
 
             return groupList.Take(resultCount).ToList();

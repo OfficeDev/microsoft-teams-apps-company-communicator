@@ -18,7 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="visibility">The visibility.</param>
         /// <returns>Indicating if the visibility is hidden membership.</returns>
-        public static bool IsHiddenMemberShip(this string visibility) =>
+        public static bool IsHiddenMembership(this string visibility) =>
             !string.IsNullOrEmpty(visibility) &&
             visibility.Equals(Constants.HiddenMembership, StringComparison.CurrentCultureIgnoreCase);
     }

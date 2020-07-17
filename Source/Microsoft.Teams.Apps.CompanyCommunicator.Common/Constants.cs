@@ -2,8 +2,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-using System.Data;
-
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
 {
     /// <summary>
@@ -39,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         /// <summary>
         /// claim type user id.
         /// </summary>
-        public const string ClaimTypeUserId = "http://schemas.microsoft.com/identity/claims/objectidentifier";
+        public const string ClaimTypeObjectId = "http://schemas.microsoft.com/identity/claims/objectidentifier";
 
         /// <summary>
         /// blob container name.
@@ -55,6 +53,5 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         /// get the header key for graph permission type.
         /// </summary>
         public const string PermissionTypeKey = "x-api-permission";
-
     }
 }

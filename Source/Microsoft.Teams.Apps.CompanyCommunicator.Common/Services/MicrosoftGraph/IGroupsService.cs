@@ -18,14 +18,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="groupIds">list of group ids.</param>
         /// <returns>list of groups.</returns>
-        IAsyncEnumerable<Group> GetByIdsAsync(List<string> groupIds);
+        IAsyncEnumerable<Group> GetByIdsAsync(IEnumerable<string> groupIds);
 
         /// <summary>
         /// check if list has hidden membership group.
         /// </summary>
         /// <param name="groupIds">list of group ids.</param>
         /// <returns>boolean.</returns>
-        Task<bool> ContainsHiddenMembershipAsync(List<string> groupIds);
+        Task<bool> ContainsHiddenMembershipAsync(IEnumerable<string> groupIds);
 
         /// <summary>
         /// Search groups based on query.
