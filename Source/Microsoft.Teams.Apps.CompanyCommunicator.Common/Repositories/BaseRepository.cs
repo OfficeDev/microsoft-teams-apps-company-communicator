@@ -153,6 +153,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         }
 
         /// <summary>
+        /// Get all data stream from the table storage in a partition.
+        /// </summary>
+        /// <param name="partition">Partition key value.</param>
+        /// <param name="count">The max number of desired entities.</param>
+        /// <returns>All data stream..</returns>
+        public async IAsyncEnumerable<IEnumerable<T>> GetStreamsAsync(string partition = null, int? count = null)
+        {
+            var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
+
+            var query = new TableQuery<T>().Where(partitionKeyFilter);
+
+            var entityStream = this.ExecuteQueryStreamAsync(query, count);
+
+            await foreach (var entities in entityStream)
+            {
+                yield return entities;
+            }
+        }
+
+        /// <summary>
         /// Insert or merge a batch of entities in Azure table storage.
         /// A batch can contain up to 100 entities.
         /// </summary>
@@ -263,6 +283,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             {
                 Console.WriteLine(e.Message);
                 throw;
+            }
+        }
+
+        private async IAsyncEnumerable<IEnumerable<T>> ExecuteQueryStreamAsync(
+            TableQuery<T> query,
+            int? count = null,
+            CancellationToken ct = default)
+        {
+            query.TakeCount = count;
+            TableContinuationToken token = null;
+            TableQuerySegment<T> seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, token);
+            token = seg.ContinuationToken;
+            yield return seg;
+            while (token != null &&
+                !ct.IsCancellationRequested)
+            {
+                seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, token);
+                token = seg.ContinuationToken;
+                yield return seg;
             }
         }
     }
