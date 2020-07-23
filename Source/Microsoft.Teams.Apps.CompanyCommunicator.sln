@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.757
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator", "Microsoft.Teams.Apps.CompanyCommunicator\Microsoft.Teams.Apps.CompanyCommunicator.csproj", "{1EF4F8A5-2C38-4059-BD5C-E8478DE4779F}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -15,15 +15,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.Compan
 		{069D255F-37E5-49DA-90D2-E3942C64970C} = {069D255F-37E5-49DA-90D2-E3942C64970C}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func", "Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj", "{E8831097-3A82-43A4-8122-56A146F70600}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func", "Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj", "{E8831097-3A82-43A4-8122-56A146F70600}"
 	ProjectSection(ProjectDependencies) = postProject
 		{069D255F-37E5-49DA-90D2-E3942C64970C} = {069D255F-37E5-49DA-90D2-E3942C64970C}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Teams.Apps.CompanyCommunicator.Data.Func", "Microsoft.Teams.Apps.CompanyCommunicator.Data.Func\Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj", "{19DCF1AC-35D3-456B-9F9A-68BC8AC21696}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Data.Func", "Microsoft.Teams.Apps.CompanyCommunicator.Data.Func\Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj", "{19DCF1AC-35D3-456B-9F9A-68BC8AC21696}"
 	ProjectSection(ProjectDependencies) = postProject
 		{069D255F-37E5-49DA-90D2-E3942C64970C} = {069D255F-37E5-49DA-90D2-E3942C64970C}
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Export.Func", "Microsoft.Teams.Apps.CompanyCommunicator.Export.Func\Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.csproj", "{AF749ABD-DC6F-4D1A-9400-0B44967D07E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{19DCF1AC-35D3-456B-9F9A-68BC8AC21696}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19DCF1AC-35D3-456B-9F9A-68BC8AC21696}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19DCF1AC-35D3-456B-9F9A-68BC8AC21696}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF749ABD-DC6F-4D1A-9400-0B44967D07E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF749ABD-DC6F-4D1A-9400-0B44967D07E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF749ABD-DC6F-4D1A-9400-0B44967D07E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF749ABD-DC6F-4D1A-9400-0B44967D07E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
