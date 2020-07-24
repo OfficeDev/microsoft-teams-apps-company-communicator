@@ -232,7 +232,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 });
             }
             else {
-                return error;
+                throw error;
             }
         });
     }

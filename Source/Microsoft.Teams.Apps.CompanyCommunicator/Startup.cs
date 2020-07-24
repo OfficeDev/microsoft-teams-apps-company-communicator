@@ -106,7 +106,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             Startup.FillAuthenticationOptionsProperties(authenticationOptionsParameter, this.Configuration);
             services.AddAuthentication(this.Configuration, authenticationOptionsParameter);
             services.AddControllersWithViews();
-            services.AddRazorPages();
 
             // Setup SPA static files.
             // In production, the React files will be served from this directory.

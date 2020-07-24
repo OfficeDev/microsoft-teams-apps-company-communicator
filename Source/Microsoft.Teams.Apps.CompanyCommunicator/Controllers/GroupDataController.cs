@@ -88,19 +88,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var groups = new List<GroupData>();
-            await foreach (var result in
-                this.groupsService.GetByIdsAsync(notificationEntity.Groups))
-            {
-                var group = new GroupData()
+            var groups = await this.groupsService.GetByIdsAsync(notificationEntity.Groups)
+                .Select(group => new GroupData()
                 {
-                    Id = result.Id,
-                    Name = result.DisplayName,
-                    Mail = result.Mail,
-                };
-                groups.Add(group);
-            }
-
+                    Id = group.Id,
+                    Name = group.DisplayName,
+                    Mail = group.Mail,
+                }).ToListAsync();
             return this.Ok(groups);
         }
     }

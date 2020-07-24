@@ -57,7 +57,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPost]
         public async Task<ActionResult<string>> CreateDraftNotificationAsync([FromBody] DraftNotification notification)
         {
-            var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups.ToList());
+            var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
             if (containsHiddenMembership)
             {
                 return this.Forbid();
@@ -219,12 +219,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var groupNames = new List<string>();
-            await foreach (var group in
-                this.groupsService.GetByIdsAsync(notificationEntity.Groups))
-            {
-                groupNames.Add(group.DisplayName);
-            }
+            var groupNames = await this.groupsService.
+                GetByIdsAsync(notificationEntity.Groups).
+                Select(x => x.DisplayName).
+                ToListAsync();
 
             var result = new DraftNotificationSummaryForConsent
             {

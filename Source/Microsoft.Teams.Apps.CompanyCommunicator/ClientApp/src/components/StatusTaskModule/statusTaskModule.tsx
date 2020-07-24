@@ -10,7 +10,7 @@ import {
 } from '../AdaptiveCard/adaptiveCard';
 import { ImageUtil } from '../../utility/imageutil';
 
-type listItem = {
+export interface IListItem {
     header: string,
     media: JSX.Element,
 }
@@ -186,19 +186,18 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
     }
 
     private getItemList = (items: string[]) => {
-        const resultedTeams: listItem[] = [];
+        let resultedTeams: IListItem[] = [];
         if (items) {
-            items.forEach((element) => {
-                resultedTeams.push({
-
+            resultedTeams = items.map((element) => {
+                const resultedTeam: IListItem = {
                     header: element,
-                    media: <Image src={ImageUtil.makeInitialImage(element)} avatar />,
-                });
+                    media: <Image src={ImageUtil.makeInitialImage(element)} avatar />
+                }
+                return resultedTeam;
             });
         }
         return resultedTeams;
     }
-
     private renderAudienceSelection = () => {
         if (this.state.message.teamNames && this.state.message.teamNames.length > 0) {
             return (

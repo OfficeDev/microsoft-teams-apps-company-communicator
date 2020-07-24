@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -73,7 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <returns>The result of an action method.</returns>
         [HttpPost]
         public async Task<IActionResult> CreateSentNotificationAsync(
-            [FromBody]DraftNotification draftNotification)
+            [FromBody] DraftNotification draftNotification)
         {
             var draftNotificationDataEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.DraftNotificationsPartition,
@@ -160,12 +161,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var groupNames = new List<string>();
-            await foreach (var group in
-                this.groupsService.GetByIdsAsync(notificationEntity.Groups))
-            {
-                groupNames.Add(group.DisplayName);
-            }
+            var groupNames = await this.groupsService.
+                GetByIdsAsync(notificationEntity.Groups).
+                Select(x => x.DisplayName).
+                ToListAsync();
 
             var result = new SentNotification
             {

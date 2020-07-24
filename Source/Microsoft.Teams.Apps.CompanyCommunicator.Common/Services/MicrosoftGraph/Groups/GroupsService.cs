@@ -56,16 +56,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <returns>boolean.</returns>
         public async Task<bool> ContainsHiddenMembershipAsync(IEnumerable<string> groupIds)
         {
-            await foreach (var group in
-               this.GetByIdsAsync(groupIds))
-            {
-                if (group.Visibility.IsHiddenMembership())
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return await this.GetByIdsAsync(groupIds).
+                           Where(group => !group.Visibility.IsHiddenMembership()).
+                           AnyAsync();
         }
 
         /// <summary>
