@@ -4,6 +4,7 @@ import { getSentNotification, exportNotification } from '../../apis/messageListA
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
+import { TooltipHost } from 'office-ui-fabric-react';
 import { Icon, Loader, List, Image, Button, IconProps } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import {
@@ -183,10 +184,12 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                         </div>
 
                         <div className="footerContainer">
-                            <div className={this.state.message.canDownload ? "" : "hide"}>
+                            <div className={this.state.message.canDownload ? "" : "disabled"}>
                                 <div className="buttonContainer">
-                                    <Loader id="exportingLoader" className="hiddenLoader exportingLoader" size="smallest" label="exporting" labelPosition="end" />
-                                    <Button icon={downloadIcon} content="Export detailed results" id="exportBtn" onClick={this.onExport} primary />
+                                    <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="exporting" labelPosition="end" />
+                                    <TooltipHost content={this.state.message.canDownload ? "" : "download in progress"} calloutProps={{ gapSpace: 0 }}>
+                                        <Button icon={downloadIcon} disabled={!this.state.message.canDownload} content="Export detailed results" id="exportBtn" onClick={this.onExport} primary />
+                                    </TooltipHost>
                                 </div>
                             </div>
                         </div>
