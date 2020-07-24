@@ -32,6 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches.Groups;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.SendTriggersToAzureFunctions;
 
     /// <summary>
@@ -99,7 +100,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<SetNotificationMetadataActivity>();
             builder.Services.AddTransient<SendDataAggregationMessageActivity>();
             builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
+            builder.Services.AddTransient<GetGroupMembersActivity>();
+            builder.Services.AddTransient<GetGroupMembersNextPageActivity>();
+            builder.Services.AddTransient<InitializeorFailGroupMembersActivity>();
             builder.Services.AddTransient<HandleFailureActivity>();
+            builder.Services.AddTransient<HandleWarningActivity>();
 
             // Add bot services.
             builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();

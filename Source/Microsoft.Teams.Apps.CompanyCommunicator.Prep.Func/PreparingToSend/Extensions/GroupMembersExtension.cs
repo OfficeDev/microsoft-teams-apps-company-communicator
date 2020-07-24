@@ -16,18 +16,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Ext
     public static class GroupMembersExtension
     {
         /// <summary>
-        /// Remove the installed users from group members on Aad Id.
+        /// Filter the installed users from group members on Aad Id.
         /// </summary>
         /// <param name="groupMembers"> group members.</param>
         /// <param name="installedUsers">installed app users.</param>
         /// <returns> filtered group members.</returns>
-        public static IEnumerable<User> Intersect(
+        public static IEnumerable<User> FilterInstalledUsers(
              this IEnumerable<User> groupMembers,
              IEnumerable<UserDataEntity> installedUsers)
         {
+            var installedUserIdSet = installedUsers.Select(user => user.AadId).ToHashSet();
             return groupMembers.
-                Where(x => !installedUsers.Select(y => y.AadId).
-                Contains(x.Id));
+                Where(member => !installedUserIdSet.Contains(member.Id));
         }
 
         /// <summary>
@@ -51,6 +51,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Ext
             }
 
             return remainingUserEntities;
+        }
+
+        /// <summary>
+        /// extracts the next page url.
+        /// </summary>
+        /// <param name="additionalData">dictionary contaning odata next page link.</param>
+        /// <returns>next page url.</returns>
+        public static string NextPageUrl(this IDictionary<string, object> additionalData)
+        {
+            additionalData.TryGetValue(Common.Constants.ODataNextPageLink, out object nextLink);
+            var nextPageUrl = (nextLink == null) ? string.Empty : nextLink.ToString();
+            return nextPageUrl;
         }
     }
 }
