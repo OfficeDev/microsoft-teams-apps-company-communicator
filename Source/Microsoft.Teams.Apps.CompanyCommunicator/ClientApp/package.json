@@ -5,6 +5,7 @@
   "dependencies": {
     "@microsoft/teams-js": "^1.4.2",
     "@stardust-ui/react": "^0.34.0",
+    "@types/color-hash": "^1.0.0",
     "@types/faker": "^4.1.5",
     "@types/jest": "24.0.13",
     "@types/node": "12.0.4",
@@ -14,6 +15,7 @@
     "@types/redux": "^3.6.0",
     "adaptivecards": "^1.2.0",
     "axios": "^0.19.0",
+    "color-hash": "^1.0.3",
     "faker": "^4.1.0",
     "font-awesome": "^4.7.0",
     "msteams-ui-components-react": "^0.8.1",
