@@ -29,6 +29,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             this.graphServiceClient = graphServiceClient;
         }
 
+        private int MaxRetry { get; set; } = 10;
+
         /// <summary>
         /// get list of users by ids.
         /// </summary>
@@ -64,7 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="userIdsByGroups">list of grouped user ids.</param>
         /// <returns>list of users.</returns>
-        public async Task<IEnumerable<User>> GetBatchByUserIds(IEnumerable<List<string>> userIdsByGroups)
+        public async Task<IEnumerable<User>> GetBatchByUserIds(IEnumerable<IEnumerable<string>> userIdsByGroups)
         {
             if (userIdsByGroups.Count() < 1)
             {
@@ -74,12 +76,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             try
             {
                 var batchRequestContent = this.GetBatchRequest(userIdsByGroups);
-                var response = await this.graphServiceClient.Batch.Request().PostAsync(batchRequestContent);
+                var response = await this.graphServiceClient
+                    .Batch
+                    .Request()
+                    .WithMaxRetry(this.MaxRetry)
+                    .PostAsync(batchRequestContent);
+
                 Dictionary<string, HttpResponseMessage> responses = await response.GetResponsesAsync();
                 var users = new List<User>();
                 foreach (string key in responses.Keys)
                 {
                     HttpResponseMessage httpResponse = await response.GetResponseByIdAsync(key);
+                    httpResponse.EnsureSuccessStatusCode();
+
                     var responseContent = await httpResponse.Content.ReadAsStringAsync();
                     var user = JsonConvert.DeserializeObject<User>(responseContent);
                     JObject content = JObject.Parse(responseContent);
@@ -108,7 +117,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             var graphResult = await this.graphServiceClient
                     .Users
                     .Request()
-                    .WithMaxRetry(10)
+                    .WithMaxRetry(this.MaxRetry)
                     .Filter(filter)
                     .Select(user => new
                     {
@@ -123,6 +132,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 graphResult = await graphResult.NextPageRequest.GetAsync();
                 yield return graphResult.CurrentPage;
             }
+        }
+
+        /// <summary>
+        /// get user by id.
+        /// </summary>
+        /// <param name="userId">the user id.</param>
+        /// <returns>user data.</returns>
+        public async Task<User> GetUser(string userId)
+        {
+            var graphResult = await this.graphServiceClient
+                    .Users[userId]
+                    .Request()
+                    .WithMaxRetry(this.MaxRetry)
+                    .Select(user => new
+                    {
+                        user.Id,
+                        user.DisplayName,
+                        user.UserPrincipalName,
+                    })
+                    .GetAsync();
+            return graphResult;
         }
 
         private string GetUserIdFilter(IEnumerable<string> userIds)
@@ -141,7 +171,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             return filterUserIds.ToString();
         }
 
-        private BatchRequestContent GetBatchRequest(IEnumerable<List<string>> userIdsByGroups)
+        private BatchRequestContent GetBatchRequest(IEnumerable<IEnumerable<string>> userIdsByGroups)
         {
             var batchRequestContent = new BatchRequestContent();
             int requestId = 1;

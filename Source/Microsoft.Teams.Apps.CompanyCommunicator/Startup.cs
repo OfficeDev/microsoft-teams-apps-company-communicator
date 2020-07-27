@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
+    using global::Azure.Storage.Blobs;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
@@ -112,12 +113,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                 configuration.RootPath = "ClientApp/build";
             });
 
+            // Add blob client.
+            services.AddSingleton(sp => new BlobContainerClient(
+                sp.GetService<IConfiguration>().GetValue<string>("StorageAccountConnectionString"),
+                Common.Constants.BlobContainerName));
+
             // Add bot services.
             services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             services.AddTransient<CompanyCommunicatorBotFilterMiddleware>();
             services.AddSingleton<CompanyCommunicatorBotAdapter>();
             services.AddTransient<TeamsDataCapture>();
             services.AddTransient<IBot, CompanyCommunicatorBot>();
+            services.AddTransient<IBot, CompanyCommunicatorFileUploadBot>();
 
             // Add repositories.
             services.AddSingleton<TeamDataRepository>();

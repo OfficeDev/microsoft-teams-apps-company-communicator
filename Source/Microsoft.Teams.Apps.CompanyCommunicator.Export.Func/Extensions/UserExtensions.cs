@@ -4,13 +4,10 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Extensions
 {
-    using System;
     using System.Collections.Generic;
-    using System.Text;
-    using Microsoft.Graph;
 
     /// <summary>
-    /// Extenions for User Ids.
+    /// Extensions for User Ids.
     /// </summary>
     public static class UserExtensions
     {
@@ -24,7 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Extensions
         /// </summary>
         /// <param name="userIds">the user ids.</param>
         /// <returns>group list of user id list.</returns>
-        public static IEnumerable<List<string>> AsGroups(this List<string> userIds)
+        public static IEnumerable<IEnumerable<string>> AsGroups(this IList<string> userIds)
         {
             var buffer = new List<string>(MaxGroupSize);
             for (int i = 0; i < userIds.Count; i++)

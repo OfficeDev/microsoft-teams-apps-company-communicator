@@ -15,8 +15,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
-    using Microsoft.Extensions.Options;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Newtonsoft.Json.Linq;
 
@@ -26,23 +24,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     public class CompanyCommunicatorFileUploadBot : TeamsActivityHandler
     {
         private readonly IHttpClientFactory clientFactory;
-        private readonly string storageConnectionString;
         private readonly ExportDataRepository exportDataRepository;
+        private readonly BlobContainerClient blobContainerClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorFileUploadBot"/> class.
         /// </summary>
         /// <param name="clientFactory">http client factory.</param>
-        /// <param name="repositoryOptions">options.</param>
-        /// <param name="exportDataRepository">Export Data Repository</param>
+        /// <param name="exportDataRepository">Export Data Repository.</param>
+        /// <param name="blobContainerClient">azure blob container client.</param>
         public CompanyCommunicatorFileUploadBot(
             IHttpClientFactory clientFactory,
-            IOptions<RepositoryOptions> repositoryOptions,
-            ExportDataRepository exportDataRepository)
+            ExportDataRepository exportDataRepository,
+            BlobContainerClient blobContainerClient)
         {
             this.clientFactory = clientFactory;
-            this.storageConnectionString = repositoryOptions.Value.StorageAccountConnectionString;
             this.exportDataRepository = exportDataRepository;
+            this.blobContainerClient = blobContainerClient;
         }
 
         /// <summary>
@@ -63,13 +61,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     notificationId);
 
                 // Download the file from blob storage.
-                var blobContainerClient = new BlobContainerClient(this.storageConnectionString, Common.Constants.BlobContainerName);
-                await blobContainerClient.CreateIfNotExistsAsync();
-                var blobClient = blobContainerClient.GetBlobClient(fileName);
-                var client = this.clientFactory.CreateClient();
+                await this.blobContainerClient.CreateIfNotExistsAsync();
+                var blobClient = this.blobContainerClient.GetBlobClient(fileName);
                 var download = await blobClient.DownloadAsync();
 
                 // Upload the file to User's One Drive
+                var client = this.clientFactory.CreateClient();
                 long fileSize = download.Value.ContentLength;
                 var fileContent = new StreamContent(download.Value.Content);
                 fileContent.Headers.ContentLength = download.Value.ContentLength;
@@ -158,9 +155,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
         private async Task DeleteFileAsync(string fileName)
         {
-            var blobContainerClient = new BlobContainerClient(this.storageConnectionString, Common.Constants.BlobContainerName);
-            await blobContainerClient.CreateIfNotExistsAsync();
-            var blobClient = blobContainerClient.GetBlobClient(fileName);
+            await this.blobContainerClient.CreateIfNotExistsAsync();
+            var blobClient = this.blobContainerClient.GetBlobClient(fileName);
             await blobClient.DeleteIfExistsAsync();
         }
     }

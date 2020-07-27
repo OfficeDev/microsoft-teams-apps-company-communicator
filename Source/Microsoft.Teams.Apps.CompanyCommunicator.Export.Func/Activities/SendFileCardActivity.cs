@@ -6,7 +6,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
 {
     using System;
     using System.Collections.Generic;
-    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
@@ -20,9 +19,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Polly;
 
     /// <summary>
-    /// sends the file card.
+    /// Sends the file card.
     /// </summary>
     public class SendFileCardActivity
     {
@@ -53,34 +53,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="sendData">Tuple containing user id, notification data entity and export data entity.</param>
         /// <param name="log">Logging service.</param>
-        /// <returns>responsse of send file card acitivy.</returns>
-        public async Task<SendNotificationResponse> RunAsync(
+        /// <returns>responsse of send file card acitivity.</returns>
+        public async Task<string> RunAsync(
         IDurableOrchestrationContext context,
         (string userId, string notificationId, string fileName) sendData,
         ILogger log)
         {
-            var response = await context.CallActivityWithRetryAsync<SendNotificationResponse>(
+            return await context.CallActivityWithRetryAsync<string>(
               nameof(SendFileCardActivity.SendFileCardActivityAsync),
               ActivitySettings.CommonActivityRetryOptions,
               sendData);
-            return response;
         }
 
         /// <summary>
-        /// send the file card to the user.
+        /// Sends the file card to the user.
         /// </summary>
-        /// <param name="sendData">Tuple containing user id, notification id and file name.</param>
-        /// <returns>file card response.</returns>
+        /// <param name="sendData">Tuple containing user id, notification id and filename.</param>
+        /// <returns>file card response id.</returns>
         [FunctionName(nameof(SendFileCardActivityAsync))]
-        public async Task<SendNotificationResponse> SendFileCardActivityAsync(
+        public async Task<string> SendFileCardActivityAsync(
         [ActivityTrigger](string userId, string notificationId, string fileName) sendData)
         {
-            var sendNotificationResponse = new SendNotificationResponse
-            {
-                TotalNumberOfSendThrottles = 0,
-                AllSendStatusCodes = string.Empty,
-            };
-
             var user = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, sendData.userId);
 
             // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
@@ -95,99 +88,51 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
                 },
             };
 
-            int maxNumberOfAttempts = 100;
+            int maxNumberOfAttempts = 10;
+            string consentId = string.Empty;
             await this.botAdapter.ContinueConversationAsync(
                botAppId: this.microsoftAppId,
                reference: conversationReference,
                callback: async (turnContext, cancellationToken) =>
                {
-                   var consentContext = new Dictionary<string, string>
+                   var fileCardAttachment = this.GetFileCardAttachment(sendData.fileName, sendData.notificationId);
+                   var message = MessageFactory.Attachment(fileCardAttachment);
+
+                   // Retry it in addition to the original call.
+                   var retryPolicy = Policy.Handle<Exception>().WaitAndRetryAsync(maxNumberOfAttempts, p => TimeSpan.FromSeconds(p));
+                   await retryPolicy.ExecuteAsync(async () =>
                    {
-                       { "filename", sendData.fileName },
-                       { "notificationId", sendData.notificationId },
-                   };
-
-                   var fileCard = new FileConsentCard
-                   {
-                       Description = "This is the file Bot wants to send you",
-                       AcceptContext = consentContext,
-                       DeclineContext = consentContext,
-                   };
-
-                   var asAttachment = new Attachment
-                   {
-                       Content = fileCard,
-                       ContentType = FileConsentCard.ContentType,
-                       Name = sendData.fileName,
-                   };
-
-                   var message = MessageFactory.Attachment(asAttachment);
-
-                   // Loop through attempts to try and send the notification.
-                   for (int i = 1; i <= maxNumberOfAttempts; i++)
-                   {
-                       try
-                       {
-                           var response = await turnContext.SendActivityAsync(message, cancellationToken);
-
-                           // If made it passed the sending step, then the notification was sent successfully.
-                           // Store the data about the successful request.
-                           sendNotificationResponse.ResponseId = response.Id;
-                           sendNotificationResponse.ResultType = SendNotificationResultType.Succeeded;
-                           sendNotificationResponse.StatusCode = (int)HttpStatusCode.Created;
-                           sendNotificationResponse.AllSendStatusCodes += $"{(int)HttpStatusCode.Created},";
-
-                           break;
-                       }
-                       catch (ErrorResponseException e)
-                       {
-                           var responseStatusCode = e.Response.StatusCode;
-                           sendNotificationResponse.StatusCode = (int)responseStatusCode;
-                           sendNotificationResponse.AllSendStatusCodes += $"{(int)responseStatusCode},";
-
-                           // If the response was a throttled status code or a 5xx status code,
-                           // then delay and retry the request.
-                           if (responseStatusCode == HttpStatusCode.TooManyRequests
-                              || ((int)responseStatusCode >= 500 && (int)responseStatusCode < 600))
-                           {
-                               if (responseStatusCode == HttpStatusCode.TooManyRequests)
-                               {
-                                   // If the request was throttled, set the flag for indicating the throttled state and
-                                   // increment the count of the number of throttles to be stored later.
-                                   sendNotificationResponse.ResultType = SendNotificationResultType.Throttled;
-                                   sendNotificationResponse.TotalNumberOfSendThrottles++;
-                               }
-                               else
-                               {
-                                   // If the request failed with a 5xx status code, set the flag for indicating the failure
-                                   // and store the content of the error message.
-                                   sendNotificationResponse.ResultType = SendNotificationResultType.Failed;
-                                   sendNotificationResponse.ErrorMessage = e.Response.Content;
-                               }
-
-                               // If the maximum number of attempts has not been reached, delay
-                               // for a bit of time to attempt the request again.
-                               // Do not delay if already attempted the maximum number of attempts.
-                               if (i < maxNumberOfAttempts)
-                               {
-                                   var random = new Random();
-                                   await Task.Delay(random.Next(500, 1500));
-                               }
-                           }
-                           else
-                           {
-                               // If in this block, then an error has occurred with the service.
-                               // Return the failure and do not attempt the request again.
-                               sendNotificationResponse.ResultType = SendNotificationResultType.Failed;
-                               sendNotificationResponse.ErrorMessage = e.Response.Content;
-
-                               break;
-                           }
-                       }
-                   }
+                       var response = await turnContext.SendActivityAsync(message, cancellationToken);
+                       consentId = (response == null) ? string.Empty : response.Id;
+                   });
                },
                cancellationToken: CancellationToken.None);
-            return sendNotificationResponse;
+            return consentId;
+        }
+
+        private Attachment GetFileCardAttachment(string fileName, string notificationId)
+        {
+            var consentContext = new Dictionary<string, string>
+                   {
+                       { "filename", fileName },
+                       { "notificationId", notificationId },
+                   };
+
+            var fileCard = new FileConsentCard
+            {
+                Description = "This is the file Bot wants to send you",
+                AcceptContext = consentContext,
+                DeclineContext = consentContext,
+            };
+
+            var asAttachment = new Attachment
+            {
+                Content = fileCard,
+                ContentType = FileConsentCard.ContentType,
+                Name = fileName,
+            };
+
+            return asAttachment;
         }
     }
 }

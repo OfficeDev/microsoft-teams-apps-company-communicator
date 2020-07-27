@@ -24,7 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
     using Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Streams;
 
     /// <summary>
-    /// uploads the file to the blob storage.
+    /// Uploads the file to the blob storage.
     /// </summary>
     public class UploadActivity
     {
@@ -50,7 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
 
         /// <summary>
         /// Run the activity.
-        /// Uploads the notification data to Azure Blob Storage.
+        /// Upload the notification data to Azure Blob storage.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="uploadData">Tuple containing notification data entity,metadata and filename.</param>
@@ -61,23 +61,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         (NotificationDataEntity sentNotificationDataEntity, MetaData metaData, string fileName) uploadData,
         ILogger log)
         {
-            try
-            {
-                await context.CallActivityWithRetryAsync(
-                  nameof(UploadActivity.UploadActivityAsync),
-                  ActivitySettings.CommonActivityRetryOptions,
-                  uploadData);
-            }
-            catch (Exception ex)
-            {
-                var errorMessage = $"Failed to create metadata {ex.Message}";
-
-                log.LogError(ex, errorMessage);
-            }
+            await context.CallActivityWithRetryAsync(
+              nameof(UploadActivity.UploadActivityAsync),
+              ActivitySettings.CommonActivityRetryOptions,
+              uploadData);
         }
 
         /// <summary>
-        /// Upload the file to azure blob storage.
+        /// Upload the zip file to blob storage.
         /// </summary>
         /// <param name="uploadData">Tuple containing notification data, metadata and filename.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
@@ -116,7 +107,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
             {
                 using var writer = new StreamWriter(entryStream);
                 using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-                if (uploadData.sentNotificationDataEntity.Teams.Count() != 0)
+                if (uploadData.sentNotificationDataEntity.Teams.Any())
                 {
                     var userDataStream = this.userDataStream.GetTeamDataStreamAsync(uploadData.sentNotificationDataEntity.Id);
                     await foreach (var data in userDataStream)

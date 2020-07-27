@@ -4,9 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -17,7 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
     using Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Model;
 
     /// <summary>
-    /// activity to create the metadata.
+    /// Activity to create the metadata.
     /// </summary>
     public class GetMetaDataActivity
     {
@@ -54,7 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         }
 
         /// <summary>
-        /// create and get the metadata.
+        /// Create and get the metadata.
         /// </summary>
         /// <param name="exportRequiredData">Tuple containing notification data entity and export data entity.</param>
         /// <returns>instance of metadata.</returns>
@@ -64,10 +61,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
             NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity) exportRequiredData)
         {
-            var userId = exportRequiredData.exportDataEntity.PartitionKey;
-            var user = await this.usersService.FilterByUserIdsAsync(new List<string>() { userId });
-            var userPrincipalName = (user.Count() > 0) ?
-                user.FirstOrDefault().UserPrincipalName :
+            var user = await this.usersService.GetUser(exportRequiredData.exportDataEntity.PartitionKey);
+            var userPrincipalName = (user != null) ?
+                user.UserPrincipalName :
                 Common.Constants.AdminConsentError;
 
             return this.Get(

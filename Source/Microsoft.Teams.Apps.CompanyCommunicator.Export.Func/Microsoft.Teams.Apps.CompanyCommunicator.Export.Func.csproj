@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>C:\Users\prsaxen\workbase\msteams-app-companycommunicator\Source\Microsoft.Teams.Apps.CompanyCommunicator.Export.Func\Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.xml</DocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="stylecop.json" />
@@ -23,6 +23,7 @@
     <PackageReference Include="Microsoft.Graph" Version="3.8.0" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.15.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.3" />
+    <PackageReference Include="Polly" Version="7.2.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

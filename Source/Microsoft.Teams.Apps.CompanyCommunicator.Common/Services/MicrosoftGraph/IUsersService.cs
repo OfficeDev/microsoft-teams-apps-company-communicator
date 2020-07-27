@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="userIdsByGroups">list of grouped user ids.</param>
         /// <returns>list of users.</returns>
-        Task<IEnumerable<User>> GetBatchByUserIds(IEnumerable<List<string>> userIdsByGroups);
+        Task<IEnumerable<User>> GetBatchByUserIds(IEnumerable<IEnumerable<string>> userIdsByGroups);
 
         /// <summary>
         /// get the stream of users.
@@ -33,5 +33,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <param name="filter">the filter condition.</param>
         /// <returns>stream of users.</returns>
         IAsyncEnumerable<IEnumerable<User>> GetUsersAsync(string filter = null);
+
+        /// <summary>
+        /// get user by id.
+        /// </summary>
+        /// <param name="userId">the user id.</param>
+        /// <returns>user data.</returns>
+        Task<User> GetUser(string userId);
     }
 }

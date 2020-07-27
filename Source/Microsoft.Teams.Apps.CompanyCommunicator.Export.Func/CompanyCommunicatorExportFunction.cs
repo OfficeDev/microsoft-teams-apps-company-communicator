@@ -63,8 +63,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func
                 partitionKey: NotificationDataTableNames.SentNotificationsPartition,
                 rowKey: notificationId);
             var exportDataEntity = await this.exportDataRepository.GetAsync(messageContent.UserId, notificationId);
-            string fileName = this.GetFileName();
-            var requirement = new ExportDataRequirement(sentNotificationDataEntity, exportDataEntity, messageContent.UserId, fileName);
+            exportDataEntity.FileName = this.GetFileName();
+            var requirement = new ExportDataRequirement(sentNotificationDataEntity, exportDataEntity, messageContent.UserId);
             if (requirement.IsValid())
             {
                 string instanceId = await starter.StartNewAsync(

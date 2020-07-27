@@ -13,7 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Streams
     using Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Model;
 
     /// <summary>
-    /// facade to get the data stream.
+    /// Facade to get the data stream.
     /// </summary>
     public class DataStreamFacade : IDataStreamFacade
     {
@@ -47,12 +47,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Streams
             var sentNotificationDataEntitiesStream = this.sentNotificationDataRepository.GetStreamsAsync(notificationId);
             await foreach (var sentNotifcations in sentNotificationDataEntitiesStream)
             {
-                var userIds = sentNotifcations.Select(x => x.RowKey).ToList();
-                var userIdsList = userIds.ToList();
-                var userIdGroups = userIdsList.AsGroups();
-                var users = await this.usersService.GetBatchByUserIds(userIdGroups);
-                var userData = sentNotifcations.CreateUserData(users);
-                yield return userData;
+                var users = await this.usersService.GetBatchByUserIds(
+                    sentNotifcations.Select(x => x.RowKey)
+                    .ToList()
+                    .AsGroups());
+                yield return sentNotifcations.CreateUserData(users);
             }
         }
 

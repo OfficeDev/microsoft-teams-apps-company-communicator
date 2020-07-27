@@ -79,9 +79,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func
             builder.Services.AddTransient<ExportOrchestration>();
 
             // Add activities.
+            builder.Services.AddTransient<UpdateExportDataActivity>();
             builder.Services.AddTransient<GetMetaDataActivity>();
             builder.Services.AddTransient<UploadActivity>();
             builder.Services.AddTransient<SendFileCardActivity>();
+            builder.Services.AddTransient<HandleFailureActivity>();
 
             // Add bot services.
             builder.Services.AddSingleton<CommonMicrosoftAppCredentials>();

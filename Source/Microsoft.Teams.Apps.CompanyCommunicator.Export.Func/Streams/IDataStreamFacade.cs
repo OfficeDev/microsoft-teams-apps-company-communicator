@@ -8,7 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Streams
     using Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Model;
 
     /// <summary>
-    /// facade to get the data stream.
+    /// Facade to get the data stream.
     /// </summary>
     public interface IDataStreamFacade
     {

@@ -17,28 +17,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Orchestrator
     /// </summary>
     public class ExportOrchestration
     {
-        private readonly ExportDataRepository exportDataRepository;
         private readonly UploadActivity uploadActivity;
         private readonly SendFileCardActivity sendFileCardActivity;
         private readonly GetMetaDataActivity getMetaDataActivity;
+        private readonly UpdateExportDataActivity updateExportDataActivity;
+        private readonly HandleFailureActivity handleFailureActivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportOrchestration"/> class.
         /// </summary>
-        /// <param name="exportDataRepository">the export data repository.</param>
         /// <param name="uploadActivity">upload zip activity.</param>
         /// <param name="sendFileCardActivity">send file card activity.</param>
         /// <param name="getMetaDataActivity">get the metadata activity.</param>
+        /// <param name="updateExportDataActivity">update the export data activity.</param>
+        /// <param name="handleFailureActivity">handle failure activity.</param>
         public ExportOrchestration(
-            ExportDataRepository exportDataRepository,
             UploadActivity uploadActivity,
             SendFileCardActivity sendFileCardActivity,
-            GetMetaDataActivity getMetaDataActivity)
+            GetMetaDataActivity getMetaDataActivity,
+            UpdateExportDataActivity updateExportDataActivity,
+            HandleFailureActivity handleFailureActivity)
         {
-            this.exportDataRepository = exportDataRepository;
             this.uploadActivity = uploadActivity;
             this.sendFileCardActivity = sendFileCardActivity;
             this.getMetaDataActivity = getMetaDataActivity;
+            this.updateExportDataActivity = updateExportDataActivity;
+            this.handleFailureActivity = handleFailureActivity;
         }
 
         /// <summary>
@@ -56,28 +60,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Orchestrator
             var exportRequiredData = context.GetInput<ExportDataRequirement>();
             var sentNotificationDataEntity = exportRequiredData.NotificationDataEntity;
             var exportDataEntity = exportRequiredData.ExportDataEntity;
-            var metaData = await this.getMetaDataActivity.RunAsync(context, (sentNotificationDataEntity, exportDataEntity), log);
-            await this.uploadActivity.RunAsync(context, (sentNotificationDataEntity, metaData, exportRequiredData.FileName), log);
-            var sendResponse = await this.sendFileCardActivity.RunAsync(context, (exportRequiredData.UserId, exportRequiredData.NotificationDataEntity.Id, exportRequiredData.FileName), log);
-            exportDataEntity.FileConsentId = sendResponse.ResponseId;
-            exportDataEntity.FileName = exportRequiredData.FileName;
 
-            await context.CallActivityWithRetryAsync<Task>(
-                   nameof(ExportOrchestration.UpdateExportDataActivityAsync),
-                   ActivitySettings.CommonActivityRetryOptions,
-                   exportDataEntity);
-        }
+            try
+            {
+                // Update the status of export as in progress.
+                exportDataEntity.Status = ExportStatus.InProgress.ToString();
+                await this.updateExportDataActivity.RunAsync(context, exportDataEntity, log);
 
-        /// <summary>
-        /// update the export data.
-        /// </summary>
-        /// <param name="exportDataEntity">export data entity.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [FunctionName(nameof(UpdateExportDataActivityAsync))]
-        public async Task UpdateExportDataActivityAsync(
-        [ActivityTrigger] ExportDataEntity exportDataEntity)
-        {
-            await this.exportDataRepository.CreateOrUpdateAsync(exportDataEntity);
+                var metaData = await this.getMetaDataActivity.RunAsync(context, (sentNotificationDataEntity, exportDataEntity), log);
+                await this.uploadActivity.RunAsync(context, (sentNotificationDataEntity, metaData, exportDataEntity.FileName), log);
+                var consentId = await this.sendFileCardActivity.RunAsync(context, (exportRequiredData.UserId, exportRequiredData.NotificationDataEntity.Id, exportDataEntity.FileName), log);
+
+                // Update export as completed.
+                exportDataEntity.FileConsentId = consentId;
+                exportDataEntity.Status = ExportStatus.Completed.ToString();
+                await this.updateExportDataActivity.RunAsync(context, exportDataEntity, log);
+            }
+            catch
+            {
+                await this.handleFailureActivity.RunAsync(context, exportDataEntity, log);
+            }
         }
     }
 }

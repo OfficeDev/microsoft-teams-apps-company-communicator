@@ -29,8 +29,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Extensions
             foreach (var sentNotification in sentNotificationDataEntities)
             {
                 var user = users.
-                Where(user => user != null && user.Id.Equals(sentNotification.RowKey))
-                .FirstOrDefault();
+                FirstOrDefault(user => user != null && user.Id.Equals(sentNotification.RowKey));
 
                 var userData = new UserData
                 {

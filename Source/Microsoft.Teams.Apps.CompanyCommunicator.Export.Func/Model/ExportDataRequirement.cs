@@ -18,17 +18,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Model
         /// <param name="notificationDataEntity">the notification data entity.</param>
         /// <param name="exportDataEntity">the esport data entity.</param>
         /// <param name="userId">user id.</param>
-        /// <param name="fileName">file name.</param>
         public ExportDataRequirement(
             NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity,
-            string userId,
-            string fileName)
+            string userId)
         {
             this.NotificationDataEntity = notificationDataEntity;
             this.ExportDataEntity = exportDataEntity;
             this.UserId = userId;
-            this.FileName = fileName;
         }
 
         /// <summary>
@@ -40,11 +37,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Model
         /// Gets the notification data entity.
         /// </summary>
         public NotificationDataEntity NotificationDataEntity { get; private set; }
-
-        /// <summary>
-        /// Gets the file name.
-        /// </summary>
-        public string FileName { get; private set; }
 
         /// <summary>
         /// Gets the export data entity.
