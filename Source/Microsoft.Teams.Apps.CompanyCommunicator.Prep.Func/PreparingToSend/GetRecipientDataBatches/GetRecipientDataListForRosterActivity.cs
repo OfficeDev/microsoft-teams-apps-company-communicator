@@ -10,10 +10,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
+    using Microsoft.Bot.Schema.Teams;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -150,7 +152,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                 conversationReference,
                 async (turnContext, cancellationToken) =>
                 {
-                    var members = await TeamsInfo.GetMembersAsync(turnContext, cancellationToken);
+                    var members = await this.GetMembersAsync(turnContext, cancellationToken);
 
                     userDataEntitiesResult = members.Select(member =>
                     {
@@ -175,6 +177,36 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                 CancellationToken.None);
 
             return userDataEntitiesResult;
+        }
+
+        /// <summary>
+        /// Fetches the roster with the new paginated calls to handles larger teams.
+        /// https://docs.microsoft.com/en-us/microsoftteams/platform/bots/how-to/get-teams-context?tabs=dotnet#fetching-the-roster-or-user-profile
+        /// </summary>
+        /// <param name="turnContext">The context object for this turn.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects.</param>
+        /// <returns>The roster fetched by calling the new paginated SDK API.</returns>
+        private async Task<IEnumerable<TeamsChannelAccount>> GetMembersAsync(
+            ITurnContext turnContext,
+            CancellationToken cancellationToken)
+        {
+            var members = new List<TeamsChannelAccount>();
+            string continuationToken = null;
+            const int pageSize = 500;
+
+            do
+            {
+                var currentPage = await TeamsInfo.GetPagedMembersAsync(
+                    turnContext,
+                    pageSize,
+                    continuationToken,
+                    cancellationToken);
+                continuationToken = currentPage.ContinuationToken;
+                members.AddRange(currentPage.Members);
+            }
+            while (continuationToken != null && !cancellationToken.IsCancellationRequested);
+
+            return members;
         }
     }
 }
