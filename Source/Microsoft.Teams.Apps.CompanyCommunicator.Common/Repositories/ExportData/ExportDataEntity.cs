@@ -27,5 +27,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportDat
         /// Gets or sets the DateTime of exporting the notification.
         /// </summary>
         public DateTime? SentDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the status of the export.
+        /// </summary>
+        public string Status { get; set; }
     }
 }

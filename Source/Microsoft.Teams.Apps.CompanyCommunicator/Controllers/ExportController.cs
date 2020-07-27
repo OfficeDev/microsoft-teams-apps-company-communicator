@@ -76,6 +76,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 PartitionKey = userId,
                 RowKey = id,
                 SentDate = DateTime.UtcNow,
+                Status = ExportStatus.New.ToString(),
             });
 
             var exportQueueMessageContent = new ExportQueueMessageContent
