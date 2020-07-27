@@ -43,7 +43,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
             var userDataEntity = UserDataRepositoryExtensions.ParseUserData(activity);
             if (userDataEntity != null)
             {
-                var found = await userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, userDataEntity.UserId);
+                var found = await userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, userDataEntity.AadId);
                 if (found != null)
                 {
                     await userDataRepository.DeleteAsync(found);
