@@ -185,6 +185,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ErrorMessage = notificationEntity.ExceptionMessage,
                 WarningMessage = notificationEntity.WarningMessage,
                 CanDownload = userNotificationDownload == null,
+                SendingCompleted = notificationEntity.IsCompleted,
             };
 
             return this.Ok(result);

@@ -41,6 +41,7 @@ export interface IMessage {
     errorMessage?: string;
     warningMessage?: string;
     canDownload?: boolean;
+    sendingCompleted?: boolean;
 }
 
 export interface IStatusState {
@@ -187,8 +188,8 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                             <div className={this.state.message.canDownload ? "" : "disabled"}>
                                 <div className="buttonContainer">
                                     <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="exporting" labelPosition="end" />
-                                    <TooltipHost content={this.state.message.canDownload ? "" : "download in progress"} calloutProps={{ gapSpace: 0 }}>
-                                        <Button icon={downloadIcon} disabled={!this.state.message.canDownload} content="Export detailed results" id="exportBtn" onClick={this.onExport} primary />
+                                    <TooltipHost content={!this.state.message.sendingCompleted ? "" : (this.state.message.canDownload ? "" : "download in progress")} calloutProps={{ gapSpace: 0 }}>
+                                        <Button icon={downloadIcon} disabled={!this.state.message.canDownload || !this.state.message.sendingCompleted} content="Export detailed results" id="exportBtn" onClick={this.onExport} primary />
                                     </TooltipHost>
                                 </div>
                             </div>
