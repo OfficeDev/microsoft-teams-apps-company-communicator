@@ -5,7 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
     using System;
-    using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
     /// <summary>
     /// Settings for Activity classes for durable tasks.

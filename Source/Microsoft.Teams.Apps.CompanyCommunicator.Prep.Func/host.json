@@ -9,8 +9,8 @@
     "durableTask": {
       "hubName": "PrepareToSendFunctionTaskHub",
       "storageProvider": {
-        "controlQueueVisibilityTimeout": "01:05:00",
-        "workItemQueueVisibilityTimeout": "01:05:00"
+        "controlQueueVisibilityTimeout": "01:00:00",
+        "workItemQueueVisibilityTimeout": "01:00:00"
       },
       "extendedSessionsEnabled": true,
       "extendedSessionIdleTimeoutInSeconds": 60,

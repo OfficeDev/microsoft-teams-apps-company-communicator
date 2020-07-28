@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Bot.Builder;
+    using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Connector.Authentication;
@@ -38,6 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         private readonly string microsoftAppId;
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
+        private readonly HandleWarningActivity handleWarningActivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientDataListForRosterActivity"/> class.
@@ -46,16 +48,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <param name="botOptions">The bot options.</param>
         /// <param name="notificationDataRepository">Notification data repository.</param>
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
+        /// <param name="handleWarningActivity">handle warning activity.</param>
         public GetRecipientDataListForRosterActivity(
             BotFrameworkHttpAdapter botAdapter,
             IOptions<BotOptions> botOptions,
             NotificationDataRepository notificationDataRepository,
-            SentNotificationDataRepository sentNotificationDataRepository)
+            SentNotificationDataRepository sentNotificationDataRepository,
+            HandleWarningActivity handleWarningActivity)
         {
             this.botAdapter = botAdapter;
             this.microsoftAppId = botOptions.Value.MicrosoftAppId;
             this.notificationDataRepository = notificationDataRepository;
             this.sentNotificationDataRepository = sentNotificationDataRepository;
+            this.handleWarningActivity = handleWarningActivity;
         }
 
         /// <summary>
@@ -68,7 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
-            DurableOrchestrationContext context,
+            IDurableOrchestrationContext context,
             string notificationDataEntityId,
             TeamDataEntity teamDataEntity,
             ILogger log)
@@ -89,9 +94,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                 var errorMessage = $"Failed to load roster for team {teamDataEntity.TeamId}: {ex.Message}";
 
                 log.LogError(ex, errorMessage);
-
-                await this.notificationDataRepository
-                    .SaveWarningInNotificationDataEntityAsync(notificationDataEntityId, errorMessage);
+                await this.handleWarningActivity.RunAsync(context, notificationDataEntityId, errorMessage);
             }
         }
 
