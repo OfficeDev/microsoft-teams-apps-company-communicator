@@ -6,11 +6,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Security.Claims;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -35,6 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly double forceCompleteMessageDelayInSeconds;
         private readonly SendBatchesDataRepository sendBatchesDataRepository;
         private readonly IGroupsService groupsService;
+        private readonly ExportDataRepository exportDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
@@ -47,6 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="dataQueueMessageOptions">The options for the data queue messages.</param>
         /// <param name="sendBatchesDataRepository">The send batches data repository.</param>
         /// <param name="groupsService">The groups service.</param>
+        /// <param name="exportDataRepository">The Export data repository instance.</param>
         public SentNotificationsController(
             NotificationDataRepository notificationDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository,
@@ -55,7 +59,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             DataQueue dataQueue,
             IOptions<DataQueueMessageOptions> dataQueueMessageOptions,
             SendBatchesDataRepository sendBatchesDataRepository,
-            IGroupsService groupsService)
+            IGroupsService groupsService,
+            ExportDataRepository exportDataRepository)
         {
             this.notificationDataRepository = notificationDataRepository;
             this.sentNotificationDataRepository = sentNotificationDataRepository;
@@ -65,6 +70,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.forceCompleteMessageDelayInSeconds = dataQueueMessageOptions.Value.ForceCompleteMessageDelayInSeconds;
             this.sendBatchesDataRepository = sendBatchesDataRepository;
             this.groupsService = groupsService;
+            this.exportDataRepository = exportDataRepository;
         }
 
         /// <summary>
@@ -166,6 +172,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Select(x => x.DisplayName).
                 ToListAsync();
 
+            var userId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeUserId);
+            var userNotificationDownload = await this.exportDataRepository.GetAsync(userId, id);
+
             var result = new SentNotification
             {
                 Id = notificationEntity.Id,
@@ -187,6 +196,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 SendingStartedDate = notificationEntity.SendingStartedDate,
                 ErrorMessage = notificationEntity.ExceptionMessage,
                 WarningMessage = notificationEntity.WarningMessage,
+                CanDownload = userNotificationDownload == null,
+                SendingCompleted = notificationEntity.IsCompleted,
             };
 
             return this.Ok(result);

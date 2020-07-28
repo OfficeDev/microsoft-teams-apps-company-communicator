@@ -66,14 +66,20 @@ export class AxiosJWTDecorator {
     public async put<T = any, R = AxiosResponse<T>>(
         url: string,
         data?: any,
+        handleError: boolean = true,
         config?: AxiosRequestConfig
     ): Promise<R> {
         try {
             config = await this.setupAuthorizationHeader(config);
             return await axios.put(url, data, config);
         } catch (error) {
-            this.handleError(error);
-            throw error;
+            if (handleError) {
+                this.handleError(error);
+                throw error;
+            }
+            else {
+                throw error;
+            }
         }
     }
 

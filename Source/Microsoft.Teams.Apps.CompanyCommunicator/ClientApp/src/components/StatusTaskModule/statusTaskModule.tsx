@@ -1,9 +1,12 @@
 import * as React from 'react';
 import './statusTaskModule.scss';
-import { getSentNotification } from '../../apis/messageListApi';
+import { getSentNotification, exportNotification } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
-import { List, Image, Loader } from '@stardust-ui/react';
+import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
+import { TooltipHost } from 'office-ui-fabric-react';
+import { Icon, Loader, List, Image, Button, IconProps } from '@stardust-ui/react';
+import * as microsoftTeams from "@microsoft/teams-js";
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
@@ -38,11 +41,14 @@ export interface IMessage {
     sendingDuration?: string;
     errorMessage?: string;
     warningMessage?: string;
+    canDownload?: boolean;
+    sendingCompleted?: boolean;
 }
 
 export interface IStatusState {
     message: IMessage;
     loader: boolean;
+    page: string;
 }
 
 class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState> {
@@ -55,12 +61,13 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
 
     constructor(props: RouteComponentProps) {
         super(props);
-
+        initializeIcons();
         this.card = getInitAdaptiveCard();
 
         this.state = {
             message: this.initMessage,
-            loader: true
+            loader: true,
+            page: "ViewStatus",
         };
     }
 
@@ -131,58 +138,129 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                 </div>
             );
         } else {
-            return (
-                <div className="taskModule">
-                    <div className="formContainer">
-                        <div className="formContentContainer" >
-                            <div className="contentField">
-                                <h3>Title</h3>
-                                <span>{this.state.message.title}</span>
+            const downloadIcon: IconProps = { name: 'download', size: "medium" };
+            if (this.state.page === "ViewStatus") {
+                return (
+                    <div className="taskModule">
+                        <div className="formContainer">
+                            <div className="formContentContainer" >
+                                <div className="contentField">
+                                    <h3>Title</h3>
+                                    <span>{this.state.message.title}</span>
+                                </div>
+                                <div className="contentField">
+                                    <h3>Sending started</h3>
+                                    <span>{this.state.message.sendingStartedDate}</span>
+                                </div>
+                                <div className="contentField">
+                                    <h3>Completed</h3>
+                                    <span>{this.state.message.sentDate}</span>
+                                </div>
+                                <div className="contentField">
+                                    <h3>Duration</h3>
+                                    <span>{this.state.message.sendingDuration}</span>
+                                </div>
+                                <div className="contentField">
+                                    <h3>Results</h3>
+                                    <label>Success : </label>
+                                    <span>{this.state.message.succeeded}</span>
+                                    <br />
+                                    <label>Failure : </label>
+                                    <span>{this.state.message.failed}</span>
+                                    <br />
+                                    <label>Throttled : </label>
+                                    <span>{this.state.message.throttled}</span>
+                                </div>
+                                <div className="contentField">
+                                    {this.renderAudienceSelection()}
+                                </div>
+                                <div className="contentField">
+                                    {this.renderErrorMessage()}
+                                </div>
+                                <div className="contentField">
+                                    {this.renderWarningMessage()}
+                                </div>
                             </div>
-                            <div className="contentField">
-                                <h3>Sending started</h3>
-                                <span>{this.state.message.sendingStartedDate}</span>
-                            </div>
-                            <div className="contentField">
-                                <h3>Completed</h3>
-                                <span>{this.state.message.sentDate}</span>
-                            </div>
-                            <div className="contentField">
-                                <h3>Duration</h3>
-                                <span>{this.state.message.sendingDuration}</span>
-                            </div>
-                            <div className="contentField">
-                                <h3>Results</h3>
-                                <label>Success : </label>
-                                <span>{this.state.message.succeeded}</span>
-                                <br />
-                                <label>Failure : </label>
-                                <span>{this.state.message.failed}</span>
-                                <br />
-                                <label>Throttled : </label>
-                                <span>{this.state.message.throttled}</span>
-                            </div>
-                            <div className="contentField">
-                                {this.renderAudienceSelection()}
-                            </div>
-                            <div className="contentField">
-                                {this.renderErrorMessage()}
-                            </div>
-                            <div className="contentField">
-                                {this.renderWarningMessage()}
+                            <div className="adaptiveCardContainer">
                             </div>
                         </div>
-                        <div className="adaptiveCardContainer">
+
+                        <div className="footerContainer">
+                            <div className={this.state.message.canDownload ? "" : "disabled"}>
+                                <div className="buttonContainer">
+                                    <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="exporting" labelPosition="end" />
+                                    <TooltipHost content={!this.state.message.sendingCompleted ? "" : (this.state.message.canDownload ? "" : "download in progress")} calloutProps={{ gapSpace: 0 }}>
+                                        <Button icon={downloadIcon} disabled={!this.state.message.canDownload || !this.state.message.sendingCompleted} content="Export detailed results" id="exportBtn" onClick={this.onExport} primary />
+                                    </TooltipHost>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+            else if (this.state.page === "SuccessPage") {
+                return (
+                    <div className="taskModule">
+                        <div className="formContainer">
+                            <div className="displayMessageField">
+                                <br />
+                                <br />
+                                <div><span><Icon className="iconStyle" name="stardust-checkmark" xSpacing="before" size="largest" outline /></span>
+                                    <h1>Success</h1></div>
+                                <span>The export has been queued.</span><br />
+                                <span>Once the exported results are available, you'll receive a notification from the Company Communicator app in 1:1</span>
+                                <span> chat to download the file.</span>
+                                <br />
+                                <br />
+                                <span>If you've not already done so, you will be prompted to allow the bot permission to wirte the file to your OneDrive.</span>
+                            </div>
+                        </div>
+                        <div className="footerContainer">
+                            <div className="buttonContainer">
+                                <Button content="Close" id="closeBtn" onClick={this.onClose} primary />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="footerContainer">
-                        <div className="buttonContainer">
+                );
+            }
+            else {
+                return (
+                    <div className="taskModule">
+                        <div className="formContainer">
+                            <div className="displayMessageField">
+                                <br />
+                                <br />
+                                <div><span><Icon className="iconStyle" name="stardust-close" xSpacing="before" size="largest" outline /></span>
+                                    <h1 className="light">Uh Oh! Something went wrong...</h1></div>
+                                <span>The export request could not be queued. Please try again.</span>
+                                <br />
+                                <span>If the problem persists, contact your administrator to troubleshoot.</span>
+                            </div>
+                        </div>
+                        <div className="footerContainer">
+                            <div className="buttonContainer">
+                                <Button content="Close" id="closeBtn" onClick={this.onClose} primary />
+                            </div>
                         </div>
                     </div>
-                </div>
-            );
+                );
+            }
         }
+    }
+
+    private onClose = () => {
+        microsoftTeams.tasks.submitTask();
+    }
+
+    private onExport = async () => {
+        let spanner = document.getElementsByClassName("sendingLoader");
+        spanner[0].classList.remove("hiddenLoader");
+        await exportNotification(this.state.message.id).then(() => {
+            this.setState({ page: "SuccessPage" })
+        }).catch(() => {
+            this.setState({ page: "ErrorPage" })
+        });
     }
 
     private getItemList = (items: string[]) => {

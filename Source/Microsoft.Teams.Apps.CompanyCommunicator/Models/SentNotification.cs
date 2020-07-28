@@ -66,5 +66,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets warning message.
         /// </summary>
         public string WarningMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether user can download notification.
+        /// </summary>
+        public bool CanDownload { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether sending is in progress.
+        /// </summary>
+        public bool SendingCompleted { get; set; }
     }
 }
