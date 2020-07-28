@@ -6,6 +6,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 {
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
@@ -48,8 +49,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                 PrepareToSendQueue.QueueName,
                 Connection = PrepareToSendQueue.ServiceBusConnectionConfigurationKey)]
             string myQueueItem,
-            [OrchestrationClient]
-            DurableOrchestrationClient starter)
+            [DurableClient]
+            IDurableOrchestrationClient starter)
         {
             var queueMessageContent = JsonConvert.DeserializeObject<PrepareToSendQueueMessageContent>(myQueueItem);
             var notificationId = queueMessageContent.NotificationId;

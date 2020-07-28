@@ -5,7 +5,6 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
     using System;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
@@ -49,7 +48,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             await base.OnConversationUpdateActivityAsync(turnContext, cancellationToken);
 
             var activity = turnContext.Activity;
-            var botId = activity.Recipient.Id;
 
             var isTeamRenamed = this.IsTeamInformationUpdated(activity);
             if (isTeamRenamed)
@@ -57,14 +55,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 await this.teamsDataCapture.OnTeamInformationUpdatedAsync(activity);
             }
 
-            // Take action if this event includes the bot being added
-            if (activity.MembersAdded?.FirstOrDefault(p => p.Id == botId) != null)
+            if (activity.MembersAdded != null)
             {
                 await this.teamsDataCapture.OnBotAddedAsync(activity);
             }
 
-            // Take action if this event includes the bot being removed
-            if (activity.MembersRemoved?.FirstOrDefault(p => p.Id == botId) != null)
+            if (activity.MembersRemoved != null)
             {
                 await this.teamsDataCapture.OnBotRemovedAsync(activity);
             }
