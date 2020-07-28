@@ -3,11 +3,17 @@ import './statusTaskModule.scss';
 import { getSentNotification } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
-import { Loader } from '@stardust-ui/react';
+import { List, Image, Loader } from '@stardust-ui/react';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
+import { ImageUtil } from '../../utility/imageutil';
+
+export interface IListItem {
+    header: string,
+    media: JSX.Element,
+}
 
 export interface IMessage {
     id: string;
@@ -26,6 +32,7 @@ export interface IMessage {
     buttonTitle?: string;
     teamNames?: string[];
     rosterNames?: string[];
+    groupNames?: string[];
     allUsers?: boolean;
     sendingStartedDate?: string;
     sendingDuration?: string;
@@ -178,32 +185,38 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         }
     }
 
+    private getItemList = (items: string[]) => {
+        let resultedTeams: IListItem[] = [];
+        if (items) {
+            resultedTeams = items.map((element) => {
+                const resultedTeam: IListItem = {
+                    header: element,
+                    media: <Image src={ImageUtil.makeInitialImage(element)} avatar />
+                }
+                return resultedTeam;
+            });
+        }
+        return resultedTeams;
+    }
     private renderAudienceSelection = () => {
         if (this.state.message.teamNames && this.state.message.teamNames.length > 0) {
-            let length = this.state.message.teamNames.length;
             return (
                 <div>
                     <h3>Sent to General channel in teams</h3>
-                    {this.state.message.teamNames.sort().map((team, index) => {
-                        if (length === index + 1) {
-                            return (<span key={`teamName${index}`} >{team}</span>);
-                        } else {
-                            return (<span key={`teamName${index}`} >{team}, </span>);
-                        }
-                    })}
+                    <List items={this.getItemList(this.state.message.teamNames)} />
                 </div>);
         } else if (this.state.message.rosterNames && this.state.message.rosterNames.length > 0) {
-            let length = this.state.message.rosterNames.length;
             return (
                 <div>
                     <h3>Sent in chat to people in teams</h3>
-                    {this.state.message.rosterNames.sort().map((team, index) => {
-                        if (length === index + 1) {
-                            return (<span key={`teamName${index}`} >{team}</span>);
-                        } else {
-                            return (<span key={`teamName${index}`} >{team}, </span>);
-                        }
-                    })}
+                    <List items={this.getItemList(this.state.message.rosterNames)} />
+                </div>);
+        } else if (this.state.message.groupNames && this.state.message.groupNames.length > 0) {
+            return (
+                <div>
+                    <h3>Sent in chat to everyone in below</h3>
+                    <span>M365 groups, Distribution groups or Security Groups</span>
+                    <List items={this.getItemList(this.state.message.groupNames)} />
                 </div>);
         } else if (this.state.message.allUsers) {
             return (
@@ -214,7 +227,6 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
             return (<div></div>);
         }
     }
-
     private renderErrorMessage = () => {
         if (this.state.message.errorMessage) {
             return (

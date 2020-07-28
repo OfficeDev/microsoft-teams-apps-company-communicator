@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -41,6 +42,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <returns>A task that represents the work queued to execute.</returns>
         public async Task OnBotAddedAsync(IConversationUpdateActivity activity)
         {
+            // Take action if the event includes the bot being added.
+            var membersAdded = activity.MembersAdded;
+            if (membersAdded == null || !membersAdded.Any(p => p.Id == activity.Recipient.Id))
+            {
+                return;
+            }
+
             switch (activity.Conversation.ConversationType)
             {
                 case TeamsDataCapture.ChannelType:
@@ -60,12 +68,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <returns>A task that represents the work queued to execute.</returns>
         public async Task OnBotRemovedAsync(IConversationUpdateActivity activity)
         {
+            var membersRemoved = activity.MembersRemoved;
+            if (membersRemoved == null || !membersRemoved.Any())
+            {
+                return;
+            }
+
             switch (activity.Conversation.ConversationType)
             {
                 case TeamsDataCapture.ChannelType:
-                    await this.teamDataRepository.RemoveTeamDataAsync(activity);
+                    // Take action if the event includes the bot being removed.
+                    if (membersRemoved.Any(p => p.Id == activity.Recipient.Id))
+                    {
+                        await this.teamDataRepository.RemoveTeamDataAsync(activity);
+                    }
+
                     break;
                 case TeamsDataCapture.PersonalType:
+                    // The event triggered (when a user is removed from the tenant) doesn't
+                    // include the bot in the member list being removed.
                     await this.userDataRepository.RemoveUserDataAsync(activity);
                     break;
                 default: break;

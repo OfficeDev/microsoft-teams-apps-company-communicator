@@ -43,7 +43,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 var team = new TeamData
                 {
-                    TeamId = entity.TeamId,
+                    Id = entity.TeamId,
                     Name = entity.Name,
                 };
                 result.Add(team);

@@ -48,6 +48,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public IEnumerable<string> RosterNames { get; set; }
 
         /// <summary>
+        /// Gets or sets Groups audience name collection.
+        /// </summary>
+        public IEnumerable<string> GroupNames { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether a notification was sent to all users.
         /// </summary>
         public bool AllUsers { get; set; }
