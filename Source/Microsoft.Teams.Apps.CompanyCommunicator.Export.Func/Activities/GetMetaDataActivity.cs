@@ -38,10 +38,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         /// <param name="log">Logging service.</param>
         /// <returns>instance of metadata.</returns>
         public async Task<MetaData> RunAsync(
-        IDurableOrchestrationContext context,
-        (NotificationDataEntity notificationDataEntity,
+            IDurableOrchestrationContext context,
+            (NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity) exportRequiredData,
-        ILogger log)
+            ILogger log)
         {
             var metaData = await context.CallActivityWithRetryAsync<MetaData>(
                nameof(GetMetaDataActivity.GetMetaDataActivityAsync),
@@ -57,7 +57,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         /// <returns>instance of metadata.</returns>
         [FunctionName(nameof(GetMetaDataActivityAsync))]
         public async Task<MetaData> GetMetaDataActivityAsync(
-        [ActivityTrigger](
+            [ActivityTrigger](
             NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity) exportRequiredData)
         {

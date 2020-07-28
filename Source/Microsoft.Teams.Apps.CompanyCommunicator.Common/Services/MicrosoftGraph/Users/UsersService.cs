@@ -141,18 +141,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <returns>user data.</returns>
         public async Task<User> GetUser(string userId)
         {
-            var graphResult = await this.graphServiceClient
-                    .Users[userId]
-                    .Request()
-                    .WithMaxRetry(this.MaxRetry)
-                    .Select(user => new
-                    {
-                        user.Id,
-                        user.DisplayName,
-                        user.UserPrincipalName,
-                    })
-                    .GetAsync();
-            return graphResult;
+            try
+            {
+                var graphResult = await this.graphServiceClient
+                        .Users[userId]
+                        .Request()
+                        .WithMaxRetry(this.MaxRetry)
+                        .Select(user => new
+                        {
+                            user.Id,
+                            user.DisplayName,
+                            user.UserPrincipalName,
+                        })
+                        .GetAsync();
+                return graphResult;
+            }
+            catch
+            {
+                return default;
+            }
         }
 
         private string GetUserIdFilter(IEnumerable<string> userIds)

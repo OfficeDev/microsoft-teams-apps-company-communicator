@@ -57,9 +57,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
-        IDurableOrchestrationContext context,
-        (NotificationDataEntity sentNotificationDataEntity, MetaData metaData, string fileName) uploadData,
-        ILogger log)
+            IDurableOrchestrationContext context,
+            (NotificationDataEntity sentNotificationDataEntity, MetaData metaData, string fileName) uploadData,
+            ILogger log)
         {
             await context.CallActivityWithRetryAsync(
               nameof(UploadActivity.UploadActivityAsync),
@@ -74,7 +74,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(UploadActivityAsync))]
         public async Task UploadActivityAsync(
-        [ActivityTrigger](NotificationDataEntity sentNotificationDataEntity, MetaData metaData, string fileName) uploadData)
+            [ActivityTrigger](
+            NotificationDataEntity sentNotificationDataEntity,
+            MetaData metaData, string fileName) uploadData)
         {
             CloudStorageAccount storage = CloudStorageAccount.Parse(this.storageConnectionString);
             CloudBlobClient client = storage.CreateCloudBlobClient();

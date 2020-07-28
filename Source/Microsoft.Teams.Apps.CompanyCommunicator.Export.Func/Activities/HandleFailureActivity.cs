@@ -66,9 +66,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         /// <param name="log">Logging service.</param>
         /// <returns>instance of metadata.</returns>
         public async Task RunAsync(
-        IDurableOrchestrationContext context,
-        ExportDataEntity exportDataEntity,
-        ILogger log)
+            IDurableOrchestrationContext context,
+            ExportDataEntity exportDataEntity,
+            ILogger log)
         {
             await context.CallActivityWithRetryAsync<Task>(
                       nameof(HandleFailureActivity.HandleFailureActivityAsync),
@@ -85,7 +85,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(HandleFailureActivityAsync))]
         public async Task HandleFailureActivityAsync(
-        [ActivityTrigger] ExportDataEntity exportDataEntity)
+            [ActivityTrigger] ExportDataEntity exportDataEntity)
         {
             await this.DeleteFileAsync(exportDataEntity.FileName);
             await this.SendFailureMessageAsync(exportDataEntity.PartitionKey);

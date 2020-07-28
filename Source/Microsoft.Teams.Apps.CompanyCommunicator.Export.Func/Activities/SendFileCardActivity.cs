@@ -55,9 +55,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         /// <param name="log">Logging service.</param>
         /// <returns>responsse of send file card acitivity.</returns>
         public async Task<string> RunAsync(
-        IDurableOrchestrationContext context,
-        (string userId, string notificationId, string fileName) sendData,
-        ILogger log)
+            IDurableOrchestrationContext context,
+            (string userId, string notificationId, string fileName) sendData,
+            ILogger log)
         {
             return await context.CallActivityWithRetryAsync<string>(
               nameof(SendFileCardActivity.SendFileCardActivityAsync),
@@ -72,7 +72,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         /// <returns>file card response id.</returns>
         [FunctionName(nameof(SendFileCardActivityAsync))]
         public async Task<string> SendFileCardActivityAsync(
-        [ActivityTrigger](string userId, string notificationId, string fileName) sendData)
+            [ActivityTrigger](string userId, string notificationId, string fileName) sendData)
         {
             var user = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, sendData.userId);
 

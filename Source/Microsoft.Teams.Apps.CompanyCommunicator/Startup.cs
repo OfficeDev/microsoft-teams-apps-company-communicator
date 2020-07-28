@@ -118,13 +118,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                 sp.GetService<IConfiguration>().GetValue<string>("StorageAccountConnectionString"),
                 Common.Constants.BlobContainerName));
 
+            // The bot needs an HttpClient to download and upload files.
+            services.AddHttpClient();
+
             // Add bot services.
             services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             services.AddTransient<CompanyCommunicatorBotFilterMiddleware>();
             services.AddSingleton<CompanyCommunicatorBotAdapter>();
             services.AddTransient<TeamsDataCapture>();
+            services.AddTransient<TeamsFileUpload>();
             services.AddTransient<IBot, CompanyCommunicatorBot>();
-            services.AddTransient<IBot, CompanyCommunicatorFileUploadBot>();
 
             // Add repositories.
             services.AddSingleton<TeamDataRepository>();

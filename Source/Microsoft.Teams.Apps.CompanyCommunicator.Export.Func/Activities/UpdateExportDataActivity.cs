@@ -35,9 +35,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         /// <param name="log">Logging service.</param>
         /// <returns>instance of metadata.</returns>
         public async Task RunAsync(
-        IDurableOrchestrationContext context,
-        ExportDataEntity exportDataEntity,
-        ILogger log)
+            IDurableOrchestrationContext context,
+            ExportDataEntity exportDataEntity,
+            ILogger log)
         {
             await context.CallActivityWithRetryAsync<Task>(
                                   nameof(UpdateExportDataActivity.UpdateExportDataActivityAsync),
@@ -52,7 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(UpdateExportDataActivityAsync))]
         public async Task UpdateExportDataActivityAsync(
-        [ActivityTrigger] ExportDataEntity exportDataEntity)
+            [ActivityTrigger] ExportDataEntity exportDataEntity)
         {
             await this.exportDataRepository.CreateOrUpdateAsync(exportDataEntity);
         }

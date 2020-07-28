@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Orchestrator
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -54,12 +55,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Orchestrator
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(ExportOrchestrationAsync))]
         public async Task ExportOrchestrationAsync(
-          [OrchestrationTrigger] IDurableOrchestrationContext context,
-          ILogger log)
+            [OrchestrationTrigger] IDurableOrchestrationContext context,
+            ILogger log)
         {
             var exportRequiredData = context.GetInput<ExportDataRequirement>();
             var sentNotificationDataEntity = exportRequiredData.NotificationDataEntity;
             var exportDataEntity = exportRequiredData.ExportDataEntity;
+
+            if (!context.IsReplaying)
+            {
+                log.LogInformation($"Start to export the notification {sentNotificationDataEntity.Id}!");
+            }
 
             try
             {
@@ -75,9 +81,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Orchestrator
                 exportDataEntity.FileConsentId = consentId;
                 exportDataEntity.Status = ExportStatus.Completed.ToString();
                 await this.updateExportDataActivity.RunAsync(context, exportDataEntity, log);
+
+                log.LogInformation($"Export Notification Successful!");
             }
-            catch
+            catch (Exception ex)
             {
+                var errorMessage = $"Failed to export notification {sentNotificationDataEntity.Id} : {ex.Message}";
+                log.LogError(ex, errorMessage);
+
                 await this.handleFailureActivity.RunAsync(context, exportDataEntity, log);
             }
         }

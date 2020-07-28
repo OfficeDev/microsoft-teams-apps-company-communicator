@@ -22,14 +22,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Extensions
         /// <param name="users">the user list.</param>
         /// <returns>list of created user data.</returns>
         public static IEnumerable<UserData> CreateUserData(
-        this IEnumerable<SentNotificationDataEntity> sentNotificationDataEntities,
-        IEnumerable<User> users)
+            this IEnumerable<SentNotificationDataEntity> sentNotificationDataEntities,
+            IEnumerable<User> users)
         {
             var userdatalist = new List<UserData>();
             foreach (var sentNotification in sentNotificationDataEntities)
             {
                 var user = users.
-                FirstOrDefault(user => user != null && user.Id.Equals(sentNotification.RowKey));
+                    FirstOrDefault(user => user != null && user.Id.Equals(sentNotification.RowKey));
 
                 var userData = new UserData
                 {
