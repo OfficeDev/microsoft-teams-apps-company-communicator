@@ -23,5 +23,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         /// Type indicating sending the notification failed.
         /// </summary>
         Failed,
+
+        /// <summary>
+        /// Type indicating that the recipient can't be found.
+        /// When sending a notification to a removed recipient, the send function gets 404 error.
+        /// The recipient should be excluded from the list.
+        /// </summary>
+        RecipientNotFound,
     }
 }

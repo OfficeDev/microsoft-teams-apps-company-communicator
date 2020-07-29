@@ -46,6 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
             var succeededCount = aggregatedSentNotificationDataResults.SucceededCount;
             var failedCount = aggregatedSentNotificationDataResults.FailedCount;
             var throttledCount = aggregatedSentNotificationDataResults.ThrottledCount;
+            var recipientNotFoundCount = aggregatedSentNotificationDataResults.RecipientNotFoundCount;
             var lastSentDate = aggregatedSentNotificationDataResults.LastSentDate;
 
             // Create the general update.
@@ -55,6 +56,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
                 RowKey = notificationId,
                 Succeeded = succeededCount,
                 Failed = failedCount,
+                RecipientNotFound = recipientNotFoundCount,
                 Throttled = throttledCount,
                 IsCompleted = false,
             };

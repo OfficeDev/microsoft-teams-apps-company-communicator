@@ -95,6 +95,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
             {
                 updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Throttled;
             }
+            else if (statusCode == (int)HttpStatusCode.NotFound)
+            {
+                updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.RecipientNotFound;
+            }
             else if (statusCode == SentNotificationDataEntity.FaultedAndRetryingStatusCode)
             {
                 // This is a special case where an exception was thrown in the function.

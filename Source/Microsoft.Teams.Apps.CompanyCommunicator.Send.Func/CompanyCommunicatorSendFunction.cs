@@ -5,7 +5,6 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
     using System;
-    using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
@@ -163,7 +162,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     // all throttling responses, then set the overall delay time for the system so all
                     // other calls will be delayed and add the message back to the queue with a delay to be
                     // attempted later.
-                    log.LogError("MESSAGE THROTTLED");
+                    log.LogError($"MESSAGE THROTTLED. ERROR: {sendNotificationResponse.ErrorMessage}");
 
                     await this.delaySendingNotificationService
                         .DelaySendingNotificationAsync(
@@ -173,11 +172,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     // Ensure all processing of the queue message is stopped because of being delayed.
                     return;
                 }
+                else if (sendNotificationResponse.ResultType == SendNotificationResultType.RecipientNotFound)
+                {
+                    // If in this block, then the recipient must have been removed.
+                    // Save the relevant information and exclude the not found recipient from the list.
+                    log.LogError($"MESSAGE RECIPIENT NOT FOUND. ERROR: {sendNotificationResponse.ErrorMessage}");
+
+                    await this.manageResultDataService.ProccessResultDataAsync(
+                        notificationId: messageContent.NotificationId,
+                        recipientId: sendNotificationParams.RecipientId,
+                        totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
+                        isStatusCodeFromCreateConversation: false,
+                        statusCode: sendNotificationResponse.StatusCode,
+                        allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes,
+                        errorMessage: sendNotificationResponse.ErrorMessage);
+                }
                 else if (sendNotificationResponse.ResultType == SendNotificationResultType.Failed)
                 {
                     // If in this block, then an error has occurred with the service.
                     // Save the relevant information and do not attempt the request again.
-                    log.LogError($"MESSAGE FAILED: {sendNotificationResponse.StatusCode}");
+                    log.LogError($"MESSAGE FAILED: {sendNotificationResponse.StatusCode}. ERROR: {sendNotificationResponse.ErrorMessage}");
 
                     await this.manageResultDataService.ProccessResultDataAsync(
                         notificationId: messageContent.NotificationId,
