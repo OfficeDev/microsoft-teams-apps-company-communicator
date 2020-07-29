@@ -55,13 +55,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public static readonly string Succeeded = "Succeeded";
 
         /// <summary>
+        /// String indicating a recipient is not found when sending the notification to
+        /// the recipient.
+        /// </summary>
+        public static readonly string RecipientNotFound = "RecipientNotFound";
+
+        /// <summary>
         /// String indicating a failure response was received when sending the notification to
         /// the recipient.
         /// </summary>
         public static readonly string Failed = "Failed";
 
         /// <summary>
-        /// [Deprecated] String indicationg sending the notification to the recipient was throttled
+        /// [Deprecated] String indicating sending the notification to the recipient was throttled
         /// and not sent successfully.
         /// </summary>
         public static readonly string Throttled = "Throttled";

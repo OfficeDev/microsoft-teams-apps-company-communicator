@@ -126,6 +126,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <summary>
+        /// Gets or sets the GroupsInsString value.
+        /// This property helps to save the Grousp list in the Azure Table storage.
+        /// Table storage doesn't support an array type of the property directly
+        /// so this is a comma separated list of the group ids for which the members
+        /// are the recipients.
+        /// </summary>
+        public string GroupsInString { get; set; }
+
+        /// <summary>
+        /// Gets or sets the team ids of the Groups audience collection.
+        /// </summary>
+        [IgnoreProperty]
+        public IEnumerable<string> Groups
+        {
+            get
+            {
+                return JsonConvert.DeserializeObject<IEnumerable<string>>(this.GroupsInString);
+            }
+
+            set
+            {
+                this.GroupsInString = JsonConvert.SerializeObject(value);
+            }
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether a notification should be sent to all the
         /// known users - this is equivalent to all of the users stored in the User Data table.
         /// </summary>

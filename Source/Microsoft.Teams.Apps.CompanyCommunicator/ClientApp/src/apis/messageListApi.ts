@@ -13,6 +13,26 @@ export const getDraftNotifications = async (): Promise<any> => {
     return await axios.get(url);
 }
 
+export const verifyGroupAccess = async (): Promise<any> => {
+    let url = baseAxiosUrl + "/groupdata/verifyaccess";
+    return await axios.get(url, false);
+}
+
+export const getGroups = async (id: number): Promise<any> => {
+    let url = baseAxiosUrl + "/groupdata/" + id;
+    return await axios.get(url);
+}
+
+export const searchGroups = async (query: string): Promise<any> => {
+    let url = baseAxiosUrl + "/groupdata/search/" + query;
+    return await axios.get(url);
+}
+
+export const exportNotification = async (id: string): Promise<any> => {
+    let url = baseAxiosUrl + "/exportnotification/" + id;
+    return await axios.put(url,null,false);
+}
+
 export const getSentNotification = async (id: number): Promise<any> => {
     let url = baseAxiosUrl + "/sentnotifications/" + id;
     return await axios.get(url);
@@ -22,6 +42,7 @@ export const getDraftNotification = async (id: number): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications/" + id;
     return await axios.get(url);
 }
+
 
 export const deleteDraftNotification = async (id: number): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications/" + id;
@@ -59,7 +80,7 @@ export const getConsentSummaries = async (id: number): Promise<any> => {
 }
 
 export const sendPreview = async (payload: {}): Promise<any> => {
-    let url = baseAxiosUrl + "/draftNotifications/previews";
+    let url = baseAxiosUrl + "/draftnotifications/previews";
     return await axios.post(url, payload);
 }
 

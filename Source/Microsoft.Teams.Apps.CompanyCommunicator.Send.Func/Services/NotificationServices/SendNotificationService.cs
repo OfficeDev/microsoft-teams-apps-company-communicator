@@ -133,6 +133,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                                     await Task.Delay(random.Next(500, 1500));
                                 }
                             }
+                            else if (responseStatusCode == HttpStatusCode.NotFound)
+                            {
+                                // If in this block, then the recipient has been removed.
+                                // This recipient should be excluded from the list.
+                                sendNotificationResponse.ResultType = SendNotificationResultType.RecipientNotFound;
+                                sendNotificationResponse.ErrorMessage = e.Response.Content;
+
+                                break;
+                            }
                             else
                             {
                                 // If in this block, then an error has occurred with the service.

@@ -18,10 +18,21 @@
             }
 
             .results {
-                margin: 3rem 4rem;
+                margin: 0 2rem;
+                overflow-y: auto;
+                position: absolute;
 
                 .label {
                     font-weight: bold;
+                }
+
+                ul {
+                    li {
+                        img {
+                            width: 2.5rem;
+                            height: 2.5rem;
+                        }
+                    }
                 }
             }
         }

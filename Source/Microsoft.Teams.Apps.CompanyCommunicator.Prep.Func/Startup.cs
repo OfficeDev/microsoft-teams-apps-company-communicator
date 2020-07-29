@@ -7,11 +7,15 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 {
+    using System;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Options;
+    using Microsoft.Graph;
+    using Microsoft.Identity.Client;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData;
@@ -23,8 +27,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.GroupMembers;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches.Groups;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.SendTriggersToAzureFunctions;
 
     /// <summary>
@@ -69,20 +77,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                         configuration.GetValue<double>("FirstDataAggregationMessageDelayInSeconds", 20);
                 });
 
+            builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
+                Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
+             {
+                 confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("ClientId");
+                 confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("ClientSecret");
+                 confidentialClientApplicationOptions.TenantId = configuration.GetValue<string>("TenantId");
+             });
+
             // Add orchestration.
             builder.Services.AddTransient<PreparingToSendOrchestration>();
 
             // Add activities.
             builder.Services.AddTransient<GetRecipientDataListForAllUsersActivity>();
             builder.Services.AddTransient<GetTeamDataEntitiesByIdsActivity>();
+            builder.Services.AddTransient<GetUserDataEntitiesByIdsActivity>();
             builder.Services.AddTransient<GetRecipientDataListForRosterActivity>();
-            builder.Services.AddTransient<ProcessRecipientDataListForRosterActivity>();
+            builder.Services.AddTransient<GetRecipientDataListForGroupActivity>();
+            builder.Services.AddTransient<ProcessRecipientDataListActivity>();
             builder.Services.AddTransient<GetRecipientDataListForTeamsActivity>();
             builder.Services.AddTransient<CreateSendingNotificationActivity>();
             builder.Services.AddTransient<SetNotificationMetadataActivity>();
             builder.Services.AddTransient<SendDataAggregationMessageActivity>();
             builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
+            builder.Services.AddTransient<GetGroupMembersActivity>();
+            builder.Services.AddTransient<GetGroupMembersNextPageActivity>();
+            builder.Services.AddTransient<InitializeorFailGroupMembersActivity>();
             builder.Services.AddTransient<HandleFailureActivity>();
+            builder.Services.AddTransient<HandleWarningActivity>();
 
             // Add bot services.
             builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
@@ -103,6 +125,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             // Add miscellaneous dependencies.
             builder.Services.AddTransient<TableRowKeyGenerator>();
             builder.Services.AddTransient<AdaptiveCardCreator>();
+
+            // graph token services
+            builder.Services.AddSingleton<IConfidentialClientApplication>(provider =>
+            {
+                var options = provider.GetRequiredService<IOptions<ConfidentialClientApplicationOptions>>();
+                return ConfidentialClientApplicationBuilder
+                    .Create(options.Value.ClientId)
+                    .WithClientSecret(options.Value.ClientSecret)
+                    .WithAuthority(new Uri($"https://login.microsoftonline.com/{options.Value.TenantId}"))
+                    .Build();
+            });
+            builder.Services.AddTransient<IGraphServiceClient>(serviceProvider =>
+            new GraphServiceClient(serviceProvider.GetRequiredService<IAuthenticationProvider>()));
+            builder.Services.AddTransient<IAuthenticationProvider, MsalAuthenticationProvider>();
+            builder.Services.AddScoped<IGroupMembersService, GroupMembersService>();
         }
     }
 }

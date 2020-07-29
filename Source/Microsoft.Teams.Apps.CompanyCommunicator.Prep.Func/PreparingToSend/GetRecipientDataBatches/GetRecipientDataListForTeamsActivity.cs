@@ -9,6 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -52,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <param name="notificationDataEntity">Notification data entity.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task<RecipientDataListInformation> RunAsync(
-            DurableOrchestrationContext context,
+            IDurableOrchestrationContext context,
             NotificationDataEntity notificationDataEntity)
         {
             if (notificationDataEntity.Teams == null || notificationDataEntity.Teams.Count() == 0)

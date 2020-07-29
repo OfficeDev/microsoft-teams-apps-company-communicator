@@ -90,6 +90,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 IsDraft = false,
                 Teams = draftNotificationEntity.Teams,
                 Rosters = draftNotificationEntity.Rosters,
+                Groups = draftNotificationEntity.Groups,
                 AllUsers = draftNotificationEntity.AllUsers,
                 MessageVersion = draftNotificationEntity.MessageVersion,
                 Succeeded = 0,
