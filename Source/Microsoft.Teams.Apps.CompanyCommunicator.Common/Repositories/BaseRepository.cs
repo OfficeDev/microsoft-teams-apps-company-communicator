@@ -153,6 +153,47 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         }
 
         /// <summary>
+        /// Get filtered data entities by date time from the table storage.
+        /// </summary>
+        /// <param name="dateTime">less than date time.</param>
+        /// <returns>Filtered data entities.</returns>
+        public async Task<IEnumerable<T>> GetAllLessThanDateTimeAsync(DateTime dateTime)
+        {
+            var filterByDate = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.LessThanOrEqual, dateTime);
+
+            var query = new TableQuery<T>().Where(filterByDate);
+
+            var entities = await this.ExecuteQueryAsync(query);
+
+            return entities;
+        }
+
+        /// <summary>
+        /// Get all data stream from the table storage in a partition.
+        /// </summary>
+        /// <param name="partition">Partition key value.</param>
+        /// <param name="count">The max number of desired entities.</param>
+        /// <returns>All data stream..</returns>
+        public async IAsyncEnumerable<IEnumerable<T>> GetStreamsAsync(string partition = null, int? count = null)
+        {
+            var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
+
+            var query = new TableQuery<T>().Where(partitionKeyFilter);
+            query.TakeCount = count;
+
+            TableContinuationToken token = null;
+            TableQuerySegment<T> seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, token);
+            token = seg.ContinuationToken;
+            yield return seg;
+            while (token != null)
+            {
+                seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, token);
+                token = seg.ContinuationToken;
+                yield return seg;
+            }
+        }
+
+        /// <summary>
         /// Insert or merge a batch of entities in Azure table storage.
         /// A batch can contain up to 100 entities.
         /// </summary>
@@ -174,6 +215,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
                 for (var j = lowerBound; j <= upperBound; j++)
                 {
                     batchOperation.InsertOrMerge(array[j]);
+                }
+
+                await this.Table.ExecuteBatchAsync(batchOperation);
+            }
+        }
+
+        /// <summary>
+        /// Insert or merge a batch of entities in Azure table storage.
+        /// A batch can contain up to 100 entities.
+        /// </summary>
+        /// <param name="entities">Entities to be inserted or merged in Azure table storage.</param>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        public async Task BatchDeleteAsync(IEnumerable<T> entities)
+        {
+            var array = entities.ToArray();
+            for (var i = 0; i <= array.Length / 100; i++)
+            {
+                var lowerBound = i * 100;
+                var upperBound = Math.Min(lowerBound + 99, array.Length - 1);
+                if (lowerBound > upperBound)
+                {
+                    break;
+                }
+
+                var batchOperation = new TableBatchOperation();
+                for (var j = lowerBound; j <= upperBound; j++)
+                {
+                    batchOperation.Delete(array[j]);
                 }
 
                 await this.Table.ExecuteBatchAsync(batchOperation);

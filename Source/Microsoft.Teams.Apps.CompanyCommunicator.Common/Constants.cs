@@ -58,5 +58,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         /// get the OData next page link.
         /// </summary>
         public const string ODataNextPageLink = "@odata.nextLink";
+
+        /// <summary>
+        /// get the admin consent error message.
+        /// </summary>
+        public const string AdminConsentError = "<Administrator consent not granted yet>";
     }
 }
