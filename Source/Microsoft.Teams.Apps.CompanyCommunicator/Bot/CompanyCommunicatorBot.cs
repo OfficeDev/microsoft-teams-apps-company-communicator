@@ -90,11 +90,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             FileConsentCardResponse fileConsentCardResponse,
             CancellationToken cancellationToken)
         {
+            var (fileName, notificationId) = this.teamsFileUpload.ExtractInformation(fileConsentCardResponse.Context);
             try
             {
-                var (fileName, notificationId) = this.teamsFileUpload.ExtractInformation(
-                    fileConsentCardResponse.Context);
-
                 await this.teamsFileUpload.UploadToOneDrive(
                     fileName,
                     fileConsentCardResponse.UploadInfo.UploadUrl,
@@ -111,6 +109,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             {
                 await this.teamsFileUpload.FileUploadFailedAsync(
                     turnContext,
+                    notificationId,
                     e.ToString(),
                     cancellationToken);
             }

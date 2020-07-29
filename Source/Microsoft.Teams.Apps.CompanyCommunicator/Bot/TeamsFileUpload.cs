@@ -87,18 +87,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// Send the file upload failed message.
         /// </summary>
         /// <param name="turnContext">The context object for this turn.</param>
+        /// <param name="notificationId">The notification id.</param>
         /// <param name="error">The error message.</param>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects
         /// or threads to receive notice of cancellation.</param>
         /// <returns>A task reprsenting asynchronous operation.</returns>
         public async Task FileUploadFailedAsync(
             ITurnContext turnContext,
+            string notificationId,
             string error,
             CancellationToken cancellationToken)
         {
-            var reply = MessageFactory.Text($"<b>File upload failed.</b> Error: <pre>{error}</pre>");
-            reply.TextFormat = "xml";
-            await turnContext.SendActivityAsync(reply, cancellationToken);
+            var exportData = await this.exportDataRepository.GetAsync(
+                turnContext.Activity.From?.AadObjectId,
+                notificationId);
+
+            if (exportData != null)
+            {
+                var reply = MessageFactory.Text($"<b>File upload failed.</b> Error: <pre>{error}</pre>");
+                reply.TextFormat = "xml";
+                await turnContext.SendActivityAsync(reply, cancellationToken);
+            }
         }
 
         /// <summary>

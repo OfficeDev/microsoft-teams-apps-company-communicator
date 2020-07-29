@@ -99,8 +99,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
                    var message = MessageFactory.Attachment(fileCardAttachment);
 
                    // Retry it in addition to the original call.
-                   var retryPolicy = Policy.Handle<Exception>()
-                   .WaitAndRetryAsync(maxNumberOfAttempts, p => TimeSpan.FromSeconds(p));
+                   var retryPolicy = Policy.Handle<Exception>().WaitAndRetryAsync(maxNumberOfAttempts, p => TimeSpan.FromSeconds(p));
                    await retryPolicy.ExecuteAsync(async () =>
                    {
                        var response = await turnContext.SendActivityAsync(message, cancellationToken);
