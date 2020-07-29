@@ -75,28 +75,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
 
             try
             {
-                var batchRequestContent = this.GetBatchRequest(userIdsByGroups);
-                var response = await this.graphServiceClient
-                    .Batch
-                    .Request()
-                    .WithMaxRetry(this.MaxRetry)
-                    .PostAsync(batchRequestContent);
-
-                Dictionary<string, HttpResponseMessage> responses = await response.GetResponsesAsync();
                 var users = new List<User>();
-                foreach (string key in responses.Keys)
+                var batches = this.GetBatchRequest(userIdsByGroups);
+                foreach (var batchRequestContent in batches)
                 {
-                    HttpResponseMessage httpResponse = await response.GetResponseByIdAsync(key);
-                    httpResponse.EnsureSuccessStatusCode();
+                    var response = await this.graphServiceClient
+                        .Batch
+                        .Request()
+                        .WithMaxRetry(this.MaxRetry)
+                        .PostAsync(batchRequestContent);
 
-                    var responseContent = await httpResponse.Content.ReadAsStringAsync();
-                    var user = JsonConvert.DeserializeObject<User>(responseContent);
-                    JObject content = JObject.Parse(responseContent);
-                    var test = content["value"]
-                        .Children()
-                        .OfType<JObject>()
-                        .Select(obj => obj.ToObject<User>());
-                    users.AddRange(test);
+                    Dictionary<string, HttpResponseMessage> responses = await response.GetResponsesAsync();
+
+                    foreach (string key in responses.Keys)
+                    {
+                        HttpResponseMessage httpResponse = await response.GetResponseByIdAsync(key);
+                        httpResponse.EnsureSuccessStatusCode();
+
+                        var responseContent = await httpResponse.Content.ReadAsStringAsync();
+                        JObject content = JObject.Parse(responseContent);
+                        var userstemp = content["value"]
+                            .Children()
+                            .OfType<JObject>()
+                            .Select(obj => obj.ToObject<User>());
+                        users.AddRange(userstemp);
+                    }
                 }
 
                 return users;
@@ -139,7 +142,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="userId">the user id.</param>
         /// <returns>user data.</returns>
-        public async Task<User> GetUser(string userId)
+        public async Task<User> GetUserAsync(string userId)
         {
             try
             {
@@ -178,19 +181,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             return filterUserIds.ToString();
         }
 
-        private BatchRequestContent GetBatchRequest(IEnumerable<IEnumerable<string>> userIdsByGroups)
+        private IEnumerable<BatchRequestContent> GetBatchRequest(IEnumerable<IEnumerable<string>> userIdsByGroups)
         {
+            var batches = new List<BatchRequestContent>();
+            int maxNoBatchItems = 20;
+
             var batchRequestContent = new BatchRequestContent();
             int requestId = 1;
+
             foreach (var userIds in userIdsByGroups)
             {
                 var filterUserIds = this.GetUserIdFilter(userIds);
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://graph.microsoft.com/v1.0/users?$filters={filterUserIds}");
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://graph.microsoft.com/v1.0/users?$filter={filterUserIds}&$select=id,displayName,userPrincipalName");
                 batchRequestContent.AddBatchRequestStep(new BatchRequestStep(requestId.ToString(), httpRequestMessage));
+
+                if (batchRequestContent.BatchRequestSteps.Count() % maxNoBatchItems == 0)
+                {
+                    batches.Add(batchRequestContent);
+                    batchRequestContent = new BatchRequestContent();
+                }
+
                 requestId++;
             }
 
-            return batchRequestContent;
+            if (batchRequestContent.BatchRequestSteps.Count < maxNoBatchItems)
+            {
+                batches.Add(batchRequestContent);
+            }
+
+            return batches;
         }
     }
 }

@@ -61,7 +61,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.Activities
             NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity) exportRequiredData)
         {
-            var user = await this.usersService.GetUser(exportRequiredData.exportDataEntity.PartitionKey);
+            var user = await this.usersService.GetUserAsync(exportRequiredData.exportDataEntity.PartitionKey);
             var userPrincipalName = (user != null) ?
                 user.UserPrincipalName :
                 Common.Constants.AdminConsentError;

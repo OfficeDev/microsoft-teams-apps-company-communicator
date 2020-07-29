@@ -39,6 +39,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="userId">the user id.</param>
         /// <returns>user data.</returns>
-        Task<User> GetUser(string userId);
+        Task<User> GetUserAsync(string userId);
     }
 }
