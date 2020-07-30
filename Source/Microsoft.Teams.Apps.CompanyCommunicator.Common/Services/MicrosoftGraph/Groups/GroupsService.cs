@@ -56,9 +56,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <returns>boolean.</returns>
         public async Task<bool> ContainsHiddenMembershipAsync(IEnumerable<string> groupIds)
         {
-            return await this.GetByIdsAsync(groupIds).
-                           Where(group => !group.Visibility.IsHiddenMembership()).
-                           AnyAsync();
+            var groups = this.GetByIdsAsync(groupIds);
+            await foreach (var group in groups)
+            {
+                if (group.Visibility.IsHiddenMembership())
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -68,7 +75,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <returns>list of group.</returns>
         public async Task<IList<Group>> SearchAsync(string query)
         {
-            string filterforM365 = $"groupTypes/any(c:c+eq+'Unified') and mailEnabled eq true and securityEnabled eq false and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))";
+            string filterforM365 = $"groupTypes/any(c:c+eq+'Unified') and mailEnabled eq true and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))";
             var groupList = await this.SearchAsync(filterforM365, Common.Constants.HiddenMembership, this.MaxResultCount);
             groupList.AddRange(await this.AddDistributionGroupAsync(query, this.MaxResultCount - groupList.Count()));
             groupList.AddRange(await this.AddSecurityGroupAsync(query, this.MaxResultCount - groupList.Count()));
@@ -88,7 +95,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 return default;
             }
 
-            string filterforDL = $"mailEnabled eq true and securityEnabled eq false and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))";
+            string filterforDL = $"mailEnabled eq true and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))";
             var distributionGroups = await this.SearchAsync(filterforDL, resultCount);
 
             // Filtering the result only for distribution groups.

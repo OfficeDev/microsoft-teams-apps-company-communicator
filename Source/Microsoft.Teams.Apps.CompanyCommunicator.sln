@@ -27,8 +27,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.Compan
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Export.Func", "Microsoft.Teams.Apps.CompanyCommunicator.Export.Func\Microsoft.Teams.Apps.CompanyCommunicator.Export.Func.csproj", "{AF749ABD-DC6F-4D1A-9400-0B44967D07E3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.CleanUp.Func", "Microsoft.Teams.Apps.CompanyCommunicator.CleanUp.Func\Microsoft.Teams.Apps.CompanyCommunicator.CleanUp.Func.csproj", "{EA82C766-C24E-449D-9973-67789CF2E8F6}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,10 +57,6 @@ Global
 		{AF749ABD-DC6F-4D1A-9400-0B44967D07E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF749ABD-DC6F-4D1A-9400-0B44967D07E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF749ABD-DC6F-4D1A-9400-0B44967D07E3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EA82C766-C24E-449D-9973-67789CF2E8F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EA82C766-C24E-449D-9973-67789CF2E8F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EA82C766-C24E-449D-9973-67789CF2E8F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EA82C766-C24E-449D-9973-67789CF2E8F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

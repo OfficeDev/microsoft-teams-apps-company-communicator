@@ -96,8 +96,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notification">An existing Draft Notification to be updated.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [HttpPut]
-        public async Task UpdateDraftNotificationAsync([FromBody] DraftNotification notification)
+        public async Task<IActionResult> UpdateDraftNotificationAsync([FromBody] DraftNotification notification)
         {
+            var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
+            if (containsHiddenMembership)
+            {
+                return this.Forbid();
+            }
+
             var notificationEntity = new NotificationDataEntity
             {
                 PartitionKey = NotificationDataTableNames.DraftNotificationsPartition,
@@ -119,6 +125,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             };
 
             await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
+            return this.Ok();
         }
 
         /// <summary>
