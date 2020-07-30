@@ -11,7 +11,7 @@ import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
-import { ImageUtil } from '../../utility/imageutil';
+import { ImageUtil } from '../../utility/imageutility';
 
 export interface IListItem {
     header: string,

@@ -13,7 +13,7 @@ import {
 } from '../AdaptiveCard/adaptiveCard';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getBaseUrl } from '../../configVariables';
-import { ImageUtil } from '../../utility/imageutil';
+import { ImageUtil } from '../../utility/imageutility';
 
 type dropdownItem = {
     header: string,
