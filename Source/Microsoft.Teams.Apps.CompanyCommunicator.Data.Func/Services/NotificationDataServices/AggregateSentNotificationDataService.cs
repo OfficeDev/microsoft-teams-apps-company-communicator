@@ -4,8 +4,10 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
 
     /// <summary>
@@ -29,9 +31,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
         /// as results.
         /// </summary>
         /// <param name="notificationId">The notification ID.</param>
+        /// <param name="log">The logger.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<AggregatedSentNotificationDataResults> AggregateSentNotificationDataResultsAsync(
-            string notificationId)
+            string notificationId,
+            ILogger log)
         {
             var partitionKeyFilter = TableQuery.GenerateFilterCondition(
                 nameof(TableEntity.PartitionKey),
@@ -79,8 +83,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
 
                 return aggregatedResults;
             }
-            catch
+            catch (Exception e)
             {
+                var errorMessage = $"{e.GetType()}: {e.Message}";
+                log.LogError(e, $"ERROR: {errorMessage}");
                 throw;
             }
         }

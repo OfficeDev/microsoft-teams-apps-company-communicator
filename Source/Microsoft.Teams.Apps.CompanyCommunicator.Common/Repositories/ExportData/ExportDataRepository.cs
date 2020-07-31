@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData
 {
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
 
     /// <summary>
@@ -15,13 +16,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportDat
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportDataRepository"/> class.
         /// </summary>
+        /// <param name="logger">The logging service.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public ExportDataRepository(IOptions<RepositoryOptions> repositoryOptions)
+        public ExportDataRepository(
+            ILogger<ExportDataRepository> logger,
+            IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: ExportDataTableName.TableName,
-                defaultPartitionKey: ExportDataTableName.DefaultPartition,
-                isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  logger,
+                  storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                  tableName: ExportDataTableName.TableName,
+                  defaultPartitionKey: ExportDataTableName.DefaultPartition,
+                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }
 

@@ -4,15 +4,19 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
+    using System.Net;
     using global::Azure.Storage.Blobs;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Diagnostics;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
@@ -33,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
 
     /// <summary>
-    /// Register services in DI container, and set up middlewares in the pipeline.
+    /// Register services in DI container, and set up middle-wares in the pipeline.
     /// </summary>
     public class Startup
     {
@@ -83,7 +87,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     repositoryOptions.StorageAccountConnectionString =
                         configuration.GetValue<string>("StorageAccountConnectionString");
 
-                    // Setting this to false because the main app should ensure that all
+                    // Setting this to false because the main application should ensure that all
                     // tables exist.
                     repositoryOptions.IsItExpectedThatTableAlreadyExists = false;
                 });
@@ -100,6 +104,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                         configuration.GetValue<double>("ForceCompleteMessageDelayInSeconds", 86400);
                 });
             services.AddOptions();
+
+            // Add localization services.
+            services.AddLocalization();
 
             // Add authentication services.
             AuthenticationOptions authenticationOptionsParameter = new AuthenticationOptions();
@@ -164,19 +171,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         /// <param name="env">IHostingEnvironment instance, which provides information about the web hosting environment an application is running in.</param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                app.UseHsts();
-            }
+            app.UseExceptionHandler(applicationBuilder => this.HandleGlobalException(applicationBuilder));
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
+
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
@@ -221,6 +221,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
             authenticationOptions.DisableCreatorUpnCheck = configuration.GetValue<bool>("DisableCreatorUpnCheck", false);
             authenticationOptions.AuthorizedCreatorUpns = configuration.GetValue<string>("AuthorizedCreatorUpns");
+        }
+
+        /// <summary>
+        /// Handle exceptions happened in the HTTP process pipe-line.
+        /// </summary>
+        /// <param name="applicationBuilder">IApplicationBuilder instance, which is a class that provides the mechanisms to configure an application's request pipeline.</param>
+        private void HandleGlobalException(IApplicationBuilder applicationBuilder)
+        {
+            applicationBuilder.Run(async context =>
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                context.Response.ContentType = "application/json";
+
+                var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
+                if (contextFeature != null)
+                {
+                    var loggerFactory = applicationBuilder.ApplicationServices.GetService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger(nameof(Startup));
+                    logger.LogError($"{contextFeature.Error}");
+
+                    await context.Response.WriteAsync(new
+                    {
+                        context.Response.StatusCode,
+                        Message = "Internal Server Error.",
+                    }.ToString());
+                }
+            });
         }
     }
 }

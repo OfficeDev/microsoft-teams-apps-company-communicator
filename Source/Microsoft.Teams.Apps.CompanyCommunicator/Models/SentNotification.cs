@@ -33,9 +33,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public int Failed { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of recipients who were throttled out.
+        /// Gets or sets the number of recipients whose delivery status is unknown.
         /// </summary>
-        public int Throttled { get; set; }
+        public int? Unknown { get; set; }
 
         /// <summary>
         /// Gets or sets Teams audience name collection.

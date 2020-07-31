@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData
 {
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
 
     /// <summary>
@@ -15,13 +16,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationDataRepository"/> class.
         /// </summary>
+        /// <param name="logger">The logging service.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public SentNotificationDataRepository(IOptions<RepositoryOptions> repositoryOptions)
+        public SentNotificationDataRepository(
+            ILogger<SentNotificationDataRepository> logger,
+            IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: SentNotificationDataTableNames.TableName,
-                defaultPartitionKey: SentNotificationDataTableNames.DefaultPartition,
-                isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  logger,
+                  storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                  tableName: SentNotificationDataTableNames.TableName,
+                  defaultPartitionKey: SentNotificationDataTableNames.DefaultPartition,
+                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }
 

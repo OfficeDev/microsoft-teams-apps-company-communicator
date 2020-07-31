@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
 
     /// <summary>
@@ -17,13 +18,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamDataRepository"/> class.
         /// </summary>
+        /// <param name="logger">The logging service.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public TeamDataRepository(IOptions<RepositoryOptions> repositoryOptions)
+        public TeamDataRepository(
+            ILogger<TeamDataRepository> logger,
+            IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: TeamDataTableNames.TableName,
-                defaultPartitionKey: TeamDataTableNames.TeamDataPartition,
-                isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  logger,
+                  storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                  tableName: TeamDataTableNames.TableName,
+                  defaultPartitionKey: TeamDataTableNames.TeamDataPartition,
+                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }
 
@@ -46,7 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         /// <returns>Names of the teams matching incoming ids.</returns>
         public async Task<IEnumerable<string>> GetTeamNamesByIdsAsync(IEnumerable<string> ids)
         {
-            if (ids == null || ids.Count() == 0)
+            if (ids == null || !ids.Any())
             {
                 return new List<string>();
             }

@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData
 {
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
 
@@ -16,13 +17,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatch
         /// <summary>
         /// Initializes a new instance of the <see cref="SendBatchesDataRepository"/> class.
         /// </summary>
+        /// <param name="logger">The logging service.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public SendBatchesDataRepository(IOptions<RepositoryOptions> repositoryOptions)
+        public SendBatchesDataRepository(
+            ILogger<SendBatchesDataRepository> logger,
+            IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: SendBatchesDataTableNames.TableName,
-                defaultPartitionKey: SendBatchesDataTableNames.DefaultPartition,
-                isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  logger,
+                  storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                  tableName: SendBatchesDataTableNames.TableName,
+                  defaultPartitionKey: SendBatchesDataTableNames.DefaultPartition,
+                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }
 

@@ -54,7 +54,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             var tokenHandler = new JwtSecurityTokenHandler();
             var securityToken = tokenHandler.ReadToken(accessToken) as JwtSecurityToken;
             var claimValue = securityToken.Claims
-                .First(claim => claim.Type.Equals(Common.Constants.ClaimTypeScp.ToString(),StringComparison.CurrentCultureIgnoreCase)).Value;
+                .First(claim => claim.Type.Equals(Common.Constants.ClaimTypeScp.ToString(), StringComparison.CurrentCultureIgnoreCase)).Value;
             var intersectScopes = claimValue.ToLower().Split(' ').Intersect(scopes.Select(scp => scp.ToLower())).ToArray();
             return scopes.Length == intersectScopes.Length;
         }

@@ -155,13 +155,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             SecurityToken securityToken,
             TokenValidationParameters validationParameters)
         {
-            if (tokenAudiences == null || tokenAudiences.Count() == 0)
+            if (tokenAudiences == null || !tokenAudiences.Any())
             {
                 throw new ApplicationException("No audience defined in token!");
             }
 
             var validAudiences = validationParameters.ValidAudiences;
-            if (validAudiences == null || validAudiences.Count() == 0)
+            if (validAudiences == null || !validAudiences.Any())
             {
                 throw new ApplicationException("No valid audiences defined in validationParameters!");
             }
