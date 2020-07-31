@@ -27,6 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.Groups;
@@ -142,6 +143,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             // Add service bus message queues.
             services.AddSingleton<PrepareToSendQueue>();
             services.AddSingleton<DataQueue>();
+            services.AddSingleton<ExportQueue>();
 
             // Add draft notification preview services.
             services.AddTransient<DraftNotificationPreviewService>();
