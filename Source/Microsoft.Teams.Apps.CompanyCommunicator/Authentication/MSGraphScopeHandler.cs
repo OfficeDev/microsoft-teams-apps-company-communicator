@@ -50,11 +50,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// <returns>Indicate if access token has scope.</returns>
         private async Task<bool> HasScopesAsync(string[] scopes)
         {
-            var accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new[] { Common.Constants.ScopeUserRead });
+            var accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new[] { Common.Constants.ScopeGroupReadAll });
             var tokenHandler = new JwtSecurityTokenHandler();
             var securityToken = tokenHandler.ReadToken(accessToken) as JwtSecurityToken;
             var claimValue = securityToken.Claims
-                .First(claim => claim.Type.Equals(Common.Constants.ClaimTypeScp.ToString(),StringComparison.CurrentCultureIgnoreCase)).Value;
+                .First(claim => claim.Type.Equals(Common.Constants.ClaimTypeScp.ToString(), StringComparison.CurrentCultureIgnoreCase)).Value;
             var intersectScopes = claimValue.ToLower().Split(' ').Intersect(scopes.Select(scp => scp.ToLower())).ToArray();
             return scopes.Length == intersectScopes.Length;
         }

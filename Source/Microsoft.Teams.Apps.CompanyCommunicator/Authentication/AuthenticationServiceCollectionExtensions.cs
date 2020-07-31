@@ -146,8 +146,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                     .Build());
             });
 
-            services.AddSingleton<IAuthorizationHandler, MustBeValidUpnHandler>();
-            services.AddSingleton<IAuthorizationHandler, MSGraphScopeHandler>();
+            services.AddScoped<IAuthorizationHandler, MustBeValidUpnHandler>();
+            services.AddScoped<IAuthorizationHandler, MSGraphScopeHandler>();
         }
 
         private static bool AudienceValidator(
