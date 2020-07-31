@@ -136,6 +136,7 @@
     "serviceBusSendQueueName": "company-communicator-send",
     "serviceBusDataQueueName": "company-communicator-data",
     "serviceBusPrepareToSendQueueName": "company-communicator-prep",
+	  "serviceBusExportQueueName": "company-communicator-export",
     "defaultSASKeyName": "RootManageSharedAccessKey",
     "authRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('serviceBusNamespaceName'), variables('defaultSASKeyName'))]",
     "sharedSkus": [
@@ -212,6 +213,10 @@
             {
               "name": "AzureAd:ClientId",
               "value": "[parameters('botClientId')]"
+            },
+            {
+              "name": "AzureAd:ClientSecret",
+              "value": "[parameters('botClientSecret')]"
             },
             {
               "name": "AzureAd:ApplicationIdURI",
@@ -423,6 +428,28 @@
             "enablePartitioning": false,
             "enableExpress": false
           }
+        },
+		    {
+          "type": "Queues",
+          "apiVersion": "2017-04-01",
+          "name": "[variables('serviceBusExportQueueName')]",
+          "dependsOn": [
+            "[concat('Microsoft.ServiceBus/namespaces/', variables('serviceBusNamespaceName'))]"
+          ],
+          "properties": {
+            "lockDuration": "PT5M",
+            "maxSizeInMegabytes": 1024,
+            "requiresDuplicateDetection": false,
+            "requiresSession": false,
+            "defaultMessageTimeToLive": "P14D",
+            "deadLetteringOnMessageExpiration": false,
+            "enableBatchedOperations": true,
+            "duplicateDetectionHistoryTimeWindow": "PT10M",
+            "maxDeliveryCount": 10,
+            "status": "Active",
+            "enablePartitioning": false,
+            "enableExpress": false
+          }
         }
       ]
     },
@@ -483,6 +510,10 @@
             {
               "name": "MicrosoftAppPassword",
               "value": "[parameters('botClientSecret')]"
+            },
+			      {
+              "name": "TenantId",
+              "value": "[parameters('tenantId')]"
             },
             {
               "name": "StorageAccountConnectionString",
@@ -661,6 +692,22 @@
             {
               "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
               "value": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
+            },
+            {
+              "name": "MicrosoftAppId",
+              "value": "[parameters('botClientId')]"
+            },
+            {
+              "name": "MicrosoftAppPassword",
+              "value": "[parameters('botClientSecret')]"
+            },
+			      {
+              "name": "CleanUpScheduleTriggerTime",
+              "value": "30 23 * * *"
+            },
+            {
+              "name": "CleanUpFile",
+              "value": "1"
             },
             {
               "name": "StorageAccountConnectionString",

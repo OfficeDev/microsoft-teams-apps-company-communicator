@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -47,8 +48,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
             var sentNotificationDataEntitiesStream = this.sentNotificationDataRepository.GetStreamsAsync(notificationId);
             await foreach (var sentNotifcations in sentNotificationDataEntitiesStream)
             {
+                // filter the recipient not found users.
                 var users = await this.usersService.GetBatchByUserIds(
-                    sentNotifcations.Select(x => x.RowKey)
+                    sentNotifcations
+                    .Where(sentNotifcation => !sentNotifcation.DeliveryStatus.Equals(SentNotificationDataEntity.RecipientNotFound, StringComparison.CurrentCultureIgnoreCase))
+                    .Select(notitification => notitification.RowKey)
                     .ToList()
                     .AsGroups());
                 yield return sentNotifcations.CreateUserData(users);

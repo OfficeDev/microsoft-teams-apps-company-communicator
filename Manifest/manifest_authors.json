@@ -35,7 +35,7 @@
     "scopes": [
       "team"
     ],
-    "supportsFiles": false,
+    "supportsFiles": true,
     "isNotificationOnly": false
   }],
   "permissions": [
