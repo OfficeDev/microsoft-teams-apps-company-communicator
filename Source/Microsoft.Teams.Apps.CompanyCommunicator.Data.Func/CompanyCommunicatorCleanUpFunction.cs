@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.CleanUp.Func
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 {
     using System;
     using System.Collections.Generic;
@@ -12,8 +12,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.CleanUp.Func
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using Microsoft.Teams.Apps.CompanyCommunicator.CleanUp.Func.Services.FileCardServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardServices;
 
     /// <summary>
     /// Azure Function App triggered as per scheduled.

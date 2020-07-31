@@ -17,6 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Graph;
     using Microsoft.Identity.Client;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -26,11 +27,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.GroupMembers;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.Users;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Authentication;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches.Groups;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.SendTriggersToAzureFunctions;
@@ -80,13 +86,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
                 Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
              {
-                 confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("ClientId");
-                 confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("ClientSecret");
+                 confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("MicrosoftAppId");
+                 confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("MicrosoftAppPassword");
                  confidentialClientApplicationOptions.TenantId = configuration.GetValue<string>("TenantId");
              });
 
             // Add orchestration.
             builder.Services.AddTransient<PreparingToSendOrchestration>();
+            builder.Services.AddTransient<ExportOrchestration>();
 
             // Add activities.
             builder.Services.AddTransient<GetRecipientDataListForAllUsersActivity>();
@@ -105,6 +112,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<InitializeorFailGroupMembersActivity>();
             builder.Services.AddTransient<HandleFailureActivity>();
             builder.Services.AddTransient<HandleWarningActivity>();
+            builder.Services.AddTransient<UpdateExportDataActivity>();
+            builder.Services.AddTransient<GetMetaDataActivity>();
+            builder.Services.AddTransient<UploadActivity>();
+            builder.Services.AddTransient<SendFileCardActivity>();
+            builder.Services.AddTransient<HandleExportFailureActivity>();
 
             // Add bot services.
             builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
@@ -117,10 +129,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<UserDataRepository>();
             builder.Services.AddSingleton<TeamDataRepository>();
             builder.Services.AddSingleton<SendBatchesDataRepository>();
+            builder.Services.AddSingleton<ExportDataRepository>();
 
             // Add service bus message queues.
             builder.Services.AddSingleton<SendQueue>();
             builder.Services.AddSingleton<DataQueue>();
+            builder.Services.AddSingleton<ExportQueue>();
 
             // Add miscellaneous dependencies.
             builder.Services.AddTransient<TableRowKeyGenerator>();
@@ -140,6 +154,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             new GraphServiceClient(serviceProvider.GetRequiredService<IAuthenticationProvider>()));
             builder.Services.AddTransient<IAuthenticationProvider, MsalAuthenticationProvider>();
             builder.Services.AddScoped<IGroupMembersService, GroupMembersService>();
+            builder.Services.AddScoped<IUsersService, UsersService>();
+            builder.Services.AddTransient<IDataStreamFacade, DataStreamFacade>();
         }
     }
 }

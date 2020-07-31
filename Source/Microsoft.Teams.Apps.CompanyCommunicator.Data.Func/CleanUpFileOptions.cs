@@ -2,12 +2,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.CleanUp.Func
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     /// <summary>
     /// Options used for holding clean up file number in days.
     /// </summary>

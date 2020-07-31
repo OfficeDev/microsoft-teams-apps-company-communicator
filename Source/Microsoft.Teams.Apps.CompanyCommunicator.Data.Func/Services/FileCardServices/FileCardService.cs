@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.CleanUp.Func.Services.FileCardServices
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardServices
 {
     using System;
     using System.Threading;
