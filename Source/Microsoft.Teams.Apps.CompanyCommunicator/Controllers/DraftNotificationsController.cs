@@ -107,8 +107,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notification">An existing Draft Notification to be updated.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [HttpPut]
-        public async Task<ActionResult> UpdateDraftNotificationAsync([FromBody] DraftNotification notification)
+        public async Task<IActionResult> UpdateDraftNotificationAsync([FromBody] DraftNotification notification)
         {
+            var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
+            if (containsHiddenMembership)
+            {
+                return this.Forbid();
+            }
+
             if (!notification.Validate(this.localizer, out string errorMessage))
             {
                 return this.BadRequest(errorMessage);
@@ -135,7 +141,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             };
 
             await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
-
             return this.Ok();
         }
 

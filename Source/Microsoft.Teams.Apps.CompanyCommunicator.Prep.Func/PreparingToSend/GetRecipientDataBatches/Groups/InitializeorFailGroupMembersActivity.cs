@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches.Groups
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Extensions;
+    using Polly;
 
     /// <summary>
     /// This class contains the "initialize or fail group member" durable activity.
@@ -80,6 +82,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             IEnumerable<User> groupMembers,
             IEnumerable<UserDataEntity> appUsers) groupMembersAndUsersDto)
         {
+            int maxNumberOfAttempts = 10;
+
             // Filter the user not found.
             groupMembersAndUsersDto.appUsers = groupMembersAndUsersDto.appUsers.
                                              Where(user => user != null);
@@ -91,7 +95,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                     return userDataEntity.CreateInitialSentNotificationDataEntity(
                         partitionKey: groupMembersAndUsersDto.notificationDataEntity);
                 });
-            await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(sentNotificationDataEntities);
+
+            // Retry it in addition to the original call.
+            var retryPolicy = Policy.Handle<Exception>().WaitAndRetryAsync(maxNumberOfAttempts, p => TimeSpan.FromSeconds(p));
+            await retryPolicy.ExecuteAsync(async () =>
+            {
+                await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(sentNotificationDataEntities);
+            });
 
             // Fail the user in SentNotificationsData Table.
             var failedUsers = groupMembersAndUsersDto.groupMembers.FilterInstalledUsers(groupMembersAndUsersDto.appUsers).Convert();
@@ -101,7 +111,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                   return userDataEntity.CreateFailedSentNotificationDataEntity(
                       partitionKey: groupMembersAndUsersDto.notificationDataEntity);
               });
-            await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(failedsentNotificationDataEntities);
+
+            // Retry it in addition to the original call.
+            var retryFailedUserPolicy = Policy.Handle<Exception>().WaitAndRetryAsync(maxNumberOfAttempts, p => TimeSpan.FromSeconds(p));
+            await retryPolicy.ExecuteAsync(async () =>
+            {
+                await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(failedsentNotificationDataEntities);
+            });
         }
     }
 }

@@ -21,6 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -30,6 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.Groups;
@@ -143,10 +145,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddSingleton<SentNotificationDataRepository>();
             services.AddSingleton<NotificationDataRepository>();
             services.AddSingleton<SendBatchesDataRepository>();
+            services.AddSingleton<ExportDataRepository>();
 
             // Add service bus message queues.
             services.AddSingleton<PrepareToSendQueue>();
             services.AddSingleton<DataQueue>();
+            services.AddSingleton<ExportQueue>();
 
             // Add draft notification preview services.
             services.AddTransient<DraftNotificationPreviewService>();
