@@ -16,6 +16,7 @@ import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutil';
 
 type dropdownItem = {
+    key: string,
     header: string,
     content: string,
     image: string,
@@ -163,6 +164,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         if (items) {
             items.forEach((element) => {
                 resultedTeams.push({
+                    key: element.id,
                     header: element.name,
                     content: element.mail,
                     image: ImageUtil.makeInitialImage(element.name),
@@ -181,6 +183,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         items.forEach(element =>
             dropdownItemList.push(
                 typeof element !== "string" ? element : {
+                    key: fromItems!.find(x => x.id === element).id,
                     header: fromItems!.find(x => x.id === element).name,
                     image: ImageUtil.makeInitialImage(fromItems!.find(x => x.id === element).name),
                     team: {
@@ -435,7 +438,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                         className="hideToggle"
                                         hidden={!this.state.groupsOptionSelected || !this.state.groupAccess}
                                         placeholder="Type the name or email address of the group(s)"
-                                        search
+                                        search={this.onGroupSearch}
                                         multiple
                                         loading={this.state.loading}
                                         loadingMessage="Loading..."
@@ -516,6 +519,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             }
             remainingUserTeams.forEach((element) => {
                 resultedTeams.push({
+                    key: element.id,
                     header: element.name,
                     content: element.mail,
                     image: ImageUtil.makeInitialImage(element.name),
@@ -554,11 +558,20 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         this.setState({
             selectedGroups: itemsData.value,
             selectedGroupsNum: itemsData.value.length,
+            groups: [],
             selectedTeams: [],
             selectedTeamsNum: 0,
             selectedRosters: [],
             selectedRostersNum: 0
         })
+    }
+
+    private onGroupSearch = (itemList: any, searchQuery: string) => {
+        const result = itemList.filter(
+            (item: { header: string; content: string; }) => item.header.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
+                item.content.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1,
+        )
+        return result;
     }
 
     private onGroupSearchQueryChange = async (event: any, itemsData: any) => {
@@ -580,6 +593,15 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 loading: true,
                 noResultMessage: "",
             });
+
+            // handle event trigger on item select.
+            const result = itemsData.items.filter(
+                (item: { header: string; }) => item.header.toLowerCase().indexOf(itemsData.searchQuery.toLowerCase()) !== -1,
+            )
+            if (result.length > 0) {
+                return;
+            }
+
             try {
                 const response = await searchGroups(itemsData.searchQuery);
                 this.setState({
