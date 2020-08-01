@@ -33,9 +33,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public int Failed { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of recipients who were throttled out.
+        /// Gets or sets the number of recipients whose delivery status is unknown.
         /// </summary>
-        public int Throttled { get; set; }
+        public int? Unknown { get; set; }
 
         /// <summary>
         /// Gets or sets Teams audience name collection.
@@ -48,8 +48,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public IEnumerable<string> RosterNames { get; set; }
 
         /// <summary>
+        /// Gets or sets Groups audience name collection.
+        /// </summary>
+        public IEnumerable<string> GroupNames { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether a notification was sent to all users.
         /// </summary>
         public bool AllUsers { get; set; }
+
+        /// <summary>
+        /// Gets or sets error message.
+        /// </summary>
+        public string ErrorMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets warning message.
+        /// </summary>
+        public string WarningMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether user can download notification.
+        /// </summary>
+        public bool CanDownload { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether sending is in progress.
+        /// </summary>
+        public bool SendingCompleted { get; set; }
     }
 }

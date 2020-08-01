@@ -5,15 +5,22 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Security.Claims;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
-    using Microsoft.Teams.Apps.CompanyCommunicator.NotificationDelivery;
 
     /// <summary>
     /// Controller for the sent notification data.
@@ -23,23 +30,47 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     public class SentNotificationsController : ControllerBase
     {
         private readonly NotificationDataRepository notificationDataRepository;
-        private readonly NotificationDelivery notificationDelivery;
+        private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly TeamDataRepository teamDataRepository;
+        private readonly PrepareToSendQueue prepareToSendQueue;
+        private readonly DataQueue dataQueue;
+        private readonly double forceCompleteMessageDelayInSeconds;
+        private readonly SendBatchesDataRepository sendBatchesDataRepository;
+        private readonly IGroupsService groupsService;
+        private readonly ExportDataRepository exportDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
-        /// <param name="notificationDelivery">Notification delivery service instance.</param>
+        /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
+        /// <param name="prepareToSendQueue">The service bus queue for preparing to send notifications.</param>
+        /// <param name="dataQueue">The service bus queue for the data queue.</param>
+        /// <param name="dataQueueMessageOptions">The options for the data queue messages.</param>
+        /// <param name="sendBatchesDataRepository">The send batches data repository.</param>
+        /// <param name="groupsService">The groups service.</param>
+        /// <param name="exportDataRepository">The Export data repository instance.</param>
         public SentNotificationsController(
             NotificationDataRepository notificationDataRepository,
-            NotificationDelivery notificationDelivery,
-            TeamDataRepository teamDataRepository)
+            SentNotificationDataRepository sentNotificationDataRepository,
+            TeamDataRepository teamDataRepository,
+            PrepareToSendQueue prepareToSendQueue,
+            DataQueue dataQueue,
+            IOptions<DataQueueMessageOptions> dataQueueMessageOptions,
+            SendBatchesDataRepository sendBatchesDataRepository,
+            IGroupsService groupsService,
+            ExportDataRepository exportDataRepository)
         {
             this.notificationDataRepository = notificationDataRepository;
-            this.notificationDelivery = notificationDelivery;
+            this.sentNotificationDataRepository = sentNotificationDataRepository;
             this.teamDataRepository = teamDataRepository;
+            this.prepareToSendQueue = prepareToSendQueue;
+            this.dataQueue = dataQueue;
+            this.forceCompleteMessageDelayInSeconds = dataQueueMessageOptions.Value.ForceCompleteMessageDelayInSeconds;
+            this.sendBatchesDataRepository = sendBatchesDataRepository;
+            this.groupsService = groupsService;
+            this.exportDataRepository = exportDataRepository;
         }
 
         /// <summary>
@@ -48,17 +79,41 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="draftNotification">An instance of <see cref="DraftNotification"/> class.</param>
         /// <returns>The result of an action method.</returns>
         [HttpPost]
-        public async Task<IActionResult> CreateSentNotificationAsync([FromBody]DraftNotification draftNotification)
+        public async Task<IActionResult> CreateSentNotificationAsync(
+            [FromBody] DraftNotification draftNotification)
         {
-            var draftNotificationEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.DraftNotificationsPartition,
+            var draftNotificationDataEntity = await this.notificationDataRepository.GetAsync(
+                NotificationDataTableNames.DraftNotificationsPartition,
                 draftNotification.Id);
-            if (draftNotificationEntity == null)
+            if (draftNotificationDataEntity == null)
             {
-                return this.NotFound();
+                return this.NotFound($"Draft notification, Id: {draftNotification.Id}, could not be found.");
             }
 
-            await this.notificationDelivery.SendAsync(draftNotificationEntity);
+            var newSentNotificationId =
+                await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity);
+
+            // Ensure the data tables needed by the Azure Functions to send the notifications exist in Azure storage.
+            await Task.WhenAll(
+                this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistsAsync(),
+                this.sendBatchesDataRepository.EnsureSendBatchesDataTableExistsAsync());
+
+            var prepareToSendQueueMessageContent = new PrepareToSendQueueMessageContent
+            {
+                NotificationId = newSentNotificationId,
+            };
+            await this.prepareToSendQueue.SendAsync(prepareToSendQueueMessageContent);
+
+            // Send a "force complete" message to the data queue with a delay to ensure that
+            // the notification will be marked as complete no matter the counts
+            var forceCompleteDataQueueMessageContent = new DataQueueMessageContent
+            {
+                NotificationId = newSentNotificationId,
+                ForceMessageComplete = true,
+            };
+            await this.dataQueue.SendDelayedAsync(
+                forceCompleteDataQueueMessageContent,
+                this.forceCompleteMessageDelayInSeconds);
 
             return this.Ok();
         }
@@ -83,10 +138,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     SentDate = notificationEntity.SentDate,
                     Succeeded = notificationEntity.Succeeded,
                     Failed = notificationEntity.Failed,
-                    Throttled = notificationEntity.Throttled,
+                    Unknown = this.GetUnknownCount(notificationEntity),
                     TotalMessageCount = notificationEntity.TotalMessageCount,
                     IsCompleted = notificationEntity.IsCompleted,
                     SendingStartedDate = notificationEntity.SendingStartedDate,
+                    IsPreparingToSend = notificationEntity.IsPreparingToSend,
                 };
 
                 result.Add(summary);
@@ -104,12 +160,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public async Task<IActionResult> GetSentNotificationByIdAsync(string id)
         {
             var notificationEntity = await this.notificationDataRepository.GetAsync(
-                PartitionKeyNames.NotificationDataTable.SentNotificationsPartition,
+                NotificationDataTableNames.SentNotificationsPartition,
                 id);
             if (notificationEntity == null)
             {
                 return this.NotFound();
             }
+
+            var groupNames = await this.groupsService.
+                GetByIdsAsync(notificationEntity.Groups).
+                Select(x => x.DisplayName).
+                ToListAsync();
+
+            var userId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeUserId);
+            var userNotificationDownload = await this.exportDataRepository.GetAsync(userId, id);
 
             var result = new SentNotification
             {
@@ -124,14 +188,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 SentDate = notificationEntity.SentDate,
                 Succeeded = notificationEntity.Succeeded,
                 Failed = notificationEntity.Failed,
-                Throttled = notificationEntity.Throttled,
+                Unknown = this.GetUnknownCount(notificationEntity),
                 TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),
                 RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
+                GroupNames = groupNames,
                 AllUsers = notificationEntity.AllUsers,
                 SendingStartedDate = notificationEntity.SendingStartedDate,
+                ErrorMessage = notificationEntity.ErrorMessage,
+                WarningMessage = notificationEntity.WarningMessage,
+                CanDownload = userNotificationDownload == null,
+                SendingCompleted = notificationEntity.IsCompleted,
             };
 
             return this.Ok(result);
+        }
+
+        private int? GetUnknownCount(NotificationDataEntity notificationEntity)
+        {
+            var unknown = notificationEntity.Unknown;
+
+            // In CC v2, the number of throttled recipients are counted and saved in NotificationDataEntity.Unknown property.
+            // However, CC v1 saved the number of throttled recipients in NotificationDataEntity.Throttled property.
+            // In order to make it backward compatible, we add the throttled number to the unknown variable.
+            var throttled = notificationEntity.Throttled;
+            if (throttled > 0)
+            {
+                unknown += throttled;
+            }
+
+            return unknown > 0 ? unknown : (int?)null;
         }
     }
 }

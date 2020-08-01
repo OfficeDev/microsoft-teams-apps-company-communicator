@@ -10,25 +10,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     using System.Security.Claims;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// This class is an authorization handler, which handles the authorization requirement.
     /// </summary>
     public class MustBeValidUpnHandler : AuthorizationHandler<MustBeValidUpnRequirement>
     {
-        private readonly bool disableAuthentication;
-        private readonly HashSet<string> validUpnSet;
+        private readonly bool disableCreatorUpnCheck;
+        private readonly HashSet<string> authorizedCreatorUpnsSet;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MustBeValidUpnHandler"/> class.
         /// </summary>
-        /// <param name="configuration">ASP.NET Core <see cref="IConfiguration"/> instance.</param>
-        public MustBeValidUpnHandler(IConfiguration configuration)
+        /// <param name="authenticationOptions">The authentication options.</param>
+        public MustBeValidUpnHandler(IOptions<AuthenticationOptions> authenticationOptions)
         {
-            this.disableAuthentication = configuration.GetValue<bool>("DisableAuthentication", false);
-            var validUpns = configuration.GetValue<string>("ValidUpns", string.Empty);
-            this.validUpnSet = validUpns
+            this.disableCreatorUpnCheck = authenticationOptions.Value.DisableCreatorUpnCheck;
+            var authorizedCreatorUpns = authenticationOptions.Value.AuthorizedCreatorUpns;
+            this.authorizedCreatorUpnsSet = authorizedCreatorUpns
                 ?.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
                 ?.Select(p => p.Trim())
                 ?.ToHashSet()
@@ -45,7 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             AuthorizationHandlerContext context,
             MustBeValidUpnRequirement requirement)
         {
-            if (this.disableAuthentication || this.IsValidUpn(context))
+            if (this.disableCreatorUpnCheck || this.IsValidUpn(context))
             {
                 context.Succeed(requirement);
             }
@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
 
         /// <summary>
         /// Check whether a upn is valid or not.
-        /// This is where we should check against the valid list of UPNs
+        /// This is where we should check against the valid list of UPNs.
         /// </summary>
         /// <param name="context">Authorization handler context instance.</param>
         /// <returns>Indicate if a upn is valid or not.</returns>
@@ -68,7 +68,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                 return false;
             }
 
-            return this.validUpnSet.Contains(upn, StringComparer.OrdinalIgnoreCase);
+            return this.authorizedCreatorUpnsSet.Contains(upn, StringComparer.OrdinalIgnoreCase);
         }
     }
 }

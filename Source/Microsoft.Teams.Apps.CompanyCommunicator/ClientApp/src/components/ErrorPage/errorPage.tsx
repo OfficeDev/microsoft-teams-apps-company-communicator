@@ -1,4 +1,4 @@
-import React, { Component }  from 'react';
+import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Text } from '@stardust-ui/react';
 import './errorPage.scss';

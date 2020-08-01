@@ -107,7 +107,7 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
 
     private duplicateDraftMessage = async (id: number) => {
         try {
-            const response = await duplicateDraftNotification(id);
+            await duplicateDraftNotification(id);
         } catch (error) {
             return error;
         }

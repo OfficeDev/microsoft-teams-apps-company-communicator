@@ -7,8 +7,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.Table;
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Repository of the team data stored in the table storage.
@@ -18,14 +18,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamDataRepository"/> class.
         /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
-        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
-        public TeamDataRepository(IConfiguration configuration, bool isFromAzureFunction = false)
+        /// <param name="logger">The logging service.</param>
+        /// <param name="repositoryOptions">Options used to create the repository.</param>
+        public TeamDataRepository(
+            ILogger<TeamDataRepository> logger,
+            IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                  configuration,
-                  PartitionKeyNames.TeamDataTable.TableName,
-                  PartitionKeyNames.TeamDataTable.TeamDataPartition,
-                  isFromAzureFunction)
+                  logger,
+                  storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                  tableName: TeamDataTableNames.TableName,
+                  defaultPartitionKey: TeamDataTableNames.TeamDataPartition,
+                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }
 
@@ -36,23 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         /// <returns>Team data entities.</returns>
         public async Task<IEnumerable<TeamDataEntity>> GetTeamDataEntitiesByIdsAsync(IEnumerable<string> teamIds)
         {
-            var rowKeysFilter = string.Empty;
-            foreach (var teamId in teamIds)
-            {
-                var singleRowKeyFilter = TableQuery.GenerateFilterCondition(
-                    nameof(TableEntity.RowKey),
-                    QueryComparisons.Equal,
-                    teamId);
-
-                if (string.IsNullOrWhiteSpace(rowKeysFilter))
-                {
-                    rowKeysFilter = singleRowKeyFilter;
-                }
-                else
-                {
-                    rowKeysFilter = TableQuery.CombineFilters(rowKeysFilter, TableOperators.Or, singleRowKeyFilter);
-                }
-            }
+            var rowKeysFilter = this.GetRowKeysFilter(teamIds);
 
             return await this.GetWithFilterAsync(rowKeysFilter);
         }
@@ -64,29 +51,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         /// <returns>Names of the teams matching incoming ids.</returns>
         public async Task<IEnumerable<string>> GetTeamNamesByIdsAsync(IEnumerable<string> ids)
         {
-            if (ids == null || ids.Count() == 0)
+            if (ids == null || !ids.Any())
             {
                 return new List<string>();
             }
 
-            var rowKeysFilter = string.Empty;
-            foreach (var id in ids)
-            {
-                var singleRowKeyFilter = TableQuery.GenerateFilterCondition(
-                    nameof(TableEntity.RowKey),
-                    QueryComparisons.Equal,
-                    id);
-
-                if (string.IsNullOrWhiteSpace(rowKeysFilter))
-                {
-                    rowKeysFilter = singleRowKeyFilter;
-                }
-                else
-                {
-                    rowKeysFilter = TableQuery.CombineFilters(rowKeysFilter, TableOperators.Or, singleRowKeyFilter);
-                }
-            }
-
+            var rowKeysFilter = this.GetRowKeysFilter(ids);
             var teamDataEntities = await this.GetWithFilterAsync(rowKeysFilter);
 
             return teamDataEntities.Select(p => p.Name).OrderBy(p => p);

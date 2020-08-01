@@ -4,7 +4,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
 {
-    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Repository of the user data stored in the table storage.
@@ -14,14 +15,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
         /// <summary>
         /// Initializes a new instance of the <see cref="UserDataRepository"/> class.
         /// </summary>
-        /// <param name="configuration">Represents the application configuration.</param>
-        /// <param name="isFromAzureFunction">Flag to show if created from Azure Function.</param>
-        public UserDataRepository(IConfiguration configuration, bool isFromAzureFunction = false)
+        /// <param name="logger">The logging service.</param>
+        /// <param name="repositoryOptions">Options used to create the repository.</param>
+        public UserDataRepository(
+            ILogger<UserDataRepository> logger,
+            IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                configuration,
-                PartitionKeyNames.UserDataTable.TableName,
-                PartitionKeyNames.UserDataTable.UserDataPartition,
-                isFromAzureFunction)
+                  logger,
+                  storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                  tableName: UserDataTableNames.TableName,
+                  defaultPartitionKey: UserDataTableNames.UserDataPartition,
+                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }
     }

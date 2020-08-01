@@ -171,7 +171,7 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
 
     private duplicateDraftMessage = async (id: number) => {
         try {
-            const response = await duplicateDraftNotification(id);
+            await duplicateDraftNotification(id);
         } catch (error) {
             return error;
         }
@@ -179,7 +179,7 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
 
     private deleteDraftMessage = async (id: number) => {
         try {
-            const response = await deleteDraftNotification(id);
+            await deleteDraftNotification(id);
         } catch (error) {
             return error;
         }
