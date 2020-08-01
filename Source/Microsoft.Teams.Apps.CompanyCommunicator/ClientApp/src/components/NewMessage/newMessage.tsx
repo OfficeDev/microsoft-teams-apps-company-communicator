@@ -13,7 +13,7 @@ import {
 } from '../AdaptiveCard/adaptiveCard';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getBaseUrl } from '../../configVariables';
-import { ImageUtil } from '../../utility/imageutil';
+import { ImageUtil } from '../../utility/imageutility';
 
 type dropdownItem = {
     key: string,
@@ -532,7 +532,10 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         return resultedTeams;
     }
 
+    private static MAX_SELECTED_TEAMS_NUM: number = 20;
+
     private onTeamsChange = (event: any, itemsData: any) => {
+        if (itemsData.value.length > NewMessage.MAX_SELECTED_TEAMS_NUM) return;
         this.setState({
             selectedTeams: itemsData.value,
             selectedTeamsNum: itemsData.value.length,
@@ -544,6 +547,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onRostersChange = (event: any, itemsData: any) => {
+      if (itemsData.value.length > NewMessage.MAX_SELECTED_TEAMS_NUM) return;
         this.setState({
             selectedRosters: itemsData.value,
             selectedRostersNum: itemsData.value.length,

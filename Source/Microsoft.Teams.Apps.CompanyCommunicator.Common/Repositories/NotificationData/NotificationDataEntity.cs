@@ -88,15 +88,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         [IgnoreProperty]
         public IEnumerable<string> Teams
         {
-            get
-            {
-                return JsonConvert.DeserializeObject<IEnumerable<string>>(this.TeamsInString);
-            }
-
-            set
-            {
-                this.TeamsInString = JsonConvert.SerializeObject(value);
-            }
+            get => JsonConvert.DeserializeObject<IEnumerable<string>>(this.TeamsInString);
+            set => this.TeamsInString = JsonConvert.SerializeObject(value);
         }
 
         /// <summary>
@@ -114,15 +107,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         [IgnoreProperty]
         public IEnumerable<string> Rosters
         {
-            get
-            {
-                return JsonConvert.DeserializeObject<IEnumerable<string>>(this.RostersInString);
-            }
-
-            set
-            {
-                this.RostersInString = JsonConvert.SerializeObject(value);
-            }
+            get => JsonConvert.DeserializeObject<IEnumerable<string>>(this.RostersInString);
+            set => this.RostersInString = JsonConvert.SerializeObject(value);
         }
 
         /// <summary>
@@ -169,13 +155,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
 
         /// <summary>
         /// Gets or sets the number of recipients who failed to receive the notification because
-        /// of a failure response in the api call.
+        /// of a failure response in the API call.
         /// </summary>
         public int Failed { get; set; }
 
         /// <summary>
         /// Gets or sets the number of recipients who did not receive the message because
-        /// the api response indicated that the bot was throttled.
+        /// the API response indicated that the bot was throttled.
         /// [DEPRECATED - because the bot now retries, this should always stay 0].
         /// </summary>
         public int Throttled { get; set; }
@@ -204,14 +190,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public DateTime? SendingStartedDate { get; set; }
 
         /// <summary>
-        /// Gets or sets the exception message for the notification if there was a failure in
-        /// preparing to send the notification.
+        /// Gets or sets the error message for the notification if there was a failure in
+        /// preparing and sending the notification.
+        /// Front-end shows the ExceptionMessage value in the "View status" task module.
         /// </summary>
-        public string ExceptionMessage { get; set; }
+        public string ErrorMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the warning message for the notification if there was a warning given
-        /// when preparing to send the notification.
+        /// when preparing and sending the notification.
+        /// Front-end shows the WarningMessage value in the "View status" task module.
         /// </summary>
         public string WarningMessage { get; set; }
 

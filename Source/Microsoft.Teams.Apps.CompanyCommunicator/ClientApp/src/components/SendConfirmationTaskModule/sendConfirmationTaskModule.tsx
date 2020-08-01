@@ -9,7 +9,7 @@ import {
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
 import * as microsoftTeams from "@microsoft/teams-js";
-import { ImageUtil } from '../../utility/imageutil';
+import { ImageUtil } from '../../utility/imageutility';
 
 export interface IListItem {
     header: string,

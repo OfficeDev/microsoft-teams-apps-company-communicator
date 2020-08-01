@@ -24,13 +24,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Ext
         {
             var batches = new List<List<T>>();
 
-            var totalNumberOfEntites = sourceList.Count;
+            var totalNumberOfEntities = sourceList.Count;
 
             // Use the SendQueue's maximum number of messages in a batch request number because
             // the list is being broken into batches in order to be added to that queue.
             var batchSize = SendQueue.MaxNumberOfMessagesInBatchRequest;
-            var numberOfCompleteBatches = totalNumberOfEntites / batchSize;
-            var numberOfEntitiesInIncompleteBatch = totalNumberOfEntites % batchSize;
+            var numberOfCompleteBatches = totalNumberOfEntities / batchSize;
+            var numberOfEntitiesInIncompleteBatch = totalNumberOfEntities % batchSize;
 
             for (var i = 0; i < numberOfCompleteBatches; i++)
             {

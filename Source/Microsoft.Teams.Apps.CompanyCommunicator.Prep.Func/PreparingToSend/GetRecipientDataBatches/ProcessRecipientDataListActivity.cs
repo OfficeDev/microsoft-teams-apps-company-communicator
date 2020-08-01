@@ -104,7 +104,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                     notificationId: notificationDataEntityId,
                     batchIndex: batchIndex);
 
-                // The SendBatchesData table is separated into batches based on the parition key, so
+                // The SendBatchesData table is separated into batches based on the partition key, so
                 // set all of the partition keys for the entities in this batch to the batchPartitionKey.
                 var sendBatchesDataRepositoryBatch = sentNotificationDataEntityBatch.Select(e =>
                     {

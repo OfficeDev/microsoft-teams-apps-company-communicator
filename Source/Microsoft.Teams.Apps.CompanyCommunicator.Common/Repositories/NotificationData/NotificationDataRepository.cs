@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
 
     /// <summary>
@@ -17,16 +18,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationDataRepository"/> class.
         /// </summary>
+        /// <param name="logger">The logging service.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
         /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
         public NotificationDataRepository(
+            ILogger<NotificationDataRepository> logger,
             IOptions<RepositoryOptions> repositoryOptions,
             TableRowKeyGenerator tableRowKeyGenerator)
             : base(
-                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: NotificationDataTableNames.TableName,
-                defaultPartitionKey: NotificationDataTableNames.DraftNotificationsPartition,
-                isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  logger,
+                  storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                  tableName: NotificationDataTableNames.TableName,
+                  defaultPartitionKey: NotificationDataTableNames.DraftNotificationsPartition,
+                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
             this.TableRowKeyGenerator = tableRowKeyGenerator;
         }
@@ -65,48 +69,56 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <returns>The new SentNotification ID.</returns>
         public async Task<string> MoveDraftToSentPartitionAsync(NotificationDataEntity draftNotificationEntity)
         {
-            if (draftNotificationEntity == null)
+            try
             {
-                throw new ArgumentNullException(nameof(draftNotificationEntity));
+                if (draftNotificationEntity == null)
+                {
+                    throw new ArgumentNullException(nameof(draftNotificationEntity));
+                }
+
+                var newSentNotificationId = this.TableRowKeyGenerator.CreateNewKeyOrderingMostRecentToOldest();
+
+                // Create a sent notification based on the draft notification.
+                var sentNotificationEntity = new NotificationDataEntity
+                {
+                    PartitionKey = NotificationDataTableNames.SentNotificationsPartition,
+                    RowKey = newSentNotificationId,
+                    Id = newSentNotificationId,
+                    Title = draftNotificationEntity.Title,
+                    ImageLink = draftNotificationEntity.ImageLink,
+                    Summary = draftNotificationEntity.Summary,
+                    Author = draftNotificationEntity.Author,
+                    ButtonTitle = draftNotificationEntity.ButtonTitle,
+                    ButtonLink = draftNotificationEntity.ButtonLink,
+                    CreatedBy = draftNotificationEntity.CreatedBy,
+                    CreatedDate = draftNotificationEntity.CreatedDate,
+                    SentDate = null,
+                    IsDraft = false,
+                    Teams = draftNotificationEntity.Teams,
+                    Rosters = draftNotificationEntity.Rosters,
+                    Groups = draftNotificationEntity.Groups,
+                    AllUsers = draftNotificationEntity.AllUsers,
+                    MessageVersion = draftNotificationEntity.MessageVersion,
+                    Succeeded = 0,
+                    Failed = 0,
+                    Throttled = 0,
+                    TotalMessageCount = draftNotificationEntity.TotalMessageCount,
+                    IsCompleted = false,
+                    SendingStartedDate = DateTime.UtcNow,
+                    IsPreparingToSend = true,
+                };
+                await this.CreateOrUpdateAsync(sentNotificationEntity);
+
+                // Delete the draft notification.
+                await this.DeleteAsync(draftNotificationEntity);
+
+                return newSentNotificationId;
             }
-
-            var newSentNotificationId = this.TableRowKeyGenerator.CreateNewKeyOrderingMostRecentToOldest();
-
-            // Create a sent notification based on the draft notification.
-            var sentNotificationEntity = new NotificationDataEntity
+            catch (Exception ex)
             {
-                PartitionKey = NotificationDataTableNames.SentNotificationsPartition,
-                RowKey = newSentNotificationId,
-                Id = newSentNotificationId,
-                Title = draftNotificationEntity.Title,
-                ImageLink = draftNotificationEntity.ImageLink,
-                Summary = draftNotificationEntity.Summary,
-                Author = draftNotificationEntity.Author,
-                ButtonTitle = draftNotificationEntity.ButtonTitle,
-                ButtonLink = draftNotificationEntity.ButtonLink,
-                CreatedBy = draftNotificationEntity.CreatedBy,
-                CreatedDate = draftNotificationEntity.CreatedDate,
-                SentDate = null,
-                IsDraft = false,
-                Teams = draftNotificationEntity.Teams,
-                Rosters = draftNotificationEntity.Rosters,
-                Groups = draftNotificationEntity.Groups,
-                AllUsers = draftNotificationEntity.AllUsers,
-                MessageVersion = draftNotificationEntity.MessageVersion,
-                Succeeded = 0,
-                Failed = 0,
-                Throttled = 0,
-                TotalMessageCount = draftNotificationEntity.TotalMessageCount,
-                IsCompleted = false,
-                SendingStartedDate = DateTime.UtcNow,
-                IsPreparingToSend = true,
-            };
-            await this.CreateOrUpdateAsync(sentNotificationEntity);
-
-            // Delete the draft notification.
-            await this.DeleteAsync(draftNotificationEntity);
-
-            return newSentNotificationId;
+                this.logger.LogError(ex, ex.Message);
+                throw;
+            }
         }
 
         /// <summary>
@@ -119,29 +131,37 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             NotificationDataEntity notificationEntity,
             string createdBy)
         {
-            var newId = this.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent();
-
-            // TODO: Set the string "(copy)" in a resource file for multi-language support.
-            var newNotificationEntity = new NotificationDataEntity
+            try
             {
-                PartitionKey = NotificationDataTableNames.DraftNotificationsPartition,
-                RowKey = newId,
-                Id = newId,
-                Title = notificationEntity.Title + " (copy)",
-                ImageLink = notificationEntity.ImageLink,
-                Summary = notificationEntity.Summary,
-                Author = notificationEntity.Author,
-                ButtonTitle = notificationEntity.ButtonTitle,
-                ButtonLink = notificationEntity.ButtonLink,
-                CreatedBy = createdBy,
-                CreatedDate = DateTime.UtcNow,
-                IsDraft = true,
-                Teams = notificationEntity.Teams,
-                Rosters = notificationEntity.Rosters,
-                AllUsers = notificationEntity.AllUsers,
-            };
+                var newId = this.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent();
 
-            await this.CreateOrUpdateAsync(newNotificationEntity);
+                // TODO: Set the string "(copy)" in a resource file for multi-language support.
+                var newNotificationEntity = new NotificationDataEntity
+                {
+                    PartitionKey = NotificationDataTableNames.DraftNotificationsPartition,
+                    RowKey = newId,
+                    Id = newId,
+                    Title = notificationEntity.Title + " (copy)",
+                    ImageLink = notificationEntity.ImageLink,
+                    Summary = notificationEntity.Summary,
+                    Author = notificationEntity.Author,
+                    ButtonTitle = notificationEntity.ButtonTitle,
+                    ButtonLink = notificationEntity.ButtonLink,
+                    CreatedBy = createdBy,
+                    CreatedDate = DateTime.UtcNow,
+                    IsDraft = true,
+                    Teams = notificationEntity.Teams,
+                    Rosters = notificationEntity.Rosters,
+                    AllUsers = notificationEntity.AllUsers,
+                };
+
+                await this.CreateOrUpdateAsync(newNotificationEntity);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, ex.Message);
+                throw;
+            }
         }
 
         /// <summary>
@@ -159,8 +179,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 notificationDataEntityId);
             if (notificationDataEntity != null)
             {
-                notificationDataEntity.ExceptionMessage =
-                    this.AppendNewLine(notificationDataEntity.ExceptionMessage, errorMessage);
+                notificationDataEntity.ErrorMessage =
+                    this.AppendNewLine(notificationDataEntity.ErrorMessage, errorMessage);
 
                 notificationDataEntity.IsCompleted = true;
 
@@ -178,15 +198,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             string notificationDataEntityId,
             string warningMessage)
         {
-            var notificationDataEntity = await this.GetAsync(
-                NotificationDataTableNames.SentNotificationsPartition,
-                notificationDataEntityId);
-            if (notificationDataEntity != null)
+            try
             {
-                notificationDataEntity.WarningMessage =
-                    this.AppendNewLine(notificationDataEntity.WarningMessage, warningMessage);
+                var notificationDataEntity = await this.GetAsync(
+                    NotificationDataTableNames.SentNotificationsPartition,
+                    notificationDataEntityId);
+                if (notificationDataEntity != null)
+                {
+                    notificationDataEntity.WarningMessage =
+                        this.AppendNewLine(notificationDataEntity.WarningMessage, warningMessage);
 
-                await this.CreateOrUpdateAsync(notificationDataEntity);
+                    await this.CreateOrUpdateAsync(notificationDataEntity);
+                }
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, ex.Message);
+                throw;
             }
         }
 

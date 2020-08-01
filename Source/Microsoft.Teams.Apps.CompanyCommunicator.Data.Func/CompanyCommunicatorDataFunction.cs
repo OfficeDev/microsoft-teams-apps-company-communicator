@@ -89,7 +89,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             {
                 // Get all of the result counts (Successes, Failures, etc.) from the Sent Notification Data.
                 var aggregatedSentNotificationDataResults = await this.aggregateSentNotificationDataService
-                    .AggregateSentNotificationDataResultsAsync(messageContent.NotificationId);
+                    .AggregateSentNotificationDataResultsAsync(messageContent.NotificationId, log);
 
                 // Use these counts to update the Notification Data accordingly.
                 var notificationDataEntityUpdate = await this.updateNotificationDataService
@@ -97,7 +97,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                         notificationId: messageContent.NotificationId,
                         shouldForceCompleteNotification: messageContent.ForceMessageComplete,
                         totalExpectedNotificationCount: notificationDataEntity.TotalMessageCount,
-                        aggregatedSentNotificationDataResults: aggregatedSentNotificationDataResults);
+                        aggregatedSentNotificationDataResults: aggregatedSentNotificationDataResults,
+                        log: log);
 
                 // If the notification is still not in a completed state, then requeue the Data Queue trigger
                 // message with a delay in order to aggregate the results again.

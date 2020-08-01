@@ -5,10 +5,11 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData
 {
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
 
     /// <summary>
-    /// Repository for the entity that holds metadata for all sending operations in the table storage.
+    /// Repository for the entity that holds meta-data for all sending operations in the table storage.
     /// </summary>
     public class GlobalSendingNotificationDataRepository : BaseRepository<GlobalSendingNotificationDataEntity>
     {
@@ -17,18 +18,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <summary>
         /// Initializes a new instance of the <see cref="GlobalSendingNotificationDataRepository"/> class.
         /// </summary>
+        /// <param name="logger">The logging service.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public GlobalSendingNotificationDataRepository(IOptions<RepositoryOptions> repositoryOptions)
+        public GlobalSendingNotificationDataRepository(
+            ILogger<GlobalSendingNotificationDataRepository> logger,
+            IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: NotificationDataTableNames.TableName,
-                defaultPartitionKey: NotificationDataTableNames.GlobalSendingNotificationDataPartition,
-                isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  logger,
+                  storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                  tableName: NotificationDataTableNames.TableName,
+                  defaultPartitionKey: NotificationDataTableNames.GlobalSendingNotificationDataPartition,
+                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }
 
         /// <summary>
-        /// Gets the entity that holds metadata for all sending operations.
+        /// Gets the entity that holds meta-data for all sending operations.
         /// </summary>
         /// <returns>The Global Sending Notification Data Entity.</returns>
         public async Task<GlobalSendingNotificationDataEntity> GetGlobalSendingNotificationDataEntityAsync()
@@ -39,10 +44,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <summary>
-        /// Insert or merges the entity that holds metadata for all sending operations. Partition Key and Row Key do not need to be
+        /// Insert or merges the entity that holds meta-data for all sending operations. Partition Key and Row Key do not need to be
         /// set on the incoming entity.
         /// </summary>
-        /// <param name="globalSendingNotificationDataEntity">Entity that holds metadata for all sending operations. Partition Key and
+        /// <param name="globalSendingNotificationDataEntity">Entity that holds meta-data for all sending operations. Partition Key and
         /// Row Key do not need to be set.</param>
         /// <returns>The Task.</returns>
         public async Task SetGlobalSendingNotificationDataEntityAsync(GlobalSendingNotificationDataEntity globalSendingNotificationDataEntity)

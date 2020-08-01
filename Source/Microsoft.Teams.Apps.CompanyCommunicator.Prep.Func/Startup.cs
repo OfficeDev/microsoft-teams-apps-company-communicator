@@ -83,6 +83,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                         configuration.GetValue<double>("FirstDataAggregationMessageDelayInSeconds", 20);
                 });
 
+            // Add localization.
+            builder.Services.AddLocalization();
+
             builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
                 Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
              {
@@ -96,6 +99,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<ExportOrchestration>();
 
             // Add activities.
+            builder.Services.AddTransient<GetAllUsersDataEntitiesActivity>();
             builder.Services.AddTransient<GetRecipientDataListForAllUsersActivity>();
             builder.Services.AddTransient<GetTeamDataEntitiesByIdsActivity>();
             builder.Services.AddTransient<GetUserDataEntitiesByIdsActivity>();

@@ -138,7 +138,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     SentDate = notificationEntity.SentDate,
                     Succeeded = notificationEntity.Succeeded,
                     Failed = notificationEntity.Failed,
-                    Throttled = notificationEntity.Throttled,
+                    Unknown = this.GetUnknownCount(notificationEntity),
                     TotalMessageCount = notificationEntity.TotalMessageCount,
                     IsCompleted = notificationEntity.IsCompleted,
                     SendingStartedDate = notificationEntity.SendingStartedDate,
@@ -188,19 +188,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 SentDate = notificationEntity.SentDate,
                 Succeeded = notificationEntity.Succeeded,
                 Failed = notificationEntity.Failed,
-                Throttled = notificationEntity.Throttled,
+                Unknown = this.GetUnknownCount(notificationEntity),
                 TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),
                 RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
                 GroupNames = groupNames,
                 AllUsers = notificationEntity.AllUsers,
                 SendingStartedDate = notificationEntity.SendingStartedDate,
-                ErrorMessage = notificationEntity.ExceptionMessage,
+                ErrorMessage = notificationEntity.ErrorMessage,
                 WarningMessage = notificationEntity.WarningMessage,
                 CanDownload = userNotificationDownload == null,
                 SendingCompleted = notificationEntity.IsCompleted,
             };
 
             return this.Ok(result);
+        }
+
+        private int? GetUnknownCount(NotificationDataEntity notificationEntity)
+        {
+            var unknown = notificationEntity.Unknown;
+
+            // In CC v2, the number of throttled recipients are counted and saved in NotificationDataEntity.Unknown property.
+            // However, CC v1 saved the number of throttled recipients in NotificationDataEntity.Throttled property.
+            // In order to make it backward compatible, we add the throttled number to the unknown variable.
+            var throttled = notificationEntity.Throttled;
+            if (throttled > 0)
+            {
+                unknown += throttled;
+            }
+
+            return unknown > 0 ? unknown : (int?)null;
         }
     }
 }

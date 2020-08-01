@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Newtonsoft.Json;
@@ -46,12 +47,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         /// <param name="serviceUrl">The service URL to use for sending the notification.</param>
         /// <param name="conversationId">The conversation ID of the conversation to which the notification should be sent.</param>
         /// <param name="maxNumberOfAttempts">The maximum number of request attempts to send the notification.</param>
+        /// <param name="log">The logger.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<SendNotificationResponse> SendAsync(
             string notificationContent,
             string serviceUrl,
             string conversationId,
-            int maxNumberOfAttempts)
+            int maxNumberOfAttempts,
+            ILogger log)
         {
             var sendNotificationResponse = new SendNotificationResponse
             {
@@ -100,6 +103,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                         }
                         catch (ErrorResponseException e)
                         {
+                            log.LogError(e, $"ERROR: {e.GetType()}: {e.Message}");
+
                             var responseStatusCode = e.Response.StatusCode;
                             sendNotificationResponse.StatusCode = (int)responseStatusCode;
                             sendNotificationResponse.AllSendStatusCodes += $"{(int)responseStatusCode},";

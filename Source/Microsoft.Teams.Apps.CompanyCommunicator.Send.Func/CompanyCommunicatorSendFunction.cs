@@ -102,7 +102,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                 var shouldProceedWithProcessing = await this.precheckService.VerifyMessageShouldBeProcessedAsync(
                     messageContent: messageContent,
-                    sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds);
+                    sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds,
+                    log: log);
 
                 // If it is determined processing the queue message should not proceed, then
                 // complete the function.
@@ -120,7 +121,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                  */
 
                 var sendNotificationParams = await this.getSendNotificationParamsService
-                    .GetSendNotificationParamsAsync(messageContent);
+                    .GetSendNotificationParamsAsync(messageContent, log);
 
                 // Stop the processing of the queue message if something negative occurred while generating
                 // the parameters e.g. getting throttled, a failure, etc.
@@ -141,20 +142,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     notificationContent: sendNotificationParams.NotificationContent,
                     serviceUrl: sendNotificationParams.ServiceUrl,
                     conversationId: sendNotificationParams.ConversationId,
-                    maxNumberOfAttempts: this.maxNumberOfAttempts);
+                    maxNumberOfAttempts: this.maxNumberOfAttempts,
+                    log: log);
 
                 if (sendNotificationResponse.ResultType == SendNotificationResultType.Succeeded)
                 {
                     log.LogInformation("MESSAGE SENT SUCCESSFULLY");
 
-                    await this.manageResultDataService.ProccessResultDataAsync(
+                    await this.manageResultDataService.ProcessResultDataAsync(
                         notificationId: messageContent.NotificationId,
                         recipientId: sendNotificationParams.RecipientId,
                         totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
                         isStatusCodeFromCreateConversation: false,
                         statusCode: sendNotificationResponse.StatusCode,
                         allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes,
-                        errorMessage: sendNotificationResponse.ErrorMessage);
+                        errorMessage: sendNotificationResponse.ErrorMessage,
+                        log: log);
                 }
                 else if (sendNotificationResponse.ResultType == SendNotificationResultType.Throttled)
                 {
@@ -167,7 +170,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     await this.delaySendingNotificationService
                         .DelaySendingNotificationAsync(
                             sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds,
-                            sendQueueMessageContent: messageContent);
+                            sendQueueMessageContent: messageContent,
+                            log: log);
 
                     // Ensure all processing of the queue message is stopped because of being delayed.
                     return;
@@ -178,14 +182,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     // Save the relevant information and exclude the not found recipient from the list.
                     log.LogError($"MESSAGE RECIPIENT NOT FOUND. ERROR: {sendNotificationResponse.ErrorMessage}");
 
-                    await this.manageResultDataService.ProccessResultDataAsync(
+                    await this.manageResultDataService.ProcessResultDataAsync(
                         notificationId: messageContent.NotificationId,
                         recipientId: sendNotificationParams.RecipientId,
                         totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
                         isStatusCodeFromCreateConversation: false,
                         statusCode: sendNotificationResponse.StatusCode,
                         allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes,
-                        errorMessage: sendNotificationResponse.ErrorMessage);
+                        errorMessage: sendNotificationResponse.ErrorMessage,
+                        log: log);
                 }
                 else if (sendNotificationResponse.ResultType == SendNotificationResultType.Failed)
                 {
@@ -193,14 +198,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     // Save the relevant information and do not attempt the request again.
                     log.LogError($"MESSAGE FAILED: {sendNotificationResponse.StatusCode}. ERROR: {sendNotificationResponse.ErrorMessage}");
 
-                    await this.manageResultDataService.ProccessResultDataAsync(
+                    await this.manageResultDataService.ProcessResultDataAsync(
                         notificationId: messageContent.NotificationId,
                         recipientId: sendNotificationParams.RecipientId,
                         totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
                         isStatusCodeFromCreateConversation: false,
                         statusCode: sendNotificationResponse.StatusCode,
                         allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes,
-                        errorMessage: sendNotificationResponse.ErrorMessage);
+                        errorMessage: sendNotificationResponse.ErrorMessage,
+                        log: log);
 
                     // Ensure all processing of the queue message is stopped because sending
                     // the notification failed.
@@ -232,14 +238,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                 // Set the status code in the allSendStatusCodes in order to store a record of
                 // the attempt.
-                await this.manageResultDataService.ProccessResultDataAsync(
+                await this.manageResultDataService.ProcessResultDataAsync(
                     notificationId: messageContent.NotificationId,
                     recipientId: messageContent.RecipientData.RecipientId,
                     totalNumberOfSendThrottles: 0,
                     isStatusCodeFromCreateConversation: false,
                     statusCode: statusCodeToStore,
                     allSendStatusCodes: $"{statusCodeToStore},",
-                    errorMessage: errorMessage);
+                    errorMessage: errorMessage,
+                    log: log);
 
                 throw;
             }

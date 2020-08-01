@@ -157,7 +157,10 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
     if (message.isCompleted) {
       return (<Text />);
     } else {
-      let currentNum = message.succeeded + message.failed + message.throttled;
+      let currentNum =
+        (message.succeeded ? message.succeeded : 0) +
+        (message.failed ? message.failed : 0) +
+        (message.unknown ? message.unknown : 0);
       return (
         <Text
           truncated
@@ -207,10 +210,13 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
               <Icon name="stardust-close" xSpacing="both" className="failed" outline />
               <span className="semiBold">{message.failed}</span>
             </TooltipHost>
-            <TooltipHost content="Throttled" calloutProps={{ gapSpace: 0 }}>
-              <Icon name="exclamation-circle" xSpacing="both" className="throttled" outline />
-              <span className="semiBold">{message.throttled}</span>
-            </TooltipHost>
+            {
+              message.unknown && 
+              <TooltipHost content="Unknown" calloutProps={{ gapSpace: 0 }}>
+                <Icon name="exclamation-circle" xSpacing="both" className="unknown" outline />
+                <span className="semiBold">{message.unknown}</span>
+              </TooltipHost>
+            }
           </div>
         </Flex.Item>
         <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >

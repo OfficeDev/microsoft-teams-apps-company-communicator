@@ -1,4 +1,4 @@
-﻿// <copyright file="HandleFailureActivity.cs" company="Microsoft">
+﻿// <copyright file="HandleExportFailureActivity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 

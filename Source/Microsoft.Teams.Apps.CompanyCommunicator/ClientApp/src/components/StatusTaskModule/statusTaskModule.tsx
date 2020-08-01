@@ -11,7 +11,7 @@ import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
-import { ImageUtil } from '../../utility/imageutil';
+import { ImageUtil } from '../../utility/imageutility';
 
 export interface IListItem {
     header: string,
@@ -26,7 +26,7 @@ export interface IMessage {
     responses?: string;
     succeeded?: string;
     failed?: string;
-    throttled?: string;
+    unknown?: string;
     sentDate?: string;
     imageLink?: string;
     summary?: string;
@@ -116,8 +116,18 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
     private formatNotificationSendingDuration = (sendingStartedDate: string, sentDate: string) => {
         let sendingDuration = "";
         if (sendingStartedDate && sentDate) {
-            let timeDifference = new Date(sentDate).getTime() - new Date(sendingStartedDate).getTime();
-            sendingDuration = new Date(timeDifference).toISOString().substr(11, 8);
+            let timeDifference = (new Date(sentDate).getTime() - new Date(sendingStartedDate).getTime()) / 1000;
+            const hours = Math.floor(timeDifference / 3600);
+            timeDifference -= hours * 3600;
+            const minutes = Math.floor(timeDifference / 60);
+            timeDifference -= minutes * 60;
+            const seconds = Math.floor(timeDifference);
+
+            const hoursAsString = ("0" + hours).slice(-2);
+            const minutesAsString = ("0" + minutes).slice(-2);
+            const secondsAsString = ("0" + seconds).slice(-2);
+
+            sendingDuration = `${hoursAsString}:${minutesAsString}:${secondsAsString}`;
         }
         return sendingDuration;
     }
@@ -168,8 +178,12 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                                     <label>Failure : </label>
                                     <span>{this.state.message.failed}</span>
                                     <br />
-                                    <label>Throttled : </label>
-                                    <span>{this.state.message.throttled}</span>
+                                    {this.state.message.unknown &&
+                                        <>
+                                            <label>Unknown : </label>
+                                            <span>{this.state.message.unknown}</span>
+                                        </>
+                                    }
                                 </div>
                                 <div className="contentField">
                                     {this.renderAudienceSelection()}
@@ -280,7 +294,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         if (this.state.message.teamNames && this.state.message.teamNames.length > 0) {
             return (
                 <div>
-                    <h3>Sent to General channel in teams</h3>
+                    <h3>Sent to General channel of the following teams</h3>
                     <List items={this.getItemList(this.state.message.teamNames)} />
                 </div>);
         } else if (this.state.message.rosterNames && this.state.message.rosterNames.length > 0) {
@@ -309,7 +323,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         if (this.state.message.errorMessage) {
             return (
                 <div>
-                    <h3>Error message</h3>
+                    <h3>Errors</h3>
                     <span>{this.state.message.errorMessage}</span>
                 </div>
             );
@@ -322,7 +336,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         if (this.state.message.warningMessage) {
             return (
                 <div>
-                    <h3>Warning message</h3>
+                    <h3>Warnings</h3>
                     <span>{this.state.message.warningMessage}</span>
                 </div>
             );

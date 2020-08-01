@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
 {
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
 
     /// <summary>
@@ -14,13 +15,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
         /// <summary>
         /// Initializes a new instance of the <see cref="UserDataRepository"/> class.
         /// </summary>
+        /// <param name="logger">The logging service.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public UserDataRepository(IOptions<RepositoryOptions> repositoryOptions)
+        public UserDataRepository(
+            ILogger<UserDataRepository> logger,
+            IOptions<RepositoryOptions> repositoryOptions)
             : base(
-                storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                tableName: UserDataTableNames.TableName,
-                defaultPartitionKey: UserDataTableNames.UserDataPartition,
-                isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  logger,
+                  storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
+                  tableName: UserDataTableNames.TableName,
+                  defaultPartitionKey: UserDataTableNames.UserDataPartition,
+                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
         {
         }
     }
