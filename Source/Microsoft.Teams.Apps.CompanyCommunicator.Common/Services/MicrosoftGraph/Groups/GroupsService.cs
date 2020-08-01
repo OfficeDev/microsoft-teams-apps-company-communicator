@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.Groups
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -75,7 +76,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <returns>list of group.</returns>
         public async Task<IList<Group>> SearchAsync(string query)
         {
-            string filterforM365 = $"groupTypes/any(c:c+eq+'Unified') and mailEnabled eq true and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))";
+            string filterforM365 = Uri.EscapeUriString($"groupTypes/any(c:c+eq+'Unified') and mailEnabled eq true and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))");
             var groupList = await this.SearchAsync(filterforM365, Common.Constants.HiddenMembership, this.MaxResultCount);
             groupList.AddRange(await this.AddDistributionGroupAsync(query, this.MaxResultCount - groupList.Count()));
             groupList.AddRange(await this.AddSecurityGroupAsync(query, this.MaxResultCount - groupList.Count()));
@@ -95,7 +96,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 return default;
             }
 
-            string filterforDL = $"mailEnabled eq true and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))";
+            string filterforDL = Uri.EscapeUriString($"mailEnabled eq true and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))");
             var distributionGroups = await this.SearchAsync(filterforDL, resultCount);
 
             // Filtering the result only for distribution groups.
@@ -123,7 +124,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 return default;
             }
 
-            string filterforSG = $"mailEnabled eq false and securityEnabled eq true and startsWith(displayName,'{query}')";
+            string filterforSG = Uri.EscapeUriString($"mailEnabled eq false and securityEnabled eq true and startsWith(displayName,'{query}')");
             var sgGroups = await this.SearchAsync(filterforSG, resultCount);
             return sgGroups.CurrentPage.Take(resultCount);
         }
