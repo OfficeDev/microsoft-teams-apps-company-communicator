@@ -27,7 +27,7 @@ The app service exposes a bot messaging endpoint, which receives activities from
 
 **messageReaction:** When the user reacts to a message sent by the bot, Teams sends the bot a `messageReaction` [event](https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/bots/bots-notifications#reactions). We don't use this information in the initial version, we plan to do so in the future.
 
-**filConsent:** When the user accepts/decline the file consent card sent by the bot, Team sends the bot a `fileConsentAccept` or `fileConsentDecline` [event](https://docs.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/send-and-receive-files?tabs=dotnet).On user's consent file is uploaded to user's One Drive.
+**fileConsent:** When the user accepts/decline the file consent card sent by the bot, Team sends the bot a `fileConsentAccept` or `fileConsentDecline` [event](https://docs.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/send-and-receive-files?tabs=dotnet).On user's consent file is uploaded to user's One Drive.
 
 
 ## Azure Function
@@ -65,4 +65,4 @@ This is an durable function and is executed on each message in the "export" Serv
 
 ### Clean function
 
-This is an time trigger function and it runs as per the scheduled time. It deletes the staged files and file consent card to which there is no response by user within a set period of time.
+This is an time trigger function and it runs as per the scheduled time. It deletes the staged files and file consent card for which there is no response from user within a set period of time.

@@ -12,29 +12,29 @@ https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deplo
 
 ##### 2: Assign Permission to your app
 
-    1. Select **API Permissions** blade from the left hand side.
+  1. Select **API Permissions** blade from the left hand side.
 
-    2. Click on **Add a permission** button to add permission to your app.
+  2. Click on **Add a permission** button to add permission to your app.
 
-    3. In Microsoft APIs under Select an API label, select the particular service and give the following permissions,
+  3. In Microsoft APIs under Select an API label, select the particular service and give the following permissions,
 
     Under “Commonly used Microsoft APIs”, 
 
     Select “Microsoft Graph”, then select **Delegated permissions** and check the following permissions,
 
-    * Group.Read.All
-    * User.Read
+        * Group.Read.All
+        * User.Read
 
     then select **Application permissions** and check the following permissions,
 
-    * Group.Read.All
-    * User.Read.All
+        * Group.Read.All
+        * User.Read.All
 
     Click on **Add Permissions** to commit your changes.
 
-    5. If you are logged in as the Global Administrator, click on the “Grant admin consent for %tenant-name%” button to grant admin consent, else inform your Admin to do the same through the portal or follow the steps provided here  to create a link and sent it to your Admin for consent.
+  5. If you are logged in as the Global Administrator, click on the “Grant admin consent for %tenant-name%” button to grant admin consent, else inform your Admin to do the same through the portal or follow the steps provided here  to create a link and sent it to your Admin for consent.
 
-    6. Global Administrator can also grant consent using following link: https://login.microsoftonline.com/common/adminconsent?client_id= <%appId%>
+  6. Global Administrator can also grant consent using following link: https://login.microsoftonline.com/common/adminconsent?client_id= <%appId%>
 
 ##### 3. Click on the "Deploy to Azure" below
 [![Deploy to Azure](https://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploy.json)
@@ -70,15 +70,15 @@ https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deplo
 
 ##### 4. Update the Teams app package
 
-    You need to only update the author's team package.
+You need to only update the author's team package.
 
-    1. Open the `Manifest\manifest_authors.json` file in a text editor.
+  1. Open the `Manifest\manifest_authors.json` file in a text editor.
 
-    2. Change the value of `supportFiles` from `false` to `true`.
+  2. Change the value of `supportFiles` from `false` to `true`.
 
-        > Please refer to step 4 in the Deployment guide for more details on creating the Teams app package [this section](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide) 
+    > Please refer to step 4 in the Deployment guide for more details on creating the Teams app package [this section](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide) 
 
-        > Please refer to [this](https://docs.microsoft.com/en-us/microsoftteams/manage-apps#upload-a-new-app) to update the app package.
+    > Please refer to [this](https://docs.microsoft.com/en-us/microsoftteams/manage-apps#upload-a-new-app) to update the app package.
 
 ##### 5. The migration is done once the deployment completed.
 No need to change either AAD App Registration. It is pretty strait-forward. 
