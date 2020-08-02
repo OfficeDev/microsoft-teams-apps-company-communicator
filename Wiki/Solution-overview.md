@@ -3,7 +3,7 @@
 The **Company Communicator** app has the following main components:
 * **App Service**: The app service implements the message compose experience in the team tab, and the messaging endpoint for the bot.
 * **Service Bus**: The individual messages sent by the bot to the recipients are enqueued on a service bus queue, to be processed by an Azure Function. This queue decouples the message composition experience from the process that delivers the message to recipients.
-* **Azure Function**: An Azure Function picks up the messages from the send queue and delivers them to the recipients.
+* **Azure Function**: An Azure Function picks up the messages from the queue, prepares the recipients and delivers them.
 
 ## App Service
 
@@ -27,10 +27,12 @@ The app service exposes a bot messaging endpoint, which receives activities from
 
 **messageReaction:** When the user reacts to a message sent by the bot, Teams sends the bot a `messageReaction` [event](https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/bots/bots-notifications#reactions). We don't use this information in the initial version, we plan to do so in the future.
 
+**filConsent:** When the user accepts/decline the file consent card sent by the bot, Team sends the bot a `fileConsentAccept` or `fileConsentDecline` [event](https://docs.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/send-and-receive-files?tabs=dotnet).On user's consent file is uploaded to user's One Drive.
+
 
 ## Azure Function
 
-Company Communicator uses two Azure Functions:
+Company Communicator uses five Azure Functions:
 
 ### Send function
 
@@ -44,3 +46,23 @@ This function is executed on each message in the "send" Service Bus queue, which
 ### Data aggregation function
 
 An instance of this function runs every 30 seconds, while the app is actively delivering messages. For each message that's currently in the sending state, the data aggregation function checks the delivery records created by the Send fuction, and updates the success, failure, and throttle counts, so that the information shown in the tab is up-to-date.
+
+### Prepare To Send function
+
+This is an durable function and is executed on each message in the "prepare-to-send" Service Bus queue. The function will:
+1. Get the receipients of the message, based on the message ID.
+2. Store the receipients in an Azure Table.
+3. Prepare the adaptive card.
+4. Send a data aggregation trigger queue message to the data queue for the data function to process.
+5. Send triggers to Send queue for the Send function.
+
+### Export function
+
+This is an durable function and is executed on each message in the "export" Service Bus queue. The function will:
+1. Get the receipients of the sent message, based on the message ID.
+2. Create and stage the zip file in Azure Blob Storage.
+3. Send the File Consent Card to upload the file to User's One Drive.
+
+### Clean function
+
+This is an time trigger function and it runs as per the scheduled time. It deletes the staged files and file consent card to which there is no response by user within a set period of time.
