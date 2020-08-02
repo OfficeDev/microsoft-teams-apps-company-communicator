@@ -186,7 +186,7 @@ Click on **Add Permissions** to commit your changes.
 1. Click "Save" to commit your changes.
 
 
-# Step 4: Create the Teams app packages
+# Step 5: Create the Teams app packages
 
 Create two Teams app packages: one to be installed to the authors team and one for recipients to install personally and/or to teams.
 
@@ -220,7 +220,7 @@ Create two Teams app packages: one to be installed to the authors team and one f
 Repeat the steps above but with the file `Manifest\manifest_users.json`. Note: you will not need to change anything for the configurationUrl or webApplicationInfo section because the recipients app does not have the configurable tab. Name the resulting package `company-communicator-users.zip`, so you know that this is the app for the recipients.
 
 
-# Step 5: Run the apps in Microsoft Teams
+# Step 6: Run the apps in Microsoft Teams
 
 If your tenant has sideloading apps enabled, you can install your app by following the instructions [here](https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/apps/apps-upload#load-your-package-into-teams).
 

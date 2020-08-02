@@ -1,4 +1,4 @@
-If you already have version 1 of the Company Communicator app deployed in Azure, then it be can easily migrated to v2 by using the following steps:
+If you already have version 1 of the Company Communicator app deployed in Azure, then it be can easily migrated to version 2 by using the following steps:
 ##### 1. Find out the following information of your Company Communicator v1 deployment. They are required in the migration:
   * The name of the Azure subscription. 
   * The name of the Azure resource group.
@@ -77,7 +77,7 @@ You need to only update the author's team package.
 
   2. Change the value of `supportFiles` from `false` to `true`.
 
-  > Please refer to step 4 in the Deployment guide for more details on creating the 
+  > Please refer to step 5 in the Deployment guide for more details on creating the 
   Teams app package 
   [this section](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide).
 
