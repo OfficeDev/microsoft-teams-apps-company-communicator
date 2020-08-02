@@ -48,8 +48,35 @@ We recommend that you copy these values into a text file, using an application l
 
 ![image2](images/azure-config-app-step3.png)
 
+# Step 2: Assign Permission to your app
 
-# Step 2: Deploy to your Azure subscription
+Continuation to Step 1(Above steps).
+
+1. Select “API Permissions” blade from the left hand side.
+
+2. Click on “Add a permission” button to add permission to your app.
+
+3. In Microsoft APIs under Select an API label, select the particular service and give the following permissions,
+
+Under “Commonly used Microsoft APIs”, 
+
+Select “Microsoft Graph”, then select “Delegated permissions” and check the following permissions,
+
+Group.Read.All
+User.Read
+
+then select "Application permissions” and check the following permissions,
+
+Group.Read.All
+User.Read.All
+
+Click on “Add Permissions” to commit your changes.
+
+5. If you are logged in as the Global Administrator, click on the “Grant admin consent for %tenant-name%” button to grant admin consent, else inform your Admin to do the same through the portal or follow the steps provided here  to create a link and sent it to your Admin for consent.
+
+6. Global Administrator can also grant consent using following link: https://login.microsoftonline.com/common/adminconsent?client_id= <%appId%>
+
+# Step 3: Deploy to your Azure subscription
 1. Click on the "Deploy to Azure" button below.
    
 [![Deploy to Azure](https://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploy.json)
@@ -98,7 +125,7 @@ We recommend that you copy these values into a text file, using an application l
 
 > **IMPORTANT:** If you plan to use a custom domain name instead of relying on Azure Front Door, read the instructions [here](Custom-domain-option) before continuing any further.
 
-# Step 3: Set up authentication
+# Step 4: Set up authentication
 
 1. Note that you have the `%botId%` and `%appDomain%` values from the previous step.
 
