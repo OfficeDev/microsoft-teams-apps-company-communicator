@@ -63,6 +63,6 @@ This is an durable function and is executed on each message in the "export" Serv
 2. Create and stage the zip file in Azure Blob Storage.
 3. Send the File Consent Card to upload the file to User's One Drive.
 
-### Clean function
+### Clean Up function
 
-This is an time trigger function and it runs as per the scheduled time. It deletes the staged files and file consent card for which there is no response from user within a set period of time.
+This is an time trigger function and runs as per the scheduled time. It deletes the staged files and file consent card for which there is no response from user within a set period of time.
