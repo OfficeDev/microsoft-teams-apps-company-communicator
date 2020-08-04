@@ -11,8 +11,8 @@ The app provides an easy interface for designated users to create, preview, coll
 
 ### Key features
 * **Message creation:** Easily create messages by using a team tab where team members who are permissioned can collaborate and create messages.
-* **Audience selection:** Pick from three options to target audience. Send to general channel of selected teams, send in 1:1 chat to members of selected teams or send to all users who have the app installed.
-
+* **Audience selection:** Pick from four options to target audience. Send to general channel of selected teams, send in 1:1 chat to members of selected teams, send to all users who have the app installed or send to M365 groups, distribution lists or security groups.
+* **Message metrics:** Export messages delivery report.
 ## Get started
 
 Begin with the [Solution overview](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview) to read about what the app does and how it works.

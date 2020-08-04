@@ -1,7 +1,3 @@
-## Message throttling
-
-Unless your bot is whitelisted for higher limits, the bot's attempt at sending a message will get throttled at 8,000 messages every 30 minutes (rolling window). If you exceed this limit, you will see messages in the throttled state. 
-
 ## Retries
 
 If your message is throttled, the app will try to send the messages again. Therefore, enabling the eventual delivery of the messages. For example, if the app is sending 15K messages, it should take a maximum of an hour or so to deliver.
