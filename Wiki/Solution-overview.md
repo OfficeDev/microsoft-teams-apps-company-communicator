@@ -1,9 +1,10 @@
-![Overview](images/architecture_overview.png)
+![Overview](images/architecture_overview_v2.png)
 
 The **Company Communicator** app has the following main components:
 * **App Service**: The app service implements the message compose experience in the team tab, and the messaging endpoint for the bot.
 * **Service Bus**: The individual messages sent by the bot to the recipients are enqueued on a service bus queue, to be processed by an Azure Function. This queue decouples the message composition experience from the process that delivers the message to recipients.
-* **Azure Function**: An Azure Function picks up the messages from the queue, prepares the recipients and delivers them.
+* **Azure Function**: The Azure Functions picks up the messages from the queues, prepares the recipients and delivers them.
+* **Microsoft Graph API**: The app leverages Microsoft graph api's to [Search Groups](https://docs.microsoft.com/en-us/graph/api/group-list?view=graph-rest-1.0&tabs=http), [Get Group Transitive Members](https://docs.microsoft.com/en-us/graph/api/group-list-transitivemembers?view=graph-rest-1.0&tabs=http) and [Get User](https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http).
 
 ## App Service
 
@@ -13,7 +14,7 @@ The app service implements two main components, the tab for composing messages a
 
 The messages tab is the interface by which message authors create the messages to be sent, specify the intended recipients, and initiate the send. After sending, the tab reports the status of the message delivery, as counts of deliveries that were successful, failed, or throttled.
 
-The tab is implemneted as a React application, using UI components from [Stardust UI](https://github.com/stardust-ui/react) and [Office UI Fabric React](https://github.com/OfficeDev/office-ui-fabric-react). The message compose UX is in a [task module](https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/task-modules/task-modules-overview), with a message preview implemented using the [Adaptive Cards SDK](https://docs.microsoft.com/en-us/adaptive-cards/sdk/rendering-cards/javascript/getting-started).
+The tab is implemented as a React application, using UI components from [Stardust UI](https://github.com/stardust-ui/react) and [Office UI Fabric React](https://github.com/OfficeDev/office-ui-fabric-react). The message compose UX is in a [task module](https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/task-modules/task-modules-overview), with a message preview implemented using the [Adaptive Cards SDK](https://docs.microsoft.com/en-us/adaptive-cards/sdk/rendering-cards/javascript/getting-started).
 
 The tab's front-end gets its data from web APIs implemented by the same app service that's hosting it. These APIs are protected by AAD token authentication, which checks that the user attempting to access the site is in the list of valid senders.
 
@@ -66,3 +67,18 @@ This is an durable function and is executed on each message in the "export" Serv
 ### Clean Up function
 
 This is an time trigger function and runs as per the scheduled time. It deletes the staged files and file consent card for which there is no response from user within a set period of time.
+
+## Microsoft Graph API 
+
+1. Company communicator app service performs group search which requires `Delegated permission` and tenant admin to provide consent.
+
+|Sr. No.| Use Case | API|  Delegated permissions| API version
+|--|--|--|--|--|
+| 1. | Search Groups | GET [https://graph.microsoft.com/v1.0/groups?$filter={condition}](https://docs.microsoft.com/en-us/graph/api/group-list?view=graph-rest-1.0&tabs=http) | Group.Read.All| V1.0
+
+2. Company Communicator azure functions gets group transitive members and get user details which requires `Application permissions` and tenant admin to provide consent.
+
+|Sr. No.| Use Case | API|  Application permissions| API version
+|--|--|--|--|--|
+| 1. | Get Group Transitive Members | GET [https://graph.microsoft.com/v1.0/groups/{group-id}/transitiveMembers](https://docs.microsoft.com/en-us/graph/api/group-list-transitivemembers?view=graph-rest-1.0&tabs=http) | Group.Read.All| V1.0
+| 2. | Get User | GET [https://graph.microsoft.com/v1.0/ysers/{user-id}](https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http) | User.Read.All| V1.0

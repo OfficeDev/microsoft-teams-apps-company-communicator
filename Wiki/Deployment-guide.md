@@ -50,7 +50,7 @@ We recommend that you copy these values into a text file, using an application l
 
 # Step 2: Assign Permission to your app
 
-Continuation to Step 1(Above steps).
+Continuing from the Azure AD app registration page where we ended Step 1.
 
 1. Select **API Permissions** blade from the left hand side.
 
@@ -58,23 +58,22 @@ Continuation to Step 1(Above steps).
 
 3. In Microsoft APIs under Select an API label, select the particular service and give the following permissions,
 
-Under “Commonly used Microsoft APIs”, 
+    * Under “Commonly used Microsoft APIs”, 
 
-Select “Microsoft Graph”, then select **Delegated permissions** and check the following permissions,
+    * Select “Microsoft Graph”, then select **Delegated permissions** and check the following permissions,
+        1. **Group.Read.All**
 
-    * Group.Read.All
-    * User.Read
+    * then select **Application permissions** and check the following permissions,
+        1. **Group.Read.All**
+        2. **User.Read.All**
 
-then select **Application permissions** and check the following permissions,
+    * Click on **Add Permissions** to commit your changes.
 
-    * Group.Read.All
-    * User.Read.All
-
-Click on **Add Permissions** to commit your changes.
+    > Please refer to [Solution overview](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview) for more details about the above permissions.
 
 5. If you are logged in as the Global Administrator, click on the “Grant admin consent for %tenant-name%” button to grant admin consent, else inform your Admin to do the same through the portal or follow the steps provided here  to create a link and sent it to your Admin for consent.
 
-6. Global Administrator can also grant consent using following link: https://login.microsoftonline.com/common/adminconsent?client_id= <%appId%>
+6. Global Administrator can also grant consent using following link: https://login.microsoftonline.com/common/adminconsent?client_id= <%appId%>. Please replace the %appId% with the `Application (client) ID` of Microsoft Teams bot app (from above).
 
 # Step 3: Deploy to your Azure subscription
 1. Click on the "Deploy to Azure" button below.
