@@ -39,43 +39,16 @@ Register an Azure AD applications in your tenant's directory for the bot.
 
 1. Once the client secret is created, copy its **Value**; we will need it later.
 
-At this point you have 3 unique values:
-* Application (client) ID for the bot
-* Client secret for the bot
-* Directory (tenant) ID
+    At this point you have 3 unique values:
+    * Application (client) ID for the bot
+    * Client secret for the bot
+    * Directory (tenant) ID
 
-We recommend that you copy these values into a text file, using an application like Notepad. We will need these values later.
+    We recommend that you copy these values into a text file, using an application like Notepad. We will need these values later.
 
-![image2](images/azure-config-app-step3.png)
+    ![image2](images/azure-config-app-step3.png)
 
-# Step 2: Assign Permission to your app
-
-Continuing from the Azure AD app registration page where we ended Step 1.
-
-1. Select **API Permissions** blade from the left hand side.
-
-2. Click on **Add a permission** button to add permission to your app.
-
-3. In Microsoft APIs under Select an API label, select the particular service and give the following permissions,
-
-    * Under “Commonly used Microsoft APIs”, 
-
-    * Select “Microsoft Graph”, then select **Delegated permissions** and check the following permissions,
-        1. **Group.Read.All**
-
-    * then select **Application permissions** and check the following permissions,
-        1. **Group.Read.All**
-        2. **User.Read.All**
-
-    * Click on **Add Permissions** to commit your changes.
-
-    > Please refer to [Solution overview](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview) for more details about the above permissions.
-
-5. If you are logged in as the Global Administrator, click on the “Grant admin consent for %tenant-name%” button to grant admin consent, else inform your Admin to do the same through the portal or follow the steps provided here  to create a link and sent it to your Admin for consent.
-
-6. Global Administrator can also grant consent using following link: https://login.microsoftonline.com/common/adminconsent?client_id= <%appId%>. Please replace the %appId% with the `Application (client) ID` of Microsoft Teams bot app (from above).
-
-# Step 3: Deploy to your Azure subscription
+# Step 2: Deploy to your Azure subscription
 1. Click on the "Deploy to Azure" button below.
    
 [![Deploy to Azure](https://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploy.json)
@@ -124,7 +97,7 @@ Continuing from the Azure AD app registration page where we ended Step 1.
 
 > **IMPORTANT:** If you plan to use a custom domain name instead of relying on Azure Front Door, read the instructions [here](Custom-domain-option) before continuing any further.
 
-# Step 4: Set up authentication
+# Step 3: Set up authentication
 
 1. Note that you have the `%botId%` and `%appDomain%` values from the previous step.
 
@@ -184,6 +157,32 @@ Continuing from the Azure AD app registration page where we ended Step 1.
 
 1. Click "Save" to commit your changes.
 
+# Step 4: Assign Permission to your app
+
+Continuing from the Azure AD app registration page where we ended Step 3.
+
+1. Select **API Permissions** blade from the left hand side.
+
+2. Click on **Add a permission** button to add permission to your app.
+
+3. In Microsoft APIs under Select an API label, select the particular service and give the following permissions,
+
+    * Under “Commonly used Microsoft APIs”, 
+
+    * Select “Microsoft Graph”, then select **Delegated permissions** and check the following permissions,
+        1. **Group.Read.All**
+
+    * then select **Application permissions** and check the following permissions,
+        1. **Group.Read.All**
+        2. **User.Read.All**
+
+    * Click on **Add Permissions** to commit your changes.
+
+    > Please refer to [Solution overview](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview) for more details about the above permissions.
+
+4. If you are logged in as the Global Administrator, click on the “Grant admin consent for %tenant-name%” button to grant admin consent, else inform your Admin to do the same through the portal or follow the steps provided here  to create a link and sent it to your Admin for consent.
+
+5. Global Administrator can also grant consent using following link: https://login.microsoftonline.com/common/adminconsent?client_id=%appId%. Please replace the `%appId%` with the `Application (client) ID` of Microsoft Teams bot app (from above).
 
 # Step 5: Create the Teams app packages
 
