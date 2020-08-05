@@ -10,7 +10,18 @@ If you already have version 1 of the Company Communicator app deployed in Azure,
     > Please refer to step 2 in the Deployment guide for more details about the above values.
 https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide
 
-##### 2: Assign Permission to your app
+##### 2: SetUp Token version
+
+1. Go to the **App Registrations** page [here](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps).
+
+1. Under "Manage", click on "Manifest".
+
+1. In the editor that appears, find the `accessTokenAcceptedVersion` property in the JSON Azure AD application, and set the value to `2`. After updating it will appear like below:
+    ```
+       "accessTokenAcceptedVersion": 2
+    ```
+
+##### 3: Assign Permission to your app
 
 1. Go to the **App Registrations** page [here](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps).
 
@@ -37,7 +48,7 @@ https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deplo
 
 6. Global Administrator can also grant consent using following link: https://login.microsoftonline.com/common/adminconsent?client_id=%appId%. Please replace the `%appId%` with the `bot client id` of Microsoft Teams bot app (from above).
 
-##### 3. Click on the "Deploy to Azure" below
+##### 4. Click on the "Deploy to Azure" below
 [![Deploy to Azure](https://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploy.json)
   * When prompted, log in to the Azure subscription.
   
@@ -69,7 +80,7 @@ https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deplo
     > If the deployment fails, see [this section](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Troubleshooting#1-code-deployment-failure) of the Troubleshooting guide.
 
 
-##### 4. Update the Teams app package
+##### 5. Update the Teams app package
 
 You need to only update the author's team package.
 
@@ -85,5 +96,5 @@ You need to only update the author's team package.
   [this link](https://docs.microsoft.com/en-us/microsoftteams/manage-apps#upload-a-new-app) 
   to update the app package.
 
-##### 5. The migration is done once the deployment completed.
+##### 6. The migration is done once the deployment completed.
 No need to change either AAD App Registration. It is pretty strait-forward. 
