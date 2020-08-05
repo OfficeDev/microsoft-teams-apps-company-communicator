@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             string defaultPartitionKey,
             bool isItExpectedThatTableAlreadyExists)
         {
-            this.logger = logger;
+            this.Logger = logger;
 
             var storageAccount = CloudStorageAccount.Parse(storageAccountConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
@@ -63,6 +63,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         public CloudTable Table { get; }
 
         /// <summary>
+        /// Gets the logger service.
+        /// </summary>
+        protected ILogger Logger { get; }
+
+        /// <summary>
         /// Create or update an entity in the table storage.
         /// </summary>
         /// <param name="entity">Entity to be created or updated.</param>
@@ -76,7 +81,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, ex.Message);
+                this.Logger.LogError(ex, ex.Message);
                 throw;
             }
         }
@@ -95,7 +100,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, ex.Message);
+                this.Logger.LogError(ex, ex.Message);
                 throw;
             }
         }
@@ -123,7 +128,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, ex.Message);
+                this.Logger.LogError(ex, ex.Message);
                 throw;
             }
         }
@@ -144,7 +149,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, ex.Message);
+                this.Logger.LogError(ex, ex.Message);
                 throw;
             }
         }
@@ -167,7 +172,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, ex.Message);
+                this.Logger.LogError(ex, ex.Message);
                 throw;
             }
         }
@@ -189,7 +194,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, ex.Message);
+                this.Logger.LogError(ex, ex.Message);
                 throw;
             }
         }
@@ -266,7 +271,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, ex.Message);
+                this.Logger.LogError(ex, ex.Message);
                 throw;
             }
         }
@@ -330,7 +335,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, ex.Message);
+                this.Logger.LogError(ex, ex.Message);
                 throw;
             }
         }

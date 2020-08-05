@@ -547,7 +547,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     private onRostersChange = (event: any, itemsData: any) => {
-      if (itemsData.value.length > NewMessage.MAX_SELECTED_TEAMS_NUM) return;
+        if (itemsData.value.length > NewMessage.MAX_SELECTED_TEAMS_NUM) return;
         this.setState({
             selectedRosters: itemsData.value,
             selectedRostersNum: itemsData.value.length,
@@ -572,8 +572,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
     private onGroupSearch = (itemList: any, searchQuery: string) => {
         const result = itemList.filter(
-            (item: { header: string; content: string; }) => item.header.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
-                item.content.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1,
+            (item: { header: string; content: string; }) => (item.header && item.header.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1) ||
+                (item.content && item.content.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1),
         )
         return result;
     }
@@ -593,18 +593,18 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             });
         }
         else if (itemsData.searchQuery && itemsData.searchQuery.length > 2) {
+            // handle event trigger on item select.
+            const result = itemsData.items && itemsData.items.find(
+                (item: { header: string; }) => item.header.toLowerCase() === itemsData.searchQuery.toLowerCase()
+            )
+            if (result) {
+                return;
+            }
+
             this.setState({
                 loading: true,
                 noResultMessage: "",
             });
-
-            // handle event trigger on item select.
-            const result = itemsData.items.filter(
-                (item: { header: string; }) => item.header.toLowerCase().indexOf(itemsData.searchQuery.toLowerCase()) !== -1,
-            )
-            if (result.length > 0) {
-                return;
-            }
 
             try {
                 const response = await searchGroups(itemsData.searchQuery);

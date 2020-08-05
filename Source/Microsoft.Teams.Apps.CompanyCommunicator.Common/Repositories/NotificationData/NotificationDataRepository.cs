@@ -116,7 +116,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, ex.Message);
+                this.Logger.LogError(ex, ex.Message);
                 throw;
             }
         }
@@ -159,7 +159,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, ex.Message);
+                this.Logger.LogError(ex, ex.Message);
                 throw;
             }
         }
@@ -213,7 +213,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, ex.Message);
+                this.Logger.LogError(ex, ex.Message);
                 throw;
             }
         }
