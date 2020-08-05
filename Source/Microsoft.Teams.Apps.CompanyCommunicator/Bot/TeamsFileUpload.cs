@@ -104,7 +104,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
             if (exportData != null)
             {
-                var reply = MessageFactory.Text("Something went wrong.Try exporting the results again.");
+                var reply = MessageFactory.Text("Something went wrong. Try exporting the results again.");
                 reply.TextFormat = "xml";
                 await turnContext.SendActivityAsync(reply, cancellationToken);
             }
