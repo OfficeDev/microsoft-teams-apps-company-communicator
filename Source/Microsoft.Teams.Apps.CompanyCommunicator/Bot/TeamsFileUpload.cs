@@ -76,7 +76,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
             await this.CleanUp(turnContext, fileName, notificationId, cancellationToken);
 
-            var reply = MessageFactory.Text($"<b>File uploaded.</b> Your file <b>{fileConsentCardResponse.UploadInfo.Name}</b> is ready to download");
+            var reply = MessageFactory.Text($"Your file is ready to download. A copy is also available in OneDrive.");
             reply.TextFormat = "xml";
             reply.Attachments = new List<Attachment> { asAttachment };
 
@@ -104,7 +104,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
             if (exportData != null)
             {
-                var reply = MessageFactory.Text($"<b>File upload failed.</b> Error: <pre>{error}</pre>");
+                var reply = MessageFactory.Text("Something went wrong.Try exporting the results again.");
                 reply.TextFormat = "xml";
                 await turnContext.SendActivityAsync(reply, cancellationToken);
             }

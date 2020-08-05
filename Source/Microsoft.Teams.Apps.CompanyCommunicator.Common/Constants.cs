@@ -62,6 +62,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         /// <summary>
         /// get the admin consent error message.
         /// </summary>
-        public const string AdminConsentError = "<Administrator consent not granted yet>";
+        public const string AdminConsentError = "Contact your IT admin for permission to view this data";
     }
 }

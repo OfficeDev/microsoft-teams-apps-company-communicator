@@ -121,7 +121,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                     Id = user.ConversationId,
                 },
             };
-            string failureText = "Something went wrong. Please re-download the file.";
+            string failureText = "Something went wrong. Try exporting the results again.";
 
             int maxNumberOfAttempts = 10;
             await this.botAdapter.ContinueConversationAsync(

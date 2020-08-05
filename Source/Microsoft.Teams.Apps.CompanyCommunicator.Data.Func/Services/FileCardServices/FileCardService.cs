@@ -62,7 +62,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
                     Id = user.ConversationId,
                 },
             };
-            string deleteText = "Your permission to download has expired. Please re-download the file.";
+            string deleteText = "The link for this download has expired. Export the results again.";
 
             int maxNumberOfAttempts = 10;
             await this.botAdapter.ContinueConversationAsync(
