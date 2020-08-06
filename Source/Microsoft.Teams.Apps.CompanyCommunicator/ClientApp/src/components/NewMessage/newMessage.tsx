@@ -451,7 +451,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     />
                                     <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
                                         <div className="noteText">
-                                            <Text error content="Note: Group members will get your message, as long as they have app in Teams." />
+                                            <Text error content="Note: Group members will get your message, as long as they have this app in Teams." />
                                         </div>
                                     </div>
                                 </RadiobuttonGroup>
