@@ -224,7 +224,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                                 <span>You'll be notified in chat when your file is ready to download.</span>
                                 <br />
                                 <br />
-                                <span>Note: You will first get a chat message asking you to give app permission to upload to your OneDrive.</span>
+                                <span>Note: You will first get a chat message asking you to give this app permission to upload to your OneDrive.</span>
                                 <br />
                                 <span>Select "Allow" to proceed.</span>
                             </div>
