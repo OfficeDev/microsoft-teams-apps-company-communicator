@@ -139,12 +139,7 @@ Register an Azure AD applications in your tenant's directory for the bot.
 
 1. Back under "Manage", click on "Manifest".
 
-1. In the editor that appears, find the `accessTokenAcceptedVersion` property in the JSON Azure AD application, and set the value to `2`. After updating it will appear like below:
-    ```
-       "accessTokenAcceptedVersion": 2
-    ```
-
-1. Then find the `optionalClaims` property in the JSON Azure AD application manifest, and replace it with the following block:
+1. In the editor that appears, find the `optionalClaims` property in the JSON Azure AD application manifest, and replace it with the following block:
     ```
         "optionalClaims": {
             "idToken": [],
