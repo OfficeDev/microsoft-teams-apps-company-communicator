@@ -607,7 +607,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
             });
 
             try {
-                const response = await searchGroups(itemsData.searchQuery);
+                const query = encodeURIComponent(itemsData.searchQuery);
+                const response = await searchGroups(query);
                 this.setState({
                     groups: response.data,
                     loading: false,

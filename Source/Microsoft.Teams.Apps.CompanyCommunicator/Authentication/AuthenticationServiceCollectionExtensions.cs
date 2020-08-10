@@ -48,7 +48,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             services.AddProtectedWebApi(configuration)
                     .AddProtectedWebApiCallsProtectedWebApi(configuration)
                     .AddInMemoryTokenCaches();
-            services.Configure<JwtBearerOptions>(AzureADDefaults.JwtBearerAuthenticationScheme, options =>
+            services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
             {
                 var azureADOptions = new AzureADOptions
                 {
@@ -58,12 +58,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                 };
                 options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
                 options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(authenticationOptions),
-                    ValidIssuers = AuthenticationServiceCollectionExtensions.GetValidIssuers(authenticationOptions),
-                    AudienceValidator = AuthenticationServiceCollectionExtensions.AudienceValidator,
-                };
+                options.TokenValidationParameters.ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(authenticationOptions);
+                options.TokenValidationParameters.AudienceValidator = AuthenticationServiceCollectionExtensions.AudienceValidator;
+                options.TokenValidationParameters.ValidIssuers = AuthenticationServiceCollectionExtensions.GetValidIssuers(authenticationOptions);
             });
         }
 
