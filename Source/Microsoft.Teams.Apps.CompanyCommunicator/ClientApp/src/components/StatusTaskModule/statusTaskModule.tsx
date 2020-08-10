@@ -203,7 +203,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                             <div className={this.state.message.canDownload ? "" : "disabled"}>
                                 <div className="buttonContainer">
                                     <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="exporting" labelPosition="end" />
-                                    <TooltipHost content={!this.state.message.sendingCompleted ? "" : (this.state.message.canDownload ? "" : "download in progress")} calloutProps={{ gapSpace: 0 }}>
+                                    <TooltipHost content={!this.state.message.sendingCompleted ? "" : (this.state.message.canDownload ? "" : "Export in progress")} calloutProps={{ gapSpace: 0 }}>
                                         <Button icon={downloadIcon} disabled={!this.state.message.canDownload || !this.state.message.sendingCompleted} content="Export detailed results" id="exportBtn" onClick={this.onExport} primary />
                                     </TooltipHost>
                                 </div>
@@ -220,13 +220,13 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                                 <br />
                                 <br />
                                 <div><span><Icon className="iconStyle" name="stardust-checkmark" xSpacing="before" size="largest" outline /></span>
-                                    <h1>Success</h1></div>
-                                <span>The export has been queued.</span><br />
-                                <span>Once the exported results are available, you'll receive a notification from the Company Communicator app in 1:1</span>
-                                <span> chat to download the file.</span>
+                                    <h1>Your export is queued</h1></div>
+                                <span>You'll be notified in chat when your file is ready to download.</span>
                                 <br />
                                 <br />
-                                <span>If you've not already done so, you will be prompted to allow the bot permission to wirte the file to your OneDrive.</span>
+                                <span>Note: You will first get a chat message asking you to give this app permission to upload to your OneDrive.</span>
+                                <br />
+                                <span>Select "Allow" to proceed.</span>
                             </div>
                         </div>
                         <div className="footerContainer">
@@ -246,10 +246,8 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                                 <br />
                                 <br />
                                 <div><span><Icon className="iconStyle" name="stardust-close" xSpacing="before" size="largest" outline /></span>
-                                    <h1 className="light">Uh Oh! Something went wrong...</h1></div>
-                                <span>The export request could not be queued. Please try again.</span>
-                                <br />
-                                <span>If the problem persists, contact your administrator to troubleshoot.</span>
+                                    <h1 className="light">Something went wrong.</h1></div>
+                                <span>Try exporting the results again. If the problem persists, contact your IT admin for help.</span>
                             </div>
                         </div>
                         <div className="footerContainer">

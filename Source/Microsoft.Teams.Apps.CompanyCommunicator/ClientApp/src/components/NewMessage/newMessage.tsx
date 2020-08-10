@@ -431,7 +431,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     <Radiobutton name="grouped" value="groups" label="Send in chat to members in a M365 groups, Distribution groups or Security groups" />
                                     <div className={this.state.groupsOptionSelected && !this.state.groupAccess ? "" : "hide"}>
                                         <div className="noteText">
-                                            <Text error content="Please reach out to your administrator as the required permissions to enable this targeting option for your message has not been granted yet. Try again " />
+                                            <Text error content="Permissions needed. Ask your IT admin to enable this option for you." />
                                         </div>
                                     </div>
                                     <Dropdown
@@ -451,7 +451,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     />
                                     <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
                                         <div className="noteText">
-                                            <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
+                                            <Text error content="Note: Group members will get your message, as long as they have this app in Teams." />
                                         </div>
                                     </div>
                                 </RadiobuttonGroup>
@@ -589,7 +589,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         else if (itemsData.searchQuery && itemsData.searchQuery.length <= 2) {
             this.setState({
                 loading: false,
-                noResultMessage: "We could'nt find any matches.",
+                noResultMessage: "No matches found.",
             });
         }
         else if (itemsData.searchQuery && itemsData.searchQuery.length > 2) {
@@ -611,7 +611,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                 this.setState({
                     groups: response.data,
                     loading: false,
-                    noResultMessage: "We could'nt find any matches."
+                    noResultMessage: "No matches found."
                 });
             }
             catch (error) {

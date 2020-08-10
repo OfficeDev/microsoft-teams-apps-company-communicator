@@ -121,7 +121,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
 
             var fileCard = new FileConsentCard
             {
-                Description = "This is the file Bot wants to send you",
+                Description = "This file contains the results you exported.",
                 AcceptContext = consentContext,
                 DeclineContext = consentContext,
             };

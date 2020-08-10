@@ -130,7 +130,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 notificationId,
                 cancellationToken);
 
-            var reply = MessageFactory.Text($"Declined. We won't upload file <b>{fileName}</b>.");
+            var reply = MessageFactory.Text("Permission declined. We will not proceed with the export.");
             reply.TextFormat = "xml";
             await turnContext.SendActivityAsync(reply, cancellationToken);
         }
