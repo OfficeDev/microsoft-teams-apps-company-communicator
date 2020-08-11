@@ -24,7 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// <summary>
         /// This value indicates that the Azure Function that attempted to process the queue message
         /// threw an exception. Because of this, this temporary status code is stored because
-        /// the function will requeue the queue message and try to process the queue message
+        /// the function will re-queue the queue message and try to process the queue message
         /// again. If the message fails to be processed enough times, then a different status
         /// code will be stored.
         /// </summary>
@@ -55,20 +55,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public static readonly string Succeeded = "Succeeded";
 
         /// <summary>
+        /// String indicating a recipient is not found when sending the notification to
+        /// the recipient.
+        /// </summary>
+        public static readonly string RecipientNotFound = "RecipientNotFound";
+
+        /// <summary>
         /// String indicating a failure response was received when sending the notification to
         /// the recipient.
         /// </summary>
         public static readonly string Failed = "Failed";
 
         /// <summary>
-        /// [Deprecated] String indicationg sending the notification to the recipient was throttled
+        /// [Deprecated] String indicating sending the notification to the recipient was throttled
         /// and not sent successfully.
         /// </summary>
         public static readonly string Throttled = "Throttled";
 
         /// <summary>
         /// String indicating that processing the current queue message resulted in an exception so
-        /// the message is being requeued and attempted again. Because of this, this string will be
+        /// the message is being re-queued and attempted again. Because of this, this string will be
         /// stored in the repository as the delivery status until a more final state is reached.
         /// </summary>
         public static readonly string Retrying = "Retrying";
@@ -153,7 +159,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public string ConversationId { get; set; }
 
         /// <summary>
-        /// Gets or sets the service url for the recipient.
+        /// Gets or sets the service URL for the recipient.
         /// </summary>
         public string ServiceUrl { get; set; }
 

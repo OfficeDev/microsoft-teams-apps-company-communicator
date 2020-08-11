@@ -33,6 +33,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
         public int ThrottledCount { get; set; }
 
         /// <summary>
+        /// Gets or sets the currently known count of notifications with recipient not found issue.
+        /// </summary>
+        public int RecipientNotFoundCount { get; set; }
+
+        /// <summary>
         /// Gets or sets the sent date of the last known notification.
         /// </summary>
         public DateTime? LastSentDate { get; set; }
@@ -56,6 +61,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
             else if (sentNotification.DeliveryStatus == SentNotificationDataEntity.Throttled)
             {
                 this.ThrottledCount++;
+            }
+            else if (sentNotification.DeliveryStatus == SentNotificationDataEntity.RecipientNotFound)
+            {
+                this.RecipientNotFoundCount++;
             }
 
             if (sentNotification.SentDate != null

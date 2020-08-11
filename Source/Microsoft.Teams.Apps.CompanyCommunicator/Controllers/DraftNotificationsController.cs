@@ -6,12 +6,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
@@ -26,6 +30,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly TeamDataRepository teamDataRepository;
         private readonly DraftNotificationPreviewService draftNotificationPreviewService;
+        private readonly IGroupsService groupsService;
+        private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
@@ -33,34 +39,52 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notificationDataRepository">Notification data repository instance.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
         /// <param name="draftNotificationPreviewService">Draft notification preview service.</param>
+        /// <param name="localizer">Localization service.</param>
+        /// <param name="groupsService">group service.</param>
         public DraftNotificationsController(
             NotificationDataRepository notificationDataRepository,
             TeamDataRepository teamDataRepository,
-            DraftNotificationPreviewService draftNotificationPreviewService)
+            DraftNotificationPreviewService draftNotificationPreviewService,
+            IStringLocalizer<Strings> localizer,
+            IGroupsService groupsService)
         {
             this.notificationDataRepository = notificationDataRepository;
             this.teamDataRepository = teamDataRepository;
             this.draftNotificationPreviewService = draftNotificationPreviewService;
+            this.localizer = localizer;
+            this.groupsService = groupsService;
         }
 
         /// <summary>
         /// Create a new draft notification.
         /// </summary>
         /// <param name="notification">A new Draft Notification to be created.</param>
-        /// <returns>The newly created notification's id.</returns>
+        /// <returns>The created notification's id.</returns>
         [HttpPost]
-        public async Task<string> CreateDraftNotificationAsync([FromBody]DraftNotification notification)
+        public async Task<ActionResult<string>> CreateDraftNotificationAsync([FromBody] DraftNotification notification)
         {
-            return await this.notificationDataRepository.CreateDraftNotificationAsync(
+            if (!notification.Validate(this.localizer, out string errorMessage))
+            {
+                return this.BadRequest(errorMessage);
+            }
+
+            var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
+            if (containsHiddenMembership)
+            {
+                return this.Forbid();
+            }
+
+            var notificationId = await this.notificationDataRepository.CreateDraftNotificationAsync(
                 notification,
                 this.HttpContext.User?.Identity?.Name);
+            return this.Ok(notificationId);
         }
 
         /// <summary>
         /// Duplicate an existing draft notification.
         /// </summary>
         /// <param name="id">The id of a Draft Notification to be duplicated.</param>
-        /// <returns>If the passed in id is invalid, it returns 404 not found error. Otherwise, it returns 200 Ok.</returns>
+        /// <returns>If the passed in id is invalid, it returns 404 not found error. Otherwise, it returns 200 OK.</returns>
         [HttpPost("duplicates/{id}")]
         public async Task<IActionResult> DuplicateDraftNotificationAsync(string id)
         {
@@ -83,8 +107,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notification">An existing Draft Notification to be updated.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [HttpPut]
-        public async Task UpdateDraftNotificationAsync([FromBody]DraftNotification notification)
+        public async Task<IActionResult> UpdateDraftNotificationAsync([FromBody] DraftNotification notification)
         {
+            var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
+            if (containsHiddenMembership)
+            {
+                return this.Forbid();
+            }
+
+            if (!notification.Validate(this.localizer, out string errorMessage))
+            {
+                return this.BadRequest(errorMessage);
+            }
+
             var notificationEntity = new NotificationDataEntity
             {
                 PartitionKey = NotificationDataTableNames.DraftNotificationsPartition,
@@ -101,17 +136,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 IsDraft = true,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,
+                Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
             };
 
             await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
+            return this.Ok();
         }
 
         /// <summary>
         /// Delete an existing draft notification.
         /// </summary>
         /// <param name="id">The id of the draft notification to be deleted.</param>
-        /// <returns>If the passed in Id is invalid, it returns 404 not found error. Otherwise, it returns 200 Ok.</returns>
+        /// <returns>If the passed in Id is invalid, it returns 404 not found error. Otherwise, it returns 200 OK.</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDraftNotificationAsync(string id)
         {
@@ -181,6 +218,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 CreatedDateTime = notificationEntity.CreatedDate,
                 Teams = notificationEntity.Teams,
                 Rosters = notificationEntity.Rosters,
+                Groups = notificationEntity.Groups,
                 AllUsers = notificationEntity.AllUsers,
             };
 
@@ -204,11 +242,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
+            var groupNames = await this.groupsService.
+                GetByIdsAsync(notificationEntity.Groups).
+                Select(x => x.DisplayName).
+                ToListAsync();
+
             var result = new DraftNotificationSummaryForConsent
             {
                 NotificationId = notificationId,
                 TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),
                 RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
+                GroupNames = groupNames,
                 AllUsers = notificationEntity.AllUsers,
             };
 
@@ -224,7 +268,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// It returns 404 not found error if the DraftNotificationId or TeamsTeamId (contained in draftNotificationPreviewRequest) is not found in the table storage.
         /// It returns 500 internal error if this method throws an unhandled exception.
         /// It returns 429 too many requests error if the preview request is throttled by the bot service.
-        /// It returns 200 Ok if the method is executed successfully.</returns>
+        /// It returns 200 OK if the method is executed successfully.</returns>
         [HttpPost("previews")]
         public async Task<ActionResult> PreviewDraftNotificationAsync(
             [FromBody] DraftNotificationPreviewRequest draftNotificationPreviewRequest)

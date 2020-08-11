@@ -74,7 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             var allowedTenantIds = this.allowedTenants
                 ?.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
                 ?.Select(p => p.Trim());
-            if (allowedTenantIds == null || allowedTenantIds.Count() == 0)
+            if (allowedTenantIds == null || !allowedTenantIds.Any())
             {
                 var exceptionMessage = "AllowedTenants setting is not set properly in the configuration file.";
                 Console.WriteLine(exceptionMessage);

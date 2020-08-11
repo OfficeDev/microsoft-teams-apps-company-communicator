@@ -9,10 +9,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
     /// <summary>
     /// User data entity class.
     /// This entity holds the information about a user.
-    /// Note: depending on how this data is filled, it is not gauranteed all
+    /// Note: depending on how this data is filled, it is not guaranteed all
     /// values will be filled.
-    /// If they are present in this table, it is gauranteed that the AAD id,
-    /// user id, conversation id, service url, and tenant id will be filled.
+    /// If they are present in this table, it is guaranteed that the AAD id,
+    /// user id, conversation id, service URL, and tenant id will be filled.
     /// </summary>
     public class UserDataEntity : TableEntity
     {
@@ -27,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
         public string Email { get; set; }
 
         /// <summary>
-        /// Gets or sets the user's upn.
+        /// Gets or sets the user's UPN.
         /// </summary>
         public string Upn { get; set; }
 
@@ -49,7 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
         public string ConversationId { get; set; }
 
         /// <summary>
-        /// Gets or sets the service url that can be used by the bot
+        /// Gets or sets the service URL that can be used by the bot
         /// to send this user a notification.
         /// </summary>
         public string ServiceUrl { get; set; }

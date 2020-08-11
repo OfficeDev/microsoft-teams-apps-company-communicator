@@ -6,6 +6,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
 {
     using System;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -57,9 +58,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         /// The service used to fetch or generate the necessary parameters for sending the notification.
         /// </summary>
         /// <param name="messageContent">The message content of the send queue message.</param>
+        /// <param name="log">The logger.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task<GetSendNotificationParamsResponse> GetSendNotificationParamsAsync(
-            SendQueueMessageContent messageContent)
+            SendQueueMessageContent messageContent,
+            ILogger log)
         {
             // Fetch the current sending notification. This is where the data about what is being sent is stored.
             var activeNotificationEntity = await this.sendingNotificationDataRepository.GetAsync(
@@ -82,7 +85,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                     await this.SetParamsForUserRecipientAsync(
                         getSendNotificationParamsResponse,
                         messageContent.RecipientData.UserData,
-                        messageContent);
+                        messageContent,
+                        log);
                     break;
 
                 case RecipientDataType.Team:
@@ -113,122 +117,137 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         /// <param name="getSendNotificationParamsResponse">The send notification parameters to be updated.</param>
         /// <param name="incomingUserDataEntity">The incoming user data entity.</param>
         /// <param name="messageContent">The queue message content.</param>
+        /// <param name="log">The logger.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SetParamsForUserRecipientAsync(
             GetSendNotificationParamsResponse getSendNotificationParamsResponse,
             UserDataEntity incomingUserDataEntity,
-            SendQueueMessageContent messageContent)
+            SendQueueMessageContent messageContent,
+            ILogger log)
         {
-            // The AAD Id and service URL will always be set in the incoming user data.
-            getSendNotificationParamsResponse.RecipientId = incomingUserDataEntity.AadId;
-            getSendNotificationParamsResponse.ServiceUrl = incomingUserDataEntity.ServiceUrl;
-
-            /*
-             * The rest of the logic in this method is primarily for fetching/generating the conversation Id.
-             *
-             */
-
-            // Case where the conversation Id is included in the incoming user data.
-            if (!string.IsNullOrWhiteSpace(incomingUserDataEntity.ConversationId))
+            try
             {
-                getSendNotificationParamsResponse.ConversationId = incomingUserDataEntity.ConversationId;
+                // The AAD Id and service URL will always be set in the incoming user data.
+                getSendNotificationParamsResponse.RecipientId = incomingUserDataEntity.AadId;
+                getSendNotificationParamsResponse.ServiceUrl = incomingUserDataEntity.ServiceUrl;
 
-                return;
-            }
-
-            // Case where the conversation Id is not included in the incoming user data (the conversation Id may or
-            // may not be stored in the User Data table).
-
-            // Fetch the data for that user from the User Data table to see if they are present.
-            // It is possible that that user's data has not been stored in the User Data table.
-            // If this is the case, then the conversation will need to be created for that user.
-            var storedUserDataEntity = await this.userDataRepository.GetAsync(
-                UserDataTableNames.UserDataPartition,
-                incomingUserDataEntity.AadId);
-
-            // These blocks are used to determine the conversation Id to be used when sending the notification.
-            string conversationId = null;
-            if (storedUserDataEntity != null)
-            {
                 /*
-                 * Case where the user's data was stored in the User Data table so their conversation Id is
-                 * known. Update the user's entry in the User Data table, though, with the incoming user data
-                 * because the incoming user data may hold more information than what is already stored for
-                 * that user, such as their name.
+                 * The rest of the logic in this method is primarily for fetching/generating the conversation Id.
+                 *
                  */
 
-                // Set the conversation Id to be used when sending the notification.
-                conversationId = storedUserDataEntity.ConversationId;
-
-                // Set the conversation Id to ensure it is not removed from the User Data table on the update.
-                incomingUserDataEntity.ConversationId = storedUserDataEntity.ConversationId;
-
-                incomingUserDataEntity.PartitionKey = UserDataTableNames.UserDataPartition;
-                incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
-
-                await this.userDataRepository.InsertOrMergeAsync(incomingUserDataEntity);
-            }
-            else
-            {
-                /*
-                 * Falling into this block means that the user data and the conversation Id for this user
-                 * has not been stored. Because of this, the conversation needs to be created and that
-                 * conversation Id needs to be stored for that user for later use.
-                 */
-
-                var createConversationResponse = await this.createUserConversationService.CreateConversationAsync(
-                    userDataEntity: incomingUserDataEntity,
-                    maxNumberOfAttempts: this.maxNumberOfAttempts);
-
-                if (createConversationResponse.ResultType == CreateUserConversationResultType.Succeeded)
+                // Case where the conversation Id is included in the incoming user data.
+                if (!string.IsNullOrWhiteSpace(incomingUserDataEntity.ConversationId))
                 {
-                    // Set the conversation Id to be used when sending the notification.
-                    conversationId = createConversationResponse.ConversationId;
+                    getSendNotificationParamsResponse.ConversationId = incomingUserDataEntity.ConversationId;
 
-                    // Store the newly created conversation Id so the create conversation
-                    // request will not need to be made again for the user for future notifications.
-                    incomingUserDataEntity.ConversationId = createConversationResponse.ConversationId;
+                    return;
+                }
+
+                // Case where the conversation Id is not included in the incoming user data (the conversation Id may or
+                // may not be stored in the User Data table).
+
+                // Fetch the data for that user from the User Data table to see if they are present.
+                // It is possible that that user's data has not been stored in the User Data table.
+                // If this is the case, then the conversation will need to be created for that user.
+                var storedUserDataEntity = await this.userDataRepository.GetAsync(
+                    UserDataTableNames.UserDataPartition,
+                    incomingUserDataEntity.AadId);
+
+                // These blocks are used to determine the conversation Id to be used when sending the notification.
+                string conversationId = null;
+                if (storedUserDataEntity != null)
+                {
+                    /*
+                     * Case where the user's data was stored in the User Data table so their conversation Id is
+                     * known. Update the user's entry in the User Data table, though, with the incoming user data
+                     * because the incoming user data may hold more information than what is already stored for
+                     * that user, such as their name.
+                     */
+
+                    // Set the conversation Id to be used when sending the notification.
+                    conversationId = storedUserDataEntity.ConversationId;
+
+                    // Set the conversation Id to ensure it is not removed from the User Data table on the update.
+                    incomingUserDataEntity.ConversationId = storedUserDataEntity.ConversationId;
 
                     incomingUserDataEntity.PartitionKey = UserDataTableNames.UserDataPartition;
                     incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
 
                     await this.userDataRepository.InsertOrMergeAsync(incomingUserDataEntity);
                 }
-                else if (createConversationResponse.ResultType == CreateUserConversationResultType.Throttled)
+                else
                 {
-                    // If the request was attempted the maximum number of allowed attempts and received
-                    // all throttling responses, then set the overall delay time for the system so all
-                    // other calls will be delayed and add the message back to the queue with a delay to be
-                    // attempted later.
-                    await this.delaySendingNotificationService.DelaySendingNotificationAsync(
-                        sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds,
-                        sendQueueMessageContent: messageContent);
+                    /*
+                     * Falling into this block means that the user data and the conversation Id for this user
+                     * has not been stored. Because of this, the conversation needs to be created and that
+                     * conversation Id needs to be stored for that user for later use.
+                     */
 
-                    // Signal that the Azure Function should be completed to be attempted later.
-                    getSendNotificationParamsResponse.ForceCloseAzureFunction = true;
-                    return;
-                }
-                else if (createConversationResponse.ResultType == CreateUserConversationResultType.Failed)
-                {
-                    // If the create conversation call failed, save the results, do not attempt the
-                    // request again, and end the function.
-                    await this.manageResultDataService.ProccessResultDataAsync(
-                        notificationId: messageContent.NotificationId,
-                        recipientId: incomingUserDataEntity.AadId,
-                        totalNumberOfSendThrottles: 0,
-                        isStatusCodeFromCreateConversation: true,
-                        statusCode: createConversationResponse.StatusCode,
-                        allSendStatusCodes: string.Empty,
-                        errorMessage: createConversationResponse.ErrorMessage);
+                    var createConversationResponse = await this.createUserConversationService.CreateConversationAsync(
+                        userDataEntity: incomingUserDataEntity,
+                        maxNumberOfAttempts: this.maxNumberOfAttempts,
+                        log: log);
 
-                    // Signal that the Azure Function should be completed.
-                    getSendNotificationParamsResponse.ForceCloseAzureFunction = true;
-                    return;
+                    if (createConversationResponse.ResultType == CreateUserConversationResultType.Succeeded)
+                    {
+                        // Set the conversation Id to be used when sending the notification.
+                        conversationId = createConversationResponse.ConversationId;
+
+                        // Store the newly created conversation Id so the create conversation
+                        // request will not need to be made again for the user for future notifications.
+                        incomingUserDataEntity.ConversationId = createConversationResponse.ConversationId;
+
+                        incomingUserDataEntity.PartitionKey = UserDataTableNames.UserDataPartition;
+                        incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
+
+                        await this.userDataRepository.InsertOrMergeAsync(incomingUserDataEntity);
+                    }
+                    else if (createConversationResponse.ResultType == CreateUserConversationResultType.Throttled)
+                    {
+                        // If the request was attempted the maximum number of allowed attempts and received
+                        // all throttling responses, then set the overall delay time for the system so all
+                        // other calls will be delayed and add the message back to the queue with a delay to be
+                        // attempted later.
+                        await this.delaySendingNotificationService.DelaySendingNotificationAsync(
+                            sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds,
+                            sendQueueMessageContent: messageContent,
+                            log: log);
+
+                        // Signal that the Azure Function should be completed to be attempted later.
+                        getSendNotificationParamsResponse.ForceCloseAzureFunction = true;
+                        return;
+                    }
+                    else if (createConversationResponse.ResultType == CreateUserConversationResultType.Failed)
+                    {
+                        // If the create conversation call failed, save the results, do not attempt the
+                        // request again, and end the function.
+                        await this.manageResultDataService.ProcessResultDataAsync(
+                            notificationId: messageContent.NotificationId,
+                            recipientId: incomingUserDataEntity.AadId,
+                            totalNumberOfSendThrottles: 0,
+                            isStatusCodeFromCreateConversation: true,
+                            statusCode: createConversationResponse.StatusCode,
+                            allSendStatusCodes: string.Empty,
+                            errorMessage: createConversationResponse.ErrorMessage,
+                            log: log);
+
+                        // Signal that the Azure Function should be completed.
+                        getSendNotificationParamsResponse.ForceCloseAzureFunction = true;
+                        return;
+                    }
                 }
+
+                // Set the conversation Id to be used when sending the notification.
+                getSendNotificationParamsResponse.ConversationId = conversationId;
             }
+            catch (Exception e)
+            {
+                var errorMessage = $"{e.GetType()}: {e.Message}";
+                log.LogError(e, $"ERROR: {errorMessage}");
 
-            // Set the conversation Id to be used when sending the notification.
-            getSendNotificationParamsResponse.ConversationId = conversationId;
+                throw;
+            }
         }
 
         /// <summary>

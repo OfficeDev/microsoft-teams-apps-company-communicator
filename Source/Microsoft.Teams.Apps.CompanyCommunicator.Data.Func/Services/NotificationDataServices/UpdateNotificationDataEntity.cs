@@ -27,6 +27,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
         public int? Failed { get; set; }
 
         /// <summary>
+        /// Gets or sets the number of not found recipients.
+        /// </summary>
+        public int? RecipientNotFound { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of recipients who were throttled out.
         /// </summary>
         public int? Throttled { get; set; }

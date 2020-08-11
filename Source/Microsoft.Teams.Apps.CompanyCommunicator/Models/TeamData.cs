@@ -12,7 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// <summary>
         /// Gets or sets team Id.
         /// </summary>
-        public string TeamId { get; set; }
+        public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets name.

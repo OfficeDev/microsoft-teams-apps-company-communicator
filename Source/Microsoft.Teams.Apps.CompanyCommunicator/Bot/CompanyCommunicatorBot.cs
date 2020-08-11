@@ -5,29 +5,35 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
     using System;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
 
     /// <summary>
     /// Company Communicator Bot.
+    /// Captures user data, team data, upload files.
     /// </summary>
-    public class CompanyCommunicatorBot : ActivityHandler
+    public class CompanyCommunicatorBot : TeamsActivityHandler
     {
         private static readonly string TeamRenamedEventType = "teamRenamed";
 
         private readonly TeamsDataCapture teamsDataCapture;
+        private readonly TeamsFileUpload teamsFileUpload;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorBot"/> class.
         /// </summary>
         /// <param name="teamsDataCapture">Teams data capture service.</param>
-        public CompanyCommunicatorBot(TeamsDataCapture teamsDataCapture)
+        /// <param name="teamsFileUpload">change this.</param>
+        public CompanyCommunicatorBot(
+            TeamsDataCapture teamsDataCapture,
+            TeamsFileUpload teamsFileUpload)
         {
             this.teamsDataCapture = teamsDataCapture;
+            this.teamsFileUpload = teamsFileUpload;
         }
 
         /// <summary>
@@ -49,7 +55,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             await base.OnConversationUpdateActivityAsync(turnContext, cancellationToken);
 
             var activity = turnContext.Activity;
-            var botId = activity.Recipient.Id;
 
             var isTeamRenamed = this.IsTeamInformationUpdated(activity);
             if (isTeamRenamed)
@@ -57,17 +62,77 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 await this.teamsDataCapture.OnTeamInformationUpdatedAsync(activity);
             }
 
-            // Take action if this event includes the bot being added
-            if (activity.MembersAdded?.FirstOrDefault(p => p.Id == botId) != null)
+            if (activity.MembersAdded != null)
             {
                 await this.teamsDataCapture.OnBotAddedAsync(activity);
             }
 
-            // Take action if this event includes the bot being removed
-            if (activity.MembersRemoved?.FirstOrDefault(p => p.Id == botId) != null)
+            if (activity.MembersRemoved != null)
             {
                 await this.teamsDataCapture.OnBotRemovedAsync(activity);
             }
+        }
+
+        /// <summary>
+        /// Invoke when a file upload accept consent activitiy is received from the channel.
+        /// </summary>
+        /// <param name="turnContext">The context object for this turn.</param>
+        /// <param name="fileConsentCardResponse">The accepted response object of File Card.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects
+        /// or threads to receive notice of cancellation.</param>
+        /// <returns>A task reprsenting asynchronous operation.</returns>
+        protected override async Task OnTeamsFileConsentAcceptAsync(
+            ITurnContext<IInvokeActivity> turnContext,
+            FileConsentCardResponse fileConsentCardResponse,
+            CancellationToken cancellationToken)
+        {
+            var (fileName, notificationId) = this.teamsFileUpload.ExtractInformation(fileConsentCardResponse.Context);
+            try
+            {
+                await this.teamsFileUpload.UploadToOneDrive(
+                    fileName,
+                    fileConsentCardResponse.UploadInfo.UploadUrl,
+                    cancellationToken);
+
+                await this.teamsFileUpload.FileUploadCompletedAsync(
+                    turnContext,
+                    fileConsentCardResponse,
+                    fileName,
+                    notificationId,
+                    cancellationToken);
+            }
+            catch (Exception e)
+            {
+                await this.teamsFileUpload.FileUploadFailedAsync(
+                    turnContext,
+                    notificationId,
+                    e.ToString(),
+                    cancellationToken);
+            }
+        }
+
+        /// <summary>
+        /// Invoke when a file upload decline consent activitiy is received from the channel.
+        /// </summary>
+        /// <param name="turnContext">The context object for this turn.</param>
+        /// <param name="fileConsentCardResponse">The declined response object of File Card.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects
+        /// or threads to receive notice of cancellation.</param>
+        /// <returns>A task reprsenting asynchronous operation.</returns>
+        protected override async Task OnTeamsFileConsentDeclineAsync(ITurnContext<IInvokeActivity> turnContext, FileConsentCardResponse fileConsentCardResponse, CancellationToken cancellationToken)
+        {
+            var (fileName, notificationId) = this.teamsFileUpload.ExtractInformation(
+                fileConsentCardResponse.Context);
+
+            await this.teamsFileUpload.CleanUp(
+                turnContext,
+                fileName,
+                notificationId,
+                cancellationToken);
+
+            var reply = MessageFactory.Text("Permission declined. We will not proceed with the export.");
+            reply.TextFormat = "xml";
+            await turnContext.SendActivityAsync(reply, cancellationToken);
         }
 
         private bool IsTeamInformationUpdated(IConversationUpdateActivity activity)

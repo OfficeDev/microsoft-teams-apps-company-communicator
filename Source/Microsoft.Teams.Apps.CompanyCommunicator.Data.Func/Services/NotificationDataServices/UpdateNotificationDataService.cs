@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
     using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
     /// <summary>
@@ -35,67 +36,80 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
         /// <param name="totalExpectedNotificationCount">The total expected count of notifications to be sent.</param>
         /// <param name="aggregatedSentNotificationDataResults">The current aggregated results for
         /// the sent notifications.</param>
+        /// <param name="log">The logger.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<UpdateNotificationDataEntity> UpdateNotificationDataAsync(
             string notificationId,
             bool shouldForceCompleteNotification,
             int totalExpectedNotificationCount,
-            AggregatedSentNotificationDataResults aggregatedSentNotificationDataResults)
+            AggregatedSentNotificationDataResults aggregatedSentNotificationDataResults,
+            ILogger log)
         {
-            var currentTotalNotificationCount = aggregatedSentNotificationDataResults.CurrentTotalNotificationCount;
-            var succeededCount = aggregatedSentNotificationDataResults.SucceededCount;
-            var failedCount = aggregatedSentNotificationDataResults.FailedCount;
-            var throttledCount = aggregatedSentNotificationDataResults.ThrottledCount;
-            var lastSentDate = aggregatedSentNotificationDataResults.LastSentDate;
-
-            // Create the general update.
-            var notificationDataEntityUpdate = new UpdateNotificationDataEntity
+            try
             {
-                PartitionKey = NotificationDataTableNames.SentNotificationsPartition,
-                RowKey = notificationId,
-                Succeeded = succeededCount,
-                Failed = failedCount,
-                Throttled = throttledCount,
-                IsCompleted = false,
-            };
+                var currentTotalNotificationCount = aggregatedSentNotificationDataResults.CurrentTotalNotificationCount;
+                var succeededCount = aggregatedSentNotificationDataResults.SucceededCount;
+                var failedCount = aggregatedSentNotificationDataResults.FailedCount;
+                var throttledCount = aggregatedSentNotificationDataResults.ThrottledCount;
+                var recipientNotFoundCount = aggregatedSentNotificationDataResults.RecipientNotFoundCount;
+                var lastSentDate = aggregatedSentNotificationDataResults.LastSentDate;
 
-            // If it should be marked as complete, set the other values accordingly.
-            if (currentTotalNotificationCount >= totalExpectedNotificationCount
-                || shouldForceCompleteNotification)
-            {
-                // Make sure it is not still in a preparing state e.g. if something has gone wrong and the
-                // force complete message has to complete the message.
-                notificationDataEntityUpdate.IsPreparingToSend = false;
-                notificationDataEntityUpdate.IsCompleted = true;
-
-                if (currentTotalNotificationCount >= totalExpectedNotificationCount)
+                // Create the general update.
+                var notificationDataEntityUpdate = new UpdateNotificationDataEntity
                 {
-                    // If the message is being completed because all messages have been accounted for,
-                    // then make sure the unknown count is 0 and update the sent date with the date
-                    // of the last sent message.
-                    notificationDataEntityUpdate.Unknown = 0;
-                    notificationDataEntityUpdate.SentDate = lastSentDate ?? DateTime.UtcNow;
-                }
-                else if (shouldForceCompleteNotification)
+                    PartitionKey = NotificationDataTableNames.SentNotificationsPartition,
+                    RowKey = notificationId,
+                    Succeeded = succeededCount,
+                    Failed = failedCount,
+                    RecipientNotFound = recipientNotFoundCount,
+                    Throttled = throttledCount,
+                    IsCompleted = false,
+                };
+
+                // If it should be marked as complete, set the other values accordingly.
+                if (currentTotalNotificationCount >= totalExpectedNotificationCount
+                    || shouldForceCompleteNotification)
                 {
-                    // If the message is being completed, not because all messages have been accounted for,
-                    // but because the trigger is coming from the delayed Service Bus message that ensures that the
-                    // notification will eventually be marked as complete, then update the unknown count of messages
-                    // not accounted for and update the sent date to the current time.
-                    var countDifference = totalExpectedNotificationCount - currentTotalNotificationCount;
+                    // Make sure it is not still in a preparing state e.g. if something has gone wrong and the
+                    // force complete message has to complete the message.
+                    notificationDataEntityUpdate.IsPreparingToSend = false;
+                    notificationDataEntityUpdate.IsCompleted = true;
 
-                    // This count must stay 0 or above.
-                    var unknownCount = countDifference >= 0 ? countDifference : 0;
+                    if (currentTotalNotificationCount >= totalExpectedNotificationCount)
+                    {
+                        // If the message is being completed because all messages have been accounted for,
+                        // then make sure the unknown count is 0 and update the sent date with the date
+                        // of the last sent message.
+                        notificationDataEntityUpdate.Unknown = 0;
+                        notificationDataEntityUpdate.SentDate = lastSentDate ?? DateTime.UtcNow;
+                    }
+                    else if (shouldForceCompleteNotification)
+                    {
+                        // If the message is being completed, not because all messages have been accounted for,
+                        // but because the trigger is coming from the delayed Service Bus message that ensures that the
+                        // notification will eventually be marked as complete, then update the unknown count of messages
+                        // not accounted for and update the sent date to the current time.
+                        var countDifference = totalExpectedNotificationCount - currentTotalNotificationCount;
 
-                    notificationDataEntityUpdate.Unknown = unknownCount;
-                    notificationDataEntityUpdate.SentDate = DateTime.UtcNow;
+                        // This count must stay 0 or above.
+                        var unknownCount = countDifference >= 0 ? countDifference : 0;
+
+                        notificationDataEntityUpdate.Unknown = unknownCount;
+                        notificationDataEntityUpdate.SentDate = DateTime.UtcNow;
+                    }
                 }
+
+                var operation = TableOperation.InsertOrMerge(notificationDataEntityUpdate);
+                await this.notificationDataRepository.Table.ExecuteAsync(operation);
+
+                return notificationDataEntityUpdate;
             }
-
-            var operation = TableOperation.InsertOrMerge(notificationDataEntityUpdate);
-            await this.notificationDataRepository.Table.ExecuteAsync(operation);
-
-            return notificationDataEntityUpdate;
+            catch (Exception e)
+            {
+                var errorMessage = $"{e.GetType()}: {e.Message}";
+                log.LogError(e, $"ERROR: {errorMessage}");
+                throw;
+            }
         }
     }
 }

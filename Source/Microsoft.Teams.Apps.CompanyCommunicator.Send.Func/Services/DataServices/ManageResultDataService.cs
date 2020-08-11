@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
     using System;
     using System.Net;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
 
     /// <summary>
@@ -39,78 +40,92 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServic
         /// <param name="allSendStatusCodes">A comma separated list representing all of the status code responses received when trying
         /// to send the notification to the recipient.</param>
         /// <param name="errorMessage">The error message to store in the database.</param>
+        /// <param name="log">The logger.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task ProccessResultDataAsync(
+        public async Task ProcessResultDataAsync(
             string notificationId,
             string recipientId,
             int totalNumberOfSendThrottles,
             bool isStatusCodeFromCreateConversation,
             int statusCode,
             string allSendStatusCodes,
-            string errorMessage)
+            string errorMessage,
+            ILogger log)
         {
-            // Storing this time before making the database call to have a timestamp closer to when the notification
-            // was sent.
-            var currentDateTimeUtc = DateTime.UtcNow;
-
-            var existingSentNotificationDataEntity = await this.sentNotificationDataRepository
-                .GetAsync(partitionKey: notificationId, rowKey: recipientId);
-
-            // Set initial values.
-            var allSendStatusCodesToStore = allSendStatusCodes;
-            var numberOfFunctionAttemptsToSend = 1;
-
-            // Replace the initial values if, for some reason, the message has already been sent/attempted.
-            // When the initial row is set up, the status code is set to the InitializationStatusCode (likely 0).
-            // Thus, if the status code is no longer the InitializationStatusCode (likely 0), then a notification
-            // has already been sent/attempted for this recipient and a result has been stored. If this is the case,
-            // then append the current result to the existing results.
-            if (existingSentNotificationDataEntity != null
-                && existingSentNotificationDataEntity.StatusCode != SentNotificationDataEntity.InitializationStatusCode)
+            try
             {
-                allSendStatusCodesToStore
-                    = $"{existingSentNotificationDataEntity.AllSendStatusCodes ?? string.Empty}{allSendStatusCodes}";
-                numberOfFunctionAttemptsToSend = existingSentNotificationDataEntity.NumberOfFunctionAttemptsToSend + 1;
+                // Storing this time before making the database call to have a time-stamp closer to when the notification
+                // was sent.
+                var currentDateTimeUtc = DateTime.UtcNow;
+
+                var existingSentNotificationDataEntity = await this.sentNotificationDataRepository
+                    .GetAsync(partitionKey: notificationId, rowKey: recipientId);
+
+                // Set initial values.
+                var allSendStatusCodesToStore = allSendStatusCodes;
+                var numberOfFunctionAttemptsToSend = 1;
+
+                // Replace the initial values if, for some reason, the message has already been sent/attempted.
+                // When the initial row is set up, the status code is set to the InitializationStatusCode (likely 0).
+                // Thus, if the status code is no longer the InitializationStatusCode (likely 0), then a notification
+                // has already been sent/attempted for this recipient and a result has been stored. If this is the case,
+                // then append the current result to the existing results.
+                if (existingSentNotificationDataEntity != null
+                    && existingSentNotificationDataEntity.StatusCode != SentNotificationDataEntity.InitializationStatusCode)
+                {
+                    allSendStatusCodesToStore
+                        = $"{existingSentNotificationDataEntity.AllSendStatusCodes ?? string.Empty}{allSendStatusCodes}";
+                    numberOfFunctionAttemptsToSend = existingSentNotificationDataEntity.NumberOfFunctionAttemptsToSend + 1;
+                }
+
+                var updatedSentNotificationDataEntity = new SentNotificationDataEntity
+                {
+                    PartitionKey = notificationId,
+                    RowKey = recipientId,
+                    RecipientId = recipientId,
+                    TotalNumberOfSendThrottles = totalNumberOfSendThrottles,
+                    SentDate = currentDateTimeUtc,
+                    IsStatusCodeFromCreateConversation = isStatusCodeFromCreateConversation,
+                    StatusCode = (int)statusCode,
+                    ErrorMessage = errorMessage,
+                    AllSendStatusCodes = allSendStatusCodesToStore,
+                    NumberOfFunctionAttemptsToSend = numberOfFunctionAttemptsToSend,
+                };
+
+                if (statusCode == (int)HttpStatusCode.Created)
+                {
+                    updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Succeeded;
+                }
+                else if (statusCode == (int)HttpStatusCode.TooManyRequests)
+                {
+                    updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Throttled;
+                }
+                else if (statusCode == (int)HttpStatusCode.NotFound)
+                {
+                    updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.RecipientNotFound;
+                }
+                else if (statusCode == SentNotificationDataEntity.FaultedAndRetryingStatusCode)
+                {
+                    // This is a special case where an exception was thrown in the function.
+                    // The system will try to add the queue message back to the queue and will try to
+                    // send the notification again. For now, we will store the current state as retrying in
+                    // the repository. If the system tries to send the notification repeatedly and reaches
+                    // the dead letter maximum number of attempts, then the system should store a status of
+                    // "Failed". In that case, the status code will not be faulted and retrying.
+                    updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Retrying;
+                }
+                else
+                {
+                    updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Failed;
+                }
+
+                await this.sentNotificationDataRepository.InsertOrMergeAsync(updatedSentNotificationDataEntity);
             }
-
-            var updatedSentNotificationDataEntity = new SentNotificationDataEntity
+            catch (Exception e)
             {
-                PartitionKey = notificationId,
-                RowKey = recipientId,
-                RecipientId = recipientId,
-                TotalNumberOfSendThrottles = totalNumberOfSendThrottles,
-                SentDate = currentDateTimeUtc,
-                IsStatusCodeFromCreateConversation = isStatusCodeFromCreateConversation,
-                StatusCode = (int)statusCode,
-                ErrorMessage = errorMessage,
-                AllSendStatusCodes = allSendStatusCodesToStore,
-                NumberOfFunctionAttemptsToSend = numberOfFunctionAttemptsToSend,
-            };
-
-            if (statusCode == (int)HttpStatusCode.Created)
-            {
-                updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Succeeded;
+                log.LogError(e, $"ERROR: {e.GetType()}: {e.Message}");
+                throw;
             }
-            else if (statusCode == (int)HttpStatusCode.TooManyRequests)
-            {
-                updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Throttled;
-            }
-            else if (statusCode == SentNotificationDataEntity.FaultedAndRetryingStatusCode)
-            {
-                // This is a special case where an exception was thrown in the function.
-                // The system will try to add the queue message back to the queue and will try to
-                // send the notification again. For now, we will store the current state as retrying in
-                // the respository. If the system tries to send the notification repeatedly and reaches
-                // the dead letter maximum number of attempts, then the system should store a status of
-                // "Failed". In that case, the status code will not be faulted and retrying.
-                updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Retrying;
-            }
-            else
-            {
-                updatedSentNotificationDataEntity.DeliveryStatus = SentNotificationDataEntity.Failed;
-            }
-
-            await this.sentNotificationDataRepository.InsertOrMergeAsync(updatedSentNotificationDataEntity);
         }
     }
 }

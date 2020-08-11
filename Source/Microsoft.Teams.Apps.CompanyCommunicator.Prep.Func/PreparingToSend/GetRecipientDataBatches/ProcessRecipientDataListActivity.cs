@@ -1,4 +1,4 @@
-﻿// <copyright file="ProcessRecipientDataListForRosterActivity.cs" company="Microsoft">
+﻿// <copyright file="ProcessRecipientDataListActivity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Extensions;
@@ -22,17 +23,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     /// 3). Store these partitioned batches in the send batches data table
     ///     one batch at a time.
     /// </summary>
-    public class ProcessRecipientDataListForRosterActivity
+    public class ProcessRecipientDataListActivity
     {
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly SendBatchesDataRepository sendBatchesDataRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProcessRecipientDataListForRosterActivity"/> class.
+        /// Initializes a new instance of the <see cref="ProcessRecipientDataListActivity"/> class.
         /// </summary>
         /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
         /// <param name="sendBatchesDataRepository">The send batches data repository.</param>
-        public ProcessRecipientDataListForRosterActivity(
+        public ProcessRecipientDataListActivity(
             SentNotificationDataRepository sentNotificationDataRepository,
             SendBatchesDataRepository sendBatchesDataRepository)
         {
@@ -47,12 +48,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <param name="notificationDataEntityId">Notification data entity Id.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task<RecipientDataListInformation> RunAsync(
-            DurableOrchestrationContext context,
+            IDurableOrchestrationContext context,
             string notificationDataEntityId)
         {
             var recipientDataListInformation =
                 await context.CallActivityWithRetryAsync<RecipientDataListInformation>(
-                    nameof(ProcessRecipientDataListForRosterActivity.ProcessRecipientDataListForRosterAsync),
+                    nameof(ProcessRecipientDataListActivity.ProcessRecipientDataListAsync),
                     ActivitySettings.CommonActivityRetryOptions,
                     notificationDataEntityId);
 
@@ -61,26 +62,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
 
         /// <summary>
         /// This method processes the entire sent notification data table that
-        /// has been initialized by fetching all of the team rosters and stores
+        /// has been initialized by fetching all of the users and stores
         /// the entities as partitioned batches in the send batches data table.
         /// 1). Fetch the sent notification data.
-        /// 2). Separate the data into batches.
-        /// 2). Create the correct batch partition key for each batch and set
+        /// 2). Filter the data with failed status.
+        /// 3). Separate the data into batches.
+        /// 4). Create the correct batch partition key for each batch and set
         ///     the partition keys for each batch.
-        /// 3). Store these partitioned batches in the send batches data table
+        /// 5). Store these partitioned batches in the send batches data table
         ///     one batch at a time.
         /// </summary>
         /// <param name="notificationDataEntityId">The notification Id.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [FunctionName(nameof(ProcessRecipientDataListForRosterAsync))]
-        public async Task<RecipientDataListInformation> ProcessRecipientDataListForRosterAsync(
+        [FunctionName(nameof(ProcessRecipientDataListAsync))]
+        public async Task<RecipientDataListInformation> ProcessRecipientDataListAsync(
             [ActivityTrigger] string notificationDataEntityId)
         {
             var sentNotificationDataEntities =
                 await this.sentNotificationDataRepository.GetAllAsync(notificationDataEntityId);
 
             var sentNotificationDataEntityList = sentNotificationDataEntities.ToList();
-            var sentNotificationDataEntityBatches = sentNotificationDataEntityList.SeparateIntoBatches();
+
+            // filter the failed messages , this is to handle the user entities which is
+            // marked as failed due to insufficient data
+            var filteredSentNotificationDataEntityList = sentNotificationDataEntityList.
+                                             Where(x => x.DeliveryStatus != SentNotificationDataEntity.Failed).
+                                             ToList();
+            var sentNotificationDataEntityBatches = filteredSentNotificationDataEntityList.SeparateIntoBatches();
 
             var recipientDataListInformation = new RecipientDataListInformation
             {
@@ -96,7 +104,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                     notificationId: notificationDataEntityId,
                     batchIndex: batchIndex);
 
-                // The SendBatchesData table is separated into batches based on the parition key, so
+                // The SendBatchesData table is separated into batches based on the partition key, so
                 // set all of the partition keys for the entities in this batch to the batchPartitionKey.
                 var sendBatchesDataRepositoryBatch = sentNotificationDataEntityBatch.Select(e =>
                     {

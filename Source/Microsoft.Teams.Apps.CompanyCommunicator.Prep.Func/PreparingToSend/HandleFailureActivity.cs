@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
@@ -35,7 +36,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="ex">Exception.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
-            DurableOrchestrationContext context,
+            IDurableOrchestrationContext context,
             NotificationDataEntity notificationDataEntity,
             Exception ex)
         {
@@ -62,12 +63,30 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             [ActivityTrigger] HandleFailureActivityDTO input,
             ILogger log)
         {
-            var errorMessage = $"Failed to prepare notification {input.NotificationDataEntity.Id} for sending: {input.Exception.Message}";
+            var errorMessage = $"Failed to prepare the message for sending: {input.Exception.Message}";
 
             log.LogError(input.Exception, errorMessage);
 
-            await this.notificationDataRepository
-                .SaveExceptionInNotificationDataEntityAsync(input.NotificationDataEntity.Id, errorMessage);
+            var notificationDataEntity = await this.notificationDataRepository.GetAsync(
+                NotificationDataTableNames.SentNotificationsPartition,
+                input.NotificationDataEntity.Id);
+
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.IsPreparingToSend = false;
+                notificationDataEntity.IsCompleted = true;
+                notificationDataEntity.WarningMessage =
+                    string.IsNullOrWhiteSpace(notificationDataEntity.WarningMessage)
+                    ? errorMessage
+                    : $"{notificationDataEntity.WarningMessage}{Environment.NewLine}{errorMessage}";
+
+                // If it failed to prepare for sending a notification, then set the end date to the current date time.
+                var currentDate = DateTime.Now;
+                notificationDataEntity.SentDate = currentDate;
+                notificationDataEntity.SendingStartedDate = currentDate;
+
+                await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
+            }
         }
     }
 }

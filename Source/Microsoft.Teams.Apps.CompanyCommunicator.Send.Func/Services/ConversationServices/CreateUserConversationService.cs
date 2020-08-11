@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
 
@@ -42,10 +43,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
         /// </summary>
         /// <param name="userDataEntity">The data entity for the user for whom the conversation should be created.</param>
         /// <param name="maxNumberOfAttempts">The maximum number of request attempts to create the conversation.</param>
+        /// <param name="log">The logger.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<CreateUserConversationResponse> CreateConversationAsync(
             UserDataEntity userDataEntity,
-            int maxNumberOfAttempts)
+            int maxNumberOfAttempts,
+            ILogger log)
         {
             var createConversationResponse = new CreateUserConversationResponse();
 
@@ -99,6 +102,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                 }
                 catch (ErrorResponseException e)
                 {
+                    var errorMessage = $"{e.GetType()}: {e.Message}";
+                    log.LogError(e, $"ERROR: {errorMessage}");
+
                     // This exception is thrown when a failure response is received when making the request
                     // to create the conversation.
                     var responseStatusCode = e.Response.StatusCode;

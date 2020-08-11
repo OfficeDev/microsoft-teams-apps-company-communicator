@@ -6,6 +6,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Hosting;
 
     /// <summary>
     /// Program class of the company communicator application.
@@ -19,7 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         /// <param name="args">Arguments passed in to the function.</param>
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Run();
         }
 
         /// <summary>
@@ -27,8 +28,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         /// </summary>
         /// <param name="args">Arguments passed into the main function.</param>
         /// <returns>A web host builder instance.</returns>
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+           Host.CreateDefaultBuilder(args)
+               .ConfigureWebHostDefaults(webBuilder =>
+               {
+                   webBuilder.UseStartup<Startup>();
+               });
     }
 }

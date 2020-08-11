@@ -10,7 +10,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     using Microsoft.AspNetCore.Authentication.AzureAD.UI;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Identity.Web;
+    using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
     using Microsoft.IdentityModel.Tokens;
 
     /// <summary>
@@ -22,12 +25,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// Extension method to register the authentication services.
         /// </summary>
         /// <param name="services">IServiceCollection instance.</param>
+        /// <param name="configuration">The configuration instance.</param>
         /// <param name="authenticationOptions">The authentication options.</param>
         public static void AddAuthentication(
             this IServiceCollection services,
+            IConfiguration configuration,
             AuthenticationOptions authenticationOptions)
         {
-            AuthenticationServiceCollectionExtensions.RegisterAuthenticationServices(services, authenticationOptions);
+            AuthenticationServiceCollectionExtensions.RegisterAuthenticationServices(services, configuration, authenticationOptions);
 
             AuthenticationServiceCollectionExtensions.RegisterAuthorizationPolicy(services);
         }
@@ -35,28 +40,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         // This method works specifically for single tenant application.
         private static void RegisterAuthenticationServices(
             IServiceCollection services,
+            IConfiguration configuration,
             AuthenticationOptions authenticationOptions)
         {
             AuthenticationServiceCollectionExtensions.ValidateAuthenticationOptions(authenticationOptions);
 
-            services.AddAuthentication(options => { options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; })
-                .AddJwtBearer(options =>
+            services.AddProtectedWebApi(configuration)
+                    .AddProtectedWebApiCallsProtectedWebApi(configuration)
+                    .AddInMemoryTokenCaches();
+            services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                var azureADOptions = new AzureADOptions
                 {
-                    var azureADOptions = new AzureADOptions
-                    {
-                        Instance = authenticationOptions.AzureAdInstance,
-                        TenantId = authenticationOptions.AzureAdTenantId,
-                        ClientId = authenticationOptions.AzureAdClientId,
-                    };
-
-                    options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(authenticationOptions),
-                        ValidIssuers = AuthenticationServiceCollectionExtensions.GetValidIssuers(authenticationOptions),
-                        AudienceValidator = AuthenticationServiceCollectionExtensions.AudienceValidator,
-                    };
-                });
+                    Instance = authenticationOptions.AzureAdInstance,
+                    TenantId = authenticationOptions.AzureAdTenantId,
+                    ClientId = authenticationOptions.AzureAdClientId,
+                };
+                options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
+                options.SaveToken = true;
+                options.TokenValidationParameters.ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(authenticationOptions);
+                options.TokenValidationParameters.AudienceValidator = AuthenticationServiceCollectionExtensions.AudienceValidator;
+                options.TokenValidationParameters.ValidIssuers = AuthenticationServiceCollectionExtensions.GetValidIssuers(authenticationOptions);
+            });
         }
 
         private static void ValidateAuthenticationOptions(AuthenticationOptions authenticationOptions)
@@ -126,10 +131,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                 var mustContainUpnClaimRequirement = new MustBeValidUpnRequirement();
                 options.AddPolicy(
                     PolicyNames.MustBeValidUpnPolicy,
-                    policyBuilder => policyBuilder.AddRequirements(mustContainUpnClaimRequirement));
+                    policyBuilder => policyBuilder
+                    .AddRequirements(mustContainUpnClaimRequirement)
+                    .RequireAuthenticatedUser()
+                    .Build());
+                options.AddPolicy(
+                    PolicyNames.MSGraphGroupDataPolicy,
+                    policyBuilder => policyBuilder
+                    .AddRequirements(new MSGraphScopeRequirement(new string[] { Common.Constants.ScopeGroupReadAll }))
+                    .RequireAuthenticatedUser()
+                    .Build());
             });
 
-            services.AddSingleton<IAuthorizationHandler, MustBeValidUpnHandler>();
+            services.AddScoped<IAuthorizationHandler, MustBeValidUpnHandler>();
+            services.AddScoped<IAuthorizationHandler, MSGraphScopeHandler>();
         }
 
         private static bool AudienceValidator(
@@ -137,13 +152,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             SecurityToken securityToken,
             TokenValidationParameters validationParameters)
         {
-            if (tokenAudiences == null || tokenAudiences.Count() == 0)
+            if (tokenAudiences == null || !tokenAudiences.Any())
             {
                 throw new ApplicationException("No audience defined in token!");
             }
 
             var validAudiences = validationParameters.ValidAudiences;
-            if (validAudiences == null || validAudiences.Count() == 0)
+            if (validAudiences == null || !validAudiences.Any())
             {
                 throw new ApplicationException("No valid audiences defined in validationParameters!");
             }
