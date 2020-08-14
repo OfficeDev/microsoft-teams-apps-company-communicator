@@ -151,6 +151,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     CreatedDate = DateTime.UtcNow,
                     IsDraft = true,
                     Teams = notificationEntity.Teams,
+                    Groups = notificationEntity.Groups,
                     Rosters = notificationEntity.Rosters,
                     AllUsers = notificationEntity.AllUsers,
                 };
