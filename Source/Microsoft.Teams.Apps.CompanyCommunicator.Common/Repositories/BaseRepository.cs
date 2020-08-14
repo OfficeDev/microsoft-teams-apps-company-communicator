@@ -19,7 +19,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
     public class BaseRepository<T>
         where T : TableEntity, new()
     {
-        protected readonly ILogger logger;
         private readonly string defaultPartitionKey;
 
         /// <summary>

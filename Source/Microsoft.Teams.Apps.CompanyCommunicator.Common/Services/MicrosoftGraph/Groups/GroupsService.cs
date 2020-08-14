@@ -9,6 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
 
     /// <summary>
     /// Groups Service.
@@ -77,11 +78,39 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         public async Task<IList<Group>> SearchAsync(string query)
         {
             query = Uri.EscapeDataString(query);
-            string filterforM365 = $"groupTypes/any(c:c+eq+'Unified') and mailEnabled eq true and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))";
-            var groupList = await this.SearchAsync(filterforM365, Common.Constants.HiddenMembership, this.MaxResultCount);
+            var groupList = await this.SearchM365GroupsAsync(query, this.MaxResultCount);
             groupList.AddRange(await this.AddDistributionGroupAsync(query, this.MaxResultCount - groupList.Count()));
             groupList.AddRange(await this.AddSecurityGroupAsync(query, this.MaxResultCount - groupList.Count()));
             return groupList;
+        }
+
+        /// <summary>
+        /// Search M365 groups, distribution groups, security groups based on query and visibilty.
+        /// </summary>
+        /// <param name="query">query param.</param>
+        /// <param name="resultCount">page size.</param>
+        /// <param name="includeHiddenMembership">boolean to filter hidden membership.</param>
+        /// <returns>list of group.</returns>
+        private async Task<List<Group>> SearchM365GroupsAsync(string query, int resultCount, bool includeHiddenMembership = false)
+        {
+            string filterQuery = $"groupTypes/any(c:c+eq+'Unified') and mailEnabled eq true and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))";
+            var groupsPaged = await this.SearchAsync(filterQuery, resultCount);
+            if (includeHiddenMembership)
+            {
+                return groupsPaged.CurrentPage.ToList();
+            }
+
+            var groupList = groupsPaged.CurrentPage.
+                                        Where(group => !group.Visibility.IsHiddenMembership()).
+                                        ToList();
+            while (groupsPaged.NextPageRequest != null && groupList.Count() < resultCount)
+            {
+                groupsPaged = await groupsPaged.NextPageRequest.GetAsync();
+                groupList.AddRange(groupsPaged.CurrentPage.
+                          Where(group => !group.Visibility.IsHiddenMembership()));
+            }
+
+            return groupList.Take(resultCount).ToList();
         }
 
         /// <summary>
@@ -97,17 +126,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 return default;
             }
 
-            query = Uri.EscapeDataString(query);
             string filterforDL = $"mailEnabled eq true and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))";
             var distributionGroups = await this.SearchAsync(filterforDL, resultCount);
 
             // Filtering the result only for distribution groups.
             var distributionGroupList = distributionGroups.CurrentPage.
-                                                           Where(dg => dg.GroupTypes == null).ToList();
+                                                           Where(dg => dg.GroupTypes.IsNullOrEmpty()).ToList();
             while (distributionGroups.NextPageRequest != null && distributionGroupList.Count() < resultCount)
             {
                 distributionGroups = await distributionGroups.NextPageRequest.GetAsync();
-                distributionGroupList.AddRange(distributionGroups.CurrentPage.Where(dg => dg.GroupTypes == null));
+                distributionGroupList.AddRange(distributionGroups.CurrentPage.Where(dg => dg.GroupTypes.IsNullOrEmpty()));
             }
 
             return distributionGroupList.Take(resultCount);
@@ -126,38 +154,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 return default;
             }
 
-            query = Uri.EscapeDataString(query);
             string filterforSG = $"mailEnabled eq false and securityEnabled eq true and startsWith(displayName,'{query}')";
             var sgGroups = await this.SearchAsync(filterforSG, resultCount);
             return sgGroups.CurrentPage.Take(resultCount);
-        }
-
-        /// <summary>
-        /// Search M365 groups, distribution groups, security groups based on query and visibilty.
-        /// </summary>
-        /// <param name="filterQuery">query param.</param>
-        /// <param name="visibility">remove hidden membership.</param>
-        /// <param name="resultCount">page size.</param>
-        /// <returns>list of group.</returns>
-        private async Task<List<Group>> SearchAsync(string filterQuery, string visibility, int resultCount)
-        {
-            var groupsPaged = await this.SearchAsync(filterQuery, resultCount);
-            if (string.IsNullOrEmpty(visibility))
-            {
-                return groupsPaged.CurrentPage.ToList();
-            }
-
-            var groupList = groupsPaged.CurrentPage.
-                                        Where(group => !group.Visibility.IsHiddenMembership()).
-                                        ToList();
-            while (groupsPaged.NextPageRequest != null && groupList.Count() < resultCount)
-            {
-                groupsPaged = await groupsPaged.NextPageRequest.GetAsync();
-                groupList.AddRange(groupsPaged.CurrentPage.
-                          Where(group => !group.Visibility.IsHiddenMembership()));
-            }
-
-            return groupList.Take(resultCount).ToList();
         }
 
         /// <summary>
