@@ -75,13 +75,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(UploadActivityAsync))]
         public async Task UploadActivityAsync(
-            [ActivityTrigger](
-            NotificationDataEntity sentNotificationDataEntity,
-            MetaData metaData, string fileName) uploadData)
+            [ActivityTrigger](NotificationDataEntity sentNotificationDataEntity, MetaData metaData, string fileName) uploadData)
         {
             CloudStorageAccount storage = CloudStorageAccount.Parse(this.storageConnectionString);
             CloudBlobClient client = storage.CreateCloudBlobClient();
             CloudBlobContainer container = client.GetContainerReference(Common.Constants.BlobContainerName);
+            await container.CreateIfNotExistsAsync();
+
+            // Set the permissions so the blobs are public.
+            BlobContainerPermissions permissions = new BlobContainerPermissions
+            {
+                PublicAccess = BlobContainerPublicAccessType.Blob,
+            };
+            await container.SetPermissionsAsync(permissions);
             CloudBlockBlob blob = container.GetBlockBlobReference(uploadData.fileName);
             var blobRequestOptions = new BlobRequestOptions()
             {
@@ -107,9 +113,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             // message delivery csv creation.
             var messageDeliveryFile = archive.CreateEntry("Message_Delivery.csv", CompressionLevel.Optimal);
             using (var entryStream = messageDeliveryFile.Open())
+            using (var writer = new StreamWriter(entryStream))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                using var writer = new StreamWriter(entryStream);
-                using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
                 if (uploadData.sentNotificationDataEntity.Teams.Any())
                 {
                     var userDataStream = this.userDataStream.GetTeamDataStreamAsync(uploadData.sentNotificationDataEntity.Id);
