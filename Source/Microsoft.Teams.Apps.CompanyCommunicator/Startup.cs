@@ -4,6 +4,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
+    extern alias BetaLib;
+
     using System.Net;
     using global::Azure.Storage.Blobs;
     using Microsoft.AspNetCore.Builder;
@@ -34,9 +36,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.Groups;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
+
+    using Beta = BetaLib::Microsoft.Graph;
 
     /// <summary>
     /// Register services in DI container, and set up middle-wares in the pipeline.
@@ -156,9 +159,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<DraftNotificationPreviewService>();
 
             // Add microsoft graph services.
-            services.AddTransient<IGraphServiceClient, GraphServiceClient>();
-            services.AddTransient<IAuthenticationProvider, GraphTokenProvider>();
-            services.AddScoped<IGroupsService, GroupsService>();
+            services.AddScoped<IAuthenticationProvider, GraphTokenProvider>();
+            services.AddScoped<IGraphServiceClient, GraphServiceClient>();
+            services.AddScoped<Beta.IGraphServiceClient, Beta.GraphServiceClient>();
+            services.AddScoped<IGraphServiceFactory, GraphServiceFactory>();
+            services.AddScoped<IGroupsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupsService());
 
             // Add Application Insights telemetry.
             services.AddApplicationInsightsTelemetry();

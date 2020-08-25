@@ -2,8 +2,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.GroupMembers
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Graph;
 
@@ -11,7 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     /// Group Members Service.
     /// This gets the groups transitive members.
     /// </summary>
-    public class GroupMembersService : IGroupMembersService
+    internal class GroupMembersService : IGroupMembersService
     {
         private readonly IGraphServiceClient graphServiceClient;
 
@@ -19,9 +20,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// Initializes a new instance of the <see cref="GroupMembersService"/> class.
         /// </summary>
         /// <param name="graphServiceClient">graph service client.</param>
-        public GroupMembersService(IGraphServiceClient graphServiceClient)
+        internal GroupMembersService(IGraphServiceClient graphServiceClient)
         {
-            this.graphServiceClient = graphServiceClient;
+            this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
         }
 
         private int MaxResultCount { get; set; } = 999;

@@ -7,6 +7,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 {
+    extern alias BetaLib;
+
     using System;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
@@ -30,8 +32,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.GroupMembers;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.Users;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
@@ -40,6 +40,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches.Groups;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.SendTriggersToAzureFunctions;
+
+    using Beta = BetaLib::Microsoft.Graph;
 
     /// <summary>
     /// Register services in DI container of the Azure functions system.
@@ -154,11 +156,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                     .WithAuthority(new Uri($"https://login.microsoftonline.com/{options.Value.TenantId}"))
                     .Build();
             });
-            builder.Services.AddTransient<IGraphServiceClient>(serviceProvider =>
-            new GraphServiceClient(serviceProvider.GetRequiredService<IAuthenticationProvider>()));
+
             builder.Services.AddTransient<IAuthenticationProvider, MsalAuthenticationProvider>();
-            builder.Services.AddScoped<IGroupMembersService, GroupMembersService>();
-            builder.Services.AddScoped<IUsersService, UsersService>();
+
+            // Add Graph Clients.
+            builder.Services.AddSingleton<IGraphServiceClient>(
+                serviceProvider =>
+                new GraphServiceClient(serviceProvider.GetRequiredService<IAuthenticationProvider>()));
+            builder.Services.AddSingleton<Beta.IGraphServiceClient>(
+                sp => new Beta.GraphServiceClient(sp.GetRequiredService<IAuthenticationProvider>()));
+
+            // Add Service Factory
+            builder.Services.AddSingleton<IGraphServiceFactory, GraphServiceFactory>();
+
+            // Add Graph Services
+            builder.Services.AddScoped<IUsersService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetUsersService());
+            builder.Services.AddScoped<IGroupMembersService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupMembersService());
+
             builder.Services.AddTransient<IDataStreamFacade, DataStreamFacade>();
         }
     }

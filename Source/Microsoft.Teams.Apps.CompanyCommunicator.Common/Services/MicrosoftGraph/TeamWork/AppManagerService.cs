@@ -17,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     /// <summary>
     /// Manage Teams Apps for a user or a team.
     /// </summary>
-    public class AppManagerService : IAppManagerService
+    internal class AppManagerService : IAppManagerService
     {
         private readonly Beta.IGraphServiceClient betaServiceClient;
         private readonly IGraphServiceClient serviceClient;
@@ -27,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="betaServiceClient">Beta Graph service client.</param>
         /// <param name="serviceClient">V1 Graph service client.</param>
-        public AppManagerService(
+        internal AppManagerService(
             Beta.IGraphServiceClient betaServiceClient,
             IGraphServiceClient serviceClient)
         {

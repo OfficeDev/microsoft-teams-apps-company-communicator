@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Authentication
 {
+    using System;
     using System.Collections.Generic;
     using System.Net.Http;
     using System.Net.Http.Headers;
@@ -12,7 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Authentication
     using Microsoft.Identity.Client;
 
     /// <summary>
-    /// Authentication provider for graph calls.
+    /// MSAL Authentication provider for graph calls.
     /// </summary>
     public class MsalAuthenticationProvider : IAuthenticationProvider
     {
@@ -24,14 +25,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Authentication
         /// <param name="clientApplication">MSAL.NET token acquisition service for confidential clients.</param>
         public MsalAuthenticationProvider(IConfidentialClientApplication clientApplication)
         {
-            this.clientApplication = clientApplication;
+            this.clientApplication = clientApplication ?? throw new ArgumentNullException(nameof(clientApplication));
         }
 
-        /// <summary>
-        /// Intercepts HttpRequest and add Bearer token.
-        /// </summary>
-        /// <param name="request">Represents a HttpRequestMessage.</param>
-        /// <returns>asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task AuthenticateRequestAsync(HttpRequestMessage request)
         {
             var accessToken = await this.GetAccesTokenAsync();
@@ -45,14 +42,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Authentication
         /// gets the access token from confidential client service.
         /// </summary>
         /// <returns>The access token.</returns>
-        public async Task<string> GetAccesTokenAsync()
+        private async Task<string> GetAccesTokenAsync()
         {
-            var scopes = new List<string>
-            {
-                Common.Constants.ScopeDefault,
-            };
+            var scopes = new List<string> { Common.Constants.ScopeDefault, };
             var result = await this.clientApplication.AcquireTokenForClient(scopes)
                 .ExecuteAsync();
+
             return result.AccessToken;
         }
     }

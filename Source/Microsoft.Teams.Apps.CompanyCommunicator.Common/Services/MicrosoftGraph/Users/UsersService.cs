@@ -2,21 +2,21 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.Users
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Graph;
-    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Get the User data.
     /// </summary>
-    public class UsersService : IUsersService
+    internal class UsersService : IUsersService
     {
         private readonly IGraphServiceClient graphServiceClient;
 
@@ -24,9 +24,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// Initializes a new instance of the <see cref="UsersService"/> class.
         /// </summary>
         /// <param name="graphServiceClient">graph service client.</param>
-        public UsersService(IGraphServiceClient graphServiceClient)
+        internal UsersService(IGraphServiceClient graphServiceClient)
         {
-            this.graphServiceClient = graphServiceClient;
+            this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
         }
 
         private int MaxRetry { get; set; } = 10;

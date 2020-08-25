@@ -14,7 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     /// <summary>
     /// Chats Service.
     /// </summary>
-    public class ChatsService : IChatsService
+    internal class ChatsService : IChatsService
     {
         private readonly Beta.IGraphServiceClient betaServiceClient;
         private readonly IAppManagerService appManagerService;
@@ -24,7 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <param name="betaServiceClient">Beta graph service client.</param>
         /// <param name="appManagerService">App manager service.</param>
-        public ChatsService(
+        internal ChatsService(
             Beta.IGraphServiceClient betaServiceClient,
             IAppManagerService appManagerService)
         {
