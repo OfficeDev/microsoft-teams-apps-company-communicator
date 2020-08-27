@@ -72,7 +72,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             foreach (var aadId in userAadIds)
             {
                 var userDataEntity = await this.userDataRepository.
-                GetAsync(UserDataTableNames.UserDataPartition, aadId);
+                    GetAsync(UserDataTableNames.UserDataPartition, aadId);
                 userDataEntities.Add(userDataEntity);
             }
 
