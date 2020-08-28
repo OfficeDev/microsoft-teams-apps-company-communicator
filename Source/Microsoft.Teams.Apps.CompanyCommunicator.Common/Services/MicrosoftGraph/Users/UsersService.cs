@@ -10,7 +10,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Graph;
-    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
     /// <summary>
@@ -42,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             {
                 if (userIds.Count() < 1)
                 {
-                    return default;
+                    return new List<User>();
                 }
 
                 var filterUserIds = this.GetUserIdFilter(userIds);
@@ -57,7 +56,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             }
             catch
             {
-                return default;
+                return new List<User>();
             }
         }
 
@@ -68,13 +67,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <returns>list of users.</returns>
         public async Task<IEnumerable<User>> GetBatchByUserIds(IEnumerable<IEnumerable<string>> userIdsByGroups)
         {
-            if (userIdsByGroups.Count() < 1)
-            {
-                return default;
-            }
-
             try
             {
+                if (userIdsByGroups.Count() < 1)
+                {
+                    return new List<User>();
+                }
+
                 var users = new List<User>();
                 var batches = this.GetBatchRequest(userIdsByGroups);
                 foreach (var batchRequestContent in batches)
@@ -106,7 +105,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             }
             catch
             {
-                return default;
+                return new List<User>();
             }
         }
 
