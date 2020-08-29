@@ -4,7 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
 {
-    using System;
+    using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -70,7 +70,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             }
             catch (ServiceException serviceException)
             {
-                if (!serviceException.StatusCode.ToString().Equals("Forbidden", StringComparison.CurrentCultureIgnoreCase))
+                if (serviceException.StatusCode != HttpStatusCode.Forbidden)
                 {
                     throw serviceException;
                 }

@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -63,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                 }
                 catch (ServiceException serviceException)
                 {
-                    if (!serviceException.StatusCode.ToString().Equals("Forbidden", StringComparison.CurrentCultureIgnoreCase))
+                    if (serviceException.StatusCode != HttpStatusCode.Forbidden)
                     {
                         throw serviceException;
                     }
