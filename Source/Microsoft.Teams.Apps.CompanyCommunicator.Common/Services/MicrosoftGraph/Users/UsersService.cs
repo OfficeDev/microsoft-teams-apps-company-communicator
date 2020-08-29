@@ -10,7 +10,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Graph;
-    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
     /// <summary>
@@ -38,27 +37,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <returns>list of users.</returns>
         public async Task<IEnumerable<User>> FilterByUserIdsAsync(IEnumerable<string> userIds)
         {
-            try
+            if (userIds.Count() < 1)
             {
-                if (userIds.Count() < 1)
-                {
-                    return default;
-                }
-
-                var filterUserIds = this.GetUserIdFilter(userIds);
-                var userList = new List<User>();
-                var usersStream = this.GetUsersAsync(filterUserIds.ToString());
-                await foreach (var users in usersStream)
-                {
-                    userList.AddRange(users);
-                }
-
-                return userList;
+                return new List<User>();
             }
-            catch
+
+            var filterUserIds = this.GetUserIdFilter(userIds);
+            var userList = new List<User>();
+            var usersStream = this.GetUsersAsync(filterUserIds.ToString());
+            await foreach (var users in usersStream)
             {
-                return default;
+                userList.AddRange(users);
             }
+
+            return userList;
         }
 
         /// <summary>
@@ -68,46 +60,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <returns>list of users.</returns>
         public async Task<IEnumerable<User>> GetBatchByUserIds(IEnumerable<IEnumerable<string>> userIdsByGroups)
         {
-            if (userIdsByGroups.Count() < 1)
+            var users = new List<User>();
+            var batches = this.GetBatchRequest(userIdsByGroups);
+            foreach (var batchRequestContent in batches)
             {
-                return default;
-            }
+                var response = await this.graphServiceClient
+                    .Batch
+                    .Request()
+                    .WithMaxRetry(this.MaxRetry)
+                    .PostAsync(batchRequestContent);
 
-            try
-            {
-                var users = new List<User>();
-                var batches = this.GetBatchRequest(userIdsByGroups);
-                foreach (var batchRequestContent in batches)
+                Dictionary<string, HttpResponseMessage> responses = await response.GetResponsesAsync();
+
+                foreach (string key in responses.Keys)
                 {
-                    var response = await this.graphServiceClient
-                        .Batch
-                        .Request()
-                        .WithMaxRetry(this.MaxRetry)
-                        .PostAsync(batchRequestContent);
+                    HttpResponseMessage httpResponse = await response.GetResponseByIdAsync(key);
+                    httpResponse.EnsureSuccessStatusCode();
 
-                    Dictionary<string, HttpResponseMessage> responses = await response.GetResponsesAsync();
-
-                    foreach (string key in responses.Keys)
-                    {
-                        HttpResponseMessage httpResponse = await response.GetResponseByIdAsync(key);
-                        httpResponse.EnsureSuccessStatusCode();
-
-                        var responseContent = await httpResponse.Content.ReadAsStringAsync();
-                        JObject content = JObject.Parse(responseContent);
-                        var userstemp = content["value"]
-                            .Children()
-                            .OfType<JObject>()
-                            .Select(obj => obj.ToObject<User>());
-                        users.AddRange(userstemp);
-                    }
+                    var responseContent = await httpResponse.Content.ReadAsStringAsync();
+                    JObject content = JObject.Parse(responseContent);
+                    var userstemp = content["value"]
+                        .Children()
+                        .OfType<JObject>()
+                        .Select(obj => obj.ToObject<User>());
+                    users.AddRange(userstemp);
                 }
+            }
 
-                return users;
-            }
-            catch
-            {
-                return default;
-            }
+            return users;
         }
 
         /// <summary>
@@ -144,25 +124,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <returns>user data.</returns>
         public async Task<User> GetUserAsync(string userId)
         {
-            try
-            {
-                var graphResult = await this.graphServiceClient
-                        .Users[userId]
-                        .Request()
-                        .WithMaxRetry(this.MaxRetry)
-                        .Select(user => new
-                        {
-                            user.Id,
-                            user.DisplayName,
-                            user.UserPrincipalName,
-                        })
-                        .GetAsync();
-                return graphResult;
-            }
-            catch
-            {
-                return default;
-            }
+            var graphResult = await this.graphServiceClient
+                    .Users[userId]
+                    .Request()
+                    .WithMaxRetry(this.MaxRetry)
+                    .Select(user => new
+                    {
+                        user.Id,
+                        user.DisplayName,
+                        user.UserPrincipalName,
+                    })
+                    .GetAsync();
+            return graphResult;
         }
 
         private string GetUserIdFilter(IEnumerable<string> userIds)
