@@ -38,5 +38,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// </summary>
         /// <returns>Returns an implementation of <see cref="IAppManagerService"/>.</returns>
         public IAppManagerService GetAppManagerService();
+
+        /// <summary>
+        /// Creates an instance of <see cref="IAppCatalogService"/> implementation.
+        /// </summary>
+        /// <returns>Returns an implementation of <see cref="IAppCatalogService"/>.</returns>
+        public IAppCatalogService GetAppCatalogService();
     }
 }

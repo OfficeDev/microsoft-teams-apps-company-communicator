@@ -60,5 +60,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         {
             return new AppManagerService(this.betaServiceClient, this.serviceClient);
         }
+
+        /// <inheritdoc/>
+        public IAppCatalogService GetAppCatalogService()
+        {
+            return new AppCatalogService(this.betaServiceClient);
+        }
     }
 }
