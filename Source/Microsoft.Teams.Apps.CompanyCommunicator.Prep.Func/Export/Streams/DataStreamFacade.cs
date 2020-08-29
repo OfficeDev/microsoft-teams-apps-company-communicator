@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
@@ -48,14 +49,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
             var sentNotificationDataEntitiesStream = this.sentNotificationDataRepository.GetStreamsAsync(notificationId);
             await foreach (var sentNotifcations in sentNotificationDataEntitiesStream)
             {
-                // filter the recipient not found users.
-                var users = await this.usersService.GetBatchByUserIds(
-                    sentNotifcations
-                    .Where(sentNotifcation => !sentNotifcation.DeliveryStatus.Equals(SentNotificationDataEntity.RecipientNotFound, StringComparison.CurrentCultureIgnoreCase))
-                    .Select(notitification => notitification.RowKey)
-                    .ToList()
-                    .AsGroups());
-                yield return sentNotifcations.CreateUserData(users);
+                List<User> userList = new List<User>();
+                try
+                {
+                    // filter the recipient not found users.
+                    var users = await this.usersService.GetBatchByUserIds(
+                        sentNotifcations
+                        .Where(sentNotifcation => !sentNotifcation.DeliveryStatus.Equals(SentNotificationDataEntity.RecipientNotFound, StringComparison.CurrentCultureIgnoreCase))
+                        .Select(notitification => notitification.RowKey)
+                        .ToList()
+                        .AsGroups());
+                    userList = users.ToList();
+                }
+                catch (ServiceException serviceException)
+                {
+                    if (!serviceException.StatusCode.ToString().Equals("Forbidden", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        throw serviceException;
+                    }
+                }
+
+                yield return sentNotifcations.CreateUserData(userList);
             }
         }
 
