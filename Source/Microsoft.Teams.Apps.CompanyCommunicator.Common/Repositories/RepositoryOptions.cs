@@ -14,9 +14,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// </summary>
         public RepositoryOptions()
         {
-            // Default this option to false because ensuring the table exists is technically
+            // Default this option to true as ensuring the table exists is technically
             // more robust.
-            this.IsItExpectedThatTableAlreadyExists = false;
+            this.EnsureTableExists = true;
         }
 
         /// <summary>
@@ -25,12 +25,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         public string StorageAccountConnectionString { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether it is expected that the table already exists.
-        /// If the table already exists but the call is made to ensure it exists, then it results
-        /// in an unnecessary failure request written in the logs. This flag is used to reduce
-        /// the number of those unnecessary failure requests when it is expected that the table
-        /// already exists.
+        /// Gets or sets a value indicating whether the table should be created
+        /// if it does not already exist.
         /// </summary>
-        public bool IsItExpectedThatTableAlreadyExists { get; set; }
+        public bool EnsureTableExists { get; set; }
     }
 }

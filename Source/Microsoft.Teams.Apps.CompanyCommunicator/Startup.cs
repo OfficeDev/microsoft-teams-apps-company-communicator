@@ -92,9 +92,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     repositoryOptions.StorageAccountConnectionString =
                         configuration.GetValue<string>("StorageAccountConnectionString");
 
-                    // Setting this to false because the main application should ensure that all
+                    // Setting this to true because the main application should ensure that all
                     // tables exist.
-                    repositoryOptions.IsItExpectedThatTableAlreadyExists = false;
+                    repositoryOptions.EnsureTableExists = true;
                 });
             services.AddOptions<MessageQueueOptions>()
                 .Configure<IConfiguration>((messageQueueOptions, configuration) =>

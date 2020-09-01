@@ -30,7 +30,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                   storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
                   tableName: NotificationDataTableNames.TableName,
                   defaultPartitionKey: NotificationDataTableNames.DraftNotificationsPartition,
-                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
             this.TableRowKeyGenerator = tableRowKeyGenerator;
         }

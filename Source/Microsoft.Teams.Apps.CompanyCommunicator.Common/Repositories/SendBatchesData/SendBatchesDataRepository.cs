@@ -27,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatch
                   storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
                   tableName: SendBatchesDataTableNames.TableName,
                   defaultPartitionKey: SendBatchesDataTableNames.DefaultPartition,
-                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
         }
 

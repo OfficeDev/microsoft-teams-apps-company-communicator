@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
                   storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
                   tableName: UserDataTableNames.TableName,
                   defaultPartitionKey: UserDataTableNames.UserDataPartition,
-                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
         }
     }
