@@ -62,7 +62,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         {
             return await context.CallActivityWithRetryAsync<string>(
               nameof(SendFileCardActivity.SendFileCardActivityAsync),
-              ActivitySettings.CommonActivityRetryOptions,
+              FunctionSettings.DefaultRetryOptions,
               sendData);
         }
 

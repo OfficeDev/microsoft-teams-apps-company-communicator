@@ -1,4 +1,4 @@
-﻿// <copyright file="SendDataAggregationMessageActivity.cs" company="Microsoft">
+﻿// <copyright file="DataAggregationActivity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -11,20 +11,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
 
     /// <summary>
-    /// This activity sends a message to the data queue to start the aggregation of the results for the given
-    /// notification.
+    /// This activity sends a message to the data queue to start aggregating results 
+    /// for a given notification.
     /// </summary>
-    public class SendDataAggregationMessageActivity
+    public class DataAggregationActivity
     {
         private readonly DataQueue dataQueue;
         private readonly double firstDataAggregationMessageDelayInSeconds;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SendDataAggregationMessageActivity"/> class.
+        /// Initializes a new instance of the <see cref="DataAggregationActivity"/> class.
         /// </summary>
         /// <param name="dataQueue">The data queue.</param>
         /// <param name="dataQueueMessageOptions">The data queue message options.</param>
-        public SendDataAggregationMessageActivity(
+        public DataAggregationActivity(
             DataQueue dataQueue,
             IOptions<DataQueueMessageOptions> dataQueueMessageOptions)
         {
@@ -33,29 +33,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         }
 
         /// <summary>
-        /// Run the activity.
-        /// </summary>
-        /// <param name="context">Durable orchestration context.</param>
-        /// <param name="notificationId">The notification Id.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task RunAsync(
-            IDurableOrchestrationContext context,
-            string notificationId)
-        {
-            await context.CallActivityWithRetryAsync(
-                nameof(SendDataAggregationMessageActivity.SendDataAggregationQueueMessageAsync),
-                ActivitySettings.CommonActivityRetryOptions,
-                notificationId);
-        }
-
-        /// <summary>
         /// Sends a message to the data queue to start the aggregation of the results for the given
         /// notification.
         /// </summary>
         /// <param name="notificationId">The notification Id.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [FunctionName(nameof(SendDataAggregationQueueMessageAsync))]
-        public async Task SendDataAggregationQueueMessageAsync(
+        [FunctionName(FunctionNames.DataAggregationActivity)]
+        public async Task RunAsync(
             [ActivityTrigger] string notificationId)
         {
             var dataQueueMessageContent = new DataQueueMessageContent

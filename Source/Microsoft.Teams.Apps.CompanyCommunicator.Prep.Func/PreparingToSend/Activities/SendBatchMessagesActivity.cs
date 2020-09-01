@@ -1,9 +1,10 @@
-﻿// <copyright file="SendTriggersToSendFunctionActivity.cs" company="Microsoft">
+﻿// <copyright file="SendBatchMessagesActivity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.SendTriggersToAzureFunctions
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Extensions;
 
     /// <summary>
-    /// This Activity represents the "send triggers to Azure service bus" activity.
+    /// This Activity represents the Send batch messages to send queue activity.
     /// Ultimately this activity sends a batch of queue messages to the Send queue.
     /// 1) It pulls the batch corresponding with the notification Id and the
     ///     recipient data batch index from the send batches data table.
@@ -26,48 +27,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
     /// 3) It sends those Send queue triggers in one batch request to the Service
     ///     Bus Send queue so they reach the Azure Send function.
     /// </summary>
-    public class SendTriggersToSendFunctionActivity
+    public class SendBatchMessagesActivity
     {
         private readonly SendBatchesDataRepository sendBatchesDataRepository;
         private readonly SendQueue sendQueue;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SendTriggersToSendFunctionActivity"/> class.
+        /// Initializes a new instance of the <see cref="SendBatchMessagesActivity"/> class.
         /// </summary>
         /// <param name="sendBatchesDataRepository">The send batches data repository.</param>
         /// <param name="sendQueue">Send queue service.</param>
-        public SendTriggersToSendFunctionActivity(
+        public SendBatchMessagesActivity(
             SendBatchesDataRepository sendBatchesDataRepository,
             SendQueue sendQueue)
         {
-            this.sendBatchesDataRepository = sendBatchesDataRepository;
-            this.sendQueue = sendQueue;
+            this.sendBatchesDataRepository = sendBatchesDataRepository ?? throw new ArgumentNullException(nameof(sendBatchesDataRepository));
+            this.sendQueue = sendQueue ?? throw new ArgumentNullException(nameof(sendQueue));
         }
 
         /// <summary>
-        /// Run the activity.
-        /// </summary>
-        /// <param name="context">Durable orchestration context.</param>
-        /// <param name="notificationId">The notification Id.</param>
-        /// <param name="recipientDataBatchIndex">The index of the recipient data batch to process.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task RunAsync(
-            IDurableOrchestrationContext context,
-            string notificationId,
-            int recipientDataBatchIndex)
-        {
-            await context.CallActivityWithRetryAsync(
-                nameof(SendTriggersToSendFunctionActivity.SendTriggersToSendFunctionAsync),
-                ActivitySettings.CommonActivityRetryOptions,
-                new SendTriggersToSendFunctionActivityDTO
-                {
-                    NotificationId = notificationId,
-                    RecipientDataBatchIndex = recipientDataBatchIndex,
-                });
-        }
-
-        /// <summary>
-        /// This method represents the "send triggers to Azure service bus" activity.
+        /// This method represents the Send batch messages to send queue activity.
         /// 1) It pulls the batch corresponding with the notification Id and the
         ///     recipient data batch index from the send batches data table.
         /// 2) It transforms that data into the appropriate content for the Send
@@ -75,14 +54,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Sen
         /// 3) It sends those Send queue triggers in one batch request to the Service
         ///     Bus Send queue so they reach the Azure Send function.
         /// </summary>
-        /// <param name="input">Input value.</param>
+        /// <param name="tuple">Tuple.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [FunctionName(nameof(SendTriggersToSendFunctionAsync))]
-        public async Task SendTriggersToSendFunctionAsync(
-            [ActivityTrigger] SendTriggersToSendFunctionActivityDTO input)
+        [FunctionName(FunctionNames.SendBatchMessagesActivity)]
+        public async Task RunAsync(
+            [ActivityTrigger](string notificationId, int recipientDataBatchIndex) tuple)
         {
-            var notificationId = input.NotificationId;
-            var recipientDataBatchIndex = input.RecipientDataBatchIndex;
+            var notificationId = tuple.notificationId;
+            var recipientDataBatchIndex = tuple.recipientDataBatchIndex;
 
             var batchPartitionKey = this.sendBatchesDataRepository.GetBatchPartitionKey(
                 notificationId: notificationId,

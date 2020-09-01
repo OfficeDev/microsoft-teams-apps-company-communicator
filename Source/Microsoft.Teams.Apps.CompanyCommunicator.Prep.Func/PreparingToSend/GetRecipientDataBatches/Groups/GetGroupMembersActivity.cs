@@ -4,7 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches.Groups
 {
-    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
@@ -55,17 +54,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             string groupId,
             ILogger log)
         {
-            var (groupMembersPage, nextPageUrl) = await context.
-                CallActivityWithRetryAsync
-                <(IGroupTransitiveMembersCollectionWithReferencesPage, string)>(
-                 nameof(GetGroupMembersActivity.GetGroupMembersAsync),
-                 ActivitySettings.CommonActivityRetryOptions,
-                 groupId);
+            var (groupMembersPage, nextPageUrl) =
+                await context.CallActivityWithRetryAsync<(IGroupTransitiveMembersCollectionWithReferencesPage, string)>(
+                    nameof(GetGroupMembersActivity.GetGroupMembersAsync),
+                    FunctionSettings.DefaultRetryOptions,
+                    groupId);
 
             // intialize the groupMembers if app installed.
             // fail the groupMembers if app is not installed.
-            await this.initializeorFailGroupMembersActivity.
-                RunAsync(
+            await this.initializeorFailGroupMembersActivity.RunAsync (
                 context,
                 notificationDataEntityId,
                 groupMembersPage.OfType<User>(),

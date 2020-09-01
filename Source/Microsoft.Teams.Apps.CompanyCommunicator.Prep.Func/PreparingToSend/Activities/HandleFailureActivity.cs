@@ -25,29 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="notificationDataRepository">Notification data repository.</param>
         public HandleFailureActivity(NotificationDataRepository notificationDataRepository)
         {
-            this.notificationDataRepository = notificationDataRepository;
-        }
-
-        /// <summary>
-        /// Run the activity.
-        /// </summary>
-        /// <param name="context">Durable orchestration context.</param>
-        /// <param name="notificationDataEntity">Notification data entity.</param>
-        /// <param name="ex">Exception.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task RunAsync(
-            IDurableOrchestrationContext context,
-            NotificationDataEntity notificationDataEntity,
-            Exception ex)
-        {
-            await context.CallActivityWithRetryAsync(
-                nameof(HandleFailureActivity.HandleFailureAsync),
-                ActivitySettings.CommonActivityRetryOptions,
-                new HandleFailureActivityDTO
-                {
-                    NotificationDataEntity = notificationDataEntity,
-                    Exception = ex,
-                });
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
         }
 
         /// <summary>
@@ -58,14 +36,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="input">Input value.</param>
         /// <param name="log">Logging service.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        [FunctionName(nameof(HandleFailureAsync))]
-        public async Task HandleFailureAsync(
+        [FunctionName(FunctionNames.HandleFailureActivity)]
+        public async Task RunAsync(
             [ActivityTrigger] HandleFailureActivityDTO input,
             ILogger log)
         {
             var errorMessage = $"Failed to prepare the message for sending: {input.Exception.Message}";
-
-            log.LogError(input.Exception, errorMessage);
 
             var notificationDataEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,

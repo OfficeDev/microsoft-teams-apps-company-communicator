@@ -42,26 +42,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         }
 
         /// <summary>
-        /// Run the activity.
-        /// </summary>
-        /// <param name="context">Durable orchestration context.</param>
-        /// <param name="allUserDataEntities">All users data entity list.</param>
-        /// <param name="notificationDataEntity">Notification data entity.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<RecipientDataListInformation> RunAsync(
-            IDurableOrchestrationContext context,
-            IEnumerable<UserDataEntity> allUserDataEntities,
-            NotificationDataEntity notificationDataEntity)
-        {
-            var recipientDataListInformation = await context.CallActivityWithRetryAsync<RecipientDataListInformation>(
-                nameof(GetRecipientDataListForAllUsersActivity.GetAllUsersRecipientDataListAsync),
-                ActivitySettings.CommonActivityRetryOptions,
-                (notificationDataEntity.Id, allUserDataEntities));
-
-            return recipientDataListInformation;
-        }
-
-        /// <summary>
         /// This method represents the "get recipient data list for all users" durable activity.
         /// 1). It takes all users' data entity list as passing in parameter.
         /// 2). It breaks that list of users into batches.

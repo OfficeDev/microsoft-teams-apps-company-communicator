@@ -41,7 +41,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         private readonly string microsoftAppId;
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
-        private readonly HandleWarningActivity handleWarningActivity;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -52,21 +51,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <param name="notificationDataRepository">Notification data repository.</param>
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         /// <param name="localizer">Localization service.</param>
-        /// <param name="handleWarningActivity">handle warning activity.</param>
         public GetRecipientDataListForRosterActivity(
             BotFrameworkHttpAdapter botAdapter,
             IOptions<BotOptions> botOptions,
             NotificationDataRepository notificationDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository,
-            IStringLocalizer<Strings> localizer,
-            HandleWarningActivity handleWarningActivity)
+            IStringLocalizer<Strings> localizer)
         {
             this.botAdapter = botAdapter;
             this.microsoftAppId = botOptions.Value.MicrosoftAppId;
             this.notificationDataRepository = notificationDataRepository;
             this.sentNotificationDataRepository = sentNotificationDataRepository;
             this.localizer = localizer;
-            this.handleWarningActivity = handleWarningActivity;
         }
 
         /// <summary>
@@ -88,7 +84,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             {
                 await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
                     nameof(GetRecipientDataListForRosterActivity.GetRecipientDataListForRosterAsync),
-                    ActivitySettings.CommonActivityRetryOptions,
+                    FunctionSettings.DefaultRetryOptions,
                     new GetRecipientDataListForRosterActivityDTO
                     {
                         NotificationDataEntityId = notificationDataEntityId,
@@ -101,7 +97,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                 var errorMessage = string.Format(format, teamDataEntity.TeamId, ex.Message);
 
                 log.LogError(ex, errorMessage);
-                await this.handleWarningActivity.RunAsync(context, notificationDataEntityId, errorMessage);
+                await context.CallActivityWithRetryAsync(
+                    FunctionNames.HandleWarningActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    (notificationDataEntityId, errorMessage));
             }
         }
 

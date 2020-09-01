@@ -40,24 +40,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         }
 
         /// <summary>
-        /// Run the activity.
-        /// </summary>
-        /// <param name="context">Durable orchestration context.</param>
-        /// <param name="notificationDataEntityId">The notification data entity id.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<IEnumerable<UserDataEntity>> RunAsync(
-            IDurableOrchestrationContext context,
-            string notificationDataEntityId)
-        {
-            var recipientDataListInformation = await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
-                nameof(GetAllUsersDataEntitiesActivity.GetAllUsersAsync),
-                ActivitySettings.CommonActivityRetryOptions,
-                notificationDataEntityId);
-
-            return recipientDataListInformation;
-        }
-
-        /// <summary>
         /// This method represents the "get all users' data entity list" durable activity.
         /// It gets the user data entities for all users stored in the user data table.
         /// </summary>

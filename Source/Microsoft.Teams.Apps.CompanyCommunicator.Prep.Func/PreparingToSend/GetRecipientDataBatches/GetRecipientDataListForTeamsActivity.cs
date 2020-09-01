@@ -9,7 +9,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -42,26 +41,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         }
 
         /// <summary>
-        /// Run the activity.
-        /// </summary>
-        /// <param name="context">Durable orchestration context.</param>
-        /// <param name="teamDataEntities">The team data entity list.</param>
-        /// <param name="notificationDataEntity">Notification data entity.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<RecipientDataListInformation> RunAsync(
-            IDurableOrchestrationContext context,
-            IEnumerable<TeamDataEntity> teamDataEntities,
-            NotificationDataEntity notificationDataEntity)
-        {
-            var recipientDataListInformation = await context.CallActivityWithRetryAsync<RecipientDataListInformation>(
-                nameof(GetRecipientDataListForTeamsActivity.GetTeamRecipientDataListAsync),
-                ActivitySettings.CommonActivityRetryOptions,
-                (notificationDataEntity.Id, teamDataEntities));
-
-            return recipientDataListInformation;
-        }
-
-        /// <summary>
         /// This method represents the "get recipient data list for teams" durable activity.
         /// 1). It takes the recipient data list of teams ("team general channels") as passing in parameter.
         /// 2). It breaks that list of teams into batches.
@@ -71,8 +50,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// </summary>
         /// <param name="dto">An instance of GetRecipientDataListForTeamsActivityDTO.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [FunctionName(nameof(GetTeamRecipientDataListAsync))]
-        public async Task<RecipientDataListInformation> GetTeamRecipientDataListAsync(
+        [FunctionName(FunctionNames.GetTeamRecipientDataListActivity)]
+        public async Task<RecipientDataListInformation> RunAsync(
             [ActivityTrigger]
             (string NotificationDataEntityId, IEnumerable<TeamDataEntity> TeamDataEntityList) dto)
         {

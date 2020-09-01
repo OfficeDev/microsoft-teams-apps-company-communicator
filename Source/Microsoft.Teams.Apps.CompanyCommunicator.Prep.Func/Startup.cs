@@ -39,7 +39,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches.Groups;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.SendTriggersToAzureFunctions;
 
     using Beta = BetaLib::Microsoft.Graph;
 
@@ -97,27 +96,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
              });
 
             // Add orchestration.
-            builder.Services.AddTransient<PreparingToSendOrchestration>();
             builder.Services.AddTransient<ExportOrchestration>();
 
             // Add activities.
-            builder.Services.AddTransient<GetAllUsersDataEntitiesActivity>();
-            builder.Services.AddTransient<GetRecipientDataListForAllUsersActivity>();
             builder.Services.AddTransient<GetTeamDataEntitiesByIdsActivity>();
-            builder.Services.AddTransient<GetUserDataEntitiesByIdsActivity>();
             builder.Services.AddTransient<GetRecipientDataListForRosterActivity>();
             builder.Services.AddTransient<GetRecipientDataListForGroupActivity>();
             builder.Services.AddTransient<ProcessRecipientDataListActivity>();
-            builder.Services.AddTransient<GetRecipientDataListForTeamsActivity>();
-            builder.Services.AddTransient<CreateSendingNotificationActivity>();
-            builder.Services.AddTransient<SetNotificationMetadataActivity>();
-            builder.Services.AddTransient<SendDataAggregationMessageActivity>();
-            builder.Services.AddTransient<SendTriggersToSendFunctionActivity>();
             builder.Services.AddTransient<GetGroupMembersActivity>();
             builder.Services.AddTransient<GetGroupMembersNextPageActivity>();
             builder.Services.AddTransient<InitializeorFailGroupMembersActivity>();
-            builder.Services.AddTransient<HandleFailureActivity>();
-            builder.Services.AddTransient<HandleWarningActivity>();
             builder.Services.AddTransient<UpdateExportDataActivity>();
             builder.Services.AddTransient<GetMetaDataActivity>();
             builder.Services.AddTransient<UploadActivity>();
@@ -146,7 +134,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<TableRowKeyGenerator>();
             builder.Services.AddTransient<AdaptiveCardCreator>();
 
-            // graph token services
+            // Add graph services.
+            this.AddGraphServices(builder);
+
+            builder.Services.AddTransient<IDataStreamFacade, DataStreamFacade>();
+        }
+
+        /// <summary>
+        /// Adds Graph Services and related dependencies.
+        /// </summary>
+        /// <param name="builder">Builder.</param>
+        private void AddGraphServices(IFunctionsHostBuilder builder)
+        {
+            // Options
+            builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
+                Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
+                {
+                    confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("MicrosoftAppId");
+                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("MicrosoftAppPassword");
+                    confidentialClientApplicationOptions.TenantId = configuration.GetValue<string>("TenantId");
+                });
+
+            // Graph Token Services
             builder.Services.AddSingleton<IConfidentialClientApplication>(provider =>
             {
                 var options = provider.GetRequiredService<IOptions<ConfidentialClientApplicationOptions>>();
@@ -157,7 +166,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                     .Build();
             });
 
-            builder.Services.AddTransient<IAuthenticationProvider, MsalAuthenticationProvider>();
+            builder.Services.AddSingleton<IAuthenticationProvider, MsalAuthenticationProvider>();
 
             // Add Graph Clients.
             builder.Services.AddSingleton<IGraphServiceClient>(
@@ -172,8 +181,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             // Add Graph Services
             builder.Services.AddScoped<IUsersService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetUsersService());
             builder.Services.AddScoped<IGroupMembersService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupMembersService());
-
-            builder.Services.AddTransient<IDataStreamFacade, DataStreamFacade>();
         }
     }
 }

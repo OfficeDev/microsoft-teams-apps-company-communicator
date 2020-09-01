@@ -1,13 +1,13 @@
-﻿// <copyright file="SetNotificationMetadataActivityDTO.cs" company="Microsoft">
+﻿// <copyright file="NotificationMetadataDTO.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
     /// <summary>
-    /// Class for transferring data to the SetNotificationMetadataActivity.
+    /// Class for transferring notification metadata.
     /// </summary>
-    public class SetNotificationMetadataActivityDTO
+    public class NotificationMetadataDTO
     {
         /// <summary>
         /// Gets or sets the notification Id.

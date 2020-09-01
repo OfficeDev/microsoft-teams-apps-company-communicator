@@ -1,39 +1,36 @@
-﻿// <copyright file="CompanyCommunicatorPrepareToSendFunction.cs" company="Microsoft">
+﻿// <copyright file="PrepareToSendFunction.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Azure Function App triggered by messages from a Service Bus queue.
-    /// This function prepares to send a notification to the target audience.
-    /// It prepares the notification for sending by reading the notification data,
-    /// creating initialization rows in the SentNotification data table for each recipient
-    /// to later hold the results of sending a notification to that recipient, fetching the
-    /// parameters for creating the notification's payload, creating and storing the notification's payload,
-    /// sending a data aggregation trigger to the data queue, and sending a queue message to the
-    /// send queue for each recipient.
+    /// Azure Function App triggered by messages from a Service Bus queue. <see cref="PrepareToSendQueue.QueueName"/>
+    ///
+    /// The function processes data from service bus queue and prepares the data to be processed in send, data queue.
     /// </summary>
-    public class CompanyCommunicatorPrepareToSendFunction
+    public class PrepareToSendFunction
     {
         private readonly NotificationDataRepository notificationDataRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompanyCommunicatorPrepareToSendFunction"/> class.
+        /// Initializes a new instance of the <see cref="PrepareToSendFunction"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository.</param>
-        public CompanyCommunicatorPrepareToSendFunction(
+        public PrepareToSendFunction(
             NotificationDataRepository notificationDataRepository)
         {
-            this.notificationDataRepository = notificationDataRepository;
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
         }
 
         /// <summary>
@@ -42,28 +39,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
         /// </summary>
         /// <param name="myQueueItem">The Service Bus queue item.</param>
         /// <param name="starter">Durable orchestration client.</param>
+        /// <param name="log">Logger.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName("CompanyCommunicatorPrepareToSendFunction")]
         public async Task Run(
-            [ServiceBusTrigger(
-                PrepareToSendQueue.QueueName,
-                Connection = PrepareToSendQueue.ServiceBusConnectionConfigurationKey)]
+            [ServiceBusTrigger(PrepareToSendQueue.QueueName, Connection = PrepareToSendQueue.ServiceBusConnectionConfigurationKey)]
             string myQueueItem,
-            [DurableClient]
-            IDurableOrchestrationClient starter)
+            [DurableClient] IDurableOrchestrationClient starter,
+            ILogger log)
         {
+            // Get Notification Data
             var queueMessageContent = JsonConvert.DeserializeObject<PrepareToSendQueueMessageContent>(myQueueItem);
             var notificationId = queueMessageContent.NotificationId;
-
             var sentNotificationDataEntity = await this.notificationDataRepository.GetAsync(
                 partitionKey: NotificationDataTableNames.SentNotificationsPartition,
                 rowKey: notificationId);
-            if (sentNotificationDataEntity != null)
+
+            if (sentNotificationDataEntity == null)
             {
-                string instanceId = await starter.StartNewAsync(
-                    nameof(PreparingToSendOrchestration.PrepareToSendOrchestrationAsync),
-                    sentNotificationDataEntity);
+                log.LogError($"Notification entity not found. Notification Id: {notificationId}");
+                return;
             }
+
+            // Start PrepareToSendOrchestrator function.
+            string instanceId = await starter.StartNewAsync(
+                nameof(PrepareToSendOrchestrator.PrepareToSendOrchestrationAsync),
+                sentNotificationDataEntity);
+
+            log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
         }
     }
 }

@@ -73,7 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         {
             await context.CallActivityWithRetryAsync<Task>(
                       nameof(HandleExportFailureActivity.HandleFailureActivityAsync),
-                      ActivitySettings.CommonActivityRetryOptions,
+                      FunctionSettings.DefaultRetryOptions,
                       exportDataEntity);
         }
 

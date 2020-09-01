@@ -46,7 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         {
             var metaData = await context.CallActivityWithRetryAsync<MetaData>(
                nameof(GetMetaDataActivity.GetMetaDataActivityAsync),
-               ActivitySettings.CommonActivityRetryOptions,
+               FunctionSettings.DefaultRetryOptions,
                (exportRequiredData.notificationDataEntity, exportRequiredData.exportDataEntity));
             return metaData;
         }

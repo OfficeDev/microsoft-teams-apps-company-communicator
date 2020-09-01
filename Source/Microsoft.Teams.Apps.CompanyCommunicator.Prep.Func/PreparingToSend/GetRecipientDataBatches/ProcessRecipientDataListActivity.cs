@@ -54,7 +54,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             var recipientDataListInformation =
                 await context.CallActivityWithRetryAsync<RecipientDataListInformation>(
                     nameof(ProcessRecipientDataListActivity.ProcessRecipientDataListAsync),
-                    ActivitySettings.CommonActivityRetryOptions,
+                    FunctionSettings.DefaultRetryOptions,
                     notificationDataEntityId);
 
             return recipientDataListInformation;

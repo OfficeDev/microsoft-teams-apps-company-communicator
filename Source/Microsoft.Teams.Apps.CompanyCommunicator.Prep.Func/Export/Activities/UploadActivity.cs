@@ -64,7 +64,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         {
             await context.CallActivityWithRetryAsync(
               nameof(UploadActivity.UploadActivityAsync),
-              ActivitySettings.CommonActivityRetryOptions,
+              FunctionSettings.DefaultRetryOptions,
               uploadData);
         }
 

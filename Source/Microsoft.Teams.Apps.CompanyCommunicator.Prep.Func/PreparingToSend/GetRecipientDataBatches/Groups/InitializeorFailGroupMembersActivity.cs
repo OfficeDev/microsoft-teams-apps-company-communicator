@@ -66,7 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             // fail the groupMembers if app is not installed.
             await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
                  nameof(InitializeorFailGroupMembersActivity.InitializeOrFailGroupMembersAsync),
-                 ActivitySettings.CommonActivityRetryOptions,
+                 FunctionSettings.DefaultRetryOptions,
                  (notificationDataEntityId, groupMembers, installedUsers));
         }
 

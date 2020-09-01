@@ -73,7 +73,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                 var errorMessage = $"Failed to load members of the group {groupId}: {ex.Message}";
 
                 log.LogError(ex, errorMessage);
-                await this.handleWarningActivity.RunAsync(context, notificationDataEntityId, errorMessage);
+                await context.CallActivityWithRetryAsync(
+                    FunctionNames.HandleWarningActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    (notificationDataEntityId, errorMessage));
             }
         }
     }

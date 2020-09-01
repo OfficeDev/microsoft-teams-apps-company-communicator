@@ -1,4 +1,4 @@
-// <copyright file="CompanyCommunicatorExportFunction.cs" company="Microsoft">
+// <copyright file="ExportFunction.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -22,17 +22,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     /// This function stage the file in Blob Storage and send the
     /// file card to the admin using bot framework adapter.
     /// </summary>
-    public class CompanyCommunicatorExportFunction
+    public class ExportFunction
     {
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly ExportDataRepository exportDataRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompanyCommunicatorExportFunction"/> class.
+        /// Initializes a new instance of the <see cref="ExportFunction"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository.</param>
         /// <param name="exportDataRepository">Export data repository.</param>
-        public CompanyCommunicatorExportFunction(
+        public ExportFunction(
             NotificationDataRepository notificationDataRepository,
             ExportDataRepository exportDataRepository)
         {

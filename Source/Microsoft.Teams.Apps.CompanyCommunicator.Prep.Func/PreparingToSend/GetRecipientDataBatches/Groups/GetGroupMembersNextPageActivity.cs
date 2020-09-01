@@ -60,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                 CallActivityWithRetryAsync
                 <(IGroupTransitiveMembersCollectionWithReferencesPage, string)>(
                  nameof(GetGroupMembersNextPageActivity.GetGroupMembersNextPageAsync),
-                 ActivitySettings.CommonActivityRetryOptions,
+                 FunctionSettings.DefaultRetryOptions,
                  (groupMembersPage, pageUrl));
 
             // intialize the groupMembers if app installed.

@@ -48,9 +48,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
                 foreach (var aadId in userAadIds)
                 {
                     var task = context.CallActivityWithRetryAsync<UserDataEntity>(
-                 nameof(GetUserDataEntitiesByIdsActivity.GetUserDataEntityAsync),
-                 ActivitySettings.CommonActivityRetryOptions,
-                 aadId);
+                        nameof(GetUserDataEntitiesByIdsActivity.GetUserDataEntityAsync),
+                        FunctionSettings.DefaultRetryOptions,
+                        aadId);
                     tasks.Add(task);
                 }
 

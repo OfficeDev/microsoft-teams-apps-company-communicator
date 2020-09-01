@@ -79,8 +79,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
             };
 
             var teamDataEntityList = await context.CallActivityWithRetryAsync<IEnumerable<TeamDataEntity>>(
-                nameof(GetTeamDataEntitiesByIdsActivity.GetTeamDataEntitiesByIdsAsync),
-                ActivitySettings.CommonActivityRetryOptions,
+                FunctionNames.GetTeamDataEntitiesByIdsActivity,
+                FunctionSettings.DefaultRetryOptions,
                 dto);
 
             return teamDataEntityList;
@@ -93,7 +93,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// <param name="dto">GetTeamDataEntitiesByIdsActivityDTO instance.</param>
         /// <param name="log">Logging service.</param>
         /// <returns>It returns the notification's audience data list.</returns>
-        [FunctionName(nameof(GetTeamDataEntitiesByIdsAsync))]
+        [FunctionName(FunctionNames.GetTeamDataEntitiesByIdsActivity)]
         public async Task<IEnumerable<TeamDataEntity>> GetTeamDataEntitiesByIdsAsync(
             [ActivityTrigger] GetTeamDataEntitiesByIdsActivityDTO dto,
             ILogger log)
