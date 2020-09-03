@@ -4,10 +4,12 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
 {
+    using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
@@ -58,11 +60,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <returns>instance of metadata.</returns>
         [FunctionName(nameof(GetMetaDataActivityAsync))]
         public async Task<MetaData> GetMetaDataActivityAsync(
-            [ActivityTrigger](
-            NotificationDataEntity notificationDataEntity,
+            [ActivityTrigger](NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity) exportRequiredData)
         {
-            var user = await this.usersService.GetUserAsync(exportRequiredData.exportDataEntity.PartitionKey);
+            User user = default;
+            try
+            {
+                user = await this.usersService.GetUserAsync(exportRequiredData.exportDataEntity.PartitionKey);
+            }
+            catch (ServiceException serviceException)
+            {
+                if (serviceException.StatusCode != HttpStatusCode.Forbidden)
+                {
+                    throw serviceException;
+                }
+            }
+
             var userPrincipalName = (user != null) ?
                 user.UserPrincipalName :
                 Common.Constants.AdminConsentError;

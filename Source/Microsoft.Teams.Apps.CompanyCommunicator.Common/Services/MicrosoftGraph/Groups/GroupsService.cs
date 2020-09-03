@@ -123,7 +123,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         {
             if (resultCount == 0)
             {
-                return default;
+                return new List<Group>();
             }
 
             string filterforDL = $"mailEnabled eq true and (startsWith(mail,'{query}') or startsWith(displayName,'{query}'))";
@@ -151,7 +151,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         {
             if (resultCount == 0)
             {
-                return default;
+                return new List<Group>();
             }
 
             string filterforSG = $"mailEnabled eq false and securityEnabled eq true and startsWith(displayName,'{query}')";
