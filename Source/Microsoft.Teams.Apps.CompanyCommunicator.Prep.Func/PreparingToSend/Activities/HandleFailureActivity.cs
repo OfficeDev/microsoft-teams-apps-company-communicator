@@ -34,12 +34,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// this method is called to do the clean up work, e.g. log the exception and etc.
         /// </summary>
         /// <param name="input">Input value.</param>
-        /// <param name="log">Logging service.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(FunctionNames.HandleFailureActivity)]
         public async Task RunAsync(
-            [ActivityTrigger] HandleFailureActivityDTO input,
-            ILogger log)
+            [ActivityTrigger] HandleFailureActivityDTO input)
         {
             var errorMessage = $"Failed to prepare the message for sending: {input.Exception.Message}";
 

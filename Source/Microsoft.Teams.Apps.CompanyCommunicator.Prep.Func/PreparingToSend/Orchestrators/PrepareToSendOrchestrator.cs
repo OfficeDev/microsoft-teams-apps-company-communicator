@@ -62,7 +62,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 }
 
                 await context.CallActivityWithRetryAsync(
-                    FunctionNames.ProcessAndStoreMessageActivity,
+                    FunctionNames.PrepareAndStoreMessageActivity,
                     FunctionSettings.DefaultRetryOptions,
                     notificationDataEntity);
 

@@ -1,4 +1,4 @@
-// <copyright file="CompanyCommunicatorSendFunction.cs" company="Microsoft">
+// <copyright file="SendFunction.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -20,7 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     /// Azure Function App triggered by messages from a Service Bus queue
     /// Used for sending messages from the bot.
     /// </summary>
-    public class CompanyCommunicatorSendFunction
+    public class SendFunction
     {
         /// <summary>
         /// This is set to 10 because the default maximum delivery count from the service bus
@@ -32,32 +32,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly int maxNumberOfAttempts;
         private readonly double sendRetryDelayNumberOfSeconds;
         private readonly PrecheckService precheckService;
-        private readonly GetSendNotificationParamsService getSendNotificationParamsService;
+        private readonly SendNotificationParamsService sendNotificationParamsService;
         private readonly SendNotificationService sendNotificationService;
         private readonly DelaySendingNotificationService delaySendingNotificationService;
         private readonly ManageResultDataService manageResultDataService;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompanyCommunicatorSendFunction"/> class.
+        /// Initializes a new instance of the <see cref="SendFunction"/> class.
         /// </summary>
-        /// <param name="companyCommunicatorSendFunctionOptions">The Company Communicator send function options.</param>
+        /// <param name="options">Send function options.</param>
         /// <param name="precheckService">The service to precheck and determine if the queue message should be processed.</param>
         /// <param name="getSendNotificationParamsService">The service to get the parameters needed to send the notification.</param>
         /// <param name="sendNotificationService">The send notification service.</param>
         /// <param name="delaySendingNotificationService">The delay sending notification service.</param>
         /// <param name="manageResultDataService">The manage result data service.</param>
-        public CompanyCommunicatorSendFunction(
-            IOptions<CompanyCommunicatorSendFunctionOptions> companyCommunicatorSendFunctionOptions,
+        public SendFunction(
+            IOptions<SendFunctionOptions> options,
             PrecheckService precheckService,
-            GetSendNotificationParamsService getSendNotificationParamsService,
+            SendNotificationParamsService getSendNotificationParamsService,
             SendNotificationService sendNotificationService,
             DelaySendingNotificationService delaySendingNotificationService,
             ManageResultDataService manageResultDataService)
         {
-            this.maxNumberOfAttempts = companyCommunicatorSendFunctionOptions.Value.MaxNumberOfAttempts;
-            this.sendRetryDelayNumberOfSeconds = companyCommunicatorSendFunctionOptions.Value.SendRetryDelayNumberOfSeconds;
+            this.maxNumberOfAttempts = options.Value.MaxNumberOfAttempts;
+            this.sendRetryDelayNumberOfSeconds = options.Value.SendRetryDelayNumberOfSeconds;
             this.precheckService = precheckService;
-            this.getSendNotificationParamsService = getSendNotificationParamsService;
+            this.sendNotificationParamsService = getSendNotificationParamsService;
             this.sendNotificationService = sendNotificationService;
             this.delaySendingNotificationService = delaySendingNotificationService;
             this.manageResultDataService = manageResultDataService;
@@ -92,52 +92,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             try
             {
-                /*
-                 *
-                 * Check if the queue message should be processed. If it should not be processed,
-                 * then complete the function.
-                 *
-                 *
-                 */
-
-                var shouldProceedWithProcessing = await this.precheckService.VerifyMessageShouldBeProcessedAsync(
+                // Check if we should process the message
+                var shouldProcessMessage = await this.precheckService.ShouldProcessMessageAsync(
                     messageContent: messageContent,
                     sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds,
                     log: log);
 
-                // If it is determined processing the queue message should not proceed, then
-                // complete the function.
-                if (!shouldProceedWithProcessing)
+                if (!shouldProcessMessage)
                 {
                     return;
                 }
 
-                /*
-                 *
-                 * Use the information from the incoming message to generate the necessary parameters for
-                 * sending the notification.
-                 *
-                 *
-                 */
+                // Prepare notification params
+                var sendNotificationParams = await this.sendNotificationParamsService.GetSendNotificationParamsAsync(messageContent, log);
 
-                var sendNotificationParams = await this.getSendNotificationParamsService
-                    .GetSendNotificationParamsAsync(messageContent, log);
-
-                // Stop the processing of the queue message if something negative occurred while generating
-                // the parameters e.g. getting throttled, a failure, etc.
                 if (sendNotificationParams.ForceCloseAzureFunction)
                 {
+                    // Stop the processing if something failed while generating the parameters e.g. getting throttled, a failure, etc.
                     return;
                 }
 
-                /*
-                 *
-                 * Send the notification.
-                 *
-                 *
-                 */
-
-                // Now that all of the necessary information is known, send the notification.
+                // Send notification.
                 var sendNotificationResponse = await this.sendNotificationService.SendAsync(
                     notificationContent: sendNotificationParams.NotificationContent,
                     serviceUrl: sendNotificationParams.ServiceUrl,
@@ -145,73 +120,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     maxNumberOfAttempts: this.maxNumberOfAttempts,
                     log: log);
 
-                if (sendNotificationResponse.ResultType == SendNotificationResultType.Succeeded)
-                {
-                    log.LogInformation("MESSAGE SENT SUCCESSFULLY");
-
-                    await this.manageResultDataService.ProcessResultDataAsync(
-                        notificationId: messageContent.NotificationId,
-                        recipientId: sendNotificationParams.RecipientId,
-                        totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
-                        isStatusCodeFromCreateConversation: false,
-                        statusCode: sendNotificationResponse.StatusCode,
-                        allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes,
-                        errorMessage: sendNotificationResponse.ErrorMessage,
-                        log: log);
-                }
-                else if (sendNotificationResponse.ResultType == SendNotificationResultType.Throttled)
-                {
-                    // If the request was attempted the maximum number of attempts and received
-                    // all throttling responses, then set the overall delay time for the system so all
-                    // other calls will be delayed and add the message back to the queue with a delay to be
-                    // attempted later.
-                    log.LogError($"MESSAGE THROTTLED. ERROR: {sendNotificationResponse.ErrorMessage}");
-
-                    await this.delaySendingNotificationService
-                        .DelaySendingNotificationAsync(
-                            sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds,
-                            sendQueueMessageContent: messageContent,
-                            log: log);
-
-                    // Ensure all processing of the queue message is stopped because of being delayed.
-                    return;
-                }
-                else if (sendNotificationResponse.ResultType == SendNotificationResultType.RecipientNotFound)
-                {
-                    // If in this block, then the recipient must have been removed.
-                    // Save the relevant information and exclude the not found recipient from the list.
-                    log.LogError($"MESSAGE RECIPIENT NOT FOUND. ERROR: {sendNotificationResponse.ErrorMessage}");
-
-                    await this.manageResultDataService.ProcessResultDataAsync(
-                        notificationId: messageContent.NotificationId,
-                        recipientId: sendNotificationParams.RecipientId,
-                        totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
-                        isStatusCodeFromCreateConversation: false,
-                        statusCode: sendNotificationResponse.StatusCode,
-                        allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes,
-                        errorMessage: sendNotificationResponse.ErrorMessage,
-                        log: log);
-                }
-                else if (sendNotificationResponse.ResultType == SendNotificationResultType.Failed)
-                {
-                    // If in this block, then an error has occurred with the service.
-                    // Save the relevant information and do not attempt the request again.
-                    log.LogError($"MESSAGE FAILED: {sendNotificationResponse.StatusCode}. ERROR: {sendNotificationResponse.ErrorMessage}");
-
-                    await this.manageResultDataService.ProcessResultDataAsync(
-                        notificationId: messageContent.NotificationId,
-                        recipientId: sendNotificationParams.RecipientId,
-                        totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
-                        isStatusCodeFromCreateConversation: false,
-                        statusCode: sendNotificationResponse.StatusCode,
-                        allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes,
-                        errorMessage: sendNotificationResponse.ErrorMessage,
-                        log: log);
-
-                    // Ensure all processing of the queue message is stopped because sending
-                    // the notification failed.
-                    return;
-                }
+                // Process response.
+                await this.ProcessResponseAsync(messageContent, sendNotificationParams, sendNotificationResponse, log);
             }
             catch (Exception e)
             {
@@ -231,7 +141,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 log.LogError(e, $"ERROR: {errorMessage}");
 
                 var statusCodeToStore = SentNotificationDataEntity.FaultedAndRetryingStatusCode;
-                if (deliveryCount >= CompanyCommunicatorSendFunction.MaxDeliveryCountForDeadLetter)
+                if (deliveryCount >= SendFunction.MaxDeliveryCountForDeadLetter)
                 {
                     statusCodeToStore = SentNotificationDataEntity.FinalFaultedStatusCode;
                 }
@@ -249,6 +159,88 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     log: log);
 
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Process send notification response.
+        /// </summary>
+        /// <param name="messageContent">Message content.</param>
+        /// <param name="sendNotificationParams">Send notification params.</param>
+        /// <param name="sendNotificationResponse">Send notification response.</param>
+        /// <param name="log">Logger.</param>
+        private async Task ProcessResponseAsync(
+            SendQueueMessageContent messageContent,
+            SendNotificationParams sendNotificationParams,
+            SendNotificationResponse sendNotificationResponse,
+            ILogger log)
+        {
+            if (sendNotificationResponse.ResultType == SendNotificationResultType.Succeeded)
+            {
+                log.LogInformation("MESSAGE SENT SUCCESSFULLY");
+
+                await this.manageResultDataService.ProcessResultDataAsync(
+                    notificationId: messageContent.NotificationId,
+                    recipientId: sendNotificationParams.RecipientId,
+                    totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
+                    isStatusCodeFromCreateConversation: false,
+                    statusCode: sendNotificationResponse.StatusCode,
+                    allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes,
+                    errorMessage: sendNotificationResponse.ErrorMessage,
+                    log: log);
+            }
+            else if (sendNotificationResponse.ResultType == SendNotificationResultType.Throttled)
+            {
+                // If the request was attempted the maximum number of attempts and received
+                // all throttling responses, then set the overall delay time for the system so all
+                // other calls will be delayed and add the message back to the queue with a delay to be
+                // attempted later.
+                log.LogError($"MESSAGE THROTTLED. ERROR: {sendNotificationResponse.ErrorMessage}");
+
+                await this.delaySendingNotificationService
+                    .DelaySendingNotificationAsync(
+                        sendRetryDelayNumberOfSeconds: this.sendRetryDelayNumberOfSeconds,
+                        sendQueueMessageContent: messageContent,
+                        log: log);
+
+                // Ensure all processing of the queue message is stopped because of being delayed.
+                return;
+            }
+            else if (sendNotificationResponse.ResultType == SendNotificationResultType.RecipientNotFound)
+            {
+                // If in this block, then the recipient must have been removed.
+                // Save the relevant information and exclude the not found recipient from the list.
+                log.LogError($"MESSAGE RECIPIENT NOT FOUND. ERROR: {sendNotificationResponse.ErrorMessage}");
+
+                await this.manageResultDataService.ProcessResultDataAsync(
+                    notificationId: messageContent.NotificationId,
+                    recipientId: sendNotificationParams.RecipientId,
+                    totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
+                    isStatusCodeFromCreateConversation: false,
+                    statusCode: sendNotificationResponse.StatusCode,
+                    allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes,
+                    errorMessage: sendNotificationResponse.ErrorMessage,
+                    log: log);
+            }
+            else if (sendNotificationResponse.ResultType == SendNotificationResultType.Failed)
+            {
+                // If in this block, then an error has occurred with the service.
+                // Save the relevant information and do not attempt the request again.
+                log.LogError($"MESSAGE FAILED: {sendNotificationResponse.StatusCode}. ERROR: {sendNotificationResponse.ErrorMessage}");
+
+                await this.manageResultDataService.ProcessResultDataAsync(
+                    notificationId: messageContent.NotificationId,
+                    recipientId: sendNotificationParams.RecipientId,
+                    totalNumberOfSendThrottles: sendNotificationResponse.TotalNumberOfSendThrottles,
+                    isStatusCodeFromCreateConversation: false,
+                    statusCode: sendNotificationResponse.StatusCode,
+                    allSendStatusCodes: sendNotificationResponse.AllSendStatusCodes,
+                    errorMessage: sendNotificationResponse.ErrorMessage,
+                    log: log);
+
+                // Ensure all processing of the queue message is stopped because sending
+                // the notification failed.
+                return;
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿// <copyright file="CreateUserConversationService.cs" company="Microsoft">
+﻿// <copyright file="ConversationService.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -16,9 +16,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
 
     /// <summary>
-    /// Service for the bot to create user conversations.
+    /// Teams Bot service to create user conversation.
     /// </summary>
-    public class CreateUserConversationService
+    public class ConversationService
     {
         private static readonly string MicrosoftTeamsChannelId = "msteams";
 
@@ -26,16 +26,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
         private readonly CommonMicrosoftAppCredentials appCredentials;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CreateUserConversationService"/> class.
+        /// Initializes a new instance of the <see cref="ConversationService"/> class.
         /// </summary>
         /// <param name="botAdapter">The bot adapter.</param>
-        /// <param name="commonMicrosoftAppCredentials">The common Microsoft app credentials.</param>
-        public CreateUserConversationService(
+        /// <param name="appCredentials">The common Microsoft app credentials.</param>
+        public ConversationService(
             BotFrameworkHttpAdapter botAdapter,
-            CommonMicrosoftAppCredentials commonMicrosoftAppCredentials)
+            CommonMicrosoftAppCredentials appCredentials)
         {
-            this.botAdapter = botAdapter;
-            this.appCredentials = commonMicrosoftAppCredentials;
+            this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
+            this.appCredentials = appCredentials ?? throw new ArgumentNullException(nameof(appCredentials));
         }
 
         /// <summary>
@@ -45,12 +45,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
         /// <param name="maxNumberOfAttempts">The maximum number of request attempts to create the conversation.</param>
         /// <param name="log">The logger.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<CreateUserConversationResponse> CreateConversationAsync(
+        public async Task<CreateConversationResponse> CreateConversationAsync(
             UserDataEntity userDataEntity,
             int maxNumberOfAttempts,
             ILogger log)
         {
-            var createConversationResponse = new CreateUserConversationResponse();
+            var createConversationResponse = new CreateConversationResponse();
 
             // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
             MicrosoftAppCredentials.TrustServiceUrl(userDataEntity.ServiceUrl);
@@ -76,7 +76,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                 try
                 {
                     await this.botAdapter.CreateConversationAsync(
-                        channelId: CreateUserConversationService.MicrosoftTeamsChannelId,
+                        channelId: ConversationService.MicrosoftTeamsChannelId,
                         serviceUrl: userDataEntity.ServiceUrl,
                         credentials: this.appCredentials,
                         conversationParameters: conversationParameters,
@@ -88,7 +88,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                             // Set the status code to indicate it was created, set that it was
                             // successfully created, and place that conversationId in the response for
                             // use when sending the notification to the user.
-                            createConversationResponse.ResultType = CreateUserConversationResultType.Succeeded;
+                            createConversationResponse.Result = Result.Succeeded;
                             createConversationResponse.StatusCode = (int)HttpStatusCode.Created;
                             createConversationResponse.ConversationId = turnContext.Activity.Conversation.Id;
 
@@ -118,13 +118,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                         if (responseStatusCode == HttpStatusCode.TooManyRequests)
                         {
                             // If the request was throttled, set the flag for indicating the throttled state.
-                            createConversationResponse.ResultType = CreateUserConversationResultType.Throttled;
+                            createConversationResponse.Result = Result.Throttled;
                         }
                         else
                         {
                             // If the request failed with a 5xx status code, set the flag for indicating the failure
                             // and store the content of the error message.
-                            createConversationResponse.ResultType = CreateUserConversationResultType.Failed;
+                            createConversationResponse.Result = Result.Failed;
                             createConversationResponse.ErrorMessage = e.Response.Content;
                         }
 
@@ -141,7 +141,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
                     {
                         // If in this block, then an error has occurred with the service.
                         // Return the failure and do not attempt the request again.
-                        createConversationResponse.ResultType = CreateUserConversationResultType.Failed;
+                        createConversationResponse.Result = Result.Failed;
                         createConversationResponse.ErrorMessage = e.Response.Content;
 
                         break;

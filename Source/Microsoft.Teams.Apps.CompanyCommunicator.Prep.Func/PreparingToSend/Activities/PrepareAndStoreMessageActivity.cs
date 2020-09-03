@@ -1,4 +1,4 @@
-﻿// <copyright file="ProcessAndStoreMessageActivity.cs" company="Microsoft">
+﻿// <copyright file="PrepareAndStoreMessageActivity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -16,17 +16,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     ///
     /// Prepares the message from notification entity and stores the information in sending notification data table.
     /// </summary>
-    public class ProcessAndStoreMessageActivity
+    public class PrepareAndStoreMessageActivity
     {
         private readonly SendingNotificationDataRepository sendingNotificationDataRepository;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProcessAndStoreMessageActivity"/> class.
+        /// Initializes a new instance of the <see cref="PrepareAndStoreMessageActivity"/> class.
         /// </summary>
         /// <param name="notificationRepo">Sending notification data repository.</param>
         /// <param name="cardCreator">The adaptive card creator.</param>
-        public ProcessAndStoreMessageActivity(
+        public PrepareAndStoreMessageActivity(
             SendingNotificationDataRepository notificationRepo,
             AdaptiveCardCreator cardCreator)
         {
@@ -41,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// </summary>
         /// <param name="notificationDataEntity">A notification to be sent to recipients.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        [FunctionName(FunctionNames.ProcessAndStoreMessageActivity)]
+        [FunctionName(FunctionNames.PrepareAndStoreMessageActivity)]
         public async Task RunAsync(
             [ActivityTrigger] NotificationDataEntity notificationDataEntity)
         {

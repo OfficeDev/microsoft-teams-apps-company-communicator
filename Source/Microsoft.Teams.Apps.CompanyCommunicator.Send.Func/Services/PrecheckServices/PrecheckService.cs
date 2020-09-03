@@ -14,7 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.PrecheckSe
     /// <summary>
     /// Service to check if the data queue message should be processed. Scenarios it checks for are:
     ///     If the entire system is currently in a throttled state.
-    ///     If the notification has already been attempted to be sent to this recipient.
+    ///     If the notification is successfully sent to the recipient.
     /// </summary>
     public class PrecheckService
     {
@@ -41,13 +41,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.PrecheckSe
         /// <summary>
         /// Checks if the data queue message should be processed. Scenarios it checks for are:
         ///     If the entire system is currently in a throttled state.
-        ///     If the notification has already been attempted to be sent to this recipient.
+        ///     If the notification is successfully sent to the recipient.
         /// </summary>
         /// <param name="messageContent">The data queue message content.</param>
         /// <param name="sendRetryDelayNumberOfSeconds">The send retry delay number of seconds.</param>
         /// <param name="log">The logger.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<bool> VerifyMessageShouldBeProcessedAsync(
+        public async Task<bool> ShouldProcessMessageAsync(
             SendQueueMessageContent messageContent,
             double sendRetryDelayNumberOfSeconds,
             ILogger log)
@@ -73,16 +73,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.PrecheckSe
                 var globalSendingNotificationDataEntity = await globalSendingNotificationDataEntityTask;
                 var existingSentNotificationDataEntity = await existingSentNotificationDataEntityTask;
 
-                var shouldProceedWithProcessing = true;
-
                 // If the overall system is in a throttled state and needs to be delayed,
                 // add the message back on the queue with a delay and stop processing the queue message.
                 if (globalSendingNotificationDataEntity?.SendRetryDelayTime != null
                     && DateTime.UtcNow < globalSendingNotificationDataEntity.SendRetryDelayTime)
                 {
                     await this.sendQueue.SendDelayedAsync(messageContent, sendRetryDelayNumberOfSeconds);
-
-                    shouldProceedWithProcessing = false;
+                    return false;
                 }
 
                 // First, verify that the recipient's sent notification data has been stored and initialized. This
@@ -96,14 +93,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.PrecheckSe
                 //          notification should be attempted again.
                 // If it is neither of these scenarios, then complete the function in order to not send a duplicate
                 // notification to this recipient.
-                else if (existingSentNotificationDataEntity == null
+                if (existingSentNotificationDataEntity == null
                     || (existingSentNotificationDataEntity.StatusCode != SentNotificationDataEntity.InitializationStatusCode
                         && existingSentNotificationDataEntity.StatusCode != SentNotificationDataEntity.FaultedAndRetryingStatusCode))
                 {
-                    shouldProceedWithProcessing = false;
+                    return false;
                 }
 
-                return shouldProceedWithProcessing;
+                return true;
             }
             catch (Exception e)
             {

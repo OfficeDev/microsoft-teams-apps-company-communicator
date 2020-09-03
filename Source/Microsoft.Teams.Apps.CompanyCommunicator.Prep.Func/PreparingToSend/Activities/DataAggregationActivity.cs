@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -11,25 +12,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
 
     /// <summary>
-    /// This activity sends a message to the data queue to start aggregating results 
+    /// This activity sends a message to the data queue to start aggregating results
     /// for a given notification.
     /// </summary>
     public class DataAggregationActivity
     {
         private readonly DataQueue dataQueue;
-        private readonly double firstDataAggregationMessageDelayInSeconds;
+        private readonly double messageDelayInSeconds;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataAggregationActivity"/> class.
         /// </summary>
         /// <param name="dataQueue">The data queue.</param>
-        /// <param name="dataQueueMessageOptions">The data queue message options.</param>
+        /// <param name="options">The data queue message options.</param>
         public DataAggregationActivity(
             DataQueue dataQueue,
-            IOptions<DataQueueMessageOptions> dataQueueMessageOptions)
+            IOptions<DataQueueMessageOptions> options)
         {
-            this.dataQueue = dataQueue;
-            this.firstDataAggregationMessageDelayInSeconds = dataQueueMessageOptions.Value.FirstDataAggregationMessageDelayInSeconds;
+            this.dataQueue = dataQueue ?? throw new ArgumentNullException(nameof(dataQueue));
+            this.messageDelayInSeconds = options?.Value?.MessageDelayInSeconds ?? throw new ArgumentNullException(nameof(options));
         }
 
         /// <summary>
@@ -50,7 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
             await this.dataQueue.SendDelayedAsync(
                 dataQueueMessageContent,
-                this.firstDataAggregationMessageDelayInSeconds);
+                this.messageDelayInSeconds);
         }
     }
 }

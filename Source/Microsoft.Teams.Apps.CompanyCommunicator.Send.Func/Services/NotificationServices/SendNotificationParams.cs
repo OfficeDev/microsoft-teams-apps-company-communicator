@@ -1,4 +1,4 @@
-﻿// <copyright file="GetSendNotificationParamsResponse.cs" company="Microsoft">
+﻿// <copyright file="SendNotificationParams.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     /// <summary>
     /// The class to hold the necessary parameters generated/fetched for sending the notification.
     /// </summary>
-    public class GetSendNotificationParamsResponse
+    public class SendNotificationParams
     {
         /// <summary>
         /// Gets or sets the notification content.

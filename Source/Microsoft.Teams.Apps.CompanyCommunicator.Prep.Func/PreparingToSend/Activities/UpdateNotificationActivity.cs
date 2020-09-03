@@ -40,6 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         ///         expected number of notifications to be sent.
         /// </summary>
         /// <param name="input">The trigger DTO.</param>
+        /// <param name="log">logger.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.UpdateNotificationActivity)]
         public async Task RunAsync(
@@ -50,17 +51,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 NotificationDataTableNames.SentNotificationsPartition,
                 input.NotificationId);
 
-            if (notificationDataEntity != null)
-            {
-                notificationDataEntity.IsPreparingToSend = false;
-                notificationDataEntity.TotalMessageCount = input.TotalNumberOfRecipients;
-
-                await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
-            }
-            else
+            if (notificationDataEntity == null)
             {
                 log.LogError($"Notification entity not found. Notification Id: {input.NotificationId}");
+                return;
             }
+
+            notificationDataEntity.IsPreparingToSend = false;
+            notificationDataEntity.TotalMessageCount = input.TotalNumberOfRecipients;
+
+            await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
         }
     }
 }

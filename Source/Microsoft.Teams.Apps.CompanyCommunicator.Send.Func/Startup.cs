@@ -33,7 +33,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         public override void Configure(IFunctionsHostBuilder builder)
         {
             // Add all options set from configuration values.
-            builder.Services.AddOptions<CompanyCommunicatorSendFunctionOptions>()
+            builder.Services.AddOptions<SendFunctionOptions>()
                 .Configure<IConfiguration>((companyCommunicatorSendFunctionOptions, configuration) =>
                 {
                     companyCommunicatorSendFunctionOptions.MaxNumberOfAttempts =
@@ -74,10 +74,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<PrecheckService>();
 
             // Add the create user conversation service.
-            builder.Services.AddTransient<CreateUserConversationService>();
+            builder.Services.AddTransient<ConversationService>();
 
             // Add the notification services.
-            builder.Services.AddTransient<GetSendNotificationParamsService>();
+            builder.Services.AddTransient<SendNotificationParamsService>();
             builder.Services.AddTransient<SendNotificationService>();
             builder.Services.AddTransient<DelaySendingNotificationService>();
 

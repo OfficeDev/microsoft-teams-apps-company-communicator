@@ -22,7 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <summary>
         /// Process and store message activity function.
         /// </summary>
-        public const string ProcessAndStoreMessageActivity = nameof(ProcessAndStoreMessageActivity);
+        public const string PrepareAndStoreMessageActivity = nameof(PrepareAndStoreMessageActivity);
 
         /// <summary>
         /// Update notification activity function.

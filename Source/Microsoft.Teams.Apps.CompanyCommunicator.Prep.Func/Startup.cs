@@ -80,8 +80,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddOptions<DataQueueMessageOptions>()
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
                 {
-                    dataQueueMessageOptions.FirstDataAggregationMessageDelayInSeconds =
-                        configuration.GetValue<double>("FirstDataAggregationMessageDelayInSeconds", 20);
+                    dataQueueMessageOptions.MessageDelayInSeconds =
+                        configuration.GetValue<double>("DataQueueMessageDelayInSeconds", 20);
                 });
 
             // Add localization.

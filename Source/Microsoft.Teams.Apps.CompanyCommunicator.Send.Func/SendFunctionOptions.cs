@@ -1,4 +1,4 @@
-﻿// <copyright file="CompanyCommunicatorSendFunctionOptions.cs" company="Microsoft">
+﻿// <copyright file="SendFunctionOptions.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -7,7 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     /// <summary>
     /// Options used to configure the Company Communicator Send Function.
     /// </summary>
-    public class CompanyCommunicatorSendFunctionOptions
+    public class SendFunctionOptions
     {
         /// <summary>
         /// Gets or sets the max number of request attempts.

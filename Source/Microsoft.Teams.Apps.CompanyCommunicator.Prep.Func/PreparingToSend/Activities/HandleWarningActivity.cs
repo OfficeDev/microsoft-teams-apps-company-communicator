@@ -36,11 +36,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(FunctionNames.HandleWarningActivity)]
         public async Task RunAsync(
-            [ActivityTrigger](string notificationDataEntityId,
-            string errorMessage) input)
+            [ActivityTrigger](string notificationDataEntityId, string errorMessage) input)
         {
             await this.notificationDataRepository
-                                .SaveWarningInNotificationDataEntityAsync(input.notificationDataEntityId, input.errorMessage);
+                .SaveWarningInNotificationDataEntityAsync(input.notificationDataEntityId, input.errorMessage);
         }
     }
 }

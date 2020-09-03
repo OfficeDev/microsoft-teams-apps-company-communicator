@@ -4,8 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices
 {
-    using System.Net;
-
     /// <summary>
     /// The class for the send notification response.
     /// </summary>

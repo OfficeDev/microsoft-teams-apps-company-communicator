@@ -1,15 +1,13 @@
-﻿// <copyright file="CreateUserConversationResponse.cs" company="Microsoft">
+﻿// <copyright file="CreateConversationResponse.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices
 {
-    using System.Net;
-
     /// <summary>
-    /// The class for the create user conversation response.
+    /// The class for the create conversation response.
     /// </summary>
-    public class CreateUserConversationResponse
+    public class CreateConversationResponse
     {
         /// <summary>
         /// Gets or sets the status code.
@@ -19,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Conversati
         /// <summary>
         /// Gets or sets the result type.
         /// </summary>
-        public CreateUserConversationResultType ResultType { get; set; }
+        public Result Result { get; set; }
 
         /// <summary>
         /// Gets or sets the conversation ID.
