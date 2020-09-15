@@ -103,6 +103,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     return;
                 }
 
+                // TODO(guptaa): Move the logic to fetch conversation to Prep function.
                 // Prepare notification params
                 var sendNotificationParams = await this.sendNotificationParamsService.GetSendNotificationParamsAsync(messageContent, log);
 

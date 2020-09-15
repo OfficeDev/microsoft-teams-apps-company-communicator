@@ -1,4 +1,4 @@
-﻿// <copyright file="PrepareAndStoreMessageActivity.cs" company="Microsoft">
+﻿// <copyright file="StoreMessageActivity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -12,21 +12,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
 
     /// <summary>
-    /// Process message activity.
-    ///
-    /// Prepares the message from notification entity and stores the information in sending notification data table.
+    /// Stores the message in sending notification data table.
     /// </summary>
-    public class PrepareAndStoreMessageActivity
+    public class StoreMessageActivity
     {
         private readonly SendingNotificationDataRepository sendingNotificationDataRepository;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PrepareAndStoreMessageActivity"/> class.
+        /// Initializes a new instance of the <see cref="StoreMessageActivity"/> class.
         /// </summary>
         /// <param name="notificationRepo">Sending notification data repository.</param>
         /// <param name="cardCreator">The adaptive card creator.</param>
-        public PrepareAndStoreMessageActivity(
+        public StoreMessageActivity(
             SendingNotificationDataRepository notificationRepo,
             AdaptiveCardCreator cardCreator)
         {
@@ -35,23 +33,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         }
 
         /// <summary>
-        /// Durable activity function.
-        ///
-        /// Prepares serialzied message content and stores the message in sending notification data table.
+        /// Stores the message in sending notification data table.
         /// </summary>
-        /// <param name="notificationDataEntity">A notification to be sent to recipients.</param>
+        /// <param name="notification">A notification to be sent to recipients.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        [FunctionName(FunctionNames.PrepareAndStoreMessageActivity)]
+        [FunctionName(FunctionNames.StoreMessageActivity)]
         public async Task RunAsync(
-            [ActivityTrigger] NotificationDataEntity notificationDataEntity)
+            [ActivityTrigger] NotificationDataEntity notification)
         {
-            var serializedContent = this.adaptiveCardCreator.CreateAdaptiveCard(notificationDataEntity).ToJson();
+            var serializedContent = this.adaptiveCardCreator.CreateAdaptiveCard(notification).ToJson();
 
             var sendingNotification = new SendingNotificationDataEntity
             {
                 PartitionKey = NotificationDataTableNames.SendingNotificationsPartition,
-                RowKey = notificationDataEntity.RowKey,
-                NotificationId = notificationDataEntity.Id,
+                RowKey = notification.RowKey,
+                NotificationId = notification.Id,
                 Content = serializedContent,
             };
 

@@ -12,7 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
 
     /// <summary>
@@ -20,11 +20,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
     /// </summary>
     public class SendNotificationParamsService
     {
-        private readonly int maxNumberOfAttempts;
+        private readonly int maxAttempts;
         private readonly double sendRetryDelayNumberOfSeconds;
         private readonly SendingNotificationDataRepository sendingNotificationDataRepository;
         private readonly UserDataRepository userDataRepository;
-        private readonly ConversationService userConversationService;
+        private readonly IConversationService conversationService;
         private readonly DelaySendingNotificationService delaySendingNotificationService;
         private readonly ManageResultDataService manageResultDataService;
 
@@ -34,22 +34,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         /// <param name="options">The Company Communicator send function options.</param>
         /// <param name="sendingNotificationDataRepository">The sending notification data repository.</param>
         /// <param name="userDataRepository">The user data repository.</param>
-        /// <param name="createUserConversationService">The create user conversation service.</param>
+        /// <param name="conversationService">The create user conversation service.</param>
         /// <param name="delaySendingNotificationService">The delay sending notification service.</param>
         /// <param name="manageResultDataService">The manage result data service.</param>
         public SendNotificationParamsService(
             IOptions<SendFunctionOptions> options,
             SendingNotificationDataRepository sendingNotificationDataRepository,
             UserDataRepository userDataRepository,
-            ConversationService createUserConversationService,
+            IConversationService conversationService,
             DelaySendingNotificationService delaySendingNotificationService,
             ManageResultDataService manageResultDataService)
         {
-            this.maxNumberOfAttempts = options.Value.MaxNumberOfAttempts;
+            this.maxAttempts = options.Value.MaxNumberOfAttempts;
             this.sendRetryDelayNumberOfSeconds = options.Value.SendRetryDelayNumberOfSeconds;
             this.sendingNotificationDataRepository = sendingNotificationDataRepository;
             this.userDataRepository = userDataRepository;
-            this.userConversationService = createUserConversationService;
+            this.conversationService = conversationService;
             this.delaySendingNotificationService = delaySendingNotificationService;
             this.manageResultDataService = manageResultDataService;
         }
@@ -115,31 +115,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         ///     Sending to a team's members - the conversation Id was not stored for that user in the User Data table.
         /// </summary>
         /// <param name="serviceNotificationParams">The send notification parameters to be updated.</param>
-        /// <param name="incomingUserDataEntity">The incoming user data entity.</param>
+        /// <param name="userDataEntity">The incoming user data entity.</param>
         /// <param name="messageContent">The queue message content.</param>
         /// <param name="log">The logger.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SetParamsForUserRecipientAsync(
             SendNotificationParams serviceNotificationParams,
-            UserDataEntity incomingUserDataEntity,
+            UserDataEntity userDataEntity,
             SendQueueMessageContent messageContent,
             ILogger log)
         {
             // The AAD Id and service URL should always be set in the incoming user data.
-            serviceNotificationParams.RecipientId = incomingUserDataEntity.AadId;
-            serviceNotificationParams.ServiceUrl = incomingUserDataEntity.ServiceUrl;
+            serviceNotificationParams.RecipientId = userDataEntity.AadId;
+            serviceNotificationParams.ServiceUrl = userDataEntity.ServiceUrl;
 
             // Case where the conversation Id is included in the incoming user data.
-            if (!string.IsNullOrWhiteSpace(incomingUserDataEntity.ConversationId))
+            if (!string.IsNullOrWhiteSpace(userDataEntity.ConversationId))
             {
-                serviceNotificationParams.ConversationId = incomingUserDataEntity.ConversationId;
+                serviceNotificationParams.ConversationId = userDataEntity.ConversationId;
                 return;
             }
 
             // Check if user conversationId is stored.
             var storedUserDataEntity = await this.userDataRepository.GetAsync(
                 UserDataTableNames.UserDataPartition,
-                incomingUserDataEntity.AadId);
+                userDataEntity.AadId);
 
             if (storedUserDataEntity != null)
             {
@@ -147,33 +147,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                 serviceNotificationParams.ConversationId = storedUserDataEntity.ConversationId;
 
                 // Merge incoming user data. (few properties may not be stored in the table - user name etc).
-                incomingUserDataEntity.PartitionKey = UserDataTableNames.UserDataPartition;
-                incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
-                await this.userDataRepository.InsertOrMergeAsync(incomingUserDataEntity);
+                userDataEntity.PartitionKey = UserDataTableNames.UserDataPartition;
+                userDataEntity.RowKey = userDataEntity.AadId;
+                await this.userDataRepository.InsertOrMergeAsync(userDataEntity);
                 return;
             }
 
             try
             {
                 // Create a conversation.
-                var createConversationResponse = await this.userConversationService.CreateConversationAsync(
-                    userDataEntity: incomingUserDataEntity,
-                    maxNumberOfAttempts: this.maxNumberOfAttempts,
+                var response = await this.conversationService.CreateConversationAsync(
+                    teamsUserId: userDataEntity.UserId,
+                    tenantId: userDataEntity.TenantId,
+                    serviceUrl: userDataEntity.ServiceUrl,
+                    maxAttempts: this.maxAttempts,
                     log: log);
 
-                if (createConversationResponse.Result == Result.Succeeded)
+                if (response.Result == Result.Succeeded)
                 {
                     // Set the conversation Id to be used when sending the notification.
-                    serviceNotificationParams.ConversationId = createConversationResponse.ConversationId;
+                    serviceNotificationParams.ConversationId = response.ConversationId;
 
                     // Store the newly created conversation Id so the create conversation
                     // request will not need to be made again for the user for future notifications.
-                    incomingUserDataEntity.ConversationId = createConversationResponse.ConversationId;
-                    incomingUserDataEntity.PartitionKey = UserDataTableNames.UserDataPartition;
-                    incomingUserDataEntity.RowKey = incomingUserDataEntity.AadId;
-                    await this.userDataRepository.InsertOrMergeAsync(incomingUserDataEntity);
+                    userDataEntity.ConversationId = response.ConversationId;
+                    userDataEntity.PartitionKey = UserDataTableNames.UserDataPartition;
+                    userDataEntity.RowKey = userDataEntity.AadId;
+                    await this.userDataRepository.InsertOrMergeAsync(userDataEntity);
                 }
-                else if (createConversationResponse.Result == Result.Throttled)
+                else if (response.Result == Result.Throttled)
                 {
                     // If the request was attempted the maximum number of allowed attempts and received
                     // all throttling responses, then set the overall delay time for the system so all
@@ -188,18 +190,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
                     serviceNotificationParams.ForceCloseAzureFunction = true;
                     return;
                 }
-                else if (createConversationResponse.Result == Result.Failed)
+                else if (response.Result == Result.Failed)
                 {
                     // If the create conversation call failed, save the results, do not attempt the
                     // request again, and end the function.
                     await this.manageResultDataService.ProcessResultDataAsync(
                         notificationId: messageContent.NotificationId,
-                        recipientId: incomingUserDataEntity.AadId,
+                        recipientId: userDataEntity.AadId,
                         totalNumberOfSendThrottles: 0,
                         isStatusCodeFromCreateConversation: true,
-                        statusCode: createConversationResponse.StatusCode,
+                        statusCode: response.StatusCode,
                         allSendStatusCodes: string.Empty,
-                        errorMessage: createConversationResponse.ErrorMessage,
+                        errorMessage: response.ErrorMessage,
                         log: log);
 
                     // Signal that the Azure Function should be completed.

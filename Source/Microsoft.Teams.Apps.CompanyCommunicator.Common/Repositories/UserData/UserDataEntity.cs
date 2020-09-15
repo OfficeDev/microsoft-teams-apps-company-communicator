@@ -8,11 +8,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
 
     /// <summary>
     /// User data entity class.
-    /// This entity holds the information about a user.
-    /// Note: depending on how this data is filled, it is not guaranteed all
-    /// values will be filled.
-    /// If they are present in this table, it is guaranteed that the AAD id,
-    /// user id, conversation id, service URL, and tenant id will be filled.
     /// </summary>
     public class UserDataEntity : TableEntity
     {

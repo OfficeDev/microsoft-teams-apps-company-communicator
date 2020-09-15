@@ -14,7 +14,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
@@ -35,7 +34,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly PrepareToSendQueue prepareToSendQueue;
         private readonly DataQueue dataQueue;
         private readonly double forceCompleteMessageDelayInSeconds;
-        private readonly SendBatchesDataRepository sendBatchesDataRepository;
         private readonly IGroupsService groupsService;
         private readonly ExportDataRepository exportDataRepository;
 
@@ -48,7 +46,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="prepareToSendQueue">The service bus queue for preparing to send notifications.</param>
         /// <param name="dataQueue">The service bus queue for the data queue.</param>
         /// <param name="dataQueueMessageOptions">The options for the data queue messages.</param>
-        /// <param name="sendBatchesDataRepository">The send batches data repository.</param>
         /// <param name="groupsService">The groups service.</param>
         /// <param name="exportDataRepository">The Export data repository instance.</param>
         public SentNotificationsController(
@@ -58,7 +55,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             PrepareToSendQueue prepareToSendQueue,
             DataQueue dataQueue,
             IOptions<DataQueueMessageOptions> dataQueueMessageOptions,
-            SendBatchesDataRepository sendBatchesDataRepository,
             IGroupsService groupsService,
             ExportDataRepository exportDataRepository)
         {
@@ -68,7 +64,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.prepareToSendQueue = prepareToSendQueue;
             this.dataQueue = dataQueue;
             this.forceCompleteMessageDelayInSeconds = dataQueueMessageOptions.Value.ForceCompleteMessageDelayInSeconds;
-            this.sendBatchesDataRepository = sendBatchesDataRepository;
             this.groupsService = groupsService;
             this.exportDataRepository = exportDataRepository;
         }
@@ -93,10 +88,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var newSentNotificationId =
                 await this.notificationDataRepository.MoveDraftToSentPartitionAsync(draftNotificationDataEntity);
 
-            // Ensure the data tables needed by the Azure Functions to send the notifications exist in Azure storage.
-            await Task.WhenAll(
-                this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistsAsync(),
-                this.sendBatchesDataRepository.EnsureSendBatchesDataTableExistsAsync());
+            // Ensure the data table needed by the Azure Functions to send the notifications exist in Azure storage.
+            await this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistsAsync();
 
             var prepareToSendQueueMessageContent = new PrepareToSendQueueMessageContent
             {

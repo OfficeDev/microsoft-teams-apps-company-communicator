@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
 {
     /// <summary>
     /// The class for the create conversation response.

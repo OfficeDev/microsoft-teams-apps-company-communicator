@@ -21,7 +21,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
@@ -32,13 +31,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.GetRecipientDataBatches.Groups;
 
     using Beta = BetaLib::Microsoft.Graph;
 
@@ -99,13 +97,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<ExportOrchestration>();
 
             // Add activities.
-            builder.Services.AddTransient<GetTeamDataEntitiesByIdsActivity>();
-            builder.Services.AddTransient<GetRecipientDataListForRosterActivity>();
-            builder.Services.AddTransient<GetRecipientDataListForGroupActivity>();
-            builder.Services.AddTransient<ProcessRecipientDataListActivity>();
-            builder.Services.AddTransient<GetGroupMembersActivity>();
-            builder.Services.AddTransient<GetGroupMembersNextPageActivity>();
-            builder.Services.AddTransient<InitializeorFailGroupMembersActivity>();
             builder.Services.AddTransient<UpdateExportDataActivity>();
             builder.Services.AddTransient<GetMetaDataActivity>();
             builder.Services.AddTransient<UploadActivity>();
@@ -122,7 +113,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<SentNotificationDataRepository>();
             builder.Services.AddSingleton<UserDataRepository>();
             builder.Services.AddSingleton<TeamDataRepository>();
-            builder.Services.AddSingleton<SendBatchesDataRepository>();
             builder.Services.AddSingleton<ExportDataRepository>();
 
             // Add service bus message queues.
@@ -133,6 +123,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             // Add miscellaneous dependencies.
             builder.Services.AddTransient<TableRowKeyGenerator>();
             builder.Services.AddTransient<AdaptiveCardCreator>();
+
+            // Add Teams services.
+            builder.Services.AddTransient<ITeamMembersService, TeamMembersService>();
 
             // Add graph services.
             this.AddGraphServices(builder);

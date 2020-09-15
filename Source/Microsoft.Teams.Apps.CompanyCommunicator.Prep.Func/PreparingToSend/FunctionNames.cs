@@ -12,7 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <summary>
         /// Process recipients orchestrator function.
         /// </summary>
-        public const string ProcessRecipientsOrchestrator = nameof(ProcessRecipientsOrchestrator);
+        public const string SyncRecipientsOrchestrator = nameof(SyncRecipientsOrchestrator);
 
         /// <summary>
         /// Send queue orchestrator function.
@@ -22,32 +22,42 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <summary>
         /// Process and store message activity function.
         /// </summary>
-        public const string PrepareAndStoreMessageActivity = nameof(PrepareAndStoreMessageActivity);
+        public const string StoreMessageActivity = nameof(StoreMessageActivity);
 
         /// <summary>
-        /// Update notification activity function.
+        /// Sync all users activity function.
         /// </summary>
-        public const string UpdateNotificationActivity = nameof(UpdateNotificationActivity);
+        public const string SyncAllUsersActivity = nameof(SyncAllUsersActivity);
+
+        /// <summary>
+        /// Sync Team members acitivity function.
+        /// </summary>
+        public const string SyncTeamMembersActivity = nameof(SyncTeamMembersActivity);
+
+        /// <summary>
+        /// Sync group members acitivity function.
+        /// </summary>
+        public const string SyncGroupMembersActivity = nameof(SyncGroupMembersActivity);
+
+        /// <summary>
+        /// Sync Teams acitivity function.
+        /// </summary>
+        public const string SyncTeamsActivity = nameof(SyncTeamsActivity);
+
+        /// <summary>
+        /// Get recipients acitvity function.
+        /// </summary>
+        public const string GetRecipientsActivity = nameof(GetRecipientsActivity);
 
         /// <summary>
         /// Data aggregation activity function.
         /// </summary>
-        public const string DataAggregationActivity = nameof(DataAggregationActivity);
+        public const string DataAggregationTriggerActivity = nameof(DataAggregationTriggerActivity);
 
         /// <summary>
         /// Send batch messages to send queue activity function.
         /// </summary>
         public const string SendBatchMessagesActivity = nameof(SendBatchMessagesActivity);
-
-        /// <summary>
-        /// Get Teams Entities by Ids activity function.
-        /// </summary>
-        public const string GetTeamDataEntitiesByIdsActivity = nameof(GetTeamDataEntitiesByIdsActivity);
-
-        /// <summary>
-        /// Get Team recipient data list activity function.
-        /// </summary>
-        public const string GetTeamRecipientDataListActivity = nameof(GetTeamRecipientDataListActivity);
 
         /// <summary>
         /// Handle failure activity function.

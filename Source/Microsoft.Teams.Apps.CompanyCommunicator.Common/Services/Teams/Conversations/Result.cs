@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
 {
     /// <summary>
     /// An enum indicating the different create user conversation result types.

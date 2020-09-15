@@ -19,7 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.PrecheckServices;
@@ -73,8 +73,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             // Add the precheck service.
             builder.Services.AddTransient<PrecheckService>();
 
-            // Add the create user conversation service.
-            builder.Services.AddTransient<ConversationService>();
+            // Add the teams conversation service.
+            builder.Services.AddTransient<IConversationService, ConversationService>();
 
             // Add the notification services.
             builder.Services.AddTransient<SendNotificationParamsService>();

@@ -17,11 +17,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// This function prepares to send a notification to the target audience.
     ///
     /// Performs following:
-    /// 1. Fetch and store recipients information and batch the recipients for further processing.
-    /// 2. Prepare and store the message to be sent in notification table.
-    /// 3. Update notification metadata.
-    /// 4. Send a message to Data Queue to start aggregating data.
-    /// 5. Send a batch of queue messages (1 message for each recipient) to send queue.
+    /// 1. Store the message in sending notification table.
+    /// 2. Sync recipients information to sent notification table.
+    /// 3. Start Send Queue orchestration.
     /// </summary>
     public static class PrepareToSendOrchestrator
     {
@@ -48,61 +46,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             {
                 if (!context.IsReplaying)
                 {
-                    log.LogInformation("About to process recipient data.");
+                    log.LogInformation("About to store message content.");
                 }
 
-                var recipientsInfo = await context.CallSubOrchestratorWithRetryAsync<RecipientDataListInformation>(
-                    FunctionNames.ProcessRecipientsOrchestrator,
+                await context.CallActivityWithRetryAsync(
+                    FunctionNames.StoreMessageActivity,
                     FunctionSettings.DefaultRetryOptions,
                     notificationDataEntity);
 
                 if (!context.IsReplaying)
                 {
-                    log.LogInformation("About to process and store message.");
+                    log.LogInformation("About to sync recipients.");
                 }
 
-                await context.CallActivityWithRetryAsync(
-                    FunctionNames.PrepareAndStoreMessageActivity,
+                await context.CallSubOrchestratorWithRetryAsync(
+                    FunctionNames.SyncRecipientsOrchestrator,
                     FunctionSettings.DefaultRetryOptions,
                     notificationDataEntity);
 
                 if (!context.IsReplaying)
                 {
-                    log.LogInformation("About to update notification entity.");
-                }
-
-                await context.CallActivityWithRetryAsync(
-                    FunctionNames.UpdateNotificationActivity,
-                    FunctionSettings.DefaultRetryOptions,
-                    new NotificationMetadataDTO
-                    {
-                        NotificationId = notificationDataEntity.Id,
-                        TotalNumberOfRecipients = recipientsInfo.TotalNumberOfRecipients,
-                    });
-
-                if (!context.IsReplaying)
-                {
-                    log.LogInformation("About to send data aggregration message to data queue.");
-                }
-
-                await context.CallActivityWithRetryAsync(
-                    FunctionNames.DataAggregationActivity,
-                    FunctionSettings.DefaultRetryOptions,
-                    notificationDataEntity.Id);
-
-                if (!context.IsReplaying)
-                {
-                    log.LogInformation("About to send batch queue messages to send queue.");
+                    log.LogInformation("About to send messages to send queue.");
                 }
 
                 await context.CallSubOrchestratorWithRetryAsync(
                     FunctionNames.SendQueueOrchestrator,
                     FunctionSettings.DefaultRetryOptions,
-                    new SendMessageDTO
-                    {
-                        NotificationId = notificationDataEntity.Id,
-                        TotalBatchCount = recipientsInfo.NumberOfRecipientDataBatches,
-                    });
+                    notificationDataEntity);
 
                 log.LogInformation($"PrepareToSendOrchestrator successfully completed for notification: {notificationDataEntity.Id}!");
             }

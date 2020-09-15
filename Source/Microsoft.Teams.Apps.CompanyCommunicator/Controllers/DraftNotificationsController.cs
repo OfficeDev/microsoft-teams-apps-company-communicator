@@ -242,9 +242,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var groupNames = await this.groupsService.
-                GetByIdsAsync(notificationEntity.Groups).
-                Select(x => x.DisplayName).
+            var groupNames = await this.groupsService
+                .GetByIdsAsync(notificationEntity.Groups)
+                .Select(x => x.DisplayName).
                 ToListAsync();
 
             var result = new DraftNotificationSummaryForConsent
