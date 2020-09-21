@@ -1,13 +1,13 @@
-﻿// <copyright file="SendNotificationResultType.cs" company="Microsoft">
+﻿// <copyright file="SendMessageResult.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
 {
     /// <summary>
-    /// An enum indicating the different send notification result types.
+    /// Send message result enum.
     /// </summary>
-    public enum SendNotificationResultType
+    public enum SendMessageResult
     {
         /// <summary>
         /// Type indicating sending the notification succeeded.

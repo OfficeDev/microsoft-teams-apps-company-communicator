@@ -17,9 +17,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// This function prepares to send a notification to the target audience.
     ///
     /// Performs following:
-    /// 1. Store the message in sending notification table.
-    /// 2. Sync recipients information to sent notification table.
-    /// 3. Start Send Queue orchestration.
+    /// 1. Stores the message in sending notification table.
+    /// 2. Syncs recipients information to sent notification table.
+    /// 3. Creates teams conversation with recipients if required.
+    /// 4. Starts Send Queue orchestration.
     /// </summary>
     public static class PrepareToSendOrchestrator
     {
@@ -30,8 +31,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="log">Logger.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        [FunctionName(nameof(PrepareToSendOrchestrationAsync))]
-        public static async Task PrepareToSendOrchestrationAsync(
+        [FunctionName(FunctionNames.PrepareToSendOrchestrator)]
+        public static async Task RunOrchestrator(
             [OrchestrationTrigger] IDurableOrchestrationContext context,
             ILogger log)
         {
@@ -66,6 +67,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
                 if (!context.IsReplaying)
                 {
+                    log.LogInformation("About to create conversation for recipients if required.");
+                }
+
+                await context.CallSubOrchestratorWithRetryAsync(
+                    FunctionNames.TeamsConversationOrchestrator,
+                    FunctionSettings.DefaultRetryOptions,
+                    notificationDataEntity);
+
+                if (!context.IsReplaying)
+                {
                     log.LogInformation("About to send messages to send queue.");
                 }
 
@@ -84,11 +95,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 await context.CallActivityWithRetryAsync(
                     FunctionNames.HandleFailureActivity,
                     FunctionSettings.DefaultRetryOptions,
-                    new HandleFailureActivityDTO
-                    {
-                        NotificationDataEntity = notificationDataEntity,
-                        Exception = ex,
-                    });
+                    (notificationDataEntity, ex));
             }
         }
     }

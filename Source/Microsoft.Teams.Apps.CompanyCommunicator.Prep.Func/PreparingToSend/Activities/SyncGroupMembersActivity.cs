@@ -6,7 +6,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -15,7 +14,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Extensions;
-    using Polly;
 
     /// <summary>
     /// Syncs group members to Sent notification table.
@@ -55,35 +53,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             var groupId = input.groupId;
 
             // Get all members.
-            var users = await this.GetGroupMembersAsync(groupId);
+            var users = await this.groupMembersService.GetGroupMembersAsync(groupId);
 
             // Convert to Recipients
             var recipients = await this.GetRecipientsAsync(notificationId, users);
 
             // Store.
             await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
-        }
-
-        private async Task<IEnumerable<User>> GetGroupMembersAsync(string groupId)
-        {
-            var users = new List<User>();
-
-            var groupMembersPage = await this.groupMembersService.
-                GetGroupMembersPageByIdAsync(groupId);
-            var nextPageUrl = this.GetNextPageUrl(groupMembersPage.AdditionalData);
-
-            users.AddRange(groupMembersPage.OfType<User>());
-
-            while (!string.IsNullOrWhiteSpace(nextPageUrl))
-            {
-                groupMembersPage = await this.groupMembersService
-                    .GetGroupMembersNextPageAsnyc(groupMembersPage, nextPageUrl);
-                nextPageUrl = this.GetNextPageUrl(groupMembersPage.AdditionalData);
-
-                users.AddRange(groupMembersPage.OfType<User>());
-            }
-
-            return users;
         }
 
         /// <summary>
@@ -115,18 +91,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             }
 
             return recipients;
-        }
-
-        /// <summary>
-        /// Extracts the next page url.
-        /// </summary>
-        /// <param name="additionalData">dictionary contaning odata next page link.</param>
-        /// <returns>next page url.</returns>
-        private string GetNextPageUrl(IDictionary<string, object> additionalData)
-        {
-            additionalData.TryGetValue(Common.Constants.ODataNextPageLink, out object nextLink);
-            var nextPageUrl = (nextLink == null) ? string.Empty : nextLink.ToString();
-            return nextPageUrl;
         }
     }
 }

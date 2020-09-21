@@ -14,7 +14,8 @@
       },
       "extendedSessionsEnabled": true,
       "extendedSessionIdleTimeoutInSeconds": 60,
-      "maxConcurrentOrchestratorFunctions": 4
+      "maxConcurrentOrchestratorFunctions": 5,
+      "maxConcurrentActivityFunctions": 30
     }
   },
   "functionTimeout": "01:00:00",

@@ -44,7 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
         /// <summary>
         /// Does following:
-        /// 1. Updates notification to indiciate completion of "prepare to send" phase and total recipient count.
+        /// 1. Updates notification to indicate completion of "prepare to send" phase and total recipient count.
         /// 2. Sends message to data queue.
         /// </summary>
         /// <param name="input">Input.</param>

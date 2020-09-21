@@ -41,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
         /// <param name="starter">Durable orchestration client.</param>
         /// <param name="log">Logger.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [FunctionName("CompanyCommunicatorPrepareToSendFunction")]
+        [FunctionName(FunctionNames.PrepareToSendFunction)]
         public async Task Run(
             [ServiceBusTrigger(PrepareToSendQueue.QueueName, Connection = PrepareToSendQueue.ServiceBusConnectionConfigurationKey)]
             string myQueueItem,
@@ -63,7 +63,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 
             // Start PrepareToSendOrchestrator function.
             string instanceId = await starter.StartNewAsync(
-                nameof(PrepareToSendOrchestrator.PrepareToSendOrchestrationAsync),
+                FunctionNames.PrepareToSendOrchestrator,
                 sentNotificationDataEntity);
 
             log.LogInformation($"Started orchestration with ID = '{instanceId}'.");

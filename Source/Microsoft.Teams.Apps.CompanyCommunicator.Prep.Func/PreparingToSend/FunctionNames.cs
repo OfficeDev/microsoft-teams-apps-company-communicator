@@ -10,9 +10,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     public static class FunctionNames
     {
         /// <summary>
-        /// Process recipients orchestrator function.
+        /// Prepare to send function.
+        /// </summary>
+        public const string PrepareToSendFunction = nameof(PrepareToSendFunction);
+
+        /// <summary>
+        /// Prepare to send orchestrator function.
+        /// </summary>
+        public const string PrepareToSendOrchestrator = nameof(PrepareToSendOrchestrator);
+
+        /// <summary>
+        /// Sync recipients orchestrator function.
         /// </summary>
         public const string SyncRecipientsOrchestrator = nameof(SyncRecipientsOrchestrator);
+
+        /// <summary>
+        /// Teams conversation orchestrator.
+        /// </summary>
+        public const string TeamsConversationOrchestrator = nameof(TeamsConversationOrchestrator);
 
         /// <summary>
         /// Send queue orchestrator function.
@@ -48,6 +63,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// Get recipients acitvity function.
         /// </summary>
         public const string GetRecipientsActivity = nameof(GetRecipientsActivity);
+
+        /// <summary>
+        /// Get pending recipients (ie recipients with no conversation id in the database) acitvity function.
+        /// </summary>
+        public const string GetPendingRecipientsActivity = nameof(GetPendingRecipientsActivity);
+
+        /// <summary>
+        /// Teams conversation activity function.
+        /// </summary>
+        public const string TeamsConversationActivity = nameof(TeamsConversationActivity);
 
         /// <summary>
         /// Data aggregation activity function.

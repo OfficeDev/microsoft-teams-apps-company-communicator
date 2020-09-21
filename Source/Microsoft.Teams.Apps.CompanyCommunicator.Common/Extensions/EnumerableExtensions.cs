@@ -8,7 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
     using System.Linq;
 
     /// <summary>
-    /// Group Extension.
+    /// IEnumerable Extension.
     /// </summary>
     public static class EnumerableExtensions
     {

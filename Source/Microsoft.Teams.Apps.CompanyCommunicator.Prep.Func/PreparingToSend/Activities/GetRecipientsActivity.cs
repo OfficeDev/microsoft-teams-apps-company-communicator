@@ -6,6 +6,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -34,10 +35,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="notification">notification.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.GetRecipientsActivity)]
-        public async Task<IEnumerable<SentNotificationDataEntity>> RunAsync([ActivityTrigger] NotificationDataEntity notification)
+        public async Task<IEnumerable<SentNotificationDataEntity>> GetRecipientsAsync([ActivityTrigger] NotificationDataEntity notification)
         {
             var recipients = await this.sentNotificationDataRepository.GetAllAsync(notification.Id);
             return recipients;
+        }
+
+        /// <summary>
+        /// Reads all the recipients from Sent notification table who do not have conversation details.
+        /// </summary>
+        /// <param name="notification">notification.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [FunctionName(FunctionNames.GetPendingRecipientsActivity)]
+        public async Task<IEnumerable<SentNotificationDataEntity>> GetPendingRecipientsAsync([ActivityTrigger] NotificationDataEntity notification)
+        {
+            var recipients = await this.sentNotificationDataRepository.GetAllAsync(notification.Id);
+            return recipients.Where(recipient => string.IsNullOrEmpty(recipient.ConversationId));
         }
     }
 }

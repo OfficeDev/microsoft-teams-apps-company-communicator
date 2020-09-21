@@ -46,6 +46,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             int maxAttempts,
             ILogger log)
         {
+            if (string.IsNullOrEmpty(teamsUserId))
+            {
+                throw new ArgumentException($"'{nameof(teamsUserId)}' cannot be null or empty", nameof(teamsUserId));
+            }
+
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                throw new ArgumentException($"'{nameof(tenantId)}' cannot be null or empty", nameof(tenantId));
+            }
+
+            if (string.IsNullOrEmpty(serviceUrl))
+            {
+                throw new ArgumentException($"'{nameof(serviceUrl)}' cannot be null or empty", nameof(serviceUrl));
+            }
+
+            if (log is null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
+
             var response = new CreateConversationResponse();
 
             // Set the service URL in the trusted list to ensure the SDK includes the token in the request.

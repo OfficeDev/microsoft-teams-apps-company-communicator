@@ -59,8 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             var teamsData = await this.GetTeamDataEntities(notification.Id, notification.Rosters, log);
 
             // Convert to recipients.
-            var recipients = teamsData.Select(teamData => this.ConvertToRecipient(notification.Id, teamData))
-                .ToList();
+            var recipients = teamsData.Select(teamData => this.ConvertToRecipient(notification.Id, teamData));
 
             // Store.
             await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);

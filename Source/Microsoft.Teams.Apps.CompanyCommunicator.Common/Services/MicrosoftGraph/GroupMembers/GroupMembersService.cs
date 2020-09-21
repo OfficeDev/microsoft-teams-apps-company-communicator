@@ -5,6 +5,8 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Graph;
 
@@ -59,6 +61,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             return await groupMembersRef
                 .NextPageRequest
                 .GetAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<User>> GetGroupMembersAsync(string groupId)
+        {
+            var response = await this.graphServiceClient
+                                    .Groups[groupId]
+                                    .TransitiveMembers
+                                    .Request()
+                                    .Top(this.MaxResultCount)
+                                    .WithMaxRetry(this.MaxRetry)
+                                    .GetAsync();
+
+            var users = response.OfType<User>().ToList();
+            while (response.NextPageRequest != null)
+            {
+                response = await response.NextPageRequest.GetAsync();
+                users?.AddRange(response.OfType<User>() ?? new List<User>());
+            }
+
+            return users;
         }
     }
 }

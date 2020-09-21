@@ -1,13 +1,13 @@
-﻿// <copyright file="SendNotificationResponse.cs" company="Microsoft">
+﻿// <copyright file="SendMessageResponse.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
 {
     /// <summary>
-    /// The class for the send notification response.
+    /// Send message response object.
     /// </summary>
-    public class SendNotificationResponse
+    public class SendMessageResponse
     {
         /// <summary>
         /// Gets or sets the status code.
@@ -17,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.Notificati
         /// <summary>
         /// Gets or sets the result type.
         /// </summary>
-        public SendNotificationResultType ResultType { get; set; }
+        public SendMessageResult ResultType { get; set; }
 
         /// <summary>
         /// Gets or sets a comma separated list representing all of the status code responses received when trying

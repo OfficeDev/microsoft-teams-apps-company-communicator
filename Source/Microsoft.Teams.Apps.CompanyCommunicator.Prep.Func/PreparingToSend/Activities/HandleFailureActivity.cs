@@ -36,13 +36,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(FunctionNames.HandleFailureActivity)]
         public async Task RunAsync(
-            [ActivityTrigger] HandleFailureActivityDTO input)
+            [ActivityTrigger](NotificationDataEntity notification, Exception exception) input)
         {
-            var errorMessage = $"Failed to prepare the message for sending: {input.Exception.Message}";
+            var errorMessage = $"Failed to prepare the message for sending: {input.exception.Message}";
 
             var notificationDataEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,
-                input.NotificationDataEntity.Id);
+                input.notification.Id);
 
             if (notificationDataEntity != null)
             {

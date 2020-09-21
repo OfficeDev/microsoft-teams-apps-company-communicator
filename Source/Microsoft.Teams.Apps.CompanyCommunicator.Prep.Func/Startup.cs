@@ -104,6 +104,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<HandleExportFailureActivity>();
 
             // Add bot services.
+            builder.Services.AddSingleton<CommonMicrosoftAppCredentials>();
             builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
 
@@ -126,6 +127,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 
             // Add Teams services.
             builder.Services.AddTransient<ITeamMembersService, TeamMembersService>();
+            builder.Services.AddTransient<IConversationService, ConversationService>();
 
             // Add graph services.
             this.AddGraphServices(builder);
