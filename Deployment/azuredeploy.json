@@ -155,6 +155,7 @@
       "name": "[variables('storageAccountName')]",
       "apiVersion": "2018-02-01",
       "location": "[parameters('location')]",
+      "properties": { "allowBlobPublicAccess": False },
       "kind": "Storage",
       "sku": {
         "name": "Standard_LRS"
