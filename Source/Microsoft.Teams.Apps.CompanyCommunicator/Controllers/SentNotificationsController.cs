@@ -4,21 +4,27 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
 
     /// <summary>
@@ -36,6 +42,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly double forceCompleteMessageDelayInSeconds;
         private readonly IGroupsService groupsService;
         private readonly ExportDataRepository exportDataRepository;
+        private readonly IAppCatalogService appCatalogService;
+        private readonly IAppSettingsService appSettingsService;
+        private readonly UserAppOptions userAppOptions;
+        private readonly ILogger<SentNotificationsController> logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
@@ -48,6 +58,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="dataQueueMessageOptions">The options for the data queue messages.</param>
         /// <param name="groupsService">The groups service.</param>
         /// <param name="exportDataRepository">The Export data repository instance.</param>
+        /// <param name="appCatalogService">App catalog service.</param>
+        /// <param name="appSettingsService">App settings service.</param>
+        /// <param name="userAppOptions">User app options.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
         public SentNotificationsController(
             NotificationDataRepository notificationDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository,
@@ -56,16 +70,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             DataQueue dataQueue,
             IOptions<DataQueueMessageOptions> dataQueueMessageOptions,
             IGroupsService groupsService,
-            ExportDataRepository exportDataRepository)
+            ExportDataRepository exportDataRepository,
+            IAppCatalogService appCatalogService,
+            IAppSettingsService appSettingsService,
+            IOptions<UserAppOptions> userAppOptions,
+            ILoggerFactory loggerFactory)
         {
-            this.notificationDataRepository = notificationDataRepository;
-            this.sentNotificationDataRepository = sentNotificationDataRepository;
-            this.teamDataRepository = teamDataRepository;
-            this.prepareToSendQueue = prepareToSendQueue;
-            this.dataQueue = dataQueue;
+            if (dataQueueMessageOptions is null)
+            {
+                throw new ArgumentNullException(nameof(dataQueueMessageOptions));
+            }
+
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
+            this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
+            this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
+            this.prepareToSendQueue = prepareToSendQueue ?? throw new ArgumentNullException(nameof(prepareToSendQueue));
+            this.dataQueue = dataQueue ?? throw new ArgumentNullException(nameof(dataQueue));
             this.forceCompleteMessageDelayInSeconds = dataQueueMessageOptions.Value.ForceCompleteMessageDelayInSeconds;
-            this.groupsService = groupsService;
-            this.exportDataRepository = exportDataRepository;
+            this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
+            this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
+            this.appCatalogService = appCatalogService ?? throw new ArgumentNullException(nameof(appCatalogService));
+            this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
+            this.userAppOptions = userAppOptions?.Value ?? throw new ArgumentNullException(nameof(userAppOptions));
+            this.logger = loggerFactory?.CreateLogger<SentNotificationsController>() ?? throw new ArgumentNullException(nameof(loggerFactory));
         }
 
         /// <summary>
@@ -90,6 +117,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             // Ensure the data table needed by the Azure Functions to send the notifications exist in Azure storage.
             await this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistsAsync();
+
+            // Update user app id if proactive installation is enabled.
+            await this.UpdateUserAppIdAsync();
 
             var prepareToSendQueueMessageContent = new PrepareToSendQueueMessageContent
             {
@@ -210,6 +240,37 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             return unknown > 0 ? unknown : (int?)null;
+        }
+
+        /// <summary>
+        /// Updates user app id if its not already synced.
+        /// </summary>
+        private async Task UpdateUserAppIdAsync()
+        {
+            // check if proactive installation is enabled.
+            if (!this.userAppOptions.ProactivelyInstallUserApp)
+            {
+                return;
+            }
+
+            // check if we have already synced app id.
+            var appId = await this.appSettingsService.GetUserAppIdAsync();
+            if (!string.IsNullOrWhiteSpace(appId))
+            {
+                return;
+            }
+
+            try
+            {
+                // Fetch and store user app id in App Catalog.
+                appId = await this.appCatalogService.GetTeamsAppIdAsync(this.userAppOptions.UserAppExternalId);
+                await this.appSettingsService.SetUserAppIdAsync(appId);
+            }
+            catch (ServiceException exception)
+            {
+                // Failed to fetch app id.
+                this.logger.LogError(exception, $"Failed to get catalog app id. Error message: {exception.Message}.");
+            }
         }
     }
 }

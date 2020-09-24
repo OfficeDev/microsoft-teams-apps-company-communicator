@@ -17,18 +17,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// Teams conversation orchestrator.
     /// Does following:
     /// 1. Gets all the recipients for whom we do not have conversation Id.
-    /// 2. Creates conversation.
-    ///
-    /// Note: The orchestrator only handles "members of specific team" scenario. Support for other scenarios
-    /// will be added with proactive app installation changes.
+    /// 2. Creates conversation with each recipient.
     /// </summary>
     public static class TeamsConversationOrchestrator
     {
         /// <summary>
         /// TeamsConversationOrchestrator function.
         /// Does following:
-        /// 1. Creates conversation for members of Teams if the conversationId isn't available.
-        /// 2. No-op for other target set of users.
+        /// 1. Gets all the pending recipients(for whom we do not have conversation Id).
+        /// 2. Creates conversation with each recipient.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="log">Logger.</param>
@@ -40,37 +37,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         {
             var notification = context.GetInput<NotificationDataEntity>();
 
-            // Members of specific teams.
-            if (notification.Rosters.Any())
+            if (!context.IsReplaying)
             {
-                if (!context.IsReplaying)
-                {
-                    log.LogInformation($"About to get pending recipients. (who do not have a conversation id in the database.");
-                }
-
-                var recipients = await context.CallActivityWithRetryAsync<IEnumerable<SentNotificationDataEntity>>(
-                    FunctionNames.GetPendingRecipientsActivity,
-                    FunctionSettings.DefaultRetryOptions,
-                    notification);
-
-                if (!context.IsReplaying)
-                {
-                    log.LogInformation("About to create conversation.");
-                }
-
-                var tasks = new List<Task>();
-                foreach (var recipient in recipients)
-                {
-                    var task = context.CallActivityWithRetryAsync(
-                        FunctionNames.TeamsConversationActivity,
-                        FunctionSettings.DefaultRetryOptions,
-                        recipient);
-                    tasks.Add(task);
-                }
-
-                // Fan-out Fan-in.
-                await Task.WhenAll(tasks);
+                log.LogInformation($"About to get pending recipients (with no conversation id in database.");
             }
+
+            var recipients = await context.CallActivityWithRetryAsync<IEnumerable<SentNotificationDataEntity>>(
+                FunctionNames.GetPendingRecipientsActivity,
+                FunctionSettings.DefaultRetryOptions,
+                notification);
+
+            if (!context.IsReplaying)
+            {
+                log.LogInformation($"About to create conversation with {recipients.Count()} recipients.");
+            }
+
+            var tasks = new List<Task>();
+            foreach (var recipient in recipients)
+            {
+                var task = context.CallActivityWithRetryAsync(
+                    FunctionNames.TeamsConversationActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    (notification.Id, recipient));
+                tasks.Add(task);
+            }
+
+            // Fan-out Fan-in.
+            await Task.WhenAll(tasks);
         }
     }
 }

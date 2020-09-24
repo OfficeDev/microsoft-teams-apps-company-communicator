@@ -10,20 +10,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     using System.Linq;
     using System.Threading.Tasks;
 
-    using Beta = BetaLib::Microsoft.Graph;
+    using BetaLib::Microsoft.Graph;
 
     /// <summary>
     /// Read information about the apps published in the Teams app store and organization's app catalog.
     /// </summary>
     internal class AppCatalogService : IAppCatalogService
     {
-        private readonly Beta.IGraphServiceClient betaServiceClient;
+        private readonly IGraphServiceClient betaServiceClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AppCatalogService"/> class.
         /// </summary>
         /// <param name="betaServiceClient">Beta Graph service client.</param>
-        internal AppCatalogService(Beta.IGraphServiceClient betaServiceClient)
+        internal AppCatalogService(IGraphServiceClient betaServiceClient)
         {
             this.betaServiceClient = betaServiceClient ?? throw new ArgumentNullException(nameof(betaServiceClient));
         }
@@ -40,7 +40,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 .AppCatalogs
                 .TeamsApps
                 .Request()
-                .Filter($"distributionMethod eq 'organization' and externalId eq {externalId}")
+                .Header(Common.Constants.PermissionTypeKey, GraphPermissionType.Delegate.ToString())
+                .Filter($"distributionMethod eq 'organization' and externalId eq '{externalId}'")
                 .GetAsync();
 
             return apps?.FirstOrDefault()?.Id;

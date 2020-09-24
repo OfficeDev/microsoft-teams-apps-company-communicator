@@ -24,6 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
@@ -82,6 +83,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                         configuration.GetValue<double>("DataQueueMessageDelayInSeconds", 20);
                 });
 
+            builder.Services.AddOptions<TeamsConversationOptions>()
+                .Configure<IConfiguration>((options, configuration) =>
+                {
+                    options.ProactivelyInstallUserApp =
+                        configuration.GetValue<bool>("ProactivelyInstallUserApp", true);
+
+                    options.MaxAttemptsToCreateConversation =
+                        configuration.GetValue<int>("MaxAttemptsToCreateConversation", 1);
+                });
+
             // Add localization.
             builder.Services.AddLocalization();
 
@@ -115,6 +126,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<UserDataRepository>();
             builder.Services.AddSingleton<TeamDataRepository>();
             builder.Services.AddSingleton<ExportDataRepository>();
+            builder.Services.AddSingleton<AppConfigRepository>();
 
             // Add service bus message queues.
             builder.Services.AddSingleton<SendQueue>();
@@ -124,6 +136,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             // Add miscellaneous dependencies.
             builder.Services.AddTransient<TableRowKeyGenerator>();
             builder.Services.AddTransient<AdaptiveCardCreator>();
+            builder.Services.AddSingleton<IAppSettingsService, AppSettingsService>();
 
             // Add Teams services.
             builder.Services.AddTransient<ITeamMembersService, TeamMembersService>();
@@ -176,6 +189,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             // Add Graph Services
             builder.Services.AddScoped<IUsersService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetUsersService());
             builder.Services.AddScoped<IGroupMembersService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupMembersService());
+            builder.Services.AddScoped<IAppManagerService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetAppManagerService());
+            builder.Services.AddScoped<IChatsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetChatsService());
         }
     }
 }
