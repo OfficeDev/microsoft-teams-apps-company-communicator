@@ -81,9 +81,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     userEntity = new UserDataEntity()
                     {
                         AadId = user.Id,
-                        Name = user.DisplayName,
-                        Email = user.Mail,
-                        Upn = user.UserPrincipalName,
                     };
                 }
 

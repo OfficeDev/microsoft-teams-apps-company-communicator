@@ -18,5 +18,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// Microsoft Graph Beta base url.
         /// </summary>
         public const string BetaBaseUrl = "https://graph.microsoft.com/beta";
+
+        /// <summary>
+        /// Max page size.
+        /// </summary>
+        public const int MaxPageSize = 999;
     }
 }

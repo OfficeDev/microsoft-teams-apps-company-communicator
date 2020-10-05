@@ -14,13 +14,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     public interface IUsersService
     {
         /// <summary>
-        /// get list of users by ids.
-        /// </summary>
-        /// <param name="userIds">list of user ids.</param>
-        /// <returns>list of users.</returns>
-        Task<IEnumerable<User>> FilterByUserIdsAsync(IEnumerable<string> userIds);
-
-        /// <summary>
         /// get the list of users by group of userids.
         /// </summary>
         /// <param name="userIdsByGroups">list of grouped user ids.</param>
@@ -40,5 +33,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <param name="userId">the user id.</param>
         /// <returns>user data.</returns>
         Task<User> GetUserAsync(string userId);
+
+        /// <summary>
+        /// Gets all the users in the tenant. Doesn't include 'Guest' users.
+        ///
+        /// Note: If delta link is passed, the API returns delta changes only.
+        /// </summary>
+        /// <param name="deltaLink">Delta link.</param>
+        /// <returns>List of users and delta link.</returns>
+        Task<(IEnumerable<User>, string)> GetAllUsersAsync(string deltaLink = null);
+
+        /// <summary>
+        /// Checks if the user has teams license.
+        /// </summary>
+        /// <param name="userId">User's AAD id.</param>
+        /// <returns>true if the user has teams license, false otherwise.</returns>
+        Task<bool> HasTeamsLicenseAsync(string userId);
     }
 }
