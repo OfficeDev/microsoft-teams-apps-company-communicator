@@ -1,17 +1,19 @@
 import * as React from 'react';
-import './newMessage.scss';
-import './teamTheme.scss';
+import { RouteComponentProps } from 'react-router-dom';
+import { withTranslation, WithTranslation } from "react-i18next";
 import { Input, TextArea, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
+import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as AdaptiveCards from "adaptivecards";
 import { Button, Loader, Dropdown, Text } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
-import { RouteComponentProps } from 'react-router-dom';
-import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess } from '../../apis/messageListApi';
+
+import './newMessage.scss';
+import './teamTheme.scss';
+import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess  } from '../../apis/messageListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
 
@@ -72,17 +74,17 @@ export interface formState {
     errorButtonUrlMessage: string,
 }
 
-export interface INewMessageProps extends RouteComponentProps {
+export interface INewMessageProps extends RouteComponentProps, WithTranslation {
     getDraftMessagesList?: any;
 }
 
-export default class NewMessage extends React.Component<INewMessageProps, formState> {
+class NewMessage extends React.Component<INewMessageProps, formState> {
     private card: any;
 
     constructor(props: INewMessageProps) {
         super(props);
         initializeIcons();
-        this.card = getInitAdaptiveCard();
+        this.card = getInitAdaptiveCard(this.props.t);
         this.setDefaultCard(this.card);
 
         this.state = {
@@ -195,12 +197,17 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     public setDefaultCard = (card: any) => {
-        setCardTitle(card, "Title");
+        const titleAsString = this.props.t("TitleText");
+        const summaryAsString = this.props.t("Summary");
+        const authorAsString = this.props.t("Author1");
+        const buttonTitleAsString = this.props.t("ButtonTitle");
+
+        setCardTitle(card, titleAsString);
         let imgUrl = getBaseUrl() + "/image/imagePlaceholder.png";
         setCardImageLink(card, imgUrl);
-        setCardSummary(card, "Summary");
-        setCardAuthor(card, "- Author");
-        setCardBtn(card, "Button title", "https://adaptivecards.io");
+        setCardSummary(card, summaryAsString);
+        setCardAuthor(card, authorAsString);
+        setCardBtn(card, buttonTitleAsString, "https://adaptivecards.io");
     }
 
     private getTeamList = async () => {
@@ -322,8 +329,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.title}
-                                    label="Title"
-                                    placeholder="Title (required)"
+                                    label={this.props.t("TitleText")}
+                                    placeholder={this.props.t("PlaceHolderTitle")}
                                     onChange={this.onTitleChanged}
                                     autoComplete="off"
                                     required
@@ -332,8 +339,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.imageLink}
-                                    label="Image URL"
-                                    placeholder="Image URL"
+                                    label={this.props.t("ImageURL")}
+                                    placeholder={this.props.t("ImageURL")}
                                     onChange={this.onImageLinkChanged}
                                     errorLabel={this.state.errorImageUrlMessage}
                                     autoComplete="off"
@@ -342,8 +349,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <TextArea
                                     className="inputField textArea"
                                     autoFocus
-                                    placeholder="Summary"
-                                    label="Summary"
+                                    placeholder={this.props.t("Summary")}
+                                    label={this.props.t("Summary")}
                                     value={this.state.summary}
                                     onChange={this.onSummaryChanged}
                                 />
@@ -351,8 +358,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.author}
-                                    label="Author"
-                                    placeholder="Author"
+                                    label={this.props.t("Author")}
+                                    placeholder={this.props.t("Author")}
                                     onChange={this.onAuthorChanged}
                                     autoComplete="off"
                                 />
@@ -360,8 +367,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.btnTitle}
-                                    label="Button title"
-                                    placeholder="Button title"
+                                    label={this.props.t("ButtonTitle")}
+                                    placeholder={this.props.t("ButtonTitle")}
                                     onChange={this.onBtnTitleChanged}
                                     autoComplete="off"
                                 />
@@ -369,8 +376,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.btnLink}
-                                    label="Button URL"
-                                    placeholder="Button URL"
+                                    label={this.props.t("ButtonURL")}
+                                    placeholder={this.props.t("ButtonURL")}
                                     onChange={this.onBtnLinkChanged}
                                     errorLabel={this.state.errorButtonUrlMessage}
                                     autoComplete="off"
@@ -382,7 +389,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
                         <div className="footerContainer">
                             <div className="buttonContainer">
-                                <Button content="Next" disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
+                                <Button content={this.props.t("Next")} disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
                             </div>
                         </div>
                     </div>
@@ -399,33 +406,33 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     value={this.state.selectedRadioBtn}
                                     onSelected={this.onGroupSelected}
                                 >
-                                    <Radiobutton name="grouped" value="teams" label="Send to General channel of specific teams" />
+                                    <Radiobutton name="grouped" value="teams" label={this.props.t("SendToGeneralChannel")} />
                                     <Dropdown
                                         hidden={!this.state.teamsOptionSelected}
-                                        placeholder="Select team(s)"
+                                        placeholder={this.props.t("SendToGeneralChannelPlaceHolder")}
                                         search
                                         multiple
                                         items={this.getItems()}
                                         value={this.state.selectedTeams}
                                         onSelectedChange={this.onTeamsChange}
-                                        noResultsMessage="We couldn't find any matches."
+                                        noResultsMessage={this.props.t("NoMatchMessage")}
                                     />
-                                    <Radiobutton name="grouped" value="rosters" label="Send in chat to specific people" />
+                                    <Radiobutton name="grouped" value="rosters" label={this.props.t("SendToRosters")} />
                                     <Dropdown
                                         hidden={!this.state.rostersOptionSelected}
-                                        placeholder="Choose team(s) members"
+                                        placeholder={this.props.t("SendToRostersPlaceHolder")}
                                         search
                                         multiple
                                         items={this.getItems()}
                                         value={this.state.selectedRosters}
                                         onSelectedChange={this.onRostersChange}
-                                        noResultsMessage="We couldn't find any matches."
                                         unstable_pinned={this.state.unstablePinned}
+                                        noResultsMessage={this.props.t("NoMatchMessage")}
                                     />
-                                    <Radiobutton name="grouped" value="allUsers" label="Send in chat to everyone" />
+                                    <Radiobutton name="grouped" value="allUsers" label={this.props.t("SendToAllUsers")} />
                                     <div className={this.state.selectedRadioBtn === "allUsers" ? "" : "hide"}>
                                         <div className="noteText">
-                                            <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
+                                            <Text error content={this.props.t("SendToAllUsersNote")} />
                                         </div>
                                     </div>
                                     <Radiobutton name="grouped" value="groups" label="Send in chat to members in a M365 groups, Distribution groups or Security groups" />
@@ -462,8 +469,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
                         <div className="footerContainer">
                             <div className="buttonContainer">
-                                <Button content="Back" onClick={this.onBack} secondary />
-                                <Button content="Save as draft" disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
+                                <Button content={this.props.t("Back")} onClick={this.onBack} secondary />
+                                <Button content={this.props.t("SaveAsDraft")} disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
                             </div>
                         </div>
                     </div>
@@ -859,3 +866,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
     }
 }
+
+const newMessageWithTranslation = withTranslation()(NewMessage);
+export default newMessageWithTranslation;

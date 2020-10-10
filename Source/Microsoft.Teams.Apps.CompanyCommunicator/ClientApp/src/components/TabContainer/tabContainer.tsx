@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { withTranslation, WithTranslation } from "react-i18next";
 import Messages from '../Messages/messages';
 import DraftMessages from '../DraftMessages/draftMessages';
 import './tabContainer.scss';
@@ -18,7 +19,7 @@ interface ITaskInfo {
     completionBotId?: string;
 }
 
-export interface ITaskInfoProps {
+export interface ITaskInfoProps extends WithTranslation {
     getDraftMessagesList?: any;
 }
 
@@ -30,7 +31,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
     constructor(props: ITaskInfoProps) {
         super(props);
         this.state = {
-            url: getBaseUrl() + "/newmessage"
+            url: getBaseUrl() + "/newmessage?locale={locale}"
         }
         this.escFunction = this.escFunction.bind(this);
     }
@@ -54,7 +55,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
     public render(): JSX.Element {
         const panels = [
             {
-                title: 'Draft messages',
+                title: this.props.t('DraftMessagesSectionTitle'),
                 content: {
                     key: 'sent',
                     content: (
@@ -65,7 +66,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                 },
             },
             {
-                title: 'Sent messages',
+                title: this.props.t('SentMessagesSectionTitle'),
                 content: {
                     key: 'draft',
                     content: (
@@ -79,7 +80,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
         return (
             <div className="tabContainer">
                 <div className="newPostBtn">
-                    <Button content="New message" onClick={this.onNewMessage} primary />
+                    <Button content={this.props.t("NewMessage")} onClick={this.onNewMessage} primary />
                 </div>
                 <div className="messageContainer">
                     <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
@@ -91,7 +92,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
     public onNewMessage = () => {
         let taskInfo: ITaskInfo = {
             url: this.state.url,
-            title: "New message",
+            title: this.props.t("NewMessage"),
             height: 530,
             width: 1000,
             fallbackUrl: this.state.url,
@@ -109,4 +110,5 @@ const mapStateToProps = (state: any) => {
     return { messages: state.draftMessagesList };
 }
 
-export default connect(mapStateToProps, { getDraftMessagesList })(TabContainer);
+const tabContainerWithTranslation = withTranslation()(TabContainer);
+export default connect(mapStateToProps, { getDraftMessagesList })(tabContainerWithTranslation);

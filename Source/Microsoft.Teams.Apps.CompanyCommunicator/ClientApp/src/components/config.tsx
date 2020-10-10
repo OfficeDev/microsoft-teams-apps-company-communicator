@@ -10,7 +10,7 @@ class Configuration extends React.Component<{}, IConfigState> {
     constructor(props: {}) {
         super(props);
         this.state = {
-            url: getBaseUrl() + "/messages"
+            url: getBaseUrl() + "/messages?locale={locale}"
         }
     }
 

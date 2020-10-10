@@ -1,11 +1,13 @@
 import * as React from 'react';
-import './draftMessages.scss';
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { connect } from 'react-redux';
+import { withTranslation, WithTranslation } from "react-i18next";
+import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
+import { Loader, List, Flex, Text } from '@stardust-ui/react';
+import * as microsoftTeams from "@microsoft/teams-js";
+
+import './draftMessages.scss';
 import { selectMessage, getDraftMessagesList, getMessagesList } from '../../actions';
 import { getBaseUrl } from '../../configVariables';
-import * as microsoftTeams from "@microsoft/teams-js";
-import { Loader, List, Flex, Text } from '@stardust-ui/react';
 import Overflow from '../OverFlow/draftMessageOverflow';
 
 export interface ITaskInfo {
@@ -28,7 +30,7 @@ export interface IMessage {
   responses?: string;
 }
 
-export interface IMessageProps {
+export interface IMessageProps extends WithTranslation {
   messages: IMessage[];
   selectedMessage: any;
   selectMessage?: any;
@@ -105,8 +107,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         ),
         styles: { margin: '0.2rem 0.2rem 0 0' },
         onClick: (): void => {
-          let url = getBaseUrl() + "/newmessage/" + message.id;
-          this.onOpenTaskModule(null, url, "Edit message");
+          let url = getBaseUrl() + "/newmessage/" + message.id + "?locale={locale}";
+          this.onOpenTaskModule(null, url, this.props.t("EditMessage"));
         },
       };
       return out;
@@ -121,7 +123,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         <Loader />
       );
     } else if (this.state.message.length === 0) {
-      return (<div className="results">You have no draft messages.</div>);
+      return (<div className="results">{this.props.t("EmptyDraftMessages")}</div>);
     }
     else {
       return (
@@ -139,7 +141,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
             <Text
               truncated
               weight="bold"
-              content="Title"
+              content={this.props.t("TitleText")}
             >
             </Text>
           </Flex.Item>
@@ -177,4 +179,5 @@ const mapStateToProps = (state: any) => {
   return { messages: state.draftMessagesList, selectedMessage: state.selectedMessage };
 }
 
-export default connect(mapStateToProps, { selectMessage, getDraftMessagesList, getMessagesList })(DraftMessages);
+const draftMessagesWithTranslation = withTranslation()(DraftMessages);
+export default connect(mapStateToProps, { selectMessage, getDraftMessagesList, getMessagesList })(draftMessagesWithTranslation);

@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { withTranslation, WithTranslation } from "react-i18next";
 import './statusTaskModule.scss';
 import { getSentNotification, exportNotification } from '../../apis/messageListApi';
+import moment from 'moment';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
@@ -12,6 +14,7 @@ import {
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
 import { ImageUtil } from '../../utility/imageutility';
+import { formatDate } from '../../i18n';
 
 export interface IListItem {
     header: string,
@@ -51,7 +54,9 @@ export interface IStatusState {
     page: string;
 }
 
-class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState> {
+interface StatusTaskModuleProps extends RouteComponentProps, WithTranslation { }
+
+class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusState> {
     private initMessage = {
         id: "",
         title: ""
@@ -59,10 +64,11 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
 
     private card: any;
 
-    constructor(props: RouteComponentProps) {
+    constructor(props: StatusTaskModuleProps) {
         super(props);
         initializeIcons();
-        this.card = getInitAdaptiveCard();
+
+        this.card = getInitAdaptiveCard(this.props.t);
 
         this.state = {
             message: this.initMessage,
@@ -103,8 +109,8 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         try {
             const response = await getSentNotification(id);
             response.data.sendingDuration = this.formatNotificationSendingDuration(response.data.sendingStartedDate, response.data.sentDate);
-            response.data.sendingStartedDate = this.formatNotificationDate(response.data.sendingStartedDate);
-            response.data.sentDate = this.formatNotificationDate(response.data.sentDate);
+            response.data.sendingStartedDate = formatDate(response.data.sendingStartedDate);
+            response.data.sentDate = formatDate(response.data.sentDate);
             this.setState({
                 message: response.data
             });
@@ -132,14 +138,6 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         return sendingDuration;
     }
 
-    private formatNotificationDate = (notificationDate: string) => {
-        if (notificationDate) {
-            notificationDate = (new Date(notificationDate)).toLocaleString(navigator.language, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
-            notificationDate = notificationDate.replace(',', '\xa0\xa0');
-        }
-        return notificationDate;
-    }
-
     public render(): JSX.Element {
         if (this.state.loader) {
             return (
@@ -155,27 +153,27 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
                         <div className="formContainer">
                             <div className="formContentContainer" >
                                 <div className="contentField">
-                                    <h3>Title</h3>
+                                    <h3>{this.props.t("TitleText")}</h3>
                                     <span>{this.state.message.title}</span>
                                 </div>
                                 <div className="contentField">
-                                    <h3>Sending started</h3>
+                                    <h3>{this.props.t("SendingStarted")}</h3>
                                     <span>{this.state.message.sendingStartedDate}</span>
                                 </div>
                                 <div className="contentField">
-                                    <h3>Completed</h3>
+                                    <h3>{this.props.t("Completed")}</h3>
                                     <span>{this.state.message.sentDate}</span>
                                 </div>
                                 <div className="contentField">
-                                    <h3>Duration</h3>
+                                    <h3>{this.props.t("Duration")}</h3>
                                     <span>{this.state.message.sendingDuration}</span>
                                 </div>
                                 <div className="contentField">
-                                    <h3>Results</h3>
-                                    <label>Success : </label>
+                                    <h3>{this.props.t("Results")}</h3>
+                                    <label>{this.props.t("Success")}</label>
                                     <span>{this.state.message.succeeded}</span>
                                     <br />
-                                    <label>Failure : </label>
+                                    <label>{this.props.t("Failure")}</label>
                                     <span>{this.state.message.failed}</span>
                                     <br />
                                     {this.state.message.unknown &&
@@ -292,13 +290,13 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         if (this.state.message.teamNames && this.state.message.teamNames.length > 0) {
             return (
                 <div>
-                    <h3>Sent to General channel of the following teams</h3>
+                        <h3>{this.props.t("SendToGeneralChannel1")}</h3>
                     <List items={this.getItemList(this.state.message.teamNames)} />
                 </div>);
         } else if (this.state.message.rosterNames && this.state.message.rosterNames.length > 0) {
             return (
                 <div>
-                    <h3>Sent in chat to people in teams</h3>
+                        <h3>{this.props.t("SendToRosters1")}</h3>
                     <List items={this.getItemList(this.state.message.rosterNames)} />
                 </div>);
         } else if (this.state.message.groupNames && this.state.message.groupNames.length > 0) {
@@ -311,7 +309,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         } else if (this.state.message.allUsers) {
             return (
                 <div>
-                    <h3>Sent in chat to everyone</h3>
+                    <h3>{this.props.t("SendToAllUsers")}</h3>
                 </div>);
         } else {
             return (<div></div>);
@@ -321,7 +319,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         if (this.state.message.errorMessage) {
             return (
                 <div>
-                    <h3>Errors</h3>
+                    <h3>{this.props.t("Errors")}</h3>
                     <span>{this.state.message.errorMessage}</span>
                 </div>
             );
@@ -334,7 +332,7 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
         if (this.state.message.warningMessage) {
             return (
                 <div>
-                    <h3>Warnings</h3>
+                    <h3>{this.props.t("Warnings")}</h3>
                     <span>{this.state.message.warningMessage}</span>
                 </div>
             );
@@ -344,4 +342,5 @@ class StatusTaskModule extends React.Component<RouteComponentProps, IStatusState
     }
 }
 
-export default StatusTaskModule;
+const StatusTaskModuleWithTranslation = withTranslation()(StatusTaskModule);
+export default StatusTaskModuleWithTranslation;

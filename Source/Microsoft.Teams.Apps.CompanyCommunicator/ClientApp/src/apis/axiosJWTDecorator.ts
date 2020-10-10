@@ -1,5 +1,6 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 import * as microsoftTeams from "@microsoft/teams-js";
+import i18n from '../i18n';
 
 export class AxiosJWTDecorator {
     public async get<T = any, R = AxiosResponse<T>>(
@@ -83,48 +84,48 @@ export class AxiosJWTDecorator {
         }
     }
 
-    private handleError(error: any): void {
-        if (error.hasOwnProperty("response")) {
-            const errorStatus = error.response.status;
-            if (errorStatus === 403) {
-                window.location.href = "/errorpage/403";
-            } else if (errorStatus === 401) {
-                window.location.href = "/errorpage/401";
-            } else {
-                window.location.href = "/errorpage";
-            }
-        } else {
-            window.location.href = "/errorpage";
-        }
+  private handleError(error: any): void {
+    if (error.hasOwnProperty("response")) {
+      const errorStatus = error.response.status;
+      if (errorStatus === 403) {
+        window.location.href = `/errorpage/403?locale=${i18n.language}`;
+      } else if (errorStatus === 401) {
+        window.location.href = `/errorpage/401?locale=${i18n.language}`;
+      } else {
+        window.location.href = `/errorpage?locale=${i18n.language}`;
+      }
+    } else {
+      window.location.href = `/errorpage?locale=${i18n.language}`;
     }
+  }
 
     private async setupAuthorizationHeader(
         config?: AxiosRequestConfig
     ): Promise<AxiosRequestConfig> {
         microsoftTeams.initialize();
 
-        return new Promise<AxiosRequestConfig>((resolve, reject) => {
-            const authTokenRequest = {
-                successCallback: (token: string) => {
-                    if (!config) {
-                        config = axios.defaults;
-                    }
-                    config.headers["Authorization"] = `Bearer ${token}`;
-                    resolve(config);
-                },
-                failureCallback: (error: string) => {
-                    // When the getAuthToken function returns a "resourceRequiresConsent" error, 
-                    // it means Azure AD needs the user's consent before issuing a token to the app. 
-                    // The following code redirects the user to the "Sign in" page where the user can grant the consent. 
-                    // Right now, the app redirects to the consent page for any error.
-                    console.error("Error from getAuthToken: ", error);
-                    window.location.href = "/signin";
-                },
-                resources: []
-            };
-            microsoftTeams.authentication.getAuthToken(authTokenRequest);
-        });
-    }
+    return new Promise<AxiosRequestConfig>((resolve, reject) => {
+      const authTokenRequest = {
+        successCallback: (token: string) => {
+          if (!config) {
+            config = axios.defaults;
+          }
+          config.headers["Authorization"] = `Bearer ${token}`;
+          resolve(config);
+        },
+        failureCallback: (error: string) => {
+          // When the getAuthToken function returns a "resourceRequiresConsent" error, 
+          // it means Azure AD needs the user's consent before issuing a token to the app. 
+          // The following code redirects the user to the "Sign in" page where the user can grant the consent. 
+          // Right now, the app redirects to the consent page for any error.
+          console.error("Error from getAuthToken: ", error);
+          window.location.href = `/signin?locale=${i18n.language}`;
+        },
+        resources: []
+      };
+      microsoftTeams.authentication.getAuthToken(authTokenRequest);
+    });
+  }
 }
 
 const axiosJWTDecoratorInstance = new AxiosJWTDecorator();

@@ -1,12 +1,13 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { withTranslation, WithTranslation } from "react-i18next";
 import { Menu } from '@stardust-ui/react';
 import { getBaseUrl } from '../../configVariables';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { duplicateDraftNotification } from '../../apis/messageListApi';
-import { connect } from 'react-redux';
 import { selectMessage, getMessagesList, getDraftMessagesList } from '../../actions';
 
-export interface OverflowProps {
+export interface OverflowProps extends WithTranslation {
     message?: any;
     styles?: object;
     title?: string;
@@ -56,19 +57,19 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                     items: [
                         {
                             key: 'status',
-                            content: 'View status',
+                            content: this.props.t("ViewStatus"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({
                                     menuOpen: false,
                                 });
-                                let url = getBaseUrl() + "/viewstatus/" + this.props.message.id;
-                                this.onOpenTaskModule(null, url, "View status");
+                                let url = getBaseUrl() + "/viewstatus/" + this.props.message.id + "?locale={locale}";
+                                this.onOpenTaskModule(null, url, this.props.t("ViewStatus"));
                             }
                         },
                         {
                             key: 'duplicate',
-                            content: 'Duplicate',
+                            content: this.props.t("Duplicate"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({
@@ -118,4 +119,5 @@ const mapStateToProps = (state: any) => {
     return { messagesList: state.messagesList };
 }
 
-export default connect(mapStateToProps, { selectMessage, getMessagesList, getDraftMessagesList })(Overflow);
+const overflowWithTranslation = withTranslation()(Overflow);
+export default connect(mapStateToProps, { selectMessage, getMessagesList, getDraftMessagesList })(overflowWithTranslation);
