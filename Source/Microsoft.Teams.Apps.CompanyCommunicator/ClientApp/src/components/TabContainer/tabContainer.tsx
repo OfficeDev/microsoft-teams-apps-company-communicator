@@ -8,6 +8,7 @@ import { getBaseUrl } from '../../configVariables';
 import { Accordion, Button } from '@stardust-ui/react';
 import { getDraftMessagesList } from '../../actions';
 import { connect } from 'react-redux';
+import { TFunction } from "i18next";
 
 interface ITaskInfo {
     title?: string;
@@ -28,8 +29,10 @@ export interface ITabContainerState {
 }
 
 class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
+    readonly localize: TFunction;
     constructor(props: ITaskInfoProps) {
         super(props);
+        this.localize = this.props.t;
         this.state = {
             url: getBaseUrl() + "/newmessage?locale={locale}"
         }
@@ -55,7 +58,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
     public render(): JSX.Element {
         const panels = [
             {
-                title: this.props.t('DraftMessagesSectionTitle'),
+                title: this.localize('DraftMessagesSectionTitle'),
                 content: {
                     key: 'sent',
                     content: (
@@ -66,7 +69,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                 },
             },
             {
-                title: this.props.t('SentMessagesSectionTitle'),
+                title: this.localize('SentMessagesSectionTitle'),
                 content: {
                     key: 'draft',
                     content: (
@@ -80,7 +83,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
         return (
             <div className="tabContainer">
                 <div className="newPostBtn">
-                    <Button content={this.props.t("NewMessage")} onClick={this.onNewMessage} primary />
+                    <Button content={this.localize("NewMessage")} onClick={this.onNewMessage} primary />
                 </div>
                 <div className="messageContainer">
                     <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
@@ -92,7 +95,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
     public onNewMessage = () => {
         let taskInfo: ITaskInfo = {
             url: this.state.url,
-            title: this.props.t("NewMessage"),
+            title: this.localize("NewMessage"),
             height: 530,
             width: 1000,
             fallbackUrl: this.state.url,

@@ -16,6 +16,7 @@ import {
 } from '../AdaptiveCard/adaptiveCard';
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
+import { TFunction } from "i18next";
 
 type dropdownItem = {
     key: string,
@@ -79,12 +80,14 @@ export interface INewMessageProps extends RouteComponentProps, WithTranslation {
 }
 
 class NewMessage extends React.Component<INewMessageProps, formState> {
+    readonly localize: TFunction;
     private card: any;
 
     constructor(props: INewMessageProps) {
         super(props);
         initializeIcons();
-        this.card = getInitAdaptiveCard(this.props.t);
+        this.localize = this.props.t;
+        this.card = getInitAdaptiveCard(this.localize);
         this.setDefaultCard(this.card);
 
         this.state = {
@@ -197,10 +200,10 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     }
 
     public setDefaultCard = (card: any) => {
-        const titleAsString = this.props.t("TitleText");
-        const summaryAsString = this.props.t("Summary");
-        const authorAsString = this.props.t("Author1");
-        const buttonTitleAsString = this.props.t("ButtonTitle");
+        const titleAsString = this.localize("TitleText");
+        const summaryAsString = this.localize("Summary");
+        const authorAsString = this.localize("Author1");
+        const buttonTitleAsString = this.localize("ButtonTitle");
 
         setCardTitle(card, titleAsString);
         let imgUrl = getBaseUrl() + "/image/imagePlaceholder.png";
@@ -329,8 +332,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                 <Input
                                     className="inputField"
                                     value={this.state.title}
-                                    label={this.props.t("TitleText")}
-                                    placeholder={this.props.t("PlaceHolderTitle")}
+                                    label={this.localize("TitleText")}
+                                    placeholder={this.localize("PlaceHolderTitle")}
                                     onChange={this.onTitleChanged}
                                     autoComplete="off"
                                     required
@@ -339,8 +342,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                 <Input
                                     className="inputField"
                                     value={this.state.imageLink}
-                                    label={this.props.t("ImageURL")}
-                                    placeholder={this.props.t("ImageURL")}
+                                    label={this.localize("ImageURL")}
+                                    placeholder={this.localize("ImageURL")}
                                     onChange={this.onImageLinkChanged}
                                     errorLabel={this.state.errorImageUrlMessage}
                                     autoComplete="off"
@@ -349,8 +352,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                 <TextArea
                                     className="inputField textArea"
                                     autoFocus
-                                    placeholder={this.props.t("Summary")}
-                                    label={this.props.t("Summary")}
+                                    placeholder={this.localize("Summary")}
+                                    label={this.localize("Summary")}
                                     value={this.state.summary}
                                     onChange={this.onSummaryChanged}
                                 />
@@ -358,8 +361,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                 <Input
                                     className="inputField"
                                     value={this.state.author}
-                                    label={this.props.t("Author")}
-                                    placeholder={this.props.t("Author")}
+                                    label={this.localize("Author")}
+                                    placeholder={this.localize("Author")}
                                     onChange={this.onAuthorChanged}
                                     autoComplete="off"
                                 />
@@ -367,8 +370,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                 <Input
                                     className="inputField"
                                     value={this.state.btnTitle}
-                                    label={this.props.t("ButtonTitle")}
-                                    placeholder={this.props.t("ButtonTitle")}
+                                    label={this.localize("ButtonTitle")}
+                                    placeholder={this.localize("ButtonTitle")}
                                     onChange={this.onBtnTitleChanged}
                                     autoComplete="off"
                                 />
@@ -376,8 +379,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                 <Input
                                     className="inputField"
                                     value={this.state.btnLink}
-                                    label={this.props.t("ButtonURL")}
-                                    placeholder={this.props.t("ButtonURL")}
+                                    label={this.localize("ButtonURL")}
+                                    placeholder={this.localize("ButtonURL")}
                                     onChange={this.onBtnLinkChanged}
                                     errorLabel={this.state.errorButtonUrlMessage}
                                     autoComplete="off"
@@ -389,7 +392,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
                         <div className="footerContainer">
                             <div className="buttonContainer">
-                                <Button content={this.props.t("Next")} disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
+                                <Button content={this.localize("Next")} disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
                             </div>
                         </div>
                     </div>
@@ -406,49 +409,49 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     value={this.state.selectedRadioBtn}
                                     onSelected={this.onGroupSelected}
                                 >
-                                    <Radiobutton name="grouped" value="teams" label={this.props.t("SendToGeneralChannel")} />
+                                    <Radiobutton name="grouped" value="teams" label={this.localize("SendToGeneralChannel")} />
                                     <Dropdown
                                         hidden={!this.state.teamsOptionSelected}
-                                        placeholder={this.props.t("SendToGeneralChannelPlaceHolder")}
+                                        placeholder={this.localize("SendToGeneralChannelPlaceHolder")}
                                         search
                                         multiple
                                         items={this.getItems()}
                                         value={this.state.selectedTeams}
                                         onSelectedChange={this.onTeamsChange}
-                                        noResultsMessage={this.props.t("NoMatchMessage")}
+                                        noResultsMessage={this.localize("NoMatchMessage")}
                                     />
-                                    <Radiobutton name="grouped" value="rosters" label={this.props.t("SendToRosters")} />
+                                    <Radiobutton name="grouped" value="rosters" label={this.localize("SendToRosters")} />
                                     <Dropdown
                                         hidden={!this.state.rostersOptionSelected}
-                                        placeholder={this.props.t("SendToRostersPlaceHolder")}
+                                        placeholder={this.localize("SendToRostersPlaceHolder")}
                                         search
                                         multiple
                                         items={this.getItems()}
                                         value={this.state.selectedRosters}
                                         onSelectedChange={this.onRostersChange}
                                         unstable_pinned={this.state.unstablePinned}
-                                        noResultsMessage={this.props.t("NoMatchMessage")}
+                                        noResultsMessage={this.localize("NoMatchMessage")}
                                     />
-                                    <Radiobutton name="grouped" value="allUsers" label={this.props.t("SendToAllUsers")} />
+                                    <Radiobutton name="grouped" value="allUsers" label={this.localize("SendToAllUsers")} />
                                     <div className={this.state.selectedRadioBtn === "allUsers" ? "" : "hide"}>
                                         <div className="noteText">
-                                            <Text error content={this.props.t("SendToAllUsersNote")} />
+                                            <Text error content={this.localize("SendToAllUsersNote")} />
                                         </div>
                                     </div>
-                                    <Radiobutton name="grouped" value="groups" label="Send in chat to members in a M365 groups, Distribution groups or Security groups" />
+                                    <Radiobutton name="grouped" value="groups" label={this.localize("SendToGroups")} />
                                     <div className={this.state.groupsOptionSelected && !this.state.groupAccess ? "" : "hide"}>
                                         <div className="noteText">
-                                            <Text error content="Permissions needed. Ask your IT admin to enable this option for you." />
+                                            <Text error content={this.localize("SendToGroupsPermissionNote")} />
                                         </div>
                                     </div>
                                     <Dropdown
                                         className="hideToggle"
                                         hidden={!this.state.groupsOptionSelected || !this.state.groupAccess}
-                                        placeholder="Type the name or email address of the group(s)"
+                                        placeholder={this.localize("SendToGroupsPlaceHolder")}
                                         search={this.onGroupSearch}
                                         multiple
                                         loading={this.state.loading}
-                                        loadingMessage="Loading..."
+                                        loadingMessage={this.localize("LoadingText")}
                                         items={this.getGroupItems()}
                                         value={this.state.selectedGroups}
                                         onSearchQueryChange={this.onGroupSearchQueryChange}
@@ -458,7 +461,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     />
                                     <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
                                         <div className="noteText">
-                                            <Text error content="Note: Group members will get your message, as long as they have this app in Teams." />
+                                            <Text error content={this.localize("SendToGroupsNote")} />
                                         </div>
                                     </div>
                                 </RadiobuttonGroup>
@@ -469,8 +472,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
                         <div className="footerContainer">
                             <div className="buttonContainer">
-                                <Button content={this.props.t("Back")} onClick={this.onBack} secondary />
-                                <Button content={this.props.t("SaveAsDraft")} disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
+                                <Button content={this.localize("Back")} onClick={this.onBack} secondary />
+                                <Button content={this.localize("SaveAsDraft")} disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
                             </div>
                         </div>
                     </div>

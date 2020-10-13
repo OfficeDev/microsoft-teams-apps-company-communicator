@@ -25,7 +25,6 @@ export const updateLocale = () => {
   const locale = params.get("locale") || 'en-US';
   i18n.changeLanguage(locale);
   moment.locale(locale);
-  console.log('updateLocale', locale);
 };
 
 export const formatDate = (date: string) => {

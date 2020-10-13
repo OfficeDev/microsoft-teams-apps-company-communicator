@@ -15,6 +15,7 @@ import {
 } from '../AdaptiveCard/adaptiveCard';
 import { ImageUtil } from '../../utility/imageutility';
 import { formatDate } from '../../i18n';
+import { TFunction } from "i18next";
 
 export interface IListItem {
     header: string,
@@ -57,6 +58,7 @@ export interface IStatusState {
 interface StatusTaskModuleProps extends RouteComponentProps, WithTranslation { }
 
 class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusState> {
+    readonly localize: TFunction;
     private initMessage = {
         id: "",
         title: ""
@@ -67,6 +69,8 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
     constructor(props: StatusTaskModuleProps) {
         super(props);
         initializeIcons();
+
+        this.localize = this.props.t;
 
         this.card = getInitAdaptiveCard(this.props.t);
 
@@ -153,33 +157,30 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                         <div className="formContainer">
                             <div className="formContentContainer" >
                                 <div className="contentField">
-                                    <h3>{this.props.t("TitleText")}</h3>
+                                    <h3>{this.localize("TitleText")}</h3>
                                     <span>{this.state.message.title}</span>
                                 </div>
                                 <div className="contentField">
-                                    <h3>{this.props.t("SendingStarted")}</h3>
+                                    <h3>{this.localize("SendingStarted")}</h3>
                                     <span>{this.state.message.sendingStartedDate}</span>
                                 </div>
                                 <div className="contentField">
-                                    <h3>{this.props.t("Completed")}</h3>
+                                    <h3>{this.localize("Completed")}</h3>
                                     <span>{this.state.message.sentDate}</span>
                                 </div>
                                 <div className="contentField">
-                                    <h3>{this.props.t("Duration")}</h3>
+                                    <h3>{this.localize("Duration")}</h3>
                                     <span>{this.state.message.sendingDuration}</span>
                                 </div>
                                 <div className="contentField">
-                                    <h3>{this.props.t("Results")}</h3>
-                                    <label>{this.props.t("Success")}</label>
-                                    <span>{this.state.message.succeeded}</span>
+                                    <h3>{this.localize("Results")}</h3>
+                                    <label>{this.localize("Success", { "SuccessCount": this.state.message.succeeded })}</label>
                                     <br />
-                                    <label>{this.props.t("Failure")}</label>
-                                    <span>{this.state.message.failed}</span>
+                                    <label>{this.localize("Failure", { "FailureCount": this.state.message.failed })}</label>
                                     <br />
                                     {this.state.message.unknown &&
                                         <>
-                                            <label>Unknown : </label>
-                                            <span>{this.state.message.unknown}</span>
+                                        <label>{this.localize("Unknown", { "UnknownCount": this.state.message.unknown })}</label>
                                         </>
                                     }
                                 </div>
@@ -201,8 +202,8 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                             <div className={this.state.message.canDownload ? "" : "disabled"}>
                                 <div className="buttonContainer">
                                     <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="exporting" labelPosition="end" />
-                                    <TooltipHost content={!this.state.message.sendingCompleted ? "" : (this.state.message.canDownload ? "" : "Export in progress")} calloutProps={{ gapSpace: 0 }}>
-                                        <Button icon={downloadIcon} disabled={!this.state.message.canDownload || !this.state.message.sendingCompleted} content="Export detailed results" id="exportBtn" onClick={this.onExport} primary />
+                                    <TooltipHost content={!this.state.message.sendingCompleted ? "" : (this.state.message.canDownload ? "" : this.localize("ExportButtonProgressText"))} calloutProps={{ gapSpace: 0 }}>
+                                        <Button icon={downloadIcon} disabled={!this.state.message.canDownload || !this.state.message.sendingCompleted} content={this.localize("ExportButtonText")} id="exportBtn" onClick={this.onExport} primary />
                                     </TooltipHost>
                                 </div>
                             </div>
@@ -218,13 +219,13 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                 <br />
                                 <br />
                                 <div><span><Icon className="iconStyle" name="stardust-checkmark" xSpacing="before" size="largest" outline /></span>
-                                    <h1>Your export is queued</h1></div>
-                                <span>You'll be notified in chat when your file is ready to download.</span>
+                                    <h1>{this.localize("ExportQueueTitle")}</h1></div>
+                                <span>{this.localize("ExportQueueSuccessMessage1")}</span>
                                 <br />
                                 <br />
-                                <span>Note: You will first get a chat message asking you to give this app permission to upload to your OneDrive.</span>
+                                <span>{this.localize("ExportQueueSuccessMessage2")}</span>
                                 <br />
-                                <span>Select "Allow" to proceed.</span>
+                                <span>{this.localize("ExportQueueSuccessMessage3")}</span>
                             </div>
                         </div>
                         <div className="footerContainer">
@@ -244,8 +245,8 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                 <br />
                                 <br />
                                 <div><span><Icon className="iconStyle" name="stardust-close" xSpacing="before" size="largest" outline /></span>
-                                    <h1 className="light">Something went wrong.</h1></div>
-                                <span>Try exporting the results again. If the problem persists, contact your IT admin for help.</span>
+                                    <h1 className="light">{this.localize("ExportErrorTitle")}</h1></div>
+                                <span>{this.localize("ExportErrorMessage")}</span>
                             </div>
                         </div>
                         <div className="footerContainer">
@@ -290,26 +291,26 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
         if (this.state.message.teamNames && this.state.message.teamNames.length > 0) {
             return (
                 <div>
-                        <h3>{this.props.t("SendToGeneralChannel1")}</h3>
+                    <h3>{this.localize("SentToGeneralChannel")}</h3>
                     <List items={this.getItemList(this.state.message.teamNames)} />
                 </div>);
         } else if (this.state.message.rosterNames && this.state.message.rosterNames.length > 0) {
             return (
                 <div>
-                        <h3>{this.props.t("SendToRosters1")}</h3>
+                    <h3>{this.localize("SentToRosters")}</h3>
                     <List items={this.getItemList(this.state.message.rosterNames)} />
                 </div>);
         } else if (this.state.message.groupNames && this.state.message.groupNames.length > 0) {
             return (
                 <div>
-                    <h3>Sent in chat to everyone in below</h3>
-                    <span>M365 groups, Distribution groups or Security Groups</span>
+                    <h3>{this.localize("SentToGroups1")}</h3>
+                    <span>{this.localize("SentToGroups2")}</span>
                     <List items={this.getItemList(this.state.message.groupNames)} />
                 </div>);
         } else if (this.state.message.allUsers) {
             return (
                 <div>
-                    <h3>{this.props.t("SendToAllUsers")}</h3>
+                    <h3>{this.localize("SendToAllUsers")}</h3>
                 </div>);
         } else {
             return (<div></div>);
@@ -319,7 +320,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
         if (this.state.message.errorMessage) {
             return (
                 <div>
-                    <h3>{this.props.t("Errors")}</h3>
+                    <h3>{this.localize("Errors")}</h3>
                     <span>{this.state.message.errorMessage}</span>
                 </div>
             );
@@ -332,7 +333,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
         if (this.state.message.warningMessage) {
             return (
                 <div>
-                    <h3>{this.props.t("Warnings")}</h3>
+                    <h3>{this.localize("Warnings")}</h3>
                     <span>{this.state.message.warningMessage}</span>
                 </div>
             );

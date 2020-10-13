@@ -9,6 +9,7 @@ import './draftMessages.scss';
 import { selectMessage, getDraftMessagesList, getMessagesList } from '../../actions';
 import { getBaseUrl } from '../../configVariables';
 import Overflow from '../OverFlow/draftMessageOverflow';
+import { TFunction } from "i18next";
 
 export interface ITaskInfo {
   title?: string;
@@ -47,12 +48,14 @@ export interface IMessageState {
 }
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
+  readonly localize: TFunction;
   private interval: any;
   private isOpenTaskModuleAllowed: boolean;
 
   constructor(props: IMessageProps) {
     super(props);
     initializeIcons();
+    this.localize = this.props.t;
     this.isOpenTaskModuleAllowed = true;
     this.state = {
       message: props.messages,
@@ -71,7 +74,6 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         teamsChannelId: context.channelId,
       });
     });
-
     this.props.getDraftMessagesList();
     this.interval = setInterval(() => {
       this.props.getDraftMessagesList();
@@ -107,8 +109,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         ),
         styles: { margin: '0.2rem 0.2rem 0 0' },
         onClick: (): void => {
-          let url = getBaseUrl() + "/newmessage/" + message.id + "?locale={locale}";
-          this.onOpenTaskModule(null, url, this.props.t("EditMessage"));
+            let url = getBaseUrl() + "/newmessage/" + message.id + "?locale={locale}";
+            this.onOpenTaskModule(null, url, this.localize("EditMessage"));
         },
       };
       return out;
@@ -123,7 +125,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         <Loader />
       );
     } else if (this.state.message.length === 0) {
-      return (<div className="results">{this.props.t("EmptyDraftMessages")}</div>);
+        return (<div className="results">{this.localize("EmptyDraftMessages")}</div>);
     }
     else {
       return (
@@ -141,7 +143,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
             <Text
               truncated
               weight="bold"
-              content={this.props.t("TitleText")}
+              content={this.localize("TitleText")}
             >
             </Text>
           </Flex.Item>

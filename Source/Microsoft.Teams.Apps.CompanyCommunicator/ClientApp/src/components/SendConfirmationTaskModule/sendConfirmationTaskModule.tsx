@@ -12,6 +12,7 @@ import {
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
 import { ImageUtil } from '../../utility/imageutility';
+import { TFunction } from "i18next";
 
 export interface IListItem {
     header: string,
@@ -49,6 +50,7 @@ export interface IStatusState {
 }
 
 class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskModuleProps, IStatusState> {
+    readonly localize: TFunction;
     private initMessage = {
         id: "",
         title: ""
@@ -58,8 +60,8 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
 
     constructor(props: SendConfirmationTaskModuleProps) {
         super(props);
-
-        this.card = getInitAdaptiveCard(this.props.t);
+        this.localize = this.props.t;
+        this.card = getInitAdaptiveCard(this.localize);
 
         this.state = {
             message: this.initMessage,
@@ -138,8 +140,8 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                     <div className="formContainer">
                         <div className="formContentContainer" >
                             <div className="contentField">
-                                <h3>{this.props.t("ConfirmToSend")}</h3>
-                                <span>{this.props.t("SendToRecipientsLabel")}</span>
+                                <h3>{this.localize("ConfirmToSend")}</h3>
+                                <span>{this.localize("SendToRecipientsLabel")}</span>
                             </div>
 
                             <div className="results">
@@ -153,7 +155,7 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                     <div className="footerContainer">
                         <div className="buttonContainer">
                             <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="Preparing message" labelPosition="end" />
-                            <Button content={this.props.t("Send")} id="sendBtn" onClick={this.onSendMessage} primary />
+                            <Button content={this.localize("Send")} id="sendBtn" onClick={this.onSendMessage} primary />
                         </div>
                     </div>
                 </div>
@@ -186,26 +188,26 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
     private renderAudienceSelection = () => {
         if (this.state.teamNames && this.state.teamNames.length > 0) {
             return (
-                <div key="teamNames"> <span className="label">{this.props.t("TeamsLabel")}</span>
+                <div key="teamNames"> <span className="label">{this.localize("TeamsLabel")}</span>
                     <List items={this.getItemList(this.state.teamNames)} />
                 </div>
             );
         } else if (this.state.rosterNames && this.state.rosterNames.length > 0) {
             return (
-                <div key="rosterNames"> <span className="label">{this.props.t("TeamsMembersLabel")}</span>
+                <div key="rosterNames"> <span className="label">{this.localize("TeamsMembersLabel")}</span>
                     <List items={this.getItemList(this.state.rosterNames)} />
                 </div>);
         } else if (this.state.groupNames && this.state.groupNames.length > 0) {
             return (
-                <div>
+                <div key="groupNames" > <span className="label">{this.localize("GroupsMembersLabel")}</span>
                     <List items={this.getItemList(this.state.groupNames)} />
                 </div>);
         } else if (this.state.allUsers) {
             return (
                 <div key="allUsers">
-                    <span className="label">{this.props.t("AllUsersLabel")}</span>
+                    <span className="label">{this.localize("AllUsersLabel")}</span>
                     <div className="noteText">
-                        <Text error content={this.props.t("SendToAllUsersNote")} />
+                        <Text error content={this.localize("SendToAllUsersNote")} />
                     </div>
                 </div>);
         } else {

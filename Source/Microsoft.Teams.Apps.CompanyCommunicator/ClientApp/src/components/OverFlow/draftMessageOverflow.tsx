@@ -7,6 +7,7 @@ import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../../configVariables';
 import { selectMessage, getMessagesList, getDraftMessagesList } from '../../actions';
 import { deleteDraftNotification, duplicateDraftNotification, sendPreview } from '../../apis/messageListApi';
+import { TFunction } from "i18next";
 
 export interface OverflowProps extends WithTranslation {
     message: any;
@@ -34,8 +35,10 @@ export interface ITaskInfo {
 }
 
 class Overflow extends React.Component<OverflowProps, OverflowState> {
+    readonly localize: TFunction;
     constructor(props: OverflowProps) {
         super(props);
+        this.localize = this.props.t;
         this.state = {
             teamsChannelId: '',
             teamsTeamId: '',
@@ -68,19 +71,19 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                     items: [
                         {
                             key: 'send',
-                            content: this.props.t("Send"),
+                            content: this.localize("Send"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({
                                     menuOpen: false,
                                 });
                                 let url = getBaseUrl() + "/sendconfirmation/" + this.props.message.id + "?locale={locale}";
-                                this.onOpenTaskModule(null, url, this.props.t("SendConfirmation"));
+                                this.onOpenTaskModule(null, url, this.localize("SendConfirmation"));
                             }
                         },
                         {
                             key: 'preview',
-                            content: this.props.t("PreviewInThisChannel"),
+                            content: this.localize("PreviewInThisChannel"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({
@@ -100,19 +103,19 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                         },
                         {
                             key: 'edit',
-                            content: this.props.t("Edit"),
+                            content: this.localize("Edit"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({
                                     menuOpen: false,
                                 });
                                 let url = getBaseUrl() + "/newmessage/" + this.props.message.id + "?locale={locale}";
-                                this.onOpenTaskModule(null, url, this.props.t("EditMessage"));
+                                this.onOpenTaskModule(null, url, this.localize("EditMessage"));
                             }
                         },
                         {
                             key: 'duplicate',
-                            content: this.props.t("Duplicate"),
+                            content: this.localize("Duplicate"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({
@@ -129,7 +132,7 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                         },
                         {
                             key: 'delete',
-                            content: this.props.t("Delete"),
+                            content: this.localize("Delete"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({

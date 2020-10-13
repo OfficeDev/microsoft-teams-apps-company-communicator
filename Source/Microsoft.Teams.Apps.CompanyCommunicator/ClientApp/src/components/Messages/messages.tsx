@@ -10,6 +10,7 @@ import { selectMessage, getMessagesList, getDraftMessagesList } from '../../acti
 import { getBaseUrl } from '../../configVariables';
 import Overflow from '../OverFlow/sentMessageOverflow';
 import './messages.scss';
+import { TFunction } from "i18next";
 
 export interface ITaskInfo {
   title?: string;
@@ -43,11 +44,13 @@ export interface IMessageState {
 }
 
 class Messages extends React.Component<IMessageProps, IMessageState> {
+  readonly localize: TFunction;
   private interval: any;
   private isOpenTaskModuleAllowed: boolean;
   constructor(props: IMessageProps) {
     super(props);
     initializeIcons();
+    this.localize = this.props.t;
     this.isOpenTaskModuleAllowed = true;
     this.state = {
       message: this.props.messagesList,
@@ -88,7 +91,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         content: this.messageContent(message),
         onClick: (): void => {
           let url = getBaseUrl() + "/viewstatus/" + message.id;
-          this.onOpenTaskModule(null, url, this.props.t("ViewStatus"));
+            this.onOpenTaskModule(null, url, this.localize("ViewStatus"));
         },
         styles: { margin: '0.2rem 0.2rem 0 0' },
       };
@@ -104,7 +107,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         <Loader />
       );
     } else if (this.state.message.length === 0) {
-      return (<div className="results">{this.props.t("EmptySentMessages")}</div>);
+        return (<div className="results">{this.localize("EmptySentMessages")}</div>);
     }
     else {
       return (
@@ -122,7 +125,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             <Text
               truncated
               weight="bold"
-              content={this.props.t("TitleText")}
+              content={this.localize("TitleText")}
             >
             </Text>
           </Flex.Item>
@@ -132,7 +135,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
           <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
             <Text
               truncated
-              content={this.props.t("Recipients")}
+              content={this.localize("Recipients")}
               weight="bold"
             >
             </Text>
@@ -140,7 +143,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
           <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
             <Text
               truncated
-              content={this.props.t("Sent")}
+              content={this.localize("Sent")}
               weight="bold"
             >
             </Text>
@@ -178,7 +181,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
       return (
         <Text
           truncated
-          content={this.props.t("PreparingToSend")}
+          content={this.localize("PreparingToSend")}
         >
         </Text>
       );
