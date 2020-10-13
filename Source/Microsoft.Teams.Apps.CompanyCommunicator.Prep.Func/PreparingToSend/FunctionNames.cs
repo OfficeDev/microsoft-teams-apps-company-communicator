@@ -80,6 +80,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public const string DataAggregationTriggerActivity = nameof(DataAggregationTriggerActivity);
 
         /// <summary>
+        /// Update notification activity function.
+        /// </summary>
+        public const string UpdateNotificationStatusActivity = nameof(UpdateNotificationStatusActivity);
+
+        /// <summary>
         /// Send batch messages to send queue activity function.
         /// </summary>
         public const string SendBatchMessagesActivity = nameof(SendBatchMessagesActivity);
@@ -88,10 +93,5 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// Handle failure activity function.
         /// </summary>
         public const string HandleFailureActivity = nameof(HandleFailureActivity);
-
-        /// <summary>
-        /// Handle warning activity function.
-        /// </summary>
-        public const string HandleWarningActivity = nameof(HandleWarningActivity);
     }
 }

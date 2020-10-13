@@ -6,6 +6,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
 {
     using System;
     using Microsoft.Azure.Cosmos.Table;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
     /// <summary>
     /// A subset of the full NotificationDataEntity setting fields as nullable in order to
@@ -13,6 +14,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
     /// overwrite unset non-nullable values from the full NotificationDataEntity and remove
     /// unexpected data from the existing database row e.g. not setting TotalMessageCount for this
     /// entity will not result in the value being set to 0 in the database by mistake.
+    ///
+    /// TODO(guptaa): Remove this file.
     /// </summary>
     public class UpdateNotificationDataEntity : TableEntity
     {
@@ -42,18 +45,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
         public int? Unknown { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the notification is in the "preparing to send" state.
-        /// </summary>
-        public bool? IsPreparingToSend { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the sending process is completed or not.
-        /// </summary>
-        public bool IsCompleted { get; set; }
-
-        /// <summary>
         /// Gets or sets the Sent DateTime value.
         /// </summary>
         public DateTime? SentDate { get; set; }
+
+        /// <summary>
+        /// Gets or sets Notification status.
+        /// </summary>
+        public string Status { get; set; }
+
+        /// <summary>
+        /// Checks if the notification is completed.
+        /// </summary>
+        /// <returns>If the notification is completed.</returns>
+        public bool IsCompleted()
+        {
+            return NotificationStatus.Failed.ToString().Equals(this.Status) ||
+                NotificationStatus.Sent.ToString().Equals(this.Status);
+        }
     }
 }

@@ -175,6 +175,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
 
         /// <summary>
         /// Gets or sets a value indicating whether the sending process is completed.
+        /// [DEPRECATED - kept for backward compatibility].
         /// </summary>
         public bool IsCompleted { get; set; }
 
@@ -205,7 +206,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
 
         /// <summary>
         /// Gets or sets a value indicating whether the notification is in the "preparing to send" state.
+        /// [DEPRECATED - kept for backward compatibility].
         /// </summary>
         public bool IsPreparingToSend { get; set; }
+
+        /// <summary>
+        /// Gets or sets notification status.
+        /// </summary>
+        public string Status { get; set; }
     }
 }

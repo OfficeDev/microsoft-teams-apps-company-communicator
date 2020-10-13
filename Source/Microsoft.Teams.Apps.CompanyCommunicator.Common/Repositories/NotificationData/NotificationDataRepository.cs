@@ -103,9 +103,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Failed = 0,
                     Throttled = 0,
                     TotalMessageCount = draftNotificationEntity.TotalMessageCount,
-                    IsCompleted = false,
                     SendingStartedDate = DateTime.UtcNow,
-                    IsPreparingToSend = true,
+                    Status = NotificationStatus.Queued.ToString(),
                 };
                 await this.CreateOrUpdateAsync(sentNotificationEntity);
 
@@ -166,25 +165,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <summary>
-        /// Save exception error message in a notification data entity.
+        /// Updates notification status.
         /// </summary>
-        /// <param name="notificationDataEntityId">Notification data entity id.</param>
-        /// <param name="errorMessage">Error message.</param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public async Task SaveExceptionInNotificationDataEntityAsync(
-            string notificationDataEntityId,
-            string errorMessage)
+        /// <param name="notificationId">Notificaion Id.</param>
+        /// <param name="status">Status.</param>
+        /// <returns><see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task UpdateNotificationStatusAsync(string notificationId, NotificationStatus status)
         {
             var notificationDataEntity = await this.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,
-                notificationDataEntityId);
+                notificationId);
+
             if (notificationDataEntity != null)
             {
-                notificationDataEntity.ErrorMessage =
-                    this.AppendNewLine(notificationDataEntity.ErrorMessage, errorMessage);
-
-                notificationDataEntity.IsCompleted = true;
-
+                notificationDataEntity.Status = status.ToString();
                 await this.CreateOrUpdateAsync(notificationDataEntity);
             }
         }

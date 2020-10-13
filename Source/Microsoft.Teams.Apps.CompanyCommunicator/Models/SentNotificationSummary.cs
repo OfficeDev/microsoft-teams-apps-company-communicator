@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
     using System;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
     /// <summary>
     /// Sent notification summary model class.
@@ -65,5 +66,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets a value indicating whether the notification is in the "preparing to send" state.
         /// </summary>
         public bool IsPreparingToSend { get; set; }
+
+        /// <summary>
+        /// Gets or sets notification status. <see cref="NotificationStatus"/> for possible values.
+        /// </summary>
+        public string Status { get; set; }
     }
 }

@@ -47,11 +47,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 FunctionSettings.DefaultRetryOptions,
                 notification);
 
+            var count = recipients.Count();
             if (!context.IsReplaying)
             {
-                log.LogInformation($"About to create conversation with {recipients.Count()} recipients.");
+                log.LogInformation($"About to create conversation with {count} recipients.");
             }
 
+            if (count > 0)
+            {
+                // Update notification status.
+                await context.CallActivityWithRetryAsync(
+                    FunctionNames.UpdateNotificationStatusActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    (notification.Id, NotificationStatus.InstallingApp));
+            }
+
+            // Create conversation.
             var tasks = new List<Task>();
             foreach (var recipient in recipients)
             {

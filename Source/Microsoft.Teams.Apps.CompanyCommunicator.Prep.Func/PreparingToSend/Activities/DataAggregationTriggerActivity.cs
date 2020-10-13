@@ -17,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// Data aggregation trigger activity.
     ///
     /// Does following:
-    /// 1. Updates notification to indiciate completion of "prepare to send" phase and total recipient count.
+    /// 1. Updates notification (total recipient count).
     /// 2. Sends message to data queue.
     /// </summary>
     public class DataAggregationTriggerActivity
@@ -44,7 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
         /// <summary>
         /// Does following:
-        /// 1. Updates notification to indicate completion of "prepare to send" phase and total recipient count.
+        /// 1. Updates notification (total recipient count).
         /// 2. Sends message to data queue.
         /// </summary>
         /// <param name="input">Input.</param>
@@ -63,7 +63,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         }
 
         /// <summary>
-        /// Update notification data to indicate "prepare to send" completion and total recipient count.
+        /// Update notification data (total recipient count).
         /// </summary>
         /// <param name="notificationId">Notification id.</param>
         /// <param name="recipientCount">Recipient count.</param>
@@ -81,7 +81,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 return;
             }
 
-            notificationDataEntity.IsPreparingToSend = false;
             notificationDataEntity.TotalMessageCount = recipientCount;
 
             await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);

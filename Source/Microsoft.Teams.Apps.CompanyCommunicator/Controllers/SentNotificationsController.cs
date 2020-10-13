@@ -16,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Extensions.Options;
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -163,9 +164,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     Failed = notificationEntity.Failed,
                     Unknown = this.GetUnknownCount(notificationEntity),
                     TotalMessageCount = notificationEntity.TotalMessageCount,
-                    IsCompleted = notificationEntity.IsCompleted,
+                    IsCompleted = notificationEntity.IsCompleted(),
                     SendingStartedDate = notificationEntity.SendingStartedDate,
-                    IsPreparingToSend = notificationEntity.IsPreparingToSend,
+                    IsPreparingToSend = !notificationEntity.IsCompleted(),
+                    Status = notificationEntity.Status,
                 };
 
                 result.Add(summary);
@@ -220,7 +222,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ErrorMessage = notificationEntity.ErrorMessage,
                 WarningMessage = notificationEntity.WarningMessage,
                 CanDownload = userNotificationDownload == null,
-                SendingCompleted = notificationEntity.IsCompleted,
+                SendingCompleted = notificationEntity.IsCompleted(),
             };
 
             return this.Ok(result);

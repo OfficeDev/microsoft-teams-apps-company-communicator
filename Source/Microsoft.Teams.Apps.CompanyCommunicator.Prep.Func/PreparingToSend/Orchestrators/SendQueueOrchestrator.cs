@@ -41,6 +41,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         {
             var notification = context.GetInput<NotificationDataEntity>();
 
+            // Update notification status.
+            await context.CallActivityWithRetryAsync(
+                FunctionNames.UpdateNotificationStatusActivity,
+                FunctionSettings.DefaultRetryOptions,
+                (notification.Id, NotificationStatus.Sending));
+
             if (!context.IsReplaying)
             {
                 log.LogInformation("About to get all recipients.");
