@@ -23,5 +23,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// Max page size.
         /// </summary>
         public const int MaxPageSize = 999;
+
+        /// <summary>
+        /// Max retry for Graph API calls.
+        /// Note: Max value allowed is 10.
+        /// </summary>
+        public const int MaxRetry = 5;
     }
 }

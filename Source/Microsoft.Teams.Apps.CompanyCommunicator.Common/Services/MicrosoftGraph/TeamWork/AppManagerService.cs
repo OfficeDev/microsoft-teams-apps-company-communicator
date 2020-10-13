@@ -60,6 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 .Teamwork
                 .InstalledApps
                 .Request()
+                .WithMaxRetry(GraphConstants.MaxRetry)
                 .AddAsync(userScopeTeamsAppInstallation);
         }
 
@@ -87,6 +88,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             await this.serviceClient.Teams[teamId]
                 .InstalledApps
                 .Request()
+                .WithMaxRetry(GraphConstants.MaxRetry)
                 .AddAsync(userScopeTeamsAppInstallation);
         }
 
@@ -109,6 +111,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 .Request()
                 .Expand("teamsApp")
                 .Filter($"teamsApp/id eq '{appId}'")
+                .WithMaxRetry(GraphConstants.MaxRetry)
                 .GetAsync();
 
             return pagedApps.CurrentPage.Any();
@@ -132,6 +135,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 .Request()
                 .Expand("teamsApp")
                 .Filter($"teamsApp/id eq '{appId}'")
+                .WithMaxRetry(GraphConstants.MaxRetry)
                 .GetAsync();
 
             return pagedApps.CurrentPage.Any();
@@ -156,6 +160,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 .Request()
                 .Expand("teamsApp")
                 .Filter($"teamsApp/id eq '{appId}'")
+                .WithMaxRetry(GraphConstants.MaxRetry)
                 .GetAsync();
 
             return collection?.FirstOrDefault().Id;
@@ -179,6 +184,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 .Request()
                 .Expand("teamsApp")
                 .Filter($"teamsApp/id eq '{appId}'")
+                .WithMaxRetry(GraphConstants.MaxRetry)
                 .GetAsync();
 
             return collection?.FirstOrDefault().Id;

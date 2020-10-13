@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
 
     using System;
     using System.Threading.Tasks;
+    using Microsoft.Graph;
 
     using Beta = BetaLib::Microsoft.Graph;
 
@@ -51,6 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 .InstalledApps[installationId]
                 .Chat
                 .Request()
+                .WithMaxRetry(GraphConstants.MaxRetry)
                 .GetAsync();
 
             return chat?.Id;

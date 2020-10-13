@@ -165,9 +165,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             if (string.IsNullOrEmpty(appId))
             {
                 log.LogError("User app id not available.");
-                return null;
+                return string.Empty;
             }
 
+            // Install app.
             try
             {
                 await this.appManagerService.InstallAppForUserAsync(appId, recipient.RecipientId);
@@ -177,23 +178,30 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 switch (exception.StatusCode)
                 {
                     case HttpStatusCode.Conflict:
+                        // Note: application is already installed, we should fetch conversation id for this user.
                         log.LogWarning("Application is already installed for the user.");
                         break;
 
-                    case HttpStatusCode.TooManyRequests:
-                        log.LogWarning("Application install request throttled.");
-                        throw exception;
-
                     default:
-                        var errorMessage = $"Failed to install application for user: {recipient?.UserId}. Exception: {exception.Message}";
+                        var errorMessage = $"Failed to install application for user: {recipient?.UserId}. Status Code: {exception.StatusCode} Exception: {exception.Message}";
                         log.LogError(exception, errorMessage);
                         await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
-                        return null;
+                        return string.Empty;
                 }
             }
 
-            var conversationId = await this.chatsService.GetChatThreadIdAsync(recipient.RecipientId, appId);
-            return conversationId;
+            // Get conversation id.
+            try
+            {
+                return await this.chatsService.GetChatThreadIdAsync(recipient.RecipientId, appId);
+            }
+            catch (ServiceException exception)
+            {
+                var errorMessage = $"Failed to get conversation id for user: {recipient?.UserId}. Status Code: {exception.StatusCode} Exception: {exception.Message}";
+                log.LogError(exception, errorMessage);
+                await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
+                return string.Empty;
+            }
         }
 
         /// <summary>

@@ -27,10 +27,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
         }
 
-        private int MaxResultCount { get; set; } = 999;
-
-        private int MaxRetry { get; set; } = 10;
-
         /// <summary>
         /// get group members page by id.
         /// </summary>
@@ -42,8 +38,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                                     .Groups[groupId]
                                     .TransitiveMembers
                                     .Request()
-                                    .Top(this.MaxResultCount)
-                                    .WithMaxRetry(this.MaxRetry)
+                                    .Top(GraphConstants.MaxPageSize)
+                                    .WithMaxRetry(GraphConstants.MaxRetry)
                                     .GetAsync();
         }
 
@@ -70,8 +66,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                                     .Groups[groupId]
                                     .TransitiveMembers
                                     .Request()
-                                    .Top(this.MaxResultCount)
-                                    .WithMaxRetry(this.MaxRetry)
+                                    .Top(GraphConstants.MaxPageSize)
+                                    .WithMaxRetry(GraphConstants.MaxRetry)
                                     .GetAsync();
 
             var users = response.OfType<User>().ToList();

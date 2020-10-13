@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
@@ -23,6 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private readonly IGroupMembersService groupMembersService;
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly UserDataRepository userDataRepository;
+        private readonly NotificationDataRepository notificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SyncGroupMembersActivity"/> class.
@@ -30,14 +32,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         /// <param name="groupMembersService">Group members service.</param>
         /// <param name="userDataRepository">User Data repository.</param>
+        /// <param name="notificationDataRepository">Notification data entity repository.</param>
         public SyncGroupMembersActivity(
             SentNotificationDataRepository sentNotificationDataRepository,
             IGroupMembersService groupMembersService,
-            UserDataRepository userDataRepository)
+            UserDataRepository userDataRepository,
+            NotificationDataRepository notificationDataRepository)
         {
             this.groupMembersService = groupMembersService ?? throw new ArgumentNullException(nameof(groupMembersService));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
         }
 
         /// <summary>
@@ -53,7 +58,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             var groupId = input.groupId;
 
             // Get all members.
-            var users = await this.groupMembersService.GetGroupMembersAsync(groupId);
+            IEnumerable<User> users;
+            try
+            {
+                users = await this.groupMembersService.GetGroupMembersAsync(groupId);
+            }
+            catch (ServiceException exception)
+            {
+                var errorMessage = $"Failed to sync group members. Status Code: {exception.StatusCode} Exception: {exception.Message}";
+                await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
+                return;
+            }
 
             // Convert to Recipients
             var recipients = await this.GetRecipientsAsync(notificationId, users);

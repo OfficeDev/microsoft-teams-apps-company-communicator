@@ -26,6 +26,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private readonly UserDataRepository userDataRepository;
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly IUsersService usersService;
+        private readonly NotificationDataRepository notificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SyncAllUsersActivity"/> class.
@@ -33,14 +34,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="userDataRepository">User Data repository.</param>
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         /// <param name="usersService">Users service.</param>
+        /// <param name="notificationDataRepository">Notification data entity repository.</param>
         public SyncAllUsersActivity(
             UserDataRepository userDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository,
-            IUsersService usersService)
+            IUsersService usersService,
+            NotificationDataRepository notificationDataRepository)
         {
             this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
         }
 
         /// <summary>
@@ -52,7 +56,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public async Task RunAsync([ActivityTrigger] NotificationDataEntity notification)
         {
             // Sync all users.
-            await this.SyncAllUsers();
+            await this.SyncAllUsers(notification.Id);
 
             // Get users.
             var users = await this.userDataRepository.GetAllAsync();
@@ -66,11 +70,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <summary>
         /// Syncs delta changes only.
         /// </summary>
-        private async Task SyncAllUsers()
+        private async Task SyncAllUsers(string notificationId)
         {
             // Sync users
             var deltaLink = await this.userDataRepository.GetDeltaLinkAsync();
-            (IEnumerable<User>, string) tuple = await this.usersService.GetAllUsersAsync(deltaLink);
+
+            (IEnumerable<User>, string) tuple = (new List<User>(), string.Empty);
+            try
+            {
+                tuple = await this.usersService.GetAllUsersAsync(deltaLink);
+            }
+            catch (ServiceException exception)
+            {
+                var errorMessage = $"Failed to sync all users. Status Code: {exception.StatusCode} Exception: {exception.Message}";
+                await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
+                return;
+            }
 
             // process users.
             var users = tuple.Item1;

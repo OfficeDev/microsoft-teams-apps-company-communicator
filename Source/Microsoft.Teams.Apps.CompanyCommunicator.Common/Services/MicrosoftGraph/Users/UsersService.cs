@@ -31,8 +31,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
         }
 
-        private int MaxRetry { get; set; } = 10;
-
         /// <inheritdoc/>
         public async Task<IEnumerable<User>> GetBatchByUserIds(IEnumerable<IEnumerable<string>> userIdsByGroups)
         {
@@ -43,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 var response = await this.graphServiceClient
                     .Batch
                     .Request()
-                    .WithMaxRetry(this.MaxRetry)
+                    .WithMaxRetry(GraphConstants.MaxRetry)
                     .PostAsync(batchRequestContent);
 
                 Dictionary<string, HttpResponseMessage> responses = await response.GetResponsesAsync();
@@ -72,7 +70,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             var graphResult = await this.graphServiceClient
                     .Users
                     .Request()
-                    .WithMaxRetry(this.MaxRetry)
+                    .WithMaxRetry(GraphConstants.MaxRetry)
                     .Filter(filter)
                     .Select(user => new
                     {
@@ -95,13 +93,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             var graphResult = await this.graphServiceClient
                     .Users[userId]
                     .Request()
-                    .WithMaxRetry(this.MaxRetry)
                     .Select(user => new
                     {
                         user.Id,
                         user.DisplayName,
                         user.UserPrincipalName,
                     })
+                    .WithMaxRetry(GraphConstants.MaxRetry)
                     .GetAsync();
             return graphResult;
         }
@@ -119,6 +117,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                     .Request()
                     .Select("id, displayName, userPrincipalName, userType")
                     .Top(GraphConstants.MaxPageSize)
+                    .WithMaxRetry(GraphConstants.MaxRetry)
                     .GetAsync();
             }
             else
@@ -127,6 +126,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 collectionPage.InitializeNextPageRequest(this.graphServiceClient, deltaLink);
                 collectionPage = await collectionPage
                     .NextPageRequest
+                    .WithMaxRetry(GraphConstants.MaxRetry)
                     .GetAsync();
             }
 
@@ -136,6 +136,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             {
                 collectionPage = await collectionPage
                     .NextPageRequest
+                    .WithMaxRetry(GraphConstants.MaxRetry)
                     .GetAsync();
 
                 users.AddRange(collectionPage);
@@ -158,6 +159,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 .LicenseDetails
                 .Request()
                 .Top(GraphConstants.MaxPageSize)
+                .WithMaxRetry(GraphConstants.MaxRetry)
                 .GetAsync();
 
             if (this.HasTeamsLicense(licenseCollection))
@@ -169,6 +171,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             {
                 licenseCollection = await licenseCollection
                     .NextPageRequest
+                    .WithMaxRetry(GraphConstants.MaxRetry)
                     .GetAsync();
 
                 if (this.HasTeamsLicense(licenseCollection))

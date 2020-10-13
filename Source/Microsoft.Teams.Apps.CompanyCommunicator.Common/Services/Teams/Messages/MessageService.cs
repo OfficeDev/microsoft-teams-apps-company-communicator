@@ -14,6 +14,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Polly;
+    using Polly.Contrib.WaitAndRetry;
+    using Polly.Retry;
 
     /// <summary>
     /// Teams message service.
@@ -87,80 +90,61 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                 reference: conversationReference,
                 callback: async (turnContext, cancellationToken) =>
                 {
-                    for (int i = 1; i <= maxAttempts; i++)
+                    var policy = this.GetRetryPolicy(maxAttempts, log);
+                    try
                     {
-                        try
+                        // Send message.
+                        await policy.ExecuteAsync(async () => await turnContext.SendActivityAsync(message));
+
+                        // Success.
+                        response.ResultType = SendMessageResult.Succeeded;
+                        response.StatusCode = (int)HttpStatusCode.Created;
+                        response.AllSendStatusCodes += $"{(int)HttpStatusCode.Created},";
+                    }
+                    catch (ErrorResponseException e)
+                    {
+                        var errorMessage = $"{e.GetType()}: {e.Message}";
+                        log.LogError(e, $"Failed to send message. Exception message: {errorMessage}");
+
+                        response.StatusCode = (int)e.Response.StatusCode;
+                        response.AllSendStatusCodes += $"{(int)e.Response.StatusCode},";
+                        response.ErrorMessage = e.Response.Content;
+                        switch (e.Response.StatusCode)
                         {
-                            // Send message.
-                            await turnContext.SendActivityAsync(message);
+                            case HttpStatusCode.TooManyRequests:
+                                response.ResultType = SendMessageResult.Throttled;
+                                response.TotalNumberOfSendThrottles = maxAttempts;
+                                break;
 
-                            // Success.
-                            response.ResultType = SendMessageResult.Succeeded;
-                            response.StatusCode = (int)HttpStatusCode.Created;
-                            response.AllSendStatusCodes += $"{(int)HttpStatusCode.Created},";
-                            break;
-                        }
-                        catch (ErrorResponseException e)
-                        {
-                            log.LogError(e, $"ERROR: {e.GetType()}: {e.Message}");
-
-                            var responseStatusCode = e.Response.StatusCode;
-                            response.StatusCode = (int)responseStatusCode;
-                            response.AllSendStatusCodes += $"{(int)responseStatusCode},";
-
-                            // If the response was a throttled status code or a 5xx status code,
-                            // then delay and retry the request.
-                            if (responseStatusCode == HttpStatusCode.TooManyRequests
-                                || ((int)responseStatusCode >= 500 && (int)responseStatusCode < 600))
-                            {
-                                if (responseStatusCode == HttpStatusCode.TooManyRequests)
-                                {
-                                    // If the request was throttled, set the flag for indicating the throttled state and
-                                    // increment the count of the number of throttles to be stored later.
-                                    response.ResultType = SendMessageResult.Throttled;
-                                    response.TotalNumberOfSendThrottles++;
-                                }
-                                else
-                                {
-                                    // If the request failed with a 5xx status code, set the flag for indicating the failure
-                                    // and store the content of the error message.
-                                    response.ResultType = SendMessageResult.Failed;
-                                    response.ErrorMessage = e.Response.Content;
-                                }
-
-                                // If the maximum number of attempts has not been reached, delay
-                                // for a bit of time to attempt the request again.
-                                // Do not delay if already attempted the maximum number of attempts.
-                                if (i < maxAttempts)
-                                {
-                                    var random = new Random();
-                                    await Task.Delay(random.Next(500, 1500));
-                                }
-                            }
-                            else if (responseStatusCode == HttpStatusCode.NotFound)
-                            {
-                                // If in this block, then the recipient has been removed.
-                                // This recipient should be excluded from the list.
+                            case HttpStatusCode.NotFound:
                                 response.ResultType = SendMessageResult.RecipientNotFound;
-                                response.ErrorMessage = e.Response.Content;
-
                                 break;
-                            }
-                            else
-                            {
-                                // If in this block, then an error has occurred with the service.
-                                // Return the failure and do not attempt the request again.
+
+                            default:
                                 response.ResultType = SendMessageResult.Failed;
-                                response.ErrorMessage = e.Response.Content;
-
                                 break;
-                            }
                         }
                     }
                 },
                 cancellationToken: CancellationToken.None);
 
             return response;
+        }
+
+        private AsyncRetryPolicy GetRetryPolicy(int maxAttempts, ILogger log)
+        {
+            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: maxAttempts);
+            return Policy
+                .Handle<ErrorResponseException>(e =>
+                {
+                    var errorMessage = $"{e.GetType()}: {e.Message}";
+                    log.LogError(e, $"Exception thrown: {errorMessage}");
+
+                    // Handle throttling and internal server errors.
+                    var statusCode = e.Response.StatusCode;
+                    return statusCode == HttpStatusCode.TooManyRequests || ((int)statusCode >= 500 && (int)statusCode < 600);
+                })
+                .WaitAndRetryAsync(delay);
         }
     }
 }
