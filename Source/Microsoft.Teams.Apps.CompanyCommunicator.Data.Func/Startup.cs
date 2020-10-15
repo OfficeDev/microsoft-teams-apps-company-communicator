@@ -7,6 +7,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 {
+    using System;
+    using System.Globalization;
     using global::Azure.Storage.Blobs;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
@@ -75,6 +77,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                     dataQueueMessageOptions.RequeueMessageDelayInSeconds =
                         configuration.GetValue<double>("RequeueMessageDelayInSeconds", 300);
                 });
+
+            builder.Services.AddLocalization();
+
+            // Set current culture.
+            var culture = Environment.GetEnvironmentVariable("i18n:DefaultCulture");
+            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(culture);
+            CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(culture);
 
             // Add blob client.
             builder.Services.AddSingleton(sp => new BlobContainerClient(

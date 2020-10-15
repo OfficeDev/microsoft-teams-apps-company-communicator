@@ -8,8 +8,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+    using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
@@ -26,18 +28,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     {
         private readonly NotificationDataRepository notificationDataRepository;
         private readonly ExportDataRepository exportDataRepository;
+        private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportFunction"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository.</param>
         /// <param name="exportDataRepository">Export data repository.</param>
+        /// <param name="localizer">Localization service.</param>
         public ExportFunction(
             NotificationDataRepository notificationDataRepository,
-            ExportDataRepository exportDataRepository)
+            ExportDataRepository exportDataRepository,
+            IStringLocalizer<Strings> localizer)
         {
             this.notificationDataRepository = notificationDataRepository;
             this.exportDataRepository = exportDataRepository;
+            this.localizer = localizer;
         }
 
         /// <summary>
@@ -76,7 +82,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
         private string GetFileName()
         {
             var guid = Guid.NewGuid().ToString();
-            return $"ExportData_{guid}.zip";
+            var fileName = this.localizer.GetString("FileName_ExportData");
+            return $"{fileName}_{guid}.zip";
         }
     }
 }

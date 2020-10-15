@@ -5,16 +5,17 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
     using System;
-    using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Schema;
+    using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
@@ -40,6 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly SendingNotificationDataRepository notificationRepo;
         private readonly IMessageService messageService;
         private readonly SendQueue sendQueue;
+        private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SendFunction"/> class.
@@ -49,12 +51,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="messageService">Message service.</param>
         /// <param name="notificationRepo">Notification repository.</param>
         /// <param name="sendQueue">The send queue.</param>
+        /// <param name="localizer">Localization service.</param>
         public SendFunction(
             IOptions<SendFunctionOptions> options,
             INotificationService notificationService,
             IMessageService messageService,
             SendingNotificationDataRepository notificationRepo,
-            SendQueue sendQueue)
+            SendQueue sendQueue,
+            IStringLocalizer<Strings> localizer)
         {
             if (options is null)
             {
@@ -68,6 +72,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
             this.notificationRepo = notificationRepo ?? throw new ArgumentNullException(nameof(notificationRepo));
             this.sendQueue = sendQueue ?? throw new ArgumentNullException(nameof(sendQueue));
+            this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
@@ -116,7 +121,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         totalNumberOfSendThrottles: 0,
                         statusCode: SentNotificationDataEntity.FinalFaultedStatusCode,
                         allSendStatusCodes: $"{SentNotificationDataEntity.FinalFaultedStatusCode},",
-                        errorMessage: "App Not Installed");
+                        errorMessage: this.localizer.GetString("AppNotInstalled"));
                     return;
                 }
 

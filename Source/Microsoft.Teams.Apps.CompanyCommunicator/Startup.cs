@@ -28,6 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
@@ -39,6 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Localization;
 
     using Beta = BetaLib::Microsoft.Graph;
 
@@ -123,7 +125,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddOptions();
 
             // Add localization services.
-            services.AddLocalization();
+            services.AddLocalizationSettings(this.Configuration);
 
             // Add authentication services.
             AuthenticationOptions authenticationOptionsParameter = new AuthenticationOptions();
@@ -203,6 +205,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseRequestLocalization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

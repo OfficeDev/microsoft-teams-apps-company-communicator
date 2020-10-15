@@ -9,10 +9,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+    using Microsoft.Extensions.Localization;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Extensions;
 
@@ -22,59 +25,63 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     public class SyncGroupMembersActivity
     {
         private readonly IGroupMembersService groupMembersService;
+        private readonly NotificationDataRepository notificationDataRepository;
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly UserDataRepository userDataRepository;
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SyncGroupMembersActivity"/> class.
         /// </summary>
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
+        /// <param name="notificationDataRepository">Notifications data repository.</param>
         /// <param name="groupMembersService">Group members service.</param>
         /// <param name="userDataRepository">User Data repository.</param>
-        /// <param name="notificationDataRepository">Notification data entity repository.</param>
+        /// <param name="localizer">Localization service.</param>
         public SyncGroupMembersActivity(
             SentNotificationDataRepository sentNotificationDataRepository,
+            NotificationDataRepository notificationDataRepository,
             IGroupMembersService groupMembersService,
             UserDataRepository userDataRepository,
-            NotificationDataRepository notificationDataRepository)
+            IStringLocalizer<Strings> localizer)
         {
             this.groupMembersService = groupMembersService ?? throw new ArgumentNullException(nameof(groupMembersService));
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
-            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
+            this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
         /// Syncs group members to Sent notification table.
         /// </summary>
         /// <param name="input">Input.</param>
+        /// <param name="log">Logging service.</param>
         /// <returns>It returns the group transitive members first page and next page url.</returns>
         [FunctionName(FunctionNames.SyncGroupMembersActivity)]
         public async Task RunAsync(
-        [ActivityTrigger](string notificationId, string groupId) input)
+        [ActivityTrigger](string notificationId, string groupId) input, ILogger log)
         {
             var notificationId = input.notificationId;
             var groupId = input.groupId;
 
-            // Get all members.
-            IEnumerable<User> users;
             try
             {
-                users = await this.groupMembersService.GetGroupMembersAsync(groupId);
+                // Get all members.
+                var users = await this.groupMembersService.GetGroupMembersAsync(groupId);
+
+                // Convert to Recipients
+                var recipients = await this.GetRecipientsAsync(notificationId, users);
+
+                // Store.
+                await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
             }
-            catch (ServiceException exception)
+            catch (Exception ex)
             {
-                var errorMessage = $"Failed to sync group members. Status Code: {exception.StatusCode} Exception: {exception.Message}";
+                var errorMessage = this.localizer.GetString("FailedToGetMembersForGroupFormat", groupId, ex.Message);
+                log.LogError(ex, errorMessage);
                 await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
-                return;
             }
-
-            // Convert to Recipients
-            var recipients = await this.GetRecipientsAsync(notificationId, users);
-
-            // Store.
-            await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
         }
 
         /// <summary>

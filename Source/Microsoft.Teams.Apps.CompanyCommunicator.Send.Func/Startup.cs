@@ -7,6 +7,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
+    using System;
+    using System.Globalization;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
@@ -66,6 +68,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     messageQueueOptions.ServiceBusConnection =
                         configuration.GetValue<string>("ServiceBusConnection");
                 });
+
+            builder.Services.AddLocalization();
+
+            // Set current culture.
+            var culture = Environment.GetEnvironmentVariable("i18n:DefaultCulture");
+            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(culture);
+            CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(culture);
 
             // Add bot services.
             builder.Services.AddSingleton<CommonMicrosoftAppCredentials>();

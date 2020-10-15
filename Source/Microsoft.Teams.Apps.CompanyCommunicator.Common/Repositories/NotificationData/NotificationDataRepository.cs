@@ -184,6 +184,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <summary>
+        /// Save exception error message in a notification data entity.
+        /// </summary>
+        /// <param name="notificationDataEntityId">Notification data entity id.</param>
+        /// <param name="errorMessage">Error message.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public async Task SaveExceptionInNotificationDataEntityAsync(
+            string notificationDataEntityId,
+            string errorMessage)
+        {
+            var notificationDataEntity = await this.GetAsync(
+                NotificationDataTableNames.SentNotificationsPartition,
+                notificationDataEntityId);
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.ErrorMessage =
+                    this.AppendNewLine(notificationDataEntity.ErrorMessage, errorMessage);
+                notificationDataEntity.Status = NotificationStatus.Failed.ToString();
+
+                // Set the end date as current date.
+                notificationDataEntity.SentDate = DateTime.UtcNow;
+
+                await this.CreateOrUpdateAsync(notificationDataEntity);
+            }
+        }
+
+        /// <summary>
         /// Save warning message in a notification data entity.
         /// </summary>
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
@@ -202,7 +228,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 {
                     notificationDataEntity.WarningMessage =
                         this.AppendNewLine(notificationDataEntity.WarningMessage, warningMessage);
-
                     await this.CreateOrUpdateAsync(notificationDataEntity);
                 }
             }

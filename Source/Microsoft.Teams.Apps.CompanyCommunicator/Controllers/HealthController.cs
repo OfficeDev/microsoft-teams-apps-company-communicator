@@ -19,7 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet]
         public ActionResult Index()
         {
-            return new OkResult();
+            return this.Ok();
         }
     }
 }

@@ -83,8 +83,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             {
                 if (!teamDataEntities.Any(p => p.TeamId == teamId))
                 {
-                    var format = this.localizer.GetString("FailedToFindTeamInDbFormat");
-                    var errorMessage = string.Format(format, teamId);
+                    var errorMessage = this.localizer.GetString("FailedToFindTeamInDbFormat", teamId);
                     log.LogWarning($"Notification {notificationId}: {errorMessage}");
                     await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
                 }

@@ -8,8 +8,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
 
     /// <summary>
     /// This class contains the "clean up" durable activity.
@@ -18,14 +19,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     public class HandleFailureActivity
     {
         private readonly NotificationDataRepository notificationDataRepository;
+        private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HandleFailureActivity"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository.</param>
-        public HandleFailureActivity(NotificationDataRepository notificationDataRepository)
+        /// <param name="localizer">Localization service.</param>
+        public HandleFailureActivity(
+            NotificationDataRepository notificationDataRepository,
+            IStringLocalizer<Strings> localizer)
         {
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
+            this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
@@ -34,37 +40,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// this method is called to do the clean up work, e.g. log the exception and etc.
         /// </summary>
         /// <param name="input">Input value.</param>
-        /// <param name="log">logger.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [FunctionName(FunctionNames.HandleFailureActivity)]
         public async Task RunAsync(
-            [ActivityTrigger](NotificationDataEntity notification, Exception exception) input,
-            ILogger log)
+            [ActivityTrigger](NotificationDataEntity notification, Exception exception) input)
         {
-            var errorMessage = $"Failed to prepare the message for sending: {input.exception.Message}";
-
-            var notificationDataEntity = await this.notificationDataRepository.GetAsync(
-                NotificationDataTableNames.SentNotificationsPartition,
-                input.notification.Id);
-
-            if (notificationDataEntity == null)
-            {
-                log.LogError($"Notification entity not found. Notification Id: {input.notification.Id}");
-                return;
-            }
-
-            notificationDataEntity.Status = NotificationStatus.Failed.ToString();
-            notificationDataEntity.WarningMessage =
-                string.IsNullOrWhiteSpace(notificationDataEntity.WarningMessage)
-                ? errorMessage
-                : $"{notificationDataEntity.WarningMessage}{Environment.NewLine}{errorMessage}";
-
-            // If it failed to prepare for sending a notification, then set the end date to the current date time.
-            var currentDate = DateTime.Now;
-            notificationDataEntity.SentDate = currentDate;
-            notificationDataEntity.SendingStartedDate = currentDate;
-
-            await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
+            var errorMessage = this.localizer.GetString("FailtoPrepareMessageFormat", input.exception.Message);
+            await this.notificationDataRepository
+                .SaveExceptionInNotificationDataEntityAsync(input.notification.Id, errorMessage);
         }
     }
 }

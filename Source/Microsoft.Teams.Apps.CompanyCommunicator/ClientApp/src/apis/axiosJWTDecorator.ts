@@ -111,6 +111,7 @@ export class AxiosJWTDecorator {
             config = axios.defaults;
           }
           config.headers["Authorization"] = `Bearer ${token}`;
+          config.headers["Accept-Language"] = i18n.language;
           resolve(config);
         },
         failureCallback: (error: string) => {

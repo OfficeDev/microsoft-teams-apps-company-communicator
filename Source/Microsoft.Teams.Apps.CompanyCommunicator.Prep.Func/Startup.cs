@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     extern alias BetaLib;
 
     using System;
+    using System.Globalization;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
@@ -93,9 +94,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                         configuration.GetValue<int>("MaxAttemptsToCreateConversation", 1);
                 });
 
-            // Add localization.
-            builder.Services.AddLocalization();
-
             builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
                 Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
              {
@@ -104,12 +102,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                  confidentialClientApplicationOptions.TenantId = configuration.GetValue<string>("TenantId");
              });
 
+            builder.Services.AddLocalization();
+
+            // Set current culture.
+            var culture = Environment.GetEnvironmentVariable("i18n:DefaultCulture");
+            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(culture);
+            CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(culture);
+
             // Add orchestration.
             builder.Services.AddTransient<ExportOrchestration>();
 
             // Add activities.
             builder.Services.AddTransient<UpdateExportDataActivity>();
-            builder.Services.AddTransient<GetMetaDataActivity>();
+            builder.Services.AddTransient<GetMetadataActivity>();
             builder.Services.AddTransient<UploadActivity>();
             builder.Services.AddTransient<SendFileCardActivity>();
             builder.Services.AddTransient<HandleExportFailureActivity>();

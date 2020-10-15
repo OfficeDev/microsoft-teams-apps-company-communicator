@@ -10,11 +10,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+    using Microsoft.Extensions.Localization;
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Extensions;
 
@@ -27,6 +29,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
         private readonly IUsersService usersService;
         private readonly NotificationDataRepository notificationDataRepository;
+        private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SyncAllUsersActivity"/> class.
@@ -35,16 +38,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         /// <param name="usersService">Users service.</param>
         /// <param name="notificationDataRepository">Notification data entity repository.</param>
+        /// <param name="localizer">Localization service.</param>
         public SyncAllUsersActivity(
             UserDataRepository userDataRepository,
             SentNotificationDataRepository sentNotificationDataRepository,
             IUsersService usersService,
-            NotificationDataRepository notificationDataRepository)
+            NotificationDataRepository notificationDataRepository,
+            IStringLocalizer<Strings> localizer)
         {
             this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
+            this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
@@ -82,7 +88,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             }
             catch (ServiceException exception)
             {
-                var errorMessage = $"Failed to sync all users. Status Code: {exception.StatusCode} Exception: {exception.Message}";
+                var errorMessage = this.localizer.GetString("FailedToGetAllUsersFormat", exception.StatusCode, exception.Message);
                 await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
                 return;
             }

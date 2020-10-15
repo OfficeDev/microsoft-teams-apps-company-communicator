@@ -74,8 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             var teamInfo = await this.teamDataRepository.GetAsync(TeamDataTableNames.TeamDataPartition, teamId);
             if (teamInfo == null)
             {
-                var format = this.localizer.GetString("FailedToFindTeamInDbFormat");
-                var errorMessage = string.Format(format, teamId);
+                var errorMessage = this.localizer.GetString("FailedToFindTeamInDbFormat", teamId);
                 log.LogWarning($"Notification {notificationId}: {errorMessage}");
                 await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
                 return;
@@ -97,11 +96,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             }
             catch (Exception ex)
             {
-                var format = this.localizer.GetString("FailedToGetMembersForTeamFormat");
-                var errorMessage = string.Format(format, teamId, ex.Message);
-
+                var errorMessage = this.localizer.GetString("FailedToGetMembersForTeamFormat", teamId, ex.Message);
                 log.LogError(ex, errorMessage);
-
                 await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
             }
         }

@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Net.Http;
@@ -14,7 +15,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
+    using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Newtonsoft.Json.Linq;
 
     /// <summary>
@@ -25,6 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         private readonly BlobContainerClient blobContainerClient;
         private readonly IHttpClientFactory clientFactory;
         private readonly ExportDataRepository exportDataRepository;
+        private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamsFileUpload"/> class.
@@ -32,14 +36,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <param name="clientFactory">http client factory.</param>
         /// <param name="exportDataRepository">Export Data Repository.</param>
         /// <param name="blobContainerClient">azure blob container client.</param>
+        /// <param name="localizer">Localization service.</param>
         public TeamsFileUpload(
             IHttpClientFactory clientFactory,
             ExportDataRepository exportDataRepository,
-            BlobContainerClient blobContainerClient)
+            BlobContainerClient blobContainerClient,
+            IStringLocalizer<Strings> localizer)
         {
-            this.clientFactory = clientFactory;
-            this.exportDataRepository = exportDataRepository;
-            this.blobContainerClient = blobContainerClient;
+            this.clientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
+            this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
+            this.blobContainerClient = blobContainerClient ?? throw new ArgumentNullException(nameof(blobContainerClient));
+            this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
@@ -76,7 +83,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
             await this.CleanUp(turnContext, fileName, notificationId, cancellationToken);
 
-            var reply = MessageFactory.Text($"Your file is ready to download. A copy is also available in OneDrive.");
+            var reply = MessageFactory.Text(this.localizer.GetString("FileReadyText"));
             reply.TextFormat = "xml";
             reply.Attachments = new List<Attachment> { asAttachment };
 
@@ -104,7 +111,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
             if (exportData != null)
             {
-                var reply = MessageFactory.Text("Something went wrong. Try exporting the results again.");
+                var reply = MessageFactory.Text(this.localizer.GetString("FileUploadErrorText"));
                 reply.TextFormat = "xml";
                 await turnContext.SendActivityAsync(reply, cancellationToken);
             }
