@@ -53,19 +53,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public int TotalMessageCount { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the sending process is completed or not.
-        /// </summary>
-        public bool IsCompleted { get; set; }
-
-        /// <summary>
         /// Gets or sets the sending started date time.
         /// </summary>
         public DateTime? SendingStartedDate { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the notification is in the "preparing to send" state.
-        /// </summary>
-        public bool IsPreparingToSend { get; set; }
 
         /// <summary>
         /// Gets or sets notification status. <see cref="NotificationStatus"/> for possible values.

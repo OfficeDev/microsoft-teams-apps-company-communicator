@@ -24,5 +24,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
                 NotificationStatus.Sent.ToString().Equals(entity.Status) ||
                 entity.IsCompleted;
         }
+
+        /// <summary>
+        /// Returns notification status.
+        ///
+        /// Note: We check for IsCompleted property for backward compatibility. (Data generated for CC v1, v2).
+        /// </summary>
+        /// <param name="entity">Notification data entity.</param>
+        /// <returns>Notification status.</returns>
+        public static string GetStatus(this NotificationDataEntity entity)
+        {
+            // For v1, v2, status field is not set.
+            if (entity.Status == null)
+            {
+                return entity.IsCompleted ? NotificationStatus.Sent.ToString() : NotificationStatus.Unknown.ToString();
+            }
+
+            return entity.Status.ToString();
+        }
     }
 }

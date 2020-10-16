@@ -163,10 +163,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     Failed = notificationEntity.Failed,
                     Unknown = this.GetUnknownCount(notificationEntity),
                     TotalMessageCount = notificationEntity.TotalMessageCount,
-                    IsCompleted = notificationEntity.IsCompleted(),
                     SendingStartedDate = notificationEntity.SendingStartedDate,
-                    IsPreparingToSend = !notificationEntity.IsCompleted(),
-                    Status = notificationEntity.Status,
+                    Status = notificationEntity.GetStatus(),
                 };
 
                 result.Add(summary);

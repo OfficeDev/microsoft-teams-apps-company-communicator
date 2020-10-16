@@ -158,38 +158,32 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
     return out;
   }
 
-  private renderSendingNumbersText = (message: any) => {
-    if (message.isCompleted) {
-      return (<Text />);
-    } else {
-      let currentNum =
-        (message.succeeded ? message.succeeded : 0) +
-        (message.failed ? message.failed : 0) +
-        (message.unknown ? message.unknown : 0);
-      return (
-        <Text
-          truncated
-          content={`Sending... ${currentNum} of ${message.totalMessageCount}`}
-        >
-        </Text>
-      );
-    }
-  }
-
   private renderSendingText = (message: any) => {
-    if (message.isPreparingToSend) {
-      return (
-        <Text
-          truncated
-          content={this.localize("PreparingToSend")}
-        >
-        </Text>
-      );
-    } else {
-      return (
-        this.renderSendingNumbersText(message)
-      );
+    var text = "";
+    switch (message.status) {
+        case "Queued":
+            text = this.localize("Queued");
+            break;
+        case "SyncingRecipients":
+            text = this.localize("SyncingRecipients");
+            break;
+        case "InstallingApp":
+            text = this.localize("InstallingApp");
+            break;
+        case "Sending":
+            let sentCount =
+                (message.succeeded ? message.succeeded : 0) +
+                (message.failed ? message.failed : 0) +
+                (message.unknown ? message.unknown : 0);
+
+            text = this.localize("SendingMessages", { "SentCount": sentCount, "TotalCount": message.totalMessageCount });
+            break;
+        case "Sent":
+        case "Failed":
+            text = "";
     }
+
+    return (<Text truncated content={text} />);
   }
 
   private messageContent = (message: any) => {
