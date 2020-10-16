@@ -44,18 +44,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         {
             try
             {
-                var tasks = new List<Task<UserDataEntity>>();
-                foreach (var aadId in userAadIds)
-                {
-                    var task = context.CallActivityWithRetryAsync<UserDataEntity>(
-                 nameof(GetUserDataEntitiesByIdsActivity.GetUserDataEntityAsync),
-                 ActivitySettings.CommonActivityRetryOptions,
-                 aadId);
-                    tasks.Add(task);
-                }
-
-                var userEntities = await Task.WhenAll(tasks);
-                return userEntities;
+                return await context.CallActivityWithRetryAsync<IEnumerable<UserDataEntity>>(
+                         nameof(GetUserDataEntitiesByIdsActivity.GetUserDataEntitiesAsync),
+                         ActivitySettings.CommonActivityRetryOptions,
+                         userAadIds);
             }
             catch (Exception ex)
             {
@@ -70,14 +62,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Get
         /// This method represents the "get user data entity" durable activity.
         /// It gets installed user data.
         /// </summary>
-        /// <param name="aadId">User's Aad Id.</param>
+        /// <param name="userAadIds">list of user Aad Id.</param>
         /// <returns>It returns the installed user data entity.</returns>
-        [FunctionName(nameof(GetUserDataEntityAsync))]
-        public async Task<UserDataEntity> GetUserDataEntityAsync(
-           [ActivityTrigger] string aadId)
+        [FunctionName(nameof(GetUserDataEntitiesAsync))]
+        public async Task<IEnumerable<UserDataEntity>> GetUserDataEntitiesAsync(
+           [ActivityTrigger] IEnumerable<string> userAadIds)
         {
-              return await this.userDataRepository.
-                GetAsync(UserDataTableNames.UserDataPartition, aadId);
+            var userDataEntities = new List<UserDataEntity>();
+            foreach (var aadId in userAadIds)
+            {
+                var userDataEntity = await this.userDataRepository.
+                    GetAsync(UserDataTableNames.UserDataPartition, aadId);
+                userDataEntities.Add(userDataEntity);
+            }
+
+            return userDataEntities;
         }
     }
 }
