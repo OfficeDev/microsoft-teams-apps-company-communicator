@@ -32,4 +32,16 @@ export const formatDate = (date: string) => {
   return moment(date).format('l LT');
 }
 
+export const formatDuration = (startDate: string, endDate: string) => {
+    let result = "";
+    if (startDate && endDate) {
+        const difference = moment(endDate).diff(moment(startDate));
+        const totalDuration = moment.duration(difference);
+        // Handling the scenario of duration being more than 24 hrs as it is not done by moment.js.
+        const hh = ("0" + Math.floor(totalDuration.asHours())).slice(-2);
+        result = hh + moment.utc(totalDuration.asMilliseconds()).format(":mm:ss")
+    }
+    return result;
+}
+
 export default i18n;

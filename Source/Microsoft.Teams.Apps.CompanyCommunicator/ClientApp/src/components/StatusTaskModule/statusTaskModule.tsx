@@ -2,7 +2,6 @@ import * as React from 'react';
 import { withTranslation, WithTranslation } from "react-i18next";
 import './statusTaskModule.scss';
 import { getSentNotification, exportNotification } from '../../apis/messageListApi';
-import moment from 'moment';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
@@ -14,7 +13,7 @@ import {
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
 import { ImageUtil } from '../../utility/imageutility';
-import { formatDate } from '../../i18n';
+import { formatDate, formatDuration } from '../../i18n';
 import { TFunction } from "i18next";
 
 export interface IListItem {
@@ -112,7 +111,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
     private getItem = async (id: number) => {
         try {
             const response = await getSentNotification(id);
-            response.data.sendingDuration = this.formatNotificationSendingDuration(response.data.sendingStartedDate, response.data.sentDate);
+            response.data.sendingDuration = formatDuration(response.data.sendingStartedDate, response.data.sentDate);
             response.data.sendingStartedDate = formatDate(response.data.sendingStartedDate);
             response.data.sentDate = formatDate(response.data.sentDate);
             this.setState({
@@ -121,25 +120,6 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
         } catch (error) {
             return error;
         }
-    }
-
-    private formatNotificationSendingDuration = (sendingStartedDate: string, sentDate: string) => {
-        let sendingDuration = "";
-        if (sendingStartedDate && sentDate) {
-            let timeDifference = (new Date(sentDate).getTime() - new Date(sendingStartedDate).getTime()) / 1000;
-            const hours = Math.floor(timeDifference / 3600);
-            timeDifference -= hours * 3600;
-            const minutes = Math.floor(timeDifference / 60);
-            timeDifference -= minutes * 60;
-            const seconds = Math.floor(timeDifference);
-
-            const hoursAsString = ("0" + hours).slice(-2);
-            const minutesAsString = ("0" + minutes).slice(-2);
-            const secondsAsString = ("0" + seconds).slice(-2);
-
-            sendingDuration = `${hoursAsString}:${minutesAsString}:${secondsAsString}`;
-        }
-        return sendingDuration;
     }
 
     public render(): JSX.Element {
