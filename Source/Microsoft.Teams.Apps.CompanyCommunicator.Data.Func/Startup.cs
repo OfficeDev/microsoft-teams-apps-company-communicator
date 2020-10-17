@@ -72,10 +72,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
                 {
                     dataQueueMessageOptions.FirstTenMinutesRequeueMessageDelayInSeconds =
-                        configuration.GetValue<double>("FirstTenMinutesRequeueMessageDelayInSeconds", 30);
+                        configuration.GetValue<double>("FirstTenMinutesRequeueMessageDelayInSeconds", 20);
 
                     dataQueueMessageOptions.RequeueMessageDelayInSeconds =
-                        configuration.GetValue<double>("RequeueMessageDelayInSeconds", 300);
+                        configuration.GetValue<double>("RequeueMessageDelayInSeconds", 120);
                 });
 
             builder.Services.AddLocalization();

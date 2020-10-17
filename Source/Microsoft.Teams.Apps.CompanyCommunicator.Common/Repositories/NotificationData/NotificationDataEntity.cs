@@ -185,8 +185,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public int TotalMessageCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the DateTime the notification's sending was started - this means when
-        /// it was passed to the prep queue for preparation for sending.
+        /// Gets or sets the DateTime the notification's was queued to be sent.
         /// </summary>
         public DateTime? SendingStartedDate { get; set; }
 

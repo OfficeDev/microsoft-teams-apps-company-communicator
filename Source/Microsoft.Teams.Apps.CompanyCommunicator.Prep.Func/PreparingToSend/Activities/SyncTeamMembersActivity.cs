@@ -5,12 +5,15 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -110,15 +113,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>List of recipients.</returns>
         private async Task<IEnumerable<SentNotificationDataEntity>> GetRecipientsAsync(string notificationId, IEnumerable<UserDataEntity> users)
         {
-            var recipients = new List<SentNotificationDataEntity>();
+            var recipients = new ConcurrentBag<SentNotificationDataEntity>();
 
             // Update conversation id from table if available.
-            foreach (var user in users)
+            var maxParallelism = Math.Min(100, users.Count());
+            await Task.WhenAll(users.ForEachAsync(maxParallelism, async user =>
             {
                 var userEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, user.AadId);
                 user.ConversationId ??= userEntity?.ConversationId;
                 recipients.Add(user.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
-            }
+            }));
 
             return recipients;
         }

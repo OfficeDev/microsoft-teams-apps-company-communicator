@@ -81,7 +81,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
                 {
                     dataQueueMessageOptions.MessageDelayInSeconds =
-                        configuration.GetValue<double>("DataQueueMessageDelayInSeconds", 20);
+                        configuration.GetValue<double>("DataQueueMessageDelayInSeconds", 5);
                 });
 
             builder.Services.AddOptions<TeamsConversationOptions>()
@@ -91,7 +91,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                         configuration.GetValue<bool>("ProactivelyInstallUserApp", true);
 
                     options.MaxAttemptsToCreateConversation =
-                        configuration.GetValue<int>("MaxAttemptsToCreateConversation", 1);
+                        configuration.GetValue<int>("MaxAttemptsToCreateConversation", 2);
                 });
 
             builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
