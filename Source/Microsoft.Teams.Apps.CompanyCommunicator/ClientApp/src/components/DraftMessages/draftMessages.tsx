@@ -46,6 +46,7 @@ export interface IMessageState {
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
   private interval: any;
+  private timeout: any;
   private isOpenTaskModuleAllowed: boolean;
 
   constructor(props: IMessageProps) {
@@ -99,7 +100,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
               <Text>{message.title}</Text>
             </Flex.Item>
             <Flex.Item shrink={0} hAlign="end" vAlign="center">
-              <Overflow message={message} title="" />
+              <Overflow message={message} send={this.updateInterval} title="" />
             </Flex.Item>
           </Flex>
         ),
@@ -170,6 +171,29 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
 
       microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     }
+  }
+
+  private updateInterval = () => {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
+
+    this.interval = setInterval(() => {
+      this.props.getDraftMessagesList().then(() => {
+        this.props.getMessagesList();
+      });
+    }, 10000)
+
+    this.timeout = setTimeout(() => {
+      clearInterval(this.interval);
+      this.interval = setInterval(() => {
+        this.props.getDraftMessagesList();
+      }, 60000);
+    }, 60000);
   }
 }
 

@@ -13,6 +13,7 @@ export interface OverflowProps {
     selectMessage?: any;
     getMessagesList?: any;
     getDraftMessagesList?: any;
+    send?: any;
 }
 
 export interface OverflowState {
@@ -32,6 +33,7 @@ export interface ITaskInfo {
 }
 
 class Overflow extends React.Component<OverflowProps, OverflowState> {
+
     constructor(props: OverflowProps) {
         super(props);
         this.state = {
@@ -162,7 +164,9 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
 
         let submitHandler = (err: any, result: any) => {
             this.props.getDraftMessagesList().then(() => {
-                this.props.getMessagesList();
+                this.props.getMessagesList().then(() => {
+                    this.props.send();
+                });
             });
         };
 
