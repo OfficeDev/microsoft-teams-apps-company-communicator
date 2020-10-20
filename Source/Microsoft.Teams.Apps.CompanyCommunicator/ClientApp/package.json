@@ -1,6 +1,6 @@
 {
   "name": "company-communicator",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "dependencies": {
     "@microsoft/teams-js": "^1.4.2",
