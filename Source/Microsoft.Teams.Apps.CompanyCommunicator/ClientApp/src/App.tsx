@@ -41,12 +41,12 @@ class App extends React.Component<{}, IAppState> {
     });
 
     microsoftTeams.registerOnThemeChangeHandler((theme) => {
-      this.updateTheme(theme);
-      this.setState({
-        theme: theme,
-      }, () => {
-        this.forceUpdate();
-      });
+          this.updateTheme(theme);
+          this.setState({
+            theme: theme,
+          }, () => {
+            this.forceUpdate();
+          });
     });
 
     updateLocale();

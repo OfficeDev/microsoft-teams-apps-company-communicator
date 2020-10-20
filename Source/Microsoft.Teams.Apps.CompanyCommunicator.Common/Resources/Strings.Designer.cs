@@ -187,6 +187,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed.
+        /// </summary>
+        public static string Failed {
+            get {
+                return ResourceManager.GetString("Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to create conversation. Error message: {0}.
         /// </summary>
         public static string FailedToCreateConversationFormat {
@@ -381,6 +390,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         public static string PermissionDeclinedText {
             get {
                 return ResourceManager.GetString("PermissionDeclinedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recipient Not Found.
+        /// </summary>
+        public static string RecipientNotFound {
+            get {
+                return ResourceManager.GetString("RecipientNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Succeeded.
+        /// </summary>
+        public static string Succeeded {
+            get {
+                return ResourceManager.GetString("Succeeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Throttled.
+        /// </summary>
+        public static string Throttled {
+            get {
+                return ResourceManager.GetString("Throttled", resourceCulture);
             }
         }
     }

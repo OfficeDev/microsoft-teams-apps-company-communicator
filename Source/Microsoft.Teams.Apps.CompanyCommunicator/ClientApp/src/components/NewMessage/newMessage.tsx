@@ -403,7 +403,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                     <div className="taskModule">
                         <div className="formContainer">
                             <div className="formContentContainer" >
-                                <h3>Choose how you want to send your message</h3>
+                                <h3>{this.localize("SendHeadingText")}</h3>
                                 <RadiobuttonGroup
                                     className="radioBtns"
                                     value={this.state.selectedRadioBtn}

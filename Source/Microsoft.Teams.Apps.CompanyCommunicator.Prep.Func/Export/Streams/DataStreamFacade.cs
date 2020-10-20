@@ -99,7 +99,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     {
                         Id = sentNotificationDataEntity.RowKey,
                         Name = team.Name,
-                        DeliveryStatus = sentNotificationDataEntity.DeliveryStatus,
+                        DeliveryStatus = this.localizer.GetString(sentNotificationDataEntity.DeliveryStatus),
                         StatusReason = this.GetStatusReason(sentNotificationDataEntity.ErrorMessage, sentNotificationDataEntity.StatusCode.ToString()),
                     };
                     teamDataList.Add(teamData);
@@ -130,7 +130,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     Id = sentNotification.RowKey,
                     Name = user == null ? this.localizer.GetString("AdminConsentError") : user.DisplayName,
                     Upn = user == null ? this.localizer.GetString("AdminConsentError") : user.UserPrincipalName,
-                    DeliveryStatus = sentNotification.DeliveryStatus,
+                    DeliveryStatus = this.localizer.GetString(sentNotification.DeliveryStatus),
                     StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode.ToString()),
                 };
                 userdatalist.Add(userData);

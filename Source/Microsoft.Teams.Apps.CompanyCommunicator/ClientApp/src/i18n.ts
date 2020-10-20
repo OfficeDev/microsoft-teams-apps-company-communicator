@@ -12,7 +12,7 @@ i18n
   .use(initReactI18next)
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
-  .init({
+    .init({
     fallbackLng: 'en-US',
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
@@ -20,16 +20,16 @@ i18n
   });
 
 export const updateLocale = () => {
-  const search = window.location.search;
-  const params = new URLSearchParams(search);
-  const locale = params.get("locale") || 'en-US';
-  i18n.changeLanguage(locale);
-  moment.locale(locale);
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const locale = params.get("locale") || 'en-US';
+    i18n.changeLanguage(locale);
+    moment.locale(locale);
 };
 
 export const formatDate = (date: string) => {
-  if (!date) return date;
-  return moment(date).format('l LT');
+    if (!date) return date;
+    return moment(date).format('l LT');
 }
 
 export const formatDuration = (startDate: string, endDate: string) => {

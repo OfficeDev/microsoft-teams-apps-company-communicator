@@ -154,7 +154,7 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
 
                     <div className="footerContainer">
                         <div className="buttonContainer">
-                            <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="Preparing message" labelPosition="end" />
+                            <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label={this.localize("PreparingMessageLabel")} labelPosition="end" />
                             <Button content={this.localize("Send")} id="sendBtn" onClick={this.onSendMessage} primary />
                         </div>
                     </div>

@@ -159,6 +159,9 @@
   <data name="ExportFailureText" xml:space="preserve">
     <value>Something went wrong. Try exporting the results again.</value>
   </data>
+  <data name="Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
   <data name="FailedToCreateConversationFormat" xml:space="preserve">
     <value>Failed to create conversation. Error message: {0}</value>
   </data>
@@ -224,5 +227,14 @@
   </data>
   <data name="PermissionDeclinedText" xml:space="preserve">
     <value>Permission declined. We will not proceed with the export.</value>
+  </data>
+  <data name="RecipientNotFound" xml:space="preserve">
+    <value>Recipient Not Found</value>
+  </data>
+  <data name="Succeeded" xml:space="preserve">
+    <value>Succeeded</value>
+  </data>
+  <data name="Throttled" xml:space="preserve">
+    <value>Throttled</value>
   </data>
 </root>

@@ -181,7 +181,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                         <div className="footerContainer">
                             <div className={this.state.message.canDownload ? "" : "disabled"}>
                                 <div className="buttonContainer">
-                                    <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label="exporting" labelPosition="end" />
+                                    <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label={this.localize("ExportLabel")} labelPosition="end" />
                                     <TooltipHost content={!this.state.message.sendingCompleted ? "" : (this.state.message.canDownload ? "" : this.localize("ExportButtonProgressText"))} calloutProps={{ gapSpace: 0 }}>
                                         <Button icon={downloadIcon} disabled={!this.state.message.canDownload || !this.state.message.sendingCompleted} content={this.localize("ExportButtonText")} id="exportBtn" onClick={this.onExport} primary />
                                     </TooltipHost>
@@ -210,7 +210,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                         </div>
                         <div className="footerContainer">
                             <div className="buttonContainer">
-                                <Button content="Close" id="closeBtn" onClick={this.onClose} primary />
+                                <Button content={this.localize("CloseText")} id="closeBtn" onClick={this.onClose} primary />
                             </div>
                         </div>
                     </div>
@@ -231,7 +231,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                         </div>
                         <div className="footerContainer">
                             <div className="buttonContainer">
-                                <Button content="Close" id="closeBtn" onClick={this.onClose} primary />
+                                <Button content={this.localize("CloseText")} id="closeBtn" onClick={this.onClose} primary />
                             </div>
                         </div>
                     </div>
