@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Authentication
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
     using System;
     using System.Collections.Generic;

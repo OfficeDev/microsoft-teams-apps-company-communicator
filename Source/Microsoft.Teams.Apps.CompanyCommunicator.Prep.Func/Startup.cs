@@ -34,7 +34,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
