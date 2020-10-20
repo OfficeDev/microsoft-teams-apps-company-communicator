@@ -35,6 +35,17 @@ The Users Collection stores the users who have installed Company Communicator ap
 | TenantId      | The user's tenant identifier.
 | UserId        | The user's Id in teams.
 
+### AppConfig Collection
+
+The App Config Collection stores the user app Id and service url.
+
+| Value         | Description
+| ---           | ---
+| PartitionKey  | Constant value as 'Settings'.
+| RowKey        | Constants as "ServiceUrl" or "UserAppId". "ServiceUrl" - The value stored is service url. "UserAppId" - The value stored is user app Id.
+| Timestamp     | The latest DateTime record.
+| Value         | The user's app Id or the service url.
+
 ### Notification Data
 
 The Notification Collection stores the notification data.
@@ -58,9 +69,9 @@ The Notification Collection stores the notification data.
 | TeamsInString     | The list of team identifiers.
 | RostersInString   | The list of roster identifiers.
 | GroupsInString    | The list of group identifiers.
-| IsCompleted       | Indicating if the notification sending process is completed.
+| IsCompleted       | [Deprecated] Indicating if the notification sending process is completed.
 | IsDraft           | Indicating if the notifcation is a draft.
-| IsPreparingToSend | Indicating if the notification is in the "preparing to send" state.
+| IsPreparingToSend | [Deprecated] Indicating if the notification is in the "preparing to send" state.
 | Unknown           | The number of recipients who have an unknown status.
 | Content           | The content of the notification in serialized JSON form.
 | NotificationId    | The notification identifier.
@@ -71,6 +82,7 @@ The Notification Collection stores the notification data.
 | SentDate          | The DateTime when the notification's sending was completed.
 | WarningMessage    | The warning message for the notification if there was a warning given when preparing and sending notification.
 | ErrorMessage      | The error message for the notification if there was a failure in preparing and sending notification.
+| Status            | The notification status.
 
 ### SentNotification Data
 
@@ -95,7 +107,7 @@ The SentNotification Collection stores the sent notification data.
 | TotalNumberOfSendThrottles        | The total number of throttle responses the bot received when trying to send the notification to the recipient.
 | UserId            | The user identifier of the recipient.
 
-### SendBatches Data 
+### SendBatches Data [Deprecated] 
 
 The SendBatches Collection stoes the notification batches data.
 
