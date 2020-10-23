@@ -1,12 +1,12 @@
 - [Deployment Guide](#outlook-web-service-ows)
     - [Prerequisites](#prerequisites)
     - [Steps](#Deployment-Steps)
-        - [Register AD Application](#1.-register-azure-ad-application)
-        - [Deploy to Azure subscription](#2.-deploy-to-your-azure-subscription)
-        - [Set-up Authentication](#3.-set-up-authentication)
-        - [Add Permissions to your app](#4.-add-permissions-to-your-app)
-        - [Create the Teams app packages](#5.-create-the-teams-app-packages)
-        - [Install the apps in Microsoft Teams](#6.-install-the-apps-in-microsoft-teams)
+        - [Register AD Application](#1-register-azure-ad-application)
+        - [Deploy to Azure subscription](#2-deploy-to-your-azure-subscription)
+        - [Set-up Authentication](#3-set-up-authentication)
+        - [Add Permissions to your app](#4-add-permissions-to-your-app)
+        - [Create the Teams app packages](#5-create-the-teams-app-packages)
+        - [Install the apps in Microsoft Teams](#6-install-the-apps-in-microsoft-teams)
     - [Troubleshooting](#troubleshooting)
 - - -
 
@@ -93,8 +93,8 @@ Register an Azure AD application in your tenant's directory.
     1. **Bot Client ID**: The application (client) ID of the Microsoft Teams bot app. (from Step 1)
     2. **Bot Client Secret**: The client secret of the Microsoft Teams bot app. (from Step 1)
     3. **Tenant Id**: The tenant ID. (from Step 1)
-    4. **Proactively Install User App [Optional]**: Default value is true. You may set it to `false` if you want to disable the feature.
-    5. **User App ExternalId [Optional]**: Default value is `148a66bb-e83d-425a-927d-09f4299a9274`. This is the external Id provided in the User app manifest.
+    4. **Proactively Install User App [Optional]**: Default value is `true`. You may set it to `false` if you want to disable the feature.
+    5. **User App ExternalId [Optional]**: Default value is `148a66bb-e83d-425a-927d-09f4299a9274`. This **MUST** be the same `id` that is in the Teams app manifest for the user app.
     6. **DefaultCulture, SupportedCultures [Optional]**: By default the application contains `en-US` resources. You may add/update the resources for other locales and update this configuration if desired.
 
     > **Note:** Make sure that the values are copied as-is, with no extra spaces. The template checks that GUIDs are exactly 36 characters.
@@ -260,7 +260,7 @@ Repeat the steps above but with the file `Manifest\manifest_users.json`. Note: y
 
 1. Add the configurable tab to the team of authors, so that they can compose and send messages.
 
-1. Upload the User app to your tenant's app catalog so that it is available for everyone in your tenant to install. See [here](https://docs.microsoft.com/en-us/microsoftteams/tenant-apps-catalog-teams).
+1. [Upload](https://docs.microsoft.com/en-us/microsoftteams/tenant-apps-catalog-teams) the User app to your tenant's app catalog so that it is available for everyone in your tenant to install.
 > **IMPORTANT:** Proactive app installation will work only if you upload the User app to your tenant's app catalog.
 
 1. Install the User app (the `company-communicator-users.zip` package) to the users and teams that will be the target of messages. 

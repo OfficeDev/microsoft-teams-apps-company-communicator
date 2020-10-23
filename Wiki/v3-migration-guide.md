@@ -39,7 +39,7 @@ Please refer [step 2](https://github.com/OfficeDev/microsoft-teams-company-commu
     1. **Bot Client ID**: The application (client) ID of the Microsoft Teams bot app. (from Step 1)
     2. **Bot Client Secret**: The client secret of the Microsoft Teams bot app. (from Step 1)
     3. **Tenant Id**: The tenant ID. (from Step 1)
-    4. **Proactively Install User App [Optional]**: Default value is true. You may set it to `false` if you want to disable the feature.
+    4. **Proactively Install User App [Optional]**: Default value is `true`. You may set it to `false` if you want to disable the feature.
     5. **User App ExternalId [Optional]**: Default value is `148a66bb-e83d-425a-927d-09f4299a9274`. This **MUST** be the same `id` that is in the Teams app manifest for the user app.
     6. **DefaultCulture, SupportedCultures [Optional]**: By default the application contains `en-US` resources. You may add/update the resources for other locales and update this configuration if desired.
 
@@ -82,7 +82,8 @@ We have added new features in CCv3 - sync all users in a tenant and proactively 
 
     * Click on **Add Permissions** to commit your changes.
 
-    ![Azure AD API permissions](images/multitenant_app_permissions.png)
+    ![Azure AD API permissions](images/multitenant_app_permissions_1.png)
+    ![Azure AD API permissions](images/multitenant_app_permissions_2.png)
 
     > Please refer to [Solution overview](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview#microsoft-graph-api) for more details about the above permissions.
 

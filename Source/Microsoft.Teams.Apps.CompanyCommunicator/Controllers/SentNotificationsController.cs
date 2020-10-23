@@ -263,6 +263,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 // Fetch and store user app id in App Catalog.
                 appId = await this.appCatalogService.GetTeamsAppIdAsync(this.userAppOptions.UserAppExternalId);
+
+                // Graph SDK returns empty id if the app is not found.
+                if (string.IsNullOrEmpty(appId))
+                {
+                    this.logger.LogError($"Failed to find an app in AppCatalog with external Id: {this.userAppOptions.UserAppExternalId}");
+                    return;
+                }
+
                 await this.appSettingsService.SetUserAppIdAsync(appId);
             }
             catch (ServiceException exception)

@@ -66,6 +66,13 @@ This happens when the Microsoft Azure application ID entered during the setup of
 #### Fix
 Either register a new Microsoft Azure AD application or delete the bot registration that is currently using the attempted Microsoft Azure application ID.
 
+## 4. Proactive app installation is not working
+If proactive app installation for a user is not working as expected, make sure you have performed the following:
+
+1. Grant Admin consent to the application for all the graph permissions mentioned [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide#4-add-permissions-to-your-app).
+2. "ProactivelyInstallUserApp" configuration is enabled (set to "true") for the web app and the prep-function.
+3. "UserAppExternalId" configuration matches with the User app Id (in the Teams App manifest) for the web app.
+4. [Upload](https://docs.microsoft.com/en-us/microsoftteams/tenant-apps-catalog-teams) the User app to your tenant's app catalog so that it is available for everyone in your tenant to install.
 
 # Didn't find your problem here?
 Please report the issue [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/issues/new)
