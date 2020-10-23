@@ -178,6 +178,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} (copy).
+        /// </summary>
+        public static string DuplicateText {
+            get {
+                return ResourceManager.GetString("DuplicateText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Something went wrong. Try exporting the results again..
         /// </summary>
         public static string ExportFailureText {

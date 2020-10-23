@@ -4,6 +4,10 @@ import Backend from 'i18next-http-backend';
 import moment from 'moment';
 import 'moment/min/locales.min';
 
+export const defaultLocale = () => {
+    return 'en-US';
+} 
+
 i18n
   // load translation using http -> see /public/locales (i.e. https://github.com/i18next/react-i18next/tree/master/example/react/public/locales)
   // learn more: https://github.com/i18next/i18next-http-backend
@@ -13,7 +17,7 @@ i18n
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
     .init({
-    fallbackLng: 'en-US',
+    fallbackLng: defaultLocale(),
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
     }
@@ -22,7 +26,7 @@ i18n
 export const updateLocale = () => {
     const search = window.location.search;
     const params = new URLSearchParams(search);
-    const locale = params.get("locale") || 'en-US';
+    const locale = params.get("locale") || defaultLocale();
     i18n.changeLanguage(locale);
     moment.locale(locale);
 };
@@ -39,9 +43,16 @@ export const formatDuration = (startDate: string, endDate: string) => {
         const totalDuration = moment.duration(difference);
         // Handling the scenario of duration being more than 24 hrs as it is not done by moment.js.
         const hh = ("0" + Math.floor(totalDuration.asHours())).slice(-2);
-        result = hh + moment.utc(totalDuration.asMilliseconds()).format(":mm:ss")
+        result = hh + moment.utc(totalDuration.asMilliseconds()).locale(defaultLocale()).format(":mm:ss")
     }
     return result;
+}
+
+export const formatNumber = (number: any) => {
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const locale = params.get("locale") || defaultLocale();
+    return Number(number).toLocaleString(locale);
 }
 
 export default i18n;

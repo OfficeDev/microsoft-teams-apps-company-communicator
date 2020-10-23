@@ -48,16 +48,45 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
 
                 foreach (string key in responses.Keys)
                 {
-                    HttpResponseMessage httpResponse = await response.GetResponseByIdAsync(key);
-                    httpResponse.EnsureSuccessStatusCode();
+                    HttpResponseMessage httpResponse = default;
+                    try
+                    {
+                        httpResponse = await response.GetResponseByIdAsync(key);
+                        if (httpResponse == null)
+                        {
+                            throw new ArgumentNullException(nameof(httpResponse));
+                        }
 
-                    var responseContent = await httpResponse.Content.ReadAsStringAsync();
-                    JObject content = JObject.Parse(responseContent);
-                    var userstemp = content["value"]
-                        .Children()
-                        .OfType<JObject>()
-                        .Select(obj => obj.ToObject<User>());
-                    users.AddRange(userstemp);
+                        httpResponse.EnsureSuccessStatusCode();
+                        var responseContent = await httpResponse.Content.ReadAsStringAsync();
+                        JObject content = JObject.Parse(responseContent);
+                        var userstemp = content["value"]
+                            .Children()
+                            .OfType<JObject>()
+                            .Select(obj => obj.ToObject<User>());
+                        if (userstemp == null)
+                        {
+                            continue;
+                        }
+
+                        users.AddRange(userstemp);
+                    }
+                    catch (HttpRequestException httpRequestException)
+                    {
+                        var error = new Error
+                        {
+                            Code = httpResponse.StatusCode.ToString(),
+                            Message = httpResponse.ReasonPhrase,
+                        };
+                        throw new ServiceException(error, httpResponse.Headers, httpResponse.StatusCode, httpRequestException.InnerException);
+                    }
+                    finally
+                    {
+                        if (httpResponse != null)
+                        {
+                            httpResponse.Dispose();
+                        }
+                    }
                 }
             }
 

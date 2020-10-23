@@ -95,7 +95,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             var createdBy = this.HttpContext.User?.Identity?.Name;
-
+            notificationEntity.Title = this.localizer.GetString("DuplicateText", notificationEntity.Title);
             await this.notificationDataRepository.DuplicateDraftNotificationAsync(notificationEntity, createdBy);
 
             return this.Ok();

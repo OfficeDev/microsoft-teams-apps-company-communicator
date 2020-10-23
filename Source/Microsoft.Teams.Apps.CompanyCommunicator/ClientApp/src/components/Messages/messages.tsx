@@ -11,6 +11,7 @@ import { getBaseUrl } from '../../configVariables';
 import Overflow from '../OverFlow/sentMessageOverflow';
 import './messages.scss';
 import { TFunction } from "i18next";
+import { formatNumber } from '../../i18n';
 
 export interface ITaskInfo {
   title?: string;
@@ -84,13 +85,13 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
 
   public render(): JSX.Element {
     let keyCount = 0;
-    const processItem = (message: any) => {
+      const processItem = (message: any) => {
       keyCount++;
       const out = {
         key: keyCount,
         content: this.messageContent(message),
         onClick: (): void => {
-          let url = getBaseUrl() + "/viewstatus/" + message.id;
+            let url = getBaseUrl() + "/viewstatus/" + message.id + "?locale={locale}";
             this.onOpenTaskModule(null, url, this.localize("ViewStatus"));
         },
         styles: { margin: '0.2rem 0.2rem 0 0' },
@@ -176,7 +177,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                 (message.failed ? message.failed : 0) +
                 (message.unknown ? message.unknown : 0);
 
-            text = this.localize("SendingMessages", { "SentCount": sentCount, "TotalCount": message.totalMessageCount });
+            text = this.localize("SendingMessages", { "SentCount": formatNumber(sentCount), "TotalCount": formatNumber(message.totalMessageCount) });
             break;
         case "Sent":
         case "Failed":
@@ -203,17 +204,17 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
           <div>
             <TooltipHost content={this.props.t("TooltipSuccess")} calloutProps={{ gapSpace: 0 }}>
               <Icon name="stardust-checkmark" xSpacing="after" className="succeeded" outline />
-              <span className="semiBold">{message.succeeded}</span>
+              <span className="semiBold">{formatNumber(message.succeeded)}</span>
             </TooltipHost>
             <TooltipHost content={this.props.t("TooltipFailure")} calloutProps={{ gapSpace: 0 }}>
               <Icon name="stardust-close" xSpacing="both" className="failed" outline />
-              <span className="semiBold">{message.failed}</span>
+                        <span className="semiBold">{formatNumber(message.failed)}</span>
             </TooltipHost>
             {
               message.unknown && 
               <TooltipHost content="Unknown" calloutProps={{ gapSpace: 0 }}>
                 <Icon name="exclamation-circle" xSpacing="both" className="unknown" outline />
-                <span className="semiBold">{message.unknown}</span>
+                            <span className="semiBold">{formatNumber(message.unknown)}</span>
               </TooltipHost>
             }
           </div>

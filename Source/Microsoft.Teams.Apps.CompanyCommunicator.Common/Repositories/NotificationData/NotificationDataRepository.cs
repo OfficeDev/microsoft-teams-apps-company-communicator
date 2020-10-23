@@ -140,7 +140,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     PartitionKey = NotificationDataTableNames.DraftNotificationsPartition,
                     RowKey = newId,
                     Id = newId,
-                    Title = notificationEntity.Title + " (copy)",
+                    Title = notificationEntity.Title,
                     ImageLink = notificationEntity.ImageLink,
                     Summary = notificationEntity.Summary,
                     Author = notificationEntity.Author,

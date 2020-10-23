@@ -13,7 +13,7 @@ import {
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
 import { ImageUtil } from '../../utility/imageutility';
-import { formatDate, formatDuration } from '../../i18n';
+import { formatDate, formatDuration, formatNumber } from '../../i18n';
 import { TFunction } from "i18next";
 
 export interface IListItem {
@@ -114,6 +114,9 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             response.data.sendingDuration = formatDuration(response.data.sendingStartedDate, response.data.sentDate);
             response.data.sendingStartedDate = formatDate(response.data.sendingStartedDate);
             response.data.sentDate = formatDate(response.data.sentDate);
+            response.data.succeeded = formatNumber(response.data.succeeded);
+            response.data.failed = formatNumber(response.data.failed);
+            response.data.unknown = response.data.unknown && formatNumber(response.data.unknown);
             this.setState({
                 message: response.data
             });

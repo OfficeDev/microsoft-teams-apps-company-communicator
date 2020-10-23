@@ -156,6 +156,9 @@
   <data name="ColumnName_UserName" xml:space="preserve">
     <value>Name</value>
   </data>
+  <data name="DuplicateText" xml:space="preserve">
+    <value>{0} (copy)</value>
+  </data>
   <data name="ExportFailureText" xml:space="preserve">
     <value>Something went wrong. Try exporting the results again.</value>
   </data>
