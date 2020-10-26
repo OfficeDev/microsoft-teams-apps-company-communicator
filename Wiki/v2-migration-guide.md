@@ -1,7 +1,7 @@
-## Migration Guide
+## Company Communicator v2 Migration Guide
 
-## CCv2
-If you have the CCv1 deployed and plan to migrate to CCv2.x, perform the following steps:
+## Upgrading from v1.x to v2
+If you have the CCv1 deployed and plan to migrate to CCv2, perform the following steps:
 
 ### 1. Read CCv1 deployment parameters:
 Copy all the parameters from the previous deployment (CCv1), and make sure you have the following:
@@ -43,17 +43,23 @@ Please refer [step 2](https://github.com/OfficeDev/microsoft-teams-company-commu
 
     > **Note:** For ids, make sure that the values are copied as-is, with no extra spaces. The template checks that GUIDs are exactly 36 characters.
 
-  * Fill in the "Sender UPN List", which is a semicolon-delimited list of users who will be allowed to send messages using Company Communicator.
+7. Fill in the "Sender UPN List", which is a semicolon-delimited list of users who will be allowed to send messages using Company Communicator.
     * For example, to allow Megan Bowen (meganb@contoso.com) and Adele Vance (adelev@contoso.com) to send messages, set this parameter to `meganb@contoso.com;adelev@contoso.com`.
     * You can change this list later by going to the app service's "Configuration" blade.
 
-  * Agree to the Azure terms and conditions by clicking on the check box "I agree to the terms and conditions stated above" located at the bottom of the page.
+8. Agree to the Azure terms and conditions by clicking on the check box "I agree to the terms and conditions stated above" located at the bottom of the page.
 
-  * Click on "Purchase" to start the deployment.
+9. Click on "Purchase" to start the deployment.
 
-  * Wait for the deployment to finish. You can check the progress of the deployment from the "Notifications" pane of the Azure Portal. It can take **up to an hour** for the deployment to finish.
+10. Wait for the deployment to finish. You can check the progress of the deployment from the "Notifications" pane of the Azure Portal. It can take **up to an hour** for the deployment to finish.
 
     > If the deployment fails, see [this section](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Troubleshooting#1-code-deployment-failure) of the Troubleshooting guide.
+
+11. Then go to the "Deployment Center" section of the app service. Click on the "Sync" to update the existing app service to the latest code in the GitHub repository.
+
+  ![Screenshot of refreshing code deployment](images/troubleshooting_sourcecontrols.png)
+
+12. Please repeat the above step (step 11) for the function apps.
 
 ### 3. Assign Permissions to your app
 
