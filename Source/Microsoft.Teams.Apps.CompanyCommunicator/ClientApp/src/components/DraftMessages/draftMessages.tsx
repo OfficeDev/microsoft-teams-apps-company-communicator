@@ -1,12 +1,15 @@
 import * as React from 'react';
-import './draftMessages.scss';
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { connect } from 'react-redux';
+import { withTranslation, WithTranslation } from "react-i18next";
+import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
+import { Loader, List, Flex, Text } from '@stardust-ui/react';
+import * as microsoftTeams from "@microsoft/teams-js";
+
+import './draftMessages.scss';
 import { selectMessage, getDraftMessagesList, getMessagesList } from '../../actions';
 import { getBaseUrl } from '../../configVariables';
-import * as microsoftTeams from "@microsoft/teams-js";
-import { Loader, List, Flex, Text } from '@stardust-ui/react';
 import Overflow from '../OverFlow/draftMessageOverflow';
+import { TFunction } from "i18next";
 
 export interface ITaskInfo {
   title?: string;
@@ -28,7 +31,7 @@ export interface IMessage {
   responses?: string;
 }
 
-export interface IMessageProps {
+export interface IMessageProps extends WithTranslation {
   messages: IMessage[];
   selectedMessage: any;
   selectMessage?: any;
@@ -45,12 +48,14 @@ export interface IMessageState {
 }
 
 class DraftMessages extends React.Component<IMessageProps, IMessageState> {
+  readonly localize: TFunction;
   private interval: any;
   private isOpenTaskModuleAllowed: boolean;
 
   constructor(props: IMessageProps) {
     super(props);
     initializeIcons();
+    this.localize = this.props.t;
     this.isOpenTaskModuleAllowed = true;
     this.state = {
       message: props.messages,
@@ -69,7 +74,6 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         teamsChannelId: context.channelId,
       });
     });
-
     this.props.getDraftMessagesList();
     this.interval = setInterval(() => {
       this.props.getDraftMessagesList();
@@ -105,8 +109,8 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         ),
         styles: { margin: '0.2rem 0.2rem 0 0' },
         onClick: (): void => {
-          let url = getBaseUrl() + "/newmessage/" + message.id;
-          this.onOpenTaskModule(null, url, "Edit message");
+            let url = getBaseUrl() + "/newmessage/" + message.id + "?locale={locale}";
+            this.onOpenTaskModule(null, url, this.localize("EditMessage"));
         },
       };
       return out;
@@ -121,7 +125,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
         <Loader />
       );
     } else if (this.state.message.length === 0) {
-      return (<div className="results">You have no draft messages.</div>);
+        return (<div className="results">{this.localize("EmptyDraftMessages")}</div>);
     }
     else {
       return (
@@ -139,7 +143,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
             <Text
               truncated
               weight="bold"
-              content="Title"
+              content={this.localize("TitleText")}
             >
             </Text>
           </Flex.Item>
@@ -177,4 +181,5 @@ const mapStateToProps = (state: any) => {
   return { messages: state.draftMessagesList, selectedMessage: state.selectedMessage };
 }
 
-export default connect(mapStateToProps, { selectMessage, getDraftMessagesList, getMessagesList })(DraftMessages);
+const draftMessagesWithTranslation = withTranslation()(DraftMessages);
+export default connect(mapStateToProps, { selectMessage, getDraftMessagesList, getMessagesList })(draftMessagesWithTranslation);

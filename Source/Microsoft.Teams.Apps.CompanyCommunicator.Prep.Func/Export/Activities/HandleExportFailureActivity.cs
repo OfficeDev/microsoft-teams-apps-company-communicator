@@ -14,11 +14,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
+    using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Polly;
@@ -35,6 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         private readonly UserDataRepository userDataRepository;
         private readonly string microsoftAppId;
         private readonly BotFrameworkHttpAdapter botAdapter;
+        private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HandleExportFailureActivity"/> class.
@@ -44,12 +47,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <param name="botOptions">the bot options.</param>
         /// <param name="botAdapter">the users service.</param>
         /// <param name="userDataRepository">the user data repository.</param>
+        /// <param name="localizer">Localization service.</param>
         public HandleExportFailureActivity(
             ExportDataRepository exportDataRepository,
             IOptions<RepositoryOptions> repositoryOptions,
             IOptions<BotOptions> botOptions,
             BotFrameworkHttpAdapter botAdapter,
-            UserDataRepository userDataRepository)
+            UserDataRepository userDataRepository,
+            IStringLocalizer<Strings> localizer)
         {
             this.exportDataRepository = exportDataRepository;
             this.storageConnectionString = repositoryOptions.Value.StorageAccountConnectionString;
@@ -57,6 +62,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             this.botAdapter = botAdapter;
             this.microsoftAppId = botOptions.Value.MicrosoftAppId;
             this.userDataRepository = userDataRepository;
+            this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
@@ -73,7 +79,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         {
             await context.CallActivityWithRetryAsync<Task>(
                       nameof(HandleExportFailureActivity.HandleFailureActivityAsync),
-                      ActivitySettings.CommonActivityRetryOptions,
+                      FunctionSettings.DefaultRetryOptions,
                       exportDataEntity);
         }
 
@@ -121,7 +127,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                     Id = user.ConversationId,
                 },
             };
-            string failureText = "Something went wrong. Try exporting the results again.";
+            string failureText = this.localizer.GetString("ExportFailureText");
 
             int maxNumberOfAttempts = 10;
             await this.botAdapter.ContinueConversationAsync(

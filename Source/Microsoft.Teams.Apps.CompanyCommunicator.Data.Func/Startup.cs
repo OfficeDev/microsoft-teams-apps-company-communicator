@@ -7,6 +7,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 {
+    using System;
+    using System.Globalization;
     using global::Azure.Storage.Blobs;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
@@ -42,8 +44,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                     // Defaulting this value to true because the main app should ensure all
                     // tables exist. It is here as a possible configuration setting in
                     // case it needs to be set differently.
-                    repositoryOptions.IsItExpectedThatTableAlreadyExists =
-                        configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
+                    repositoryOptions.EnsureTableExists =
+                        !configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
                 });
             builder.Services.AddOptions<MessageQueueOptions>()
                 .Configure<IConfiguration>((messageQueueOptions, configuration) =>
@@ -70,11 +72,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
                 {
                     dataQueueMessageOptions.FirstTenMinutesRequeueMessageDelayInSeconds =
-                        configuration.GetValue<double>("FirstTenMinutesRequeueMessageDelayInSeconds", 30);
+                        configuration.GetValue<double>("FirstTenMinutesRequeueMessageDelayInSeconds", 20);
 
                     dataQueueMessageOptions.RequeueMessageDelayInSeconds =
-                        configuration.GetValue<double>("RequeueMessageDelayInSeconds", 300);
+                        configuration.GetValue<double>("RequeueMessageDelayInSeconds", 120);
                 });
+
+            builder.Services.AddLocalization();
+
+            // Set current culture.
+            var culture = Environment.GetEnvironmentVariable("i18n:DefaultCulture");
+            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(culture);
+            CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(culture);
 
             // Add blob client.
             builder.Services.AddSingleton(sp => new BlobContainerClient(

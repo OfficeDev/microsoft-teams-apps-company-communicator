@@ -11,6 +11,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
+    using Microsoft.Extensions.Localization;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
 
     /// <summary>
     /// Company Communicator Bot.
@@ -22,18 +24,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
         private readonly TeamsDataCapture teamsDataCapture;
         private readonly TeamsFileUpload teamsFileUpload;
+        private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompanyCommunicatorBot"/> class.
         /// </summary>
         /// <param name="teamsDataCapture">Teams data capture service.</param>
         /// <param name="teamsFileUpload">change this.</param>
+        /// <param name="localizer">Localization service.</param>
         public CompanyCommunicatorBot(
             TeamsDataCapture teamsDataCapture,
-            TeamsFileUpload teamsFileUpload)
+            TeamsFileUpload teamsFileUpload,
+            IStringLocalizer<Strings> localizer)
         {
-            this.teamsDataCapture = teamsDataCapture;
-            this.teamsFileUpload = teamsFileUpload;
+            this.teamsDataCapture = teamsDataCapture ?? throw new ArgumentNullException(nameof(teamsDataCapture));
+            this.teamsFileUpload = teamsFileUpload ?? throw new ArgumentNullException(nameof(teamsFileUpload));
+            this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
@@ -130,7 +136,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 notificationId,
                 cancellationToken);
 
-            var reply = MessageFactory.Text("Permission declined. We will not proceed with the export.");
+            var reply = MessageFactory.Text(this.localizer.GetString("PermissionDeclinedText"));
             reply.TextFormat = "xml";
             await turnContext.SendActivityAsync(reply, cancellationToken);
         }

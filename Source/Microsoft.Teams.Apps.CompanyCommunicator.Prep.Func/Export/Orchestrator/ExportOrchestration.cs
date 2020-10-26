@@ -20,7 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
     {
         private readonly UploadActivity uploadActivity;
         private readonly SendFileCardActivity sendFileCardActivity;
-        private readonly GetMetaDataActivity getMetaDataActivity;
+        private readonly GetMetadataActivity getMetadataActivity;
         private readonly UpdateExportDataActivity updateExportDataActivity;
         private readonly HandleExportFailureActivity handleExportFailureActivity;
 
@@ -29,19 +29,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
         /// </summary>
         /// <param name="uploadActivity">upload zip activity.</param>
         /// <param name="sendFileCardActivity">send file card activity.</param>
-        /// <param name="getMetaDataActivity">get the metadata activity.</param>
+        /// <param name="getMetadataActivity">get the metadata activity.</param>
         /// <param name="updateExportDataActivity">update the export data activity.</param>
         /// <param name="handleExportFailureActivity">handle failure activity.</param>
         public ExportOrchestration(
             UploadActivity uploadActivity,
             SendFileCardActivity sendFileCardActivity,
-            GetMetaDataActivity getMetaDataActivity,
+            GetMetadataActivity getMetadataActivity,
             UpdateExportDataActivity updateExportDataActivity,
             HandleExportFailureActivity handleExportFailureActivity)
         {
             this.uploadActivity = uploadActivity;
             this.sendFileCardActivity = sendFileCardActivity;
-            this.getMetaDataActivity = getMetaDataActivity;
+            this.getMetadataActivity = getMetadataActivity;
             this.updateExportDataActivity = updateExportDataActivity;
             this.handleExportFailureActivity = handleExportFailureActivity;
         }
@@ -73,7 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
                 exportDataEntity.Status = ExportStatus.InProgress.ToString();
                 await this.updateExportDataActivity.RunAsync(context, exportDataEntity, log);
 
-                var metaData = await this.getMetaDataActivity.RunAsync(context, (sentNotificationDataEntity, exportDataEntity), log);
+                var metaData = await this.getMetadataActivity.RunAsync(context, (sentNotificationDataEntity, exportDataEntity), log);
                 await this.uploadActivity.RunAsync(context, (sentNotificationDataEntity, metaData, exportDataEntity.FileName), log);
                 var consentId = await this.sendFileCardActivity.RunAsync(context, (exportRequiredData.UserId, exportRequiredData.NotificationDataEntity.Id, exportDataEntity.FileName), log);
 

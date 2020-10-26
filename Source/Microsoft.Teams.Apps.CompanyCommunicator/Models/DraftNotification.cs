@@ -73,6 +73,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
                 stringBuilder.AppendLine();
             }
 
+            var groups = this.Groups.ToList();
+            if (groups.Count > DraftNotification.MaxSelectedTeamNum)
+            {
+                var format = localizer.GetString("NumberOfGroupsExceededLimitWarningFormat");
+                stringBuilder.AppendFormat(format, groups.Count, DraftNotification.MaxSelectedTeamNum);
+                stringBuilder.AppendLine();
+            }
+
             errorMessage = stringBuilder.ToString();
             return stringBuilder.Length == 0;
         }

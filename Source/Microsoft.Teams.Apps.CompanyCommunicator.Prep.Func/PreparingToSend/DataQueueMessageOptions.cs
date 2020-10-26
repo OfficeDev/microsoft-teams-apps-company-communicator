@@ -10,10 +10,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     public class DataQueueMessageOptions
     {
         /// <summary>
-        /// Gets or sets the value for the delay to be applied to the data queue message
-        /// used as the first message to trigger an aggregation of the current results
-        /// of the notifications that have been sent.
+        /// Gets or sets the value for the delay to be applied to the data queue message.
         /// </summary>
-        public double FirstDataAggregationMessageDelayInSeconds { get; set; }
+        public double MessageDelayInSeconds { get; set; }
     }
 }

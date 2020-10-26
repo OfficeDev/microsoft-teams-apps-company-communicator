@@ -7,6 +7,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
+    using System;
+    using System.Globalization;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
@@ -15,14 +17,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.ConversationServices;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.DataServices;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.NotificationServices;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services.PrecheckServices;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
 
     /// <summary>
     /// Register services in DI container of the Azure functions system.
@@ -33,7 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         public override void Configure(IFunctionsHostBuilder builder)
         {
             // Add all options set from configuration values.
-            builder.Services.AddOptions<CompanyCommunicatorSendFunctionOptions>()
+            builder.Services.AddOptions<SendFunctionOptions>()
                 .Configure<IConfiguration>((companyCommunicatorSendFunctionOptions, configuration) =>
                 {
                     companyCommunicatorSendFunctionOptions.MaxNumberOfAttempts =
@@ -60,8 +59,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     // Defaulting this value to true because the main app should ensure all
                     // tables exist. It is here as a possible configuration setting in
                     // case it needs to be set differently.
-                    repositoryOptions.IsItExpectedThatTableAlreadyExists =
-                        configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
+                    repositoryOptions.EnsureTableExists =
+                        !configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
                 });
             builder.Services.AddOptions<MessageQueueOptions>()
                 .Configure<IConfiguration>((messageQueueOptions, configuration) =>
@@ -70,33 +69,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         configuration.GetValue<string>("ServiceBusConnection");
                 });
 
-            // Add the precheck service.
-            builder.Services.AddTransient<PrecheckService>();
+            builder.Services.AddLocalization();
 
-            // Add the create user conversation service.
-            builder.Services.AddTransient<CreateUserConversationService>();
-
-            // Add the notification services.
-            builder.Services.AddTransient<GetSendNotificationParamsService>();
-            builder.Services.AddTransient<SendNotificationService>();
-            builder.Services.AddTransient<DelaySendingNotificationService>();
-
-            // Add the result data service.
-            builder.Services.AddTransient<ManageResultDataService>();
+            // Set current culture.
+            var culture = Environment.GetEnvironmentVariable("i18n:DefaultCulture");
+            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(culture);
+            CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(culture);
 
             // Add bot services.
             builder.Services.AddSingleton<CommonMicrosoftAppCredentials>();
             builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
 
+            // Add teams services.
+            builder.Services.AddTransient<IMessageService, MessageService>();
+
             // Add repositories.
             builder.Services.AddSingleton<SendingNotificationDataRepository>();
             builder.Services.AddSingleton<GlobalSendingNotificationDataRepository>();
-            builder.Services.AddSingleton<UserDataRepository>();
             builder.Services.AddSingleton<SentNotificationDataRepository>();
 
             // Add service bus message queues.
             builder.Services.AddSingleton<SendQueue>();
+
+            // Add the Notification service.
+            builder.Services.AddTransient<INotificationService, NotificationService>();
         }
     }
 }

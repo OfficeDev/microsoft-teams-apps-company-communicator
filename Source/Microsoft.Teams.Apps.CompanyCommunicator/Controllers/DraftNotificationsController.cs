@@ -95,7 +95,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             var createdBy = this.HttpContext.User?.Identity?.Name;
-
+            notificationEntity.Title = this.localizer.GetString("DuplicateText", notificationEntity.Title);
             await this.notificationDataRepository.DuplicateDraftNotificationAsync(notificationEntity, createdBy);
 
             return this.Ok();
@@ -242,9 +242,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var groupNames = await this.groupsService.
-                GetByIdsAsync(notificationEntity.Groups).
-                Select(x => x.DisplayName).
+            var groupNames = await this.groupsService
+                .GetByIdsAsync(notificationEntity.Groups)
+                .Select(x => x.DisplayName).
                 ToListAsync();
 
             var result = new DraftNotificationSummaryForConsent

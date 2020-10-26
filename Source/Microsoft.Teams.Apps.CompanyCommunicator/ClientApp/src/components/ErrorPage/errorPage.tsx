@@ -1,24 +1,23 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Text } from '@stardust-ui/react';
 import './errorPage.scss';
 
 const ErrorPage: React.FunctionComponent<RouteComponentProps> = props => {
-    const unauthorizedErrorMessage = "Sorry, an error occurred while trying to access this service.";
-    const forbiddenErrorMessage = "Sorry, you do not have permission to access this page. Please contact your administrator to be granted permission."
-    const generalErrorMessage = "Ooops! An unexpected error seems to have occured. Why not try refreshing your page? Or you can contact your administrator if the problem persists.";
+    const { t } = useTranslation();
 
     function parseErrorMessage(): string {
         const params = props.match.params;
-        if('id' in params) {
+        if ('id' in params) {
             const id = params['id'];
-            if(id === "401") {
-                return `${unauthorizedErrorMessage}`;
-            } else if(id === "403") {
-                return `${forbiddenErrorMessage}`;
+            if (id === "401") {
+                return t("UnauthorizedErrorMessage");
+            } else if (id === "403") {
+                return t("ForbiddenErrorMessage");
             }
         }
-        return generalErrorMessage;
+        return t("GeneralErrorMessage");
     }
 
     return (

@@ -30,7 +30,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                   storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
                   tableName: NotificationDataTableNames.TableName,
                   defaultPartitionKey: NotificationDataTableNames.DraftNotificationsPartition,
-                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
             this.TableRowKeyGenerator = tableRowKeyGenerator;
         }
@@ -103,9 +103,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Failed = 0,
                     Throttled = 0,
                     TotalMessageCount = draftNotificationEntity.TotalMessageCount,
-                    IsCompleted = false,
                     SendingStartedDate = DateTime.UtcNow,
-                    IsPreparingToSend = true,
+                    Status = NotificationStatus.Queued.ToString(),
                 };
                 await this.CreateOrUpdateAsync(sentNotificationEntity);
 
@@ -141,7 +140,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     PartitionKey = NotificationDataTableNames.DraftNotificationsPartition,
                     RowKey = newId,
                     Id = newId,
-                    Title = notificationEntity.Title + " (copy)",
+                    Title = notificationEntity.Title,
                     ImageLink = notificationEntity.ImageLink,
                     Summary = notificationEntity.Summary,
                     Author = notificationEntity.Author,
@@ -166,6 +165,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <summary>
+        /// Updates notification status.
+        /// </summary>
+        /// <param name="notificationId">Notificaion Id.</param>
+        /// <param name="status">Status.</param>
+        /// <returns><see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task UpdateNotificationStatusAsync(string notificationId, NotificationStatus status)
+        {
+            var notificationDataEntity = await this.GetAsync(
+                NotificationDataTableNames.SentNotificationsPartition,
+                notificationId);
+
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.Status = status.ToString();
+                await this.CreateOrUpdateAsync(notificationDataEntity);
+            }
+        }
+
+        /// <summary>
         /// Save exception error message in a notification data entity.
         /// </summary>
         /// <param name="notificationDataEntityId">Notification data entity id.</param>
@@ -182,8 +200,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             {
                 notificationDataEntity.ErrorMessage =
                     this.AppendNewLine(notificationDataEntity.ErrorMessage, errorMessage);
+                notificationDataEntity.Status = NotificationStatus.Failed.ToString();
 
-                notificationDataEntity.IsCompleted = true;
+                // Set the end date as current date.
+                notificationDataEntity.SentDate = DateTime.UtcNow;
 
                 await this.CreateOrUpdateAsync(notificationDataEntity);
             }
@@ -208,7 +228,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 {
                     notificationDataEntity.WarningMessage =
                         this.AppendNewLine(notificationDataEntity.WarningMessage, warningMessage);
-
                     await this.CreateOrUpdateAsync(notificationDataEntity);
                 }
             }

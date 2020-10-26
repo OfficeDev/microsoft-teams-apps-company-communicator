@@ -2,8 +2,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.GroupMembers
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Graph;
 
@@ -11,7 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     /// Group Members Service.
     /// This gets the groups transitive members.
     /// </summary>
-    public class GroupMembersService : IGroupMembersService
+    internal class GroupMembersService : IGroupMembersService
     {
         private readonly IGraphServiceClient graphServiceClient;
 
@@ -19,14 +22,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// Initializes a new instance of the <see cref="GroupMembersService"/> class.
         /// </summary>
         /// <param name="graphServiceClient">graph service client.</param>
-        public GroupMembersService(IGraphServiceClient graphServiceClient)
+        internal GroupMembersService(IGraphServiceClient graphServiceClient)
         {
-            this.graphServiceClient = graphServiceClient;
+            this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
         }
-
-        private int MaxResultCount { get; set; } = 999;
-
-        private int MaxRetry { get; set; } = 10;
 
         /// <summary>
         /// get group members page by id.
@@ -39,8 +38,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                                     .Groups[groupId]
                                     .TransitiveMembers
                                     .Request()
-                                    .Top(this.MaxResultCount)
-                                    .WithMaxRetry(this.MaxRetry)
+                                    .Top(GraphConstants.MaxPageSize)
+                                    .WithMaxRetry(GraphConstants.MaxRetry)
                                     .GetAsync();
         }
 
@@ -58,6 +57,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             return await groupMembersRef
                 .NextPageRequest
                 .GetAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<User>> GetGroupMembersAsync(string groupId)
+        {
+            var response = await this.graphServiceClient
+                                    .Groups[groupId]
+                                    .TransitiveMembers
+                                    .Request()
+                                    .Top(GraphConstants.MaxPageSize)
+                                    .WithMaxRetry(GraphConstants.MaxRetry)
+                                    .GetAsync();
+
+            var users = response.OfType<User>().ToList();
+            while (response.NextPageRequest != null)
+            {
+                response = await response.NextPageRequest.GetAsync();
+                users?.AddRange(response.OfType<User>() ?? new List<User>());
+            }
+
+            return users;
         }
     }
 }

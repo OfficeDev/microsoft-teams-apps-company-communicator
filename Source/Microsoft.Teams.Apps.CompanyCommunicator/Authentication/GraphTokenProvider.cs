@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// <param name="tokenAcquisition">MSAL.NET token acquisition service.</param>
         public GraphTokenProvider(ITokenAcquisition tokenAcquisition)
         {
-            this.tokenAcquisition = tokenAcquisition;
+            this.tokenAcquisition = tokenAcquisition ?? throw new ArgumentNullException(nameof(tokenAcquisition));
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             else
             {
                 // we use MSAL.NET to get a token to call the API On Behalf Of the current user
-                accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] { Common.Constants.ScopeGroupReadAll });
+                accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] { Common.Constants.ScopeGroupReadAll, Common.Constants.ScopeAppCatalogReadAll });
             }
 
             return accessToken;

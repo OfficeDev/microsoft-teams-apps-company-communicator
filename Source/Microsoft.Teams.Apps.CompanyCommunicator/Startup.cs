@@ -4,6 +4,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
+    extern alias BetaLib;
+
     using System.Net;
     using global::Azure.Storage.Blobs;
     using Microsoft.AspNetCore.Builder;
@@ -23,10 +25,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SendBatchesData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
@@ -34,9 +37,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.Groups;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Localization;
+
+    using Beta = BetaLib::Microsoft.Graph;
 
     /// <summary>
     /// Register services in DI container, and set up middle-wares in the pipeline.
@@ -89,9 +95,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     repositoryOptions.StorageAccountConnectionString =
                         configuration.GetValue<string>("StorageAccountConnectionString");
 
-                    // Setting this to false because the main application should ensure that all
+                    // Setting this to true because the main application should ensure that all
                     // tables exist.
-                    repositoryOptions.IsItExpectedThatTableAlreadyExists = false;
+                    repositoryOptions.EnsureTableExists = true;
                 });
             services.AddOptions<MessageQueueOptions>()
                 .Configure<IConfiguration>((messageQueueOptions, configuration) =>
@@ -105,10 +111,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     dataQueueMessageOptions.ForceCompleteMessageDelayInSeconds =
                         configuration.GetValue<double>("ForceCompleteMessageDelayInSeconds", 86400);
                 });
+
+            services.AddOptions<UserAppOptions>()
+                .Configure<IConfiguration>((options, configuration) =>
+                {
+                    options.ProactivelyInstallUserApp =
+                        configuration.GetValue<bool>("ProactivelyInstallUserApp", true);
+
+                    options.UserAppExternalId =
+                        configuration.GetValue<string>("UserAppExternalId", "148a66bb-e83d-425a-927d-09f4299a9274");
+                });
+
             services.AddOptions();
 
             // Add localization services.
-            services.AddLocalization();
+            services.AddLocalizationSettings(this.Configuration);
 
             // Add authentication services.
             AuthenticationOptions authenticationOptionsParameter = new AuthenticationOptions();
@@ -144,8 +161,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddSingleton<UserDataRepository>();
             services.AddSingleton<SentNotificationDataRepository>();
             services.AddSingleton<NotificationDataRepository>();
-            services.AddSingleton<SendBatchesDataRepository>();
             services.AddSingleton<ExportDataRepository>();
+            services.AddSingleton<AppConfigRepository>();
 
             // Add service bus message queues.
             services.AddSingleton<PrepareToSendQueue>();
@@ -156,9 +173,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<DraftNotificationPreviewService>();
 
             // Add microsoft graph services.
-            services.AddTransient<IGraphServiceClient, GraphServiceClient>();
-            services.AddTransient<IAuthenticationProvider, GraphTokenProvider>();
-            services.AddScoped<IGroupsService, GroupsService>();
+            services.AddScoped<IAuthenticationProvider, GraphTokenProvider>();
+            services.AddScoped<IGraphServiceClient, GraphServiceClient>();
+            services.AddScoped<Beta.IGraphServiceClient, Beta.GraphServiceClient>();
+            services.AddScoped<IGraphServiceFactory, GraphServiceFactory>();
+            services.AddScoped<IGroupsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupsService());
+            services.AddScoped<IAppCatalogService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetAppCatalogService());
 
             // Add Application Insights telemetry.
             services.AddApplicationInsightsTelemetry();
@@ -166,6 +186,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             // Add miscellaneous dependencies.
             services.AddTransient<TableRowKeyGenerator>();
             services.AddTransient<AdaptiveCardCreator>();
+            services.AddSingleton<IAppSettingsService, AppSettingsService>();
         }
 
         /// <summary>
@@ -184,6 +205,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseRequestLocalization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

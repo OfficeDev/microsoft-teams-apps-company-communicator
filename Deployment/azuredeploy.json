@@ -31,6 +31,40 @@
         "description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
       }
     },
+    "ProactivelyInstallUserApp": {
+      "defaultValue": true,
+      "type": "Bool",
+      "metadata": {
+      "description": "If proactive app installation should be enabled."
+      }
+    },
+    "UserAppExternalId": {
+      "defaultValue": "148a66bb-e83d-425a-927d-09f4299a9274",
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "User app external ID."
+      }
+    },
+    "DefaultCulture": {
+      "defaultValue": "en-US",
+      "allowedValues": [
+        "en-US"
+      ],
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "Default culture."
+      }
+    },
+    "SupportedCultures": {
+      "defaultValue": "en-US",
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "Comma-delimited list of the supported cultures."
+      }
+    },
     "customDomainOption": {
       "type": "string",
       "allowedValues": [
@@ -136,7 +170,7 @@
     "serviceBusSendQueueName": "company-communicator-send",
     "serviceBusDataQueueName": "company-communicator-data",
     "serviceBusPrepareToSendQueueName": "company-communicator-prep",
-	  "serviceBusExportQueueName": "company-communicator-export",
+	"serviceBusExportQueueName": "company-communicator-export",
     "defaultSASKeyName": "RootManageSharedAccessKey",
     "authRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('serviceBusNamespaceName'), variables('defaultSASKeyName'))]",
     "sharedSkus": [
@@ -147,7 +181,11 @@
     "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]",
     "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]",
     "frontDoorName": "[parameters('baseResourceName')]",
-    "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.net'))]"
+    "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.net'))]",
+	  "ProactivelyInstallUserApp": "[parameters('ProactivelyInstallUserApp')]",
+    "UserAppExternalId": "[parameters('UserAppExternalId')]",
+    "i18n:DefaultCulture": "[parameters('DefaultCulture')]",
+    "i18n:SupportedCultures": "[parameters('SupportedCultures')]"
   },
   "resources": [
     {
@@ -205,6 +243,22 @@
             {
               "name": "SITE_ROLE",
               "value": "app"
+            },
+            {
+              "name": "i18n:DefaultCulture",
+              "value": "[variables('i18n:DefaultCulture')]"
+            },
+            {
+              "name": "i18n:SupportedCultures",
+              "value": "[variables('i18n:SupportedCultures')]"
+            },
+            {
+              "name": "ProactivelyInstallUserApp",
+              "value": "[variables('ProactivelyInstallUserApp')]"
+            },
+            {
+              "name": "UserAppExternalId",
+              "value": "[variables('UserAppExternalId')]"
             },
             {
               "name": "AzureAd:TenantId",
@@ -476,6 +530,22 @@
               "value": "function"
             },
             {
+              "name": "i18n:DefaultCulture",
+              "value": "[variables('i18n:DefaultCulture')]"
+            },
+            {
+              "name": "i18n:SupportedCultures",
+              "value": "[variables('i18n:SupportedCultures')]"
+            },
+            {
+              "name": "ProactivelyInstallUserApp",
+              "value": "[variables('ProactivelyInstallUserApp')]"
+            },
+            {
+              "name": "UserAppExternalId",
+              "value": "[variables('UserAppExternalId')]"
+            },
+            {
               "name": "AzureWebJobsStorage",
               "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
             },
@@ -571,6 +641,14 @@
               "value": "function"
             },
             {
+              "name": "i18n:DefaultCulture",
+              "value": "[variables('i18n:DefaultCulture')]"
+            },
+            {
+              "name": "i18n:SupportedCultures",
+              "value": "[variables('i18n:SupportedCultures')]"
+            },
+            {
               "name": "AzureWebJobsStorage",
               "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
             },
@@ -664,6 +742,14 @@
             {
               "name": "SITE_ROLE",
               "value": "function"
+            },
+            {
+              "name": "i18n:DefaultCulture",
+              "value": "[variables('i18n:DefaultCulture')]"
+            },
+            {
+              "name": "i18n:SupportedCultures",
+              "value": "[variables('i18n:SupportedCultures')]"
             },
             {
               "name": "AzureWebJobsStorage",

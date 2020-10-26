@@ -15,9 +15,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
+    using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Polly;
@@ -30,6 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         private readonly string microsoftAppId;
         private readonly BotFrameworkHttpAdapter botAdapter;
         private readonly UserDataRepository userDataRepository;
+        private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SendFileCardActivity"/> class.
@@ -37,14 +40,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <param name="botOptions">the bot options.</param>
         /// <param name="botAdapter">the users service.</param>
         /// <param name="userDataRepository">the user data repository.</param>
+        /// <param name="localizer">Localization service.</param>
         public SendFileCardActivity(
             IOptions<BotOptions> botOptions,
             BotFrameworkHttpAdapter botAdapter,
-            UserDataRepository userDataRepository)
+            UserDataRepository userDataRepository,
+            IStringLocalizer<Strings> localizer)
         {
             this.botAdapter = botAdapter;
             this.microsoftAppId = botOptions.Value.MicrosoftAppId;
             this.userDataRepository = userDataRepository;
+            this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
@@ -62,7 +68,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         {
             return await context.CallActivityWithRetryAsync<string>(
               nameof(SendFileCardActivity.SendFileCardActivityAsync),
-              ActivitySettings.CommonActivityRetryOptions,
+              FunctionSettings.DefaultRetryOptions,
               sendData);
         }
 
@@ -121,7 +127,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
 
             var fileCard = new FileConsentCard
             {
-                Description = "This file contains the results you exported.",
+                Description = this.localizer.GetString("FileCardDescription"),
                 AcceptContext = consentContext,
                 DeclineContext = consentContext,
             };

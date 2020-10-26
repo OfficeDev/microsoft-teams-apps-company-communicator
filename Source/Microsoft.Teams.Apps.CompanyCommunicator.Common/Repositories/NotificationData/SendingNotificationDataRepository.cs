@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                   storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
                   tableName: NotificationDataTableNames.TableName,
                   defaultPartitionKey: NotificationDataTableNames.SendingNotificationsPartition,
-                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
         }
     }

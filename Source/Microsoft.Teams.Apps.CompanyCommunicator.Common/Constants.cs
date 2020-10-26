@@ -15,6 +15,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         public const string ScopeGroupReadAll = "Group.Read.All";
 
         /// <summary>
+        /// AppCatalog Read All scope.
+        /// </summary>
+        public const string ScopeAppCatalogReadAll = "AppCatalog.Read.All";
+
+        /// <summary>
         /// get the user read scope.
         /// </summary>
         public const string ScopeUserRead = "User.Read";
@@ -58,10 +63,5 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         /// get the OData next page link.
         /// </summary>
         public const string ODataNextPageLink = "@odata.nextLink";
-
-        /// <summary>
-        /// get the admin consent error message.
-        /// </summary>
-        public const string AdminConsentError = "Contact your IT admin for permission to view this data";
     }
 }

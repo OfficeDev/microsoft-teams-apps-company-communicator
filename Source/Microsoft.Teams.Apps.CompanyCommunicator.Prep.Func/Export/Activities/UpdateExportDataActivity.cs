@@ -42,7 +42,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         {
             await context.CallActivityWithRetryAsync<Task>(
                                   nameof(UpdateExportDataActivity.UpdateExportDataActivityAsync),
-                                  ActivitySettings.CommonActivityRetryOptions,
+                                  FunctionSettings.DefaultRetryOptions,
                                   exportDataEntity);
         }
 

@@ -1,19 +1,22 @@
 import * as React from 'react';
-import './newMessage.scss';
-import './teamTheme.scss';
+import { RouteComponentProps } from 'react-router-dom';
+import { withTranslation, WithTranslation } from "react-i18next";
 import { Input, TextArea, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
+import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as AdaptiveCards from "adaptivecards";
 import { Button, Loader, Dropdown, Text } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
-import { RouteComponentProps } from 'react-router-dom';
-import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess } from '../../apis/messageListApi';
+
+import './newMessage.scss';
+import './teamTheme.scss';
+import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess  } from '../../apis/messageListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
+import { TFunction } from "i18next";
 
 type dropdownItem = {
     key: string,
@@ -72,17 +75,19 @@ export interface formState {
     errorButtonUrlMessage: string,
 }
 
-export interface INewMessageProps extends RouteComponentProps {
+export interface INewMessageProps extends RouteComponentProps, WithTranslation {
     getDraftMessagesList?: any;
 }
 
-export default class NewMessage extends React.Component<INewMessageProps, formState> {
+class NewMessage extends React.Component<INewMessageProps, formState> {
+    readonly localize: TFunction;
     private card: any;
 
     constructor(props: INewMessageProps) {
         super(props);
         initializeIcons();
-        this.card = getInitAdaptiveCard();
+        this.localize = this.props.t;
+        this.card = getInitAdaptiveCard(this.localize);
         this.setDefaultCard(this.card);
 
         this.state = {
@@ -195,12 +200,17 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
     }
 
     public setDefaultCard = (card: any) => {
-        setCardTitle(card, "Title");
+        const titleAsString = this.localize("TitleText");
+        const summaryAsString = this.localize("Summary");
+        const authorAsString = this.localize("Author1");
+        const buttonTitleAsString = this.localize("ButtonTitle");
+
+        setCardTitle(card, titleAsString);
         let imgUrl = getBaseUrl() + "/image/imagePlaceholder.png";
         setCardImageLink(card, imgUrl);
-        setCardSummary(card, "Summary");
-        setCardAuthor(card, "- Author");
-        setCardBtn(card, "Button title", "https://adaptivecards.io");
+        setCardSummary(card, summaryAsString);
+        setCardAuthor(card, authorAsString);
+        setCardBtn(card, buttonTitleAsString, "https://adaptivecards.io");
     }
 
     private getTeamList = async () => {
@@ -322,8 +332,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.title}
-                                    label="Title"
-                                    placeholder="Title (required)"
+                                    label={this.localize("TitleText")}
+                                    placeholder={this.localize("PlaceHolderTitle")}
                                     onChange={this.onTitleChanged}
                                     autoComplete="off"
                                     required
@@ -332,8 +342,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.imageLink}
-                                    label="Image URL"
-                                    placeholder="Image URL"
+                                    label={this.localize("ImageURL")}
+                                    placeholder={this.localize("ImageURL")}
                                     onChange={this.onImageLinkChanged}
                                     errorLabel={this.state.errorImageUrlMessage}
                                     autoComplete="off"
@@ -342,8 +352,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <TextArea
                                     className="inputField textArea"
                                     autoFocus
-                                    placeholder="Summary"
-                                    label="Summary"
+                                    placeholder={this.localize("Summary")}
+                                    label={this.localize("Summary")}
                                     value={this.state.summary}
                                     onChange={this.onSummaryChanged}
                                 />
@@ -351,8 +361,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.author}
-                                    label="Author"
-                                    placeholder="Author"
+                                    label={this.localize("Author")}
+                                    placeholder={this.localize("Author")}
                                     onChange={this.onAuthorChanged}
                                     autoComplete="off"
                                 />
@@ -360,8 +370,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.btnTitle}
-                                    label="Button title"
-                                    placeholder="Button title"
+                                    label={this.localize("ButtonTitle")}
+                                    placeholder={this.localize("ButtonTitle")}
                                     onChange={this.onBtnTitleChanged}
                                     autoComplete="off"
                                 />
@@ -369,8 +379,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                 <Input
                                     className="inputField"
                                     value={this.state.btnLink}
-                                    label="Button URL"
-                                    placeholder="Button URL"
+                                    label={this.localize("ButtonURL")}
+                                    placeholder={this.localize("ButtonURL")}
                                     onChange={this.onBtnLinkChanged}
                                     errorLabel={this.state.errorButtonUrlMessage}
                                     autoComplete="off"
@@ -382,7 +392,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
                         <div className="footerContainer">
                             <div className="buttonContainer">
-                                <Button content="Next" disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
+                                <Button content={this.localize("Next")} disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
                             </div>
                         </div>
                     </div>
@@ -393,55 +403,55 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                     <div className="taskModule">
                         <div className="formContainer">
                             <div className="formContentContainer" >
-                                <h3>Choose how you want to send your message</h3>
+                                <h3>{this.localize("SendHeadingText")}</h3>
                                 <RadiobuttonGroup
                                     className="radioBtns"
                                     value={this.state.selectedRadioBtn}
                                     onSelected={this.onGroupSelected}
                                 >
-                                    <Radiobutton name="grouped" value="teams" label="Send to General channel of specific teams" />
+                                    <Radiobutton name="grouped" value="teams" label={this.localize("SendToGeneralChannel")} />
                                     <Dropdown
                                         hidden={!this.state.teamsOptionSelected}
-                                        placeholder="Select team(s)"
+                                        placeholder={this.localize("SendToGeneralChannelPlaceHolder")}
                                         search
                                         multiple
                                         items={this.getItems()}
                                         value={this.state.selectedTeams}
                                         onSelectedChange={this.onTeamsChange}
-                                        noResultsMessage="We couldn't find any matches."
+                                        noResultsMessage={this.localize("NoMatchMessage")}
                                     />
-                                    <Radiobutton name="grouped" value="rosters" label="Send in chat to specific people" />
+                                    <Radiobutton name="grouped" value="rosters" label={this.localize("SendToRosters")} />
                                     <Dropdown
                                         hidden={!this.state.rostersOptionSelected}
-                                        placeholder="Choose team(s) members"
+                                        placeholder={this.localize("SendToRostersPlaceHolder")}
                                         search
                                         multiple
                                         items={this.getItems()}
                                         value={this.state.selectedRosters}
                                         onSelectedChange={this.onRostersChange}
-                                        noResultsMessage="We couldn't find any matches."
                                         unstable_pinned={this.state.unstablePinned}
+                                        noResultsMessage={this.localize("NoMatchMessage")}
                                     />
-                                    <Radiobutton name="grouped" value="allUsers" label="Send in chat to everyone" />
+                                    <Radiobutton name="grouped" value="allUsers" label={this.localize("SendToAllUsers")} />
                                     <div className={this.state.selectedRadioBtn === "allUsers" ? "" : "hide"}>
                                         <div className="noteText">
-                                            <Text error content="Note: This option sends the message to everyone in your org who has access to the app." />
+                                            <Text error content={this.localize("SendToAllUsersNote")} />
                                         </div>
                                     </div>
-                                    <Radiobutton name="grouped" value="groups" label="Send in chat to members in a M365 groups, Distribution groups or Security groups" />
+                                    <Radiobutton name="grouped" value="groups" label={this.localize("SendToGroups")} />
                                     <div className={this.state.groupsOptionSelected && !this.state.groupAccess ? "" : "hide"}>
                                         <div className="noteText">
-                                            <Text error content="Permissions needed. Ask your IT admin to enable this option for you." />
+                                            <Text error content={this.localize("SendToGroupsPermissionNote")} />
                                         </div>
                                     </div>
                                     <Dropdown
                                         className="hideToggle"
                                         hidden={!this.state.groupsOptionSelected || !this.state.groupAccess}
-                                        placeholder="Type the name or email address of the group(s)"
+                                        placeholder={this.localize("SendToGroupsPlaceHolder")}
                                         search={this.onGroupSearch}
                                         multiple
                                         loading={this.state.loading}
-                                        loadingMessage="Loading..."
+                                        loadingMessage={this.localize("LoadingText")}
                                         items={this.getGroupItems()}
                                         value={this.state.selectedGroups}
                                         onSearchQueryChange={this.onGroupSearchQueryChange}
@@ -451,7 +461,7 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
                                     />
                                     <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
                                         <div className="noteText">
-                                            <Text error content="Note: Group members will get your message, as long as they have this app in Teams." />
+                                            <Text error content={this.localize("SendToGroupsNote")} />
                                         </div>
                                     </div>
                                 </RadiobuttonGroup>
@@ -462,8 +472,8 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
 
                         <div className="footerContainer">
                             <div className="buttonContainer">
-                                <Button content="Back" onClick={this.onBack} secondary />
-                                <Button content="Save as draft" disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
+                                <Button content={this.localize("Back")} onClick={this.onBack} secondary />
+                                <Button content={this.localize("SaveAsDraft")} disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
                             </div>
                         </div>
                     </div>
@@ -859,3 +869,6 @@ export default class NewMessage extends React.Component<INewMessageProps, formSt
         adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
     }
 }
+
+const newMessageWithTranslation = withTranslation()(NewMessage);
+export default newMessageWithTranslation;
