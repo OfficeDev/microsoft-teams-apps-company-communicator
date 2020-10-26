@@ -1,6 +1,6 @@
-## Migration Guide
+## Company Communicator v3 Migration Guide
 
-## CCv3
+## Upgrading from v2.x to v3
 If you have the CCv2.x deployed and plan to migrate to CCv3, perform the following steps:
 
 ### 1. Read CCv2.x deployment parameters:
@@ -57,6 +57,14 @@ Please refer [step 2](https://github.com/OfficeDev/microsoft-teams-company-commu
 10. Wait for the deployment to finish. You can check the progress of the deployment from the "Notifications" pane of the Azure Portal. It may take **up to an hour** for the deployment to finish.
 
     > If the deployment fails, see [this section](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Troubleshooting#1-code-deployment-failure) of the Troubleshooting guide.
+
+11. Then go to the "Deployment Center" section of the app service. Click on the "Sync" to update the existing app service to the latest code in the GitHub repository.
+  ![Screenshot of refreshing code deployment](images/troubleshooting_sourcecontrols.png)
+
+12. Please repeat the above step (step 11) for the three function apps.
+    * [Base Resource Name]-prepare-function
+    * [Base Resource Name]-function
+    * [Base Resource Name]-data-function
 
 ### 3. Add Permissions to your app
 
