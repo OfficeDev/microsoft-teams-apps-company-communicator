@@ -89,10 +89,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             CloudBlobContainer container = client.GetContainerReference(Common.Constants.BlobContainerName);
             await container.CreateIfNotExistsAsync();
 
-            // Set the permissions so the blobs are public.
+            // Set the permissions so the blobs are private.
             BlobContainerPermissions permissions = new BlobContainerPermissions
             {
-                PublicAccess = BlobContainerPublicAccessType.Blob,
+                PublicAccess = BlobContainerPublicAccessType.Off,
             };
             await container.SetPermissionsAsync(permissions);
             CloudBlockBlob blob = container.GetBlockBlobReference(uploadData.fileName);
