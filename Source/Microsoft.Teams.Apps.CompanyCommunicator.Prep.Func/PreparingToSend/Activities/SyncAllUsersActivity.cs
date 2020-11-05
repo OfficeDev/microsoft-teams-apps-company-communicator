@@ -25,10 +25,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class SyncAllUsersActivity
     {
-        private readonly UserDataRepository userDataRepository;
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
+        private readonly IUserDataRepository userDataRepository;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
         private readonly IUsersService usersService;
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -40,10 +40,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="notificationDataRepository">Notification data entity repository.</param>
         /// <param name="localizer">Localization service.</param>
         public SyncAllUsersActivity(
-            UserDataRepository userDataRepository,
-            SentNotificationDataRepository sentNotificationDataRepository,
+            IUserDataRepository userDataRepository,
+            ISentNotificationDataRepository sentNotificationDataRepository,
             IUsersService usersService,
-            NotificationDataRepository notificationDataRepository,
+            INotificationDataRepository notificationDataRepository,
             IStringLocalizer<Strings> localizer)
         {
             this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));

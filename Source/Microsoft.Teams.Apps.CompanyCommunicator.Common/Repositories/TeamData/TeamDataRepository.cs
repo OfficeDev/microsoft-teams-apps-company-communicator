@@ -13,7 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
     /// <summary>
     /// Repository of the team data stored in the table storage.
     /// </summary>
-    public class TeamDataRepository : BaseRepository<TeamDataEntity>
+    public class TeamDataRepository : BaseRepository<TeamDataEntity>, ITeamDataRepository
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamDataRepository"/> class.
@@ -32,11 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
         {
         }
 
-        /// <summary>
-        /// Gets team data entities by ID values.
-        /// </summary>
-        /// <param name="teamIds">Team IDs.</param>
-        /// <returns>Team data entities.</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<TeamDataEntity>> GetTeamDataEntitiesByIdsAsync(IEnumerable<string> teamIds)
         {
             var rowKeysFilter = this.GetRowKeysFilter(teamIds);
@@ -44,11 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
             return await this.GetWithFilterAsync(rowKeysFilter);
         }
 
-        /// <summary>
-        /// Get team names by Ids.
-        /// </summary>
-        /// <param name="ids">Team ids.</param>
-        /// <returns>Names of the teams matching incoming ids.</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<string>> GetTeamNamesByIdsAsync(IEnumerable<string> ids)
         {
             if (ids == null || !ids.Any())
@@ -62,10 +54,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData
             return teamDataEntities.Select(p => p.Name).OrderBy(p => p);
         }
 
-        /// <summary>
-        /// Get all team data entities, and sort the result alphabetically by name.
-        /// </summary>
-        /// <returns>The team data entities sorted alphabetically by name.</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<TeamDataEntity>> GetAllSortedAlphabeticallyByNameAsync()
         {
             var teamDataEntities = await this.GetAllAsync();

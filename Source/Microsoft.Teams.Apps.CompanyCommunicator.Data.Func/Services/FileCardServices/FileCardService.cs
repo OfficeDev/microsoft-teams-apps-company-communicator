@@ -23,7 +23,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
     /// </summary>
     public class FileCardService : IFileCardService
     {
-        private readonly UserDataRepository userDataRepository;
+        private readonly IUserDataRepository userDataRepository;
         private readonly string microsoftAppId;
         private readonly BotFrameworkHttpAdapter botAdapter;
         private readonly IStringLocalizer<Strings> localizer;
@@ -38,7 +38,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
         public FileCardService(
             IOptions<BotOptions> botOptions,
             BotFrameworkHttpAdapter botAdapter,
-            UserDataRepository userDataRepository,
+            IUserDataRepository userDataRepository,
             IStringLocalizer<Strings> localizer)
         {
             this.botAdapter = botAdapter;

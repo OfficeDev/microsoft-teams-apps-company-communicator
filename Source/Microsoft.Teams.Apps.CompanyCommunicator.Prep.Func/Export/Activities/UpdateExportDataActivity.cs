@@ -16,13 +16,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     /// </summary>
     public class UpdateExportDataActivity
     {
-        private readonly ExportDataRepository exportDataRepository;
+        private readonly IExportDataRepository exportDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UpdateExportDataActivity"/> class.
         /// </summary>
         /// <param name="exportDataRepository">the export data respository.</param>
-        public UpdateExportDataActivity(ExportDataRepository exportDataRepository)
+        public UpdateExportDataActivity(IExportDataRepository exportDataRepository)
         {
             this.exportDataRepository = exportDataRepository;
         }

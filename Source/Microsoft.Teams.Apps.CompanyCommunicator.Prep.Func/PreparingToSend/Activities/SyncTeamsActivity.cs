@@ -22,10 +22,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class SyncTeamsActivity
     {
-        private readonly TeamDataRepository teamDataRepository;
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
+        private readonly ITeamDataRepository teamDataRepository;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
         private readonly IStringLocalizer<Strings> localizer;
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SyncTeamsActivity"/> class.
@@ -35,10 +35,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="localizer">Localization service.</param>
         /// <param name="notificationDataRepository">Notification data entity repository.</param>
         public SyncTeamsActivity(
-            TeamDataRepository teamDataRepository,
-            SentNotificationDataRepository sentNotificationDataRepository,
+            ITeamDataRepository teamDataRepository,
+            ISentNotificationDataRepository sentNotificationDataRepository,
             IStringLocalizer<Strings> localizer,
-            NotificationDataRepository notificationDataRepository)
+            INotificationDataRepository notificationDataRepository)
         {
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));

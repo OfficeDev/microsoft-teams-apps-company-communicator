@@ -31,7 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     {
         private readonly string microsoftAppId;
         private readonly BotFrameworkHttpAdapter botAdapter;
-        private readonly UserDataRepository userDataRepository;
+        private readonly IUserDataRepository userDataRepository;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         public SendFileCardActivity(
             IOptions<BotOptions> botOptions,
             BotFrameworkHttpAdapter botAdapter,
-            UserDataRepository userDataRepository,
+            IUserDataRepository userDataRepository,
             IStringLocalizer<Strings> localizer)
         {
             this.botAdapter = botAdapter;

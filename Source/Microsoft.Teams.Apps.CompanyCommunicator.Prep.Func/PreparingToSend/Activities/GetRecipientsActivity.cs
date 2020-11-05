@@ -18,13 +18,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class GetRecipientsActivity
     {
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientsActivity"/> class.
         /// </summary>
         /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
-        public GetRecipientsActivity(SentNotificationDataRepository sentNotificationDataRepository)
+        public GetRecipientsActivity(ISentNotificationDataRepository sentNotificationDataRepository)
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
         }

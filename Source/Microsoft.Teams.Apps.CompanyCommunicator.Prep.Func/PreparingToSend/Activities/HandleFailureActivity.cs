@@ -18,7 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class HandleFailureActivity
     {
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="notificationDataRepository">Notification data repository.</param>
         /// <param name="localizer">Localization service.</param>
         public HandleFailureActivity(
-            NotificationDataRepository notificationDataRepository,
+            INotificationDataRepository notificationDataRepository,
             IStringLocalizer<Strings> localizer)
         {
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));

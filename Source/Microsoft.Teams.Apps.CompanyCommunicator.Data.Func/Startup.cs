@@ -103,13 +103,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             builder.Services.AddTransient<UpdateNotificationDataService>();
 
             // Add repositories.
-            builder.Services.AddSingleton<NotificationDataRepository>();
-            builder.Services.AddSingleton<SentNotificationDataRepository>();
-            builder.Services.AddSingleton<UserDataRepository>();
-            builder.Services.AddSingleton<ExportDataRepository>();
+            builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
+            builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
+            builder.Services.AddSingleton<IUserDataRepository, UserDataRepository>();
+            builder.Services.AddSingleton<IExportDataRepository,ExportDataRepository>();
 
             // Add service bus message queues.
-            builder.Services.AddSingleton<DataQueue>();
+            builder.Services.AddSingleton<IDataQueue, DataQueue>();
         }
     }
 }

@@ -22,8 +22,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class DataAggregationTriggerActivity
     {
-        private readonly NotificationDataRepository notificationDataRepository;
-        private readonly DataQueue dataQueue;
+        private readonly INotificationDataRepository notificationDataRepository;
+        private readonly IDataQueue dataQueue;
         private readonly double messageDelayInSeconds;
 
         /// <summary>
@@ -33,8 +33,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="dataQueue">The data queue.</param>
         /// <param name="options">The data queue message options.</param>
         public DataAggregationTriggerActivity(
-            NotificationDataRepository notificationDataRepository,
-            DataQueue dataQueue,
+            INotificationDataRepository notificationDataRepository,
+            IDataQueue dataQueue,
             IOptions<DataQueueMessageOptions> options)
         {
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));

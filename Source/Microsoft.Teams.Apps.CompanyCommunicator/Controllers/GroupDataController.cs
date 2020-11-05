@@ -21,7 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
     public class GroupDataController : Controller
     {
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
         private readonly IGroupsService groupsService;
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notificationDataRepository">Notification data repository instance.</param>
         /// <param name="groupsService">Microsoft Graph service instance.</param>
         public GroupDataController(
-            NotificationDataRepository notificationDataRepository,
+            INotificationDataRepository notificationDataRepository,
             IGroupsService groupsService)
         {
             this.notificationDataRepository = notificationDataRepository;

@@ -31,10 +31,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     /// </summary>
     public class HandleExportFailureActivity
     {
-        private readonly ExportDataRepository exportDataRepository;
+        private readonly IExportDataRepository exportDataRepository;
         private readonly string storageConnectionString;
         private readonly BlobContainerClient blobContainerClient;
-        private readonly UserDataRepository userDataRepository;
+        private readonly IUserDataRepository userDataRepository;
         private readonly string microsoftAppId;
         private readonly BotFrameworkHttpAdapter botAdapter;
         private readonly IStringLocalizer<Strings> localizer;
@@ -49,11 +49,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <param name="userDataRepository">the user data repository.</param>
         /// <param name="localizer">Localization service.</param>
         public HandleExportFailureActivity(
-            ExportDataRepository exportDataRepository,
+            IExportDataRepository exportDataRepository,
             IOptions<RepositoryOptions> repositoryOptions,
             IOptions<BotOptions> botOptions,
             BotFrameworkHttpAdapter botAdapter,
-            UserDataRepository userDataRepository,
+            IUserDataRepository userDataRepository,
             IStringLocalizer<Strings> localizer)
         {
             this.exportDataRepository = exportDataRepository;

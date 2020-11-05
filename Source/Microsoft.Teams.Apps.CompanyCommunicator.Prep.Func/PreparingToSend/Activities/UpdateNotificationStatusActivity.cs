@@ -15,13 +15,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class UpdateNotificationStatusActivity
     {
-        private readonly NotificationDataRepository notificationRepository;
+        private readonly INotificationDataRepository notificationRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UpdateNotificationStatusActivity"/> class.
         /// </summary>
         /// <param name="notificationRepository">Notification data repository.</param>
-        public UpdateNotificationStatusActivity(NotificationDataRepository notificationRepository)
+        public UpdateNotificationStatusActivity(INotificationDataRepository notificationRepository)
         {
             this.notificationRepository = notificationRepository ?? throw new ArgumentNullException(nameof(notificationRepository));
         }

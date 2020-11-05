@@ -85,12 +85,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<IMessageService, MessageService>();
 
             // Add repositories.
-            builder.Services.AddSingleton<SendingNotificationDataRepository>();
-            builder.Services.AddSingleton<GlobalSendingNotificationDataRepository>();
-            builder.Services.AddSingleton<SentNotificationDataRepository>();
+            builder.Services.AddSingleton<ISendingNotificationDataRepository, SendingNotificationDataRepository>();
+            builder.Services.AddSingleton<IGlobalSendingNotificationDataRepository, GlobalSendingNotificationDataRepository>();
+            builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
 
             // Add service bus message queues.
-            builder.Services.AddSingleton<SendQueue>();
+            builder.Services.AddSingleton<ISendQueue, SendQueue>();
 
             // Add the Notification service.
             builder.Services.AddTransient<INotificationService, NotificationService>();

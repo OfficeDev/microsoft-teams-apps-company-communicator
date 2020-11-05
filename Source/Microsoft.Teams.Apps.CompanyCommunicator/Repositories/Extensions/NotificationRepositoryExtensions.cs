@@ -22,7 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
         /// <param name="userName">Name of the user who is running the application.</param>
         /// <returns>The newly created notification's id.</returns>
         public static async Task<string> CreateDraftNotificationAsync(
-            this NotificationDataRepository notificationRepository,
+            this INotificationDataRepository notificationRepository,
             DraftNotification notification,
             string userName)
         {

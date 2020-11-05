@@ -27,12 +27,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class SyncTeamMembersActivity
     {
-        private readonly TeamDataRepository teamDataRepository;
+        private readonly ITeamDataRepository teamDataRepository;
         private readonly ITeamMembersService memberService;
-        private readonly NotificationDataRepository notificationDataRepository;
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
         private readonly IStringLocalizer<Strings> localizer;
-        private readonly UserDataRepository userDataRepository;
+        private readonly IUserDataRepository userDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SyncTeamMembersActivity"/> class.
@@ -44,12 +44,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="localizer">Localization service.</param>
         /// <param name="userDataRepository">User Data repository.</param>
         public SyncTeamMembersActivity(
-            TeamDataRepository teamDataRepository,
+            ITeamDataRepository teamDataRepository,
             ITeamMembersService memberService,
-            NotificationDataRepository notificationDataRepository,
-            SentNotificationDataRepository sentNotificationDataRepository,
+            INotificationDataRepository notificationDataRepository,
+            ISentNotificationDataRepository sentNotificationDataRepository,
             IStringLocalizer<Strings> localizer,
-            UserDataRepository userDataRepository)
+            IUserDataRepository userDataRepository)
         {
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.memberService = memberService ?? throw new ArgumentNullException(nameof(memberService));

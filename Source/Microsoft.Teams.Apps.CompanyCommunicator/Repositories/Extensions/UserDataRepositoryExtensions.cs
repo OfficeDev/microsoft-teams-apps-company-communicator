@@ -20,7 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
         /// <param name="activity">Bot conversation update activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         public static async Task SaveUserDataAsync(
-            this UserDataRepository userDataRepository,
+            this IUserDataRepository userDataRepository,
             IConversationUpdateActivity activity)
         {
             var userDataEntity = UserDataRepositoryExtensions.ParseUserData(activity);
@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
         /// <param name="activity">Bot conversation update activity instance.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         public static async Task RemoveUserDataAsync(
-            this UserDataRepository userDataRepository,
+            this IUserDataRepository userDataRepository,
             IConversationUpdateActivity activity)
         {
             var userDataEntity = UserDataRepositoryExtensions.ParseUserData(activity);

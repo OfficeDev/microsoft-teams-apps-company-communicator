@@ -28,9 +28,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     {
         private readonly TeamsConversationOptions options;
         private readonly IConversationService conversationService;
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
-        private readonly UserDataRepository userDataRepository;
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
+        private readonly IUserDataRepository userDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
         private readonly IAppManagerService appManagerService;
         private readonly IChatsService chatsService;
         private readonly IAppSettingsService appSettingsService;
@@ -50,9 +50,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="localizer">Localization service.</param>
         public TeamsConversationActivity(
             IConversationService conversationService,
-            SentNotificationDataRepository sentNotificationDataRepository,
-            UserDataRepository userDataRepository,
-            NotificationDataRepository notificationDataRepository,
+            ISentNotificationDataRepository sentNotificationDataRepository,
+            IUserDataRepository userDataRepository,
+            INotificationDataRepository notificationDataRepository,
             IAppManagerService appManagerService,
             IChatsService chatsService,
             IAppSettingsService appSettingsService,

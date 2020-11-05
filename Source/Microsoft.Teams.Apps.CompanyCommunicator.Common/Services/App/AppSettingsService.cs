@@ -13,7 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
     /// </summary>
     public class AppSettingsService : IAppSettingsService
     {
-        private readonly AppConfigRepository repository;
+        private readonly IAppConfigRepository repository;
 
         private string serviceUrl;
         private string userAppId;
@@ -22,7 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
         /// Initializes a new instance of the <see cref="AppSettingsService"/> class.
         /// </summary>
         /// <param name="repository">App configuration repository.</param>
-        public AppSettingsService(AppConfigRepository repository)
+        public AppSettingsService(IAppConfigRepository repository)
         {
             this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }

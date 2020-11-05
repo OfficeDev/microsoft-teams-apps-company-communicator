@@ -21,14 +21,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     /// </summary>
     public class PrepareToSendFunction
     {
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PrepareToSendFunction"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository.</param>
         public PrepareToSendFunction(
-            NotificationDataRepository notificationDataRepository)
+            INotificationDataRepository notificationDataRepository)
         {
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
         }

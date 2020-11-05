@@ -23,10 +23,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     {
         private static readonly double TenMinutes = 10;
 
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
         private readonly AggregateSentNotificationDataService aggregateSentNotificationDataService;
         private readonly UpdateNotificationDataService updateNotificationDataService;
-        private readonly DataQueue dataQueue;
+        private readonly IDataQueue dataQueue;
         private readonly double firstTenMinutesRequeueMessageDelayInSeconds;
         private readonly double requeueMessageDelayInSeconds;
 
@@ -40,10 +40,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
         /// <param name="dataQueue">The data queue.</param>
         /// <param name="dataQueueMessageOptions">The data queue message options.</param>
         public CompanyCommunicatorDataFunction(
-            NotificationDataRepository notificationDataRepository,
+            INotificationDataRepository notificationDataRepository,
             AggregateSentNotificationDataService aggregateSentNotificationDataService,
             UpdateNotificationDataService updateNotificationDataService,
-            DataQueue dataQueue,
+            IDataQueue dataQueue,
             IOptions<DataQueueMessageOptions> dataQueueMessageOptions)
         {
             this.notificationDataRepository = notificationDataRepository;

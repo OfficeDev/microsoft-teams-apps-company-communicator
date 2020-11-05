@@ -23,8 +23,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
     /// </summary>
     public class DataStreamFacade : IDataStreamFacade
     {
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
-        private readonly TeamDataRepository teamDataRepository;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
+        private readonly ITeamDataRepository teamDataRepository;
         private readonly IUsersService usersService;
         private readonly IStringLocalizer<Strings> localizer;
 
@@ -36,8 +36,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
         /// <param name="usersService">the users service.</param>
         /// <param name="localizer">Localization service.</param>
         public DataStreamFacade(
-            SentNotificationDataRepository sentNotificationDataRepository,
-            TeamDataRepository teamDataRepository,
+            ISentNotificationDataRepository sentNotificationDataRepository,
+            ITeamDataRepository teamDataRepository,
             IUsersService usersService,
             IStringLocalizer<Strings> localizer)
         {

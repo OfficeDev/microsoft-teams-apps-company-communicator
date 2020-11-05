@@ -124,18 +124,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
 
             // Add repositories.
-            builder.Services.AddSingleton<NotificationDataRepository>();
-            builder.Services.AddSingleton<SendingNotificationDataRepository>();
-            builder.Services.AddSingleton<SentNotificationDataRepository>();
-            builder.Services.AddSingleton<UserDataRepository>();
-            builder.Services.AddSingleton<TeamDataRepository>();
-            builder.Services.AddSingleton<ExportDataRepository>();
-            builder.Services.AddSingleton<AppConfigRepository>();
+            builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
+            builder.Services.AddSingleton<ISendingNotificationDataRepository, SendingNotificationDataRepository>();
+            builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
+            builder.Services.AddSingleton<IUserDataRepository, UserDataRepository>();
+            builder.Services.AddSingleton<ITeamDataRepository, TeamDataRepository>();
+            builder.Services.AddSingleton<IExportDataRepository, ExportDataRepository>();
+            builder.Services.AddSingleton<IAppConfigRepository, AppConfigRepository>();
 
             // Add service bus message queues.
-            builder.Services.AddSingleton<SendQueue>();
-            builder.Services.AddSingleton<DataQueue>();
-            builder.Services.AddSingleton<ExportQueue>();
+            builder.Services.AddSingleton<ISendQueue,SendQueue>();
+            builder.Services.AddSingleton<IDataQueue, DataQueue>();
+            builder.Services.AddSingleton<IExportQueue, ExportQueue>();
 
             // Add miscellaneous dependencies.
             builder.Services.AddTransient<TableRowKeyGenerator>();

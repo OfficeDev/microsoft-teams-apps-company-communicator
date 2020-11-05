@@ -157,17 +157,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<IBot, CompanyCommunicatorBot>();
 
             // Add repositories.
-            services.AddSingleton<TeamDataRepository>();
-            services.AddSingleton<UserDataRepository>();
-            services.AddSingleton<SentNotificationDataRepository>();
-            services.AddSingleton<NotificationDataRepository>();
-            services.AddSingleton<ExportDataRepository>();
-            services.AddSingleton<AppConfigRepository>();
+            services.AddSingleton<ITeamDataRepository, TeamDataRepository>();
+            services.AddSingleton<IUserDataRepository, UserDataRepository>();
+            services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
+            services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
+            services.AddSingleton<IExportDataRepository, ExportDataRepository>();
+            services.AddSingleton<IAppConfigRepository, AppConfigRepository>();
 
             // Add service bus message queues.
-            services.AddSingleton<PrepareToSendQueue>();
-            services.AddSingleton<DataQueue>();
-            services.AddSingleton<ExportQueue>();
+            services.AddSingleton<IPrepareToSendQueue, PrepareToSendQueue>();
+            services.AddSingleton<IDataQueue, DataQueue>();
+            services.AddSingleton<IExportQueue, ExportQueue>();
 
             // Add draft notification preview services.
             services.AddTransient<DraftNotificationPreviewService>();

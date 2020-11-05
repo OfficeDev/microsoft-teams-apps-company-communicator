@@ -6,11 +6,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
 {
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
 
     /// <summary>
     /// App configuration repository.
     /// </summary>
-    public class AppConfigRepository : BaseRepository<AppConfigEntity>
+    public class AppConfigRepository : BaseRepository<AppConfigEntity>, IAppConfigRepository
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AppConfigRepository"/> class.

@@ -27,8 +27,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
     public class DraftNotificationsController : ControllerBase
     {
-        private readonly NotificationDataRepository notificationDataRepository;
-        private readonly TeamDataRepository teamDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
+        private readonly ITeamDataRepository teamDataRepository;
         private readonly DraftNotificationPreviewService draftNotificationPreviewService;
         private readonly IGroupsService groupsService;
         private readonly IStringLocalizer<Strings> localizer;
@@ -42,8 +42,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="localizer">Localization service.</param>
         /// <param name="groupsService">group service.</param>
         public DraftNotificationsController(
-            NotificationDataRepository notificationDataRepository,
-            TeamDataRepository teamDataRepository,
+            INotificationDataRepository notificationDataRepository,
+            ITeamDataRepository teamDataRepository,
             DraftNotificationPreviewService draftNotificationPreviewService,
             IStringLocalizer<Strings> localizer,
             IGroupsService groupsService)

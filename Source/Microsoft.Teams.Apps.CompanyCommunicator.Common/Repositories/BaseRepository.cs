@@ -16,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
     /// Base repository for the data stored in the Azure Table Storage.
     /// </summary>
     /// <typeparam name="T">Entity class type.</typeparam>
-    public class BaseRepository<T>
+    public class BaseRepository<T> : IRepository<T>
         where T : TableEntity, new()
     {
         private readonly string defaultPartitionKey;
@@ -49,9 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
         }
 
-        /// <summary>
-        /// Gets cloud table instance.
-        /// </summary>
+        /// <inheritdoc/>
         public CloudTable Table { get; }
 
         /// <summary>
@@ -59,11 +57,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// </summary>
         protected ILogger Logger { get; }
 
-        /// <summary>
-        /// Create or update an entity in the table storage.
-        /// </summary>
-        /// <param name="entity">Entity to be created or updated.</param>
-        /// <returns>A task that represents the work queued to execute.</returns>
+        /// <inheritdoc/>
         public async Task CreateOrUpdateAsync(T entity)
         {
             try
@@ -78,11 +72,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
         }
 
-        /// <summary>
-        /// Insert or merge an entity in the table storage.
-        /// </summary>
-        /// <param name="entity">Entity to be inserted or merged.</param>
-        /// <returns>A task that represents the work queued to execute.</returns>
+        /// <inheritdoc/>
         public async Task InsertOrMergeAsync(T entity)
         {
             try
@@ -97,11 +87,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
         }
 
-        /// <summary>
-        /// Delete an entity in the table storage.
-        /// </summary>
-        /// <param name="entity">Entity to be deleted.</param>
-        /// <returns>A task that represents the work queued to execute.</returns>
+        /// <inheritdoc/>
         public async Task DeleteAsync(T entity)
         {
             try
@@ -125,12 +111,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
         }
 
-        /// <summary>
-        /// Get an entity by the keys in the table storage.
-        /// </summary>
-        /// <param name="partitionKey">The partition key of the entity.</param>
-        /// <param name="rowKey">The row key for the entity.</param>
-        /// <returns>The entity matching the keys.</returns>
+        /// <inheritdoc/>
         public async Task<T> GetAsync(string partitionKey, string rowKey)
         {
             try
@@ -146,12 +127,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
         }
 
-        /// <summary>
-        /// Get entities from the table storage in a partition with a filter.
-        /// </summary>
-        /// <param name="filter">Filter to the result.</param>
-        /// <param name="partition">Partition key value.</param>
-        /// <returns>All data entities.</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<T>> GetWithFilterAsync(string filter, string partition = null)
         {
             try
@@ -169,12 +145,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
         }
 
-        /// <summary>
-        /// Get all data entities from the table storage in a partition.
-        /// </summary>
-        /// <param name="partition">Partition key value.</param>
-        /// <param name="count">The max number of desired entities.</param>
-        /// <returns>All data entities.</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<T>> GetAllAsync(string partition = null, int? count = null)
         {
             try
@@ -191,11 +162,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
         }
 
-        /// <summary>
-        /// Get filtered data entities by date time from the table storage.
-        /// </summary>
-        /// <param name="dateTime">less than date time.</param>
-        /// <returns>Filtered data entities.</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<T>> GetAllLessThanDateTimeAsync(DateTime dateTime)
         {
             var filterByDate = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.LessThanOrEqual, dateTime);
@@ -207,12 +174,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             return entities;
         }
 
-        /// <summary>
-        /// Get all data stream from the table storage in a partition.
-        /// </summary>
-        /// <param name="partition">Partition key value.</param>
-        /// <param name="count">The max number of desired entities.</param>
-        /// <returns>All data stream..</returns>
+        /// <inheritdoc/>
         public async IAsyncEnumerable<IEnumerable<T>> GetStreamsAsync(string partition = null, int? count = null)
         {
             var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
@@ -232,12 +194,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
         }
 
-        /// <summary>
-        /// Insert or merge a batch of entities in Azure table storage.
-        /// A batch can contain up to 100 entities.
-        /// </summary>
-        /// <param name="entities">Entities to be inserted or merged in Azure table storage.</param>
-        /// <returns>A task that represents the work queued to execute.</returns>
+        /// <inheritdoc/>
         public async Task BatchInsertOrMergeAsync(IEnumerable<T> entities)
         {
             try
@@ -268,12 +225,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
             }
         }
 
-        /// <summary>
-        /// Insert or merge a batch of entities in Azure table storage.
-        /// A batch can contain up to 100 entities.
-        /// </summary>
-        /// <param name="entities">Entities to be inserted or merged in Azure table storage.</param>
-        /// <returns>A task that represents the work queued to execute.</returns>
+        /// <inheritdoc/>
         public async Task BatchDeleteAsync(IEnumerable<T> entities)
         {
             var array = entities.ToArray();

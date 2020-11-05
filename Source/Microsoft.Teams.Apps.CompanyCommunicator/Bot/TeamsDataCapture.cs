@@ -21,8 +21,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         private const string PersonalType = "personal";
         private const string ChannelType = "channel";
 
-        private readonly TeamDataRepository teamDataRepository;
-        private readonly UserDataRepository userDataRepository;
+        private readonly ITeamDataRepository teamDataRepository;
+        private readonly IUserDataRepository userDataRepository;
         private readonly IAppSettingsService appSettingsService;
 
         /// <summary>
@@ -32,8 +32,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <param name="userDataRepository">User data repository instance.</param>
         /// <param name="appSettingsService">App Settings service.</param>
         public TeamsDataCapture(
-            TeamDataRepository teamDataRepository,
-            UserDataRepository userDataRepository,
+            ITeamDataRepository teamDataRepository,
+            IUserDataRepository userDataRepository,
             IAppSettingsService appSettingsService)
         {
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));

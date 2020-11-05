@@ -22,10 +22,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
     public class ExportController : Controller
     {
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
-        private readonly ExportDataRepository exportDataRepository;
-        private readonly UserDataRepository userDataRepository;
-        private readonly ExportQueue exportQueue;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
+        private readonly IExportDataRepository exportDataRepository;
+        private readonly IUserDataRepository userDataRepository;
+        private readonly IExportQueue exportQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportController"/> class.
@@ -35,10 +35,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="userDataRepository">User data repository instance.</param>
         /// <param name="exportQueue">The service bus queue for the export queue.</param>
         public ExportController(
-            SentNotificationDataRepository sentNotificationDataRepository,
-            ExportDataRepository exportDataRepository,
-            UserDataRepository userDataRepository,
-            ExportQueue exportQueue)
+            ISentNotificationDataRepository sentNotificationDataRepository,
+            IExportDataRepository exportDataRepository,
+            IUserDataRepository userDataRepository,
+            IExportQueue exportQueue)
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository;
             this.exportDataRepository = exportDataRepository;

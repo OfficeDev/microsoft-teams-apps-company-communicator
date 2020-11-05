@@ -17,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
     /// Base Azure service bus queue service.
     /// </summary>
     /// <typeparam name="T">Queue message class type.</typeparam>
-    public class BaseQueue<T>
+    public class BaseQueue<T> : IBaseQueue<T>
     {
         /// <summary>
         /// Constant for the service bus connection configuration key.
@@ -41,11 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
             this.messageSender = new MessageSender(serviceBusConnectionString, queueName);
         }
 
-        /// <summary>
-        /// Sends a message to the Azure service bus queue.
-        /// </summary>
-        /// <param name="queueMessageContent">Content of the message to be sent to the service bus queue.</param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task SendAsync(T queueMessageContent)
         {
             var messageBody = JsonConvert.SerializeObject(queueMessageContent);
@@ -54,11 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
             await this.messageSender.SendAsync(serviceBusMessage);
         }
 
-        /// <summary>
-        /// Sends a list of messages to the Azure service bus queue.
-        /// </summary>
-        /// <param name="queueMessageContentBatch">A batch of message contents to be sent to the service bus queue.</param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task SendAsync(IEnumerable<T> queueMessageContentBatch)
         {
             var queueMessageContentBatchAsList = queueMessageContentBatch.ToList();
@@ -82,12 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
             await this.messageSender.SendAsync(serviceBusMessages);
         }
 
-        /// <summary>
-        /// Send message marked with a delay to the Azure service bus queue.
-        /// </summary>
-        /// <param name="queueMessageContent">Content of the message to be sent.</param>
-        /// <param name="delayNumberOfSeconds">Number of seconds to apply as a delay to the message.</param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task SendDelayedAsync(T queueMessageContent, double delayNumberOfSeconds)
         {
             var messageBody = JsonConvert.SerializeObject(queueMessageContent);
