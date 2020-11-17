@@ -102,5 +102,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
             // Update in-memory cache.
             this.userAppId = userAppId;
         }
+
+        /// <inheritdoc/>
+        public async Task DeleteUserAppIdAsync()
+        {
+            var appId = await this.GetUserAppIdAsync();
+            if (string.IsNullOrEmpty(appId))
+            {
+                // User App id isn't cached.
+                return;
+            }
+
+            var appConfig = new AppConfigEntity()
+            {
+                PartitionKey = AppConfigTableName.SettingsPartition,
+                RowKey = AppConfigTableName.UserAppIdRowKey,
+            };
+
+            await this.repository.DeleteAsync(appConfig);
+
+            // Clear in-memory cache.
+            this.userAppId = null;
+        }
     }
 }

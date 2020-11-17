@@ -140,7 +140,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             // Add miscellaneous dependencies.
             builder.Services.AddTransient<TableRowKeyGenerator>();
             builder.Services.AddTransient<AdaptiveCardCreator>();
-            builder.Services.AddSingleton<IAppSettingsService, AppSettingsService>();
+            builder.Services.AddTransient<IAppSettingsService, AppSettingsService>();
 
             // Add Teams services.
             builder.Services.AddTransient<ITeamMembersService, TeamMembersService>();

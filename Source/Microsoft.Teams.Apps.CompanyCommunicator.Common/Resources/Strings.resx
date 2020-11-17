@@ -165,6 +165,13 @@
   <data name="Failed" xml:space="preserve">
     <value>Failed</value>
   </data>
+  <data name="UserAppNotFound" xml:space="preserve">
+    <value>User application not found. Make sure the User app is uploaded to your organization's app catalog.</value>
+  </data>
+  <data name="FailedToFindUserAppInAppCatalog" xml:space="preserve">
+    <value>Failed to find the User application: {0} in the organization's app catalog.</value>
+    <comment>{0} - app Id. (GUID).</comment>
+  </data>
   <data name="FailedToCreateConversationFormat" xml:space="preserve">
     <value>Failed to create conversation. Error message: {0}</value>
   </data>

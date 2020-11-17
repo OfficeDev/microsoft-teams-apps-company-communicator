@@ -170,7 +170,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             var appId = await this.appSettingsService.GetUserAppIdAsync();
             if (string.IsNullOrEmpty(appId))
             {
-                log.LogError("User app id not available.");
+                // This may happen if the User app is not added to the organization's app catalog.
+                var errorMessage = this.localizer.GetString("UserAppNotFound");
+                log.LogError(errorMessage);
+                await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
                 return string.Empty;
             }
 
@@ -187,9 +190,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                         // Note: application is already installed, we should fetch conversation id for this user.
                         log.LogWarning("Application is already installed for the user.");
                         break;
+                    case HttpStatusCode.NotFound:
+                        // Failed to find the User app in App Catalog. This may happen if the User app is deleted from app catalog.
+                        var message = this.localizer.GetString("FailedToFindUserAppInAppCatalog", appId);
+                        log.LogError(message);
+                        await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, message);
 
+                        // Clear cached user app id. The app may fetch an updated app id next time a message is sent.
+                        await this.appSettingsService.DeleteUserAppIdAsync();
+                        return string.Empty;
                     default:
-                        var errorMessage = this.localizer.GetString("FailedToInstallApplicationForUserFormat", recipient?.UserId, exception.Message);
+                        var errorMessage = this.localizer.GetString("FailedToInstallApplicationForUserFormat", recipient?.RecipientId, exception.Message);
                         log.LogError(exception, errorMessage);
                         await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
                         return string.Empty;
