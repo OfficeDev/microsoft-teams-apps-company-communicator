@@ -61,7 +61,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notification">A new Draft Notification to be created.</param>
         /// <returns>The created notification's id.</returns>
         [HttpPost]
-        public async Task<ActionResult<string>> CreateDraftNotificationAsync([FromBody] DraftNotification notification)
+        public async Task<ActionResult<string>> CreateDraftNotificationAsync([FromForm] DraftNotification notification)
         {
             if (!notification.Validate(this.localizer, out string errorMessage))
             {
