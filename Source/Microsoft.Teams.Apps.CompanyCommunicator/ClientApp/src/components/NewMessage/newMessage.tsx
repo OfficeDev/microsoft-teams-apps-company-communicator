@@ -73,8 +73,8 @@ export interface formState {
     selectedGroups: dropdownItem[],
     errorImageUrlMessage: string,
     errorButtonUrlMessage: string,
-    fileTitle: string,
-    file: any,
+    fileTitle?: string,
+    file?: any,
 }
 
 export interface INewMessageProps extends RouteComponentProps, WithTranslation {
@@ -662,7 +662,10 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         const formData = new FormData();
         const draftMessageString = JSON.stringify(draftMessage)
         formData.append("draftMessage", draftMessageString);
-        formData.append("file", this.state.file, this.state.fileTitle);
+
+        if (this.state.file) {
+            formData.append("file", this.state.file, this.state.fileTitle);
+        }
 
         if (this.state.exists) {
             this.editDraftMessage(draftMessage).then(() => {

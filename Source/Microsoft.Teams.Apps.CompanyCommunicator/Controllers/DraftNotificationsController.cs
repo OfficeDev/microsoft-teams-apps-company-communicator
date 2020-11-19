@@ -18,7 +18,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Controller for the draft notification data.
@@ -32,6 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly DraftNotificationPreviewService draftNotificationPreviewService;
         private readonly IGroupsService groupsService;
         private readonly IStringLocalizer<Strings> localizer;
+        private readonly ILogger<DraftNotificationsController> logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
@@ -46,23 +49,39 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             TeamDataRepository teamDataRepository,
             DraftNotificationPreviewService draftNotificationPreviewService,
             IStringLocalizer<Strings> localizer,
-            IGroupsService groupsService)
+            IGroupsService groupsService,
+            ILogger<DraftNotificationsController> logger)
         {
             this.notificationDataRepository = notificationDataRepository;
             this.teamDataRepository = teamDataRepository;
             this.draftNotificationPreviewService = draftNotificationPreviewService;
             this.localizer = localizer;
             this.groupsService = groupsService;
+            this.logger = logger;
         }
 
         /// <summary>
         /// Create a new draft notification.
         /// </summary>
-        /// <param name="notification">A new Draft Notification to be created.</param>
+        /// <param name="formDataRequest">A new Draft Notification to be created.</param>
         /// <returns>The created notification's id.</returns>
         [HttpPost]
-        public async Task<ActionResult<string>> CreateDraftNotificationAsync([FromForm] DraftNotification notification)
+        public async Task<ActionResult<string>> CreateDraftNotificationAsync([FromForm] FormDataRequest formDataRequest)
         {
+            this.logger.LogError("In the CreateDraftNotificationAsync method........");
+            this.logger.LogError($"Draft Notification Message : {formDataRequest.DraftMessage}");
+            if (formDataRequest.File != null)
+            {
+                this.logger.LogError($"File name is : {formDataRequest.File.FileName}");
+                this.logger.LogError($"Saving file content in a variable named 'fileContent'.............");
+            }
+            else
+            {
+                this.logger.LogError($"File is not attached...");
+            }
+
+            var notification = JsonConvert.DeserializeObject<DraftNotification>(formDataRequest.DraftMessage);
+
             if (!notification.Validate(this.localizer, out string errorMessage))
             {
                 return this.BadRequest(errorMessage);
@@ -79,7 +98,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 this.HttpContext.User?.Identity?.Name);
             return this.Ok(notificationId);
         }
-
+        
         /// <summary>
         /// Duplicate an existing draft notification.
         /// </summary>

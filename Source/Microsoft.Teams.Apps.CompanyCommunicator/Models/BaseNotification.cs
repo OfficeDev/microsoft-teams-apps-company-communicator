@@ -2,8 +2,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-using Microsoft.AspNetCore.Http;
-
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
     using System;
@@ -37,16 +35,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets the Author value.
         /// </summary>
         public string Author { get; set; }
-
-        /// <summary>
-        /// Gets or sets the File name.
-        /// </summary>
-        public string FileName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the File content value.
-        /// </summary>
-        public IFormFile File { get; set; }
 
         /// <summary>
         /// Gets or sets the Button Title value.
