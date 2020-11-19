@@ -220,7 +220,7 @@ function CreateAzureADApp {
             $appSecret = az ad app credential reset --id $app.appId --append | ConvertFrom-Json;
         }
 
-        Write-Host "### AZURE AD APP ($appName) CREATION & CONFIGURATION FINISHED ###" -ForegroundColor Green
+        Write-Host "### AZURE AD APP ($appName) CREATION FINISHED ###" -ForegroundColor Green
         return $appSecret
     }
     catch {
@@ -284,7 +284,9 @@ function CollectARMDeploymentLogs {
 function DeployARMTemplate {
     Param(
         [Parameter(Mandatory = $true)] $appId,
-        [Parameter(Mandatory = $true)] $secret
+        [Parameter(Mandatory = $true)] $secret,
+		[Parameter(Mandatory = $true)] $userappId,
+        [Parameter(Mandatory = $true)] $usersecret
     )
     try { 
         if ((az group exists --name $parameters.ResourceGroupName.Value --subscription $parameters.subscriptionId.Value) -eq $false) {
@@ -294,7 +296,7 @@ function DeployARMTemplate {
         
         # Deploy ARM templates
         Write-Host "Deploying app services, Azure function, bot service, and other supporting resources..." -ForegroundColor Yellow
-        az deployment group create --resource-group $parameters.ResourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "botClientId=$appId" "botClientSecret=$secret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.location.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"
+        az deployment group create --resource-group $parameters.ResourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$appId" "authorClientSecret=$secret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.location.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"
         if ($LASTEXITCODE -ne 0) {
             CollectARMDeploymentLogs
             Throw "ERROR: ARM template deployment error."
@@ -321,7 +323,7 @@ function ADAppUpdate {
             $configAppUrl = "https://$azureDomainBase"
             $RedirectUris = ($configAppUrl + '/signin-simple-end')
             $IdentifierUris = "api://$azureDomainBase"
-            $appName = $parameters.baseResourceName.Value
+            $appName = $parameters.baseResourceName.Value + '-authors'
 
     function CreatePreAuthorizedApplication(
         [string] $applicationIdToPreAuthorize,
@@ -432,6 +434,15 @@ function ADAppUpdate {
             Set-AzureADMSApplication -ObjectId $app.Id -Api $app.Api
             Write-Host "Teams mobile/desktop and web clients applications pre-authorized."
      
+}
+
+#Removing existing access of user app.
+function ADAppUpdateUser {
+    Param(
+        [Parameter(Mandatory = $true)] $appId
+	)
+			az ad app update --id $appId --remove replyUrls --remove IdentifierUris
+			az ad app update --id $appId --remove requiredResourceAccess
 }
 #update manifest file and create a .zip file.
 function GenerateAppManifestPackage {
@@ -567,14 +578,20 @@ function GenerateAppManifestPackage {
     $validateName = validateresourcesnames
 
 #Function call to create AD app and get the creds.	
-    $appCred = CreateAzureADApp $parameters.baseResourceName.Value
-    if ( $appCred -eq $null) {
-        Write-Host "Failed to create or update an app in azure active directory, this script is now exiting."
+    $appcredUser = CreateAzureADApp $parameters.baseresourcename.value
+    if ( $appCredUser -eq $null) {
+        Write-Host "Failed to create or update user app in azure active directory, this script is now exiting."
         Exit
     }
-
+	
+	$authorsApp = $parameters.baseResourceName.Value + '-authors'
+	$appCred = CreateAzureADApp $authorsApp
+    if ( $appCred -eq $null) {
+        Write-Host "Failed to create or update authors app in azure active directory, this script is now exiting."
+        Exit
+    }
 #Function call to Deploy ARM Template.
-    $deploymentOutput = DeployARMTemplate $appCred.appId $appCred.password
+    $deploymentOutput = DeployARMTemplate $appCred.appId $appCred.password $appCredUser.appId $appCredUser.password
     if ($deploymentOutput -eq $null) {
         Write-Host "Encountered error during ARM template deployment, this script is now exiting..."
         Exit
@@ -590,11 +607,11 @@ function GenerateAppManifestPackage {
     
     Write-Host "Updating required parameters and urls..."-ForegroundColor Yellow
     ADAppUpdate $appdomainName $appCred.appId
-
+	ADAppUpdateUser $appcredUser.appId
 
 # Function call to generate manifest.zip folder for User and Author. 
     GenerateAppManifestPackage 'authors' $appdomainName $appCred.appId
-    GenerateAppManifestPackage 'users' $appdomainName $appCred.appId
+    GenerateAppManifestPackage 'users' $appdomainName $appcredUser.appId
 
 
 #Log out to avoid tokens caching
