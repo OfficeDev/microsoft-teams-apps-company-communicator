@@ -55,6 +55,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             [ActivityTrigger](string notificationId, int recipientCount) input,
             ILogger log)
         {
+            if (input.notificationId == null)
+            {
+                throw new ArgumentNullException(nameof(input.notificationId));
+            }
+
+            if (input.recipientCount <= 0)
+            {
+                throw new ArgumentOutOfRangeException($"Recipient count should be > 0. Value: {input.recipientCount}");
+            }
+
             // Update notification.
             await this.UpdateNotification(input.notificationId, input.recipientCount, log);
 

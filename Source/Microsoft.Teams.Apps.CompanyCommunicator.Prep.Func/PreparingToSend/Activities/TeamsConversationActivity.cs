@@ -84,6 +84,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             [ActivityTrigger](string notificationId, SentNotificationDataEntity recipient) input,
             ILogger log)
         {
+            if (input.notificationId == null)
+            {
+                throw new ArgumentNullException(nameof(input.notificationId));
+            }
+
+            if (input.recipient == null)
+            {
+                throw new ArgumentNullException(nameof(input.recipient));
+            }
+
+            if (log == null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
+
             var recipient = input.recipient;
 
             // No-op for Team recipient.

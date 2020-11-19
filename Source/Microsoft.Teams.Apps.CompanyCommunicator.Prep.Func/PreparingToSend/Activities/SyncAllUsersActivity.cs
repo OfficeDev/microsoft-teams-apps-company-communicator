@@ -61,6 +61,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         [FunctionName(FunctionNames.SyncAllUsersActivity)]
         public async Task RunAsync([ActivityTrigger] NotificationDataEntity notification)
         {
+            if (notification == null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
+
             // Sync all users.
             await this.SyncAllUsers(notification.Id);
 
