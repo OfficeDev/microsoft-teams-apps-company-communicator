@@ -1,4 +1,7 @@
-﻿
+﻿// <copyright file="FormDataRequest.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 {
     using Microsoft.AspNetCore.Http;
@@ -17,6 +20,5 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets the File content value.
         /// </summary>
         public IFormFile File { get; set; } = null;
-
     }
 }

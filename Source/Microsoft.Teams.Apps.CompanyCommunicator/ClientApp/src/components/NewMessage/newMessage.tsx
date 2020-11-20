@@ -371,7 +371,14 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     autoComplete="off"
                                 />
 
-                                <input type="file" name="file" onChange={this.onFileChanged} />
+                                <Input
+                                    className="inputField"
+                                    type="file"
+                                    label={this.localize("File Attachment")}
+                                    placeholder={this.localize("File Attachment")}
+                                    onChange={this.onFileChanged}
+                                    autoComplete="off"
+                                />
 
                                 <Input
                                     className="inputField"

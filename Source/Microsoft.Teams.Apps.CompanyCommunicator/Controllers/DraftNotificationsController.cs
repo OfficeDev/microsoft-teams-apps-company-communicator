@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Localization;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -18,7 +19,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
-    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
     using Newtonsoft.Json;
 
@@ -44,6 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="draftNotificationPreviewService">Draft notification preview service.</param>
         /// <param name="localizer">Localization service.</param>
         /// <param name="groupsService">group service.</param>
+        /// <param name="logger">logger service.</param>
         public DraftNotificationsController(
             NotificationDataRepository notificationDataRepository,
             TeamDataRepository teamDataRepository,
@@ -95,10 +96,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             var notificationId = await this.notificationDataRepository.CreateDraftNotificationAsync(
                 notification,
+                formDataRequest.File,
                 this.HttpContext.User?.Identity?.Name);
             return this.Ok(notificationId);
         }
-        
+
         /// <summary>
         /// Duplicate an existing draft notification.
         /// </summary>
