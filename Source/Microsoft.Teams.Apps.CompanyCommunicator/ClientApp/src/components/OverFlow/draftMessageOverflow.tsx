@@ -127,10 +127,6 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                             }
                         },
                         {
-                            key: 'divider',
-                            kind: 'divider',
-                        },
-                        {
                             key: 'delete',
                             content: this.localize("Delete"),
                             onClick: (event: any) => {

@@ -133,7 +133,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<IAppConfigRepository, AppConfigRepository>();
 
             // Add service bus message queues.
-            builder.Services.AddSingleton<ISendQueue,SendQueue>();
+            builder.Services.AddSingleton<ISendQueue, SendQueue>();
             builder.Services.AddSingleton<IDataQueue, DataQueue>();
             builder.Services.AddSingleton<IExportQueue, ExportQueue>();
 

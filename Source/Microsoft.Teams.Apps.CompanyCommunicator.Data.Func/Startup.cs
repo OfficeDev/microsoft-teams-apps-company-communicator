@@ -106,7 +106,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
             builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
             builder.Services.AddSingleton<IUserDataRepository, UserDataRepository>();
-            builder.Services.AddSingleton<IExportDataRepository,ExportDataRepository>();
+            builder.Services.AddSingleton<IExportDataRepository, ExportDataRepository>();
 
             // Add service bus message queues.
             builder.Services.AddSingleton<IDataQueue, DataQueue>();
