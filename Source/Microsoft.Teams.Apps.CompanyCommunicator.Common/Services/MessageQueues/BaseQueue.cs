@@ -17,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
     /// Base Azure service bus queue service.
     /// </summary>
     /// <typeparam name="T">Queue message class type.</typeparam>
-    public class BaseQueue<T> : IBaseQueue<T>
+    public abstract class BaseQueue<T> : IBaseQueue<T>
     {
         /// <summary>
         /// Constant for the service bus connection configuration key.
