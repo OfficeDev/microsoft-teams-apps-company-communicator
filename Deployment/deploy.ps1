@@ -220,7 +220,7 @@ function CreateAzureADApp {
             $appSecret = az ad app credential reset --id $app.appId --append | ConvertFrom-Json;
         }
 
-        Write-Host "### AZURE AD APP ($appName) CREATION FINISHED ###" -ForegroundColor Green
+        Write-Host "### AZURE AD APP ($appName) CREATED/REGISTERED SUCCESSFULLY. ###" -ForegroundColor Green
         return $appSecret
     }
     catch {
@@ -441,7 +441,9 @@ function ADAppUpdateUser {
     Param(
         [Parameter(Mandatory = $true)] $appId
 	)
-			az ad app update --id $appId --remove replyUrls --remove IdentifierUris
+            az ad app update --id $appId --remove replyUrls --remove IdentifierUris
+            $IdentifierUris = "api://$appId"
+			az ad app update --id $appId --identifier-uris "$IdentifierUris"
 			az ad app update --id $appId --remove requiredResourceAccess
 }
 #update manifest file and create a .zip file.
@@ -580,14 +582,14 @@ function GenerateAppManifestPackage {
 #Function call to create AD app and get the creds.	
     $appcredUser = CreateAzureADApp $parameters.baseresourcename.value
     if ( $appCredUser -eq $null) {
-        Write-Host "Failed to create or update user app in azure active directory, this script is now exiting."
+        Write-Host "Failed to create or update user app in Azure Active Directory, this script is now exiting."
         Exit
     }
 	
 	$authorsApp = $parameters.baseResourceName.Value + '-authors'
 	$appCred = CreateAzureADApp $authorsApp
     if ( $appCred -eq $null) {
-        Write-Host "Failed to create or update authors app in azure active directory, this script is now exiting."
+        Write-Host "Failed to create or update authors app in Azure Active Directory, this script is now exiting."
         Exit
     }
 #Function call to Deploy ARM Template.
@@ -606,8 +608,9 @@ function GenerateAppManifestPackage {
 # Function call to update reply-urls and uris for registered app.
     
     Write-Host "Updating required parameters and urls..."-ForegroundColor Yellow
+    ADAppUpdateUser $appcredUser.appId
     ADAppUpdate $appdomainName $appCred.appId
-	ADAppUpdateUser $appcredUser.appId
+	
 
 # Function call to generate manifest.zip folder for User and Author. 
     GenerateAppManifestPackage 'authors' $appdomainName $appCred.appId
