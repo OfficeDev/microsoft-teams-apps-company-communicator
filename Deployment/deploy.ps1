@@ -304,6 +304,18 @@ function DeployARMTemplate {
         Write-Host "Finished deploying resources." -ForegroundColor Green
         #get the output of current deployment
         $value = Get-AzResourceGroupDeployment -ResourceGroupName $parameters.ResourceGroupName.Value -Name azuredeploy
+        
+        # sync app services code deployment (ARM deployment will not sync automatically)
+        $appServicesNames = @($parameters.BaseResourceName.Value, #app-service
+        "$($parameters.BaseResourceName.Value)-prep-function", #prep-function
+        "$($parameters.BaseResourceName.Value)-function", #function
+        "$($parameters.BaseResourceName.Value)-data-function" #data-function
+        )
+        foreach ($appService in $appServicesNames) {
+            Write-Host "Sync $appService code from latest version"
+            az webapp deployment source sync --name $appService --resource-group $parameters.ResourceGroupName.Value
+        }
+        
         return $value
     }
     catch {
