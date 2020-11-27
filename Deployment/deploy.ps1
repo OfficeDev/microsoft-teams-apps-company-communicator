@@ -183,7 +183,7 @@ function CreateAzureADApp {
             if ($updateDecision -eq 0) {
                 Write-Host "Updating the existing app..." -ForegroundColor Yellow
 
-                az ad app update --id $app.appId --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow --required-resource-accesses './AadAppManifest.json'
+                az ad app update --id $app.appId --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow
 
                 Write-Host "Waiting for app update to finish..."
 
@@ -202,7 +202,7 @@ function CreateAzureADApp {
             Write-Host "Creating Azure AD App - ($appName)..."
 
             # Create Azure AD app registration using CLI
-            az ad app create --display-name $appName --end-date '2299-12-31T11:59:59+00:00' --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow --required-resource-accesses './AadAppManifest.json'
+            az ad app create --display-name $appName --end-date '2299-12-31T11:59:59+00:00' --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow
 
             Write-Host "Waiting for app creation to finish..."
 
@@ -295,7 +295,7 @@ function DeployARMTemplate {
         }
         
         # Deploy ARM templates
-        Write-Host "Deploying app services, Azure function, bot service, and other supporting resources..." -ForegroundColor Yellow
+        Write-Host "`nDeploying app services, Azure function, bot service, and other supporting resources..." -ForegroundColor Yellow
         az deployment group create --resource-group $parameters.ResourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$appId" "authorClientSecret=$secret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.location.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"
         if ($LASTEXITCODE -ne 0) {
             CollectARMDeploymentLogs
@@ -304,8 +304,8 @@ function DeployARMTemplate {
         Write-Host "Finished deploying resources." -ForegroundColor Green
         #get the output of current deployment
         $value = Get-AzResourceGroupDeployment -ResourceGroupName $parameters.ResourceGroupName.Value -Name azuredeploy
-        
-        # sync app services code deployment (ARM deployment will not sync automatically)
+		
+		# sync app services code deployment (ARM deployment will not sync automatically)
         $appServicesNames = @($parameters.BaseResourceName.Value, #app-service
         "$($parameters.BaseResourceName.Value)-prep-function", #prep-function
         "$($parameters.BaseResourceName.Value)-function", #function
@@ -315,7 +315,6 @@ function DeployARMTemplate {
             Write-Host "Sync $appService code from latest version"
             az webapp deployment source sync --name $appService --resource-group $parameters.ResourceGroupName.Value
         }
-        
         return $value
     }
     catch {
@@ -364,6 +363,7 @@ function ADAppUpdate {
         return $scope
     }
 
+	az ad app update --id $configAppId --required-resource-accesses './AadAppManifest.json'
     $confirmationTitle = "Admin consent permissions is required for app registration using CLI"
     $confirmationQuestion = "Are you sure you want to proceed?"
     $confirmationChoices = "&Yes", "&No" # 0 = Yes, 1 = No
@@ -383,7 +383,7 @@ function ADAppUpdate {
         }
     }
     else {
-        Write-Host "Please check the below link to provide admin consent manually. `nhttps://docs.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent#:~:text=Select%20Azure%20Active%20Directory%20then,the%20permissions%20the%20application%20requires."
+        Write-Host "Please check the below link to provide admin consent manually. `n`nhttps://docs.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent#:~:text=Select%20Azure%20Active%20Directory%20then,the%20permissions%20the%20application%20requires."
     }
     Import-Module AzureAD
             
@@ -403,19 +403,21 @@ function ADAppUpdate {
 
     # Do nothing if the app has already been configured
     if ($app.IdentifierUris.Count -gt 0) {
-        Write-Host "Exiting, application already configured." -ForegroundColor Red
+        Write-Host "Exiting, authors app already configured." -ForegroundColor Red
         return
     }
-             
+    Write-Host "`nUpdating authors app..."-ForegroundColor Yellow         
     # Expose an API
             $appId = $app.AppId
-            Set-AzureADMSApplication -ObjectId $app.Id -IdentifierUris "$IdentifierUris"
-                    
-            $configApp = az ad app update --id $configAppId --reply-urls $RedirectUris
-                    
-            az ad app update --id $configAppId --optional-claims './AadOptionalClaims.json'
-                    
-            Write-Host "App URI,Urls, Optionalclaim set."
+			
+            az ad app update --id $configAppId --identifier-uris $IdentifierUris
+            Write-Host "App URI set"        
+            
+			$configApp = az ad app update --id $configAppId --reply-urls $RedirectUris
+            Write-Host "App reply-urls set"  
+            
+			az ad app update --id $configAppId --optional-claims './AadOptionalClaims.json'
+            Write-Host "App optionalclaim set."
                     
             # Create access_as_user scope
             # Add all existing scopes first
@@ -453,9 +455,47 @@ function ADAppUpdateUser {
     Param(
         [Parameter(Mandatory = $true)] $appId
 	)
-            az ad app update --id $appId --remove replyUrls --remove IdentifierUris
+				
+				$appName = $parameters.baseResourceName.Value
+				
+			    $apps = Get-AzureADApplication -Filter "DisplayName eq '$appName'"
+
+				if (0 -eq $apps.Length) {
+					$app = New-AzureADApplication -DisplayName $appName
+				}
+				else {
+					$app = $apps[0]
+				}
+
+				$applicationObjectId = $app.ObjectId
+
+				$app = Get-AzureADMSApplication -ObjectId $applicationObjectId
+
+				# Do nothing if the app has already been configured
+				if ($app.IdentifierUris.Count -eq 0) {
+					Write-Host "User app already configured." -ForegroundColor Green
+					return
+				}
+			
+			Write-Host "`nUpdating user app..."-ForegroundColor Yellow
             $IdentifierUris = "api://$appId"
+			
+			$DEFAULT_SCOPE=$(az ad app show --id $appId | jq '.oauth2Permissions[0].isEnabled = false' | jq -r '.oauth2Permissions')
+			$DEFAULT_SCOPE>>scope.json
+			az ad app update --id $appId --set oauth2Permissions=@scope.json
+			rm .\scope.json
+
+			$DEFAULT_SCOPE=$(az ad app show --id $appId | jq '.oauth2Permissions[1].isEnabled = false' | jq -r '.oauth2Permissions')
+			$DEFAULT_SCOPE>scope.json
+			az ad app update --id $appId --set oauth2Permissions=@scope.json
+			rm .\scope.json
+
+			$oauth2AllowIdTokenImplicitFlow = az ad app update --id $appId --set oauth2AllowIdTokenImplicitFlow=false
+			az ad app update --id $appId --remove replyUrls --remove IdentifierUris
+			az ad app update --id $appId --remove oauth2Permissions
 			az ad app update --id $appId --identifier-uris "$IdentifierUris"
+			az ad app update --id $appId --remove IdentifierUris
+			az ad app update --id $appId --optional-claims './aa.json'
 			az ad app update --id $appId --remove requiredResourceAccess
 }
 #update manifest file and create a .zip file.
@@ -466,7 +506,7 @@ function GenerateAppManifestPackage {
         [Parameter(Mandatory = $true)] $appId
     )
 
-        Write-Host "Generating package for $manifestType..."
+        Write-Host "`nGenerating package for $manifestType..."
 
         $azureDomainBase = $appdomainName
         $sourceManifestPath = "..\Manifest\manifest_$manifestType.json"

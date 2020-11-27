@@ -27,6 +27,11 @@ Please follow below steps to deploy app template:
 - Navigate to deploy.ps1 in your local machine.
   - cd \PathToLocalFolder\Deployment
 - Before running the script, some installations are needed for the user who is running the script for the first time. Please find the steps below:
+  - Please run the below command to check if jq is installed or not.
+**PS C:\\&gt; jq -–version**
+
+  If not installed, please install [jq](https://stedolan.github.io/jq/download/)  with the help of [chocolatey](https://chocolatey.org/install).
+
   - In the above-navigated path in PowerShell, run the command &quot; **Set-ExecutionPolicy -ExecutionPolicy RemoteSigned**&quot;. This command will allow the user to run deploy.ps1 as execution policy is restricted by default. You can change it to restricted again after successful deployment.
   - You will need to unblock the deployment script file before executing the script &quot; **Unblock-File -Path .\deploy.ps1**&quot;
 
