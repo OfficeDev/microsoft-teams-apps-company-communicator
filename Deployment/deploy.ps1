@@ -495,7 +495,7 @@ function ADAppUpdateUser {
 			az ad app update --id $appId --remove oauth2Permissions
 			az ad app update --id $appId --identifier-uris "$IdentifierUris"
 			az ad app update --id $appId --remove IdentifierUris
-			az ad app update --id $appId --optional-claims './aa.json'
+			az ad app update --id $appId --optional-claims './AadOptionalClaims_Reset.json'
 			az ad app update --id $appId --remove requiredResourceAccess
 }
 #update manifest file and create a .zip file.
