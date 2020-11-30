@@ -13,7 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
-    using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -28,7 +28,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
@@ -37,6 +36,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
@@ -78,8 +79,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
-                    botOptions.MicrosoftAppId = configuration.GetValue<string>("MicrosoftAppId");
-                    botOptions.MicrosoftAppPassword = configuration.GetValue<string>("MicrosoftAppPassword");
+                    botOptions.UserAppId = configuration.GetValue<string>("UserAppId");
+                    botOptions.UserAppPassword = configuration.GetValue<string>("UserAppPassword");
+                    botOptions.AuthorAppId = configuration.GetValue<string>("AuthorAppId");
+                    botOptions.AuthorAppPassword = configuration.GetValue<string>("AuthorAppPassword");
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>
@@ -149,12 +152,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddHttpClient();
 
             // Add bot services.
+            services.AddTransient<TeamsDataCapture>();
+            services.AddTransient<TeamsFileUpload>();
+            services.AddTransient<UserTeamsActivityHandler>();
+            services.AddTransient<AuthorTeamsActivityHandler>();
             services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             services.AddTransient<CompanyCommunicatorBotFilterMiddleware>();
             services.AddSingleton<CompanyCommunicatorBotAdapter>();
-            services.AddTransient<TeamsDataCapture>();
-            services.AddTransient<TeamsFileUpload>();
-            services.AddTransient<IBot, CompanyCommunicatorBot>();
+            services.AddSingleton<BotFrameworkHttpAdapter>();
 
             // Add repositories.
             services.AddSingleton<ITeamDataRepository, TeamDataRepository>();
@@ -187,6 +192,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<TableRowKeyGenerator>();
             services.AddTransient<AdaptiveCardCreator>();
             services.AddTransient<IAppSettingsService, AppSettingsService>();
+            services.AddTransient<IUserDataService, UserDataService>();
+            services.AddTransient<ITeamMembersService, TeamMembersService>();
         }
 
         /// <summary>

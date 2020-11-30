@@ -25,7 +25,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     public class TeamMembersService : ITeamMembersService
     {
         private readonly BotFrameworkHttpAdapter botAdapter;
-        private readonly string microsoftAppId;
+        private readonly string userAppId;
+        private readonly string authorAppId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamMembersService"/> class.
@@ -37,11 +38,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             IOptions<BotOptions> botOptions)
         {
             this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
-            this.microsoftAppId = botOptions?.Value?.MicrosoftAppId ?? throw new ArgumentNullException(nameof(botOptions));
+            this.userAppId = botOptions?.Value?.UserAppId ?? throw new ArgumentNullException(nameof(botOptions));
+            this.authorAppId = botOptions?.Value?.AuthorAppId ?? throw new ArgumentNullException(nameof(botOptions));
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<UserDataEntity>> GetMembersAsync(string teamId, string tenantId, string serviceUrl)
+        public async Task<IEnumerable<UserDataEntity>> GetUsersAsync(string teamId, string tenantId, string serviceUrl)
+        {
+            return await this.GetMembersAsync(teamId, tenantId, serviceUrl, this.userAppId);
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<UserDataEntity>> GetAuthorsAsync(string teamId, string tenantId, string serviceUrl)
+        {
+            return await this.GetMembersAsync(teamId, tenantId, serviceUrl, this.authorAppId);
+        }
+
+        private async Task<IEnumerable<UserDataEntity>> GetMembersAsync(string teamId, string tenantId, string serviceUrl, string appId)
         {
             // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
             MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
@@ -58,7 +71,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             IEnumerable<UserDataEntity> userDataEntitiesResult = null;
 
             await this.botAdapter.ContinueConversationAsync(
-                this.microsoftAppId,
+                appId,
                 conversationReference,
                 async (turnContext, cancellationToken) =>
                 {

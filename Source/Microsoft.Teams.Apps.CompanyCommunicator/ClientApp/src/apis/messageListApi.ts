@@ -28,9 +28,9 @@ export const searchGroups = async (query: string): Promise<any> => {
     return await axios.get(url);
 }
 
-export const exportNotification = async (id: string): Promise<any> => {
-    let url = baseAxiosUrl + "/exportnotification/" + id;
-    return await axios.put(url,null,false);
+export const exportNotification = async(payload: {}): Promise<any> => {
+    let url = baseAxiosUrl + "/exportnotification/export";
+    return await axios.put(url, payload);
 }
 
 export const getSentNotification = async (id: number): Promise<any> => {

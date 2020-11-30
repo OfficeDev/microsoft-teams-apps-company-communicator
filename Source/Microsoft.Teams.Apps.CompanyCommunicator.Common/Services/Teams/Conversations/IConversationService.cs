@@ -21,7 +21,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         /// <param name="maxAttempts">Maximum attempts.</param>
         /// <param name="log">Logger.</param>
         /// <returns><see cref="CreateConversationResponse"/>.</returns>
-        public Task<CreateConversationResponse> CreateConversationAsync(
+        public Task<CreateConversationResponse> CreateUserConversationAsync(
+            string teamsUserId,
+            string tenantId,
+            string serviceUrl,
+            int maxAttempts,
+            ILogger log);
+
+        /// <summary>
+        /// Creates a new conversation with the author.
+        /// </summary>
+        /// <param name="teamsUserId">User's Id in Teams.</param>
+        /// <param name="tenantId">Tenant Id.</param>
+        /// <param name="serviceUrl">Service url.</param>
+        /// <param name="maxAttempts">Maximum attempts.</param>
+        /// <param name="log">Logger.</param>
+        /// <returns><see cref="CreateConversationResponse"/>.</returns>
+        public Task<CreateConversationResponse> CreateAuthorConversationAsync(
             string teamsUserId,
             string tenantId,
             string serviceUrl,

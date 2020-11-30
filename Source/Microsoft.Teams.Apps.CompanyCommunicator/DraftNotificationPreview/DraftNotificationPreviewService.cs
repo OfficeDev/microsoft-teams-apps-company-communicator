@@ -43,14 +43,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
             AdaptiveCardCreator adaptiveCardCreator,
             CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter)
         {
-            this.botAppId = botOptions.Value.MicrosoftAppId;
+            var options = botOptions ?? throw new ArgumentNullException(nameof(botOptions));
+            this.botAppId = options.Value.AuthorAppId;
             if (string.IsNullOrEmpty(this.botAppId))
             {
-                throw new ApplicationException("MicrosoftAppId setting is missing in the configuration.");
+                throw new ApplicationException("AuthorAppId setting is missing in the configuration.");
             }
 
-            this.adaptiveCardCreator = adaptiveCardCreator;
-            this.companyCommunicatorBotAdapter = companyCommunicatorBotAdapter;
+            this.adaptiveCardCreator = adaptiveCardCreator ?? throw new ArgumentNullException(nameof(adaptiveCardCreator));
+            this.companyCommunicatorBotAdapter = companyCommunicatorBotAdapter ?? throw new ArgumentNullException(nameof(companyCommunicatorBotAdapter));
         }
 
         /// <summary>

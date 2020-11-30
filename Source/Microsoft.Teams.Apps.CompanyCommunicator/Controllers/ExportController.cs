@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
+    using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
@@ -12,8 +13,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Models;
 
     /// <summary>
     /// Coontroller for exporting notification.
@@ -26,6 +30,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly IExportDataRepository exportDataRepository;
         private readonly IUserDataRepository userDataRepository;
         private readonly IExportQueue exportQueue;
+        private readonly ITeamMembersService memberService;
+        private readonly ITeamDataRepository teamDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportController"/> class.
@@ -34,38 +40,45 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="exportDataRepository">Export data repository instance.</param>
         /// <param name="userDataRepository">User data repository instance.</param>
         /// <param name="exportQueue">The service bus queue for the export queue.</param>
+        /// <param name="memberService">Teams member service.</param>
+        /// <param name="teamDataRepository">Team data reporsitory.</param>
         public ExportController(
             ISentNotificationDataRepository sentNotificationDataRepository,
             IExportDataRepository exportDataRepository,
             IUserDataRepository userDataRepository,
-            IExportQueue exportQueue)
+            IExportQueue exportQueue,
+            ITeamMembersService memberService,
+            ITeamDataRepository teamDataRepository)
         {
-            this.sentNotificationDataRepository = sentNotificationDataRepository;
-            this.exportDataRepository = exportDataRepository;
-            this.userDataRepository = userDataRepository;
-            this.exportQueue = exportQueue;
+            this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
+            this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
+            this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
+            this.exportQueue = exportQueue ?? throw new ArgumentNullException(nameof(exportQueue));
+            this.memberService = memberService ?? throw new ArgumentNullException(nameof(memberService));
+            this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
         }
 
         /// <summary>
         /// Initiate a export of notification.
         /// </summary>
-        /// <param name="id">notification id.</param>
+        /// <param name="exportRequest">export request.</param>
         /// <returns>The result of an action method.</returns>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> ExportNotificationAsync(string id)
+        [HttpPut("export")]
+        public async Task<IActionResult> ExportNotificationAsync(
+            [FromBody]ExportRequest exportRequest)
         {
             var userId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeUserId);
-            var user = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, userId);
+            var user = await this.userDataRepository.GetAsync(UserDataTableNames.AuthorDataPartition, userId);
             if (user == null)
             {
-                return this.NotFound();
+                await this.SyncAuthorAsync(exportRequest.TeamId, userId);
             }
 
             // Ensure the data tables needed by the Azure Function to export the notification exist in Azure storage.
             await Task.WhenAll(
                 this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistsAsync(),
                 this.exportDataRepository.EnsureExportDataTableExistsAsync());
-            var exportNotification = await this.exportDataRepository.GetAsync(userId, id);
+            var exportNotification = await this.exportDataRepository.GetAsync(userId, exportRequest.Id);
             if (exportNotification != null)
             {
                 return this.Conflict();
@@ -74,19 +87,45 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             await this.exportDataRepository.CreateOrUpdateAsync(new ExportDataEntity()
             {
                 PartitionKey = userId,
-                RowKey = id,
+                RowKey = exportRequest.Id,
                 SentDate = DateTime.UtcNow,
                 Status = ExportStatus.New.ToString(),
             });
 
             var exportQueueMessageContent = new ExportQueueMessageContent
             {
-                NotificationId = id,
+                NotificationId = exportRequest.Id,
                 UserId = userId,
             };
             await this.exportQueue.SendAsync(exportQueueMessageContent);
 
             return this.Ok();
+        }
+
+        private async Task SyncAuthorAsync(string teamId, string userId)
+        {
+            // Read team information.
+            var teamInfo = await this.teamDataRepository.GetAsync(TeamDataTableNames.TeamDataPartition, teamId);
+            if (teamInfo == null)
+            {
+                throw new ApplicationException("Unable to find Team Id in database.");
+            }
+
+            // Sync members.
+            var userEntities = await this.memberService.GetAuthorsAsync(
+                teamId: teamInfo.TeamId,
+                tenantId: teamInfo.TenantId,
+                serviceUrl: teamInfo.ServiceUrl);
+
+            var userData = userEntities.FirstOrDefault(user => user.AadId.Equals(userId));
+            if (userData == null)
+            {
+                throw new ApplicationException("Unable to find user in Team roster");
+            }
+
+            userData.PartitionKey = UserDataTableNames.AuthorDataPartition;
+            userData.RowKey = userData.AadId;
+            await this.userDataRepository.CreateOrUpdateAsync(userData);
         }
     }
 }

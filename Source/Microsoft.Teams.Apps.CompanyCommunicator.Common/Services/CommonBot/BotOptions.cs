@@ -10,13 +10,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
     public class BotOptions
     {
         /// <summary>
-        /// Gets or sets the Microsoft app ID for the bot.
+        /// Gets or sets the Microsoft app ID for the user bot.
         /// </summary>
-        public string MicrosoftAppId { get; set; }
+        public string UserAppId { get; set; }
 
         /// <summary>
-        /// Gets or sets the Microsoft app password for the bot.
+        /// Gets or sets the Microsoft app password for the user bot.
         /// </summary>
-        public string MicrosoftAppPassword { get; set; }
+        public string UserAppPassword { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Microsoft app ID for the author bot.
+        /// </summary>
+        public string AuthorAppId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Microsoft app password for the author bot.
+        /// </summary>
+        public string AuthorAppPassword { get; set; }
     }
 }

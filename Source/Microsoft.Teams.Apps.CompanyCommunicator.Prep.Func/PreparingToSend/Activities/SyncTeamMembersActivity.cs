@@ -101,7 +101,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             try
             {
                 // Sync members.
-                var userEntities = await this.memberService.GetMembersAsync(
+                var userEntities = await this.memberService.GetUsersAsync(
                     teamId: teamInfo.TeamId,
                     tenantId: teamInfo.TenantId,
                     serviceUrl: teamInfo.ServiceUrl);

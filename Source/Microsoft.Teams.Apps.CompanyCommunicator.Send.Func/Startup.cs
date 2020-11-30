@@ -44,11 +44,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
-                    botOptions.MicrosoftAppId =
-                        configuration.GetValue<string>("MicrosoftAppId");
+                    botOptions.UserAppId =
+                        configuration.GetValue<string>("UserAppId");
 
-                    botOptions.MicrosoftAppPassword =
-                        configuration.GetValue<string>("MicrosoftAppPassword");
+                    botOptions.UserAppPassword =
+                        configuration.GetValue<string>("UserAppPassword");
                 });
             builder.Services.AddOptions<RepositoryOptions>()
                 .Configure<IConfiguration>((repositoryOptions, configuration) =>
@@ -77,8 +77,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(culture);
 
             // Add bot services.
-            builder.Services.AddSingleton<CommonMicrosoftAppCredentials>();
-            builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
+            builder.Services.AddSingleton<UserAppCredentials>();
+            builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
 
             // Add teams services.
