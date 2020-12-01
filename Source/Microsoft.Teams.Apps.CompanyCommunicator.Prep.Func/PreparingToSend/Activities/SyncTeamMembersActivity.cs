@@ -70,6 +70,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             [ActivityTrigger](string notificationId, string teamId) input,
             ILogger log)
         {
+            if (input.notificationId == null)
+            {
+                throw new ArgumentNullException(nameof(input.notificationId));
+            }
+
+            if (input.teamId == null)
+            {
+                throw new ArgumentNullException(nameof(input.teamId));
+            }
+
+            if (log == null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
+
             var notificationId = input.notificationId;
             var teamId = input.teamId;
 
@@ -86,7 +101,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             try
             {
                 // Sync members.
-                var userEntities = await this.memberService.GetMembersAsync(
+                var userEntities = await this.memberService.GetUsersAsync(
                     teamId: teamInfo.TeamId,
                     tenantId: teamInfo.TenantId,
                     serviceUrl: teamInfo.ServiceUrl);

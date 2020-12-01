@@ -55,6 +55,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         [FunctionName(FunctionNames.SyncTeamsActivity)]
         public async Task RunAsync([ActivityTrigger] NotificationDataEntity notification, ILogger log)
         {
+            if (notification == null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
+
+            if (log == null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
+
             // Get teams data.
             var teamsData = await this.GetTeamDataEntities(notification.Id, notification.Teams, log);
 

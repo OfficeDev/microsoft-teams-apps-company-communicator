@@ -9,8 +9,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using System.Threading.Tasks;
     using Microsoft.Bot.Schema;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
 
     /// <summary>
@@ -22,22 +22,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         private const string ChannelType = "channel";
 
         private readonly ITeamDataRepository teamDataRepository;
-        private readonly IUserDataRepository userDataRepository;
+        private readonly IUserDataService userDataService;
         private readonly IAppSettingsService appSettingsService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TeamsDataCapture"/> class.
         /// </summary>
         /// <param name="teamDataRepository">Team data repository instance.</param>
-        /// <param name="userDataRepository">User data repository instance.</param>
+        /// <param name="userDataService">User data service instance.</param>
         /// <param name="appSettingsService">App Settings service.</param>
         public TeamsDataCapture(
             ITeamDataRepository teamDataRepository,
-            IUserDataRepository userDataRepository,
+            IUserDataService userDataService,
             IAppSettingsService appSettingsService)
         {
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
-            this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
+            this.userDataService = userDataService ?? throw new ArgumentNullException(nameof(userDataService));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
         }
 
@@ -61,7 +61,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     await this.teamDataRepository.SaveTeamDataAsync(activity);
                     break;
                 case TeamsDataCapture.PersonalType:
-                    await this.userDataRepository.SaveUserDataAsync(activity);
+                    await this.userDataService.SaveUserDataAsync(activity);
                     break;
                 default: break;
             }
@@ -96,7 +96,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 case TeamsDataCapture.PersonalType:
                     // The event triggered (when a user is removed from the tenant) doesn't
                     // include the bot in the member list being removed.
-                    await this.userDataRepository.RemoveUserDataAsync(activity);
+                    await this.userDataService.RemoveUserDataAsync(activity);
                     break;
                 default: break;
             }

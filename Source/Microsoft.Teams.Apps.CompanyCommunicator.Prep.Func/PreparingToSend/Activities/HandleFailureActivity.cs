@@ -45,6 +45,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public async Task RunAsync(
             [ActivityTrigger](NotificationDataEntity notification, Exception exception) input)
         {
+            if (input.notification == null)
+            {
+                throw new ArgumentNullException(nameof(input.notification));
+            }
+
+            if (input.exception == null)
+            {
+                throw new ArgumentNullException(nameof(input.exception));
+            }
+
             var errorMessage = this.localizer.GetString("FailtoPrepareMessageFormat", input.exception.Message);
             await this.notificationDataRepository
                 .SaveExceptionInNotificationDataEntityAsync(input.notification.Id, errorMessage);

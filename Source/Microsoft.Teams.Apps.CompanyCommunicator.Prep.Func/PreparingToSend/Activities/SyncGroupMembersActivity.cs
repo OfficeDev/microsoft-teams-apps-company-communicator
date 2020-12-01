@@ -65,6 +65,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public async Task RunAsync(
         [ActivityTrigger](string notificationId, string groupId) input, ILogger log)
         {
+            if (input.notificationId == null)
+            {
+                throw new ArgumentNullException(nameof(input.notificationId));
+            }
+
+            if (input.groupId == null)
+            {
+                throw new ArgumentNullException(nameof(input.groupId));
+            }
+
+            if (log == null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
+
             var notificationId = input.notificationId;
             var groupId = input.groupId;
 

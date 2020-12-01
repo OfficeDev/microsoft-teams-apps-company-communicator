@@ -82,7 +82,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(UploadActivityAsync))]
         public async Task UploadActivityAsync(
-            [ActivityTrigger] (NotificationDataEntity sentNotificationDataEntity, Metadata metadata, string fileName) uploadData)
+            [ActivityTrigger](NotificationDataEntity sentNotificationDataEntity, Metadata metadata, string fileName) uploadData)
         {
             CloudStorageAccount storage = CloudStorageAccount.Parse(this.storageConnectionString);
             CloudBlobClient client = storage.CreateCloudBlobClient();

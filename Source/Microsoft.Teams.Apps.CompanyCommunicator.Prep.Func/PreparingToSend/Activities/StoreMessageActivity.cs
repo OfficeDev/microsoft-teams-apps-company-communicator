@@ -41,6 +41,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public async Task RunAsync(
             [ActivityTrigger] NotificationDataEntity notification)
         {
+            if (notification == null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
+
             var serializedContent = this.adaptiveCardCreator.CreateAdaptiveCard(notification).ToJson();
 
             var sendingNotification = new SendingNotificationDataEntity

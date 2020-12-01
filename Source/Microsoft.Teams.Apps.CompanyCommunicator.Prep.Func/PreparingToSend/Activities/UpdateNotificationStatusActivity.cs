@@ -35,6 +35,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public async Task RunAsync(
             [ActivityTrigger](string notificationId, NotificationStatus status) input)
         {
+            if (input.notificationId == null)
+            {
+                throw new ArgumentNullException(nameof(input.notificationId));
+            }
+
+            if (input.status == null)
+            {
+                throw new ArgumentNullException(nameof(input.status));
+            }
+
             await this.notificationRepository.UpdateNotificationStatusAsync(input.notificationId, input.status);
         }
     }

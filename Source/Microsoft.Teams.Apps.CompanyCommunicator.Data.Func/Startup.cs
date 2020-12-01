@@ -56,11 +56,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             builder.Services.AddOptions<BotOptions>()
                .Configure<IConfiguration>((botOptions, configuration) =>
                {
-                   botOptions.MicrosoftAppId =
-                       configuration.GetValue<string>("MicrosoftAppId");
+                   botOptions.UserAppId =
+                       configuration.GetValue<string>("UserAppId");
 
-                   botOptions.MicrosoftAppPassword =
-                       configuration.GetValue<string>("MicrosoftAppPassword");
+                   botOptions.UserAppPassword =
+                       configuration.GetValue<string>("UserAppPassword");
+
+                   botOptions.AuthorAppId =
+                       configuration.GetValue<string>("AuthorAppId");
+
+                   botOptions.AuthorAppPassword =
+                       configuration.GetValue<string>("AuthorAppPassword");
                });
             builder.Services.AddOptions<CleanUpFileOptions>()
                .Configure<IConfiguration>((cleanUpFileOptions, configuration) =>
@@ -91,8 +97,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 Common.Constants.BlobContainerName));
 
             // Add bot services.
-            builder.Services.AddSingleton<CommonMicrosoftAppCredentials>();
-            builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
+            builder.Services.AddSingleton<UserAppCredentials>();
+            builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
 
             // Add services.
@@ -106,7 +112,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
             builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
             builder.Services.AddSingleton<IUserDataRepository, UserDataRepository>();
-            builder.Services.AddSingleton<IExportDataRepository,ExportDataRepository>();
+            builder.Services.AddSingleton<IExportDataRepository, ExportDataRepository>();
 
             // Add service bus message queues.
             builder.Services.AddSingleton<IDataQueue, DataQueue>();

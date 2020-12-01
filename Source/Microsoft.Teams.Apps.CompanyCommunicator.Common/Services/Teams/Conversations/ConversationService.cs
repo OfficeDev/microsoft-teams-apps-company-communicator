@@ -25,27 +25,53 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         private static readonly string MicrosoftTeamsChannelId = "msteams";
 
         private readonly BotFrameworkHttpAdapter botAdapter;
-        private readonly CommonMicrosoftAppCredentials appCredentials;
+        private readonly UserAppCredentials userAppCredentials;
+        private readonly AuthorAppCredentials authorAppCredentials;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConversationService"/> class.
         /// </summary>
         /// <param name="botAdapter">The bot adapter.</param>
-        /// <param name="appCredentials">The common Microsoft app credentials.</param>
+        /// <param name="userAppCredentials">The user Microsoft app credentials.</param>
+        /// <param name="authorAppCredentials">The author Microsoft app credentials.</param>
         public ConversationService(
             BotFrameworkHttpAdapter botAdapter,
-            CommonMicrosoftAppCredentials appCredentials)
+            UserAppCredentials userAppCredentials,
+            AuthorAppCredentials authorAppCredentials)
         {
             this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
-            this.appCredentials = appCredentials ?? throw new ArgumentNullException(nameof(appCredentials));
+            this.userAppCredentials = userAppCredentials ?? throw new ArgumentNullException(nameof(userAppCredentials));
+            this.authorAppCredentials = authorAppCredentials ?? throw new ArgumentNullException(nameof(authorAppCredentials));
         }
 
         /// <inheritdoc/>
-        public async Task<CreateConversationResponse> CreateConversationAsync(
+        public async Task<CreateConversationResponse> CreateUserConversationAsync(
             string teamsUserId,
             string tenantId,
             string serviceUrl,
             int maxAttempts,
+            ILogger log)
+        {
+            return await this.CreateConversationAsync(teamsUserId, tenantId, serviceUrl, maxAttempts, this.userAppCredentials, log);
+        }
+
+        /// <inheritdoc/>
+        public async Task<CreateConversationResponse> CreateAuthorConversationAsync(
+            string teamsUserId,
+            string tenantId,
+            string serviceUrl,
+            int maxAttempts,
+            ILogger log)
+        {
+            return await this.CreateConversationAsync(teamsUserId, tenantId, serviceUrl, maxAttempts, this.authorAppCredentials, log);
+        }
+
+        private async Task<CreateConversationResponse> CreateConversationAsync(
+            string teamsUserId,
+            string tenantId,
+            string serviceUrl,
+            int maxAttempts,
+            MicrosoftAppCredentials credentials,
             ILogger log)
         {
             if (string.IsNullOrEmpty(teamsUserId))
@@ -91,7 +117,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                     await this.botAdapter.CreateConversationAsync(
                         channelId: ConversationService.MicrosoftTeamsChannelId,
                         serviceUrl: serviceUrl,
-                        credentials: this.appCredentials,
+                        credentials: credentials,
                         conversationParameters: conversationParameters,
                         callback: (turnContext, cancellationToken) =>
                         {

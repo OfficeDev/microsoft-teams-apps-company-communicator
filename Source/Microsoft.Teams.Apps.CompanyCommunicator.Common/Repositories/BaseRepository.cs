@@ -16,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
     /// Base repository for the data stored in the Azure Table Storage.
     /// </summary>
     /// <typeparam name="T">Entity class type.</typeparam>
-    public class BaseRepository<T> : IRepository<T>
+    public abstract class BaseRepository<T> : IRepository<T>
         where T : TableEntity, new()
     {
         private readonly string defaultPartitionKey;

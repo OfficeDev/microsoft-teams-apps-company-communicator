@@ -42,6 +42,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public async Task RunAsync(
             [ActivityTrigger](NotificationDataEntity notification, List<SentNotificationDataEntity> batch) input)
         {
+            if (input.notification == null)
+            {
+                throw new ArgumentNullException(nameof(input.notification));
+            }
+
+            if (input.batch == null)
+            {
+                throw new ArgumentNullException(nameof(input.batch));
+            }
+
             var messageBatch = input.batch.Select(
                 recipient =>
                 {

@@ -1,10 +1,11 @@
-// <copyright file="CompanyCommunicatorBot.cs" company="Microsoft">
+﻿// <copyright file="AuthorTeamsActivityHandler.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
@@ -13,32 +14,37 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
 
     /// <summary>
-    /// Company Communicator Bot.
-    /// Captures user data, team data, upload files.
+    /// Company Communicator Author Bot.
+    /// Captures author data, file upload.
     /// </summary>
-    public class CompanyCommunicatorBot : TeamsActivityHandler
+    public class AuthorTeamsActivityHandler : TeamsActivityHandler
     {
-        private static readonly string TeamRenamedEventType = "teamRenamed";
-
-        private readonly TeamsDataCapture teamsDataCapture;
+        private const string ChannelType = "channel";
         private readonly TeamsFileUpload teamsFileUpload;
+        private readonly IUserDataService userDataService;
+        private readonly IAppSettingsService appSettingsService;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompanyCommunicatorBot"/> class.
+        /// Initializes a new instance of the <see cref="AuthorTeamsActivityHandler"/> class.
         /// </summary>
-        /// <param name="teamsDataCapture">Teams data capture service.</param>
-        /// <param name="teamsFileUpload">change this.</param>
+        /// <param name="teamsFileUpload">File upload service.</param>
+        /// <param name="userDataService">User data service.</param>
+        /// <param name="appSettingsService">App Settings service.</param>
         /// <param name="localizer">Localization service.</param>
-        public CompanyCommunicatorBot(
-            TeamsDataCapture teamsDataCapture,
+        public AuthorTeamsActivityHandler(
             TeamsFileUpload teamsFileUpload,
+            IUserDataService userDataService,
+            IAppSettingsService appSettingsService,
             IStringLocalizer<Strings> localizer)
         {
-            this.teamsDataCapture = teamsDataCapture ?? throw new ArgumentNullException(nameof(teamsDataCapture));
+            this.userDataService = userDataService ?? throw new ArgumentNullException(nameof(userDataService));
             this.teamsFileUpload = teamsFileUpload ?? throw new ArgumentNullException(nameof(teamsFileUpload));
+            this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
@@ -62,21 +68,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
             var activity = turnContext.Activity;
 
-            var isTeamRenamed = this.IsTeamInformationUpdated(activity);
-            if (isTeamRenamed)
+            // Take action if the event includes the bot being added.
+            var membersAdded = activity.MembersAdded;
+            if (membersAdded != null && membersAdded.Any(p => p.Id == activity.Recipient.Id))
             {
-                await this.teamsDataCapture.OnTeamInformationUpdatedAsync(activity);
-            }
-
-            if (activity.MembersAdded != null)
-            {
-                await this.teamsDataCapture.OnBotAddedAsync(activity);
+                if (activity.Conversation.ConversationType.Equals(ChannelType))
+                {
+                    await this.userDataService.SaveAuthorDataAsync(activity);
+                }
             }
 
             if (activity.MembersRemoved != null)
             {
-                await this.teamsDataCapture.OnBotRemovedAsync(activity);
+                await this.userDataService.RemoveAuthorDataAsync(activity);
             }
+
+            // Update service url app setting.
+            await this.UpdateServiceUrl(activity.ServiceUrl);
         }
 
         /// <summary>
@@ -141,20 +149,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             await turnContext.SendActivityAsync(reply, cancellationToken);
         }
 
-        private bool IsTeamInformationUpdated(IConversationUpdateActivity activity)
+        private async Task UpdateServiceUrl(string serviceUrl)
         {
-            if (activity == null)
+            // Check if service url is already synced.
+            var cachedUrl = await this.appSettingsService.GetServiceUrlAsync();
+            if (!string.IsNullOrWhiteSpace(cachedUrl))
             {
-                return false;
+                return;
             }
 
-            var channelData = activity.GetChannelData<TeamsChannelData>();
-            if (channelData == null)
-            {
-                return false;
-            }
-
-            return CompanyCommunicatorBot.TeamRenamedEventType.Equals(channelData.EventType, StringComparison.OrdinalIgnoreCase);
+            // Update service url.
+            await this.appSettingsService.SetServiceUrlAsync(serviceUrl);
         }
     }
 }

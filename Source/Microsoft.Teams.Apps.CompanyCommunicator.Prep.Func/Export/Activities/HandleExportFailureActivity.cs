@@ -35,7 +35,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         private readonly string storageConnectionString;
         private readonly BlobContainerClient blobContainerClient;
         private readonly IUserDataRepository userDataRepository;
-        private readonly string microsoftAppId;
+        private readonly string authorAppId;
         private readonly BotFrameworkHttpAdapter botAdapter;
         private readonly IStringLocalizer<Strings> localizer;
 
@@ -60,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             this.storageConnectionString = repositoryOptions.Value.StorageAccountConnectionString;
             this.blobContainerClient = new BlobContainerClient(this.storageConnectionString, Common.Constants.BlobContainerName);
             this.botAdapter = botAdapter;
-            this.microsoftAppId = botOptions.Value.MicrosoftAppId;
+            this.authorAppId = botOptions.Value.AuthorAppId;
             this.userDataRepository = userDataRepository;
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
@@ -114,7 +114,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
 
         private async Task SendFailureMessageAsync(string userId)
         {
-            var user = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, userId);
+            var user = await this.userDataRepository.GetAsync(UserDataTableNames.AuthorDataPartition, userId);
 
             // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
             MicrosoftAppCredentials.TrustServiceUrl(user.ServiceUrl);
@@ -131,7 +131,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
 
             int maxNumberOfAttempts = 10;
             await this.botAdapter.ContinueConversationAsync(
-               botAppId: this.microsoftAppId,
+               botAppId: this.authorAppId,
                reference: conversationReference,
                callback: async (turnContext, cancellationToken) =>
                {
