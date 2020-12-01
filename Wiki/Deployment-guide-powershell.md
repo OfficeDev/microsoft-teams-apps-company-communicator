@@ -106,7 +106,9 @@ Then the script will validate the existence of Azure resources in the selected r
 
 ![Powershell deployment guide](images/name_availability_check.png)
 
-If Azure AD applications already exist on tenant, The script will show confirmation dialog to update current applications&#39; configurations.
+If Azure AD applications already exist on tenant, The script will show confirmation dialog to update current applications & configurations.
+
+The same message you will get twice to get the confirmation, one for author app and another for user app. 
 
 ![Powershell deployment guide](images/ad_app_update.png)
 
@@ -119,6 +121,13 @@ When the script has completed a &quot; **DEPLOYMENT SUCCEEDED**&quot; message wi
 
 ![Powershell deployment guide](images/success_message.png)
 
+**Note** - While updating the user app, script will through a warning message as below.
+
+![Powershell deployment guide](images/warning_msg.png)
+
+Please ignore this warning, the backend data has been updated.
+
+Just after successful deployment the containing zip file, folder will open as below.
 
 ![Powershell deployment guide](images/manifest_folder_view.png)
 

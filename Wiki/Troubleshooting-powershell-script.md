@@ -24,7 +24,22 @@ Exception calling &quot;AcquireAccessToken&quot; with &quot;1&quot; argument(s):
 
 **Fix** : This means user is logged-in with multiple accounts in the current powershell session. Close the shell window and open a new one.&quot;
 
-**4. Azure AD app permission consent error**
+**4. Authorization failed**
+
+**Description**
+
+The resources created by ARM template requires a sync with latest code, so it can run with latest update.
+
+![Powershell deployment guide](images/Authorization_failed.png)
+
+**Fix** :
+
+To avoid automate sync issue the current user should have admin privilege.
+
+**Note**: If you ignore this issue, it will not impact your deployment. But, to get the latest code update you need to sync the resources like function and apps manually. 
+
+
+**5. Azure AD app permission consent error**
 
 **Description**
 
@@ -38,7 +53,7 @@ Please ask your tenant administrator to consent the &quot;User.Read&quot; permis
 
 ![Powershell deployment guide](images/graph_access.png)
 
-**5. Error while deploying the ARM Template**
+**6. Error while deploying the ARM Template**
 
 **Description**
 

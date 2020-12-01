@@ -362,8 +362,17 @@ function ADAppUpdate {
         $scope.Type = "User"
         return $scope
     }
-
-	az ad app update --id $configAppId --required-resource-accesses './AadAppManifest.json'
+        #Removing default scope user_impersonation
+		$DEFAULT_SCOPE=$(az ad app show --id $configAppId | jq '.oauth2Permissions[0].isEnabled = false' | jq -r '.oauth2Permissions')
+		$DEFAULT_SCOPE>>scope.json
+		az ad app update --id $configAppId --set oauth2Permissions=@scope.json
+		Remove-Item .\scope.json
+		az ad app update --id $configAppId --remove oauth2Permissions
+        
+        #Assigning graph permissions  
+        az ad app update --id $configAppId --required-resource-accesses './AadAppManifest.json'
+    
+    #Assigning Admin consent
     $confirmationTitle = "Admin consent permissions is required for app registration using CLI"
     $confirmationQuestion = "Are you sure you want to proceed?"
     $confirmationChoices = "&Yes", "&No" # 0 = Yes, 1 = No
@@ -483,16 +492,10 @@ function ADAppUpdateUser {
 			$DEFAULT_SCOPE=$(az ad app show --id $appId | jq '.oauth2Permissions[0].isEnabled = false' | jq -r '.oauth2Permissions')
 			$DEFAULT_SCOPE>>scope.json
 			az ad app update --id $appId --set oauth2Permissions=@scope.json
-			rm .\scope.json
-
-			$DEFAULT_SCOPE=$(az ad app show --id $appId | jq '.oauth2Permissions[1].isEnabled = false' | jq -r '.oauth2Permissions')
-			$DEFAULT_SCOPE>scope.json
-			az ad app update --id $appId --set oauth2Permissions=@scope.json
-			rm .\scope.json
-
-			$oauth2AllowIdTokenImplicitFlow = az ad app update --id $appId --set oauth2AllowIdTokenImplicitFlow=false
-			az ad app update --id $appId --remove replyUrls --remove IdentifierUris
+			Remove-Item .\scope.json
 			az ad app update --id $appId --remove oauth2Permissions
+			az ad app update --id $appId --set oauth2AllowIdTokenImplicitFlow=false
+            az ad app update --id $appId --remove replyUrls --remove IdentifierUris
 			az ad app update --id $appId --identifier-uris "$IdentifierUris"
 			az ad app update --id $appId --remove IdentifierUris
 			az ad app update --id $appId --optional-claims './AadOptionalClaims_Reset.json'
