@@ -26,7 +26,7 @@ The Users Collection stores the users who have installed Company Communicator ap
 
 | Value         | Description
 | ---           | ---
-| PartitionKey  | Constant value as 'User Data'.
+| PartitionKey  | Constant value as 'User Data' or 'Author Data'.
 | RowKey        | The user's azure active directory object identifier.
 | Timestamp     | The latest DateTime record.
 | AadId         | The user's azure active directory object identifier.
