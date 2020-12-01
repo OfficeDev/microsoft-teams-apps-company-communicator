@@ -412,7 +412,7 @@ function ADAppUpdate {
 
     # Do nothing if the app has already been configured
     if ($app.IdentifierUris.Count -gt 0) {
-        Write-Host "Exiting, authors app already configured." -ForegroundColor Red
+        Write-Host "Exiting, authors app already configured." -ForegroundColor Green
         return
     }
     Write-Host "`nUpdating authors app..."-ForegroundColor Yellow         
