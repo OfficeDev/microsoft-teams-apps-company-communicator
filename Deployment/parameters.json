@@ -7,9 +7,13 @@
         "Value": "<<value>>",
         "Description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
     },
+    "subscriptionTenantId": {
+        "Value": "<<value>>",
+        "Description": "Azure subscription tenant's Id"
+    },
     "tenantId": {
         "Value": "<<value>>",
-        "Description": "The ID of the tenant to which the app will be deployed."
+        "Description": "Tenant Id where the teams application will be installed."
     },
     "subscriptionId": {
         "Value": "<<value>>",
@@ -40,7 +44,7 @@
         "Description": "Company terms of use url."
     },
     "customDomainOption": {
-        "Value": "<<value>>",
+        "Value": "Azure Front Door",
         "Description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs."
     },
     "proactivelyInstallUserApp": {

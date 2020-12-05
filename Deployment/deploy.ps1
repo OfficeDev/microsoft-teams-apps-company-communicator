@@ -6,6 +6,21 @@ function ValidateSecureUrl {
     return ($url -match "https:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)")
 }
 
+function Test-IsGuid
+{
+    [OutputType([bool])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [string]$ObjectGuid
+    )
+
+    # Define verification regex
+    [regex]$guidRegex = '(?im)^[{(]?[0-9A-F]{8}[-]?(?:[0-9A-F]{4}[-]?){3}[0-9A-F]{12}[)}]?$'
+
+    # Check guid against regex
+    return $ObjectGuid -match $guidRegex
+}
 
 function ValidateUrlParameters {
     $isValidUrl = $true
@@ -53,16 +68,11 @@ function validateresourcesnames {
 
     if (!$allresourcesavailable) {
         $confirmationtitle = "Some of the resource types names already exist. If you proceed, this will update the existing resources."
-        $confirmationquestion = "Are you sure you want to proceed?"
+        $confirmationquestion = "Do you want to proceed?"
         $confirmationchoices = "&yes", "&no" # 0 = yes, 1 = no
         
         $updatedecision = $host.ui.promptforchoice($confirmationtitle, $confirmationquestion, $confirmationchoices, 1)
-        if ($updatedecision -eq 0) {
-            return $true
-        }
-        else {
-            return $false
-        }
+        return ($updatedecision -eq 0)
     }
 }
 
@@ -75,28 +85,25 @@ function validateresourcenames {
         if ($null -eq (get-azapplicationinsights | where-object name -eq $resourceinfo.name)) {
             write-host "Application Insights resource ($($resourceinfo.name)) is available." -foregroundcolor green
             return $true
-        }
-        else {
+        } else {
             write-host "Application Insights resource ($($resourceinfo.name)) is not available." -foregroundcolor yellow
             return $false
         }
-    }
-    else {
+    } else {
         $availabilityresult = $null
         $availabilityresult = test-aznameavailability @resourceinfo -erroraction stop
     
         if ($availabilityresult.available) {
             write-host "resource: $($resourceinfo.name) of type $($resourceinfo.servicetype) is available." -foregroundcolor green
             return $true
-        }
-        else {
+        } else {
             write-host "resource $($resourceinfo.name) is not available." -foregroundcolor yellow
             write-host $availabilityresult.message -foregroundcolor yellow
             return $false
         }
     }
 }
-#get access token from the logged-in user.
+# Get access token from the logged-in user.
 function get-accesstokenfromcurrentuser {
     try {
         $azcontext = get-azcontext
@@ -109,7 +116,7 @@ function get-accesstokenfromcurrentuser {
         throw
     }
 } 
-#to check if the name of resource is available.
+# Check if the name of resource is available.
 function test-aznameavailability {
     param(
         [parameter(mandatory = $true)] [string] $authorizationtoken,
@@ -148,16 +155,14 @@ function test-aznameavailability {
     select-object @{n = 'name'; e = { $name } }, @{n = 'type'; e = { $servicetype } }, @{n = 'available'; e = { $_ | select-object -expandproperty *available } }, reason, message
 }
 
-# to get the ADapp detail. 
+# To get the Azure AD app detail. 
 function GetAzureADApp {
     param ($appName)
-
     $app = az ad app list --filter "displayName eq '$appName'" | ConvertFrom-Json
-
     return $app
-
 }
-# Create/re-set AD app.
+
+# Create/re-set Azure AD app.
 function CreateAzureADApp {
     param(
         [Parameter(Mandatory = $true)] [string] $AppName,
@@ -176,14 +181,14 @@ function CreateAzureADApp {
 
             # Update Azure AD app registration using CLI
             $confirmationTitle = "The Azure AD app '$appName' already exists. If you proceed, this will update the existing app configuration."
-            $confirmationQuestion = "Are you sure you want to proceed?"
+            $confirmationQuestion = "Do you want to proceed?"
             $confirmationChoices = "&Yes", "&No" # 0 = Yes, 1 = No
             
             $updateDecision = $Host.UI.PromptForChoice($confirmationTitle, $confirmationQuestion, $confirmationChoices, 1)
             if ($updateDecision -eq 0) {
                 Write-Host "Updating the existing app..." -ForegroundColor Yellow
 
-                az ad app update --id $app.appId --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow --required-resource-accesses './AadAppManifest.json'
+                az ad app update --id $app.appId --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow
 
                 Write-Host "Waiting for app update to finish..."
 
@@ -191,18 +196,16 @@ function CreateAzureADApp {
 
                 Write-Host "Azure AD App ($appName) is updated." -ForegroundColor Green
 
-            }
-            else {
+            } else {
                 Write-Host "Deployment cancelled. Please use a different name for the Azure AD app and try again." -ForegroundColor Yellow
                 return $null
             }
-        } 
-        else {
+        } else {
             # Create the app
             Write-Host "Creating Azure AD App - ($appName)..."
 
             # Create Azure AD app registration using CLI
-            az ad app create --display-name $appName --end-date '2299-12-31T11:59:59+00:00' --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow --required-resource-accesses './AadAppManifest.json'
+            az ad app create --display-name $appName --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow
 
             Write-Host "Waiting for app creation to finish..."
 
@@ -215,12 +218,13 @@ function CreateAzureADApp {
         $app = GetAzureADApp $appName
         
         $appSecret = $null;
+        #Reset the app credentials to get the secret. The default validity of this secret will be for 1 year from the date its created. 
         if ($ResetAppSecret) {
             Write-Host "Updating app secret..."
             $appSecret = az ad app credential reset --id $app.appId --append | ConvertFrom-Json;
         }
 
-        Write-Host "### AZURE AD APP ($appName) CREATION & CONFIGURATION FINISHED ###" -ForegroundColor Green
+        Write-Host "### AZURE AD APP ($appName) CREATED/REGISTERED SUCCESSFULLY. ###" -ForegroundColor Green
         return $appSecret
     }
     catch {
@@ -283,8 +287,10 @@ function CollectARMDeploymentLogs {
 
 function DeployARMTemplate {
     Param(
-        [Parameter(Mandatory = $true)] $appId,
-        [Parameter(Mandatory = $true)] $secret
+        [Parameter(Mandatory = $true)] $authorappId,
+        [Parameter(Mandatory = $true)] $authorsecret,
+		[Parameter(Mandatory = $true)] $userappId,
+        [Parameter(Mandatory = $true)] $usersecret
     )
     try { 
         if ((az group exists --name $parameters.ResourceGroupName.Value --subscription $parameters.subscriptionId.Value) -eq $false) {
@@ -293,8 +299,8 @@ function DeployARMTemplate {
         }
         
         # Deploy ARM templates
-        Write-Host "Deploying app services, Azure function, bot service, and other supporting resources..." -ForegroundColor Yellow
-        az deployment group create --resource-group $parameters.ResourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "botClientId=$appId" "botClientSecret=$secret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.location.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"
+        Write-Host "`nDeploying app services, Azure function, bot service, and other supporting resources..." -ForegroundColor Yellow
+        az deployment group create --resource-group $parameters.ResourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.location.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"
         if ($LASTEXITCODE -ne 0) {
             CollectARMDeploymentLogs
             Throw "ERROR: ARM template deployment error."
@@ -302,6 +308,17 @@ function DeployARMTemplate {
         Write-Host "Finished deploying resources." -ForegroundColor Green
         #get the output of current deployment
         $value = Get-AzResourceGroupDeployment -ResourceGroupName $parameters.ResourceGroupName.Value -Name azuredeploy
+		
+		# sync app services code deployment (ARM deployment will not sync automatically)
+        $appServicesNames = @($parameters.BaseResourceName.Value, #app-service
+        "$($parameters.BaseResourceName.Value)-prep-function", #prep-function
+        "$($parameters.BaseResourceName.Value)-function", #function
+        "$($parameters.BaseResourceName.Value)-data-function" #data-function
+        )
+        foreach ($appService in $appServicesNames) {
+            Write-Host "Sync $appService code from latest version"
+            az webapp deployment source sync --name $appService --resource-group $parameters.ResourceGroupName.Value
+        }
         return $value
     }
     catch {
@@ -310,7 +327,70 @@ function DeployARMTemplate {
     }
 }
 
-# AD app update. Assigning Admin-consent,RedirectUris,IdentifierUris,Optionalclaim etc. 
+# Create Azure AD App principal if app is used in other tenants
+function CreateAdAppPrincipal {
+    Param(
+        [Parameter(Mandatory = $true)] $tenantId,
+        [Parameter(Mandatory = $true)] $authorAppId,
+        [Parameter(Mandatory = $true)] $userAppId
+    )
+
+    Write-Host "`nPlease login to the tenant where this app template will be used in Microsoft Teams."
+    $user = az login --tenant $tenantId
+    $sp = az ad sp list --filter "appId eq '$authorAppId'"
+    if(0 -eq ($sp | ConvertFrom-Json).length){
+        Write-Host "Azure AD app principal will be created in tenant ($tenantId)"
+        
+        # Delete old service principal for user app
+        $sp = az ad sp list --filter "appId eq '$userAppId'"
+        if(0 -ne ($sp | ConvertFrom-Json).length){
+            $sp = az ad sp delete --id $userAppId
+        }
+
+        # create new service principal
+        $sp = az ad sp create --id $authorAppId
+    }
+    $logOut = az logout
+    Write-Host "`nPlease inform your admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/common/adminconsent?client_id=$authorAppId" -ForegroundColor Yellow
+}    
+
+# Grant Admin consent
+function GrantAdminConsent {
+    Param(
+        [Parameter(Mandatory = $true)] $authorAppId
+	)
+
+    $confirmationTitle = "Admin consent permissions is required for app registration using CLI"
+    $confirmationQuestion = "Do you want to proceed?"
+    $confirmationChoices = "&Yes", "&No" # 0 = Yes, 1 = No
+    $consentErrorMessage = "Current user does not have the privilege to consent the below permissions on this app.
+    * AppCatalog.Read.All(Delegated)
+    * Group.Read.All(Delegated)
+    * Group.Read.All(Application)
+    * TeamsAppInstallation.ReadWriteForUser.All(Application)
+    * User.Read.All(Delegated)
+    * User.Read(Application) 
+    Please ask your tenant's global administrator to consent."
+
+    $updateDecision = $Host.UI.PromptForChoice($confirmationTitle, $confirmationQuestion, $confirmationChoices, 1)
+    if ($updateDecision -eq 0) {
+        # Grant admin consent for app registration required permissions using CLI
+        Write-Host "Waiting for admin consent to finish..."
+		az ad app permission admin-consent --id $authorAppId
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host $consentErrorMessage -ForegroundColor Yellow
+            Write-Host "`nPlease inform your admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/common/adminconsent?client_id=$authorAppId" -ForegroundColor Yellow
+            [Console]::ResetColor()
+        } else {
+            Write-Host "Admin consent has been granted." -ForegroundColor Green
+        }
+    } else {
+        Write-Host "`nPlease inform your admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/common/adminconsent?client_id=$authorAppId" -ForegroundColor Yellow
+    }
+}
+
+# Azure AD app update. Assigning Admin-consent,RedirectUris,IdentifierUris,Optionalclaim etc. 
 function ADAppUpdate {
     Param(
         [Parameter(Mandatory = $true)] $appdomainName,
@@ -321,7 +401,7 @@ function ADAppUpdate {
             $configAppUrl = "https://$azureDomainBase"
             $RedirectUris = ($configAppUrl + '/signin-simple-end')
             $IdentifierUris = "api://$azureDomainBase"
-            $appName = $parameters.baseResourceName.Value
+            $appName = $parameters.baseResourceName.Value + '-authors'
 
     function CreatePreAuthorizedApplication(
         [string] $applicationIdToPreAuthorize,
@@ -350,36 +430,19 @@ function ADAppUpdate {
         return $scope
     }
 
-    $confirmationTitle = "Admin consent permissions is required for app registration using CLI"
-    $confirmationQuestion = "Are you sure you want to proceed?"
-    $confirmationChoices = "&Yes", "&No" # 0 = Yes, 1 = No
-    $consentErrorMessage = "Current user does not have the privilege to consent the `"User.Read`" permission on this app. Please ask your tenant administrator to consent."
-            
-    $updateDecision = $Host.UI.PromptForChoice($confirmationTitle, $confirmationQuestion, $confirmationChoices, 1)
-    if ($updateDecision -eq 0) {
-        # Grant admin consent for app registration required permissions using CLI
-        az ad app permission admin-consent --id $configAppId
-        Write-Host "Waiting for admin consent to finish..."
-        if (0 -ne $LastExitCode) {
-            Write-Host $consentErrorMessage -ForegroundColor Yellow
-            [Console]::ResetColor()
-        }
-        else {
-            Write-Host "Admin consent has been granted." -ForegroundColor Green
-        }
-    }
-    else {
-        Write-Host "Please check the below link to provide admin consent manually. `nhttps://docs.microsoft.com/en-us/azure/active-directory/manage-apps/grant-admin-consent#:~:text=Select%20Azure%20Active%20Directory%20then,the%20permissions%20the%20application%20requires."
-    }
+    # Grant Admin consent
+    GrantAdminConsent $configAppId
+    
+    # Assigning graph permissions  
+    az ad app update --id $configAppId --required-resource-accesses './AadAppManifest.json'    
+
     Import-Module AzureAD
-            
 
     $apps = Get-AzureADApplication -Filter "DisplayName eq '$appName'"
 
     if (0 -eq $apps.Length) {
         $app = New-AzureADApplication -DisplayName $appName
-    }
-    else {
+    } else {
         $app = $apps[0]
     }
 
@@ -389,49 +452,113 @@ function ADAppUpdate {
 
     # Do nothing if the app has already been configured
     if ($app.IdentifierUris.Count -gt 0) {
-        Write-Host "Exiting, application already configured." -ForegroundColor Red
+        Write-Host "`nExiting, authors app already configured." -ForegroundColor Green
         return
     }
-             
+    Write-Host "`nUpdating authors app..."-ForegroundColor Yellow
+
+	#Removing default scope user_impersonation
+	$DEFAULT_SCOPE=$(az ad app show --id $configAppId | jq '.oauth2Permissions[0].isEnabled = false' | jq -r '.oauth2Permissions')
+	$DEFAULT_SCOPE>>scope.json
+	az ad app update --id $configAppId --set oauth2Permissions=@scope.json
+	Remove-Item .\scope.json
+	az ad app update --id $configAppId --remove oauth2Permissions
+    
+    #Re-assign app detail after removing default scope user_impersonation
+	$apps = Get-AzureADApplication -Filter "DisplayName eq '$appName'"
+
+    if (0 -eq $apps.Length) {
+        $app = New-AzureADApplication -DisplayName $appName
+    } else {
+        $app = $apps[0]
+    }
+
+    $applicationObjectId = $app.ObjectId
+
+    $app = Get-AzureADMSApplication -ObjectId $applicationObjectId
+	
     # Expose an API
-            $appId = $app.AppId
-            Set-AzureADMSApplication -ObjectId $app.Id -IdentifierUris "$IdentifierUris"
+    $appId = $app.AppId
+			
+    az ad app update --id $configAppId --identifier-uris $IdentifierUris
+    Write-Host "App URI set"        
+            
+	$configApp = az ad app update --id $configAppId --reply-urls $RedirectUris
+    Write-Host "App reply-urls set"  
+            
+    az ad app update --id $configAppId --optional-claims './AadOptionalClaims.json'
+    Write-Host "App optionalclaim set."
                     
-            $configApp = az ad app update --id $configAppId --reply-urls $RedirectUris
-                    
-            az ad app update --id $configAppId --optional-claims './AadOptionalClaims.json'
-                    
-            Write-Host "App URI,Urls, Optionalclaim set."
-                    
-            # Create access_as_user scope
-            # Add all existing scopes first
-            $scopes = New-Object System.Collections.Generic.List[Microsoft.Open.MsGraph.Model.PermissionScope]
-            $app.Api.Oauth2PermissionScopes | foreach-object { $scopes.Add($_) }
-            $scope = CreateScope -value "access_as_user"  `
-                -userConsentDisplayName "Access the API as the current logged-in user."  `
-                -userConsentDescription "Access the API as the current logged-in user."  `
-                -adminConsentDisplayName "Access the API as the current logged-in user."  `
-                -adminConsentDescription "Access the API as the current logged-in user."
-            $scopes.Add($scope)
-            $app.Api.Oauth2PermissionScopes = $scopes
-            Set-AzureADMSApplication -ObjectId $app.Id -Api $app.Api
-            Write-Host "Scope access_as_user added."
+    # Create access_as_user scope
+    # Add all existing scopes first
+    $scopes = New-Object System.Collections.Generic.List[Microsoft.Open.MsGraph.Model.PermissionScope]
+    $app.Api.Oauth2PermissionScopes | foreach-object { $scopes.Add($_) }
+    $scope = CreateScope -value "access_as_user"  `
+        -userConsentDisplayName "Access the API as the current logged-in user."  `
+        -userConsentDescription "Access the API as the current logged-in user."  `
+        -adminConsentDisplayName "Access the API as the current logged-in user."  `
+        -adminConsentDescription "Access the API as the current logged-in user."
+    $scopes.Add($scope)
+    $app.Api.Oauth2PermissionScopes = $scopes
+    Set-AzureADMSApplication -ObjectId $app.Id -Api $app.Api
+    Write-Host "Scope access_as_user added."
              
     # Authorize Teams mobile/desktop client and Teams web client to access API
-            $preAuthorizedApplications = New-Object 'System.Collections.Generic.List[Microsoft.Open.MSGraph.Model.PreAuthorizedApplication]'
-            $teamsRichClientPreauthorization = CreatePreAuthorizedApplication `
-                -applicationIdToPreAuthorize '1fec8e78-bce4-4aaf-ab1b-5451cc387264' `
-                -scopeId $scope.Id
-            $teamsWebClientPreauthorization = CreatePreAuthorizedApplication `
-                -applicationIdToPreAuthorize '5e3ce6c0-2b1f-4285-8d4b-75ee78787346' `
-                -scopeId $scope.Id
-            $preAuthorizedApplications.Add($teamsRichClientPreauthorization)
-            $preAuthorizedApplications.Add($teamsWebClientPreauthorization)   
-            $app = Get-AzureADMSApplication -ObjectId $applicationObjectId
-            $app.Api.PreAuthorizedApplications = $preAuthorizedApplications
-            Set-AzureADMSApplication -ObjectId $app.Id -Api $app.Api
-            Write-Host "Teams mobile/desktop and web clients applications pre-authorized."
-     
+    $preAuthorizedApplications = New-Object 'System.Collections.Generic.List[Microsoft.Open.MSGraph.Model.PreAuthorizedApplication]'
+    $teamsRichClientPreauthorization = CreatePreAuthorizedApplication `
+        -applicationIdToPreAuthorize '1fec8e78-bce4-4aaf-ab1b-5451cc387264' `
+        -scopeId $scope.Id
+    $teamsWebClientPreauthorization = CreatePreAuthorizedApplication `
+        -applicationIdToPreAuthorize '5e3ce6c0-2b1f-4285-8d4b-75ee78787346' `
+        -scopeId $scope.Id
+    $preAuthorizedApplications.Add($teamsRichClientPreauthorization)
+    $preAuthorizedApplications.Add($teamsWebClientPreauthorization)   
+    $app = Get-AzureADMSApplication -ObjectId $applicationObjectId
+    $app.Api.PreAuthorizedApplications = $preAuthorizedApplications
+    Set-AzureADMSApplication -ObjectId $app.Id -Api $app.Api
+    Write-Host "Teams mobile/desktop and web clients applications pre-authorized."
+}
+
+# Removing existing access of user app.
+function ADAppUpdateUser {
+    Param(
+        [Parameter(Mandatory = $true)] $appId
+	)
+				
+				$appName = $parameters.baseResourceName.Value
+				
+			    $apps = Get-AzureADApplication -Filter "DisplayName eq '$appName'"
+
+				if (0 -eq $apps.Length) {
+					$app = New-AzureADApplication -DisplayName $appName
+				} else {
+					$app = $apps[0]
+				}
+
+				$applicationObjectId = $app.ObjectId
+
+				$app = Get-AzureADMSApplication -ObjectId $applicationObjectId
+
+				# Do nothing if the app has already been configured
+				if ($app.IdentifierUris.Count -eq 0) {
+					Write-Host "`nUser app already configured." -ForegroundColor Green
+					return
+				}
+			
+			Write-Host "`nUpdating user app..."-ForegroundColor Yellow
+            $IdentifierUris = "api://$appId"
+			
+			$DEFAULT_SCOPE=$(az ad app show --id $appId | jq '.oauth2Permissions[0].isEnabled = false' | jq -r '.oauth2Permissions')
+			$DEFAULT_SCOPE>>scope.json
+			az ad app update --id $appId --set oauth2Permissions=@scope.json
+			Remove-Item .\scope.json
+			az ad app update --id $appId --remove oauth2Permissions
+			az ad app update --id $appId --set oauth2AllowIdTokenImplicitFlow=false
+            az ad app update --id $appId --remove replyUrls --remove IdentifierUris
+			az ad app update --id $appId --identifier-uris "$IdentifierUris"
+			az ad app update --id $appId --remove IdentifierUris
+			az ad app update --id $appId --optional-claims './AadOptionalClaims_Reset.json'
+			az ad app update --id $appId --remove requiredResourceAccess
 }
 #update manifest file and create a .zip file.
 function GenerateAppManifestPackage {
@@ -441,7 +568,7 @@ function GenerateAppManifestPackage {
         [Parameter(Mandatory = $true)] $appId
     )
 
-        Write-Host "Generating package for $manifestType..."
+        Write-Host "`nGenerating package for $manifestType..."
 
         $azureDomainBase = $appdomainName
         $sourceManifestPath = "..\Manifest\manifest_$manifestType.json"
@@ -487,7 +614,7 @@ function GenerateAppManifestPackage {
     If (-not (Test-Path -Path "C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2")) {
         Write-Host "AZURE CLI NOT INSTALLED!"
         $confirmationtitle      = "Please select YES to install Azure CLI."
-        $confirmationquestion   = "Are you sure you want to proceed?"
+        $confirmationquestion   = "Do you want to proceed?"
         $confirmationchoices    = "&yes", "&no" # 0 = yes, 1 = no
             
         $updatedecision = $host.ui.promptforchoice($confirmationtitle, $confirmationquestion, $confirmationchoices, 1)
@@ -496,17 +623,16 @@ function GenerateAppManifestPackage {
             Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; rm .\AzureCLI.msi
             Write-Host "AZURE CLI IS INSTALLED!.. Please close the PowerShell window and re-run this script in a new PowerShell session."            
             return
-        }
-        else {
-            Write-Host "AZURE CLI NOT INSTALLED!`nPLEASE INSTALL THE CLI FROM https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest and re-run this script in a new PowerShell session" -ForegroundColor Red
+        } else {
+            Write-Host "AZURE CLI IS NOT INSTALLED!`nPLEASE INSTALL THE CLI FROM https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest and re-run this script in a new PowerShell session" -ForegroundColor Red
             break
         }
     }
 
 # Installing required modules
     Write-Host "Checking for required modules..." -ForegroundColor Yellow
-    $confirmationTitle = Write-Host "To run this script. Below module needs to be installed. `n 1.Az module`n 2.AzureAD module `n 3.WriteAscii module`nif you proceed, the script will install the modules."
-    $confirmationQuestion = "Are you sure you want to proceed?"
+    $confirmationTitle = Write-Host "To run this script. Below module needs to be installed. `n 1.Az module`n 2.AzureAD module `n 3.WriteAscii module`nIf you proceed, the script will install the modules."
+    $confirmationQuestion = "Do you want to proceed?"
     $confirmationChoices = "&Yes", "&No" # 0 = Yes, 1 = No
                 
     $updateDecision = $Host.UI.PromptForChoice($confirmationTitle, $confirmationQuestion, $confirmationChoices, 1)
@@ -514,7 +640,7 @@ function GenerateAppManifestPackage {
             if (-not (Get-Module -ListAvailable -Name "Az")) {
                 Write-Host "Installing AZ module..." -ForegroundColor Yellow
                 Install-Module Az -AllowClobber -Scope CurrentUser
-            } 
+            }
             if (-not (Get-Module -ListAvailable -Name "AzureAD")) {
                 Write-Host "Installing AzureAD module..." -ForegroundColor Yellow
                 Install-Module AzureAD -Scope CurrentUser -Force
@@ -523,83 +649,100 @@ function GenerateAppManifestPackage {
                 Write-Host "Installing WriteAscii module..." -ForegroundColor Yellow
                 Install-Module WriteAscii -Scope CurrentUser -Force
             }
-                    
-        }
-        else {
-            Write-Host "You can install modules manually, by following below link and re-run the script. `nhttps://docs.microsoft.com/en-us/powershell/module/powershellget/install-module?view=powershell-7"
+        } else {
+            Write-Host "You can install modules manually by following below link. Please re-run the script after the modules are installed. `nhttps://docs.microsoft.com/en-us/powershell/module/powershellget/install-module?view=powershell-7"
+            EXIT
         }
 
-# Loading Parameters from JSON meta-data file
+# Load Parameters from JSON meta-data file
     $parametersListContent = Get-Content '.\parameters.json' -ErrorAction Stop
+
     $missingRequiredParameter = $parametersListContent | % { $_ -match '<<value>>' }
     If ($missingRequiredParameter -contains $true) {
-        Write-Host "Some required parameters are missing values. Please replace all <<value>> occurrences in parameters.json file with correct values." -ForegroundColor Red
+        Write-Host "Some required parameters are missing values. Please update the <<value>> occurrences in parameters.json file with respective values." -ForegroundColor Red
         Exit
     }
 
 # Parse & assign parameters
     $parameters = $parametersListContent | ConvertFrom-Json
     
+    # If tenantId is empty or invalid, then use original tenantId
+    if([string]::IsNullOrEmpty($parameters.tenantId.Value) -or ($false -eq (Test-IsGuid -ObjectGuid $parameters.tenantId.Value))){
+        $parameters.tenantId.Value = $parameters.subscriptionTenantId.Value
+    }
+    
     
 # Validate Https Urls parameters.
     if (!(ValidateUrlParameters)) {
-        Write-Host "WebsiteUrl, PrivacyUrl, TermsOfUseUrl parameters must be in correct format and start with https:// prefix. Please correct values in parameters.json file." -ForegroundColor Red
+        Write-Host "WebsiteUrl, PrivacyUrl, TermsOfUseUrl parameters must be in correct format and start with https:// prefix. Please update the parameters with valid Urls in the parameters.json file." -ForegroundColor Red
         Exit
     }
 
-#Deployment started message to user.
+# Start Deployment.
     Write-Ascii -InputObject "Company Communicator" -ForegroundColor Magenta
     Write-Host "### DEPLOYMENT SCRIPT STARTED ###" -ForegroundColor Magenta
 
-# Initialise connections - Azure Az/CLI/AzureAD
-    Write-Host "Launching Azure sign-in..."
+# Initialise connections - Azure Az/CLI/Azure AD
+    Write-Host "Login with with your Azure subscription account. Launching Azure sign-in window..."
     Connect-AzAccount -Subscription $parameters.subscriptionId.Value -ErrorAction Stop
     $user = az login
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Login failed for user..." -ForegroundColor Red
-        return
+        EXIT
     }
-    Write-Host "AzureAD sign-in..."
-    $ADaccount = Connect-AzureAD -Tenant $parameters.tenantId.Value -ErrorAction Stop
+
+    Write-Host "Azure AD sign-in..."
+    $ADaccount = Connect-AzureAD -Tenant $parameters.subscriptionTenantId.Value -ErrorAction Stop
     $userAlias = ($user | ConvertFrom-Json).user.name
 
-# Function Call to valiadte the name of resources to be created.
+# Validate the name of resources to be created.
     $validateName = validateresourcesnames
 
-#Function call to create AD app and get the creds.	
-    $appCred = CreateAzureADApp $parameters.baseResourceName.Value
-    if ( $appCred -eq $null) {
-        Write-Host "Failed to create or update an app in azure active directory, this script is now exiting."
+# Create User App
+    $userAppCred = CreateAzureADApp $parameters.baseresourcename.value
+    if ( $userAppCred -eq $null) {
+        Write-Host "Failed to create or update User app in Azure Active Directory. Exiting..."
         Exit
     }
-
-#Function call to Deploy ARM Template.
-    $deploymentOutput = DeployARMTemplate $appCred.appId $appCred.password
+	
+# Create Author App
+	$authorsApp = $parameters.baseResourceName.Value + '-authors'
+	$authorAppCred = CreateAzureADApp $authorsApp
+    if ( $authorAppCred -eq $null) {
+        Write-Host "Failed to create or update the Author app in Azure Active Directory. Exiting..."
+        Exit
+    }
+# Function call to Deploy ARM Template.
+    $deploymentOutput = DeployARMTemplate $authorAppCred.appId $authorAppCred.password $userAppCred.appId $userAppCred.password
     if ($deploymentOutput -eq $null) {
-        Write-Host "Encountered error during ARM template deployment, this script is now exiting..."
+        Write-Host "Encountered error during ARM template deployment. Exiting..."
         Exit
     }
 
 # Reading the deployment output.
-    Write-Host "Fetching deployment outputs..."-ForegroundColor Yellow
+    Write-Host "Reading deployment outputs..." -ForegroundColor Yellow
 
 # Assigning return values to variable. 
     $appdomainName = $deploymentOutput.Outputs.appDomain.Value
 
 # Function call to update reply-urls and uris for registered app.
-    
-    Write-Host "Updating required parameters and urls..."-ForegroundColor Yellow
-    ADAppUpdate $appdomainName $appCred.appId
+    Write-Host "Updating required parameters and urls..." -ForegroundColor Yellow
+    ADAppUpdateUser $userAppCred.appId
+    ADAppUpdate $appdomainName $authorAppCred.appId
 
-
-# Function call to generate manifest.zip folder for User and Author. 
-    GenerateAppManifestPackage 'authors' $appdomainName $appCred.appId
-    GenerateAppManifestPackage 'users' $appdomainName $appCred.appId
-
-
-#Log out to avoid tokens caching
+# Log out to avoid tokens caching
     $logOut = az logout
     $disAzAcc = Disconnect-AzAccount
+
+# App template is deployed on tenant A and used in tenant B
+    if($parameters.tenantId.Value -ne $parameters.subscriptionTenantId.Value){
+        CreateAdAppPrincipal $parameters.tenantId.Value $authorAppCred.appId $userAppCred.appId
+        
+    }
+
+# Function call to generate manifest.zip folder for User and Author. 
+    GenerateAppManifestPackage 'authors' $appdomainName $authorAppCred.appId
+    GenerateAppManifestPackage 'users' $appdomainName $userAppCred.appId
 
 # Open manifest folder
     Invoke-Item ..\Manifest\
