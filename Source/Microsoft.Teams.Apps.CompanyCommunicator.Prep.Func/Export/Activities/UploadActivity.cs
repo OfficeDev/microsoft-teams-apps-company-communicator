@@ -110,7 +110,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             var metadataFileName = string.Concat(this.localizer.GetString("FileName_Metadata"), ".csv");
             var metadataFile = archive.CreateEntry(metadataFileName, CompressionLevel.Optimal);
             using (var entryStream = metadataFile.Open())
-            using (var writer = new StreamWriter(entryStream))
+            using (var writer = new StreamWriter(entryStream, System.Text.Encoding.UTF8))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 var metadataMap = new MetadataMap(this.localizer);
@@ -124,7 +124,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             var messageDeliveryFileName = string.Concat(this.localizer.GetString("FileName_Message_Delivery"), ".csv");
             var messageDeliveryFile = archive.CreateEntry(messageDeliveryFileName, CompressionLevel.Optimal);
             using (var entryStream = messageDeliveryFile.Open())
-            using (var writer = new StreamWriter(entryStream))
+            using (var writer = new StreamWriter(entryStream, System.Text.Encoding.UTF8))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 if (uploadData.sentNotificationDataEntity.Teams.Any())
