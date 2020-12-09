@@ -15,6 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
@@ -32,6 +33,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly IExportQueue exportQueue;
         private readonly ITeamMembersService memberService;
         private readonly ITeamDataRepository teamDataRepository;
+        private readonly IAppSettingsService appSettingsService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportController"/> class.
@@ -42,13 +44,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="exportQueue">The service bus queue for the export queue.</param>
         /// <param name="memberService">Teams member service.</param>
         /// <param name="teamDataRepository">Team data reporsitory.</param>
+        /// <param name="appSettingsService">App Settings service.</param>
         public ExportController(
             ISentNotificationDataRepository sentNotificationDataRepository,
             IExportDataRepository exportDataRepository,
             IUserDataRepository userDataRepository,
             IExportQueue exportQueue,
             ITeamMembersService memberService,
-            ITeamDataRepository teamDataRepository)
+            ITeamDataRepository teamDataRepository,
+            IAppSettingsService appSettingsService)
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
@@ -56,6 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.exportQueue = exportQueue ?? throw new ArgumentNullException(nameof(exportQueue));
             this.memberService = memberService ?? throw new ArgumentNullException(nameof(memberService));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
+            this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
         }
 
         /// <summary>
@@ -104,18 +109,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
         private async Task SyncAuthorAsync(string teamId, string userId)
         {
-            // Read team information.
-            var teamInfo = await this.teamDataRepository.GetAsync(TeamDataTableNames.TeamDataPartition, teamId);
-            if (teamInfo == null)
-            {
-                throw new ApplicationException("Unable to find Team Id in database.");
-            }
+            var tenantId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeTenantId);
+            var serviceUrl = await this.appSettingsService.GetServiceUrlAsync();
 
             // Sync members.
             var userEntities = await this.memberService.GetAuthorsAsync(
-                teamId: teamInfo.TeamId,
-                tenantId: teamInfo.TenantId,
-                serviceUrl: teamInfo.ServiceUrl);
+                teamId: teamId,
+                tenantId: tenantId,
+                serviceUrl: serviceUrl);
 
             var userData = userEntities.FirstOrDefault(user => user.AadId.Equals(userId));
             if (userData == null)
