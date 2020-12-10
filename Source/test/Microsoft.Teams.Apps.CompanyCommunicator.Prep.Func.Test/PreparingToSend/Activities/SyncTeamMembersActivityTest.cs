@@ -78,7 +78,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(teamData);
             membersService
-                .Setup(x => x.GetMembersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(x => x.GetUsersAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(userData);
             sentNotificationDataRepository
                 .Setup(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()))
@@ -90,7 +90,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             // Assert
             await task.Should().NotThrowAsync();
             teamDataRepository.Verify(x => x.GetAsync(It.IsAny<string>(), It.Is<string>(x => x.Equals(teamId))));
-            membersService.Verify(x => x.GetMembersAsync(It.Is<string>(x => x.Equals(teamData.TeamId)), It.Is<string>(x => x.Equals(teamData.TenantId)), It.Is<string>(x => x.Equals(teamData.ServiceUrl))));
+            membersService.Verify(x => x.GetUsersAsync(It.Is<string>(x => x.Equals(teamData.TeamId)), It.Is<string>(x => x.Equals(teamData.TenantId)), It.Is<string>(x => x.Equals(teamData.ServiceUrl))));
         }
 
         /// <summary>

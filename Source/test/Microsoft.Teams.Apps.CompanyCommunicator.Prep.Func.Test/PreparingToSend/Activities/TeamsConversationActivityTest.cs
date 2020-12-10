@@ -113,7 +113,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 ConversationId = "conversationid"
             };
             conversationService
-                .Setup(x => x.CreateConversationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), logger.Object))
+                .Setup(x => x.CreateUserConversationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), logger.Object))
                 .ReturnsAsync(response);
             appSettingsService
                 .Setup(x => x.GetServiceUrlAsync())
@@ -130,7 +130,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync();
-            conversationService.Verify(x => x.CreateConversationAsync(
+            conversationService.Verify(x => x.CreateUserConversationAsync(
                 It.Is<string>(x => recipient.UserId.Equals(x)),
                 It.Is<string>(x => recipient.TenantId.Equals(x)),
                 It.Is<string>(x => recipient.ServiceUrl.Equals(x)),

@@ -1,0 +1,105 @@
+pool:
+  name: Azure Pipelines
+  vmImage: 'vs2017-win2016'
+  demands:
+  - msbuild
+  - visualstudio
+variables:
+  BuildPlatform: 'Any CPU'
+  BuildConfiguration: 'Release'
+steps:
+- task: DotNetCoreCLI@2
+  displayName: 'Build CompanyCommunicator'
+  inputs:
+    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj
+    arguments: '--configuration $(BuildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish CompanyCommunicator'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj
+    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+    zipAfterPublish: True
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build Data Function'
+  inputs:
+    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Data.Func/Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj
+    arguments: '--configuration $(BuildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish Data Function'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Data.Func/Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj
+    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+    zipAfterPublish: True
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build Prep Function'
+  inputs:
+    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj
+    arguments: '--configuration $(BuildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Test Prep Function '
+  inputs:
+    command: test
+    projects: Source/test/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.csproj
+    arguments: '--configuration $(BuildConfiguration)'
+
+- script: dotnet test Source/test/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.csproj --logger trx --collect "Code coverage"
+- task: PublishTestResults@2
+  inputs:
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish Prep Function'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj
+    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+    zipAfterPublish: True
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build Send Function'
+  inputs:
+    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj
+    arguments: '--configuration $(BuildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Test Send Function'
+  inputs:
+    command: test
+    projects: Source/test/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test.csproj
+    arguments: '--configuration $(BuildConfiguration)'
+
+- script: dotnet test Source/test/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test.csproj --logger trx --collect "Code coverage"
+- task: PublishTestResults@2
+  inputs:
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish Send Function'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj
+    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(build.artifactstagingdirectory)/cc'
+  inputs:
+    SourceFolder: '$(build.artifactstagingdirectory)'
+    TargetFolder: '$(build.artifactstagingdirectory)/cc'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)/cc'
