@@ -1,28 +1,28 @@
-# **General template issues**
+# Troubleshooting guide
 
 **Generic possible issues**
 
-Certain issues can arise that are common to many of the app templates. Please check [here](https://github.com/OfficeDev/microsoft-teams-stickers-app/wiki/Troubleshooting)  for reference to these.
+Certain issues can arise that are common to many of the app templates. Please refer to this [link](https://github.com/OfficeDev/microsoft-teams-stickers-app/wiki/Troubleshooting).
 
-**Problems related to PowerShell script**
+**Common issues with Powershell script deployment**
 
 **1. File is not digitally signed**
 
-While running PowerShell script, sometimes user gets an error showing &#39;File is not digitally signed&#39;.
+While running PowerShell script, you may get an error: `File is not digitally signed`
 
-**Fix** : If this type of error occurs then run this: &quot;Set-ExecutionPolicy -ExecutionPolicy unrestricted&quot;
+**Fix** : If this type of error occurs then run this: `Set-ExecutionPolicy -ExecutionPolicy unrestricted`  and re-run the script.
 
 **2. Azure subscription access failed**
 
-Connect-AzAccount : The provided account \*\*.onmicrosoft.com does not have access to subscription ID &quot;XXXX-&quot;. Please try logging in with different credentials or a different subscription ID.
+`Connect-AzAccount : The provided account \*\*.onmicrosoft.com does not have access to subscription ID XXXX. Please try logging in with different credentials or a different subscription ID.`
 
-**Fix** : User must be added as a contributor on the Azure subscription.&quot;
+**Fix** : The signed-in user must be added as a contributor in the Azure subscription. Either login with another account or add the user as a contributer.
 
 **3. Failed to acquire a token**
 
-Exception calling &quot;AcquireAccessToken&quot; with &quot;1&quot; argument(s): &quot;multiple\_matching\_tokens\_detected: The cache contains multiple tokens satisfying the requirements
+`Exception calling AcquireAccessToken with 1 argument(s): multiple\_matching\_tokens\_detected: The cache contains multiple tokens satisfying the requirements`
 
-**Fix** : This means user is logged-in with multiple accounts in the current powershell session. Close the shell window and open a new one.&quot;
+**Fix** : This means user is logged-in with multiple accounts in the current powershell session. Close the powershell window and re-run the script in a new window.
 
 **4. Authorization failed**
 
@@ -30,16 +30,15 @@ Exception calling &quot;AcquireAccessToken&quot; with &quot;1&quot; argument(s):
 
 The resources created by ARM template requires a sync with latest code, so it can run with latest update.
 
-![Powershell deployment guide](images/Authorization_failed.png)
+![Powershell deployment guide](images/authorization_fail.png)
 
 **Fix** :
 
 To avoid automate sync issue the current user should have admin privilege.
 
-**Note**: If you ignore this issue, it will not impact your deployment. But, to get the latest code update you need to sync the resources like function and apps manually. 
+> **Note**: This will not impact the app deployment. To get the latest code you must sync the resources - functions and webapp manually. 
 
-
-**5. Azure AD app permission consent error**
+**5. Azure AD App permissions consent error**
 
 **Description**
 
@@ -51,24 +50,24 @@ The apps created by this app template requires an admin consent for below graph 
 * User.Read.All (Delegated)
 * User.Read (Application)
 
-![Powershell deployment guide](images/consent_error.png)
+![Powershell deployment guide](images/admin_consent_error.png)
 
 **Fix**
 
 Please ask your tenant administrator to consent the permissions for Azure AD app.
 
-![Powershell deployment guide](images/graph_access.png)
+![Powershell deployment guide](images/graph_permissions_access.png)
 
 **6. Error while deploying the ARM Template**
 
 **Description**
 
-This happens when the resources are already created or due to some conflicts.
+`Errors: The resource operation completed with terminal provisioning state "Failed"`
 
-Errors: The resource operation completed with terminal provisioning state &#39;Failed&#39;
+This may happen if the resources were already created or due to conflicts.
 
 **Fix**
 
-In case of such a scenario, the user needs to navigate to the deployment center section of failed/conflict resources through the Azure portal and check the error logs to get the actual errors and fix them accordingly.
+Navigate to the deployment center and check the deployment status for the failed resources in the Azure portal. Check the error logs to understand why the deployment failed.
 
-Redeploy it after fixing the issue/conflict.
+In most of the scenarios you may need to either redeploy the application (using scripts) or sync manually.

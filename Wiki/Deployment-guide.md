@@ -269,15 +269,15 @@ Repeat the steps above but with the file `Manifest\manifest_users.json` and use 
 
 > **IMPORTANT:** We recommend installing the authors app to the appropriate team as a custom (sideloaded) app. Do NOT use [app permission policies](https://docs.microsoft.com/en-us/microsoftteams/teams-app-permission-policies) to restrict access to this app to the members of the authors team. Otherwise, members of the authoring team may not receive messages sent from Company Communicator.
 
-1. Add the configurable tab to the team of authors, so that they can compose and send messages.
+2. Add the configurable tab to the team of authors, so that they can compose and send messages.
 
-1. [Upload](https://docs.microsoft.com/en-us/microsoftteams/tenant-apps-catalog-teams) the User app to your tenant's app catalog so that it is available for everyone in your tenant to install.
+3. [Upload](https://docs.microsoft.com/en-us/microsoftteams/tenant-apps-catalog-teams) the User app to your tenant's app catalog so that it is available for everyone in your tenant to install.
 > **IMPORTANT:** Proactive app installation will work only if you upload the User app to your tenant's app catalog.
 
-1. Install the User app (the `company-communicator-users.zip` package) to the users and teams that will be the target of messages. 
+4. Install the User app (the `company-communicator-users.zip` package) to the users and teams that will be the target audience.
 > If `proactiveAppInstallation` is enabled, you may skip this step. The service will install the app for all the recipients when authors send a message.
 
 ---
 
 # Troubleshooting
-Please see our [Troubleshooting](Troubleshooting) page.
+Please check the [Troubleshooting](Troubleshooting) guide.
