@@ -40,11 +40,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 throw new ArgumentNullException(nameof(input.notificationId));
             }
 
-            if (input.status == null)
-            {
-                throw new ArgumentNullException(nameof(input.status));
-            }
-
             await this.notificationRepository.UpdateNotificationStatusAsync(input.notificationId, input.status);
         }
     }

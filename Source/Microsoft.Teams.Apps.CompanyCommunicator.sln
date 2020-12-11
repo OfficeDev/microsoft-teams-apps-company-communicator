@@ -25,11 +25,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.Compan
 		{069D255F-37E5-49DA-90D2-E3942C64970C} = {069D255F-37E5-49DA-90D2-E3942C64970C}
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{351E3064-5E5C-4AC4-AB1F-D4FDFF162749}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{351E3064-5E5C-4AC4-AB1F-D4FDFF162749}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test", "test\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.csproj", "{B28BD9B9-BBB0-43E3-8BD1-9F4A0B9841C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test", "Test\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.csproj", "{B28BD9B9-BBB0-43E3-8BD1-9F4A0B9841C3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test", "test\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test.csproj", "{7426FDC6-72E9-41BA-8686-A881F1DCBAAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test", "Test\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test.csproj", "{7426FDC6-72E9-41BA-8686-A881F1DCBAAC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
