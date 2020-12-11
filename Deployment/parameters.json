@@ -27,6 +27,10 @@
     "Value": "<<value>>",
     "Description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
   },
+  "isUpgrade": {
+    "Value": "false",
+    "Description": "If this is an upgrade for old version of the app template, then value should be true. Otherwise, false is default (First-time deployment)."
+  },
   "customDomainOption": {
     "Value": "Azure Front Door",
     "Description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs."

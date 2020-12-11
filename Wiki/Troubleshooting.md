@@ -76,5 +76,10 @@ If proactive app installation for a user is not working as expected, make sure y
 3. "UserAppExternalId" configuration matches with the User app Id (in the Teams App manifest) for the web app.
 4. [Upload](https://docs.microsoft.com/en-us/microsoftteams/tenant-apps-catalog-teams) the User app to your tenant's app catalog so that it is available for everyone in your tenant to install.
 
+## 5. ARM template deployment timeout/error message
+If you encounter the following error message while deploying with the PowerShell script. This is expected and the script will recover from this failure automatically.
+![Screenshot of ARM template deployment timeout](images/ARM-Deployment-Timeout.png)
+
+
 # Didn't find your problem here?
 Please report the issue [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/issues/new)

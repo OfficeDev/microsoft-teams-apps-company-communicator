@@ -302,7 +302,7 @@ function CreateAzureADApp {
 
                 WriteS -message "Azure AD App: $appName is updated."
             } else {
-                WriteE -message "Deployment cancelled. Please use a different name for the Azure AD app and try again."
+                WriteE -message "Deployment canceled. Please use a different name for the Azure AD app and try again."
                 return $null
             }
         } else {
@@ -386,11 +386,50 @@ function CollectARMDeploymentLogs {
     WriteI -message "Deployment logs generation finished. Please share Deployment\logs.zip file with the app template team to investigate..."
 }
 
+function IsSourceControlTimeOut {
+    $failedResourcesList = az deployment operation group list --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --name azuredeploy --query "[?properties.provisioningState=='Failed']" | ConvertFrom-Json
+    $nonCodeSyncErrors = $failedResourcesList | Where-Object {($null -ne $_.properties.targetResource -and 'Microsoft.Web/sites/sourcecontrols' -ne $_.properties.targetResource.resourceType)}
+    return (0 -ne $failedResourcesList.length -and 0 -eq $nonCodeSyncErrors.length)
+}
+
+function WaitForCodeDeploymentSync {
+    Param(
+        [Parameter(Mandatory = $true)] $appServicesNames
+    )
+
+    $appserviceCodeSyncSuccess = $true
+    while($appServicesNames.Count -gt 0)
+    {
+        WriteI -message "Checking source control deployment progress..."
+        For ($i=0; $i -le $appServicesNames.Count; $i++) {
+            $appService = $appServicesNames[$i]
+            if($null -ne $appService){
+                $deploymentResponse = az rest --method get --uri /subscriptions/$($parameters.subscriptionId.Value)/resourcegroups/$($parameters.resourceGroupName.Value)/providers/Microsoft.Web/sites/$appService/deployments?api-version=2019-08-01 | ConvertFrom-Json
+                $deploymentsList = $deploymentResponse.value
+                if($deploymentsList.length -eq 0 -or $deploymentsList[0].properties.complete){
+                    $appserviceCodeSyncSuccess = $appserviceCodeSyncSuccess -and ($deploymentsList.length -eq 0 -or $deploymentsList[0].properties.status -ne 3) # 3 means sync fail
+                    $appServicesNames.remove($appService)
+                    $i--;
+                }
+            }
+        }
+
+        WriteI -message "Source control deployment is still in progress. Next check in 2 minutes."
+        Start-Sleep -Seconds 120
+    }
+    if($appserviceCodeSyncSuccess){
+        WriteI -message "Source control deployment is done."
+    } else {
+        WriteE -message "Source control deployment failed."
+    }
+    return $appserviceCodeSyncSuccess
+}
+
 function DeployARMTemplate {
     Param(
         [Parameter(Mandatory = $true)] $authorappId,
         [Parameter(Mandatory = $true)] $authorsecret,
-		[Parameter(Mandatory = $true)] $userappId,
+        [Parameter(Mandatory = $true)] $userappId,
         [Parameter(Mandatory = $true)] $usersecret
     )
     try {
@@ -400,32 +439,72 @@ function DeployARMTemplate {
         }
         
         # Deploy ARM templates
-        WriteI -message "`nDeploying app services, Azure function, bot service, and other supporting resources..."
-        az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"
-        if ($LASTEXITCODE -ne 0) {
-            CollectARMDeploymentLogs
-            Throw "ERROR: ARM template deployment error."
-        }
-        WriteS -message "Finished deploying resources."
-
-        #get the output of current deployment
-        $value = Get-AzResourceGroupDeployment -ResourceGroupName $parameters.resourceGroupName.Value -Name azuredeploy
-		
-		# sync app services code deployment (ARM deployment will not sync automatically)
-        $appServicesNames = @($parameters.BaseResourceName.Value, #app-service
+        WriteI -message "`nDeploying app services, Azure function, bot service, and other supporting resources... (this step can take over an hour)"
+        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"
+        
+        $appServicesNames = [System.Collections.ArrayList]@($parameters.BaseResourceName.Value, #app-service
         "$($parameters.BaseResourceName.Value)-prep-function", #prep-function
         "$($parameters.BaseResourceName.Value)-function", #function
         "$($parameters.BaseResourceName.Value)-data-function" #data-function
         )
 
-        foreach ($appService in $appServicesNames) {
-            WriteI -message "Sync $appService code from latest version"
-            az webapp deployment source sync --name $appService --resource-group $parameters.resourceGroupName.Value
+        $deploymentExceptionMessage = "ERROR: ARM template deployment error."
+        if ($LASTEXITCODE -ne 0) {
+            # If ARM template deployment failed for any reason, then screen colors is becoming red
+            [Console]::ResetColor()
+
+            WriteI -message "Fetching deployment status to check if deployment really failed..."
+
+            if(IsSourceControlTimeOut){
+                # wait couple of minutes & check deployment status...
+                $appserviceCodeSyncSuccess = WaitForCodeDeploymentSync $appServicesNames.Clone()
+                
+                if($appserviceCodeSyncSuccess){
+                    WriteI -message "Re-running deployment to fetch output..."
+                    $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"
+                } else{
+                    CollectARMDeploymentLogs
+                    Throw $deploymentExceptionMessage
+                }
+            } else {
+                CollectARMDeploymentLogs
+                Throw $deploymentExceptionMessage
+            }
         }
-        return $value
+        else {
+            # check source control sync progress if first-time deployment
+            if(-not $parameters.isUpgrade.Value){
+                # ARM template deployment success but source control sync is still in progress
+                $appserviceCodeSyncSuccess = WaitForCodeDeploymentSync $appServicesNames.Clone()
+                if(-not $appserviceCodeSyncSuccess){
+                    CollectARMDeploymentLogs
+                    Throw $deploymentExceptionMessage
+                }
+            }
+        }
+        WriteS -message "Finished deploying resources. ARM template deployment succeeded."
+        
+        #get the output of current deployment
+        $deploymentOutput = az deployment group show --name azuredeploy --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value | ConvertFrom-Json
+
+        if($parameters.isUpgrade.Value){
+            # sync app services code deployment (ARM deployment will not sync automatically)
+            foreach ($appService in $appServicesNames) {
+                WriteI -message "Sync $appService code from latest version"
+                az webapp deployment source sync --name $appService --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value 
+            }
+            # sync command is async. Wait for source control sync to finish
+            $appserviceCodeSyncSuccess = WaitForCodeDeploymentSync $appServicesNames.Clone()
+            if(-not $appserviceCodeSyncSuccess){
+                CollectARMDeploymentLogs
+                Throw $deploymentExceptionMessage
+            }
+        }
+        
+        return $deploymentOutput
     }
     catch {
-        WriteE -message "Error occured while deploying Azure resources."
+        WriteE -message "Error occurred while deploying Azure resources."
         throw
     }
 }
@@ -456,14 +535,14 @@ function CreateAdAppPrincipal {
     }
     
     $logOut = az logout
-    WriteW -message "`nPlease inform your admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/common/adminconsent?client_id=$authorAppId"
+    WriteW -message "`nPlease inform your admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/$tenantId/adminconsent?client_id=$authorAppId"
 }    
 
 # Grant Admin consent
 function GrantAdminConsent {
     Param(
         [Parameter(Mandatory = $true)] $authorAppId
-	)
+        )
 
     $confirmationTitle = "Admin consent permissions is required for app registration using CLI"
     $confirmationQuestion = "Do you want to proceed?"
@@ -481,16 +560,16 @@ function GrantAdminConsent {
     if ($updateDecision -eq 0) {
         # Grant admin consent for app registration required permissions using CLI
         WriteI -message "Waiting for admin consent to finish..."
-		az ad app permission admin-consent --id $authorAppId
+        az ad app permission admin-consent --id $authorAppId
         
         if ($LASTEXITCODE -ne 0) {
             WriteE -message $consentErrorMessage
-            WriteW -message "`nPlease inform the global admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/common/adminconsent?client_id=$authorAppId"
+            WriteW -message "`nPlease inform the global admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/$($parameters.tenantId.value)/adminconsent?client_id=$authorAppId"
         } else {
             WriteS -message "Admin consent has been granted."
         }
     } else {
-        WriteW -message "`nPlease inform the global admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/common/adminconsent?client_id=$authorAppId"
+        WriteW -message "`nPlease inform the global admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/$($parameters.tenantId.value)/adminconsent?client_id=$authorAppId"
     }
 }
 
@@ -563,15 +642,15 @@ function ADAppUpdate {
     }
     WriteI -message "`nUpdating authors app..."
 
-	#Removing default scope user_impersonation
-	$DEFAULT_SCOPE=$(az ad app show --id $configAppId | jq '.oauth2Permissions[0].isEnabled = false' | jq -r '.oauth2Permissions')
-	$DEFAULT_SCOPE>>scope.json
-	az ad app update --id $configAppId --set oauth2Permissions=@scope.json
-	Remove-Item .\scope.json
-	az ad app update --id $configAppId --remove oauth2Permissions
+    #Removing default scope user_impersonation
+    $DEFAULT_SCOPE=$(az ad app show --id $configAppId | jq '.oauth2Permissions[0].isEnabled = false' | jq -r '.oauth2Permissions')
+    $DEFAULT_SCOPE>>scope.json
+    az ad app update --id $configAppId --set oauth2Permissions=@scope.json
+    Remove-Item .\scope.json
+    az ad app update --id $configAppId --remove oauth2Permissions
     
     #Re-assign app detail after removing default scope user_impersonation
-	$apps = Get-AzureADApplication -Filter "DisplayName eq '$appName'"
+    $apps = Get-AzureADApplication -Filter "DisplayName eq '$appName'"
 
     if (0 -eq $apps.Length) {
         $app = New-AzureADApplication -DisplayName $appName
@@ -582,14 +661,14 @@ function ADAppUpdate {
     $applicationObjectId = $app.ObjectId
 
     $app = Get-AzureADMSApplication -ObjectId $applicationObjectId
-	
+
     # Expose an API
     $appId = $app.AppId
-			
+
     az ad app update --id $configAppId --identifier-uris $IdentifierUris
     WriteI -message "App URI set"        
             
-	$configApp = az ad app update --id $configAppId --reply-urls $RedirectUris
+    $configApp = az ad app update --id $configAppId --reply-urls $RedirectUris
     WriteI -message "App reply-urls set"  
             
     az ad app update --id $configAppId --optional-claims './AadOptionalClaims.json'
@@ -629,42 +708,42 @@ function ADAppUpdate {
 function ADAppUpdateUser {
     Param(
         [Parameter(Mandatory = $true)] $appId
-	)
-				
-				$appName = $parameters.baseResourceName.Value
-				
-			    $apps = Get-AzureADApplication -Filter "DisplayName eq '$appName'"
+    )
 
-				if (0 -eq $apps.Length) {
-					$app = New-AzureADApplication -DisplayName $appName
-				} else {
-					$app = $apps[0]
-				}
+    $appName = $parameters.baseResourceName.Value
 
-				$applicationObjectId = $app.ObjectId
+    $apps = Get-AzureADApplication -Filter "DisplayName eq '$appName'"
 
-				$app = Get-AzureADMSApplication -ObjectId $applicationObjectId
+    if (0 -eq $apps.Length) {
+        $app = New-AzureADApplication -DisplayName $appName
+    } else {
+        $app = $apps[0]
+    }
 
-				# Do nothing if the app has already been configured
-				if ($app.IdentifierUris.Count -eq 0) {
-					WriteS -message "`nUser app already configured."
-					return
-				}
-			
-			WriteI -message "`nUpdating user app..."
-            $IdentifierUris = "api://$appId"
-			
-			$DEFAULT_SCOPE=$(az ad app show --id $appId | jq '.oauth2Permissions[0].isEnabled = false' | jq -r '.oauth2Permissions')
-			$DEFAULT_SCOPE>>scope.json
-			az ad app update --id $appId --set oauth2Permissions=@scope.json
-			Remove-Item .\scope.json
-			az ad app update --id $appId --remove oauth2Permissions
-			az ad app update --id $appId --set oauth2AllowIdTokenImplicitFlow=false
-            az ad app update --id $appId --remove replyUrls --remove IdentifierUris
-			az ad app update --id $appId --identifier-uris "$IdentifierUris"
-			az ad app update --id $appId --remove IdentifierUris
-			az ad app update --id $appId --optional-claims './AadOptionalClaims_Reset.json'
-			az ad app update --id $appId --remove requiredResourceAccess
+    $applicationObjectId = $app.ObjectId
+
+    $app = Get-AzureADMSApplication -ObjectId $applicationObjectId
+
+    # Do nothing if the app has already been configured
+    if ($app.IdentifierUris.Count -eq 0) {
+        WriteS -message "`nUser app already configured."
+        return
+    }
+
+    WriteI -message "`nUpdating user app..."
+    $IdentifierUris = "api://$appId"
+
+    $DEFAULT_SCOPE=$(az ad app show --id $appId | jq '.oauth2Permissions[0].isEnabled = false' | jq -r '.oauth2Permissions')
+    $DEFAULT_SCOPE>>scope.json
+    az ad app update --id $appId --set oauth2Permissions=@scope.json
+    Remove-Item .\scope.json
+    az ad app update --id $appId --remove oauth2Permissions
+    az ad app update --id $appId --set oauth2AllowIdTokenImplicitFlow=false
+    az ad app update --id $appId --remove replyUrls --remove IdentifierUris
+    az ad app update --id $appId --identifier-uris "$IdentifierUris"
+    az ad app update --id $appId --remove IdentifierUris
+    az ad app update --id $appId --optional-claims './AadOptionalClaims_Reset.json'
+    az ad app update --id $appId --remove requiredResourceAccess
 }
 #update manifest file and create a .zip file.
 function GenerateAppManifestPackage {
@@ -821,7 +900,7 @@ function logout {
     Write-Ascii -InputObject "Company Communicator v3.1" -ForegroundColor Magenta
     WriteI -message "Starting deployment..."
 
-# Initialise connections - Azure Az/CLI/Azure AD
+# Initialize connections - Azure Az/CLI/Azure AD
     WriteI -message "Login with with your Azure subscription account. Launching Azure sign-in window..."
     Connect-AzAccount -Subscription $parameters.subscriptionId.Value -ErrorAction Stop
     $user = az login --tenant $parameters.subscriptionTenantId.value
@@ -844,16 +923,16 @@ function logout {
 
 # Create User App
     $userAppCred = CreateAzureADApp $parameters.baseresourcename.Value
-    if ($userAppCred -eq $null) {
+    if ($null -eq $userAppCred) {
         WriteE -message "Failed to create or update User app in Azure Active Directory. Exiting..."
         logout
         Exit
     }
-	
+
 # Create Author App
-	$authorsApp = $parameters.baseResourceName.Value + '-authors'
-	$authorAppCred = CreateAzureADApp $authorsApp
-    if ($authorAppCred -eq $null) {
+    $authorsApp = $parameters.baseResourceName.Value + '-authors'
+    $authorAppCred = CreateAzureADApp $authorsApp
+    if ($null -eq $authorAppCred) {
         WriteE -message "Failed to create or update the Author app in Azure Active Directory. Exiting..."
         logout
         Exit
@@ -861,7 +940,7 @@ function logout {
 
 # Function call to Deploy ARM Template
     $deploymentOutput = DeployARMTemplate $authorAppCred.appId $authorAppCred.password $userAppCred.appId $userAppCred.password
-    if ($deploymentOutput -eq $null) {
+    if ($null -eq $deploymentOutput) {
         WriteE -message "Encountered an error during ARM template deployment. Exiting..."
         logout
         Exit
@@ -871,7 +950,7 @@ function logout {
     WriteI -message "Reading deployment outputs..."
 
 # Assigning return values to variable. 
-    $appdomainName = $deploymentOutput.Outputs.appDomain.Value
+    $appdomainName = $deploymentOutput.properties.Outputs.appDomain.Value
 
 # Function call to update reply-urls and uris for registered app.
     WriteI -message "Updating required parameters and urls..."
