@@ -41,9 +41,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
             IUsersService usersService,
             IStringLocalizer<Strings> localizer)
         {
-            this.sentNotificationDataRepository = sentNotificationDataRepository;
-            this.teamDataRepository = teamDataRepository;
-            this.usersService = usersService;
+            this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
+            this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
+            this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
@@ -54,6 +54,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
         /// <returns>the streams of user data.</returns>
         public async IAsyncEnumerable<IEnumerable<UserData>> GetUserDataStreamAsync(string notificationId)
         {
+            if (notificationId == null)
+            {
+                throw new ArgumentNullException(nameof(notificationId));
+            }
+
             var sentNotificationDataEntitiesStream = this.sentNotificationDataRepository.GetStreamsAsync(notificationId);
             await foreach (var sentNotifcations in sentNotificationDataEntitiesStream)
             {
@@ -88,6 +93,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
         /// <returns>the streams of team data.</returns>
         public async IAsyncEnumerable<IEnumerable<TeamData>> GetTeamDataStreamAsync(string notificationId)
         {
+            if (notificationId == null)
+            {
+                throw new ArgumentNullException(nameof(notificationId));
+            }
+
             var sentNotificationDataEntitiesStream = this.sentNotificationDataRepository.GetStreamsAsync(notificationId);
             await foreach (var sentNotificationDataEntities in sentNotificationDataEntitiesStream)
             {

@@ -22,7 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     /// <summary>
     /// Activity to create the metadata.
     /// </summary>
-    public class GetMetadataActivity
+    public class GetMetadataActivity : IGetMetadataActivity
     {
         private readonly IUsersService usersService;
         private readonly IStringLocalizer<Strings> localizer;
@@ -36,41 +36,54 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             IUsersService usersService,
             IStringLocalizer<Strings> localizer)
         {
-            this.usersService = usersService;
+            this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
-        /// <summary>
-        /// Run the activity.
-        /// It creates and gets the metadata.
-        /// </summary>
-        /// <param name="context">Durable orchestration context.</param>
-        /// <param name="exportRequiredData">Tuple containing notification data entity and export data entity.</param>
-        /// <param name="log">Logging service.</param>
-        /// <returns>instance of metadata.</returns>
+        /// <inheritdoc/>
         public async Task<Metadata> RunAsync(
             IDurableOrchestrationContext context,
             (NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity) exportRequiredData,
             ILogger log)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (exportRequiredData.notificationDataEntity == null)
+            {
+                throw new ArgumentNullException(nameof(exportRequiredData.notificationDataEntity));
+            }
+
+            if (exportRequiredData.exportDataEntity == null)
+            {
+                throw new ArgumentNullException(nameof(exportRequiredData.exportDataEntity));
+            }
+
             var metaData = await context.CallActivityWithRetryAsync<Metadata>(
-               nameof(GetMetadataActivity.GetMetaDataActivityAsync),
+               nameof(GetMetadataActivity.GetMetadataActivityAsync),
                FunctionSettings.DefaultRetryOptions,
                (exportRequiredData.notificationDataEntity, exportRequiredData.exportDataEntity));
             return metaData;
         }
 
-        /// <summary>
-        /// Create and get the metadata.
-        /// </summary>
-        /// <param name="exportRequiredData">Tuple containing notification data entity and export data entity.</param>
-        /// <returns>instance of metadata.</returns>
-        [FunctionName(nameof(GetMetaDataActivityAsync))]
-        public async Task<Metadata> GetMetaDataActivityAsync(
+        /// <inheritdoc/>
+        public async Task<Metadata> GetMetadataActivityAsync(
             [ActivityTrigger](NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity) exportRequiredData)
         {
+            if (exportRequiredData.notificationDataEntity == null)
+            {
+                throw new ArgumentNullException(nameof(exportRequiredData.notificationDataEntity));
+            }
+
+            if (exportRequiredData.exportDataEntity == null)
+            {
+                throw new ArgumentNullException(nameof(exportRequiredData.exportDataEntity));
+            }
+
             User user = default;
             try
             {

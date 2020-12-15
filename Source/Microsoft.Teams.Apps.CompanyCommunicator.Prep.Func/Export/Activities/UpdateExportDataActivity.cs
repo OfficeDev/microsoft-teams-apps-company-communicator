@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -14,7 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     /// <summary>
     /// Activity to update export data.
     /// </summary>
-    public class UpdateExportDataActivity
+    public class UpdateExportDataActivity : IUpdateExportDataActivity
     {
         private readonly IExportDataRepository exportDataRepository;
 
@@ -24,37 +25,40 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <param name="exportDataRepository">the export data respository.</param>
         public UpdateExportDataActivity(IExportDataRepository exportDataRepository)
         {
-            this.exportDataRepository = exportDataRepository;
+            this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
         }
 
-        /// <summary>
-        /// Run the activity.
-        /// It updates the export data.
-        /// </summary>
-        /// <param name="context">Durable orchestration context.</param>
-        /// <param name="exportDataEntity">export data entity.</param>
-        /// <param name="log">Logging service.</param>
-        /// <returns>instance of metadata.</returns>
+        /// <inheritdoc/>
         public async Task RunAsync(
             IDurableOrchestrationContext context,
             ExportDataEntity exportDataEntity,
             ILogger log)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (exportDataEntity == null)
+            {
+                throw new ArgumentNullException(nameof(exportDataEntity));
+            }
+
             await context.CallActivityWithRetryAsync<Task>(
                                   nameof(UpdateExportDataActivity.UpdateExportDataActivityAsync),
                                   FunctionSettings.DefaultRetryOptions,
                                   exportDataEntity);
         }
 
-        /// <summary>
-        /// update the export data.
-        /// </summary>
-        /// <param name="exportDataEntity">export data entity.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [FunctionName(nameof(UpdateExportDataActivityAsync))]
+        /// <inheritdoc/>
         public async Task UpdateExportDataActivityAsync(
             [ActivityTrigger] ExportDataEntity exportDataEntity)
         {
+            if (exportDataEntity == null)
+            {
+                throw new ArgumentNullException(nameof(exportDataEntity));
+            }
+
             await this.exportDataRepository.CreateOrUpdateAsync(exportDataEntity);
         }
     }

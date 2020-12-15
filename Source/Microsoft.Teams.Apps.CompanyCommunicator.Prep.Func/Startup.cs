@@ -108,11 +108,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<ExportOrchestration>();
 
             // Add activities.
-            builder.Services.AddTransient<UpdateExportDataActivity>();
-            builder.Services.AddTransient<GetMetadataActivity>();
-            builder.Services.AddTransient<UploadActivity>();
-            builder.Services.AddTransient<SendFileCardActivity>();
-            builder.Services.AddTransient<HandleExportFailureActivity>();
+            builder.Services.AddTransient<IUpdateExportDataActivity, UpdateExportDataActivity>();
+            builder.Services.AddTransient<IGetMetadataActivity, GetMetadataActivity>();
+            builder.Services.AddTransient<IUploadActivity, UploadActivity>();
+            builder.Services.AddTransient<ISendFileCardActivity, SendFileCardActivity>();
+            builder.Services.AddTransient<IHandleExportFailureActivity, HandleExportFailureActivity>();
 
             // Add bot services.
             builder.Services.AddSingleton<UserAppCredentials>();

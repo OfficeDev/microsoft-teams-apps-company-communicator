@@ -18,11 +18,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
     /// </summary>
     public class ExportOrchestration
     {
-        private readonly UploadActivity uploadActivity;
-        private readonly SendFileCardActivity sendFileCardActivity;
-        private readonly GetMetadataActivity getMetadataActivity;
-        private readonly UpdateExportDataActivity updateExportDataActivity;
-        private readonly HandleExportFailureActivity handleExportFailureActivity;
+        private readonly IUploadActivity uploadActivity;
+        private readonly ISendFileCardActivity sendFileCardActivity;
+        private readonly IGetMetadataActivity getMetadataActivity;
+        private readonly IUpdateExportDataActivity updateExportDataActivity;
+        private readonly IHandleExportFailureActivity handleExportFailureActivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportOrchestration"/> class.
@@ -33,17 +33,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
         /// <param name="updateExportDataActivity">update the export data activity.</param>
         /// <param name="handleExportFailureActivity">handle failure activity.</param>
         public ExportOrchestration(
-            UploadActivity uploadActivity,
-            SendFileCardActivity sendFileCardActivity,
-            GetMetadataActivity getMetadataActivity,
-            UpdateExportDataActivity updateExportDataActivity,
-            HandleExportFailureActivity handleExportFailureActivity)
+            IUploadActivity uploadActivity,
+            ISendFileCardActivity sendFileCardActivity,
+            IGetMetadataActivity getMetadataActivity,
+            IUpdateExportDataActivity updateExportDataActivity,
+            IHandleExportFailureActivity handleExportFailureActivity)
         {
-            this.uploadActivity = uploadActivity;
-            this.sendFileCardActivity = sendFileCardActivity;
-            this.getMetadataActivity = getMetadataActivity;
-            this.updateExportDataActivity = updateExportDataActivity;
-            this.handleExportFailureActivity = handleExportFailureActivity;
+            this.uploadActivity = uploadActivity ?? throw new ArgumentNullException(nameof(uploadActivity));
+            this.sendFileCardActivity = sendFileCardActivity ?? throw new ArgumentNullException(nameof(sendFileCardActivity));
+            this.getMetadataActivity = getMetadataActivity ?? throw new ArgumentNullException(nameof(getMetadataActivity));
+            this.updateExportDataActivity = updateExportDataActivity ?? throw new ArgumentNullException(nameof(updateExportDataActivity));
+            this.handleExportFailureActivity = handleExportFailureActivity ?? throw new ArgumentNullException(nameof(handleExportFailureActivity));
         }
 
         /// <summary>
