@@ -1,7 +1,7 @@
-## Company Communicator v3.1 Migration Guide
+## Company Communicator v4 Migration Guide
 
-## Upgrading from v3 to v3.1
-If you have the CCv3 deployed and plan to migrate to CCv3.1, perform the following steps:
+## Upgrading from v3 to v4
+If you have the CCv3 deployed and plan to migrate to CCv4, perform the following steps:
 
 ### 1. Read CCv3 deployment parameters:
 Copy all the parameters from the previous deployment (CCv3), and make sure you have the following:
@@ -9,8 +9,8 @@ Copy all the parameters from the previous deployment (CCv3), and make sure you h
   * Name of the Azure resource group.
   * Base resource name.
   * Bot tenant ID.
-  * Bot client ID.(Referred as User Client Id in CCv3.1)
-  * Bot client secret.(Referred as User Client Secret in CCv3.1)
+  * Bot client ID.(Referred as User Client Id in CCv4)
+  * Bot client secret.(Referred as User Client Secret in CCv4)
   * Sender UPN list.
 
 We will use them in the next steps.
@@ -252,6 +252,3 @@ You need to only update the author's team package.
 
 ### Migration Status
 If you have performed all the steps, migration completes after successful deployment.
-
-
-

@@ -6,7 +6,7 @@ Cumulative improvements in Company Communicator App.
 
 |Release |Published to <br/> Microsoft Store |
 |---|---|
-| 3.1 | TBD
+| 4.0 | TBD
 | 3.0 | Oct 29, 2020
 | 2.1 | Oct 16, 2020
 | 2.0 | Aug 20, 2020
@@ -15,7 +15,7 @@ Cumulative improvements in Company Communicator App.
 
 ### Company Communicator feature release notes
 
-#### 3.1 (TBD)
+#### 4.0 (TBD)
 ##### Changes intoduced
 - Separate Bots for User and Author.
 - Automated deployment using Powershell script.

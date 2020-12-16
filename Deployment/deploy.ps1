@@ -897,7 +897,7 @@ function logout {
     }
 
 # Start Deployment.
-    Write-Ascii -InputObject "Company Communicator v3.1" -ForegroundColor Magenta
+    Write-Ascii -InputObject "Company Communicator v4" -ForegroundColor Magenta
     WriteI -message "Starting deployment..."
 
 # Initialize connections - Azure Az/CLI/Azure AD
