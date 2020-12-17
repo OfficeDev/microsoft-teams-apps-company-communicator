@@ -438,15 +438,38 @@ function DeployARMTemplate {
             az group create --name $parameters.resourceGroupName.Value --location $parameters.region.Value --subscription $parameters.subscriptionId.Value
         }
         
-        # Deploy ARM templates
-        WriteI -message "`nDeploying app services, Azure function, bot service, and other supporting resources... (this step can take over an hour)"
-        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"
-        
         $appServicesNames = [System.Collections.ArrayList]@($parameters.BaseResourceName.Value, #app-service
         "$($parameters.BaseResourceName.Value)-prep-function", #prep-function
         "$($parameters.BaseResourceName.Value)-function", #function
         "$($parameters.BaseResourceName.Value)-data-function" #data-function
         )
+        
+        $codeSynced = $false
+        # Remove source control config if conflict detected
+        if($parameters.isUpgrade.Value){
+            foreach ($appService in $appServicesNames) {
+                WriteI -message "Scan $appService source control configuration for conflicts"
+                $deploymentConfig = az webapp deployment source show --name $appService --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value
+                if($deploymentConfig){
+                    $deploymentConfig = $deploymentConfig | ConvertFrom-Json
+                    # conflicts in branches, clear old configuraiton
+                    if(($deploymentConfig.branch -ne $parameters.gitBranch.Value) -or ($deploymentConfig.repoUrl -ne $parameters.gitRepoUrl.Value)){
+                        WriteI -message "Remove $appService source control configuration"
+                        az webapp deployment source delete --name $appService --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value
+                        # code will be synced in ARM deployment stage
+                        $codeSynced = $true
+                    }
+                }
+                else {
+                    # If command failed due to resource not exists, then screen colors is becoming red
+                    [Console]::ResetColor()
+                }
+            }
+        }
+
+        # Deploy ARM templates
+        WriteI -message "`nDeploying app services, Azure function, bot service, and other supporting resources... (this step can take over an hour)"
+        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"
 
         $deploymentExceptionMessage = "ERROR: ARM template deployment error."
         if ($LASTEXITCODE -ne 0) {
@@ -487,7 +510,8 @@ function DeployARMTemplate {
         #get the output of current deployment
         $deploymentOutput = az deployment group show --name azuredeploy --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value | ConvertFrom-Json
 
-        if($parameters.isUpgrade.Value){
+        # Sync only in upgrades & if no source branch conflict detected
+        if($parameters.isUpgrade.Value -and (-not $codeSynced)){
             # sync app services code deployment (ARM deployment will not sync automatically)
             foreach ($appService in $appServicesNames) {
                 WriteI -message "Sync $appService code from latest version"
