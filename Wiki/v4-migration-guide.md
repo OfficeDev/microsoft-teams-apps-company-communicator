@@ -244,11 +244,16 @@ You need to only update the author's team package.
 
 ### 6. Install the authors app in Microsoft Teams.
 
-1. Uninstall the current authors app from the Tenant.
+1. Delete the current authors app from the team.
+> **IMPORTANT :** The team id will be deleted from the target audience after deleting the app. Install the User app (the `company-communicator-users.zip` package) to the team to add it to the target audience.
 
-2. Install the authors app (the `company-communicator-authors.zip` package) to your team of message authors.
-    * Note that even if non-authors install the app, the UPN list in the app configuration will prevent them from accessing the message authoring experience. Only the users in the sender UPN list will be able to compose and send messages. 
+2. Update the authors app package. Please refer to 
+  [this link](https://docs.microsoft.com/en-us/microsoftteams/manage-apps#upload-a-new-app) 
+  to update the app package.
     * If your tenant has sideloading apps enabled, you can install your app by following the instructions [here](https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/apps/apps-upload#load-your-package-into-teams).
+
+3. Add the authors app (the `company-communicator-authors.zip` package) to your team of message authors.
+    * Note that even if non-authors install the app, the UPN list in the app configuration will prevent them from accessing the message authoring experience. Only the users in the sender UPN list will be able to compose and send messages. 
 
 ### Migration Status
 If you have performed all the steps, migration completes after successful deployment.

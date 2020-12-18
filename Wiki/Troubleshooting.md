@@ -80,6 +80,13 @@ If proactive app installation for a user is not working as expected, make sure y
 If you encounter the following error message while deploying with the PowerShell script. This is expected and the script will recover from this failure automatically.
 ![Screenshot of ARM template deployment timeout](images/ARM-Deployment-Timeout.png)
 
+## 6. Unable to sign-in after upgrading the Company Communicator from a version prior to v4.
+Go to the tenant where app is installed and open **Enterprise Applicationss** page [here](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/EnterpriseApps) and search for the app you created in Company Communicator v3.
+1. Under **Manage**, click on **Properties** and then **Delete**.
+![Remove app registration](images/remove_registration.png)
+
+## 7. When upgrading Company Commmunicator from a version prior to v4, please ensure that the **users** app is installed in the teams to send messages to the team or its members.
+Install the **User** app (the `company-communicator-users.zip` package) to the teams that will be the target audience.
 
 # Didn't find your problem here?
 Please report the issue [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/issues/new)
