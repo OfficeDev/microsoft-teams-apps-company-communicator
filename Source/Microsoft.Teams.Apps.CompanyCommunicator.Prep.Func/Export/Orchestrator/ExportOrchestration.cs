@@ -18,11 +18,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
     /// </summary>
     public class ExportOrchestration
     {
-        private readonly IUploadActivity uploadActivity;
-        private readonly ISendFileCardActivity sendFileCardActivity;
-        private readonly IGetMetadataActivity getMetadataActivity;
-        private readonly IUpdateExportDataActivity updateExportDataActivity;
-        private readonly IHandleExportFailureActivity handleExportFailureActivity;
+        private readonly UploadActivity uploadActivity;
+        private readonly SendFileCardActivity sendFileCardActivity;
+        private readonly GetMetadataActivity getMetadataActivity;
+        private readonly UpdateExportDataActivity updateExportDataActivity;
+        private readonly HandleExportFailureActivity handleExportFailureActivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportOrchestration"/> class.
@@ -33,11 +33,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
         /// <param name="updateExportDataActivity">update the export data activity.</param>
         /// <param name="handleExportFailureActivity">handle failure activity.</param>
         public ExportOrchestration(
-            IUploadActivity uploadActivity,
-            ISendFileCardActivity sendFileCardActivity,
-            IGetMetadataActivity getMetadataActivity,
-            IUpdateExportDataActivity updateExportDataActivity,
-            IHandleExportFailureActivity handleExportFailureActivity)
+            UploadActivity uploadActivity,
+            SendFileCardActivity sendFileCardActivity,
+            GetMetadataActivity getMetadataActivity,
+            UpdateExportDataActivity updateExportDataActivity,
+            HandleExportFailureActivity handleExportFailureActivity)
         {
             this.uploadActivity = uploadActivity ?? throw new ArgumentNullException(nameof(uploadActivity));
             this.sendFileCardActivity = sendFileCardActivity ?? throw new ArgumentNullException(nameof(sendFileCardActivity));

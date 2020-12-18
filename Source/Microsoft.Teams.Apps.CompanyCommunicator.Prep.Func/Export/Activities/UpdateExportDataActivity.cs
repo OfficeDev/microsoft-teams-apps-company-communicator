@@ -15,7 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     /// <summary>
     /// Activity to update export data.
     /// </summary>
-    public class UpdateExportDataActivity : IUpdateExportDataActivity
+    public class UpdateExportDataActivity
     {
         private readonly IExportDataRepository exportDataRepository;
 
@@ -28,7 +28,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Run the activity.
+        /// It updates the export data.
+        /// </summary>
+        /// <param name="context">Durable orchestration context.</param>
+        /// <param name="exportDataEntity">Export data entity.</param>
+        /// <param name="log">Logging service.</param>
+        /// <returns>Instance of metadata.</returns>
         public async Task RunAsync(
             IDurableOrchestrationContext context,
             ExportDataEntity exportDataEntity,
@@ -50,7 +57,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                                   exportDataEntity);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Update the export data.
+        /// </summary>
+        /// <param name="exportDataEntity">Export data entity.</param>
+        /// <returns>A <see cref="Task"/>Representing the asynchronous operation.</returns>
+        [FunctionName(nameof(UpdateExportDataActivityAsync))]
         public async Task UpdateExportDataActivityAsync(
             [ActivityTrigger] ExportDataEntity exportDataEntity)
         {

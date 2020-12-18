@@ -22,7 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     /// <summary>
     /// Activity to create the metadata.
     /// </summary>
-    public class GetMetadataActivity : IGetMetadataActivity
+    public class GetMetadataActivity
     {
         private readonly IUsersService usersService;
         private readonly IStringLocalizer<Strings> localizer;
@@ -40,7 +40,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Run the activity.
+        /// It creates and gets the metadata.
+        /// </summary>
+        /// <param name="context">Durable orchestration context.</param>
+        /// <param name="exportRequiredData">Tuple containing notification data entity and export data entity.</param>
+        /// <param name="log">Logging service.</param>
+        /// <returns>instance of metadata.</returns>
         public async Task<Metadata> RunAsync(
             IDurableOrchestrationContext context,
             (NotificationDataEntity notificationDataEntity,
@@ -69,7 +76,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             return metaData;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Create and get the metadata.
+        /// </summary>
+        /// <param name="exportRequiredData">Tuple containing notification data entity and export data entity.</param>
+        /// <returns>instance of metadata.</returns>
+        [FunctionName(nameof(GetMetadataActivityAsync))]
         public async Task<Metadata> GetMetadataActivityAsync(
             [ActivityTrigger](NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity) exportRequiredData)

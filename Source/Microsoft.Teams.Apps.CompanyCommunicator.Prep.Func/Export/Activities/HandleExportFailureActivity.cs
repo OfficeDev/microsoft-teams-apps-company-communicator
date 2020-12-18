@@ -29,7 +29,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     /// This class contains the "clean up" durable activity.
     /// If exceptions happen in the "export" operation, this method is called to clean up and send the error message.
     /// </summary>
-    public class HandleExportFailureActivity : IHandleExportFailureActivity
+    public class HandleExportFailureActivity
     {
         private readonly IExportDataRepository exportDataRepository;
         private readonly string storageConnectionString;
@@ -65,7 +65,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Run the activity.
+        /// </summary>
+        /// <param name="context">Durable orchestration context.</param>
+        /// <param name="exportDataEntity">export data entity.</param>
+        /// <param name="log">Logging service.</param>
+        /// <returns>instance of metadata.</returns>
         public async Task RunAsync(
             IDurableOrchestrationContext context,
             ExportDataEntity exportDataEntity,
@@ -77,7 +83,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                       exportDataEntity);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// This method represents the "clean up" durable activity.
+        /// If exceptions happen in the "export" operation,
+        /// this method is called to do the clean up work, e.g. delete the files,records and etc.
+        /// </summary>
+        /// <param name="exportDataEntity">export data entity.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [FunctionName(nameof(HandleFailureActivityAsync))]
         public async Task HandleFailureActivityAsync(
             [ActivityTrigger] ExportDataEntity exportDataEntity)
         {

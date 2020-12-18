@@ -30,7 +30,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     /// <summary>
     /// Uploads the file to the blob storage.
     /// </summary>
-    public class UploadActivity : IUploadActivity
+    public class UploadActivity
     {
         private readonly string storageConnectionString;
         private readonly IDataStreamFacade userDataStream;
@@ -56,7 +56,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
 
         private int MaxRetry { get; set; } = 15;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Run the activity.
+        /// Upload the notification data to Azure Blob storage.
+        /// </summary>
+        /// <param name="context">Durable orchestration context.</param>
+        /// <param name="uploadData">Tuple containing notification data entity,metadata and filename.</param>
+        /// <param name="log">Logging service.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
             IDurableOrchestrationContext context,
             (NotificationDataEntity sentNotificationDataEntity, Metadata metadata, string fileName) uploadData,
@@ -68,9 +75,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
               uploadData);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Upload the zip file to blob storage.
+        /// </summary>
+        /// <param name="uploadData">Tuple containing notification data, metadata and filename.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [FunctionName(nameof(UploadActivityAsync))]
         public async Task UploadActivityAsync(
-            [ActivityTrigger](NotificationDataEntity sentNotificationDataEntity, Metadata metadata, string fileName) uploadData)
+            [ActivityTrigger] (NotificationDataEntity sentNotificationDataEntity, Metadata metadata, string fileName) uploadData)
         {
             CloudStorageAccount storage = CloudStorageAccount.Parse(this.storageConnectionString);
             CloudBlobClient client = storage.CreateCloudBlobClient();
