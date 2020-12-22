@@ -1,13 +1,13 @@
 # Company Communicator App Template
 
-| [Documentation](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki) | [Deployment guide](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide) | [Architecture](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview) |
+| [Documentation](https://github.com/lukman-oyee/microsoft-teams-apps-company-communicator-app/wiki) | [Deployment guide](https://github.com/lukman-oyee/microsoft-teams-apps-company-communicator-app/wiki/Deployment-guide) | [Architecture](https://github.com/lukman-oyee/microsoft-teams-apps-company-communicator-app/wiki/Solution-overview) |
 | ---- | ---- | ---- |
 
 Company Communicator is a custom Teams app that enables corporate teams to create and send messages intended for multiple teams or large number of employees over chat allowing organization to reach employees right where they collaborate. Use this template for multiple scenarios, such as new initiative announcements, employee onboarding, modern learning and development, or organization-wide broadcasts. 
 
 The app provides an easy interface for designated users to create, preview, collaborate and send messages. It's also a foundation for building custom targeted communication capabilities, such as custom telemetry on how many users acknowledged or interacted with a message.
 
-![Company Communicator compose message screen](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/images/CompanyCommunicatorCompose.png)
+![Company Communicator compose message screen](https://github.com/lukman-oyee/microsoft-teams-apps-company-communicator-app/wiki/images/CompanyCommunicatorCompose.png)
 
 ### Key features
 * **Message creation:** Easily create messages by using a team tab where team members who are permissioned can collaborate and create messages.
@@ -15,19 +15,19 @@ The app provides an easy interface for designated users to create, preview, coll
 * **Message metrics:** Export messages delivery report.
 ## Get started
 
-Begin with the [Solution overview](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview) to read about what the app does and how it works.
+Begin with the [Solution overview](https://github.com/lukman-oyee/microsoft-teams-apps-company-communicator-app/wiki/Solution-overview) to read about what the app does and how it works.
 
-When you're ready to try out Company Communicator, or to use it in your own organization, follow the steps in the [Deployment guide](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide).
+When you're ready to try out Company Communicator, or to use it in your own organization, follow the steps in the [Deployment guide](https://github.com/lukman-oyee/microsoft-teams-apps-company-communicator-app/wiki/Deployment-guide).
 
 ## Feedback
 
 Thoughts? Questions? Ideas? Share them with us on [Teams UserVoice](https://microsoftteams.uservoice.com/forums/555103-public)!
 
-Please report bugs and other code issues [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/issues/new).
+Please report bugs and other code issues [here](https://github.com/lukman-oyee/microsoft-teams-apps-company-communicator-app/issues/new).
 
 ## Legal notice
 
-This app template is provided under the [MIT License](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/blob/master/LICENSE) terms.  In addition to these terms, by using this app template you agree to the following:
+This app template is provided under the [MIT License](https://github.com/lukman-oyee/microsoft-teams-apps-company-communicator-app/blob/master/LICENSE) terms.  In addition to these terms, by using this app template you agree to the following:
 
 - You, not Microsoft, will license the use of your app to users or organization. 
 
