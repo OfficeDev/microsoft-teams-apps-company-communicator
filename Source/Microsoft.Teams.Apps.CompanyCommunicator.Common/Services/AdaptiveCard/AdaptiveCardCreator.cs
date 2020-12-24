@@ -18,7 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
         /// </summary>
         /// <param name="notificationDataEntity">Notification data entity.</param>
         /// <returns>An adaptive card.</returns>
-        public AdaptiveCard CreateAdaptiveCard(NotificationDataEntity notificationDataEntity)
+        public virtual AdaptiveCard CreateAdaptiveCard(NotificationDataEntity notificationDataEntity)
         {
             return this.CreateAdaptiveCard(
                 notificationDataEntity.Title,

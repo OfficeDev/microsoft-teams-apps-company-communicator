@@ -241,6 +241,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to find the User application: {0} in the organization&apos;s app catalog..
+        /// </summary>
+        public static string FailedToFindUserAppInAppCatalog {
+            get {
+                return ResourceManager.GetString("FailedToFindUserAppInAppCatalog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to sync all users. Status Code: {0} Exception: {1}.
         /// </summary>
         public static string FailedToGetAllUsersFormat {
@@ -426,6 +435,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         public static string Throttled {
             get {
                 return ResourceManager.GetString("Throttled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User application not found. Make sure the User app is uploaded to your organization&apos;s app catalog..
+        /// </summary>
+        public static string UserAppNotFound {
+            get {
+                return ResourceManager.GetString("UserAppNotFound", resourceCulture);
             }
         }
     }

@@ -44,11 +44,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
-                    botOptions.MicrosoftAppId =
-                        configuration.GetValue<string>("MicrosoftAppId");
+                    botOptions.UserAppId =
+                        configuration.GetValue<string>("UserAppId");
 
-                    botOptions.MicrosoftAppPassword =
-                        configuration.GetValue<string>("MicrosoftAppPassword");
+                    botOptions.UserAppPassword =
+                        configuration.GetValue<string>("UserAppPassword");
                 });
             builder.Services.AddOptions<RepositoryOptions>()
                 .Configure<IConfiguration>((repositoryOptions, configuration) =>
@@ -77,20 +77,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(culture);
 
             // Add bot services.
-            builder.Services.AddSingleton<CommonMicrosoftAppCredentials>();
-            builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
+            builder.Services.AddSingleton<UserAppCredentials>();
+            builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
 
             // Add teams services.
             builder.Services.AddTransient<IMessageService, MessageService>();
 
             // Add repositories.
-            builder.Services.AddSingleton<SendingNotificationDataRepository>();
-            builder.Services.AddSingleton<GlobalSendingNotificationDataRepository>();
-            builder.Services.AddSingleton<SentNotificationDataRepository>();
+            builder.Services.AddSingleton<ISendingNotificationDataRepository, SendingNotificationDataRepository>();
+            builder.Services.AddSingleton<IGlobalSendingNotificationDataRepository, GlobalSendingNotificationDataRepository>();
+            builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
 
             // Add service bus message queues.
-            builder.Services.AddSingleton<SendQueue>();
+            builder.Services.AddSingleton<ISendQueue, SendQueue>();
 
             // Add the Notification service.
             builder.Services.AddTransient<INotificationService, NotificationService>();

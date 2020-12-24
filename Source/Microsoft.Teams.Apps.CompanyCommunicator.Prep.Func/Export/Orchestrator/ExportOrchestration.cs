@@ -39,11 +39,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
             UpdateExportDataActivity updateExportDataActivity,
             HandleExportFailureActivity handleExportFailureActivity)
         {
-            this.uploadActivity = uploadActivity;
-            this.sendFileCardActivity = sendFileCardActivity;
-            this.getMetadataActivity = getMetadataActivity;
-            this.updateExportDataActivity = updateExportDataActivity;
-            this.handleExportFailureActivity = handleExportFailureActivity;
+            this.uploadActivity = uploadActivity ?? throw new ArgumentNullException(nameof(uploadActivity));
+            this.sendFileCardActivity = sendFileCardActivity ?? throw new ArgumentNullException(nameof(sendFileCardActivity));
+            this.getMetadataActivity = getMetadataActivity ?? throw new ArgumentNullException(nameof(getMetadataActivity));
+            this.updateExportDataActivity = updateExportDataActivity ?? throw new ArgumentNullException(nameof(updateExportDataActivity));
+            this.handleExportFailureActivity = handleExportFailureActivity ?? throw new ArgumentNullException(nameof(handleExportFailureActivity));
         }
 
         /// <summary>

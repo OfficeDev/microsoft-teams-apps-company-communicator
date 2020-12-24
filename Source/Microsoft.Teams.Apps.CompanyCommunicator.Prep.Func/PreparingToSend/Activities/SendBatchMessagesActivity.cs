@@ -21,14 +21,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class SendBatchMessagesActivity
     {
-        private readonly SendQueue sendQueue;
+        private readonly ISendQueue sendQueue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SendBatchMessagesActivity"/> class.
         /// </summary>
         /// <param name="sendQueue">Send queue service.</param>
         public SendBatchMessagesActivity(
-            SendQueue sendQueue)
+            ISendQueue sendQueue)
         {
             this.sendQueue = sendQueue ?? throw new ArgumentNullException(nameof(sendQueue));
         }
@@ -42,6 +42,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public async Task RunAsync(
             [ActivityTrigger](NotificationDataEntity notification, List<SentNotificationDataEntity> batch) input)
         {
+            if (input.notification == null)
+            {
+                throw new ArgumentNullException(nameof(input.notification));
+            }
+
+            if (input.batch == null)
+            {
+                throw new ArgumentNullException(nameof(input.batch));
+            }
+
             var messageBatch = input.batch.Select(
                 recipient =>
                 {

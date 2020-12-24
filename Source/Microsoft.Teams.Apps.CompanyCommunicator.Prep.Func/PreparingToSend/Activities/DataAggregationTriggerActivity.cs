@@ -22,8 +22,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class DataAggregationTriggerActivity
     {
-        private readonly NotificationDataRepository notificationDataRepository;
-        private readonly DataQueue dataQueue;
+        private readonly INotificationDataRepository notificationDataRepository;
+        private readonly IDataQueue dataQueue;
         private readonly double messageDelayInSeconds;
 
         /// <summary>
@@ -33,8 +33,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="dataQueue">The data queue.</param>
         /// <param name="options">The data queue message options.</param>
         public DataAggregationTriggerActivity(
-            NotificationDataRepository notificationDataRepository,
-            DataQueue dataQueue,
+            INotificationDataRepository notificationDataRepository,
+            IDataQueue dataQueue,
             IOptions<DataQueueMessageOptions> options)
         {
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
@@ -55,6 +55,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             [ActivityTrigger](string notificationId, int recipientCount) input,
             ILogger log)
         {
+            if (input.notificationId == null)
+            {
+                throw new ArgumentNullException(nameof(input.notificationId));
+            }
+
+            if (input.recipientCount <= 0)
+            {
+                throw new ArgumentOutOfRangeException($"Recipient count should be > 0. Value: {input.recipientCount}");
+            }
+
             // Update notification.
             await this.UpdateNotification(input.notificationId, input.recipientCount, log);
 

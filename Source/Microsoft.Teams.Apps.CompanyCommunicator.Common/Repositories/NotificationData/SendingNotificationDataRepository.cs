@@ -10,7 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     /// <summary>
     /// Repository for the sending notification data in the table storage.
     /// </summary>
-    public class SendingNotificationDataRepository : BaseRepository<SendingNotificationDataEntity>
+    public class SendingNotificationDataRepository : BaseRepository<SendingNotificationDataEntity>, ISendingNotificationDataRepository
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SendingNotificationDataRepository"/> class.

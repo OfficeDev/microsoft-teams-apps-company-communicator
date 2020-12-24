@@ -71,10 +71,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
-                    botOptions.MicrosoftAppId =
-                        configuration.GetValue<string>("MicrosoftAppId");
-                    botOptions.MicrosoftAppPassword =
-                        configuration.GetValue<string>("MicrosoftAppPassword");
+                    botOptions.UserAppId =
+                        configuration.GetValue<string>("UserAppId");
+                    botOptions.UserAppPassword =
+                        configuration.GetValue<string>("UserAppPassword");
+                    botOptions.AuthorAppId =
+                        configuration.GetValue<string>("AuthorAppId");
+                    botOptions.AuthorAppPassword =
+                        configuration.GetValue<string>("AuthorAppPassword");
                 });
             builder.Services.AddOptions<DataQueueMessageOptions>()
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
@@ -92,14 +96,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                     options.MaxAttemptsToCreateConversation =
                         configuration.GetValue<int>("MaxAttemptsToCreateConversation", 2);
                 });
-
-            builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
-                Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
-             {
-                 confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("MicrosoftAppId");
-                 confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("MicrosoftAppPassword");
-                 confidentialClientApplicationOptions.TenantId = configuration.GetValue<string>("TenantId");
-             });
 
             builder.Services.AddLocalization();
 
@@ -119,28 +115,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<HandleExportFailureActivity>();
 
             // Add bot services.
-            builder.Services.AddSingleton<CommonMicrosoftAppCredentials>();
-            builder.Services.AddSingleton<ICredentialProvider, CommonBotCredentialProvider>();
+            builder.Services.AddSingleton<UserAppCredentials>();
+            builder.Services.AddSingleton<AuthorAppCredentials>();
+            builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
 
             // Add repositories.
-            builder.Services.AddSingleton<NotificationDataRepository>();
-            builder.Services.AddSingleton<SendingNotificationDataRepository>();
-            builder.Services.AddSingleton<SentNotificationDataRepository>();
-            builder.Services.AddSingleton<UserDataRepository>();
-            builder.Services.AddSingleton<TeamDataRepository>();
-            builder.Services.AddSingleton<ExportDataRepository>();
-            builder.Services.AddSingleton<AppConfigRepository>();
+            builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
+            builder.Services.AddSingleton<ISendingNotificationDataRepository, SendingNotificationDataRepository>();
+            builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
+            builder.Services.AddSingleton<IUserDataRepository, UserDataRepository>();
+            builder.Services.AddSingleton<ITeamDataRepository, TeamDataRepository>();
+            builder.Services.AddSingleton<IExportDataRepository, ExportDataRepository>();
+            builder.Services.AddSingleton<IAppConfigRepository, AppConfigRepository>();
 
             // Add service bus message queues.
-            builder.Services.AddSingleton<SendQueue>();
-            builder.Services.AddSingleton<DataQueue>();
-            builder.Services.AddSingleton<ExportQueue>();
+            builder.Services.AddSingleton<ISendQueue, SendQueue>();
+            builder.Services.AddSingleton<IDataQueue, DataQueue>();
+            builder.Services.AddSingleton<IExportQueue, ExportQueue>();
 
             // Add miscellaneous dependencies.
             builder.Services.AddTransient<TableRowKeyGenerator>();
             builder.Services.AddTransient<AdaptiveCardCreator>();
-            builder.Services.AddSingleton<IAppSettingsService, AppSettingsService>();
+            builder.Services.AddTransient<IAppSettingsService, AppSettingsService>();
 
             // Add Teams services.
             builder.Services.AddTransient<ITeamMembersService, TeamMembersService>();
@@ -162,8 +159,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
                 Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
                 {
-                    confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("MicrosoftAppId");
-                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("MicrosoftAppPassword");
+                    confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("AuthorAppId");
+                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("AuthorAppPassword");
                     confidentialClientApplicationOptions.TenantId = configuration.GetValue<string>("TenantId");
                 });
 

@@ -36,7 +36,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             IUsersService usersService,
             IStringLocalizer<Strings> localizer)
         {
-            this.usersService = usersService;
+            this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
@@ -54,8 +54,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             ExportDataEntity exportDataEntity) exportRequiredData,
             ILogger log)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (exportRequiredData.notificationDataEntity == null)
+            {
+                throw new ArgumentNullException(nameof(exportRequiredData.notificationDataEntity));
+            }
+
+            if (exportRequiredData.exportDataEntity == null)
+            {
+                throw new ArgumentNullException(nameof(exportRequiredData.exportDataEntity));
+            }
+
             var metaData = await context.CallActivityWithRetryAsync<Metadata>(
-               nameof(GetMetadataActivity.GetMetaDataActivityAsync),
+               nameof(GetMetadataActivity.GetMetadataActivityAsync),
                FunctionSettings.DefaultRetryOptions,
                (exportRequiredData.notificationDataEntity, exportRequiredData.exportDataEntity));
             return metaData;
@@ -66,11 +81,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// </summary>
         /// <param name="exportRequiredData">Tuple containing notification data entity and export data entity.</param>
         /// <returns>instance of metadata.</returns>
-        [FunctionName(nameof(GetMetaDataActivityAsync))]
-        public async Task<Metadata> GetMetaDataActivityAsync(
+        [FunctionName(nameof(GetMetadataActivityAsync))]
+        public async Task<Metadata> GetMetadataActivityAsync(
             [ActivityTrigger](NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity) exportRequiredData)
         {
+            if (exportRequiredData.notificationDataEntity == null)
+            {
+                throw new ArgumentNullException(nameof(exportRequiredData.notificationDataEntity));
+            }
+
+            if (exportRequiredData.exportDataEntity == null)
+            {
+                throw new ArgumentNullException(nameof(exportRequiredData.exportDataEntity));
+            }
+
             User user = default;
             try
             {

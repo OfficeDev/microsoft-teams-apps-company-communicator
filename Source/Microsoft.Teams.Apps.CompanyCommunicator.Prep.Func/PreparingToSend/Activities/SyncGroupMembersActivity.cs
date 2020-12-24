@@ -28,9 +28,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     public class SyncGroupMembersActivity
     {
         private readonly IGroupMembersService groupMembersService;
-        private readonly NotificationDataRepository notificationDataRepository;
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
-        private readonly UserDataRepository userDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
+        private readonly IUserDataRepository userDataRepository;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -42,10 +42,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="userDataRepository">User Data repository.</param>
         /// <param name="localizer">Localization service.</param>
         public SyncGroupMembersActivity(
-            SentNotificationDataRepository sentNotificationDataRepository,
-            NotificationDataRepository notificationDataRepository,
+            ISentNotificationDataRepository sentNotificationDataRepository,
+            INotificationDataRepository notificationDataRepository,
             IGroupMembersService groupMembersService,
-            UserDataRepository userDataRepository,
+            IUserDataRepository userDataRepository,
             IStringLocalizer<Strings> localizer)
         {
             this.groupMembersService = groupMembersService ?? throw new ArgumentNullException(nameof(groupMembersService));
@@ -65,6 +65,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public async Task RunAsync(
         [ActivityTrigger](string notificationId, string groupId) input, ILogger log)
         {
+            if (input.notificationId == null)
+            {
+                throw new ArgumentNullException(nameof(input.notificationId));
+            }
+
+            if (input.groupId == null)
+            {
+                throw new ArgumentNullException(nameof(input.groupId));
+            }
+
+            if (log == null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
+
             var notificationId = input.notificationId;
             var groupId = input.groupId;
 

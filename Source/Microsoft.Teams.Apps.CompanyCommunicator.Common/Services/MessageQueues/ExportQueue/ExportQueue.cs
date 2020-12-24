@@ -9,7 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
     /// <summary>
     /// The message queue service connected to the "company-communicator-export" queue in Azure service bus.
     /// </summary>
-    public class ExportQueue : BaseQueue<ExportQueueMessageContent>
+    public class ExportQueue : BaseQueue<ExportQueueMessageContent>, IExportQueue
     {
         /// <summary>
         /// Queue name of the export queue.

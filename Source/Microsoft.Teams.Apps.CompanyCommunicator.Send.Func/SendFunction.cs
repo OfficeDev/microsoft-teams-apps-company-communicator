@@ -38,9 +38,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly int maxNumberOfAttempts;
         private readonly double sendRetryDelayNumberOfSeconds;
         private readonly INotificationService notificationService;
-        private readonly SendingNotificationDataRepository notificationRepo;
+        private readonly ISendingNotificationDataRepository notificationRepo;
         private readonly IMessageService messageService;
-        private readonly SendQueue sendQueue;
+        private readonly ISendQueue sendQueue;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -56,8 +56,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             IOptions<SendFunctionOptions> options,
             INotificationService notificationService,
             IMessageService messageService,
-            SendingNotificationDataRepository notificationRepo,
-            SendQueue sendQueue,
+            ISendingNotificationDataRepository notificationRepo,
+            ISendQueue sendQueue,
             IStringLocalizer<Strings> localizer)
         {
             if (options is null)

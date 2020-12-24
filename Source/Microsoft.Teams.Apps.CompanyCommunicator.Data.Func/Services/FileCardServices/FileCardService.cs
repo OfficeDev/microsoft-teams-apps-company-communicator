@@ -23,8 +23,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
     /// </summary>
     public class FileCardService : IFileCardService
     {
-        private readonly UserDataRepository userDataRepository;
-        private readonly string microsoftAppId;
+        private readonly IUserDataRepository userDataRepository;
+        private readonly string authorAppId;
         private readonly BotFrameworkHttpAdapter botAdapter;
         private readonly IStringLocalizer<Strings> localizer;
 
@@ -38,12 +38,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
         public FileCardService(
             IOptions<BotOptions> botOptions,
             BotFrameworkHttpAdapter botAdapter,
-            UserDataRepository userDataRepository,
+            IUserDataRepository userDataRepository,
             IStringLocalizer<Strings> localizer)
         {
-            this.botAdapter = botAdapter;
-            this.microsoftAppId = botOptions.Value.MicrosoftAppId;
-            this.userDataRepository = userDataRepository;
+            this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
+            var options = botOptions ?? throw new ArgumentNullException(nameof(botOptions));
+            if (string.IsNullOrEmpty(options.Value?.AuthorAppId))
+            {
+                throw new ArgumentException("AuthorAppId setting is missing in the configuration.");
+            }
+
+            this.authorAppId = options.Value.AuthorAppId;
+            this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
@@ -72,7 +78,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
 
             int maxNumberOfAttempts = 10;
             await this.botAdapter.ContinueConversationAsync(
-               botAppId: this.microsoftAppId,
+               botAppId: this.authorAppId,
                reference: conversationReference,
                callback: async (turnContext, cancellationToken) =>
                {

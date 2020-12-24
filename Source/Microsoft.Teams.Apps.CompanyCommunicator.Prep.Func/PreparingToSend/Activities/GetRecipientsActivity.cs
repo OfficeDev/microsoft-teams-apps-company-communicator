@@ -18,13 +18,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class GetRecipientsActivity
     {
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientsActivity"/> class.
         /// </summary>
         /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
-        public GetRecipientsActivity(SentNotificationDataRepository sentNotificationDataRepository)
+        public GetRecipientsActivity(ISentNotificationDataRepository sentNotificationDataRepository)
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
         }
@@ -37,6 +37,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         [FunctionName(FunctionNames.GetRecipientsActivity)]
         public async Task<IEnumerable<SentNotificationDataEntity>> GetRecipientsAsync([ActivityTrigger] NotificationDataEntity notification)
         {
+            if (notification == null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
+
             var recipients = await this.sentNotificationDataRepository.GetAllAsync(notification.Id);
             return recipients;
         }
@@ -49,6 +54,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         [FunctionName(FunctionNames.GetPendingRecipientsActivity)]
         public async Task<IEnumerable<SentNotificationDataEntity>> GetPendingRecipientsAsync([ActivityTrigger] NotificationDataEntity notification)
         {
+            if (notification == null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
+
             var recipients = await this.sentNotificationDataRepository.GetAllAsync(notification.Id);
             return recipients.Where(recipient => string.IsNullOrEmpty(recipient.ConversationId));
         }
