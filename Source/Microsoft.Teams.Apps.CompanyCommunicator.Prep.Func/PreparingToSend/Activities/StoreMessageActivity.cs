@@ -16,7 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class StoreMessageActivity
     {
-        private readonly SendingNotificationDataRepository sendingNotificationDataRepository;
+        private readonly ISendingNotificationDataRepository sendingNotificationDataRepository;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="notificationRepo">Sending notification data repository.</param>
         /// <param name="cardCreator">The adaptive card creator.</param>
         public StoreMessageActivity(
-            SendingNotificationDataRepository notificationRepo,
+            ISendingNotificationDataRepository notificationRepo,
             AdaptiveCardCreator cardCreator)
         {
             this.sendingNotificationDataRepository = notificationRepo ?? throw new ArgumentNullException(nameof(notificationRepo));
@@ -41,6 +41,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public async Task RunAsync(
             [ActivityTrigger] NotificationDataEntity notification)
         {
+            if (notification == null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
+
             var serializedContent = this.adaptiveCardCreator.CreateAdaptiveCard(notification).ToJson();
 
             var sendingNotification = new SendingNotificationDataEntity

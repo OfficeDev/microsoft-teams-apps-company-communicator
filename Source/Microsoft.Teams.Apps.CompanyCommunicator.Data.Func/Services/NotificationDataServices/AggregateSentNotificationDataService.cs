@@ -15,13 +15,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
     /// </summary>
     public class AggregateSentNotificationDataService
     {
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AggregateSentNotificationDataService"/> class.
         /// </summary>
         /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
-        public AggregateSentNotificationDataService(SentNotificationDataRepository sentNotificationDataRepository)
+        public AggregateSentNotificationDataService(ISentNotificationDataRepository sentNotificationDataRepository)
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository;
         }

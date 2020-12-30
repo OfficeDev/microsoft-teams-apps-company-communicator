@@ -28,9 +28,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     {
         private readonly TeamsConversationOptions options;
         private readonly IConversationService conversationService;
-        private readonly SentNotificationDataRepository sentNotificationDataRepository;
-        private readonly UserDataRepository userDataRepository;
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
+        private readonly IUserDataRepository userDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
         private readonly IAppManagerService appManagerService;
         private readonly IChatsService chatsService;
         private readonly IAppSettingsService appSettingsService;
@@ -50,9 +50,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="localizer">Localization service.</param>
         public TeamsConversationActivity(
             IConversationService conversationService,
-            SentNotificationDataRepository sentNotificationDataRepository,
-            UserDataRepository userDataRepository,
-            NotificationDataRepository notificationDataRepository,
+            ISentNotificationDataRepository sentNotificationDataRepository,
+            IUserDataRepository userDataRepository,
+            INotificationDataRepository notificationDataRepository,
             IAppManagerService appManagerService,
             IChatsService chatsService,
             IAppSettingsService appSettingsService,
@@ -84,6 +84,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             [ActivityTrigger](string notificationId, SentNotificationDataEntity recipient) input,
             ILogger log)
         {
+            if (input.notificationId == null)
+            {
+                throw new ArgumentNullException(nameof(input.notificationId));
+            }
+
+            if (input.recipient == null)
+            {
+                throw new ArgumentNullException(nameof(input.recipient));
+            }
+
+            if (log == null)
+            {
+                throw new ArgumentNullException(nameof(log));
+            }
+
             var recipient = input.recipient;
 
             // No-op for Team recipient.
@@ -139,7 +154,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             try
             {
                 // Create conversation.
-                var response = await this.conversationService.CreateConversationAsync(
+                var response = await this.conversationService.CreateUserConversationAsync(
                     teamsUserId: recipient.UserId,
                     tenantId: recipient.TenantId,
                     serviceUrl: recipient.ServiceUrl,
@@ -170,7 +185,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             var appId = await this.appSettingsService.GetUserAppIdAsync();
             if (string.IsNullOrEmpty(appId))
             {
-                log.LogError("User app id not available.");
+                // This may happen if the User app is not added to the organization's app catalog.
+                var errorMessage = this.localizer.GetString("UserAppNotFound");
+                log.LogError(errorMessage);
+                await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
                 return string.Empty;
             }
 
@@ -187,9 +205,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                         // Note: application is already installed, we should fetch conversation id for this user.
                         log.LogWarning("Application is already installed for the user.");
                         break;
+                    case HttpStatusCode.NotFound:
+                        // Failed to find the User app in App Catalog. This may happen if the User app is deleted from app catalog.
+                        var message = this.localizer.GetString("FailedToFindUserAppInAppCatalog", appId);
+                        log.LogError(message);
+                        await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, message);
 
+                        // Clear cached user app id. The app may fetch an updated app id next time a message is sent.
+                        await this.appSettingsService.DeleteUserAppIdAsync();
+                        return string.Empty;
                     default:
-                        var errorMessage = this.localizer.GetString("FailedToInstallApplicationForUserFormat", recipient?.UserId, exception.Message);
+                        var errorMessage = this.localizer.GetString("FailedToInstallApplicationForUserFormat", recipient?.RecipientId, exception.Message);
                         log.LogError(exception, errorMessage);
                         await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
                         return string.Empty;

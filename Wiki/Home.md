@@ -16,6 +16,7 @@ It provides a foundation to build custom targeted communication capabilities suc
     * [Deployment guide](Deployment-guide)
     * [Troubleshooting](Troubleshooting)
 * Migrating to newer version
+  * [v4](v4-migration-guide)
   * [v3](v3-migration-guide)
   * [v2](v2-migration-guide)
 * [Extending Company Communicator](Taking-it-further)

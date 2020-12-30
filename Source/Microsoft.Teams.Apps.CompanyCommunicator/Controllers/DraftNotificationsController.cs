@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Security.Claims;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
@@ -27,10 +29,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
     public class DraftNotificationsController : ControllerBase
     {
-        private readonly NotificationDataRepository notificationDataRepository;
-        private readonly TeamDataRepository teamDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
+        private readonly ITeamDataRepository teamDataRepository;
         private readonly DraftNotificationPreviewService draftNotificationPreviewService;
         private readonly IGroupsService groupsService;
+        private readonly IAppSettingsService appSettingsService;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -39,20 +42,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notificationDataRepository">Notification data repository instance.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
         /// <param name="draftNotificationPreviewService">Draft notification preview service.</param>
+        /// <param name="appSettingsService">App Settings service.</param>
         /// <param name="localizer">Localization service.</param>
         /// <param name="groupsService">group service.</param>
         public DraftNotificationsController(
-            NotificationDataRepository notificationDataRepository,
-            TeamDataRepository teamDataRepository,
+            INotificationDataRepository notificationDataRepository,
+            ITeamDataRepository teamDataRepository,
             DraftNotificationPreviewService draftNotificationPreviewService,
+            IAppSettingsService appSettingsService,
             IStringLocalizer<Strings> localizer,
             IGroupsService groupsService)
         {
-            this.notificationDataRepository = notificationDataRepository;
-            this.teamDataRepository = teamDataRepository;
-            this.draftNotificationPreviewService = draftNotificationPreviewService;
-            this.localizer = localizer;
-            this.groupsService = groupsService;
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
+            this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
+            this.draftNotificationPreviewService = draftNotificationPreviewService ?? throw new ArgumentNullException(nameof(draftNotificationPreviewService));
+            this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
+            this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
+            this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
         }
 
         /// <summary>
@@ -289,14 +295,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.BadRequest($"Notification {draftNotificationPreviewRequest.DraftNotificationId} not found.");
             }
 
-            var teamDataEntity = await this.teamDataRepository.GetAsync(
-                TeamDataTableNames.TeamDataPartition,
-                draftNotificationPreviewRequest.TeamsTeamId);
-            if (teamDataEntity == null)
-            {
-                return this.BadRequest($"Team {draftNotificationPreviewRequest.TeamsTeamId} not found.");
-            }
-
+            var teamDataEntity = new TeamDataEntity();
+            teamDataEntity.TenantId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeTenantId);
+            teamDataEntity.ServiceUrl = await this.appSettingsService.GetServiceUrlAsync();
             var result = await this.draftNotificationPreviewService.SendPreview(
                 notificationEntity,
                 teamDataEntity,

@@ -9,7 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
     /// <summary>
     /// The message queue service connected to the "company-communicator-data" queue in Azure service bus.
     /// </summary>
-    public class DataQueue : BaseQueue<DataQueueMessageContent>
+    public class DataQueue : BaseQueue<DataQueueMessageContent>, IDataQueue
     {
         /// <summary>
         /// Queue name of the data queue.

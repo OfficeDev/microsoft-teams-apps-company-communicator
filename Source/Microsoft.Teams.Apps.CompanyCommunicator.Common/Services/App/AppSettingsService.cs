@@ -13,7 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
     /// </summary>
     public class AppSettingsService : IAppSettingsService
     {
-        private readonly AppConfigRepository repository;
+        private readonly IAppConfigRepository repository;
 
         private string serviceUrl;
         private string userAppId;
@@ -22,7 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
         /// Initializes a new instance of the <see cref="AppSettingsService"/> class.
         /// </summary>
         /// <param name="repository">App configuration repository.</param>
-        public AppSettingsService(AppConfigRepository repository)
+        public AppSettingsService(IAppConfigRepository repository)
         {
             this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
@@ -101,6 +101,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services
 
             // Update in-memory cache.
             this.userAppId = userAppId;
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteUserAppIdAsync()
+        {
+            var appId = await this.GetUserAppIdAsync();
+            if (string.IsNullOrEmpty(appId))
+            {
+                // User App id isn't cached.
+                return;
+            }
+
+            var appConfig = new AppConfigEntity()
+            {
+                PartitionKey = AppConfigTableName.SettingsPartition,
+                RowKey = AppConfigTableName.UserAppIdRowKey,
+            };
+
+            await this.repository.DeleteAsync(appConfig);
+
+            // Clear in-memory cache.
+            this.userAppId = null;
         }
     }
 }

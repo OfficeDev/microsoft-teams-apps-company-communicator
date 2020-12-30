@@ -1,7 +1,6 @@
 ﻿// <copyright file="UserDataRepository.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
-
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
 {
     using System;
@@ -13,7 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
     /// <summary>
     /// Repository of the user data stored in the table storage.
     /// </summary>
-    public class UserDataRepository : BaseRepository<UserDataEntity>
+    public class UserDataRepository : BaseRepository<UserDataEntity>, IUserDataRepository
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UserDataRepository"/> class.
@@ -32,10 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
         {
         }
 
-        /// <summary>
-        /// Get delta link.
-        /// </summary>
-        /// <returns>Delta link.</returns>
+        /// <inheritdoc/>
         public async Task<string> GetDeltaLinkAsync()
         {
             try
@@ -52,11 +48,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
             }
         }
 
-        /// <summary>
-        /// Sets delta link.
-        /// </summary>
-        /// <param name="deltaLink">delta link.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task SetDeltaLinkAsync(string deltaLink)
         {
             if (string.IsNullOrEmpty(deltaLink))

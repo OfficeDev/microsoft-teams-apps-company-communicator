@@ -52,6 +52,7 @@ export interface IStatusState {
     message: IMessage;
     loader: boolean;
     page: string;
+    teamId?: string;
 }
 
 interface StatusTaskModuleProps extends RouteComponentProps, WithTranslation { }
@@ -77,11 +78,18 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             message: this.initMessage,
             loader: true,
             page: "ViewStatus",
+            teamId: '',
         };
     }
 
     public componentDidMount() {
         let params = this.props.match.params;
+        microsoftTeams.initialize();
+        microsoftTeams.getContext((context) => {
+            this.setState({
+                teamId: context.teamId,
+            });
+        });
 
         if ('id' in params) {
             let id = params['id'];
@@ -250,10 +258,14 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
     private onExport = async () => {
         let spanner = document.getElementsByClassName("sendingLoader");
         spanner[0].classList.remove("hiddenLoader");
-        await exportNotification(this.state.message.id).then(() => {
-            this.setState({ page: "SuccessPage" })
+        let payload = {
+            id: this.state.message.id,
+            teamId: this.state.teamId
+        };
+        await exportNotification(payload).then(() => {
+            this.setState({ page: "SuccessPage" });
         }).catch(() => {
-            this.setState({ page: "ErrorPage" })
+            this.setState({ page: "ErrorPage" });
         });
     }
 

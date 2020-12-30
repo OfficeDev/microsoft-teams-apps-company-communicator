@@ -40,6 +40,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         public const string ClaimTypeUserId = "http://schemas.microsoft.com/identity/claims/objectidentifier";
 
         /// <summary>
+        /// claim type tenant id.
+        /// </summary>
+        public const string ClaimTypeTenantId = "http://schemas.microsoft.com/identity/claims/tenantid";
+
+        /// <summary>
         /// blob container name.
         /// </summary>
         public const string BlobContainerName = "exportdatablobs";

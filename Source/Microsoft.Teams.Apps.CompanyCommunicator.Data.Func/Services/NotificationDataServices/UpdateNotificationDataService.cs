@@ -15,14 +15,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
     /// </summary>
     public class UpdateNotificationDataService
     {
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UpdateNotificationDataService"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">The notification data repository.</param>
         public UpdateNotificationDataService(
-            NotificationDataRepository notificationDataRepository)
+            INotificationDataRepository notificationDataRepository)
         {
             this.notificationDataRepository = notificationDataRepository;
         }

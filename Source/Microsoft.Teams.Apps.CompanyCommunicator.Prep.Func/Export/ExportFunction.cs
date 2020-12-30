@@ -26,8 +26,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     /// </summary>
     public class ExportFunction
     {
-        private readonly NotificationDataRepository notificationDataRepository;
-        private readonly ExportDataRepository exportDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
+        private readonly IExportDataRepository exportDataRepository;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -37,13 +37,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
         /// <param name="exportDataRepository">Export data repository.</param>
         /// <param name="localizer">Localization service.</param>
         public ExportFunction(
-            NotificationDataRepository notificationDataRepository,
-            ExportDataRepository exportDataRepository,
+            INotificationDataRepository notificationDataRepository,
+            IExportDataRepository exportDataRepository,
             IStringLocalizer<Strings> localizer)
         {
-            this.notificationDataRepository = notificationDataRepository;
-            this.exportDataRepository = exportDataRepository;
-            this.localizer = localizer;
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
+            this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
+            this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
@@ -62,6 +62,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             [DurableClient]
             IDurableOrchestrationClient starter)
         {
+            if (myQueueItem == null)
+            {
+                throw new ArgumentNullException(nameof(myQueueItem));
+            }
+
+            if (starter == null)
+            {
+                throw new ArgumentNullException(nameof(starter));
+            }
+
             var messageContent = JsonConvert.DeserializeObject<ExportMessageQueueContent>(myQueueItem);
             var notificationId = messageContent.NotificationId;
 
