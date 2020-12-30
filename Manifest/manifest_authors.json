@@ -33,6 +33,7 @@
   "bots": [{
     "botId": "<<botId>>",
     "scopes": [
+      "personal",
       "team"
     ],
     "supportsFiles": true,
