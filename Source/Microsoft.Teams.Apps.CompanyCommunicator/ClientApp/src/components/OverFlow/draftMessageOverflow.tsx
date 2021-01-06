@@ -1,12 +1,15 @@
 import React from 'react';
-import { Menu } from '@stardust-ui/react';
-import { getBaseUrl } from '../../configVariables';
-import * as microsoftTeams from "@microsoft/teams-js";
 import { connect } from 'react-redux';
+import { withTranslation, WithTranslation } from "react-i18next";
+import { Menu } from '@stardust-ui/react';
+import * as microsoftTeams from "@microsoft/teams-js";
+
+import { getBaseUrl } from '../../configVariables';
 import { selectMessage, getMessagesList, getDraftMessagesList } from '../../actions';
 import { deleteDraftNotification, duplicateDraftNotification, sendPreview } from '../../apis/messageListApi';
+import { TFunction } from "i18next";
 
-export interface OverflowProps {
+export interface OverflowProps extends WithTranslation {
     message: any;
     styles?: object;
     title?: string;
@@ -32,8 +35,10 @@ export interface ITaskInfo {
 }
 
 class Overflow extends React.Component<OverflowProps, OverflowState> {
+    readonly localize: TFunction;
     constructor(props: OverflowProps) {
         super(props);
+        this.localize = this.props.t;
         this.state = {
             teamsChannelId: '',
             teamsTeamId: '',
@@ -66,19 +71,19 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                     items: [
                         {
                             key: 'send',
-                            content: 'Send',
+                            content: this.localize("Send"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({
                                     menuOpen: false,
                                 });
-                                let url = getBaseUrl() + "/sendconfirmation/" + this.props.message.id;
-                                this.onOpenTaskModule(null, url, "Send confirmation");
+                                let url = getBaseUrl() + "/sendconfirmation/" + this.props.message.id + "?locale={locale}";
+                                this.onOpenTaskModule(null, url, this.localize("SendConfirmation"));
                             }
                         },
                         {
                             key: 'preview',
-                            content: 'Preview in this channel',
+                            content: this.localize("PreviewInThisChannel"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({
@@ -98,19 +103,19 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                         },
                         {
                             key: 'edit',
-                            content: 'Edit',
+                            content: this.localize("Edit"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({
                                     menuOpen: false,
                                 });
-                                let url = getBaseUrl() + "/newmessage/" + this.props.message.id;
-                                this.onOpenTaskModule(null, url, "Edit message");
+                                let url = getBaseUrl() + "/newmessage/" + this.props.message.id + "?locale={locale}";
+                                this.onOpenTaskModule(null, url, this.localize("EditMessage"));
                             }
                         },
                         {
                             key: 'duplicate',
-                            content: 'Duplicate',
+                            content: this.localize("Duplicate"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({
@@ -122,12 +127,8 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                             }
                         },
                         {
-                            key: 'divider',
-                            kind: 'divider',
-                        },
-                        {
                             key: 'delete',
-                            content: 'Delete',
+                            content: this.localize("Delete"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({
@@ -190,4 +191,5 @@ const mapStateToProps = (state: any) => {
     return { messages: state.draftMessagesList, selectedMessage: state.selectedMessage };
 }
 
-export default connect(mapStateToProps, { selectMessage, getDraftMessagesList, getMessagesList })(Overflow);
+const overflowWithTranslation = withTranslation()(Overflow);
+export default connect(mapStateToProps, { selectMessage, getDraftMessagesList, getMessagesList })(overflowWithTranslation);

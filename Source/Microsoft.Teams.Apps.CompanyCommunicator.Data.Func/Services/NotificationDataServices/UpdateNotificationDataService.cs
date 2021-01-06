@@ -15,14 +15,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
     /// </summary>
     public class UpdateNotificationDataService
     {
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UpdateNotificationDataService"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">The notification data repository.</param>
         public UpdateNotificationDataService(
-            NotificationDataRepository notificationDataRepository)
+            INotificationDataRepository notificationDataRepository)
         {
             this.notificationDataRepository = notificationDataRepository;
         }
@@ -63,17 +63,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
                     Failed = failedCount,
                     RecipientNotFound = recipientNotFoundCount,
                     Throttled = throttledCount,
-                    IsCompleted = false,
                 };
 
                 // If it should be marked as complete, set the other values accordingly.
                 if (currentTotalNotificationCount >= totalExpectedNotificationCount
                     || shouldForceCompleteNotification)
                 {
-                    // Make sure it is not still in a preparing state e.g. if something has gone wrong and the
-                    // force complete message has to complete the message.
-                    notificationDataEntityUpdate.IsPreparingToSend = false;
-                    notificationDataEntityUpdate.IsCompleted = true;
+                    // Update the status to Sent.
+                    notificationDataEntityUpdate.Status = NotificationStatus.Sent.ToString();
 
                     if (currentTotalNotificationCount >= totalExpectedNotificationCount)
                     {

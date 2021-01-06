@@ -1,4 +1,7 @@
-export const getInitAdaptiveCard = () => {
+import { TFunction } from "i18next";
+
+export const getInitAdaptiveCard = (t: TFunction) => {
+    const titleTextAsString = t("TitleText");
     return (
         {
             "type": "AdaptiveCard",
@@ -6,7 +9,7 @@ export const getInitAdaptiveCard = () => {
                 {
                     "type": "TextBlock",
                     "weight": "Bolder",
-                    "text": "Title",
+                    "text": titleTextAsString,
                     "size": "ExtraLarge",
                     "wrap": true
                 },
@@ -31,7 +34,7 @@ export const getInitAdaptiveCard = () => {
                     "text": ""
                 }
             ],
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "$schema": "https://adaptivecards.io/schemas/adaptive-card.json",
             "version": "1.0"
         }
     );

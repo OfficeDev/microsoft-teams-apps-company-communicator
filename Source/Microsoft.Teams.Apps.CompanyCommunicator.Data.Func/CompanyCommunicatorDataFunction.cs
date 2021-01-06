@@ -9,6 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices;
@@ -22,10 +23,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     {
         private static readonly double TenMinutes = 10;
 
-        private readonly NotificationDataRepository notificationDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
         private readonly AggregateSentNotificationDataService aggregateSentNotificationDataService;
         private readonly UpdateNotificationDataService updateNotificationDataService;
-        private readonly DataQueue dataQueue;
+        private readonly IDataQueue dataQueue;
         private readonly double firstTenMinutesRequeueMessageDelayInSeconds;
         private readonly double requeueMessageDelayInSeconds;
 
@@ -39,10 +40,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
         /// <param name="dataQueue">The data queue.</param>
         /// <param name="dataQueueMessageOptions">The data queue message options.</param>
         public CompanyCommunicatorDataFunction(
-            NotificationDataRepository notificationDataRepository,
+            INotificationDataRepository notificationDataRepository,
             AggregateSentNotificationDataService aggregateSentNotificationDataService,
             UpdateNotificationDataService updateNotificationDataService,
-            DataQueue dataQueue,
+            IDataQueue dataQueue,
             IOptions<DataQueueMessageOptions> dataQueueMessageOptions)
         {
             this.notificationDataRepository = notificationDataRepository;
@@ -85,7 +86,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 rowKey: messageContent.NotificationId);
 
             // If notification is already marked complete, then there is nothing left to do for the data queue trigger.
-            if (!notificationDataEntity.IsCompleted)
+            if (!notificationDataEntity.IsCompleted())
             {
                 // Get all of the result counts (Successes, Failures, etc.) from the Sent Notification Data.
                 var aggregatedSentNotificationDataResults = await this.aggregateSentNotificationDataService
@@ -102,7 +103,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 
                 // If the notification is still not in a completed state, then requeue the Data Queue trigger
                 // message with a delay in order to aggregate the results again.
-                if (!notificationDataEntityUpdate.IsCompleted)
+                if (!notificationDataEntityUpdate.IsCompleted())
                 {
                     // Requeue data aggregation trigger message with a delay to calculate the totals again.
                     var dataQueueTriggerMessage = new DataQueueMessageContent

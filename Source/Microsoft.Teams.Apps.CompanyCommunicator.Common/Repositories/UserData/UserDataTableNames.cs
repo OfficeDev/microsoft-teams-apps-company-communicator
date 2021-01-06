@@ -18,5 +18,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData
         /// Users data partition key name.
         /// </summary>
         public static readonly string UserDataPartition = "UserData";
+
+        /// <summary>
+        /// Users sync data partition.
+        /// </summary>
+        public static readonly string UsersSyncDataPartition = "UsersSyncData";
+
+        /// <summary>
+        /// All users delta link row key.
+        /// </summary>
+        public static readonly string AllUsersDeltaLinkRowKey = "AllUsersDeltaLink";
+
+        /// <summary>
+        /// Authors data partition key name.
+        /// </summary>
+        public static readonly string AuthorDataPartition = "AuthorData";
     }
 }

@@ -13,7 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     /// <summary>
     /// Repository of the notification data in the table storage.
     /// </summary>
-    public class NotificationDataRepository : BaseRepository<NotificationDataEntity>
+    public class NotificationDataRepository : BaseRepository<NotificationDataEntity>, INotificationDataRepository
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationDataRepository"/> class.
@@ -30,20 +30,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                   storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
                   tableName: NotificationDataTableNames.TableName,
                   defaultPartitionKey: NotificationDataTableNames.DraftNotificationsPartition,
-                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
             this.TableRowKeyGenerator = tableRowKeyGenerator;
         }
 
-        /// <summary>
-        /// Gets table row key generator.
-        /// </summary>
+        /// <inheritdoc/>
         public TableRowKeyGenerator TableRowKeyGenerator { get; }
 
-        /// <summary>
-        /// Get all draft notification entities from the table storage.
-        /// </summary>
-        /// <returns>All draft notification entities.</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<NotificationDataEntity>> GetAllDraftNotificationsAsync()
         {
             var result = await this.GetAllAsync(NotificationDataTableNames.DraftNotificationsPartition);
@@ -51,10 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             return result;
         }
 
-        /// <summary>
-        /// Get the top 25 most recently sent notification entities from the table storage.
-        /// </summary>
-        /// <returns>The top 25 most recently sent notification entities.</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<NotificationDataEntity>> GetMostRecentSentNotificationsAsync()
         {
             var result = await this.GetAllAsync(NotificationDataTableNames.SentNotificationsPartition, 25);
@@ -62,11 +54,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             return result;
         }
 
-        /// <summary>
-        /// Move a draft notification from draft to sent partition.
-        /// </summary>
-        /// <param name="draftNotificationEntity">The draft notification instance to be moved to the sent partition.</param>
-        /// <returns>The new SentNotification ID.</returns>
+        /// <inheritdoc/>
         public async Task<string> MoveDraftToSentPartitionAsync(NotificationDataEntity draftNotificationEntity)
         {
             try
@@ -103,9 +91,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Failed = 0,
                     Throttled = 0,
                     TotalMessageCount = draftNotificationEntity.TotalMessageCount,
-                    IsCompleted = false,
                     SendingStartedDate = DateTime.UtcNow,
-                    IsPreparingToSend = true,
+                    Status = NotificationStatus.Queued.ToString(),
                 };
                 await this.CreateOrUpdateAsync(sentNotificationEntity);
 
@@ -121,12 +108,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             }
         }
 
-        /// <summary>
-        /// Duplicate an existing draft notification.
-        /// </summary>
-        /// <param name="notificationEntity">The notification entity to be duplicated.</param>
-        /// <param name="createdBy">Created by.</param>
-        /// <returns>A task that represents the work queued to execute.</returns>
+        /// <inheritdoc/>
         public async Task DuplicateDraftNotificationAsync(
             NotificationDataEntity notificationEntity,
             string createdBy)
@@ -141,7 +123,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     PartitionKey = NotificationDataTableNames.DraftNotificationsPartition,
                     RowKey = newId,
                     Id = newId,
-                    Title = notificationEntity.Title + " (copy)",
+                    Title = notificationEntity.Title,
                     ImageLink = notificationEntity.ImageLink,
                     Summary = notificationEntity.Summary,
                     Author = notificationEntity.Author,
@@ -165,12 +147,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             }
         }
 
-        /// <summary>
-        /// Save exception error message in a notification data entity.
-        /// </summary>
-        /// <param name="notificationDataEntityId">Notification data entity id.</param>
-        /// <param name="errorMessage">Error message.</param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        /// <inheritdoc/>
+        public async Task UpdateNotificationStatusAsync(string notificationId, NotificationStatus status)
+        {
+            var notificationDataEntity = await this.GetAsync(
+                NotificationDataTableNames.SentNotificationsPartition,
+                notificationId);
+
+            if (notificationDataEntity != null)
+            {
+                notificationDataEntity.Status = status.ToString();
+                await this.CreateOrUpdateAsync(notificationDataEntity);
+            }
+        }
+
+        /// <inheritdoc/>
         public async Task SaveExceptionInNotificationDataEntityAsync(
             string notificationDataEntityId,
             string errorMessage)
@@ -182,19 +173,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             {
                 notificationDataEntity.ErrorMessage =
                     this.AppendNewLine(notificationDataEntity.ErrorMessage, errorMessage);
+                notificationDataEntity.Status = NotificationStatus.Failed.ToString();
 
-                notificationDataEntity.IsCompleted = true;
+                // Set the end date as current date.
+                notificationDataEntity.SentDate = DateTime.UtcNow;
 
                 await this.CreateOrUpdateAsync(notificationDataEntity);
             }
         }
 
-        /// <summary>
-        /// Save warning message in a notification data entity.
-        /// </summary>
-        /// <param name="notificationDataEntityId">Notification data entity id.</param>
-        /// <param name="warningMessage">Warning message to be saved.</param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task SaveWarningInNotificationDataEntityAsync(
             string notificationDataEntityId,
             string warningMessage)
@@ -208,7 +196,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 {
                     notificationDataEntity.WarningMessage =
                         this.AppendNewLine(notificationDataEntity.WarningMessage, warningMessage);
-
                     await this.CreateOrUpdateAsync(notificationDataEntity);
                 }
             }

@@ -11,7 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     /// <summary>
     /// Repository for the entity that holds meta-data for all sending operations in the table storage.
     /// </summary>
-    public class GlobalSendingNotificationDataRepository : BaseRepository<GlobalSendingNotificationDataEntity>
+    public class GlobalSendingNotificationDataRepository : BaseRepository<GlobalSendingNotificationDataEntity>, IGlobalSendingNotificationDataRepository
     {
         private static readonly string GlobalSendingNotificationDataRowKey = "GlobalSendingNotificationData";
 
@@ -28,14 +28,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                   storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
                   tableName: NotificationDataTableNames.TableName,
                   defaultPartitionKey: NotificationDataTableNames.GlobalSendingNotificationDataPartition,
-                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
         }
 
-        /// <summary>
-        /// Gets the entity that holds meta-data for all sending operations.
-        /// </summary>
-        /// <returns>The Global Sending Notification Data Entity.</returns>
+        /// <inheritdoc/>
         public async Task<GlobalSendingNotificationDataEntity> GetGlobalSendingNotificationDataEntityAsync()
         {
             return await this.GetAsync(
@@ -43,13 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 GlobalSendingNotificationDataRepository.GlobalSendingNotificationDataRowKey);
         }
 
-        /// <summary>
-        /// Insert or merges the entity that holds meta-data for all sending operations. Partition Key and Row Key do not need to be
-        /// set on the incoming entity.
-        /// </summary>
-        /// <param name="globalSendingNotificationDataEntity">Entity that holds meta-data for all sending operations. Partition Key and
-        /// Row Key do not need to be set.</param>
-        /// <returns>The Task.</returns>
+        /// <inheritdoc/>
         public async Task SetGlobalSendingNotificationDataEntityAsync(GlobalSendingNotificationDataEntity globalSendingNotificationDataEntity)
         {
             globalSendingNotificationDataEntity.PartitionKey = NotificationDataTableNames.GlobalSendingNotificationDataPartition;

@@ -1,15 +1,19 @@
 {
   "name": "company-communicator",
-  "version": "2.0.0",
+  "version": "4.0.0",
   "private": true,
   "dependencies": {
     "@microsoft/teams-js": "^1.4.2",
-    "@stardust-ui/react": "^0.34.0",
+    "@stardust-ui/react": "^0.40.7",
     "adaptivecards": "^1.2.0",
     "axios": "^0.19.0",
     "color-hash": "^1.0.3",
     "faker": "^4.1.0",
     "font-awesome": "^4.7.0",
+    "i18next": "^19.5.1",
+    "i18next-browser-languagedetector": "^5.0.0",
+    "i18next-http-backend": "^1.0.15",
+    "moment": "2.24.0",
     "msteams-ui-components-react": "^0.8.1",
     "msteams-ui-icons-react": "^0.4.1",
     "node-sass": "^4.14.1",
@@ -17,9 +21,10 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-highlight-words": "^0.16.0",
+    "react-i18next": "^11.7.0",
     "react-redux": "^7.1.0",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^3.4.3",
+    "react-scripts": "^3.4.4",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "typescript": "3.5.1",
@@ -58,6 +63,8 @@
     "@types/react-highlight-words": "^0.16.0",
     "@types/react-redux": "^7.1.1",
     "@types/react-router-dom": "^4.3.3",
-    "@types/redux": "^3.6.0"
+    "@types/redux": "^3.6.0",
+    "tslint": "^5.20.0",
+    "tslint-microsoft-contrib": "6.2.0"
   }
 }

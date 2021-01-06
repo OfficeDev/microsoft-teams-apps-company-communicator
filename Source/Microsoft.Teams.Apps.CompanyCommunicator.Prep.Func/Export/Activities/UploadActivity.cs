@@ -16,10 +16,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using Microsoft.Azure.Storage.RetryPolicies;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+    using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Mappers;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
@@ -31,18 +34,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     {
         private readonly string storageConnectionString;
         private readonly IDataStreamFacade userDataStream;
+        private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UploadActivity"/> class.
         /// </summary>
         /// <param name="repositoryOptions">the repository options.</param>
         /// <param name="userDataStream">the user data stream.</param>
+        /// <param name="localizer">Localization service.</param>
         public UploadActivity(
             IOptions<RepositoryOptions> repositoryOptions,
-            IDataStreamFacade userDataStream)
+            IDataStreamFacade userDataStream,
+            IStringLocalizer<Strings> localizer)
         {
             this.storageConnectionString = repositoryOptions.Value.StorageAccountConnectionString;
             this.userDataStream = userDataStream;
+            this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         private TimeSpan BackOffPeriod { get; set; } = TimeSpan.FromSeconds(3);
@@ -59,12 +66,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
             IDurableOrchestrationContext context,
-            (NotificationDataEntity sentNotificationDataEntity, MetaData metaData, string fileName) uploadData,
+            (NotificationDataEntity sentNotificationDataEntity, Metadata metadata, string fileName) uploadData,
             ILogger log)
         {
             await context.CallActivityWithRetryAsync(
               nameof(UploadActivity.UploadActivityAsync),
-              ActivitySettings.CommonActivityRetryOptions,
+              FunctionSettings.DefaultRetryOptions,
               uploadData);
         }
 
@@ -75,17 +82,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(UploadActivityAsync))]
         public async Task UploadActivityAsync(
-            [ActivityTrigger](NotificationDataEntity sentNotificationDataEntity, MetaData metaData, string fileName) uploadData)
+            [ActivityTrigger] (NotificationDataEntity sentNotificationDataEntity, Metadata metadata, string fileName) uploadData)
         {
             CloudStorageAccount storage = CloudStorageAccount.Parse(this.storageConnectionString);
             CloudBlobClient client = storage.CreateCloudBlobClient();
             CloudBlobContainer container = client.GetContainerReference(Common.Constants.BlobContainerName);
             await container.CreateIfNotExistsAsync();
 
-            // Set the permissions so the blobs are public.
+            // Set the permissions so the blobs are private.
             BlobContainerPermissions permissions = new BlobContainerPermissions
             {
-                PublicAccess = BlobContainerPublicAccessType.Blob,
+                PublicAccess = BlobContainerPublicAccessType.Off,
             };
             await container.SetPermissionsAsync(permissions);
             CloudBlockBlob blob = container.GetBlockBlobReference(uploadData.fileName);
@@ -100,34 +107,42 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             using var archive = new ZipArchive(memorystream, ZipArchiveMode.Create);
 
             // metadata CSV creation.
-            var metadataFile = archive.CreateEntry("Metadata.csv", CompressionLevel.Optimal);
+            var metadataFileName = string.Concat(this.localizer.GetString("FileName_Metadata"), ".csv");
+            var metadataFile = archive.CreateEntry(metadataFileName, CompressionLevel.Optimal);
             using (var entryStream = metadataFile.Open())
-            using (var writer = new StreamWriter(entryStream))
+            using (var writer = new StreamWriter(entryStream, System.Text.Encoding.UTF8))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                csv.WriteHeader(typeof(MetaData));
+                var metadataMap = new MetadataMap(this.localizer);
+                csv.Configuration.RegisterClassMap(metadataMap);
+                csv.WriteHeader(typeof(Metadata));
                 await csv.NextRecordAsync();
-                csv.WriteRecord(uploadData.metaData);
+                csv.WriteRecord(uploadData.metadata);
             }
 
             // message delivery csv creation.
-            var messageDeliveryFile = archive.CreateEntry("Message_Delivery.csv", CompressionLevel.Optimal);
+            var messageDeliveryFileName = string.Concat(this.localizer.GetString("FileName_Message_Delivery"), ".csv");
+            var messageDeliveryFile = archive.CreateEntry(messageDeliveryFileName, CompressionLevel.Optimal);
             using (var entryStream = messageDeliveryFile.Open())
-            using (var writer = new StreamWriter(entryStream))
+            using (var writer = new StreamWriter(entryStream, System.Text.Encoding.UTF8))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 if (uploadData.sentNotificationDataEntity.Teams.Any())
                 {
-                    var userDataStream = this.userDataStream.GetTeamDataStreamAsync(uploadData.sentNotificationDataEntity.Id);
-                    await foreach (var data in userDataStream)
+                    var teamDataMap = new TeamDataMap(this.localizer);
+                    csv.Configuration.RegisterClassMap(teamDataMap);
+                    var teamDataStream = this.userDataStream.GetTeamDataStreamAsync(uploadData.sentNotificationDataEntity.Id);
+                    await foreach (var data in teamDataStream)
                     {
                         await csv.WriteRecordsAsync(data);
                     }
                 }
                 else
                 {
-                    var teamDataStream = this.userDataStream.GetUserDataStreamAsync(uploadData.sentNotificationDataEntity.Id);
-                    await foreach (var data in teamDataStream)
+                    var userDataMap = new UserDataMap(this.localizer);
+                    csv.Configuration.RegisterClassMap(userDataMap);
+                    var userDataStream = this.userDataStream.GetUserDataStreamAsync(uploadData.sentNotificationDataEntity.Id);
+                    await foreach (var data in userDataStream)
                     {
                         await csv.WriteRecordsAsync(data);
                     }

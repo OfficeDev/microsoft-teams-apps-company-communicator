@@ -1,0 +1,41 @@
+language: csharp
+dist: bionic
+sudo: false
+env:
+  global:
+    - ORG="OfficeDev"
+    - REPO_SOURCE="microsoft-teams-company-communicator-app"
+    - REPO_DEST="${REPO_SOURCE}.wiki"
+    - GH_REPO_DEST="github.com/${ORG}/${REPO_DEST}.git"
+    - GH_REPO_CONSOLIDATE="github.com/${ORG}/${REPO_SOURCE}.git"
+install: skip
+stages:
+  - name: WikiUpdate
+jobs:
+  include:
+    - stage: WikiUpdate
+      if: (branch = master) AND (type = push)
+      script:
+        - rm -rf ${REPO_SOURCE}
+        - rm -rf ${REPO_DEST}
+        # Clone repositories
+        - git clone https://${GH_REPO_DEST}
+        - git clone https://${GH_REPO_CONSOLIDATE}
+        # Update wiki repository with wiki folder contents
+        - yes | cp -rf ${REPO_SOURCE}/Wiki/* ${REPO_DEST}/
+        - cd ${REPO_DEST}
+        # Terminate Travis CI build when no changes detected
+        - |
+          if git diff-index --quiet HEAD && [ ! -n "$(git status -s)" ]; then 
+            set +e 
+            pkill -9 -P $$ &> /dev/null || true 
+            exit 0
+          else 
+            git config user.email ${EMAIL}
+            git config user.name ${USER}
+            git status
+            git add .
+            git commit -m "${REPO_SOURCE} Wiki Update | Travis CI build number $TRAVIS_BUILD_NUMBER"
+            git remote add origin-wiki "https://${USER}:${GITHUB_TOKEN}@${GH_REPO_DEST}"
+            git push origin-wiki master
+          fi

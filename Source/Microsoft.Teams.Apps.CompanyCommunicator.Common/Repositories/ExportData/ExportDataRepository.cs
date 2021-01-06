@@ -11,7 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportDat
     /// <summary>
     /// Repository of the export data stored in the table storage.
     /// </summary>
-    public class ExportDataRepository : BaseRepository<ExportDataEntity>
+    public class ExportDataRepository : BaseRepository<ExportDataEntity>, IExportDataRepository
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportDataRepository"/> class.
@@ -26,17 +26,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportDat
                   storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
                   tableName: ExportDataTableName.TableName,
                   defaultPartitionKey: ExportDataTableName.DefaultPartition,
-                  isItExpectedThatTableAlreadyExists: repositoryOptions.Value.IsItExpectedThatTableAlreadyExists)
+                  ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
         }
 
-        /// <summary>
-        /// This method ensures the ExportData table is created in the storage.
-        /// This method should be called before kicking off an Azure function that uses the ExportData table.
-        /// Otherwise the app will crash.
-        /// By design, Azure functions (in this app) do not create a table if it's absent.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task EnsureExportDataTableExistsAsync()
         {
             var exists = await this.Table.ExistsAsync();

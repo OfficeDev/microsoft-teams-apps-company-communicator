@@ -1,0 +1,98 @@
+{
+  "subscriptionId": {
+    "Value": "<<value>>",
+    "Description": "Azure Subscription ID. All resources in an Azure subscription are billed together."
+  },
+  "subscriptionTenantId": {
+    "Value": "<<value>>",
+    "Description": "Id of the tenant to deploy to (If you are not sure how to get Tenant ID, please check Azure Active Directory in Azure Portal. Under Manage, click Properties. The tenant ID is shown in the Directory ID box). e.g 98f3ece2-3a5a-428b-aa4f-4c41b3f6eef0. Tenant ID is also in the \"Overview\" section\""
+  },
+  "resourceGroupName": {
+    "Value": "<<value>>",
+    "Description": "Resource Group"
+  },
+  "region": {
+    "Value": "<<value>>",
+    "Description": "The Azure region that's right for you and your customers. Not every resource is available in every region."
+  },
+  "baseResourceName": {
+    "Value": "<<value>>",
+    "Description": "The base name to use for the resources that will be provisioned."
+  },
+  "tenantId": {
+    "Value": "<<value>>",
+    "Description": "Tenant Id where the teams application will be installed. If the Azure subscription is in the same tenant, update with \"subscriptionTenantId\" parameter value."
+  },
+  "senderUPNList": {
+    "Value": "<<value>>",
+    "Description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
+  },
+  "isUpgrade": {
+    "Value": "false",
+    "Description": "If this is an upgrade for old version of the app template, then value should be true. Otherwise, false is default (First-time deployment)."
+  },
+  "customDomainOption": {
+    "Value": "Azure Front Door",
+    "Description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs."
+  },
+  "proactivelyInstallUserApp": {
+    "Value": "true",
+    "Description": "If proactive app installation should be enabled. Default is true. If enabled, the application will proactively install the User bot for recipients."
+  },
+  "userAppExternalId": {
+    "Value": "148a66bb-e83d-425a-927d-09f4299a9274",
+    "Description": "User app external ID."
+  },
+  "defaultCulture": {
+    "Value": "en-US",
+    "Description": "Default culture."
+  },
+  "supportedCultures": {
+    "Value": "en-US",
+    "Description": "Comma-delimited list of the supported cultures."
+  },
+  "hostingPlanSku": {
+    "Value": "Standard",
+    "Description": "The pricing tier for the hosting plan. Defaul value: Standard. You may choose between Basic, Standard and Premium."
+  },
+  "hostingPlanSize": {
+    "Value": "1",
+    "Description": "The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value: 1"
+  },
+  "gitRepoUrl": {
+    "Value": "https://github.com/OfficeDev/microsoft-teams-company-communicator-app.git",
+    "Description": "The URL to the GitHub repository to deploy."
+  },
+  "gitBranch": {
+    "Value": "master",
+    "Description": "The branch of the GitHub repository to deploy."
+  },
+  "appDisplayName": {
+    "Value": "Company Communicator",
+    "Description": "The app (and bot) display name."
+  },
+  "appDescription": {
+    "Value": "Broadcast messages to multiple teams and people in one go.",
+    "Description": "The app (and bot) description."
+  },
+  "appIconUrl": {
+    "Value": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-company-communicator-app/master/Manifest/color.png",
+    "Description": "The link to the icon for the app. It must resolve to a PNG file."
+  },
+  "companyName": {
+    "Value": "<<value>>",
+    "Description": "The display name for the company."
+  },
+  "websiteUrl": {
+    "Value": "<<value>>",
+    "Description": "The https:// URL to the company's website. This link should take users to your company or product-specific landing page."
+  },
+  "privacyUrl": {
+    "Value": "<<value>>",
+    "Description": "The https:// URL to the company's privacy policy."
+  },
+  "termsOfUseUrl": {
+    "Value": "<<value>>",
+    "Description": "The https:// URL to the company's terms of use."
+  }
+}

@@ -1,3 +1,4 @@
+import { formatDate } from '../i18n';
 import { getSentNotifications, getDraftNotifications } from '../apis/messageListApi';
 
 type Notification = {
@@ -25,8 +26,8 @@ export const getMessagesList = () => async (dispatch: any) => {
     const response = await getSentNotifications();
     const notificationList: Notification[] = response.data;
     notificationList.forEach(notification => {
-        notification.sendingStartedDate = formatNotificationDate(notification.sendingStartedDate);
-        notification.sentDate = formatNotificationDate(notification.sentDate);
+        notification.sendingStartedDate = formatDate(notification.sendingStartedDate);
+        notification.sentDate = formatDate(notification.sentDate);
     });
     dispatch({ type: 'FETCH_MESSAGES', payload: notificationList });
 };
@@ -35,11 +36,3 @@ export const getDraftMessagesList = () => async (dispatch: any) => {
     const response = await getDraftNotifications();
     dispatch({ type: 'FETCH_DRAFTMESSAGES', payload: response.data });
 };
-
-const formatNotificationDate = (notificationDate: string) => {
-    if (notificationDate) {
-        notificationDate = (new Date(notificationDate)).toLocaleString(navigator.language, { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
-        notificationDate = notificationDate.replace(',', '\xa0\xa0');
-    }
-    return notificationDate;
-}

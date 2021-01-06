@@ -1,4 +1,4 @@
-﻿import ColorHash from "color-hash";
+import ColorHash from "color-hash";
 
 export class ImageUtil {
 

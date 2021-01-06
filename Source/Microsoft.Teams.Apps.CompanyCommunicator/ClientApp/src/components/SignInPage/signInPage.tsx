@@ -1,11 +1,14 @@
 import React from "react";
 import { RouteComponentProps } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { Text, Button } from "@stardust-ui/react";
 import * as microsoftTeams from "@microsoft/teams-js";
 import "./signInPage.scss";
+import i18n from "../../i18n";
 
 const SignInPage: React.FunctionComponent<RouteComponentProps> = props => {
-  const errorMessage = "Please sign in to continue.";
+  const { t } = useTranslation();
+  const errorMessage = t("SignInPromptMessage");
 
   function onSignIn() {
     microsoftTeams.authentication.authenticate({
@@ -16,7 +19,7 @@ const SignInPage: React.FunctionComponent<RouteComponentProps> = props => {
       },
       failureCallback: (reason) => {
         console.log("Login failed: " + reason);
-        window.location.href = "/errorpage";
+        window.location.href = `/errorpage?locale=${i18n.language}`;
       }
     });
   }
@@ -28,7 +31,7 @@ const SignInPage: React.FunctionComponent<RouteComponentProps> = props => {
         size="medium"
       />
       <div className="space"></div>
-      <Button content="Sign in" primary className="sign-in-button" onClick={onSignIn} />
+      <Button content={t("SignIn")} primary className="sign-in-button" onClick={onSignIn} />
     </div>
   );
 };

@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph.Groups
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
     using System;
     using System.Collections.Generic;
@@ -14,7 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     /// <summary>
     /// Groups Service.
     /// </summary>
-    public class GroupsService : IGroupsService
+    internal class GroupsService : IGroupsService
     {
         private readonly IGraphServiceClient graphServiceClient;
 
@@ -22,9 +22,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// Initializes a new instance of the <see cref="GroupsService"/> class.
         /// </summary>
         /// <param name="graphServiceClient">graph service client.</param>
-        public GroupsService(IGraphServiceClient graphServiceClient)
+        internal GroupsService(IGraphServiceClient graphServiceClient)
         {
-            this.graphServiceClient = graphServiceClient;
+            this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
         }
 
         private int MaxResultCount { get; set; } = 25;
@@ -61,7 +61,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             var groups = this.GetByIdsAsync(groupIds);
             await foreach (var group in groups)
             {
-                if (group.Visibility.IsHiddenMembership())
+                if (group.IsHiddenMembership())
                 {
                     return true;
                 }
@@ -101,13 +101,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             }
 
             var groupList = groupsPaged.CurrentPage.
-                                        Where(group => !group.Visibility.IsHiddenMembership()).
+                                        Where(group => !group.IsHiddenMembership()).
                                         ToList();
             while (groupsPaged.NextPageRequest != null && groupList.Count() < resultCount)
             {
                 groupsPaged = await groupsPaged.NextPageRequest.GetAsync();
                 groupList.AddRange(groupsPaged.CurrentPage.
-                          Where(group => !group.Visibility.IsHiddenMembership()));
+                          Where(group => !group.IsHiddenMembership()));
             }
 
             return groupList.Take(resultCount).ToList();

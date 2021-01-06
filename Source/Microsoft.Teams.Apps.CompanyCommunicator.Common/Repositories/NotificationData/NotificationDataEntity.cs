@@ -175,6 +175,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
 
         /// <summary>
         /// Gets or sets a value indicating whether the sending process is completed.
+        /// [DEPRECATED - kept for backward compatibility].
         /// </summary>
         public bool IsCompleted { get; set; }
 
@@ -184,8 +185,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public int TotalMessageCount { get; set; }
 
         /// <summary>
-        /// Gets or sets the DateTime the notification's sending was started - this means when
-        /// it was passed to the prep queue for preparation for sending.
+        /// Gets or sets the DateTime the notification's was queued to be sent.
         /// </summary>
         public DateTime? SendingStartedDate { get; set; }
 
@@ -205,7 +205,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
 
         /// <summary>
         /// Gets or sets a value indicating whether the notification is in the "preparing to send" state.
+        /// [DEPRECATED - kept for backward compatibility].
         /// </summary>
         public bool IsPreparingToSend { get; set; }
+
+        /// <summary>
+        /// Gets or sets notification status.
+        /// </summary>
+        public string Status { get; set; }
     }
 }

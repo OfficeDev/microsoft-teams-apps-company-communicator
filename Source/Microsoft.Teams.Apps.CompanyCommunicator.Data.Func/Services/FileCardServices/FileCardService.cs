@@ -11,8 +11,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
+    using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Polly;
 
@@ -21,9 +23,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
     /// </summary>
     public class FileCardService : IFileCardService
     {
-        private readonly UserDataRepository userDataRepository;
-        private readonly string microsoftAppId;
+        private readonly IUserDataRepository userDataRepository;
+        private readonly string authorAppId;
         private readonly BotFrameworkHttpAdapter botAdapter;
+        private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileCardService"/> class.
@@ -31,14 +34,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
         /// <param name="botOptions">the bot options.</param>
         /// <param name="botAdapter">the users service.</param>
         /// <param name="userDataRepository">the user data repository.</param>
+        /// <param name="localizer">Localization service.</param>
         public FileCardService(
             IOptions<BotOptions> botOptions,
             BotFrameworkHttpAdapter botAdapter,
-            UserDataRepository userDataRepository)
+            IUserDataRepository userDataRepository,
+            IStringLocalizer<Strings> localizer)
         {
-            this.botAdapter = botAdapter;
-            this.microsoftAppId = botOptions.Value.MicrosoftAppId;
-            this.userDataRepository = userDataRepository;
+            this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
+            var options = botOptions ?? throw new ArgumentNullException(nameof(botOptions));
+            if (string.IsNullOrEmpty(options.Value?.AuthorAppId))
+            {
+                throw new ArgumentException("AuthorAppId setting is missing in the configuration.");
+            }
+
+            this.authorAppId = options.Value.AuthorAppId;
+            this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
+            this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
         /// <summary>
@@ -62,11 +74,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
                     Id = user.ConversationId,
                 },
             };
-            string deleteText = "The link for this download has expired. Export the results again.";
+            string deleteText = this.localizer.GetString("FileCardExpireText");
 
             int maxNumberOfAttempts = 10;
             await this.botAdapter.ContinueConversationAsync(
-               botAppId: this.microsoftAppId,
+               botAppId: this.authorAppId,
                reference: conversationReference,
                callback: async (turnContext, cancellationToken) =>
                {
