@@ -94,7 +94,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <returns>file card response id.</returns>
         [FunctionName(nameof(SendFileCardActivityAsync))]
         public async Task<string> SendFileCardActivityAsync(
-            [ActivityTrigger] (string userId, string notificationId, string fileName) sendData,
+            [ActivityTrigger](string userId, string notificationId, string fileName) sendData,
             ILogger log)
         {
             var user = await this.userDataRepository.GetAsync(UserDataTableNames.AuthorDataPartition, sendData.userId);
