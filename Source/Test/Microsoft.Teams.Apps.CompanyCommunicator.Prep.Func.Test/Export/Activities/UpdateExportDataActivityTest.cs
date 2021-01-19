@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities;
     using Moq;
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Xunit;
 
@@ -24,30 +25,73 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         private readonly Mock<IDurableOrchestrationContext> context = new Mock<IDurableOrchestrationContext>();
 
         /// <summary>
-        /// Constructor test.
-        /// </summary> 
+        /// Constructor test for all parameters.
+        /// </summary>
         [Fact]
-        public void UpdateExportDataActivityConstructorTest()
+        public void CreateInstance_AllParameters_ShouldBeSuccess()
         {
             // Arrange
-            Action action1 = () => new UpdateExportDataActivity(null /* exportDataRepository */);
-            Action action2 = () => new UpdateExportDataActivity(exportDataRepository.Object);
+            Action action = () => new UpdateExportDataActivity(exportDataRepository.Object);
 
             // Act and Assert.
-            action1.Should().Throw<ArgumentNullException>("exportDataRepository is null.");
-            action2.Should().NotThrow();
+            action.Should().NotThrow();
         }
 
         /// <summary>
-        /// Test case to check if the update export data activity is invoked once.
+        /// Constructor test for null parameter.
+        /// </summary> 
+        [Fact]
+        public void CreateInstance_NullParamter_ThrowsArgumentNullException()
+        {
+            // Arrange
+            Action action1 = () => new UpdateExportDataActivity(null /* exportDataRepository */);
+
+            // Act and Assert.
+            action1.Should().Throw<ArgumentNullException>("exportDataRepository is null.");
+        }
+
+        /// <summary>
+        /// Test case to check if activity handles null paramaters.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Theory]
+        [MemberData(nameof(RunParameters))]
+        public async Task RunActivity_NullParameters_ThrowsAgrumentNullException(
+            Mock<IDurableOrchestrationContext> context,
+            ExportDataEntity exportDataEntity)
+        {
+            // Arrange
+            var activityInstance = this.GetUpdateExportDataActivity();
+            var mockContext = context?.Object;
+            // Act
+            Func<Task> task = async () => await activityInstance.RunAsync(mockContext, exportDataEntity, log.Object);
+
+            // Assert
+            await task.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        public static IEnumerable<object[]> RunParameters
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] {  null, new ExportDataEntity() },
+                    new object[] { new Mock<IDurableOrchestrationContext>(), null },
+                };
+            }
+        }
+
+        /// <summary>
+        /// Test case to check CallActivityWithRetryAsync method is invoked once.
         /// </summary>
         /// <returns></returns>
         [Fact]
-        public async Task RunAsyncSuccessTest()
+        public async Task Update_CallExportDataService_ShouldInvokeOnce()
         {
             // Arrange
             var activityInstance = GetUpdateExportDataActivity();
-            ExportDataEntity exportDataEntity = new ExportDataEntity();
+            var exportDataEntity = GetExportDataEntity();
 
             context.Setup(x => x.CallActivityWithRetryAsync<Task>(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<ExportDataEntity>()));
 
@@ -56,66 +100,54 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
 
             // Assert
             await task.Should().NotThrowAsync();
-            context.Verify(x => x.CallActivityWithRetryAsync<Task>(It.Is<string>(x => x.Equals(nameof(UpdateExportDataActivity.UpdateExportDataActivityAsync))), It.IsAny<RetryOptions>(), It.IsAny<ExportDataEntity>()),Times.Once);
-        }
-
-        /// <summary> 
-        /// Test case to check if the create or update export data entity is invoked once.
-        /// </summary>
-        /// <returns></returns>
-        [Fact]
-        public async Task UpdateExportDataActivityAsyncSuccessTest()
-        {
-            // Arrange
-            var activityInstance = GetUpdateExportDataActivity();
-            ExportDataEntity exportDataEntity = new ExportDataEntity() { FileConsentId = "fileConsentId" };
-
-            exportDataRepository.Setup(x => x.CreateOrUpdateAsync(It.IsAny<ExportDataEntity>())).Returns(Task.CompletedTask);
-
-            // Act
-            Func<Task> task = async () => await activityInstance.UpdateExportDataActivityAsync(exportDataEntity);
-
-            // Assert
-            await task.Should().NotThrowAsync();
-            exportDataRepository.Verify(x => x.CreateOrUpdateAsync(It.Is<ExportDataEntity>(x=>x.FileConsentId == exportDataEntity.FileConsentId)), Times.Once);
+            context.Verify(x => x.CallActivityWithRetryAsync<Task>(It.Is<string>(x => x.Equals(nameof(UpdateExportDataActivity.UpdateExportDataActivityAsync))), It.IsAny<RetryOptions>(), It.IsAny<ExportDataEntity>()), Times.Once);
         }
 
         /// <summary>
-        /// UpdateExportDataActivity RunAsync argumentNullException test. 
+        /// Test case to check ArgumentNullException when exportDataEntity argument is null for UpdateExportDataActivityAsync method. 
         /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
-        public async Task UpdateExportDataActivity_RunAsyncNullArgumentTest()
+        public async Task UpdateExportData_NullParameters_ThrowsAgrumentNullException()
         {
             // Arrange
             var activityInstance = this.GetUpdateExportDataActivity();
-            ExportDataEntity exportDataEntity = new ExportDataEntity();
-
-            // Act
-            Func<Task> task1 = async () => await activityInstance.RunAsync(null/*context*/, It.IsAny<ExportDataEntity>(), log.Object);
-            Func<Task> task2 = async () => await activityInstance.RunAsync(context.Object, null/*exportDataEntity*/, log.Object);
-
-            // Assert
-            await task1.Should().ThrowAsync<ArgumentNullException>("context is null");
-            await task2.Should().ThrowAsync<ArgumentNullException>("exportDataEntity is null");
-        }
-
-        /// <summary>
-        /// UpdateExportDataActivityAsync argumentNullException test. 
-        /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns
-        [Fact]
-        public async Task UpdateExportDataActivityAsyncNullArgumentTest()
-        {
-            // Arrange
-            var activityInstance = this.GetUpdateExportDataActivity();
-            ExportDataEntity exportDataEntity = new ExportDataEntity();
 
             // Act
             Func<Task> task = async () => await activityInstance.UpdateExportDataActivityAsync(null /*exportDataEntity*/);
 
             // Assert
             await task.Should().ThrowAsync<ArgumentNullException>("exportDataEntity is null");
+        }
+
+        /// <summary> 
+        /// Test case to check if CreateOrUpdateAsync method is invoked once.
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task ExportData_CreateOrUpdateService_ShouldInvokeOnce()
+        {
+            // Arrange
+            var activityInstance = GetUpdateExportDataActivity();
+            var exportDataEntity = GetExportDataEntity();
+
+            exportDataRepository.Setup(x => x.CreateOrUpdateAsync(It.IsAny<ExportDataEntity>())).Returns(Task.CompletedTask);
+
+            // Act
+            await activityInstance.UpdateExportDataActivityAsync(exportDataEntity);
+
+            // Assert
+            exportDataRepository.Verify(x => x.CreateOrUpdateAsync(It.Is<ExportDataEntity>(x => x.FileConsentId == exportDataEntity.FileConsentId)), Times.Once);
+        }
+
+        private ExportDataEntity GetExportDataEntity()
+        {
+            return new ExportDataEntity()
+            {
+                PartitionKey = "partitionKey",
+                SentDate = DateTime.Now,
+                FileConsentId = "fileConsentId"
+            };
         }
 
         /// <summary>

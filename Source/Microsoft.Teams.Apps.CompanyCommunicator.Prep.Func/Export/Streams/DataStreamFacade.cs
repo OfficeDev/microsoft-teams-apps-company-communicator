@@ -108,7 +108,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     var teamData = new TeamData
                     {
                         Id = sentNotificationDataEntity.RowKey,
-                        Name = team.Name,
+                        Name = team?.Name,
                         DeliveryStatus = this.localizer.GetString(sentNotificationDataEntity.DeliveryStatus),
                         StatusReason = this.GetStatusReason(sentNotificationDataEntity.ErrorMessage, sentNotificationDataEntity.StatusCode.ToString()),
                     };

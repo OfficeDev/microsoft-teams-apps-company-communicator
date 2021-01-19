@@ -15,6 +15,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
     using System.Threading.Tasks;
     using Xunit;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using System.Collections.Generic;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
 
     /// <summary>
     /// ExportFunction test class.
@@ -27,36 +30,79 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
 
         /// <summary>
-        /// Constructor test.
+        /// Constructor test for all parameters.
+        /// </summary>
+        [Fact]
+        public void CreateInstance_AllParameters_ShouldBeSuccess()
+        {
+            // Arrange
+            Action action = () => new ExportFunction(notificationDataRepository.Object, exportDataRepository.Object, localizer.Object);
+
+            // Act and Assert.
+            action.Should().NotThrow();
+        }
+
+        /// <summary>
+        /// Constructor test for null parameters.
         /// </summary> 
         [Fact]
-        public void ExportFunctionConstructorTest()
+        public void CreateInstance_NullParamters_ThrowsArgumentNullException()
         {
             // Arrange
             Action action1 = () => new ExportFunction(null /*notificationDataRepository*/, exportDataRepository.Object, localizer.Object);
             Action action2 = () => new ExportFunction(notificationDataRepository.Object, null /*exportDataRepository*/, localizer.Object);
             Action action3 = () => new ExportFunction(notificationDataRepository.Object, exportDataRepository.Object, null /*localizer*/);
-            Action action4 = () => new ExportFunction(notificationDataRepository.Object, exportDataRepository.Object, localizer.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("notificationDataRepository is null.");
             action2.Should().Throw<ArgumentNullException>("exportDataRepository is null.");
             action3.Should().Throw<ArgumentNullException>("localizer is null.");
-            action4.Should().NotThrow();
         }
 
         /// <summary>
-        /// ExportFunction RunAsyncSuccess test
+        /// Test case to check if activity handles null paramaters.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Theory]
+        [MemberData(nameof(RunParameters))]
+        public async Task RunActivity_NullParameters_ThrowsAgrumentNullException(string myQueueItem, Mock<IDurableOrchestrationClient> starter)
+        {
+            // Arrange
+            var activityInstance = this.GetExportFunction();
+            var mockStarter = starter?.Object;
+
+            // Act
+            Func<Task> task = async () => await activityInstance.Run(myQueueItem, mockStarter);
+
+            // Assert
+            await task.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        public static IEnumerable<object[]> RunParameters
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] {  null, new Mock<IDurableOrchestrationClient>() },
+                    new object[] {  "myQueueItem", null },
+                };
+            }
+        }
+
+        /// <summary>
+        /// Test case to check if StartNewAsync method is called once to start ExportOrchestration.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
-        public async Task ExportFunctionRunSuccessTest()
+        public async Task Export_ForValidData_ShouldInvokeOnce()
         {
             // Arrange
             var activityInstance = GetExportFunction();
             string messageContent = "{\"NotificationId\":\"notificationId\",\"UserId\" : \"userId\"}";
             var notificationdata = new NotificationDataEntity();
             var exportDataEntity = new ExportDataEntity();
+            var instanceId = "instanceId";
 
             notificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
@@ -64,39 +110,41 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
             exportDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(exportDataEntity);
-
-            starter.Setup(x => x.StartNewAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(It.IsAny<string>);
+            starter.Setup(x => x.StartNewAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(instanceId);
 
             // Act
-            Func<Task> task = async () => await activityInstance.Run(messageContent, starter.Object);
+            await activityInstance.Run(messageContent, starter.Object);
 
             // Assert
-            await task.Should().NotThrowAsync();
-            notificationDataRepository.Verify(x => x.GetAsync(It.IsAny<string>(), It.Is<string>(x => x.Equals("notificationId"))), Times.Once());
-            exportDataRepository.Verify(x => x.GetAsync(It.IsAny<string>(), It.Is<string>(x => x.Equals("notificationId"))), Times.Once());
+            starter.Verify(x => x.StartNewAsync(It.Is<string>(x => x.Equals("ExportOrchestrationAsync")), It.IsAny<ExportDataRequirement>()), Times.Once());
         }
 
-
         /// <summary>
-        /// ExportFunction argumentNullException test. 
+        /// Test case to check if StartNewAsync method is never called to start ExportOrchestration.
         /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
-        public async Task ExportFunctionNullArgumentTest()
+        public async Task Export_InvalidData_ShouldInvokeNever()
         {
             // Arrange
-            var activityInstance = this.GetExportFunction();
+            var activityInstance = GetExportFunction();
             string messageContent = "{\"NotificationId\":\"notificationId\",\"UserId\" : \"userId\"}";
+            var exportDataEntity = new ExportDataEntity();
+
+            notificationDataRepository
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(default(NotificationDataEntity)));
+            exportDataRepository
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(exportDataEntity);
+            starter.Setup(x => x.StartNewAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(It.IsAny<string>());
 
             // Act
-            Func<Task> task1 = async () => await activityInstance.Run(null /*messageContent*/, starter.Object);
-            Func<Task> task2 = async () => await activityInstance.Run(messageContent, null /*starter*/);
-            Func<Task> task3 = async () => await activityInstance.Run(null /*messageContent*/, null/*starter*/);
+            await activityInstance.Run(messageContent, starter.Object);
 
             // Assert
-            await task1.Should().ThrowAsync<ArgumentNullException>("messageContent is null");
-            await task2.Should().ThrowAsync<ArgumentNullException>("starter is null");
-            await task3.Should().ThrowAsync<ArgumentNullException>();
+            starter.Verify(x => x.StartNewAsync(It.Is<string>(x => x.Equals("ExportOrchestrationAsync")), It.IsAny<ExportDataRequirement>()), Times.Never());
         }
 
         /// <summary>
