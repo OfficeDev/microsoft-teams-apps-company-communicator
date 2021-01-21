@@ -28,7 +28,7 @@
     "Description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
   },
   "isUpgrade": {
-    "Value": "false",
+    "Value": false,
     "Description": "If this is an upgrade for old version of the app template, then value should be true. Otherwise, false is default (First-time deployment)."
   },
   "customDomainOption": {
@@ -53,7 +53,7 @@
   },
   "hostingPlanSku": {
     "Value": "Standard",
-    "Description": "The pricing tier for the hosting plan. Defaul value: Standard. You may choose between Basic, Standard and Premium."
+    "Description": "The pricing tier for the hosting plan. Default value: Standard. You may choose between Basic, Standard and Premium."
   },
   "hostingPlanSize": {
     "Value": "1",

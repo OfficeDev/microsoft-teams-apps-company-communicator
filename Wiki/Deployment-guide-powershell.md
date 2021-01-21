@@ -70,7 +70,7 @@ To begin, you will need:
 
 ---
 # 2. Update parameters.json file
-- You will find a `paramters.json` file under Deployment folder. Please update all the parameters.
+- You will find a `parameters.json` file under Deployment folder. Please update all the parameters.
 
   ![Powershell deployment guide](images/param_file.png)
 
@@ -100,7 +100,7 @@ To begin, you will need:
     - `proactivelyInstallUserApp`: If proactive app installation should be enabled. Default is true. If enabled, the application will proactively install the User bot for recipients.
     - `userAppExternalId`: Default value is 148a66bb-e83d-425a-927d-09f4299a9274. This is the external Id provided in the User app manifest.
     - `defaultCulture`: By default the application contains en-US resources. You may add/update the resources for other locales and update this configuration if desired.
-    - `hostingPlanSku`: The pricing tier for the hosting plan. Defaul value: Standard. You may choose between Basic, Standard and Premium.
+    - `hostingPlanSku`: The pricing tier for the hosting plan. Default value: Standard. You may choose between Basic, Standard and Premium.
     - `hostingPlanSize`: The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value: 1
     - `gitRepoUrl` - The URL to the GitHub repository to deploy. Default value: [https://github.com/OfficeDev/microsoft-teams-company-communicator-app.git](https://github.com/OfficeDev/microsoft-teams-company-communicator-app.git)
     - `gitBranch` - The branch of the GitHub repository to deploy. Default value: master
