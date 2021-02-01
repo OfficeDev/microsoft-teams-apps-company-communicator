@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     using System;
     using System.Collections.Generic;
     using Microsoft.Azure.Cosmos.Table;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -88,7 +89,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         [IgnoreProperty]
         public IEnumerable<string> Teams
         {
-            get => JsonConvert.DeserializeObject<IEnumerable<string>>(this.TeamsInString);
+            get => JsonConvert.DeserializeObject<IEnumerable<string>>(this.TeamsInString.IsNullOrEmpty() ? "[]" : this.TeamsInString);
             set => this.TeamsInString = JsonConvert.SerializeObject(value);
         }
 
@@ -107,7 +108,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         [IgnoreProperty]
         public IEnumerable<string> Rosters
         {
-            get => JsonConvert.DeserializeObject<IEnumerable<string>>(this.RostersInString);
+            get => JsonConvert.DeserializeObject<IEnumerable<string>>(this.RostersInString.IsNullOrEmpty() ? "[]" : this.RostersInString);
             set => this.RostersInString = JsonConvert.SerializeObject(value);
         }
 
@@ -126,15 +127,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         [IgnoreProperty]
         public IEnumerable<string> Groups
         {
-            get
-            {
-                return JsonConvert.DeserializeObject<IEnumerable<string>>(this.GroupsInString);
-            }
-
-            set
-            {
-                this.GroupsInString = JsonConvert.SerializeObject(value);
-            }
+            get => JsonConvert.DeserializeObject<IEnumerable<string>>(this.GroupsInString.IsNullOrEmpty() ? "[]" : this.GroupsInString);
+            set => this.GroupsInString = JsonConvert.SerializeObject(value);
         }
 
         /// <summary>
