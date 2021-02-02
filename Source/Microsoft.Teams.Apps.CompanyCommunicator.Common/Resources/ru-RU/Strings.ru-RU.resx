@@ -121,16 +121,16 @@
     <value>Обратитесь к ИТ-администратору за разрешением на просмотр этих данных.</value>
   </data>
   <data name="AppNotInstalled" xml:space="preserve">
-    <value>Приложение не установлено.</value>
+    <value>Приложение не установлено</value>
   </data>
   <data name="ColumnName_DeliveryStatus" xml:space="preserve">
-    <value>Состояние доставки</value>
+    <value>Статус доставки</value>
   </data>
   <data name="ColumnName_ExportedBy" xml:space="preserve">
     <value>Экспортировано пользователем</value>
   </data>
   <data name="ColumnName_ExportTimeStamp" xml:space="preserve">
-    <value>Экспорт метки времени</value>
+    <value>Отметка времени экспорта</value>
   </data>
   <data name="ColumnName_MessageTitle" xml:space="preserve">
     <value>Заголовок сообщения</value>
@@ -142,7 +142,7 @@
     <value>Причина состояния</value>
   </data>
   <data name="ColumnName_TeamId" xml:space="preserve">
-    <value>Идентификатор группы</value>
+    <value>Идентификатор команды</value>
   </data>
   <data name="ColumnName_TeamName" xml:space="preserve">
     <value>Имя команды</value>
@@ -206,19 +206,19 @@
     <value>Этот файл содержит экспортированные результаты.</value>
   </data>
   <data name="FileCardExpireText" xml:space="preserve">
-    <value>Срок действия ссылки для этого скачивания истек. Экспортируйте результаты еще раз.</value>
+    <value>Срок действия ссылки для скачивания истек. Экспортируйте результаты еще раз.</value>
   </data>
   <data name="FileName_ExportData" xml:space="preserve">
-    <value>експортдата</value>
+    <value>ExportData</value>
   </data>
   <data name="FileName_Message_Delivery" xml:space="preserve">
     <value>Message_Delivery</value>
   </data>
   <data name="FileName_Metadata" xml:space="preserve">
-    <value>Метаданных</value>
+    <value>Метаданные</value>
   </data>
   <data name="FileReadyText" xml:space="preserve">
-    <value>Файл готов к скачиванию. Копия также доступна в OneDrive.</value>
+    <value>Файл готов к загрузке. Копия также доступна в OneDrive.</value>
   </data>
   <data name="FileUploadErrorText" xml:space="preserve">
     <value>Произошла ошибка. Повторите попытку экспорта результатов.</value>
@@ -227,7 +227,7 @@
     <value>В уведомлении {0} группы в качестве получателей. Не должно превышать {1} групп.</value>
   </data>
   <data name="NumberOfRostersExceededLimitWarningFormat" xml:space="preserve">
-    <value>Уведомление {0} составом участников в качестве его получателей. Оно не должно превышать {1} состава.</value>
+    <value>Количество списков получателей у этого уведомления: {0}. Количество списков не должно превышать {1}.</value>
   </data>
   <data name="NumberOfTeamsExceededLimitWarningFormat" xml:space="preserve">
     <value>Уведомление содержит {0} Teams в качестве его получателей. Не должно превышать {1} Teams.</value>
@@ -236,15 +236,15 @@
     <value>ОК</value>
   </data>
   <data name="PermissionDeclinedText" xml:space="preserve">
-    <value>Разрешение отклонено. Мы не можем продолжить экспорт.</value>
+    <value>Разрешение отклонено. Экспорт не может быть продолжен.</value>
   </data>
   <data name="RecipientNotFound" xml:space="preserve">
     <value>Получатель не найден</value>
   </data>
   <data name="Succeeded" xml:space="preserve">
-    <value>Операция успешно выполнена</value>
+    <value>Успешно</value>
   </data>
   <data name="Throttled" xml:space="preserve">
-    <value>Регулируемых</value>
+    <value>Отрегулировано</value>
   </data>
 </root>

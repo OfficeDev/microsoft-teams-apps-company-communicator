@@ -118,19 +118,19 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AdminConsentError" xml:space="preserve">
-    <value>اتصل بمسؤول تكنولوجيا الاتصال لديك للحصول علي اذن لعرض هذه البيانات.</value>
+    <value>اتصل بمسؤول تكنولوجيا المعلومات لديك للحصول على إذن بعرض هذه البيانات.</value>
   </data>
   <data name="AppNotInstalled" xml:space="preserve">
     <value>التطبيق غير مثبت</value>
   </data>
   <data name="ColumnName_DeliveryStatus" xml:space="preserve">
-    <value>حاله التسليم</value>
+    <value>حالة التسليم</value>
   </data>
   <data name="ColumnName_ExportedBy" xml:space="preserve">
-    <value>تم التصدير بواسطة</value>
+    <value>تمّ التصدير بواسطة</value>
   </data>
   <data name="ColumnName_ExportTimeStamp" xml:space="preserve">
-    <value>تصدير الطابع الزمني</value>
+    <value>الطابع الزمني للتصدير</value>
   </data>
   <data name="ColumnName_MessageTitle" xml:space="preserve">
     <value>عنوان الرسالة</value>
@@ -142,7 +142,7 @@
     <value>سبب الحالة</value>
   </data>
   <data name="ColumnName_TeamId" xml:space="preserve">
-    <value>معرف الفريق</value>
+    <value>معرِّف الفريق</value>
   </data>
   <data name="ColumnName_TeamName" xml:space="preserve">
     <value>اسم الفريق</value>
@@ -151,13 +151,13 @@
     <value>UPN</value>
   </data>
   <data name="ColumnName_UserId" xml:space="preserve">
-    <value>معرّف المستخدم</value>
+    <value>معرِّف المستخدم</value>
   </data>
   <data name="ColumnName_UserName" xml:space="preserve">
     <value>الاسم</value>
   </data>
   <data name="DuplicateText" xml:space="preserve">
-    <value>{0} (نسخه)</value>
+    <value>{0}(نسخ)</value>
   </data>
   <data name="ExportFailureText" xml:space="preserve">
     <value>حدث خطا ما. حاول تصدير النتائج مره أخرى.</value>
@@ -173,7 +173,7 @@
     <comment>{0} - app Id. (GUID).</comment>
   </data>
   <data name="FailedToCreateConversationFormat" xml:space="preserve">
-    <value>فشل إنشاء المحادثة. رسالة الخطا: {0}</value>
+    <value>فشل إنشاء المحادثة. رسالة خطأ: {0}</value>
   </data>
   <data name="FailedToCreateConversationForUserFormat" xml:space="preserve">
     <value>فشل إنشاء محادثه مع مستخدمي الفرق: {0}. استثناء: {1}</value>
@@ -209,13 +209,13 @@
     <value>انتهت صلاحيه الارتباط الخاص بهذا التنزيل. تصدير النتائج مره أخرى.</value>
   </data>
   <data name="FileName_ExportData" xml:space="preserve">
-    <value>اكسبورتداتا</value>
+    <value>بيانات التصدير</value>
   </data>
   <data name="FileName_Message_Delivery" xml:space="preserve">
-    <value>Message_Delivery</value>
+    <value>تسليم_الرسالة</value>
   </data>
   <data name="FileName_Metadata" xml:space="preserve">
-    <value>Metadata</value>
+    <value>بيانات التعريف</value>
   </data>
   <data name="FileReadyText" xml:space="preserve">
     <value>الملف جاهز للتنزيل. تتوفر نسخه أيضا في OneDrive.</value>
@@ -224,13 +224,13 @@
     <value>حدث خطا ما. حاول تصدير النتائج مره أخرى.</value>
   </data>
   <data name="NumberOfGroupsExceededLimitWarningFormat" xml:space="preserve">
-    <value>يحتوي الاعلام علي {0} المجموعات كمستلمين. لا يجب ان يتجاوز {1} المجموعات.</value>
+    <value>يحتوي الإعلام علي {0} مجموعات كمستلمين. لا يجب أن يتجاوز {1} المجموعات.</value>
   </data>
   <data name="NumberOfRostersExceededLimitWarningFormat" xml:space="preserve">
     <value>يحتوي الاعلام علي {0} التقويم كمستلمين. لا يجب ان يتجاوز {1} التقويم.</value>
   </data>
   <data name="NumberOfTeamsExceededLimitWarningFormat" xml:space="preserve">
-    <value>يحتوي الاعلام علي {0} فرق كمستلمين. لا يجب ان يتجاوز {1} الفرق.</value>
+    <value>يحتوي الإعلام علي {0} فرق كمستلمين. لا يجب أن يتجاوز {1} الفرق.</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>موافق</value>
@@ -242,9 +242,9 @@
     <value>لم يتم العثور علي المستلم</value>
   </data>
   <data name="Succeeded" xml:space="preserve">
-    <value>تم بنجاح</value>
+    <value>تمّ بنجاح</value>
   </data>
   <data name="Throttled" xml:space="preserve">
-    <value>موصل</value>
+    <value>مقيّد</value>
   </data>
 </root>

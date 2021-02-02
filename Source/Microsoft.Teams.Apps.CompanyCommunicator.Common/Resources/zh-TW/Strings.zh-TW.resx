@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AdminConsentError" xml:space="preserve">
-    <value>請聯絡您的 IT 管理員，以取得查看此資料的許可權。</value>
+    <value>請連絡您的 IT 系統管理員，以取得檢視資料的權限。</value>
   </data>
   <data name="AppNotInstalled" xml:space="preserve">
     <value>應用程式未安裝</value>
@@ -133,7 +133,7 @@
     <value>匯出時間戳記</value>
   </data>
   <data name="ColumnName_MessageTitle" xml:space="preserve">
-    <value>訊息標題</value>
+    <value>郵件標題</value>
   </data>
   <data name="ColumnName_SentTimeStamp" xml:space="preserve">
     <value>已傳送時間戳記</value>
@@ -142,7 +142,7 @@
     <value>狀態原因</value>
   </data>
   <data name="ColumnName_TeamId" xml:space="preserve">
-    <value>團隊識別碼</value>
+    <value>小組識別碼</value>
   </data>
   <data name="ColumnName_TeamName" xml:space="preserve">
     <value>團隊名稱</value>
@@ -157,53 +157,53 @@
     <value>名稱</value>
   </data>
   <data name="DuplicateText" xml:space="preserve">
-    <value>{0} (複製) </value>
+    <value>{0} (複製)</value>
   </data>
   <data name="ExportFailureText" xml:space="preserve">
     <value>發生錯誤。請試著再次匯出結果。</value>
   </data>
   <data name="Failed" xml:space="preserve">
-    <value>失敗</value>
+    <value>已失敗</value>
   </data>
   <data name="UserAppNotFound" xml:space="preserve">
     <value>找不到使用者應用程式。請確定使用者應用程式已上傳至您組織的應用程式目錄。</value>
   </data>
   <data name="FailedToFindUserAppInAppCatalog" xml:space="preserve">
-    <value>找不到使用者應用程式：在組織的應用程式目錄中 {0}。</value>
+    <value>找不到使用者應用程式:在組織的應用程式目錄中 {0}。</value>
     <comment>{0} - app Id. (GUID).</comment>
   </data>
   <data name="FailedToCreateConversationFormat" xml:space="preserve">
-    <value>無法建立交談。錯誤訊息： {0}</value>
+    <value>無法建立交談。錯誤訊息: {0}</value>
   </data>
   <data name="FailedToCreateConversationForUserFormat" xml:space="preserve">
-    <value>無法建立與團隊使用者： {0} 的交談。例外狀況： {1}</value>
+    <value>無法建立與團隊使用者: {0} 的交談。例外狀況: {1}</value>
   </data>
   <data name="FailedToCreateConversationThrottledFormt" xml:space="preserve">
-    <value>無法建立交談。要求已節流。錯誤訊息： {0} "</value>
+    <value>無法建立交談。要求已節流。錯誤訊息: {0}"</value>
   </data>
   <data name="FailedToFindTeamInDbFormat" xml:space="preserve">
     <value>在 DB 中找不到團隊 {0}。</value>
   </data>
   <data name="FailedToGetAllUsersFormat" xml:space="preserve">
-    <value>無法同步處理所有使用者。狀態碼： {0} 例外： {1}</value>
+    <value>無法同步處理所有使用者。狀態碼: {0} 例外: {1}</value>
   </data>
   <data name="FailedToGetConversationForUserFormat" xml:space="preserve">
-    <value>無法取得使用者： {0} 的交談 id。狀態碼： {1} 例外： {2}</value>
+    <value>無法取得使用者: {0} 的交談 id。狀態碼: {1} 例外: {2}</value>
   </data>
   <data name="FailedToGetMembersForGroupFormat" xml:space="preserve">
-    <value>無法取得群組 {0} 的成員： {1}</value>
+    <value>無法取得群組 {0} 的成員: {1}</value>
   </data>
   <data name="FailedToGetMembersForTeamFormat" xml:space="preserve">
-    <value>無法取得團隊 {0} 的成員： {1}</value>
+    <value>無法取得團隊 {0} 的成員: {1}</value>
   </data>
   <data name="FailedToInstallApplicationForUserFormat" xml:space="preserve">
-    <value>無法為使用者： {0} 安裝應用程式。例外狀況： {1}</value>
+    <value>無法為使用者: {0} 安裝應用程式。例外狀況: {1}</value>
   </data>
   <data name="FailtoPrepareMessageFormat" xml:space="preserve">
-    <value>無法準備要傳送的訊息： {0}</value>
+    <value>無法準備要傳送的訊息: {0}</value>
   </data>
   <data name="FileCardDescription" xml:space="preserve">
-    <value>此檔案包含您匯出的結果。</value>
+    <value>此檔案包含您已匯出的結果。</value>
   </data>
   <data name="FileCardExpireText" xml:space="preserve">
     <value>此下載的連結已過期。再次匯出結果。</value>
@@ -215,7 +215,7 @@
     <value>Message_Delivery</value>
   </data>
   <data name="FileName_Metadata" xml:space="preserve">
-    <value>元</value>
+    <value>中繼資料</value>
   </data>
   <data name="FileReadyText" xml:space="preserve">
     <value>您的檔案已可供下載。在 OneDrive 中也可以使用複本。</value>
@@ -227,24 +227,24 @@
     <value>通知已 {0} 群組為其收件者。不應該超過 {1} 群組。</value>
   </data>
   <data name="NumberOfRostersExceededLimitWarningFormat" xml:space="preserve">
-    <value>通知已 {0} 名冊為其收件者。不應該超過 {1} 名冊。</value>
+    <value>此通知有 {0} 個名冊做為其收件者。它不應超過 {1} 個名冊。</value>
   </data>
   <data name="NumberOfTeamsExceededLimitWarningFormat" xml:space="preserve">
-    <value>通知已 {0} 團隊成為其收件者。不應該超過 {1} 團隊。</value>
+    <value>此通知有 {0} 個團隊做為其收件者。它不應超過 {1} 個團隊。</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>確定</value>
   </data>
   <data name="PermissionDeclinedText" xml:space="preserve">
-    <value>許可權被拒絕。我們將不會繼續匯出。</value>
+    <value>權限遭到拒絕。我們不會繼續匯出。</value>
   </data>
   <data name="RecipientNotFound" xml:space="preserve">
     <value>找不到收件者</value>
   </data>
   <data name="Succeeded" xml:space="preserve">
-    <value>成功</value>
+    <value>已成功</value>
   </data>
   <data name="Throttled" xml:space="preserve">
-    <value>扼殺</value>
+    <value>已節流</value>
   </data>
 </root>

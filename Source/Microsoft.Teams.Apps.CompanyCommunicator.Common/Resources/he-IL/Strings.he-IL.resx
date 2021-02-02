@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AdminConsentError" xml:space="preserve">
-    <value>פנה למנהל ה-IT לקבלת הרשאה להצגת נתונים אלה.</value>
+    <value>פנה למנהל ה- IT לקבלת הרשאה להצגת נתונים אלה.</value>
   </data>
   <data name="AppNotInstalled" xml:space="preserve">
     <value>האפליקציה לא מותקנת</value>
@@ -127,16 +127,16 @@
     <value>מצב מסירה</value>
   </data>
   <data name="ColumnName_ExportedBy" xml:space="preserve">
-    <value>יוצא על-ידי</value>
+    <value>הייצוא בוצע על-ידי</value>
   </data>
   <data name="ColumnName_ExportTimeStamp" xml:space="preserve">
-    <value>ייצא חותמת זמן</value>
+    <value>ייצוא TimeStamp</value>
   </data>
   <data name="ColumnName_MessageTitle" xml:space="preserve">
-    <value>כותרת ההודעה</value>
+    <value>כותרת הודעה</value>
   </data>
   <data name="ColumnName_SentTimeStamp" xml:space="preserve">
-    <value>חותמת זמן שנשלחה</value>
+    <value>נשלח TimeStamp</value>
   </data>
   <data name="ColumnName_StatusReason" xml:space="preserve">
     <value>סיבת מצב</value>
@@ -242,9 +242,9 @@
     <value>הנמען לא נמצא</value>
   </data>
   <data name="Succeeded" xml:space="preserve">
-    <value>הצליח</value>
+    <value>בוצע בהצלחה</value>
   </data>
   <data name="Throttled" xml:space="preserve">
-    <value>ויסת</value>
+    <value>מווסת</value>
   </data>
 </root>

@@ -127,22 +127,22 @@
     <value>Estado de entrega</value>
   </data>
   <data name="ColumnName_ExportedBy" xml:space="preserve">
-    <value>Exportados por</value>
+    <value>Exportado por</value>
   </data>
   <data name="ColumnName_ExportTimeStamp" xml:space="preserve">
-    <value>Exportar marca de hora</value>
+    <value>Exportar marca de tiempo</value>
   </data>
   <data name="ColumnName_MessageTitle" xml:space="preserve">
     <value>Título del mensaje</value>
   </data>
   <data name="ColumnName_SentTimeStamp" xml:space="preserve">
-    <value>Marca de hora enviada</value>
+    <value>Marca de tiempo enviada</value>
   </data>
   <data name="ColumnName_StatusReason" xml:space="preserve">
     <value>Razón para el estado</value>
   </data>
   <data name="ColumnName_TeamId" xml:space="preserve">
-    <value>IDENTIFICADOR de equipo</value>
+    <value>Id. de equipo</value>
   </data>
   <data name="ColumnName_TeamName" xml:space="preserve">
     <value>Nombre del equipo</value>
@@ -157,7 +157,7 @@
     <value>Nombre</value>
   </data>
   <data name="DuplicateText" xml:space="preserve">
-    <value>{0} (copiar)</value>
+    <value>{0} (copia)</value>
   </data>
   <data name="ExportFailureText" xml:space="preserve">
     <value>Ha habido un problema. Intente volver a exportar los resultados.</value>
@@ -182,7 +182,7 @@
     <value>No se pudo crear la conversación. Se limitó la solicitud. Mensaje de error: {0} "</value>
   </data>
   <data name="FailedToFindTeamInDbFormat" xml:space="preserve">
-    <value>No se pudo encontrar el {0} de equipo en la base de BD.</value>
+    <value>No se pudo encontrar el equipo {0} en la base de datos.</value>
   </data>
   <data name="FailedToGetAllUsersFormat" xml:space="preserve">
     <value>Error al sincronizar todos los usuarios. Código de estado: {0} excepción: {1}</value>
@@ -215,7 +215,7 @@
     <value>Message_Delivery</value>
   </data>
   <data name="FileName_Metadata" xml:space="preserve">
-    <value>Datos</value>
+    <value>Metadatos</value>
   </data>
   <data name="FileReadyText" xml:space="preserve">
     <value>El archivo está listo para descargarse. También hay una copia disponible en OneDrive.</value>
@@ -230,10 +230,10 @@
     <value>La notificación ha {0} las listas como los destinatarios. No debe superar las listas de {1}.</value>
   </data>
   <data name="NumberOfTeamsExceededLimitWarningFormat" xml:space="preserve">
-    <value>La notificación ha {0} Teams como sus destinatarios. No debe superar los equipos de {1}.</value>
+    <value>La notificación tiene {0} equipos como destinatarios. No deben superar los {1} equipos.</value>
   </data>
   <data name="OK" xml:space="preserve">
-    <value>ACEPTAR</value>
+    <value>Aceptar</value>
   </data>
   <data name="PermissionDeclinedText" xml:space="preserve">
     <value>Se rechazó el permiso. No se continuará con la exportación.</value>
@@ -242,7 +242,7 @@
     <value>No se encontró el destinatario</value>
   </data>
   <data name="Succeeded" xml:space="preserve">
-    <value>Correcto</value>
+    <value>Realizado correctamente</value>
   </data>
   <data name="Throttled" xml:space="preserve">
     <value>Limitado</value>

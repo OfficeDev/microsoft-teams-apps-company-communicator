@@ -121,7 +121,7 @@
     <value>이 데이터를 볼 수 있는 권한에 대해서는 IT 관리자에게 문의하세요.</value>
   </data>
   <data name="AppNotInstalled" xml:space="preserve">
-    <value>앱이 설치되지 않습니다.</value>
+    <value>앱이 설치되지 않음</value>
   </data>
   <data name="ColumnName_DeliveryStatus" xml:space="preserve">
     <value>배달 상태</value>
@@ -203,7 +203,7 @@
     <value>메시지를 다음을 위해 준비하지 못했습니다.{0}</value>
   </data>
   <data name="FileCardDescription" xml:space="preserve">
-    <value>이 파일에는 내보내는 결과가 포함되어 있습니다.</value>
+    <value>이 파일에는 내보낸 결과가 포함되어 있습니다.</value>
   </data>
   <data name="FileCardExpireText" xml:space="preserve">
     <value>이 다운로드에 대한 링크가 만료되었습니다. 결과를 다시 내보냅니다.</value>
@@ -230,7 +230,7 @@
     <value>알림에 받는 {0} 메일이 없습니다. {1} 명단을 초과하면 안 됩니다.</value>
   </data>
   <data name="NumberOfTeamsExceededLimitWarningFormat" xml:space="preserve">
-    <value>알림에 {0} 사람을 수신자로. {1} Teams를 초과하면 안 됩니다.</value>
+    <value>알림에 받는 사람으로 {0}개 팀이 있습니다. {1}개 팀을 초과하면 안 됩니다.</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>확인</value>
