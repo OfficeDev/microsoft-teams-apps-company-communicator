@@ -118,95 +118,95 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AdminConsentError" xml:space="preserve">
-    <value>Contact your IT admin for permission to view this data.</value>
+    <value>请与你的 IT 管理员联系，以获取查看此数据的权限。</value>
   </data>
   <data name="AppNotInstalled" xml:space="preserve">
-    <value>App Not Installed</value>
+    <value>未安装应用</value>
   </data>
   <data name="ColumnName_DeliveryStatus" xml:space="preserve">
-    <value>Delivery Status</value>
+    <value>传递状态</value>
   </data>
   <data name="ColumnName_ExportedBy" xml:space="preserve">
-    <value>Exported By</value>
+    <value>导出者</value>
   </data>
   <data name="ColumnName_ExportTimeStamp" xml:space="preserve">
-    <value>Export TimeStamp</value>
+    <value>导出时间戳</value>
   </data>
   <data name="ColumnName_MessageTitle" xml:space="preserve">
-    <value>Message Title</value>
+    <value>消息标题</value>
   </data>
   <data name="ColumnName_SentTimeStamp" xml:space="preserve">
-    <value>Sent TimeStamp</value>
+    <value>已发送时间戳</value>
   </data>
   <data name="ColumnName_StatusReason" xml:space="preserve">
-    <value>Status Reason</value>
+    <value>状态描述</value>
   </data>
   <data name="ColumnName_TeamId" xml:space="preserve">
-    <value>Team ID</value>
+    <value>团队 ID</value>
   </data>
   <data name="ColumnName_TeamName" xml:space="preserve">
-    <value>Team Name</value>
+    <value>团队名称</value>
   </data>
   <data name="ColumnName_Upn" xml:space="preserve">
     <value>UPN</value>
   </data>
   <data name="ColumnName_UserId" xml:space="preserve">
-    <value>User ID</value>
+    <value>用户 ID</value>
   </data>
   <data name="ColumnName_UserName" xml:space="preserve">
-    <value>Name</value>
+    <value>姓名</value>
   </data>
   <data name="DuplicateText" xml:space="preserve">
-    <value>{0} (copy)</value>
+    <value>{0} (复制) </value>
   </data>
   <data name="ExportFailureText" xml:space="preserve">
-    <value>Something went wrong. Try exporting the results again.</value>
+    <value>出现错误。请再次尝试导出结果。</value>
   </data>
   <data name="Failed" xml:space="preserve">
-    <value>Failed</value>
+    <value>失败</value>
   </data>
   <data name="UserAppNotFound" xml:space="preserve">
-    <value>User application not found. Make sure the User app is uploaded to your organization's app catalog.</value>
+    <value>找不到用户应用程序。请确保将用户应用上传到你组织的应用程序目录。</value>
   </data>
   <data name="FailedToFindUserAppInAppCatalog" xml:space="preserve">
-    <value>Failed to find the User application: {0} in the organization's app catalog.</value>
+    <value>找不到用户应用程序：在组织的应用程序目录中 {0}。</value>
     <comment>{0} - app Id. (GUID).</comment>
   </data>
   <data name="FailedToCreateConversationFormat" xml:space="preserve">
-    <value>Failed to create conversation. Error message: {0}</value>
+    <value>未能创建对话。错误消息： {0}</value>
   </data>
   <data name="FailedToCreateConversationForUserFormat" xml:space="preserve">
-    <value>Failed to create conversation with teams user: {0}. Exception: {1}</value>
+    <value>未能创建与团队用户： {0} 的对话。异常： {1}</value>
   </data>
   <data name="FailedToCreateConversationThrottledFormt" xml:space="preserve">
-    <value>Failed to create conversation. Request throttled. Error message: {0}"</value>
+    <value>未能创建对话。请求受到限制。错误消息： {0} "</value>
   </data>
   <data name="FailedToFindTeamInDbFormat" xml:space="preserve">
-    <value>Failed to find the team {0} in DB.</value>
+    <value>未能在 DB 中找到团队 {0}。</value>
   </data>
   <data name="FailedToGetAllUsersFormat" xml:space="preserve">
-    <value>Failed to sync all users. Status Code: {0} Exception: {1}</value>
+    <value>未能同步所有用户。状态代码： {0} 异常： {1}</value>
   </data>
   <data name="FailedToGetConversationForUserFormat" xml:space="preserve">
-    <value>Failed to get conversation id for user: {0}. Status Code: {1} Exception: {2}</value>
+    <value>未能获取用户的会话 id： {0}。状态代码： {1} 异常： {2}</value>
   </data>
   <data name="FailedToGetMembersForGroupFormat" xml:space="preserve">
-    <value>Failed to get members for group {0}: {1}</value>
+    <value>未能获取组 {0} 的成员： {1}</value>
   </data>
   <data name="FailedToGetMembersForTeamFormat" xml:space="preserve">
-    <value>Failed to get members for team {0}: {1}</value>
+    <value>未能获取团队 {0} 的成员： {1}</value>
   </data>
   <data name="FailedToInstallApplicationForUserFormat" xml:space="preserve">
-    <value>Failed to install application for user: {0}. Exception: {1}</value>
+    <value>未能为用户： {0} 安装应用程序。异常： {1}</value>
   </data>
   <data name="FailtoPrepareMessageFormat" xml:space="preserve">
-    <value>Failed to prepare the message for sending:{0}</value>
+    <value>未能准备要发送的邮件： {0}</value>
   </data>
   <data name="FileCardDescription" xml:space="preserve">
-    <value>This file contains the results you exported.</value>
+    <value>此文件包含您导出的结果。</value>
   </data>
   <data name="FileCardExpireText" xml:space="preserve">
-    <value>The link for this download has expired. Export the results again.</value>
+    <value>此下载的链接已过期。再次导出结果。</value>
   </data>
   <data name="FileName_ExportData" xml:space="preserve">
     <value>ExportData</value>
@@ -215,36 +215,36 @@
     <value>Message_Delivery</value>
   </data>
   <data name="FileName_Metadata" xml:space="preserve">
-    <value>Metadata</value>
+    <value>Meta</value>
   </data>
   <data name="FileReadyText" xml:space="preserve">
-    <value>Your file is ready to download. A copy is also available in OneDrive.</value>
+    <value>已准备好下载您的文件。OneDrive 中还提供了一个副本。</value>
   </data>
   <data name="FileUploadErrorText" xml:space="preserve">
-    <value>Something went wrong. Try exporting the results again.</value>
+    <value>出现错误。请再次尝试导出结果。</value>
   </data>
   <data name="NumberOfGroupsExceededLimitWarningFormat" xml:space="preserve">
-    <value>The notification has {0} groups as its recipients. It shouldn't exceed {1} groups.</value>
+    <value>通知已 {0} 组作为其收件人。不应超过 {1} 组。</value>
   </data>
   <data name="NumberOfRostersExceededLimitWarningFormat" xml:space="preserve">
-    <value>The notification has {0} rosters as its recipients. It shouldn't exceed {1} rosters.</value>
+    <value>通知已 {0} 花名册作为其收件人。不应超过 {1} 花名册。</value>
   </data>
   <data name="NumberOfTeamsExceededLimitWarningFormat" xml:space="preserve">
-    <value>The notification has {0} teams as its recipients. It shouldn't exceed {1} teams.</value>
+    <value>通知已 {0} 团队作为其收件人。不应超过 {1} 团队。</value>
   </data>
   <data name="OK" xml:space="preserve">
-    <value>OK</value>
+    <value>确定</value>
   </data>
   <data name="PermissionDeclinedText" xml:space="preserve">
-    <value>Permission declined. We will not proceed with the export.</value>
+    <value>已拒绝权限。我们不会继续导出。</value>
   </data>
   <data name="RecipientNotFound" xml:space="preserve">
-    <value>Recipient Not Found</value>
+    <value>找不到收件人</value>
   </data>
   <data name="Succeeded" xml:space="preserve">
-    <value>Succeeded</value>
+    <value>成功</value>
   </data>
   <data name="Throttled" xml:space="preserve">
-    <value>Throttled</value>
+    <value>调节</value>
   </data>
 </root>
