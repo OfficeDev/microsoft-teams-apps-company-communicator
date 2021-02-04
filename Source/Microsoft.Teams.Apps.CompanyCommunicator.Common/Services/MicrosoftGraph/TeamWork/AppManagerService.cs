@@ -4,35 +4,28 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
-    extern alias BetaLib;
-
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
 
     using Microsoft.Graph;
-    using Beta = BetaLib::Microsoft.Graph;
 
     /// <summary>
     /// Manage Teams Apps for a user or a team.
     /// </summary>
     internal class AppManagerService : IAppManagerService
     {
-        private readonly Beta.IGraphServiceClient betaServiceClient;
-        private readonly IGraphServiceClient serviceClient;
+        private readonly IGraphServiceClient graphServiceClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AppManagerService"/> class.
         /// </summary>
-        /// <param name="betaServiceClient">Beta Graph service client.</param>
-        /// <param name="serviceClient">V1 Graph service client.</param>
+        /// <param name="graphServiceClient">V1 Graph service client.</param>
         internal AppManagerService(
-            Beta.IGraphServiceClient betaServiceClient,
-            IGraphServiceClient serviceClient)
+            IGraphServiceClient graphServiceClient)
         {
-            this.betaServiceClient = betaServiceClient ?? throw new ArgumentNullException(nameof(betaServiceClient));
-            this.serviceClient = serviceClient ?? throw new ArgumentNullException(nameof(serviceClient));
+            this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
         }
 
         /// <inheritdoc/>
@@ -48,7 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            var userScopeTeamsAppInstallation = new Beta.UserScopeTeamsAppInstallation
+            var userScopeTeamsAppInstallation = new UserScopeTeamsAppInstallation
             {
                 AdditionalData = new Dictionary<string, object>()
                 {
@@ -56,7 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 },
             };
 
-            await this.betaServiceClient.Users[userId]
+            await this.graphServiceClient.Users[userId]
                 .Teamwork
                 .InstalledApps
                 .Request()
@@ -85,7 +78,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 },
             };
 
-            await this.serviceClient.Teams[teamId]
+            await this.graphServiceClient.Teams[teamId]
                 .InstalledApps
                 .Request()
                 .WithMaxRetry(GraphConstants.MaxRetry)
@@ -105,7 +98,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            var pagedApps = await this.betaServiceClient.Users[userId]
+            var pagedApps = await this.graphServiceClient.Users[userId]
                 .Teamwork
                 .InstalledApps
                 .Request()
@@ -130,7 +123,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 throw new ArgumentNullException(nameof(teamId));
             }
 
-            var pagedApps = await this.serviceClient.Teams[teamId]
+            var pagedApps = await this.graphServiceClient.Teams[teamId]
                 .InstalledApps
                 .Request()
                 .Expand("teamsApp")
@@ -154,7 +147,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            var collection = await this.betaServiceClient.Users[userId]
+            var collection = await this.graphServiceClient.Users[userId]
                 .Teamwork
                 .InstalledApps
                 .Request()
@@ -179,7 +172,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 throw new ArgumentNullException(nameof(teamId));
             }
 
-            var collection = await this.serviceClient.Teams[teamId]
+            var collection = await this.graphServiceClient.Teams[teamId]
                 .InstalledApps
                 .Request()
                 .Expand("teamsApp")

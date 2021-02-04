@@ -4,8 +4,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
-    extern alias BetaLib;
-
     using System.Net;
     using global::Azure.Storage.Blobs;
     using Microsoft.AspNetCore.Builder;
@@ -42,8 +40,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Localization;
-
-    using Beta = BetaLib::Microsoft.Graph;
 
     /// <summary>
     /// Register services in DI container, and set up middle-wares in the pipeline.
@@ -180,7 +176,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             // Add microsoft graph services.
             services.AddScoped<IAuthenticationProvider, GraphTokenProvider>();
             services.AddScoped<IGraphServiceClient, GraphServiceClient>();
-            services.AddScoped<Beta.IGraphServiceClient, Beta.GraphServiceClient>();
             services.AddScoped<IGraphServiceFactory, GraphServiceFactory>();
             services.AddScoped<IGroupsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupsService());
             services.AddScoped<IAppCatalogService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetAppCatalogService());

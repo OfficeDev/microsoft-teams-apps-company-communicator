@@ -7,8 +7,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 {
-    extern alias BetaLib;
-
     using System;
     using System.Globalization;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
@@ -38,8 +36,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
-
-    using Beta = BetaLib::Microsoft.Graph;
 
     /// <summary>
     /// Register services in DI container of the Azure functions system.
@@ -181,8 +177,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<IGraphServiceClient>(
                 serviceProvider =>
                 new GraphServiceClient(serviceProvider.GetRequiredService<IAuthenticationProvider>()));
-            builder.Services.AddSingleton<Beta.IGraphServiceClient>(
-                sp => new Beta.GraphServiceClient(sp.GetRequiredService<IAuthenticationProvider>()));
 
             // Add Service Factory
             builder.Services.AddSingleton<IGraphServiceFactory, GraphServiceFactory>();

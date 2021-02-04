@@ -4,28 +4,26 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
-    extern alias BetaLib;
-
     using System;
     using System.Linq;
     using System.Threading.Tasks;
 
-    using BetaLib::Microsoft.Graph;
+    using Microsoft.Graph;
 
     /// <summary>
     /// Read information about the apps published in the Teams app store and organization's app catalog.
     /// </summary>
     internal class AppCatalogService : IAppCatalogService
     {
-        private readonly IGraphServiceClient betaServiceClient;
+        private readonly IGraphServiceClient graphServiceClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AppCatalogService"/> class.
         /// </summary>
-        /// <param name="betaServiceClient">Beta Graph service client.</param>
-        internal AppCatalogService(IGraphServiceClient betaServiceClient)
+        /// <param name="graphServiceClient">Graph service client.</param>
+        internal AppCatalogService(IGraphServiceClient graphServiceClient)
         {
-            this.betaServiceClient = betaServiceClient ?? throw new ArgumentNullException(nameof(betaServiceClient));
+            this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
         }
 
         /// <inheritdoc/>
@@ -36,7 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 throw new ArgumentNullException(nameof(externalId));
             }
 
-            var apps = await this.betaServiceClient
+            var apps = await this.graphServiceClient
                 .AppCatalogs
                 .TeamsApps
                 .Request()
