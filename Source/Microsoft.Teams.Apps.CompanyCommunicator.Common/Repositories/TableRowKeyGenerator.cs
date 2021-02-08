@@ -26,7 +26,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// Generates a new row key based off of the current timestamp such that the keys are ordered oldest => most recent.
         /// </summary>
         /// <returns>A new row key.</returns>
-        public string CreateNewKeyOrderingOldestToMostRecent()
+        public virtual string CreateNewKeyOrderingOldestToMostRecent()
         {
             var ticksString = string.Format("{0:D19}", DateTime.UtcNow.Ticks);
 

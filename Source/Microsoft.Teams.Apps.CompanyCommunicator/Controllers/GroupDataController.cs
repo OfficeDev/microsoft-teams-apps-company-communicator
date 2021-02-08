@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -33,8 +34,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             INotificationDataRepository notificationDataRepository,
             IGroupsService groupsService)
         {
-            this.notificationDataRepository = notificationDataRepository;
-            this.groupsService = groupsService;
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
+            this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
         }
 
         /// <summary>

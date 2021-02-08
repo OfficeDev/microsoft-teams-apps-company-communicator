@@ -22,7 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
     /// <summary>
     /// Draft notification preview service.
     /// </summary>
-    public class DraftNotificationPreviewService
+    public class DraftNotificationPreviewService : IDraftNotificationPreviewService
     {
         private static readonly string MsTeamsChannelId = "msteams";
         private static readonly string ChannelConversationType = "channel";
@@ -54,14 +54,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
             this.companyCommunicatorBotAdapter = companyCommunicatorBotAdapter ?? throw new ArgumentNullException(nameof(companyCommunicatorBotAdapter));
         }
 
-        /// <summary>
-        /// Send a preview of a draft notification.
-        /// </summary>
-        /// <param name="draftNotificationEntity">Draft notification entity.</param>
-        /// <param name="teamDataEntity">The team data entity.</param>
-        /// <param name="teamsChannelId">The Teams channel id.</param>
-        /// <returns>It returns HttpStatusCode.OK, if this method triggers the bot service to send the adaptive card successfully.
-        /// It returns HttpStatusCode.TooManyRequests, if the bot service throttled the request to send the adaptive card.</returns>
+        /// <inheritdoc/>
         public async Task<HttpStatusCode> SendPreview(NotificationDataEntity draftNotificationEntity, TeamDataEntity teamDataEntity, string teamsChannelId)
         {
             if (draftNotificationEntity == null)

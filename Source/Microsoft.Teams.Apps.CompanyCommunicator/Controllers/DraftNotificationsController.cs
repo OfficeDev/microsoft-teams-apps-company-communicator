@@ -31,7 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly ITeamDataRepository teamDataRepository;
-        private readonly DraftNotificationPreviewService draftNotificationPreviewService;
+        private readonly IDraftNotificationPreviewService draftNotificationPreviewService;
         private readonly IGroupsService groupsService;
         private readonly IAppSettingsService appSettingsService;
         private readonly IStringLocalizer<Strings> localizer;
@@ -48,7 +48,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public DraftNotificationsController(
             INotificationDataRepository notificationDataRepository,
             ITeamDataRepository teamDataRepository,
-            DraftNotificationPreviewService draftNotificationPreviewService,
+            IDraftNotificationPreviewService draftNotificationPreviewService,
             IAppSettingsService appSettingsService,
             IStringLocalizer<Strings> localizer,
             IGroupsService groupsService)
@@ -69,6 +69,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPost]
         public async Task<ActionResult<string>> CreateDraftNotificationAsync([FromBody] DraftNotification notification)
         {
+            if (notification == null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
+
             if (!notification.Validate(this.localizer, out string errorMessage))
             {
                 return this.BadRequest(errorMessage);
@@ -94,6 +99,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPost("duplicates/{id}")]
         public async Task<IActionResult> DuplicateDraftNotificationAsync(string id)
         {
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
             var notificationEntity = await this.FindNotificationToDuplicate(id);
             if (notificationEntity == null)
             {
@@ -115,6 +125,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateDraftNotificationAsync([FromBody] DraftNotification notification)
         {
+            if (notification == null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
+
             var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
             if (containsHiddenMembership)
             {
@@ -158,6 +173,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDraftNotificationAsync(string id)
         {
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
             var notificationEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.DraftNotificationsPartition,
                 id);
@@ -204,6 +224,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<DraftNotification>> GetDraftNotificationByIdAsync(string id)
         {
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
             var notificationEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.DraftNotificationsPartition,
                 id);
@@ -240,6 +265,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("consentSummaries/{notificationId}")]
         public async Task<ActionResult<DraftNotificationSummaryForConsent>> GetDraftNotificationSummaryForConsentByIdAsync(string notificationId)
         {
+            if (notificationId == null)
+            {
+                throw new ArgumentNullException(nameof(notificationId));
+            }
+
             var notificationEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.DraftNotificationsPartition,
                 notificationId);
