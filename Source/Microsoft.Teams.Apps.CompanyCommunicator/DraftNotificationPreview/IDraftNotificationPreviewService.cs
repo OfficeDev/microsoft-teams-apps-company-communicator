@@ -1,5 +1,5 @@
 ﻿// <copyright file="IDraftNotificationPreviewService.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview

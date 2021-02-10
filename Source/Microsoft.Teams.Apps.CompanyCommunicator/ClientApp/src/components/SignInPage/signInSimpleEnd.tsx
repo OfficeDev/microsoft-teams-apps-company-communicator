@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import React, { useEffect } from "react";
 import * as microsoftTeams from "@microsoft/teams-js";
 

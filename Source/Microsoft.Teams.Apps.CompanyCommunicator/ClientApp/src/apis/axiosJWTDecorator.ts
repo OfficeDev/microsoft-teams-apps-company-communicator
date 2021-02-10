@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 import * as microsoftTeams from "@microsoft/teams-js";
 import i18n from '../i18n';

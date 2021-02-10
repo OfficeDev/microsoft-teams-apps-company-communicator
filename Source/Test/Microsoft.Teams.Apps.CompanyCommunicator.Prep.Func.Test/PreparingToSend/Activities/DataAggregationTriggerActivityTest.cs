@@ -1,22 +1,23 @@
 ﻿// <copyright file="DataAggregationTriggerActivityTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSend.Activities
 {
-    using Xunit;
-    using Moq;
+    using System;
+    using System.Threading.Tasks;
+    using FluentAssertions;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
-    using Microsoft.Extensions.Options;
-    using Microsoft.Extensions.Logging;
-    using System.Threading.Tasks;
-    using System;
-    using FluentAssertions;
+    using Moq;
+    using Xunit;
 
     /// <summary>
-    /// DataAggregationTriggerActivity test class
+    /// DataAggregationTriggerActivity test class.
     /// </summary>
     public class DataAggregationTriggerActivityTest
     {
@@ -32,10 +33,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         public void DataAggregationTriggerActivityConstructorTest()
         {
             // Arrange
-            Action action1 = () => new DataAggregationTriggerActivity(null /*notificationDataRepository*/, dataQueue.Object, Options.Create(new DataQueueMessageOptions()));
-            Action action2 = () => new DataAggregationTriggerActivity(notificationDataRepository.Object, null /*dataQueue*/, Options.Create(new DataQueueMessageOptions()));
-            Action action3 = () => new DataAggregationTriggerActivity(notificationDataRepository.Object, dataQueue.Object, null /*Ioptions<DataQueueMessageOptions>*/);
-            Action action4 = () => new DataAggregationTriggerActivity(notificationDataRepository.Object, dataQueue.Object, Options.Create(new DataQueueMessageOptions() { MessageDelayInSeconds = messageDelayInSeconds }));
+            Action action1 = () => new DataAggregationTriggerActivity(null /*notificationDataRepository*/, this.dataQueue.Object, Options.Create(new DataQueueMessageOptions()));
+            Action action2 = () => new DataAggregationTriggerActivity(this.notificationDataRepository.Object, null /*dataQueue*/, Options.Create(new DataQueueMessageOptions()));
+            Action action3 = () => new DataAggregationTriggerActivity(this.notificationDataRepository.Object, this.dataQueue.Object, null /*Ioptions<DataQueueMessageOptions>*/);
+            Action action4 = () => new DataAggregationTriggerActivity(this.notificationDataRepository.Object, this.dataQueue.Object, Options.Create(new DataQueueMessageOptions() { MessageDelayInSeconds = this.messageDelayInSeconds }));
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("notificationDataRepository is null.");
@@ -43,7 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             action3.Should().Throw<ArgumentNullException>("options is null.");
             action4.Should().NotThrow();
         }
-        
+
         /// <summary>
         /// Test to check update notificatin and send message to data queue.
         /// </summary>
@@ -58,15 +59,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             Mock<ILogger> logger = new Mock<ILogger>();
             NotificationDataEntity notificationData = new NotificationDataEntity()
             {
-                Id = notificationId
+                Id = notificationId,
             };
-            notificationDataRepository
+            this.notificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(notificationData);
-            notificationDataRepository
+            this.notificationDataRepository
                 .Setup(x => x.CreateOrUpdateAsync(It.IsAny<NotificationDataEntity>()))
                 .Returns(Task.CompletedTask);
-            dataQueue
+            this.dataQueue
                 .Setup(x => x.SendDelayedAsync(It.IsAny<DataQueueMessageContent>(), It.IsAny<double>()))
                 .Returns(Task.CompletedTask);
 
@@ -75,33 +76,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync();
-            notificationDataRepository.Verify(x => x.GetAsync(It.IsAny<string>(), It.Is<string>(x => x.Equals(notificationId))), Times.Once());
-            notificationDataRepository.Verify(x => x.CreateOrUpdateAsync(It.Is<NotificationDataEntity>(x=>x.TotalMessageCount == recipientCount)));
-            dataQueue.Verify(x => x.SendDelayedAsync(It.Is<DataQueueMessageContent>(x=>x.NotificationId == notificationId), It.Is<double>(x=>x.Equals(messageDelayInSeconds))));
+            this.notificationDataRepository.Verify(x => x.GetAsync(It.IsAny<string>(), It.Is<string>(x => x.Equals(notificationId))), Times.Once());
+            this.notificationDataRepository.Verify(x => x.CreateOrUpdateAsync(It.Is<NotificationDataEntity>(x => x.TotalMessageCount == recipientCount)));
+            this.dataQueue.Verify(x => x.SendDelayedAsync(It.Is<DataQueueMessageContent>(x => x.NotificationId == notificationId), It.Is<double>(x => x.Equals(this.messageDelayInSeconds))));
         }
 
         /// <summary>
-        /// Update notification was not done as notification data not found in repository for given notificationId. 
+        /// Update notification was not done as notification data not found in repository for given notificationId.
         /// Send message to data queue is success.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
         public async Task DataAggregationTriggerActivityNotificationDataNotFound()
         {
-
             // Arrange
             var dataAggregationTriggerActivity = this.GetDataAggregationTriggerActivity();
             var notificationId = "notificationId1";
             var recipientCount = 1;
             Mock<ILogger> logger = new Mock<ILogger>();
 
-            notificationDataRepository
+            this.notificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(default(NotificationDataEntity)));
-            notificationDataRepository
+            this.notificationDataRepository
                 .Setup(x => x.CreateOrUpdateAsync(It.IsAny<NotificationDataEntity>()))
                 .Returns(Task.CompletedTask);
-            dataQueue
+            this.dataQueue
                 .Setup(x => x.SendDelayedAsync(It.IsAny<DataQueueMessageContent>(), It.IsAny<double>()))
                 .Returns(Task.CompletedTask);
 
@@ -110,13 +110,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync();
-            notificationDataRepository.Verify(x => x.GetAsync(It.IsAny<string>(), It.Is<string>(x => x.Equals(notificationId))), Times.Once());
-            notificationDataRepository.Verify(x => x.CreateOrUpdateAsync(It.Is<NotificationDataEntity>(x => x.TotalMessageCount == recipientCount)), Times.Never());
-            dataQueue.Verify(x => x.SendDelayedAsync(It.Is<DataQueueMessageContent>(x => x.NotificationId == notificationId), It.Is<double>(x => x.Equals(messageDelayInSeconds))));
+            this.notificationDataRepository.Verify(x => x.GetAsync(It.IsAny<string>(), It.Is<string>(x => x.Equals(notificationId))), Times.Once());
+            this.notificationDataRepository.Verify(x => x.CreateOrUpdateAsync(It.Is<NotificationDataEntity>(x => x.TotalMessageCount == recipientCount)), Times.Never());
+            this.dataQueue.Verify(x => x.SendDelayedAsync(It.Is<DataQueueMessageContent>(x => x.NotificationId == notificationId), It.Is<double>(x => x.Equals(this.messageDelayInSeconds))));
         }
 
         /// <summary>
-        /// ArgumentNullException thrown for notificationId is null. 
+        /// ArgumentNullException thrown for notificationId is null.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
@@ -127,7 +127,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             var recipientCount = 2;
 
             // Act
-            Func<Task> task = async () => await dataAggregationTriggerActivity.RunAsync((null /*notificationId*/, recipientCount), logger.Object);
+            Func<Task> task = async () => await dataAggregationTriggerActivity.RunAsync((null /*notificationId*/, recipientCount), this.logger.Object);
 
             // Assert
             await task.Should().ThrowAsync<ArgumentNullException>("notificationId is null");
@@ -147,23 +147,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             var recipientCountNegative = -1;
 
             // Act
-            Func<Task> task1 = async () => await dataAggregationTriggerActivity.RunAsync((notificationId, recipientCountZero), logger.Object);
-            Func<Task> task2 = async () => await dataAggregationTriggerActivity.RunAsync((notificationId, recipientCountNegative), logger.Object);
-            
+            Func<Task> task1 = async () => await dataAggregationTriggerActivity.RunAsync((notificationId, recipientCountZero), this.logger.Object);
+            Func<Task> task2 = async () => await dataAggregationTriggerActivity.RunAsync((notificationId, recipientCountNegative), this.logger.Object);
+
             // Assert
             await task1.Should().ThrowAsync<ArgumentOutOfRangeException>($"Recipient count should be > 0. Value: {recipientCountZero}");
             await task2.Should().ThrowAsync<ArgumentOutOfRangeException>($"Recipient count should be > 0. Value: {recipientCountNegative}");
         }
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="DataAggregationTriggerActivity"/> class.
         /// </summary>
-        /// <returns>return the instance of DataAggregationTriggerActivity</returns>
+        /// <returns>return the instance of DataAggregationTriggerActivity.</returns>
         private DataAggregationTriggerActivity GetDataAggregationTriggerActivity()
         {
-            return new DataAggregationTriggerActivity(notificationDataRepository.Object, dataQueue.Object, Options.Create(new DataQueueMessageOptions() { MessageDelayInSeconds = messageDelayInSeconds }));
+            return new DataAggregationTriggerActivity(this.notificationDataRepository.Object, this.dataQueue.Object, Options.Create(new DataQueueMessageOptions() { MessageDelayInSeconds = this.messageDelayInSeconds }));
         }
     }
 }
-

@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
-    <PackageReference Include="Microsoft.Graph" Version="3.12.0" />
-    <PackageReference Include="Microsoft.Graph.Beta" Version="0.22.0-preview" />
+    <PackageReference Include="Microsoft.Graph" Version="3.22.0" />
+    <PackageReference Include="Microsoft.Graph.Core" Version="1.24.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="Moq" Version="4.16.0" />
     <PackageReference Include="xunit" Version="2.4.0" />
@@ -21,13 +21,5 @@
     <ProjectReference Include="..\Microsoft.Teams.Apps.CompanyCommunicator\Microsoft.Teams.Apps.CompanyCommunicator.csproj" />
   </ItemGroup>
 
-	<!-- Temporary work around until we upgrade to 3.1.401 sdk.-->
-	<Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
-		<ItemGroup>
-			<ReferencePath Condition="'%(FileName)' == 'Microsoft.Graph.Beta'">
-				<Aliases>BetaLib</Aliases>
-			</ReferencePath>
-		</ItemGroup>
-	</Target>
 
 </Project>

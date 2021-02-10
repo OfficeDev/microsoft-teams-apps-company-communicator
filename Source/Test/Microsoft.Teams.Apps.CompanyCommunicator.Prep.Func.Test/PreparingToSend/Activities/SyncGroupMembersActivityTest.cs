@@ -1,9 +1,14 @@
 ﻿// <copyright file="SyncGroupMembersActivityTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSend.Activities
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
     using FluentAssertions;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
@@ -15,12 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Moq;
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Xunit;
-    using System.Linq;
-
 
     /// <summary>
     /// SyncGroupMembersActivity test class.
@@ -36,17 +36,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
         /// <summary>
         /// Constructor tests.
-        /// </summary> 
+        /// </summary>
         [Fact]
         public void ConstructorArgumentNullException_Test()
         {
             // Arrange
-            Action action1 = () => new SyncGroupMembersActivity(sentNotificationDataRepository.Object, notificationDataRepository.Object, groupMembersService.Object, null /*userDataRepository*/, localier.Object);
-            Action action2 = () => new SyncGroupMembersActivity(sentNotificationDataRepository.Object, notificationDataRepository.Object, groupMembersService.Object, userDataRepository.Object, null /*localier*/);
-            Action action3 = () => new SyncGroupMembersActivity(sentNotificationDataRepository.Object, notificationDataRepository.Object, null /*groupMembersService*/, userDataRepository.Object, localier.Object);
-            Action action4 = () => new SyncGroupMembersActivity(sentNotificationDataRepository.Object, null /*notificationDataRepository*/, groupMembersService.Object, userDataRepository.Object, localier.Object);
-            Action action5 = () => new SyncGroupMembersActivity(null /*sentNotificationDataRepository*/, notificationDataRepository.Object, groupMembersService.Object, userDataRepository.Object, localier.Object);
-            Action action6 = () => new SyncGroupMembersActivity(sentNotificationDataRepository.Object, notificationDataRepository.Object, groupMembersService.Object, userDataRepository.Object, localier.Object);
+            Action action1 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, null /*userDataRepository*/, this.localier.Object);
+            Action action2 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, null /*localier*/);
+            Action action3 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, null /*groupMembersService*/, this.userDataRepository.Object, this.localier.Object);
+            Action action4 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, null /*notificationDataRepository*/, this.groupMembersService.Object, this.userDataRepository.Object, this.localier.Object);
+            Action action5 = () => new SyncGroupMembersActivity(null /*sentNotificationDataRepository*/, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, this.localier.Object);
+            Action action6 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, this.localier.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("userDataRepository is null.");
@@ -70,24 +70,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             var activityContext = this.GetSyncGroupMembersActivity();
             var users = new List<User>()
             {
-                new User(){Id = "userId"}
+                new User() { Id = "userId" },
             };
-            groupMembersService
+            this.groupMembersService
                 .Setup(x => x.GetGroupMembersAsync(It.IsAny<string>()))
                 .ReturnsAsync(users);
-            userDataRepository
+            this.userDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(default(UserDataEntity)));
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()))
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await activityContext.RunAsync((notificationId, groupId), logger.Object);
+            Func<Task> task = async () => await activityContext.RunAsync((notificationId, groupId), this.logger.Object);
 
             // Assert
             await task.Should().NotThrowAsync();
-            sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(x=>x.FirstOrDefault().PartitionKey == notificationId)));
+            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(x => x.FirstOrDefault().PartitionKey == notificationId)));
         }
 
         /// <summary>
@@ -103,8 +103,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             var activityContext = this.GetSyncGroupMembersActivity();
 
             // Act
-            Func<Task> task = async () => await activityContext.RunAsync((null /*notificationId*/, groupId), logger.Object);
-            Func<Task> task1 = async () => await activityContext.RunAsync((notificationId, null /*groupId*/), logger.Object);
+            Func<Task> task = async () => await activityContext.RunAsync((null /*notificationId*/, groupId), this.logger.Object);
+            Func<Task> task1 = async () => await activityContext.RunAsync((notificationId, null /*groupId*/), this.logger.Object);
             Func<Task> task2 = async () => await activityContext.RunAsync((notificationId, groupId), null /*logger*/);
 
             // Assert
@@ -118,7 +118,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// </summary>
         private SyncGroupMembersActivity GetSyncGroupMembersActivity()
         {
-            return new SyncGroupMembersActivity(sentNotificationDataRepository.Object, notificationDataRepository.Object, groupMembersService.Object, userDataRepository.Object, localier.Object);
+            return new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, this.localier.Object);
         }
     }
 }

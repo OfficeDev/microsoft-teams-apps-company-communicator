@@ -1,9 +1,12 @@
 ﻿// <copyright file="TeamsConversationActivityTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSend.Activities
 {
+    using System;
+    using System.Threading.Tasks;
     using FluentAssertions;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
@@ -17,8 +20,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Moq;
-    using System;
-    using System.Threading.Tasks;
     using Xunit;
 
     /// <summary>
@@ -35,25 +36,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         private readonly Mock<ISentNotificationDataRepository> sentNotificationDataRepository = new Mock<ISentNotificationDataRepository>();
         private readonly Mock<INotificationDataRepository> notificationDataRepository = new Mock<INotificationDataRepository>();
         private readonly Mock<IUserDataRepository> userDataRepository = new Mock<IUserDataRepository>();
-        private const int MaxAttempts = 10;
+        private readonly int maxAttempts = 10;
 
         /// <summary>
         /// Constructor tests.
-        /// </summary> 
+        /// </summary>
         [Fact]
         public void TeamsConversationActivityConstructorTest()
         {
             // Arrange
-            Action action1 = () => new TeamsConversationActivity(conversationService.Object, sentNotificationDataRepository.Object, null /*userDataRepository*/, notificationDataRepository.Object, appManagerService.Object, chatsService.Object, appSettingsService.Object, Options.Create(new TeamsConversationOptions()), localizer.Object);
-            Action action2 = () => new TeamsConversationActivity(null /*conversationService*/, sentNotificationDataRepository.Object, userDataRepository.Object, notificationDataRepository.Object, appManagerService.Object, chatsService.Object, appSettingsService.Object, Options.Create(new TeamsConversationOptions()), localizer.Object);
-            Action action3 = () => new TeamsConversationActivity(conversationService.Object, null /*sentNotificationDataRepository*/, userDataRepository.Object, notificationDataRepository.Object, appManagerService.Object, chatsService.Object, appSettingsService.Object, Options.Create(new TeamsConversationOptions()), localizer.Object);
-            Action action4 = () => new TeamsConversationActivity(conversationService.Object, sentNotificationDataRepository.Object, userDataRepository.Object, null /*notificationDataRepository*/, appManagerService.Object, chatsService.Object, appSettingsService.Object, Options.Create(new TeamsConversationOptions()), localizer.Object);
-            Action action5 = () => new TeamsConversationActivity(conversationService.Object, sentNotificationDataRepository.Object, userDataRepository.Object, notificationDataRepository.Object, null /*appManagerService*/, chatsService.Object, appSettingsService.Object, Options.Create(new TeamsConversationOptions()), localizer.Object);
-            Action action6 = () => new TeamsConversationActivity(conversationService.Object, sentNotificationDataRepository.Object, userDataRepository.Object, notificationDataRepository.Object, appManagerService.Object, null /*chatsService*/, appSettingsService.Object, Options.Create(new TeamsConversationOptions()), localizer.Object);
-            Action action7 = () => new TeamsConversationActivity(conversationService.Object, sentNotificationDataRepository.Object, userDataRepository.Object, notificationDataRepository.Object, appManagerService.Object, chatsService.Object, null /*appSettingsService*/, Options.Create(new TeamsConversationOptions()), localizer.Object);
-            Action action8 = () => new TeamsConversationActivity(conversationService.Object, sentNotificationDataRepository.Object, userDataRepository.Object, notificationDataRepository.Object, appManagerService.Object, chatsService.Object, appSettingsService.Object, Options.Create(new TeamsConversationOptions()), null /*localizer*/);
-            Action action9 = () => new TeamsConversationActivity(conversationService.Object, sentNotificationDataRepository.Object, userDataRepository.Object, notificationDataRepository.Object, appManagerService.Object, chatsService.Object, appSettingsService.Object, null /*options*/, localizer.Object);
-            Action action10 = () => new TeamsConversationActivity(conversationService.Object, sentNotificationDataRepository.Object, userDataRepository.Object, notificationDataRepository.Object, appManagerService.Object, chatsService.Object, appSettingsService.Object, Options.Create(new TeamsConversationOptions()), localizer.Object);
+            Action action1 = () => new TeamsConversationActivity(this.conversationService.Object, this.sentNotificationDataRepository.Object, null /*userDataRepository*/, this.notificationDataRepository.Object, this.appManagerService.Object, this.chatsService.Object, this.appSettingsService.Object, Options.Create(new TeamsConversationOptions()), this.localizer.Object);
+            Action action2 = () => new TeamsConversationActivity(null /*conversationService*/, this.sentNotificationDataRepository.Object, this.userDataRepository.Object, this.notificationDataRepository.Object, this.appManagerService.Object, this.chatsService.Object, this.appSettingsService.Object, Options.Create(new TeamsConversationOptions()), this.localizer.Object);
+            Action action3 = () => new TeamsConversationActivity(this.conversationService.Object, null /*sentNotificationDataRepository*/, this.userDataRepository.Object, this.notificationDataRepository.Object, this.appManagerService.Object, this.chatsService.Object, this.appSettingsService.Object, Options.Create(new TeamsConversationOptions()), this.localizer.Object);
+            Action action4 = () => new TeamsConversationActivity(this.conversationService.Object, this.sentNotificationDataRepository.Object, this.userDataRepository.Object, null /*notificationDataRepository*/, this.appManagerService.Object, this.chatsService.Object, this.appSettingsService.Object, Options.Create(new TeamsConversationOptions()), this.localizer.Object);
+            Action action5 = () => new TeamsConversationActivity(this.conversationService.Object, this.sentNotificationDataRepository.Object, this.userDataRepository.Object, this.notificationDataRepository.Object, null /*appManagerService*/, this.chatsService.Object, this.appSettingsService.Object, Options.Create(new TeamsConversationOptions()), this.localizer.Object);
+            Action action6 = () => new TeamsConversationActivity(this.conversationService.Object, this.sentNotificationDataRepository.Object, this.userDataRepository.Object, this.notificationDataRepository.Object, this.appManagerService.Object, null /*chatsService*/, this.appSettingsService.Object, Options.Create(new TeamsConversationOptions()), this.localizer.Object);
+            Action action7 = () => new TeamsConversationActivity(this.conversationService.Object, this.sentNotificationDataRepository.Object, this.userDataRepository.Object, this.notificationDataRepository.Object, this.appManagerService.Object, this.chatsService.Object, null /*appSettingsService*/, Options.Create(new TeamsConversationOptions()), this.localizer.Object);
+            Action action8 = () => new TeamsConversationActivity(this.conversationService.Object, this.sentNotificationDataRepository.Object, this.userDataRepository.Object, this.notificationDataRepository.Object, this.appManagerService.Object, this.chatsService.Object, this.appSettingsService.Object, Options.Create(new TeamsConversationOptions()), null /*localizer*/);
+            Action action9 = () => new TeamsConversationActivity(this.conversationService.Object, this.sentNotificationDataRepository.Object, this.userDataRepository.Object, this.notificationDataRepository.Object, this.appManagerService.Object, this.chatsService.Object, this.appSettingsService.Object, null /*options*/, this.localizer.Object);
+            Action action10 = () => new TeamsConversationActivity(this.conversationService.Object, this.sentNotificationDataRepository.Object, this.userDataRepository.Object, this.notificationDataRepository.Object, this.appManagerService.Object, this.chatsService.Object, this.appSettingsService.Object, Options.Create(new TeamsConversationOptions()), this.localizer.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("userDataRepository is null.");
@@ -76,22 +77,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         public async Task CreateConversationAsyncTest_TeamRecipientType()
         {
             // Arrange
-            var activityContext = GetTeamsConversationActivity();
+            var activityContext = this.GetTeamsConversationActivity();
             var notificationId = "notificationId";
             SentNotificationDataEntity reciepient = new SentNotificationDataEntity()
             {
-                RecipientType = SentNotificationDataEntity.TeamRecipientType
+                RecipientType = SentNotificationDataEntity.TeamRecipientType,
             };
 
             // Act
-            Func<Task> task = async () => await activityContext.CreateConversationAsync((notificationId, reciepient), logger.Object);
+            Func<Task> task = async () => await activityContext.CreateConversationAsync((notificationId, reciepient), this.logger.Object);
 
             // Assert
             await task.Should().NotThrowAsync();
         }
 
         /// <summary>
-        /// Success scenario to create conversation for users with teams user id
+        /// Success scenario to create conversation for users with teams user id.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
@@ -100,53 +101,54 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             // Arrange
             string notificationId = "notificationId";
             string serviceUrl = "serviceUrlAppSettings";
-            var activityContext = GetTeamsConversationActivity();
+            var activityContext = this.GetTeamsConversationActivity();
             SentNotificationDataEntity recipient = new SentNotificationDataEntity()
             {
                 UserId = "userId",
                 TenantId = "tenantId",
-                ServiceUrl = "serviceUrl"
+                ServiceUrl = "serviceUrl",
             };
             CreateConversationResponse response = new CreateConversationResponse()
             {
                 Result = Result.Succeeded,
-                ConversationId = "conversationid"
+                ConversationId = "conversationid",
             };
-            conversationService
-                .Setup(x => x.CreateUserConversationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), logger.Object))
+            this.conversationService
+                .Setup(x => x.CreateUserConversationAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), this.logger.Object))
                 .ReturnsAsync(response);
-            appSettingsService
+            this.appSettingsService
                 .Setup(x => x.GetServiceUrlAsync())
                 .Returns(Task.FromResult(serviceUrl));
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.InsertOrMergeAsync(It.IsAny<SentNotificationDataEntity>()))
                 .Returns(Task.CompletedTask);
-            userDataRepository
+            this.userDataRepository
                 .Setup(x => x.InsertOrMergeAsync(It.IsAny<UserDataEntity>()))
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await activityContext.CreateConversationAsync((notificationId, recipient), logger.Object);
+            Func<Task> task = async () => await activityContext.CreateConversationAsync((notificationId, recipient), this.logger.Object);
 
             // Assert
             await task.Should().NotThrowAsync();
-            conversationService.Verify(x => x.CreateUserConversationAsync(
+            this.conversationService.Verify(x => x.CreateUserConversationAsync(
                 It.Is<string>(x => recipient.UserId.Equals(x)),
                 It.Is<string>(x => recipient.TenantId.Equals(x)),
                 It.Is<string>(x => recipient.ServiceUrl.Equals(x)),
-                It.IsAny<int>(), logger.Object));
-            userDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<UserDataEntity>(x => recipient.UserId.Equals(x.UserId))));
+                It.IsAny<int>(),
+                this.logger.Object));
+            this.userDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<UserDataEntity>(x => recipient.UserId.Equals(x.UserId))));
         }
 
         /// <summary>
-        /// Conversation not created as Proactive app installation is disabled
+        /// Conversation not created as Proactive app installation is disabled.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task CreateConversationAsync_UserIdNullOrEmpty()
         {
             // Arrange
-            var activityContext = GetTeamsConversationActivity(false/*proactivelyInstallUserApp*/);
+            var activityContext = this.GetTeamsConversationActivity(false/*proactivelyInstallUserApp*/);
             var notificationId = "notificationId";
             SentNotificationDataEntity recipient = new SentNotificationDataEntity()
             {
@@ -155,7 +157,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             };
 
             // Act
-            Func<Task> task = async () => await activityContext.CreateConversationAsync((notificationId, recipient), logger.Object);
+            Func<Task> task = async () => await activityContext.CreateConversationAsync((notificationId, recipient), this.logger.Object);
 
             // Assert
             await task.Should().NotThrowAsync();
@@ -169,7 +171,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         public async Task ProactiveAppInstallationEnabledTest()
         {
             // Arrange
-            var activityContext = GetTeamsConversationActivity(true/*proactivelyInstallUserApp*/);
+            var activityContext = this.GetTeamsConversationActivity(true/*proactivelyInstallUserApp*/);
             var notificationId = "notificationId";
             var appId = "appId";
             var chatId = "chatId";
@@ -180,31 +182,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 RecipientId = "recipientId",
             };
 
-            appSettingsService
+            this.appSettingsService
                 .Setup(x => x.GetUserAppIdAsync())
                 .Returns(Task.FromResult(appId));
-            appManagerService
+            this.appManagerService
                 .Setup(x => x.InstallAppForUserAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
-            chatsService
+            this.chatsService
                 .Setup(x => x.GetChatThreadIdAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(chatId));
-            appSettingsService
+            this.appSettingsService
                 .Setup(x => x.GetServiceUrlAsync())
                 .Returns(Task.FromResult(serviceUrl));
 
             // Act
-            Func<Task> task = async () => await activityContext.CreateConversationAsync((notificationId, recipient), logger.Object);
+            Func<Task> task = async () => await activityContext.CreateConversationAsync((notificationId, recipient), this.logger.Object);
 
             // Assert
             await task.Should().NotThrowAsync();
-            appManagerService.Verify(x => x.InstallAppForUserAsync(
+            this.appManagerService.Verify(x => x.InstallAppForUserAsync(
                 It.Is<string>(x => appId.Equals(x)),
                 It.Is<string>(x => recipient.RecipientId.Equals(x))));
-            chatsService.Verify(x => x.GetChatThreadIdAsync(
+            this.chatsService.Verify(x => x.GetChatThreadIdAsync(
                 It.Is<string>(x => recipient.RecipientId.Equals(x)),
                 It.Is<string>(x => appId.Equals(x))));
-            sentNotificationDataRepository.Verify(x => x.InsertOrMergeAsync(
+            this.sentNotificationDataRepository.Verify(x => x.InsertOrMergeAsync(
                 It.Is<SentNotificationDataEntity>(x => recipient.RecipientId.Equals(
                     x.RecipientId) &&
                     chatId.Equals(x.ConversationId) &&
@@ -219,13 +221,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         public async Task ArgumentNullExceptionTest()
         {
             // Arrange
-            var activityContext = GetTeamsConversationActivity();
+            var activityContext = this.GetTeamsConversationActivity();
             string notificationId = "notificationid";
             SentNotificationDataEntity recipient = new SentNotificationDataEntity();
 
             // Act
-            Func<Task> task = async () => await activityContext.CreateConversationAsync((null /*notificationId*/, recipient), logger.Object);
-            Func<Task> task1 = async () => await activityContext.CreateConversationAsync((notificationId, null /*recipient*/), logger.Object);
+            Func<Task> task = async () => await activityContext.CreateConversationAsync((null /*notificationId*/, recipient), this.logger.Object);
+            Func<Task> task1 = async () => await activityContext.CreateConversationAsync((notificationId, null /*recipient*/), this.logger.Object);
             Func<Task> task2 = async () => await activityContext.CreateConversationAsync((notificationId, recipient), null /*log*/);
 
             // Assert
@@ -240,19 +242,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         private TeamsConversationActivity GetTeamsConversationActivity(bool proactivelyInstallUserApp = false)
         {
             return new TeamsConversationActivity(
-                conversationService.Object,
-                sentNotificationDataRepository.Object,
-                userDataRepository.Object,
-                notificationDataRepository.Object,
-                appManagerService.Object,
-                chatsService.Object,
-                appSettingsService.Object,
+                this.conversationService.Object,
+                this.sentNotificationDataRepository.Object,
+                this.userDataRepository.Object,
+                this.notificationDataRepository.Object,
+                this.appManagerService.Object,
+                this.chatsService.Object,
+                this.appSettingsService.Object,
                 Options.Create(new TeamsConversationOptions()
                 {
                     ProactivelyInstallUserApp = proactivelyInstallUserApp,
-                    MaxAttemptsToCreateConversation = MaxAttempts
+                    MaxAttemptsToCreateConversation = this.maxAttempts,
                 }),
-                localizer.Object);
+                this.localizer.Object);
         }
     }
 }

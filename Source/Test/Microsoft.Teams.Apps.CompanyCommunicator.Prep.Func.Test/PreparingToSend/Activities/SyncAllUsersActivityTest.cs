@@ -1,9 +1,14 @@
 ﻿// <copyright file="SyncAllUsersActivityTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSend.Activities
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
     using FluentAssertions;
     using Microsoft.Extensions.Localization;
     using Microsoft.Graph;
@@ -14,10 +19,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Moq;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Xunit;
 
     /// <summary>
@@ -33,17 +34,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
         /// <summary>
         /// Constructor tests.
-        /// </summary> 
+        /// </summary>
         [Fact]
         public void SyncAllUsersActivityConstructorTest()
         {
-            //Arrange
-            Action action1 = () => new SyncAllUsersActivity(null /*userDataRepository*/, sentNotificationDataRepository.Object, userService.Object, notificationDataRepository.Object, localier.Object);
-            Action action2 = () => new SyncAllUsersActivity(userDataRepository.Object, null /*sentNotificationDataRepository*/, userService.Object, notificationDataRepository.Object, localier.Object);
-            Action action3 = () => new SyncAllUsersActivity(userDataRepository.Object, sentNotificationDataRepository.Object, null /*userService*/, notificationDataRepository.Object, localier.Object);
-            Action action4 = () => new SyncAllUsersActivity(userDataRepository.Object, sentNotificationDataRepository.Object, userService.Object, null /*notificationDataRepository*/, localier.Object);
-            Action action5 = () => new SyncAllUsersActivity(userDataRepository.Object, sentNotificationDataRepository.Object, userService.Object, notificationDataRepository.Object, null /*localier*/);
-            Action action6 = () => new SyncAllUsersActivity(userDataRepository.Object, sentNotificationDataRepository.Object, userService.Object, notificationDataRepository.Object, localier.Object);
+            // Arrange
+            Action action1 = () => new SyncAllUsersActivity(null /*userDataRepository*/, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, this.localier.Object);
+            Action action2 = () => new SyncAllUsersActivity(this.userDataRepository.Object, null /*sentNotificationDataRepository*/, this.userService.Object, this.notificationDataRepository.Object, this.localier.Object);
+            Action action3 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, null /*userService*/, this.notificationDataRepository.Object, this.localier.Object);
+            Action action4 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, null /*notificationDataRepository*/, this.localier.Object);
+            Action action5 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, null /*localier*/);
+            Action action6 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, this.localier.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("userDataRepository is null.");
@@ -57,7 +58,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// <summary>
         /// Success test for sync all user to repository.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task SyncAllUsersActivitySuccessTest()
         {
@@ -66,49 +67,49 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             string deltaLink = "deltaLink";
             IEnumerable<UserDataEntity> useDataResponse = new List<UserDataEntity>()
             {
-               new UserDataEntity() { Name = string.Empty }
+               new UserDataEntity() { Name = string.Empty },
             };
             NotificationDataEntity notification = new NotificationDataEntity()
             {
-                Id = "notificationId1"
+                Id = "notificationId1",
             };
             (IEnumerable<User>, string) tuple = (new List<User>() { new User() { Id = "100" } }, deltaLink);
-            userDataRepository
+            this.userDataRepository
                 .Setup(x => x.GetDeltaLinkAsync())
                 .ReturnsAsync(deltaLink);
-            userService
+            this.userService
                 .Setup(x => x.GetAllUsersAsync(It.IsAny<string>()))
                 .ReturnsAsync(tuple);
-            
-            userDataRepository
+
+            this.userDataRepository
                 .Setup(x => x.SetDeltaLinkAsync(It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
-            userDataRepository
+            this.userDataRepository
                 .Setup(x => x.GetAllAsync(It.IsAny<string>(), null))
                 .ReturnsAsync(useDataResponse);
-            userService
+            this.userService
                 .Setup(x => x.HasTeamsLicenseAsync(It.IsAny<string>()))
                 .ReturnsAsync(true);
 
-            //store user data
-            userDataRepository
+            // store user data
+            this.userDataRepository
                 .Setup(x => x.InsertOrMergeAsync(It.IsAny<UserDataEntity>()))
                 .Returns(Task.CompletedTask);
-            sentNotificationDataRepository.Setup(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()));
+            this.sentNotificationDataRepository.Setup(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()));
 
             // Act
             Func<Task> task = async () => await activityContext.RunAsync(notification);
 
             // Assert
             await task.Should().NotThrowAsync();
-            userDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<UserDataEntity>(x=>x.RowKey == tuple.Item1.FirstOrDefault().Id)));
-            sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()));
+            this.userDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<UserDataEntity>(x=>x.RowKey == tuple.Item1.FirstOrDefault().Id)));
+            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()));
         }
 
         /// <summary>
         /// ArgumentNullException test for notification null.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task ArgumentNullExceptionTest()
         {
@@ -127,7 +128,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// </summary>
         private SyncAllUsersActivity GetSyncAllUsersActivity()
         {
-            return new SyncAllUsersActivity(userDataRepository.Object, sentNotificationDataRepository.Object, userService.Object, notificationDataRepository.Object, localier.Object);
+            return new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, this.localier.Object);
         }
     }
 }

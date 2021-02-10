@@ -1,5 +1,5 @@
 ﻿// <copyright file="AuthenticationMetadataControllerTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // </copyright>
 
 using Castle.Core.Internal;

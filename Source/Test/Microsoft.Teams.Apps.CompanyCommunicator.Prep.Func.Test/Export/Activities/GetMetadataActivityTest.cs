@@ -1,26 +1,27 @@
 ﻿// <copyright file="GetMetadataActivityTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activities
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Net;
+    using System.Threading.Tasks;
     using FluentAssertions;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities;
-    using Moq;
-    using System;
-    using System.Threading.Tasks;
-    using Xunit;
-    using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
-    using System.Collections.Generic;
-    using System.Net;
+    using Moq;
+    using Xunit;
 
     /// <summary>
     /// GetMetadataActivity test class.
@@ -38,7 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         public void CreateActivity_AllParameters_ShouldBeSuccess()
         {
             // Arrange
-            Action action = () => new GetMetadataActivity(usersService.Object, localizer.Object);
+            Action action = () => new GetMetadataActivity(this.usersService.Object, this.localizer.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
@@ -46,13 +47,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
 
         /// <summary>
         /// Constructor test for null parameters.
-        /// </summary> 
+        /// </summary>
         [Fact]
         public void CreateActivity_NullParamters_ThrowsArgumentNullException()
         {
             // Arrange
-            Action action1 = () => new GetMetadataActivity(null /*userService*/, localizer.Object);
-            Action action2 = () => new GetMetadataActivity(usersService.Object, null /**/);
+            Action action1 = () => new GetMetadataActivity(null /*userService*/, this.localizer.Object);
+            Action action2 = () => new GetMetadataActivity(this.usersService.Object, null /*localizer*/);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("userService is null.");
@@ -62,6 +63,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         /// <summary>
         /// Test case to check if activity handles null paramaters.
         /// </summary>
+        /// <param name="context">context.</param>
+        /// <param name="notificationDataEntity">notificationDataEntity.</param>
+        /// <param name="exportDataEntity">exportDataEntity.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Theory]
         [MemberData(nameof(RunParameters))]
@@ -73,6 +77,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             // Arrange
             var activityInstance = this.GetMetadataActivity();
             var mockContext = context?.Object;
+
             // Act
             Func<Task> task = async () => await activityInstance.RunAsync(mockContext, (notificationDataEntity, exportDataEntity), log.Object);
 
@@ -80,15 +85,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             await task.Should().ThrowAsync<ArgumentNullException>();
         }
 
+        /// <summary>
+        /// Gets RunParameters.
+        /// </summary>
         public static IEnumerable<object[]> RunParameters
         {
             get
             {
                 return new[]
                 {
-                    new object[] {  null, new NotificationDataEntity(), new ExportDataEntity() },
-                    new object[] {  new Mock<IDurableOrchestrationContext>(), null, new ExportDataEntity() },
-                    new object[] {  new Mock<IDurableOrchestrationContext>(), new NotificationDataEntity(), null },
+                    new object[] { null, new NotificationDataEntity(), new ExportDataEntity() },
+                    new object[] { new Mock<IDurableOrchestrationContext>(), null, new ExportDataEntity() },
+                    new object[] { new Mock<IDurableOrchestrationContext>(), new NotificationDataEntity(), null },
                 };
             }
         }
@@ -107,17 +115,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var exportDataEntityMock = new Mock<ExportDataEntity>();
             context.Setup(x => x.CallActivityWithRetryAsync<Metadata>(It.IsAny<string>(), It.IsAny<RetryOptions>(), (It.IsAny<Object>()))).ReturnsAsync(new Metadata());
 
-            //Act
-            var result = await activityInstance.RunAsync(context.Object, (notificationDataEntityMock.Object, exportDataEntityMock.Object), log.Object);
+            // Act
+            var result = await activityInstance.RunAsync(context.Object, (notificationDataEntityMock.Object, exportDataEntityMock.Object), this.log.Object);
 
-            //Assert
+            // Assert
             Assert.Equal(typeof(Metadata), result.GetType());
-
         }
 
         /// <summary>
         /// Test case to check if get method handles null paramaters.
         /// </summary>
+        /// <param name="notificationDataEntity">notificationDataEntity.</param>
+        /// <param name="exportDataEntity">exportDataEntity.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Theory]
         [MemberData(nameof(GetParameters))]
@@ -127,6 +136,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         {
             // Arrange
             var activityInstance = this.GetMetadataActivity();
+
             // Act
             Func<Task> task = async () => await activityInstance.GetMetadataActivityAsync((notificationDataEntity, exportDataEntity));
 
@@ -134,14 +144,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             await task.Should().ThrowAsync<ArgumentNullException>();
         }
 
+        /// <summary>
+        /// GetParameters.
+        /// </summary>
         public static IEnumerable<object[]> GetParameters
         {
             get
             {
                 return new[]
                 {
-                    new object[] {  null, new ExportDataEntity() },
-                    new object[] {  new NotificationDataEntity(), null },
+                    new object[] { null, new ExportDataEntity() },
+                    new object[] { new NotificationDataEntity(), null },
                 };
             }
         }
@@ -154,19 +167,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         public async Task Get_CallUserService_ShouldInvokeOnce()
         {
             // Arrange
-            var getMetadataActivityInstance = GetMetadataActivity();
-            var notificationDataEntity = GetNotificationDataEntity();
-            var exportDataEntity = GetExportDataEntity();
-            var user = GetUser();
-            usersService.Setup(x => x.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+            var getMetadataActivityInstance = this.GetMetadataActivity();
+            var notificationDataEntity = this.GetNotificationDataEntity();
+            var exportDataEntity = this.GetExportDataEntity();
+            var user = this.GetUser();
+            this.usersService.Setup(x => x.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
 
             // Act
             var metaData = await getMetadataActivityInstance.GetMetadataActivityAsync((notificationDataEntity, exportDataEntity));
 
             // Assert
-            usersService.Verify(x => x.GetUserAsync(It.IsAny<string>()), Times.Once);
+            this.usersService.Verify(x => x.GetUserAsync(It.IsAny<string>()), Times.Once);
         }
-
 
         /// <summary>
         /// Test case to check if service exception is thrown when received graph error which is not 403.
@@ -176,12 +188,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         public async Task Get_GraphServiceError_ThrowsServiceException()
         {
             // Arrange
-            var getMetadataActivityInstance = GetMetadataActivity();
-            var notificationDataEntity = GetNotificationDataEntity();
-            var exportDataEntity = GetExportDataEntity();
-            var user = GetUser();
+            var getMetadataActivityInstance = this.GetMetadataActivity();
+            var notificationDataEntity = this.GetNotificationDataEntity();
+            var exportDataEntity = this.GetExportDataEntity();
+            var user = this.GetUser();
             var serviceException = new ServiceException(null, null, HttpStatusCode.Unauthorized);
-            usersService.Setup(x => x.GetUserAsync(It.IsAny<string>())).ThrowsAsync(serviceException);
+            this.usersService.Setup(x => x.GetUserAsync(It.IsAny<string>())).ThrowsAsync(serviceException);
 
             // Act
             Func<Task> task = async () => await getMetadataActivityInstance.GetMetadataActivityAsync((notificationDataEntity, exportDataEntity));
@@ -198,16 +210,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         public async Task Get_ForbiddenGraphPermission_ReturnsAdminConsentError()
         {
             // Arrange
-            var getMetadataActivityInstance = GetMetadataActivity();
-            var notificationDataEntity = GetNotificationDataEntity();
-            var exportDataEntity = GetExportDataEntity();
-            var user = GetUser();
+            var getMetadataActivityInstance = this.GetMetadataActivity();
+            var notificationDataEntity = this.GetNotificationDataEntity();
+            var exportDataEntity = this.GetExportDataEntity();
+            var user = this.GetUser();
 
             string key = "AdminConsentError";
             var localizedString = new LocalizedString(key, key);
-            localizer.Setup(_ => _[key]).Returns(localizedString);
+            this.localizer.Setup(_ => _[key]).Returns(localizedString);
             var serviceException = new ServiceException(null, null, HttpStatusCode.Forbidden);
-            usersService.Setup(x => x.GetUserAsync(It.IsAny<string>())).ThrowsAsync(serviceException);
+            this.usersService.Setup(x => x.GetUserAsync(It.IsAny<string>())).ThrowsAsync(serviceException);
 
             // Act
             var result = await getMetadataActivityInstance.GetMetadataActivityAsync((notificationDataEntity, exportDataEntity));
@@ -225,11 +237,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         public async Task Get_CorrectMapping_ReturnsMetadataObject()
         {
             // Arrange
-            var getMetadataActivityInstance = GetMetadataActivity();
-            var notificationDataEntity = GetNotificationDataEntity();
-            var exportDataEntity = GetExportDataEntity();
-            var user = GetUser();
-            usersService.Setup(x => x.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+            var getMetadataActivityInstance = this.GetMetadataActivity();
+            var notificationDataEntity = this.GetNotificationDataEntity();
+            var exportDataEntity = this.GetExportDataEntity();
+            var user = this.GetUser();
+            this.usersService.Setup(x => x.GetUserAsync(It.IsAny<string>())).ReturnsAsync(user);
 
             // Act
             var metaData = await getMetadataActivityInstance.GetMetadataActivityAsync((notificationDataEntity, exportDataEntity));
@@ -244,10 +256,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         /// <summary>
         /// Initializes a new instance of the <see cref="GetMetadataActivity"/> class.
         /// </summary>
-        /// <returns>return the instance of GetMetadataActivity</returns>
+        /// <returns>return the instance of GetMetadataActivity.</returns>
         private GetMetadataActivity GetMetadataActivity()
         {
-            return new GetMetadataActivity(usersService.Object, localizer.Object);
+            return new GetMetadataActivity(this.usersService.Object, this.localizer.Object);
         }
 
         private NotificationDataEntity GetNotificationDataEntity()
@@ -277,4 +289,3 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         }
     }
 }
-

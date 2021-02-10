@@ -1,19 +1,20 @@
 ﻿// <copyright file="NotificationServiceTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
 {
     using System;
-    using Xunit;
-    using Moq;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using System.Threading.Tasks;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using System.Net;
+    using System.Threading.Tasks;
     using FluentAssertions;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
+    using Moq;
+    using Xunit;
 
     /// <summary>
     /// NotificationService test class.
@@ -22,20 +23,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
     {
         private readonly Mock<ISentNotificationDataRepository> sentNotificationDataRepository = new Mock<ISentNotificationDataRepository>();
         private readonly Mock<IGlobalSendingNotificationDataRepository> globalSendingNotificationDataRepository = new Mock<IGlobalSendingNotificationDataRepository>();
-        SendQueueMessageContent sendQueueMessageContent = new SendQueueMessageContent()
+        private readonly SendQueueMessageContent sendQueueMessageContent = new SendQueueMessageContent()
         {
             RecipientData = new RecipientData()
             {
-                RecipientId = "RecipientId1"
+                RecipientId = "RecipientId1",
             },
-            NotificationId = "notification1"
+            NotificationId = "notification1",
         };
-        int sendRetryDelayNumberOfSeconds = 75;
-        SentNotificationDataEntity notificationData = null;
+
+        private readonly int sendRetryDelayNumberOfSeconds = 75;
         private readonly string notificationId = "notificationId";
         private readonly string recipientId = "RecipientId1";
         private readonly int totalNumberOfSendThrottles = 100;
-
+        SentNotificationDataEntity notificationData = null;
 
         /// <summary>
         /// Constructor tests.
@@ -44,9 +45,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public void NotificationServiceConstructorTest()
         {
             // Arrange
-            Action action1 = () => new NotificationService(null /*globalSendingNotificationDataRepository*/, sentNotificationDataRepository.Object);
-            Action action2 = () => new NotificationService(globalSendingNotificationDataRepository.Object, null /*sentNotificationDataRepository*/);
-            Action action3 = () => new NotificationService(globalSendingNotificationDataRepository.Object, sentNotificationDataRepository.Object);
+            Action action1 = () => new NotificationService(null /*globalSendingNotificationDataRepository*/, this.sentNotificationDataRepository.Object);
+            Action action2 = () => new NotificationService(this.globalSendingNotificationDataRepository.Object, null /*sentNotificationDataRepository*/);
+            Action action3 = () => new NotificationService(this.globalSendingNotificationDataRepository.Object, this.sentNotificationDataRepository.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("globalSendingNotificationDataRepository is null.");
@@ -55,46 +56,46 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         }
 
         /// <summary>
-        /// Test to check send notification is Throttled
+        /// Test to check send notification is Throttled.
         /// </summary>
-        /// <returns>returns boolean flag representing notification sent</returns>
+        /// <returns>returns boolean flag representing notification sent.</returns>
         [Fact]
         public async Task SendNotificationThrottledTest()
         {
             // Arrange
-            var notificationService = GetNotificationService();
+            var notificationService = this.GetNotificationService();
             var globalSendingNofificationDataResponse = new GlobalSendingNotificationDataEntity()
             {
                 SendRetryDelayTime = DateTime.UtcNow - TimeSpan.FromSeconds(1),
             };
-            globalSendingNotificationDataRepository
+            this.globalSendingNotificationDataRepository
                 .Setup(x => x.GetGlobalSendingNotificationDataEntityAsync())
                 .ReturnsAsync(globalSendingNofificationDataResponse);
-            
+
             // Act
             var serviceResponse = await notificationService.IsSendNotificationThrottled();
-            
+
             // Assert
             serviceResponse.Should().BeFalse();
         }
 
         /// <summary>
-        /// Test to check notification is sent when sendRetry delay time is null
+        /// Test to check notification is sent when sendRetry delay time is null.
         /// </summary>
-        /// <returns>returns boolean flag representing notification sent</returns>
+        /// <returns>returns boolean flag representing notification sent.</returns>
         [Fact]
         public async Task SendNotificationThrottled_SendRetrydelayTime_Test()
         {
             // Arrange
-            var notificationService = GetNotificationService();
+            var notificationService = this.GetNotificationService();
             GlobalSendingNotificationDataEntity globalSendingNofificationDataResponse = new GlobalSendingNotificationDataEntity();
-            globalSendingNotificationDataRepository
+            this.globalSendingNotificationDataRepository
                 .Setup(x => x.GetGlobalSendingNotificationDataEntityAsync())
                 .ReturnsAsync(globalSendingNofificationDataResponse);
-            
+
             // Act
             var serviceResponse = await notificationService.IsSendNotificationThrottled();
-            
+
             // Assert
             serviceResponse.Should().BeFalse();
         }
@@ -107,40 +108,40 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public async Task NotificationPendingRecipientIdNotFoundTest()
         {
             // Arrange
-            var notificationService = GetNotificationService();
+            var notificationService = this.GetNotificationService();
             SendQueueMessageContent sendQueueMessageContent = new SendQueueMessageContent()
             {
-                RecipientData = new RecipientData()
+                RecipientData = new RecipientData(),
             };
 
             // Act
             Func<Task> task = async () => await notificationService.IsPendingNotification(sendQueueMessageContent);
-            
+
             // Assert
             await task.Should().ThrowAsync<InvalidOperationException>().WithMessage("Recipient id is not set.");
         }
 
         /// <summary>
         /// Test to avoid sending duplicate messages.
-        /// If status code set to initializationStatusCode: this means the notification has not been attempted to be sent to this recipient
+        /// If status code set to initializationStatusCode: this means the notification has not been attempted to be sent to this recipient.
         /// </summary>
         /// <returns><see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
         public async Task NotificationWithInitializationStatusTest()
         {
             // Arrange
-            var notificationService = GetNotificationService();
+            var notificationService = this.GetNotificationService();
             SentNotificationDataEntity notificationData = new SentNotificationDataEntity()
             {
-                StatusCode = SentNotificationDataEntity.InitializationStatusCode
+                StatusCode = SentNotificationDataEntity.InitializationStatusCode,
             };
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(notificationData);
 
             // Act
-            var serviceResponse = await notificationService.IsPendingNotification(sendQueueMessageContent);
-            
+            var serviceResponse = await notificationService.IsPendingNotification(this.sendQueueMessageContent);
+
             // Assert
             serviceResponse.Should().BeTrue();
         }
@@ -155,121 +156,121 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public async Task NotificationFaultedAndRetryingStatusTest()
         {
             // Arrange
-            var notificationService = GetNotificationService();
+            var notificationService = this.GetNotificationService();
 
             SentNotificationDataEntity notificationData = new SentNotificationDataEntity()
             {
-                StatusCode = SentNotificationDataEntity.FaultedAndRetryingStatusCode
+                StatusCode = SentNotificationDataEntity.FaultedAndRetryingStatusCode,
             };
 
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(notificationData);
-            
+
             // Act
-            var serviceResponse = await notificationService.IsPendingNotification(sendQueueMessageContent);
-            
+            var serviceResponse = await notificationService.IsPendingNotification(this.sendQueueMessageContent);
+
             // Assert
             serviceResponse.Should().BeTrue();
         }
 
         /// <summary>
-        /// Test to check is notification is sent
+        /// Test to check is notification is sent.
         /// </summary>
-        /// <returns>returns boolean flag representing notification sent</returns>
+        /// <returns>returns boolean flag representing notification sent.</returns>
         [Fact]
         public async Task NotificationSentTest()
         {
             // Arrange
-            var notificationService = GetNotificationService();
-            sentNotificationDataRepository
+            var notificationService = this.GetNotificationService();
+            this.sentNotificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(notificationData);
-            
+                .ReturnsAsync(this.notificationData);
+
             // Act
-            var serviceResponse = await notificationService.IsPendingNotification(sendQueueMessageContent);
-            
+            var serviceResponse = await notificationService.IsPendingNotification(this.sendQueueMessageContent);
+
             // Assert
             serviceResponse.Should().BeFalse();
         }
 
         /// <summary>
-        /// Test to set notification sent throttled
+        /// Test to set notification sent throttled.
         /// </summary>
         /// <returns><see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
         public async Task SetSendNotificationThrottledTest()
         {
             // Arrange
-            var notificationService = GetNotificationService();
-            globalSendingNotificationDataRepository
+            var notificationService = this.GetNotificationService();
+            this.globalSendingNotificationDataRepository
                 .Setup(x => x.SetGlobalSendingNotificationDataEntityAsync(It.IsAny<GlobalSendingNotificationDataEntity>()))
                 .Returns(Task.CompletedTask);
-            
+
             // Act
-            Func<Task> task = async () => await notificationService.SetSendNotificationThrottled(sendRetryDelayNumberOfSeconds);
-            
+            Func<Task> task = async () => await notificationService.SetSendNotificationThrottled(this.sendRetryDelayNumberOfSeconds);
+
             // Assert
             await task.Should().NotThrowAsync<Exception>();
-            globalSendingNotificationDataRepository.Verify(x => x.SetGlobalSendingNotificationDataEntityAsync(It.IsAny<GlobalSendingNotificationDataEntity>()));
+            this.globalSendingNotificationDataRepository.Verify(x => x.SetGlobalSendingNotificationDataEntityAsync(It.IsAny<GlobalSendingNotificationDataEntity>()));
         }
 
         /// <summary>
-        /// Test to update sent notification status as FaultedAndRetrying
+        /// Test to update sent notification status as FaultedAndRetrying.
         /// </summary>
         /// <returns><see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
         public async Task UpdateSentNotification_Status_FaultedAndRetrying_Test()
         {
             // Arrange
-            var notificationService = GetNotificationService();
-            notificationData = new SentNotificationDataEntity()
+            var notificationService = this.GetNotificationService();
+            var notificationData = new SentNotificationDataEntity()
             {
                 StatusCode = SentNotificationDataEntity.FaultedAndRetryingStatusCode,
-                DeliveryStatus = SentNotificationDataEntity.Retrying
+                DeliveryStatus = SentNotificationDataEntity.Retrying,
             };
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(notificationData);
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.InsertOrMergeAsync(It.IsAny<SentNotificationDataEntity>()))
                 .Returns(Task.CompletedTask);
-            
+
             // Act
-            Func<Task> task = async () => await notificationService.UpdateSentNotification(notificationId, recipientId, totalNumberOfSendThrottles, SentNotificationDataEntity.FaultedAndRetryingStatusCode, string.Empty, string.Empty);
-            
+            Func<Task> task = async () => await notificationService.UpdateSentNotification(this.notificationId, this.recipientId, this.totalNumberOfSendThrottles, SentNotificationDataEntity.FaultedAndRetryingStatusCode, string.Empty, string.Empty);
+
             // Assert
             await task.Should().NotThrowAsync<Exception>();
-            sentNotificationDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<SentNotificationDataEntity>(x => x.StatusCode == notificationData.StatusCode)));
+            this.sentNotificationDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<SentNotificationDataEntity>(x => x.StatusCode == notificationData.StatusCode)));
         }
 
         /// <summary>
-        /// Test to update sent notification status created
+        /// Test to update sent notification status created.
         /// </summary>
         /// <returns><see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
         public async Task UpdateSentNotification_Status_Created_Test()
         {
             // Arrange
-            var notificationService = GetNotificationService();
-            notificationData = new SentNotificationDataEntity()
+            var notificationService = this.GetNotificationService();
+            var notificationData = new SentNotificationDataEntity()
             {
                 StatusCode = (int)HttpStatusCode.Created,
-                DeliveryStatus = SentNotificationDataEntity.Succeeded
+                DeliveryStatus = SentNotificationDataEntity.Succeeded,
             };
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(notificationData);
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.InsertOrMergeAsync(It.IsAny<SentNotificationDataEntity>()))
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await notificationService.UpdateSentNotification(notificationId, recipientId, totalNumberOfSendThrottles, (int)HttpStatusCode.Created, string.Empty, string.Empty);
-            
+            Func<Task> task = async () => await notificationService.UpdateSentNotification(this.notificationId, this.recipientId, this.totalNumberOfSendThrottles, (int)HttpStatusCode.Created, string.Empty, string.Empty);
+
             // Assert
             await task.Should().NotThrowAsync<Exception>();
-            sentNotificationDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<SentNotificationDataEntity>(x => x.StatusCode == notificationData.StatusCode)));
+            this.sentNotificationDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<SentNotificationDataEntity>(x => x.StatusCode == notificationData.StatusCode)));
         }
 
         /// <summary>
@@ -280,25 +281,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public async Task UpdateSentNotification_Status_TooManyRequest_Test()
         {
             // Arrange
-            var notificationService = GetNotificationService();
-            notificationData = new SentNotificationDataEntity()
+            var notificationService = this.GetNotificationService();
+            var notificationData = new SentNotificationDataEntity()
             {
                 StatusCode = (int)HttpStatusCode.TooManyRequests,
-                DeliveryStatus = SentNotificationDataEntity.Throttled
+                DeliveryStatus = SentNotificationDataEntity.Throttled,
             };
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(notificationData);
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.InsertOrMergeAsync(It.IsAny<SentNotificationDataEntity>()))
                 .Returns(Task.CompletedTask);
-            
+
             // Act
-            Func<Task> task = async () => await notificationService.UpdateSentNotification(notificationId, recipientId, totalNumberOfSendThrottles, (int)HttpStatusCode.TooManyRequests, string.Empty, string.Empty);
-            
+            Func<Task> task = async () => await notificationService.UpdateSentNotification(this.notificationId, this.recipientId, this.totalNumberOfSendThrottles, (int)HttpStatusCode.TooManyRequests, string.Empty, string.Empty);
+
             // Assert
             await task.Should().NotThrowAsync<Exception>();
-            sentNotificationDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<SentNotificationDataEntity>(x => x.StatusCode == notificationData.StatusCode)));
+            this.sentNotificationDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<SentNotificationDataEntity>(x => x.StatusCode == notificationData.StatusCode)));
         }
 
         /// <summary>
@@ -309,25 +310,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public async Task UpdateSentNotification_Status_NotFound_Test()
         {
             // Arrange
-            var notificationService = GetNotificationService();
-            notificationData = new SentNotificationDataEntity()
+            var notificationService = this.GetNotificationService();
+            var notificationData = new SentNotificationDataEntity()
             {
                 StatusCode = (int)HttpStatusCode.NotFound,
-                DeliveryStatus = SentNotificationDataEntity.RecipientNotFound
+                DeliveryStatus = SentNotificationDataEntity.RecipientNotFound,
             };
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(notificationData);
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.InsertOrMergeAsync(It.IsAny<SentNotificationDataEntity>()))
                 .Returns(Task.CompletedTask);
-            
+
             // Act
-            Func<Task> task = async () => await notificationService.UpdateSentNotification(notificationId, recipientId, totalNumberOfSendThrottles, (int)HttpStatusCode.NotFound, string.Empty, string.Empty);
-            
+            Func<Task> task = async () => await notificationService.UpdateSentNotification(this.notificationId, this.recipientId, this.totalNumberOfSendThrottles, (int)HttpStatusCode.NotFound, string.Empty, string.Empty);
+
             // Assert
             await task.Should().NotThrowAsync<Exception>();
-            sentNotificationDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<SentNotificationDataEntity>(x => x.StatusCode == notificationData.StatusCode)));
+            this.sentNotificationDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<SentNotificationDataEntity>(x => x.StatusCode == notificationData.StatusCode)));
         }
 
         /// <summary>
@@ -338,25 +339,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public async Task UpdateSentNotification_Status_Failed_Test()
         {
             // Arrange
-            var notificationService = GetNotificationService();
-            notificationData = new SentNotificationDataEntity()
+            var notificationService = this.GetNotificationService();
+            var notificationData = new SentNotificationDataEntity()
             {
                 StatusCode = (int)HttpStatusCode.NotFound,
-                DeliveryStatus = SentNotificationDataEntity.Failed
+                DeliveryStatus = SentNotificationDataEntity.Failed,
             };
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(notificationData);
-            sentNotificationDataRepository
+            this.sentNotificationDataRepository
                 .Setup(x => x.InsertOrMergeAsync(It.IsAny<SentNotificationDataEntity>()))
                 .Returns(Task.CompletedTask);
-            
+
             // Act
-            Func<Task> task = async () => await notificationService.UpdateSentNotification(notificationId, recipientId, totalNumberOfSendThrottles, 11, string.Empty, string.Empty);
-            
+            Func<Task> task = async () => await notificationService.UpdateSentNotification(this.notificationId, this.recipientId, this.totalNumberOfSendThrottles, 11, string.Empty, string.Empty);
+
             // Assert
             await task.Should().NotThrowAsync<Exception>();
-            sentNotificationDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<SentNotificationDataEntity>(x => x.StatusCode == notificationData.StatusCode)));
+            this.sentNotificationDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<SentNotificationDataEntity>(x => x.StatusCode == notificationData.StatusCode)));
         }
 
         /// <summary>
@@ -364,7 +365,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         /// </summary>
         private NotificationService GetNotificationService()
         {
-            return new NotificationService(globalSendingNotificationDataRepository.Object, sentNotificationDataRepository.Object);
+            return new NotificationService(this.globalSendingNotificationDataRepository.Object, this.sentNotificationDataRepository.Object);
         }
     }
 }

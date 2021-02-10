@@ -1,23 +1,24 @@
 ﻿// <copyright file="ExportFunctionTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
     using FluentAssertions;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
-    using Moq;
-    using System;
-    using System.Threading.Tasks;
-    using Xunit;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using System.Collections.Generic;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
+    using Moq;
+    using Xunit;
 
     /// <summary>
     /// ExportFunction test class.

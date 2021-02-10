@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { formatDate } from '../i18n';
 import { getSentNotifications, getDraftNotifications } from '../apis/messageListApi';
 

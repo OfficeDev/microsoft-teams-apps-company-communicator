@@ -1,18 +1,19 @@
 ﻿// <copyright file="UpdateExportDataActivityTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activities
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
     using FluentAssertions;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities;
     using Moq;
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Xunit;
 
     /// <summary>
@@ -31,7 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         public void CreateInstance_AllParameters_ShouldBeSuccess()
         {
             // Arrange
-            Action action = () => new UpdateExportDataActivity(exportDataRepository.Object);
+            Action action = () => new UpdateExportDataActivity(this.exportDataRepository.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
@@ -39,7 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
 
         /// <summary>
         /// Constructor test for null parameter.
-        /// </summary> 
+        /// </summary>
         [Fact]
         public void CreateInstance_NullParamter_ThrowsArgumentNullException()
         {
@@ -53,6 +54,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         /// <summary>
         /// Test case to check if activity handles null paramaters.
         /// </summary>
+        /// <param name="context">context.</param>
+        /// <param name="exportDataEntity">exportDataEntity.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Theory]
         [MemberData(nameof(RunParameters))]
@@ -63,6 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             // Arrange
             var activityInstance = this.GetUpdateExportDataActivity();
             var mockContext = context?.Object;
+            
             // Act
             Func<Task> task = async () => await activityInstance.RunAsync(mockContext, exportDataEntity, log.Object);
 
@@ -76,7 +80,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             {
                 return new[]
                 {
-                    new object[] {  null, new ExportDataEntity() },
+                    new object[] { null, new ExportDataEntity() },
                     new object[] { new Mock<IDurableOrchestrationContext>(), null },
                 };
             }
@@ -85,26 +89,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         /// <summary>
         /// Test case to check CallActivityWithRetryAsync method is invoked once.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task Update_CallExportDataService_ShouldInvokeOnce()
         {
             // Arrange
-            var activityInstance = GetUpdateExportDataActivity();
-            var exportDataEntity = GetExportDataEntity();
+            var activityInstance = this.GetUpdateExportDataActivity();
+            var exportDataEntity = this.GetExportDataEntity();
 
-            context.Setup(x => x.CallActivityWithRetryAsync<Task>(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<ExportDataEntity>()));
+            this.context.Setup(x => x.CallActivityWithRetryAsync<Task>(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<ExportDataEntity>()));
 
             // Act
-            Func<Task> task = async () => await activityInstance.RunAsync(context.Object, exportDataEntity, log.Object);
+            Func<Task> task = async () => await activityInstance.RunAsync(this.context.Object, exportDataEntity, this.log.Object);
 
             // Assert
             await task.Should().NotThrowAsync();
-            context.Verify(x => x.CallActivityWithRetryAsync<Task>(It.Is<string>(x => x.Equals(nameof(UpdateExportDataActivity.UpdateExportDataActivityAsync))), It.IsAny<RetryOptions>(), It.IsAny<ExportDataEntity>()), Times.Once);
+            this.context.Verify(x => x.CallActivityWithRetryAsync<Task>(It.Is<string>(x => x.Equals(nameof(UpdateExportDataActivity.UpdateExportDataActivityAsync))), It.IsAny<RetryOptions>(), It.IsAny<ExportDataEntity>()), Times.Once);
         }
 
         /// <summary>
-        /// Test case to check ArgumentNullException when exportDataEntity argument is null for UpdateExportDataActivityAsync method. 
+        /// Test case to check ArgumentNullException when exportDataEntity argument is null for UpdateExportDataActivityAsync method.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
@@ -120,24 +124,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             await task.Should().ThrowAsync<ArgumentNullException>("exportDataEntity is null");
         }
 
-        /// <summary> 
+        /// <summary>
         /// Test case to check if CreateOrUpdateAsync method is invoked once.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task ExportData_CreateOrUpdateService_ShouldInvokeOnce()
         {
             // Arrange
-            var activityInstance = GetUpdateExportDataActivity();
-            var exportDataEntity = GetExportDataEntity();
+            var activityInstance = this.GetUpdateExportDataActivity();
+            var exportDataEntity = this.GetExportDataEntity();
 
-            exportDataRepository.Setup(x => x.CreateOrUpdateAsync(It.IsAny<ExportDataEntity>())).Returns(Task.CompletedTask);
+            this.exportDataRepository.Setup(x => x.CreateOrUpdateAsync(It.IsAny<ExportDataEntity>())).Returns(Task.CompletedTask);
 
             // Act
             await activityInstance.UpdateExportDataActivityAsync(exportDataEntity);
 
             // Assert
-            exportDataRepository.Verify(x => x.CreateOrUpdateAsync(It.Is<ExportDataEntity>(x => x.FileConsentId == exportDataEntity.FileConsentId)), Times.Once);
+            this.exportDataRepository.Verify(x => x.CreateOrUpdateAsync(It.Is<ExportDataEntity>(x => x.FileConsentId == exportDataEntity.FileConsentId)), Times.Once);
         }
 
         private ExportDataEntity GetExportDataEntity()
@@ -146,19 +150,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             {
                 PartitionKey = "partitionKey",
                 SentDate = DateTime.Now,
-                FileConsentId = "fileConsentId"
+                FileConsentId = "fileConsentId",
             };
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UpdateExportDataActivity"/> class.
         /// </summary>
-        /// <returns>return the instance of UpdateExportDataActivity</returns>
+        /// <returns>return the instance of UpdateExportDataActivity.</returns>
         private UpdateExportDataActivity GetUpdateExportDataActivity()
         {
-            return new UpdateExportDataActivity(exportDataRepository.Object);
+            return new UpdateExportDataActivity(this.exportDataRepository.Object);
         }
     }
 }
-
-

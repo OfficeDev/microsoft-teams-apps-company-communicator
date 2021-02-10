@@ -1,15 +1,18 @@
 ﻿// <copyright file="DataStreamFacadeTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Net;
+    using System.Threading.Tasks;
     using FluentAssertions;
-    using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
-    using Microsoft.Extensions.Logging;
     using Microsoft.Graph;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
@@ -19,11 +22,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
     using Moq;
     using Newtonsoft.Json;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net;
-    using System.Threading.Tasks;
     using Xunit;
 
     /// <summary>
@@ -61,7 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         public void DataStreamFacadeInstanceCreation_AllParameters_ShouldBeSuccess()
         {
             // Arrange
-            Action action = () => new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, usersService.Object, localizer.Object);
+            Action action = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.usersService.Object, this.localizer.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
@@ -74,10 +72,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         public void CreateInstance_NullParamters_ThrowsArgumentNullException()
         {
             // Arrange
-            Action action1 = () => new DataStreamFacade(null /*sentNotificationDataRepository*/, teamDataRepository.Object, usersService.Object, localizer.Object);
-            Action action2 = () => new DataStreamFacade(sentNotificationDataRepository.Object, null /*teamDataRepository*/, usersService.Object, localizer.Object);
-            Action action3 = () => new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, null /*usersService*/, localizer.Object);
-            Action action4 = () => new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, usersService.Object, null /*localizer*/);
+            Action action1 = () => new DataStreamFacade(null /*sentNotificationDataRepository*/, this.teamDataRepository.Object, this.usersService.Object, this.localizer.Object);
+            Action action2 = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, null /*teamDataRepository*/, this.usersService.Object, this.localizer.Object);
+            Action action3 = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, null /*usersService*/, this.localizer.Object);
+            Action action4 = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.usersService.Object, null /*localizer*/);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("sentNotificationDataRepository is null.");
@@ -94,7 +92,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         public async Task GetUserData_NullParameter_ThrowsAgrumentNullException()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
+            var activityInstance = this.GetDataStreamFacadeInstance();
 
             // Act
             Func<Task> task = async () => await activityInstance.GetTeamDataStreamAsync(null /*notificationId*/).ForEachAsync(x => x.ToList());
@@ -104,93 +102,93 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         }
 
         /// <summary>
-        /// Test case to check if GetBatchByUserIds method is called atleast once based on GetStreamsService Response
+        /// Test case to check if GetBatchByUserIds method is called atleast once based on GetStreamsService Response.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task Get_BatchByUserIdsSevice_ShouldInvokeAtleastOnce()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
-            var userData = GetUserDataList();
+            var activityInstance = this.GetDataStreamFacadeInstance();
+            var userData = this.GetUserDataList();
 
-            sentNotificationDataRepository
-                .Setup(x => x.GetStreamsAsync(notificationId, null))
-                .Returns(sentNotificationDataList.ToAsyncEnumerable());
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataList.ToAsyncEnumerable());
 
-            usersService
+            this.usersService
                 .Setup(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()))
                 .ReturnsAsync(userData);
 
             // Act
-            var userDataStream = activityInstance.GetUserDataStreamAsync(notificationId);
+            var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId);
 
             await userDataStream.ForEachAsync(x => x.ToList());
 
             // Assert
-            usersService.Verify(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()), Times.AtLeastOnce);
+            this.usersService.Verify(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()), Times.AtLeastOnce);
         }
 
         /// <summary>
         /// Test case to check if GetBatchByUserIds method is never called as GetStreamsService returns empty response.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task Get_BatchByUserIdsSevice_ShouldNeverBeInvokedForEmptysentNotificationData()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
-            var userData = GetUserDataList();
+            var activityInstance = this.GetDataStreamFacadeInstance();
+            var userData = this.GetUserDataList();
 
-            sentNotificationDataRepository
-                .Setup(x => x.GetStreamsAsync(notificationId, null))
-                .Returns(sentNotificationDataEmptyList.ToAsyncEnumerable());
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataEmptyList.ToAsyncEnumerable());
 
-            usersService
+            this.usersService
                 .Setup(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()))
                 .ReturnsAsync(userData);
 
             // Act
-            var userDataStream = activityInstance.GetUserDataStreamAsync(notificationId);
+            var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId);
 
             await userDataStream.ForEachAsync(x => x.ToList());
 
             // Assert
-            usersService.Verify(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()), Times.Never);
+            this.usersService.Verify(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()), Times.Never);
         }
 
         /// <summary>
         /// Test case to check if userdata object mapping is correct.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task GetUsersData_CorrectMapping_ReturnsUserDataObject()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
-            var userDataList = GetUserDataList();
+            var activityInstance = this.GetDataStreamFacadeInstance();
+            var userDataList = this.GetUserDataList();
 
-            sentNotificationDataRepository
-                .Setup(x => x.GetStreamsAsync(notificationId, null))
-                .Returns(sentNotificationDataList.ToAsyncEnumerable());
-            var sendNotificationData = sentNotificationDataList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
-            usersService
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataList.ToAsyncEnumerable());
+            var sendNotificationData = this.sentNotificationDataList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
+            this.usersService
                 .Setup(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()))
                 .ReturnsAsync(userDataList);
             string adminConsentError = "AdminConsentError";
             var localizedString = new LocalizedString(adminConsentError, adminConsentError);
-            localizer.Setup(_ => _[adminConsentError]).Returns(localizedString);
+            this.localizer.Setup(_ => _[adminConsentError]).Returns(localizedString);
 
             string succeeded = "Succeeded";
             var deliveryStatus = new LocalizedString(succeeded, succeeded);
-            localizer.Setup(_ => _[succeeded]).Returns(deliveryStatus);
+            this.localizer.Setup(_ => _[succeeded]).Returns(deliveryStatus);
 
             string ok = "OK";
             var result = new LocalizedString(ok, ok);
-            localizer.Setup(_ => _[ok]).Returns(result);
+            this.localizer.Setup(_ => _[ok]).Returns(result);
 
             // Act
-            var userDataStream = await activityInstance.GetUserDataStreamAsync(notificationId).ToListAsync();
+            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId).ToListAsync();
             var userData = userDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
             var user = userDataList.FirstOrDefault(user => user != null && user.Id.Equals(sendNotificationData.RowKey));
 
@@ -210,22 +208,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         public async Task Get_ForbiddenGraphPermission_ReturnsAdminConsentError()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
+            var activityInstance = this.GetDataStreamFacadeInstance();
             var userDataList = new List<User>();
 
-            sentNotificationDataRepository
-                .Setup(x => x.GetStreamsAsync(notificationId, null))
-                .Returns(sentNotificationDataWithErrorList.ToAsyncEnumerable());
-            var sendNotificationData = sentNotificationDataWithErrorList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
-            usersService
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataWithErrorList.ToAsyncEnumerable());
+            var sendNotificationData = this.sentNotificationDataWithErrorList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
+            this.usersService
                 .Setup(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()))
                 .ReturnsAsync(userDataList);
             string adminConsentError = "AdminConsentError";
             var localizedString = new LocalizedString(adminConsentError, adminConsentError);
-            localizer.Setup(_ => _[adminConsentError]).Returns(localizedString);
+            this.localizer.Setup(_ => _[adminConsentError]).Returns(localizedString);
 
             // Act
-            var userDataStream = await activityInstance.GetUserDataStreamAsync(notificationId).ToListAsync();
+            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId).ToListAsync();
             var userData = userDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             // Assert
@@ -241,14 +239,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         public async Task Get_UserStatusReason_withErrorStatus()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
-            var userDataList = GetUserDataList();
-            sentNotificationDataRepository
-                .Setup(x => x.GetStreamsAsync(notificationId, null))
-                .Returns(sentNotificationDataWithErrorList.ToAsyncEnumerable());
-            var sendNotificationData = sentNotificationDataWithErrorList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
-            
-            usersService
+            var activityInstance = this.GetDataStreamFacadeInstance();
+            var userDataList = this.GetUserDataList();
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataWithErrorList.ToAsyncEnumerable());
+            var sendNotificationData = this.sentNotificationDataWithErrorList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
+
+            this.usersService
                 .Setup(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()))
                 .ReturnsAsync(userDataList);
 
@@ -257,7 +255,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             var result = rootMessage.Error.Message;
 
             // Act
-            var userDataStream = await activityInstance.GetUserDataStreamAsync(notificationId).ToListAsync();
+            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId).ToListAsync();
             var userData = userDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             // Assert
@@ -267,80 +265,80 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         /// <summary>
         /// Test case to check if GetAsync method(to get team data) is called atleast once based on response from GetStreamsAsync.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task Get_TeamDataSevice_ShouldInvokeAtleastOnce()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
-            var teamData = GetTeamDataEntity();
-            sentNotificationDataRepository
-                .Setup(x => x.GetStreamsAsync(notificationId, null))
-                .Returns(sentNotificationDataList.ToAsyncEnumerable());
+            var activityInstance = this.GetDataStreamFacadeInstance();
+            var teamData = this.GetTeamDataEntity();
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataList.ToAsyncEnumerable());
 
             string succeeded = "Succeeded";
             var deliveryStatusString = new LocalizedString(succeeded, succeeded);
-            localizer.Setup(_ => _[succeeded]).Returns(deliveryStatusString);
-            teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamData);
+            this.localizer.Setup(_ => _[succeeded]).Returns(deliveryStatusString);
+            this.teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamData);
 
             // Act
-            var teamDataStream = activityInstance.GetTeamDataStreamAsync(notificationId);
+            var teamDataStream = activityInstance.GetTeamDataStreamAsync(this.notificationId);
             await teamDataStream.ForEachAsync(x => x.ToList());
 
             // Assert
-            teamDataRepository.Verify(x => x.GetAsync(It.Is<string>(x => x.Equals(TeamDataTableNames.TeamDataPartition)), It.IsAny<string>()), Times.AtLeastOnce);
+            this.teamDataRepository.Verify(x => x.GetAsync(It.Is<string>(x => x.Equals(TeamDataTableNames.TeamDataPartition)), It.IsAny<string>()), Times.AtLeastOnce);
         }
 
         /// <summary>
         /// Test case to check if GetAsync method(to get team data) is never called as GetStreamsService returns empty list.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task Get_TeamDataSevice_ShouldNeverBeInvokedForEmptysentNotificationData()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
+            var activityInstance = this.GetDataStreamFacadeInstance();
             var teamData = new TeamDataEntity();
-            sentNotificationDataRepository
-                .Setup(x => x.GetStreamsAsync(notificationId, null))
-                .Returns(sentNotificationDataEmptyList.ToAsyncEnumerable());
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataEmptyList.ToAsyncEnumerable());
 
-            teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamData);
+            this.teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamData);
 
             // Act
-            var teamDataStream = activityInstance.GetTeamDataStreamAsync(notificationId);
+            var teamDataStream = activityInstance.GetTeamDataStreamAsync(this.notificationId);
             await teamDataStream.ForEachAsync(x => x.ToList());
 
             // Assert
-            teamDataRepository.Verify(x => x.GetAsync(It.Is<string>(x => x.Equals(TeamDataTableNames.TeamDataPartition)), It.IsAny<string>()), Times.Never);
+            this.teamDataRepository.Verify(x => x.GetAsync(It.Is<string>(x => x.Equals(TeamDataTableNames.TeamDataPartition)), It.IsAny<string>()), Times.Never);
         }
 
         /// <summary>
         /// Test case to check if teamdata object mapping is correct.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task GetTeamData_CorrectMapping_ReturnsTeamDataObject()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
-            var teamDataEntity = GetTeamDataEntity();
-            sentNotificationDataRepository
-                .Setup(x => x.GetStreamsAsync(notificationId, null))
-                .Returns(sentNotificationDataList.ToAsyncEnumerable());
-            var sendNotificationData = sentNotificationDataList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
+            var activityInstance = this.GetDataStreamFacadeInstance();
+            var teamDataEntity = this.GetTeamDataEntity();
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataList.ToAsyncEnumerable());
+            var sendNotificationData = this.sentNotificationDataList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             string notificationDeliveryStatus = sendNotificationData.DeliveryStatus;
             var deliveryStatus = new LocalizedString(notificationDeliveryStatus, notificationDeliveryStatus);
-            localizer.Setup(_ => _[notificationDeliveryStatus]).Returns(deliveryStatus);
+            this.localizer.Setup(_ => _[notificationDeliveryStatus]).Returns(deliveryStatus);
 
             string ok = "OK";
             var result = new LocalizedString(ok, ok);
-            localizer.Setup(_ => _[ok]).Returns(result);
-            teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamDataEntity);
+            this.localizer.Setup(_ => _[ok]).Returns(result);
+            this.teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamDataEntity);
 
             // Act
-            var teamDataStream = await activityInstance.GetTeamDataStreamAsync(notificationId).ToListAsync();
+            var teamDataStream = await activityInstance.GetTeamDataStreamAsync(this.notificationId).ToListAsync();
             var teamData = teamDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             // Assert
@@ -353,26 +351,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         /// <summary>
         /// Test case to check that return teamdata object is not null and contains deleveryStatus from sendNotificationData.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task Get_TeamDeliveryStatus_SucceededFromNotificationData()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
-            var teamDataEntity = GetTeamDataEntity();
-            sentNotificationDataRepository
-                .Setup(x => x.GetStreamsAsync(notificationId, null))
-                .Returns(sentNotificationDataList.ToAsyncEnumerable());
-            var sendNotificationData = sentNotificationDataList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
+            var activityInstance = this.GetDataStreamFacadeInstance();
+            var teamDataEntity = this.GetTeamDataEntity();
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataList.ToAsyncEnumerable());
+            var sendNotificationData = this.sentNotificationDataList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             string deliveryStatus = sendNotificationData.DeliveryStatus;
             var notificationDeliveryStatus = new LocalizedString(deliveryStatus, deliveryStatus);
-            localizer.Setup(_ => _[deliveryStatus]).Returns(notificationDeliveryStatus);
+            this.localizer.Setup(_ => _[deliveryStatus]).Returns(notificationDeliveryStatus);
 
-            teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamDataEntity);
+            this.teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamDataEntity);
 
             // Act
-            var teamDataStream = await activityInstance.GetTeamDataStreamAsync(notificationId).ToListAsync();
+            var teamDataStream = await activityInstance.GetTeamDataStreamAsync(this.notificationId).ToListAsync();
             var teamData = teamDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             // Assert
@@ -383,25 +381,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         /// <summary>
         /// Test case to check that return teamdata object's statusReason is with error from sendNotificationData.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task Get_TeamStatusReason_ReturnsErrorWithStatusReasonFromNotificationData()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
-            var teamDataEntity = GetTeamDataEntity();
-            sentNotificationDataRepository
-                .Setup(x => x.GetStreamsAsync(notificationId, null))
-                .Returns(sentNotificationDataWithErrorList.ToAsyncEnumerable());
-            var sendNotificationData = sentNotificationDataWithErrorList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
-            teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamDataEntity);
-            
+            var activityInstance = this.GetDataStreamFacadeInstance();
+            var teamDataEntity = this.GetTeamDataEntity();
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataWithErrorList.ToAsyncEnumerable());
+            var sendNotificationData = this.sentNotificationDataWithErrorList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
+            this.teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamDataEntity);
+
             // Get ErrorMessage
             var rootMessage = JsonConvert.DeserializeObject<RootErrorMessage>(sendNotificationData.ErrorMessage);
             var result = rootMessage.Error.Message;
 
             // Act
-            var teamDataStream = await activityInstance.GetTeamDataStreamAsync(notificationId).ToListAsync();
+            var teamDataStream = await activityInstance.GetTeamDataStreamAsync(this.notificationId).ToListAsync();
             var teamData = teamDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             // Assert
@@ -412,21 +410,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         /// <summary>
         /// Test case to check that return teamdata object contains name as null.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task Get_NullFromDownStream_ReturnsNullForTeamName()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
-            sentNotificationDataRepository
-                .Setup(x => x.GetStreamsAsync(notificationId, null))
-                .Returns(sentNotificationDataWithErrorList.ToAsyncEnumerable());
+            var activityInstance = this.GetDataStreamFacadeInstance();
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataWithErrorList.ToAsyncEnumerable());
 
-            var sendNotificationData = sentNotificationDataList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
-            teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(default(TeamDataEntity)));
+            var sendNotificationData = this.sentNotificationDataList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
+            this.teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(default(TeamDataEntity)));
 
             // Act
-            var userDataStream = await activityInstance.GetTeamDataStreamAsync(notificationId).ToListAsync();
+            var userDataStream = await activityInstance.GetTeamDataStreamAsync(this.notificationId).ToListAsync();
             var teamData = userDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             // Assert
@@ -436,23 +434,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         /// <summary>
         /// Test case to check if service exception is thrown when received GetUser service error which is not 403 (Forbidden).
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task Get_CallBatchByUserIdsSevice_ThrowsServiceException()
         {
             // Arrange
-            var activityInstance = GetDataStreamFacadeInstance();
+            var activityInstance = this.GetDataStreamFacadeInstance();
 
-            sentNotificationDataRepository
-                .Setup(x => x.GetStreamsAsync(notificationId, null))
-                .Returns(sentNotificationDataList.ToAsyncEnumerable());
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataList.ToAsyncEnumerable());
             var serviceException = new ServiceException(null, null, HttpStatusCode.Unauthorized);
-            usersService
+            this.usersService
                 .Setup(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()))
                 .ThrowsAsync(serviceException);
 
             // Act
-            var userDataStream = activityInstance.GetUserDataStreamAsync(notificationId);
+            var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId);
             Func<Task> task = async () => await userDataStream.ForEachAsync(x => x.ToList());
 
             // Assert
@@ -468,20 +466,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         {
             return new List<User>()
             {
-                new User() {Id = "RowKey", DisplayName = "UserDisplyName", UserPrincipalName ="UserPrincipalName"}
+                new User()
+                {
+                    Id = "RowKey", DisplayName = "UserDisplyName", UserPrincipalName = "UserPrincipalName",
+                },
             };
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataStreamFacade"/> class.
         /// </summary>
-        /// <returns>return the instance of DataStreamFacade</returns>
+        /// <returns>return the instance of DataStreamFacade.</returns>
         private DataStreamFacade GetDataStreamFacadeInstance()
         {
-            return new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, usersService.Object, localizer.Object);
+            return new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.usersService.Object, this.localizer.Object);
         }
     }
 }
-
-
-

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { TFunction } from "i18next";
 
 export const getInitAdaptiveCard = (t: TFunction) => {

@@ -1,19 +1,20 @@
 ﻿// <copyright file="SendBatchMessagesActivityTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSend.Activities
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
     using FluentAssertions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Moq;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Xunit;
 
     /// <summary>
@@ -29,9 +30,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         [Fact]
         public void SendBatchMessagesActivityConstructorTest()
         {
-            //Arrange
+            // Arrange
             Action action1 = () => new SendBatchMessagesActivity(null /*sendQueue*/);
-            Action action2 = () => new SendBatchMessagesActivity(sendQueue.Object);
+            Action action2 = () => new SendBatchMessagesActivity(this.sendQueue.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("sendQueue is null.");
@@ -41,25 +42,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// <summary>
         /// Test for send batch messages activity success scenario for Reciepient type "User data".
         /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task SendBatchMessagesActivitySuccessTest()
         {
             // Arrange
-            var activity = GetSendBatchMessagesActivity();
+            var activity = this.GetSendBatchMessagesActivity();
             List<SentNotificationDataEntity> batch = new List<SentNotificationDataEntity>()
             {
                 new SentNotificationDataEntity()
                 {
                     RecipientType = SentNotificationDataEntity.UserRecipientType,
-                    RecipientId = "recipientId"
-                }
+                    RecipientId = "recipientId",
+                },
             };
             NotificationDataEntity notification = new NotificationDataEntity()
             {
-                Id = "123"
+                Id = "123",
             };
 
-            sendQueue
+            this.sendQueue
                 .Setup(x => x.SendAsync(It.IsAny<IEnumerable<SendQueueMessageContent>>()))
                 .Returns(Task.CompletedTask);
 
@@ -68,32 +70,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync();
-            sendQueue.Verify(x => x.SendAsync(It.Is<IEnumerable<SendQueueMessageContent>>(x=>x.FirstOrDefault().RecipientData.RecipientType == RecipientDataType.User)));
+            this.sendQueue.Verify(x => x.SendAsync(It.Is<IEnumerable<SendQueueMessageContent>>(x => x.FirstOrDefault().RecipientData.RecipientType == RecipientDataType.User)));
         }
-
 
         /// <summary>
         /// Test for send batch messages activity success scenario for Reciepient type "Team data".
         /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns
         [Fact]
         public async Task SendBatchMessagesActivitySuccess_ForTeamRecipientTypeTest()
         {
             // Arrange
-            var activity = GetSendBatchMessagesActivity();
+            var activity = this.GetSendBatchMessagesActivity();
             List<SentNotificationDataEntity> batch = new List<SentNotificationDataEntity>()
             {
                 new SentNotificationDataEntity()
                 {
                     RecipientType = SentNotificationDataEntity.TeamRecipientType,
-                    RecipientId = "recipientId"
-                }
+                    RecipientId = "recipientId",
+                },
             };
             NotificationDataEntity notification = new NotificationDataEntity()
             {
-                Id = "notificationId"
+                Id = "notificationId",
             };
 
-            sendQueue
+            this.sendQueue
                 .Setup(x => x.SendAsync(It.IsAny<IEnumerable<SendQueueMessageContent>>()))
                 .Returns(Task.CompletedTask);
 
@@ -102,28 +104,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync();
-            sendQueue.Verify(x => x.SendAsync(It.Is<IEnumerable<SendQueueMessageContent>>(x => x.FirstOrDefault().RecipientData.RecipientType == RecipientDataType.Team)));
+            this.sendQueue.Verify(x => x.SendAsync(It.Is<IEnumerable<SendQueueMessageContent>>(x => x.FirstOrDefault().RecipientData.RecipientType == RecipientDataType.Team)));
         }
 
         /// <summary>
         /// Failure test for Send batch messages as batch is null.
         /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns
         [Fact]
         public async Task SendBatchMessagesActivityFailureTest()
         {
             // Arrange
-            var activity = GetSendBatchMessagesActivity();
+            var activity = this.GetSendBatchMessagesActivity();
             List<SentNotificationDataEntity> batch = new List<SentNotificationDataEntity>()
             {
                 new SentNotificationDataEntity()
                 {
                     RecipientType = SentNotificationDataEntity.TeamRecipientType,
-                    RecipientId = "recipientId"
-                }
+                    RecipientId = "recipientId",
+                },
             };
             NotificationDataEntity notification = new NotificationDataEntity()
             {
-                Id = "notificationId"
+                Id = "notificationId",
             };
 
             // Act
@@ -142,7 +145,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// </summary>
         private SendBatchMessagesActivity GetSendBatchMessagesActivity()
         {
-            return new SendBatchMessagesActivity(sendQueue.Object);
+            return new SendBatchMessagesActivity(this.sendQueue.Object);
         }
     }
 }

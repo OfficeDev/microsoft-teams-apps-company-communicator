@@ -1,9 +1,14 @@
 ﻿// <copyright file="SendQueueOrchestratorTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSend.Orchestrators
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
     using FluentAssertions;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
@@ -11,10 +16,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Moq;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Xunit;
 
     /// <summary>
@@ -35,16 +36,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             NotificationDataEntity notificationDataEntity = new NotificationDataEntity()
             {
-                Id = "notificationId"
+                Id = "notificationId",
             };
 
             IEnumerable<SentNotificationDataEntity> sentNotificationDataEntitiesList = new List<SentNotificationDataEntity>();
-            
+
             List<SentNotificationDataEntity> datalist = new List<SentNotificationDataEntity>();
             for (int i = 0; i <= 100; i++)
             {
                 datalist.Add(new SentNotificationDataEntity());
             }
+
             sentNotificationDataEntitiesList = datalist;
             durableOrchestrationContextMock
                 .Setup(x => x.GetInput<NotificationDataEntity>())
@@ -60,7 +62,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Act
             Func<Task> task = async () => await SendQueueOrchestrator.RunOrchestrator(durableOrchestrationContextMock.Object, mockLogger.Object);
-            
+
             // Assert
             await task.Should().NotThrowAsync<Exception>(); 
             durableOrchestrationContextMock.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x=>x.Equals(FunctionNames.UpdateNotificationStatusActivity)), It.IsAny<RetryOptions>(), It.IsAny<Object>()), Times.Once());

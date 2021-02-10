@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { combineReducers } from "redux";
 
 export const selectedMessageReducer = (selectedMessage = null, action: { type: string; payload: any; }) => {

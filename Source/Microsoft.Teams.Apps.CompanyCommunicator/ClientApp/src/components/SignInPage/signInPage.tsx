@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import React from "react";
 import { RouteComponentProps } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
