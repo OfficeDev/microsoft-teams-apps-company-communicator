@@ -1,0 +1,52 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.5/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.5",
+    "version": "4.0.0",
+    "id": "1c07cd26-a088-4db8-8928-ace382fa219f",
+    "packageName": "com.microsoft.teams.companycommunicator.authors",
+    "developer": {
+      "name": "Infinion",
+      "websiteUrl": "http://infinion.co/",
+      "privacyUrl": "http://infinion.co/privacy.html",
+      "termsOfUseUrl": "http://infinion.co/termsofuse.html"
+    },
+    "icons": {
+      "color": "color.png",
+      "outline": "outline.png"
+    },
+    "name": {
+      "short": "Company Communicator (Authors)",
+      "full": "Company Communicator (Authors)"
+    },
+    "description": {
+      "short": "Broadcast messages to multiple teams and people in one go",
+      "full": "Broadcasts messages to multiple teams and individuals through channel posts and chat messages"
+    },
+    "accentColor": "#64A2CC",
+    "configurableTabs": [{
+      "configurationUrl": "https://infinioncommunicatorstnd.azurefd.net/configtab",
+      "canUpdateConfiguration": true,
+      "scopes": [
+        "team"
+      ]
+    }],
+    "bots": [{
+      "botId": "c4e916cd-58dd-46be-8bf6-e3c4d6e9e2bc",
+      "scopes": [
+        "team"
+      ],
+      "supportsFiles": true,
+      "isNotificationOnly": true
+    }],
+    "permissions": [
+      "identity",
+      "messageTeamMembers"
+    ],
+    "validDomains": [
+      "infinioncommunicatorstnd.azurefd.net"
+    ],
+    "webApplicationInfo": {
+      "id": "c4e916cd-58dd-46be-8bf6-e3c4d6e9e2bc",
+      "resource": "api://infinioncommunicatorstnd.azurefd.net"
+    }
+  }
