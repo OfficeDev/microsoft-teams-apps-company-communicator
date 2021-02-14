@@ -1,14 +1,14 @@
 {
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.5/MicrosoftTeams.schema.json",
-    "manifestVersion": "1.5",
+    "manifestVersion": "1.8",
     "version": "4.0.0",
     "id": "1c07cd26-a088-4db8-8928-ace382fa219f",
     "packageName": "com.microsoft.teams.companycommunicator.authors",
     "developer": {
       "name": "Infinion",
-      "websiteUrl": "http://infinion.co/",
-      "privacyUrl": "http://infinion.co/privacy.html",
-      "termsOfUseUrl": "http://infinion.co/termsofuse.html"
+      "websiteUrl": "https://infinion.co/",
+      "privacyUrl": "https://infinion.co/privacy.html",
+      "termsOfUseUrl": "https://infinion.co/termsofuse.html"
     },
     "icons": {
       "color": "color.png",
@@ -24,14 +24,14 @@
     },
     "accentColor": "#64A2CC",
     "configurableTabs": [{
-      "configurationUrl": "https://infinioncommunicatorstnd.azurefd.net/configtab",
+      "configurationUrl": "https://InfinionCommunication.azurefd.net/configtab",
       "canUpdateConfiguration": true,
       "scopes": [
         "team"
       ]
     }],
     "bots": [{
-      "botId": "c4e916cd-58dd-46be-8bf6-e3c4d6e9e2bc",
+      "botId": "6521f0b2-8ee8-471f-920a-318038db0825",
       "scopes": [
         "team"
       ],
@@ -46,7 +46,7 @@
       "infinioncommunicatorstnd.azurefd.net"
     ],
     "webApplicationInfo": {
-      "id": "c4e916cd-58dd-46be-8bf6-e3c4d6e9e2bc",
-      "resource": "api://infinioncommunicatorstnd.azurefd.net"
+      "id": "6521f0b2-8ee8-471f-920a-318038db0825",
+      "resource": "api://InfinionCommunication.azurefd.net"
     }
   }

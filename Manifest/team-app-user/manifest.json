@@ -1,14 +1,14 @@
 {
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.5/MicrosoftTeams.schema.json",
-    "manifestVersion": "1.5",
+    "manifestVersion": "1.8",
     "version": "4.0.0",
     "id": "148a66bb-e83d-425a-927d-09f4299a9274",
     "packageName": "com.microsoft.teams.companycommunicator",
     "developer": {
       "name": "Infinion",
-      "websiteUrl": "http://infinion.co/",
-      "privacyUrl": "http://infinion.co/privacy.html",
-      "termsOfUseUrl": "http://infinion.co/termsofuse.html"
+      "websiteUrl": "https://infinion.co/",
+      "privacyUrl": "https://infinion.co/privacy.html",
+      "termsOfUseUrl": "https://infinion.co/termsofuse.html"
     },
     "icons": {
       "color": "color.png",
@@ -24,7 +24,7 @@
     },
     "accentColor": "#64A2CC",
     "bots": [{
-      "botId": "7f0591ab-0989-4a3e-90fa-bd53a8bf8cfc",
+      "botId": "95ae8596-5dcf-48b3-b620-fa791701140e",
       "scopes": [
         "personal",
         "team"
@@ -37,6 +37,6 @@
       "messageTeamMembers"
     ],
     "validDomains": [
-      "infinioncommunicatorstnd.azurefd.net"
+      "infinioncommunication.azurefd.net"
     ]
   }

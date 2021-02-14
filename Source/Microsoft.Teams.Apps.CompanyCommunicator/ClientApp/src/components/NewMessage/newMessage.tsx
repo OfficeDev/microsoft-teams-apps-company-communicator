@@ -21,13 +21,7 @@ import { TFunction } from "i18next";
 import { Editor, EditorState} from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 
-// { <Editor
-//   editorState={editorState}
-//   toolbarClassName="toolbarClassName"
-//   wrapperClassName="wrapperClassName"
-//   editorClassName="editorClassName"
-//   onEditorStateChange={this.onEditorStateChange}
-// /> }
+// const { Map } = require("immutable");
 
 type dropdownItem = {
     key: string,
@@ -55,7 +49,7 @@ export interface IDraftMessage {
 
 export interface formState {
     title: string,
-    summary?: string,
+    summary?: string, //editorState: EditorState.createEmpty(),
     btnLink?: string,
     imageLink?: string,
     btnTitle?: string,
@@ -92,8 +86,10 @@ export interface INewMessageProps extends RouteComponentProps, WithTranslation {
 }
 
 class NewMessage extends React.Component<INewMessageProps, formState> {
+    
     readonly localize: TFunction;
     private card: any;
+
 
     constructor(props: INewMessageProps) {
         super(props);
@@ -104,7 +100,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
         this.state = {
             title: "",
-            summary: "",
+            summary: editorState.createEmpty(),
             author: "",
             btnLink: "",
             imageLink: "",
@@ -130,7 +126,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedGroups: [],
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
-            // editorState: EditorState.createEmpty(),
+            
         }
         
     }
@@ -353,14 +349,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     autoComplete="off"
                                     required
                                 />
-                                {/* <Editor
-                                    className="inputField"
-                                    editorState={EditorState}
-                                    toolbarClassName="toolbarClassName"
-                                    wrapperClassName="wrapperClassName"
-                                    editorClassName="editorClassName"
-                                    onEditorStateChange={this.onEditorStateChange}
-                                    /> */}
+                
 
                                 <Input
                                     className="inputField"
@@ -371,14 +360,28 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     errorLabel={this.state.errorImageUrlMessage}
                                     autoComplete="off"
                                 />
-
+                                {/* todo */}
                                 <TextArea
                                     className="inputField textArea"
                                     autoFocus
                                     placeholder={this.localize("Summary")}
                                     label={this.localize("Summary")}
                                     value={this.state.summary}
+                                    editorState={this.state.summary}
+                                    toolbarClassName="toolbarClassName"
+                                    wrapperClassName="wrapperClassName"
+                                    editorClassName="editorClassName"
+                                    onEditorStateChange={this.onSummaryChanged}
                                     onChange={this.onSummaryChanged}
+
+                                    /* <Editor
+                                    className="inputField"
+                                    editorState={EditorState}
+                                    toolbarClassName="toolbarClassName"
+                                    wrapperClassName="wrapperClassName"
+                                    editorClassName="editorClassName"
+                                    onEditorStateChange={this.onEditorStateChange}
+                                    /> */
                                 />
 
                                 <Input
