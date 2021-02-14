@@ -15,6 +15,7 @@ import SignInSimpleStart from "./components/SignInPage/signInSimpleStart";
 import SignInSimpleEnd from "./components/SignInPage/signInSimpleEnd";
 import { updateLocale } from './i18n';
 
+
 export interface IAppState {
   theme: string;
   themeStyle: number;
