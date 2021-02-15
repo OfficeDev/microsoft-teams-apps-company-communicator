@@ -43,7 +43,7 @@
       "messageTeamMembers"
     ],
     "validDomains": [
-      "infinioncommunicatorstnd.azurefd.net"
+      "InfinionCommunication.azurefd.net"
     ],
     "webApplicationInfo": {
       "id": "6521f0b2-8ee8-471f-920a-318038db0825",

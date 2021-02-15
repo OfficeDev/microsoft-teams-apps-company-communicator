@@ -49,7 +49,8 @@ export interface IDraftMessage {
 
 export interface formState {
     title: string,
-    summary?: string, //editorState: EditorState.createEmpty(),
+    summary?: string, 
+    EditorState?:string,
     btnLink?: string,
     imageLink?: string,
     btnTitle?: string,
@@ -100,7 +101,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
         this.state = {
             title: "",
-            //summary: editorState.createEmpty(),
+            //summary: EditorState.createEmpty(),
             author: "",
             btnLink: "",
             imageLink: "",
