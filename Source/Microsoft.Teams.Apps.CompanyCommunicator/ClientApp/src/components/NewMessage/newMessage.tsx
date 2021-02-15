@@ -100,7 +100,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
         this.state = {
             title: "",
-            summary: editorState.createEmpty(),
+            //summary: editorState.createEmpty(),
             author: "",
             btnLink: "",
             imageLink: "",
@@ -367,12 +367,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     placeholder={this.localize("Summary")}
                                     label={this.localize("Summary")}
                                     value={this.state.summary}
-                                    editorState={this.state.summary}
-                                    toolbarClassName="toolbarClassName"
-                                    wrapperClassName="wrapperClassName"
-                                    editorClassName="editorClassName"
-                                    onEditorStateChange={this.onSummaryChanged}
-                                    onChange={this.onSummaryChanged}
+                                    //editorState={this.state.summary}
+                                   // toolbarClassName="toolbarClassName"
+                                    // wrapperClassName="wrapperClassName"
+                                    // editorClassName="editorClassName"
+                                    // onEditorStateChange={this.onSummaryChanged}
+                                    // onChange={this.onSummaryChanged}
 
                                     /* <Editor
                                     className="inputField"

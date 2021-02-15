@@ -1,6 +1,6 @@
 {
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.5/MicrosoftTeams.schema.json",
-    "manifestVersion": "1.8",
+    "manifestVersion": "1.5",
     "version": "4.0.0",
     "id": "1c07cd26-a088-4db8-8928-ace382fa219f",
     "packageName": "com.microsoft.teams.companycommunicator.authors",
@@ -15,8 +15,8 @@
       "outline": "outline.png"
     },
     "name": {
-      "short": "Company Communicator (Authors)",
-      "full": "Company Communicator (Authors)"
+      "short": "Author Infinion Communicator",
+      "full": "Author Infinion Communicator"
     },
     "description": {
       "short": "Broadcast messages to multiple teams and people in one go",
