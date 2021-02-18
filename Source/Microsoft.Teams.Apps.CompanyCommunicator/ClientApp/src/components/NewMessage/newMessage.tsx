@@ -22,7 +22,6 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { RichUtils} from 'draft-js';
 
 
-
 type dropdownItem = {
     key: string,
     header: string,
@@ -32,12 +31,6 @@ type dropdownItem = {
         id: string,
     },
 }
-
-type editorProps = {
-    summary: any[]
-
-}
-
 
 export interface IDraftMessage {
     id?: string,
@@ -55,7 +48,7 @@ export interface IDraftMessage {
 
 export interface formState {
     title: string,
-    summary?: string, 
+    summary?: string,
     btnLink?: string,
     imageLink?: string,
     btnTitle?: string,
@@ -86,27 +79,13 @@ export interface formState {
     errorButtonUrlMessage: string,
 }
 
-
 export interface INewMessageProps extends RouteComponentProps, WithTranslation {
     getDraftMessagesList?: any;
 }
-export default class newMessage extends React.Component<editorProps, editorState> {
-    render() {
-        return <div className="App">
-            <header className="App-header">
-                <h3>Render Component with State and Props using TypeScript</h3>
-            </header>
-        </div>
-    }
-
-}
-
 
 class NewMessage extends React.Component<INewMessageProps, formState> {
-    
     readonly localize: TFunction;
     private card: any;
-
 
     constructor(props: INewMessageProps) {
         super(props);
@@ -114,11 +93,10 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         this.localize = this.props.t;
         this.card = getInitAdaptiveCard(this.localize);
         this.setDefaultCard(this.card);
-        
 
         this.state = {
             title: "",
-            summary: EditorState.createEmpty(),
+            summary: "",
             author: "",
             btnLink: "",
             imageLink: "",
@@ -144,16 +122,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedGroups: [],
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
-            
         }
-        // this.onChange = summary  => this.setState({summary});
-        handleChange(e: EditorState) {
-            this.setState({ editorState: e });
-          }
-        
     }
-   
-    
 
     public async componentDidMount() {
         microsoftTeams.initialize();
@@ -232,17 +202,17 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         );
         return dropdownItemList;
     }
-//todo
+
     public setDefaultCard = (card: any) => {
         const titleAsString = this.localize("TitleText");
-        const summaryAsEditorState = this.localize("Summary");
+        const summaryAsString = this.localize("Summary");
         const authorAsString = this.localize("Author1");
         const buttonTitleAsString = this.localize("ButtonTitle");
 
         setCardTitle(card, titleAsString);
         let imgUrl = getBaseUrl() + "/image/imagePlaceholder.png";
         setCardImageLink(card, imgUrl);
-        setCardSummary(card, summaryAsEditorState);
+        setCardSummary(card, summaryAsString);
         setCardAuthor(card, authorAsString);
         setCardBtn(card, buttonTitleAsString, "https://adaptivecards.io");
     }
@@ -351,15 +321,11 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     }
 
     public render(): JSX.Element {
-        if (this.state.loader, this.state.summary) {
+        if (this.state.loader) {
             return (
                 <div className="Loader">
                     <Loader />
-                    {/* <Editor editorState={this.state.summary}
-                    onChange= { this.onSummaryChanged} /> */}
                 </div>
-                
-
             );
         } else {
             if (this.state.page === "CardCreation") {
@@ -376,7 +342,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     autoComplete="off"
                                     required
                                 />
-                
 
                                 <Input
                                     className="inputField"
@@ -387,28 +352,14 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     errorLabel={this.state.errorImageUrlMessage}
                                     autoComplete="off"
                                 />
-                                {/* todo */}
+
                                 <TextArea
                                     className="inputField textArea"
                                     autoFocus
                                     placeholder={this.localize("Summary")}
                                     label={this.localize("Summary")}
                                     value={this.state.summary}
-                                    editorState={this.state.summary}
-                                    toolbarClassName="toolbarClassName"
-                                    wrapperClassName="wrapperClassName"
-                                    editorClassName="editorClassName"
-                                    onEditorStateChange={this.onSummaryChanged}
                                     onChange={this.onSummaryChanged}
-
-                                    /* <Editor
-                                    className="inputField"
-                                    editorState={EditorState}
-                                    toolbarClassName="toolbarClassName"
-                                    wrapperClassName="wrapperClassName"
-                                    editorClassName="editorClassName"
-                                    onEditorStateChange={this.onEditorStateChange}
-                                    /> */
                                 />
 
                                 <Input
@@ -534,9 +485,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             } else {
                 return (<div>Error</div>);
             }
-        
         }
-
     }
 
     private onGroupSelected = (value: any) => {
@@ -685,7 +634,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             }
         }
     }
-    
 
     private onSave = () => {
         const selectedTeams: string[] = [];
@@ -822,20 +770,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             this.updateCard();
         });
     }
-    // onChange = (this.onSummaryChanged) = > {
-    //     this.setCardSummary({
-    //         editorState
-    //     })
-    // }
-
-    // handleKeyCommand = (command) => {
-    //     const newState = RichUtils.handleKeyCommand(this.state.editorState, command)
-    //     if (newState) {
-    //         this.onChange(newState);
-    //         return 'handled';
-    //     }
-    //     return 'not-handled';
-    // }
 
     private onAuthorChanged = (event: any) => {
         let showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !event.target.value && !this.state.btnTitle && !this.state.btnLink);
@@ -940,6 +874,5 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     }
 }
 
-// const newMessageWithTranslation = withTranslation()(NewMessage);
-// export default newMessageWithTranslation;
-
+const newMessageWithTranslation = withTranslation()(NewMessage);
+export default newMessageWithTranslation;
