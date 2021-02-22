@@ -521,10 +521,10 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             let remainingUserTeams = this.state.teams;
             if (this.state.selectedRadioBtn !== "allUsers") {
                 if (this.state.selectedRadioBtn === "teams") {
-                    this.state.teams.filter(x => this.state.selectedTeams.findIndex(y => y.team.id === x.id) < 0);
+                    remainingUserTeams = this.state.teams.filter(x => this.state.selectedTeams.findIndex(y => y.team.id === x.id) < 0);
                 }
                 else if (this.state.selectedRadioBtn === "rosters") {
-                    this.state.teams.filter(x => this.state.selectedRosters.findIndex(y => y.team.id === x.id) < 0);
+                    remainingUserTeams = this.state.teams.filter(x => this.state.selectedRosters.findIndex(y => y.team.id === x.id) < 0);
                 }
             }
             remainingUserTeams.forEach((element) => {
