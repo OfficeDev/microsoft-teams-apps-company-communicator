@@ -35,7 +35,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Extensions
                 }
             }
 
-            yield return buffer;
+            if (buffer.Count > 0)
+            {
+                yield return buffer;
+            }
         }
     }
 }
