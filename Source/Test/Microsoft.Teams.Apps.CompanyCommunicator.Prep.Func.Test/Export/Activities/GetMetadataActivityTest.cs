@@ -41,22 +41,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             {
                 return new[]
                 {
-                    new object[] { null, new NotificationDataEntity(), new ExportDataEntity() },
-                    new object[] { new Mock<IDurableOrchestrationContext>(), null, new ExportDataEntity() },
-                    new object[] { new Mock<IDurableOrchestrationContext>(), new NotificationDataEntity(), null },
-                };
-            }
-        }
-
-        /// <summary>
-        /// GetsParameters.
-        /// </summary>
-        public static IEnumerable<object[]> GetParameters
-        {
-            get
-            {
-                return new[]
-                {
                     new object[] { null, new ExportDataEntity() },
                     new object[] { new NotificationDataEntity(), null },
                 };
@@ -77,40 +61,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         }
 
         /// <summary>
-        /// Constructor test for null parameters.
-        /// </summary>
-        [Fact]
-        public void CreateActivity_NullParamters_ThrowsArgumentNullException()
-        {
-            // Arrange
-            Action action1 = () => new GetMetadataActivity(null /*userService*/, this.localizer.Object);
-            Action action2 = () => new GetMetadataActivity(this.usersService.Object, null /*localizer*/);
-
-            // Act and Assert.
-            action1.Should().Throw<ArgumentNullException>("userService is null.");
-            action2.Should().Throw<ArgumentNullException>("localizer is null.");
-        }
-
-        /// <summary>
         /// Test case to check if activity handles null paramaters.
         /// </summary>
-        /// <param name="context">context.</param>
         /// <param name="notificationDataEntity">notificationDataEntity.</param>
         /// <param name="exportDataEntity">exportDataEntity.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Theory]
         [MemberData(nameof(RunParameters))]
         public async Task RunActivity_NullParameters_ThrowsAgrumentNullException(
-            Mock<IDurableOrchestrationContext> context,
             NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity)
         {
             // Arrange
             var activityInstance = this.GetMetadataActivity();
-            var mockContext = context?.Object;
 
             // Act
-            Func<Task> task = async () => await activityInstance.RunAsync(mockContext, (notificationDataEntity, exportDataEntity), this.log.Object);
+            Func<Task> task = async () => await activityInstance.GetMetadataActivityAsync((notificationDataEntity, exportDataEntity));
 
             // Assert
             await task.Should().ThrowAsync<ArgumentNullException>();
@@ -131,7 +97,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             context.Setup(x => x.CallActivityWithRetryAsync<Metadata>(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<object>())).ReturnsAsync(new Metadata());
 
             // Act
-            var result = await activityInstance.RunAsync(context.Object, (notificationDataEntityMock.Object, exportDataEntityMock.Object), this.log.Object);
+            var result = await activityInstance.GetMetadataActivityAsync((notificationDataEntityMock.Object, exportDataEntityMock.Object));
 
             // Assert
             Assert.Equal(typeof(Metadata), result.GetType());
@@ -144,7 +110,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         /// <param name="exportDataEntity">exportDataEntity.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Theory]
-        [MemberData(nameof(GetParameters))]
+        [MemberData(nameof(RunParameters))]
         public async Task Get_NullParameters_ThrowsArgumentNullException(
             NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity)

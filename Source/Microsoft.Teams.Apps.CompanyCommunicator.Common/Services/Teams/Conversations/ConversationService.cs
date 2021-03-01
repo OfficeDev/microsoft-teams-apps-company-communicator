@@ -9,10 +9,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Polly;
     using Polly.Contrib.WaitAndRetry;
@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     {
         private static readonly string MicrosoftTeamsChannelId = "msteams";
 
-        private readonly BotFrameworkHttpAdapter botAdapter;
+        private readonly ICCBotFrameworkHttpAdapter botAdapter;
         private readonly UserAppCredentials userAppCredentials;
         private readonly AuthorAppCredentials authorAppCredentials;
 
@@ -36,7 +36,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         /// <param name="userAppCredentials">The user Microsoft app credentials.</param>
         /// <param name="authorAppCredentials">The author Microsoft app credentials.</param>
         public ConversationService(
-            BotFrameworkHttpAdapter botAdapter,
+            ICCBotFrameworkHttpAdapter botAdapter,
             UserAppCredentials userAppCredentials,
             AuthorAppCredentials authorAppCredentials)
         {

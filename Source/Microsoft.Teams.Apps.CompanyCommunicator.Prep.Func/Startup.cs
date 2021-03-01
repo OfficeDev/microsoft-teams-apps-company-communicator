@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using System;
     using System.Globalization;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+    using Microsoft.Bot.Builder.Integration;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
@@ -18,6 +19,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Extensions.Options;
     using Microsoft.Graph;
     using Microsoft.Identity.Client;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -33,8 +37,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
 
@@ -101,21 +103,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(culture);
             CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(culture);
 
-            // Add orchestration.
-            builder.Services.AddTransient<ExportOrchestration>();
-
-            // Add activities.
-            builder.Services.AddTransient<UpdateExportDataActivity>();
-            builder.Services.AddTransient<GetMetadataActivity>();
-            builder.Services.AddTransient<UploadActivity>();
-            builder.Services.AddTransient<SendFileCardActivity>();
-            builder.Services.AddTransient<HandleExportFailureActivity>();
-
             // Add bot services.
             builder.Services.AddSingleton<UserAppCredentials>();
             builder.Services.AddSingleton<AuthorAppCredentials>();
             builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
-            builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
+            builder.Services.AddSingleton<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
 
             // Add repositories.
             builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
@@ -135,6 +127,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<TableRowKeyGenerator>();
             builder.Services.AddTransient<AdaptiveCardCreator>();
             builder.Services.AddTransient<IAppSettingsService, AppSettingsService>();
+            builder.Services.AddTransient<IStorageClientFactory, StorageClientFactory>();
 
             // Add Teams services.
             builder.Services.AddTransient<ITeamMembersService, TeamMembersService>();

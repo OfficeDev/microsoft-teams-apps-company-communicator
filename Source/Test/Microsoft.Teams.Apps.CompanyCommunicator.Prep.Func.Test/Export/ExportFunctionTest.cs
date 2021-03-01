@@ -11,10 +11,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
     using FluentAssertions;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Moq;
     using Xunit;
 
@@ -27,6 +29,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
         private readonly Mock<INotificationDataRepository> notificationDataRepository = new Mock<INotificationDataRepository>();
         private readonly Mock<IExportDataRepository> exportDataRepository = new Mock<IExportDataRepository>();
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
+        private readonly Mock<ILogger> logger = new Mock<ILogger>();
 
         /// <summary>
         /// gets RunParameters.
@@ -88,7 +91,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
             var mockStarter = starter?.Object;
 
             // Act
-            Func<Task> task = async () => await activityInstance.Run(myQueueItem, mockStarter);
+            Func<Task> task = async () => await activityInstance.Run(myQueueItem, mockStarter, this.logger.Object);
 
             // Assert
             await task.Should().ThrowAsync<ArgumentNullException>();
@@ -118,10 +121,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
                 .ReturnsAsync(instanceId);
 
             // Act
-            await activityInstance.Run(messageContent, this.starter.Object);
+            await activityInstance.Run(messageContent, this.starter.Object, this.logger.Object);
 
             // Assert
-            this.starter.Verify(x => x.StartNewAsync(It.Is<string>(x => x.Equals("ExportOrchestrationAsync")), It.IsAny<ExportDataRequirement>()), Times.Once());
+            this.starter.Verify(x => x.StartNewAsync(It.Is<string>(x => x.Equals(FunctionNames.ExportOrchestration)), It.IsAny<ExportDataRequirement>()), Times.Once());
         }
 
         /// <summary>
@@ -145,10 +148,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
             this.starter.Setup(x => x.StartNewAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(It.IsAny<string>());
 
             // Act
-            await activityInstance.Run(messageContent, this.starter.Object);
+            await activityInstance.Run(messageContent, this.starter.Object, this.logger.Object);
 
             // Assert
-            this.starter.Verify(x => x.StartNewAsync(It.Is<string>(x => x.Equals("ExportOrchestrationAsync")), It.IsAny<ExportDataRequirement>()), Times.Never());
+            this.starter.Verify(x => x.StartNewAsync(It.Is<string>(x => x.Equals(FunctionNames.ExportOrchestration)), It.IsAny<ExportDataRequirement>()), Times.Never());
         }
 
         /// <summary>

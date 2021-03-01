@@ -12,13 +12,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
@@ -33,7 +33,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     public class SendFileCardActivity
     {
         private readonly string authorAppId;
-        private readonly BotFrameworkHttpAdapter botAdapter;
+        private readonly ICCBotFrameworkHttpAdapter botAdapter;
         private readonly IUserDataRepository userDataRepository;
         private readonly IConversationService conversationService;
         private readonly TeamsConversationOptions options;
@@ -52,7 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <param name="localizer">Localization service.</param>
         public SendFileCardActivity(
             IOptions<BotOptions> botOptions,
-            BotFrameworkHttpAdapter botAdapter,
+            ICCBotFrameworkHttpAdapter botAdapter,
             IUserDataRepository userDataRepository,
             IConversationService conversationService,
             IOptions<TeamsConversationOptions> options,
@@ -69,31 +69,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         }
 
         /// <summary>
-        /// Run the activity.
-        /// It sends the file card.
-        /// </summary>
-        /// <param name="context">Durable orchestration context.</param>
-        /// <param name="sendData">Tuple containing user id, notification data entity and export data entity.</param>
-        /// <param name="log">Logging service.</param>
-        /// <returns>responsse of send file card acitivity.</returns>
-        public async Task<string> RunAsync(
-            IDurableOrchestrationContext context,
-            (string userId, string notificationId, string fileName) sendData,
-            ILogger log)
-        {
-            return await context.CallActivityWithRetryAsync<string>(
-              nameof(SendFileCardActivity.SendFileCardActivityAsync),
-              FunctionSettings.DefaultRetryOptions,
-              sendData);
-        }
-
-        /// <summary>
         /// Sends the file card to the user.
         /// </summary>
         /// <param name="sendData">Tuple containing user id, notification id and filename.</param>
         /// <param name="log">Logging service.</param>
         /// <returns>file card response id.</returns>
-        [FunctionName(nameof(SendFileCardActivityAsync))]
+        [FunctionName(FunctionNames.SendFileCardActivity)]
         public async Task<string> SendFileCardActivityAsync(
             [ActivityTrigger](string userId, string notificationId, string fileName) sendData,
             ILogger log)
@@ -128,7 +109,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             int maxNumberOfAttempts = 10;
             string consentId = string.Empty;
             await this.botAdapter.ContinueConversationAsync(
-               botAppId: this.authorAppId,
+               botId: this.authorAppId,
                reference: conversationReference,
                callback: async (turnContext, cancellationToken) =>
                {

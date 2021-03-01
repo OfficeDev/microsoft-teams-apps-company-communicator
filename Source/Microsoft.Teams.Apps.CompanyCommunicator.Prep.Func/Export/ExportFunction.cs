@@ -10,12 +10,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -53,15 +55,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
         /// </summary>
         /// <param name="myQueueItem">The Service Bus queue item.</param>
         /// <param name="starter">Durable orchestration client.</param>
+        /// <param name="log">Logger.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName("CompanyCommunicatorExportFunction")]
         public async Task Run(
-            [ServiceBusTrigger(
-             ExportQueue.QueueName,
-             Connection = ExportQueue.ServiceBusConnectionConfigurationKey)]
+            [ServiceBusTrigger(ExportQueue.QueueName, Connection = ExportQueue.ServiceBusConnectionConfigurationKey)]
             string myQueueItem,
-            [DurableClient]
-            IDurableOrchestrationClient starter)
+            [DurableClient] IDurableOrchestrationClient starter,
+            ILogger log)
         {
             if (myQueueItem == null)
             {
@@ -75,19 +76,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 
             var messageContent = JsonConvert.DeserializeObject<ExportMessageQueueContent>(myQueueItem);
             var notificationId = messageContent.NotificationId;
-
             var sentNotificationDataEntity = await this.notificationDataRepository.GetAsync(
                 partitionKey: NotificationDataTableNames.SentNotificationsPartition,
                 rowKey: notificationId);
             var exportDataEntity = await this.exportDataRepository.GetAsync(messageContent.UserId, notificationId);
             exportDataEntity.FileName = this.GetFileName();
             var requirement = new ExportDataRequirement(sentNotificationDataEntity, exportDataEntity, messageContent.UserId);
-            if (requirement.IsValid())
+            if (!requirement.IsValid())
             {
-                string instanceId = await starter.StartNewAsync(
-                    nameof(ExportOrchestration.ExportOrchestrationAsync),
-                    requirement);
+                log.LogError("Export data requirement is not valid.");
+                return;
             }
+
+            string instanceId = await starter.StartNewAsync(
+                FunctionNames.ExportOrchestration,
+                requirement);
+
+            log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
         }
 
         private string GetFileName()

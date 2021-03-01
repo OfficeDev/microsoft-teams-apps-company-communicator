@@ -11,7 +11,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
-    using Microsoft.Extensions.Logging;
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -42,47 +41,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         }
 
         /// <summary>
-        /// Run the activity.
-        /// It creates and gets the metadata.
-        /// </summary>
-        /// <param name="context">Durable orchestration context.</param>
-        /// <param name="exportRequiredData">Tuple containing notification data entity and export data entity.</param>
-        /// <param name="log">Logging service.</param>
-        /// <returns>instance of metadata.</returns>
-        public async Task<Metadata> RunAsync(
-            IDurableOrchestrationContext context,
-            (NotificationDataEntity notificationDataEntity,
-            ExportDataEntity exportDataEntity) exportRequiredData,
-            ILogger log)
-        {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (exportRequiredData.notificationDataEntity == null)
-            {
-                throw new ArgumentNullException(nameof(exportRequiredData.notificationDataEntity));
-            }
-
-            if (exportRequiredData.exportDataEntity == null)
-            {
-                throw new ArgumentNullException(nameof(exportRequiredData.exportDataEntity));
-            }
-
-            var metaData = await context.CallActivityWithRetryAsync<Metadata>(
-               nameof(GetMetadataActivity.GetMetadataActivityAsync),
-               FunctionSettings.DefaultRetryOptions,
-               (exportRequiredData.notificationDataEntity, exportRequiredData.exportDataEntity));
-            return metaData;
-        }
-
-        /// <summary>
         /// Create and get the metadata.
         /// </summary>
         /// <param name="exportRequiredData">Tuple containing notification data entity and export data entity.</param>
         /// <returns>instance of metadata.</returns>
-        [FunctionName(nameof(GetMetadataActivityAsync))]
+        [FunctionName(FunctionNames.GetMetadataActivity)]
         public async Task<Metadata> GetMetadataActivityAsync(
             [ActivityTrigger](NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity) exportRequiredData)
@@ -114,13 +77,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                 user.UserPrincipalName :
                 this.localizer.GetString("AdminConsentError");
 
-            return this.Get(
+            return this.Create(
                 exportRequiredData.notificationDataEntity,
                 exportRequiredData.exportDataEntity,
                 userPrincipalName);
         }
 
-        private Metadata Get(
+        private Metadata Create(
             NotificationDataEntity notificationDataEntity,
             ExportDataEntity exportDataEntity,
             string userPrinicipalName)

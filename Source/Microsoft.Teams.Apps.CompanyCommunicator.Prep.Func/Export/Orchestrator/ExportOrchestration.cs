@@ -11,42 +11,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
 
     /// <summary>
     /// This class is the durable framework orchestration for exporting notifications.
     /// </summary>
-    public class ExportOrchestration
+    public static class ExportOrchestration
     {
-        private readonly UploadActivity uploadActivity;
-        private readonly SendFileCardActivity sendFileCardActivity;
-        private readonly GetMetadataActivity getMetadataActivity;
-        private readonly UpdateExportDataActivity updateExportDataActivity;
-        private readonly HandleExportFailureActivity handleExportFailureActivity;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExportOrchestration"/> class.
-        /// </summary>
-        /// <param name="uploadActivity">upload zip activity.</param>
-        /// <param name="sendFileCardActivity">send file card activity.</param>
-        /// <param name="getMetadataActivity">get the metadata activity.</param>
-        /// <param name="updateExportDataActivity">update the export data activity.</param>
-        /// <param name="handleExportFailureActivity">handle failure activity.</param>
-        public ExportOrchestration(
-            UploadActivity uploadActivity,
-            SendFileCardActivity sendFileCardActivity,
-            GetMetadataActivity getMetadataActivity,
-            UpdateExportDataActivity updateExportDataActivity,
-            HandleExportFailureActivity handleExportFailureActivity)
-        {
-            this.uploadActivity = uploadActivity ?? throw new ArgumentNullException(nameof(uploadActivity));
-            this.sendFileCardActivity = sendFileCardActivity ?? throw new ArgumentNullException(nameof(sendFileCardActivity));
-            this.getMetadataActivity = getMetadataActivity ?? throw new ArgumentNullException(nameof(getMetadataActivity));
-            this.updateExportDataActivity = updateExportDataActivity ?? throw new ArgumentNullException(nameof(updateExportDataActivity));
-            this.handleExportFailureActivity = handleExportFailureActivity ?? throw new ArgumentNullException(nameof(handleExportFailureActivity));
-        }
-
         /// <summary>
         /// This is the durable orchestration method,
         /// which starts the export process.
@@ -54,8 +26,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [FunctionName(nameof(ExportOrchestrationAsync))]
-        public async Task ExportOrchestrationAsync(
+        [FunctionName(FunctionNames.ExportOrchestration)]
+        public static async Task RunOrchestrator(
             [OrchestrationTrigger] IDurableOrchestrationContext context,
             ILogger log)
         {
@@ -70,27 +42,68 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
 
             try
             {
-                // Update the status of export as in progress.
+                if (!context.IsReplaying)
+                {
+                    log.LogInformation("About to update export is in progress.");
+                }
+
                 exportDataEntity.Status = ExportStatus.InProgress.ToString();
-                await this.updateExportDataActivity.RunAsync(context, exportDataEntity, log);
+                await context.CallActivityWithRetryAsync(
+                    FunctionNames.UpdateExportDataActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    exportDataEntity);
 
-                var metaData = await this.getMetadataActivity.RunAsync(context, (sentNotificationDataEntity, exportDataEntity), log);
-                await this.uploadActivity.RunAsync(context, (sentNotificationDataEntity, metaData, exportDataEntity.FileName), log);
-                var consentId = await this.sendFileCardActivity.RunAsync(context, (exportRequiredData.UserId, exportRequiredData.NotificationDataEntity.Id, exportDataEntity.FileName), log);
+                if (!context.IsReplaying)
+                {
+                    log.LogInformation("About to get the metadata information.");
+                }
 
-                // Update export as completed.
+                var metaData = await context.CallActivityWithRetryAsync<Metadata>(
+                    FunctionNames.GetMetadataActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    (sentNotificationDataEntity, exportDataEntity));
+
+                if (!context.IsReplaying)
+                {
+                    log.LogInformation("About to start file upload.");
+                }
+
+                await context.CallActivityWithRetryAsync(
+                    FunctionNames.UploadActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    (sentNotificationDataEntity, metaData, exportDataEntity.FileName));
+
+                if (!context.IsReplaying)
+                {
+                    log.LogInformation("About to send file card.");
+                }
+
+                var consentId = await context.CallActivityWithRetryAsync<string>(
+                    FunctionNames.SendFileCardActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    (exportRequiredData.UserId, exportRequiredData.NotificationDataEntity.Id, exportDataEntity.FileName));
+
+                if (!context.IsReplaying)
+                {
+                    log.LogInformation("About to update export is completed.");
+                }
+
                 exportDataEntity.FileConsentId = consentId;
                 exportDataEntity.Status = ExportStatus.Completed.ToString();
-                await this.updateExportDataActivity.RunAsync(context, exportDataEntity, log);
+                await context.CallActivityWithRetryAsync(
+                    FunctionNames.UpdateExportDataActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    exportDataEntity);
 
-                log.LogInformation($"Export Notification Successful!");
+                log.LogInformation($"ExportOrchestration is successful for notification id:{sentNotificationDataEntity.Id}!");
             }
             catch (Exception ex)
             {
-                var errorMessage = $"Failed to export notification {sentNotificationDataEntity.Id} : {ex.Message}";
-                log.LogError(ex, errorMessage);
-
-                await this.handleExportFailureActivity.RunAsync(context, exportDataEntity, log);
+                log.LogError(ex, $"Failed to export notification {sentNotificationDataEntity.Id} : {ex.Message}");
+                await context.CallActivityWithRetryAsync(
+                    FunctionNames.HandleExportFailureActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    exportDataEntity);
             }
         }
     }

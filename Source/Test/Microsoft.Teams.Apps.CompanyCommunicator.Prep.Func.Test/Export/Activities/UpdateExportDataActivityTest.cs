@@ -6,10 +6,8 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activities
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using FluentAssertions;
-    using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities;
@@ -23,22 +21,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
     {
         private readonly Mock<ILogger> log = new Mock<ILogger>();
         private readonly Mock<IExportDataRepository> exportDataRepository = new Mock<IExportDataRepository>();
-        private readonly Mock<IDurableOrchestrationContext> context = new Mock<IDurableOrchestrationContext>();
-
-        /// <summary>
-        /// Gets RunParameters.
-        /// </summary>
-        public static IEnumerable<object[]> RunParameters
-        {
-            get
-            {
-                return new[]
-                {
-                    new object[] { null, new ExportDataEntity() },
-                    new object[] { new Mock<IDurableOrchestrationContext>(), null },
-                };
-            }
-        }
 
         /// <summary>
         /// Constructor test for all parameters.
@@ -67,47 +49,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         }
 
         /// <summary>
-        /// Test case to check if activity handles null paramaters.
-        /// </summary>
-        /// <param name="context">context.</param>
-        /// <param name="exportDataEntity">exportDataEntity.</param>
-        /// <returns>A task that represents the work queued to execute.</returns>
-        [Theory]
-        [MemberData(nameof(RunParameters))]
-        public async Task RunActivity_NullParameters_ThrowsAgrumentNullException(
-            Mock<IDurableOrchestrationContext> context,
-            ExportDataEntity exportDataEntity)
-        {
-            // Arrange
-            var activityInstance = this.GetUpdateExportDataActivity();
-            var mockContext = context?.Object;
-
-            // Act
-            Func<Task> task = async () => await activityInstance.RunAsync(mockContext, exportDataEntity, this.log.Object);
-
-            // Assert
-            await task.Should().ThrowAsync<ArgumentNullException>();
-        }
-
-        /// <summary>
         /// Test case to check CallActivityWithRetryAsync method is invoked once.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
-        public async Task Update_CallExportDataService_ShouldInvokeOnce()
+        public async Task RunActivity_NullParameters_ThrowsAgrumentNullException()
         {
             // Arrange
             var activityInstance = this.GetUpdateExportDataActivity();
-            var exportDataEntity = this.GetExportDataEntity();
-
-            this.context.Setup(x => x.CallActivityWithRetryAsync<Task>(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<ExportDataEntity>()));
 
             // Act
-            Func<Task> task = async () => await activityInstance.RunAsync(this.context.Object, exportDataEntity, this.log.Object);
+            Func<Task> task = async () => await activityInstance.UpdateExportDataActivityAsync(null);
 
             // Assert
-            await task.Should().NotThrowAsync();
-            this.context.Verify(x => x.CallActivityWithRetryAsync<Task>(It.Is<string>(x => x.Equals(nameof(UpdateExportDataActivity.UpdateExportDataActivityAsync))), It.IsAny<RetryOptions>(), It.IsAny<ExportDataEntity>()), Times.Once);
+            await task.Should().ThrowAsync<ArgumentNullException>();
         }
 
         /// <summary>
