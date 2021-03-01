@@ -34,6 +34,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <inheritdoc/>
         public async Task<IEnumerable<User>> GetBatchByUserIds(IEnumerable<IEnumerable<string>> userIdsByGroups)
         {
+            if (userIdsByGroups == null)
+            {
+                throw new ArgumentNullException(nameof(userIdsByGroups));
+            }
+
             var users = new List<User>();
             var batches = this.GetBatchRequest(userIdsByGroups);
             foreach (var batchRequestContent in batches)
@@ -238,6 +243,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
 
             foreach (var userIds in userIdsByGroups)
             {
+                if (userIds.Count() == 0)
+                {
+                    continue;
+                }
+
+                if (userIds.Count() > 15)
+                {
+                    throw new InvalidOperationException("The id count should be less than or equal to 15");
+                }
+
                 var filterUserIds = this.GetUserIdFilter(userIds);
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://graph.microsoft.com/v1.0/users?$filter={filterUserIds}&$select=id,displayName,userPrincipalName");
                 batchRequestContent.AddBatchRequestStep(new BatchRequestStep(requestId.ToString(), httpRequestMessage));
@@ -251,7 +266,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 requestId++;
             }
 
-            if (batchRequestContent.BatchRequestSteps.Count < maxNoBatchItems)
+            if (batchRequestContent.BatchRequestSteps.Count > 0 && batchRequestContent.BatchRequestSteps.Count < maxNoBatchItems)
             {
                 batches.Add(batchRequestContent);
             }
