@@ -12,7 +12,11 @@
   <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
   </ItemGroup>
-
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Microsoft.Teams.App.CompanyCommunicator.Common.Test</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AdaptiveCards" Version="1.0.6" />
     <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.1" />
