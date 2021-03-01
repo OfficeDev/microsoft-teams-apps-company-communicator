@@ -38,18 +38,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             {
                 new List<SentNotificationDataEntity>()
                 {
-                    new SentNotificationDataEntity(){ ConversationId = "conversationId" , DeliveryStatus = "Succeeded", RowKey = "RowKey", StatusCode = 0, ErrorMessage = string.Empty }
-                }
+                    new SentNotificationDataEntity()
+                    {
+                        ConversationId = "conversationId", DeliveryStatus = "Succeeded", RowKey = "RowKey", StatusCode = 0, ErrorMessage = string.Empty,
+                    },
+                },
             };
+
         private readonly IEnumerable<List<SentNotificationDataEntity>> sentNotificationDataWithErrorList = new List<List<SentNotificationDataEntity>>()
             {
                 new List<SentNotificationDataEntity>()
                 {
-                    new SentNotificationDataEntity(){ ConversationId = "conversationId" , DeliveryStatus = "Failed", RowKey = "RowKey", StatusCode = 500,
+                    new SentNotificationDataEntity()
+                    {
+                        ConversationId = "conversationId", DeliveryStatus = "Failed", RowKey = "RowKey", StatusCode = 500,
                         ErrorMessage = "{\"Error\": { \"Message\":\"Internal Server error\", \"Code\" : \"500\" } }",
-                    }
-                }
+                    },
+                },
             };
+
         private readonly IEnumerable<List<SentNotificationDataEntity>> sentNotificationDataEmptyList = new List<List<SentNotificationDataEntity>>();
 
         /// <summary>
@@ -67,7 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
 
         /// <summary>
         /// Constructor test for null parameters.
-        /// </summary> 
+        /// </summary>
         [Fact]
         public void CreateInstance_NullParamters_ThrowsArgumentNullException()
         {

@@ -36,11 +36,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         private readonly string notificationId = "notificationId";
         private readonly string recipientId = "RecipientId1";
         private readonly int totalNumberOfSendThrottles = 100;
-        SentNotificationDataEntity notificationData = null;
 
         /// <summary>
         /// Constructor tests.
-        /// </summary> 
+        /// </summary>
         [Fact]
         public void NotificationServiceConstructorTest()
         {
@@ -185,7 +184,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
             var notificationService = this.GetNotificationService();
             this.sentNotificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(this.notificationData);
+                .Returns(Task.FromResult(default(SentNotificationDataEntity)));
 
             // Act
             var serviceResponse = await notificationService.IsPendingNotification(this.sendQueueMessageContent);

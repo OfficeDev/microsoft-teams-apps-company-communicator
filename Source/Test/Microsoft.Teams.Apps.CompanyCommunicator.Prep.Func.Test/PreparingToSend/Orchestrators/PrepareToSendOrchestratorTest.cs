@@ -51,12 +51,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await PrepareToSendOrchestrator.RunOrchestrator(mockContext.Object, mockLogger.Object);
+            Func<Task> task = async () => await PrepareToSendOrchestrator.RunOrchestrator(this.mockContext.Object, this.mockLogger.Object);
 
             // Assert
             await task.Should().NotThrowAsync<Exception>();
-            this.mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x=>x.Equals(FunctionNames.StoreMessageActivity)), It.IsAny<RetryOptions>(), It.IsAny<NotificationDataEntity>()), Times.Once());
-            this.mockContext.Verify(x => x.CallSubOrchestratorWithRetryAsync(It.Is<string>(x=>x.Equals(FunctionNames.SyncRecipientsOrchestrator)), It.IsAny<RetryOptions>(), It.IsAny<NotificationDataEntity>()), Times.Once());
+            this.mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.StoreMessageActivity)), It.IsAny<RetryOptions>(), It.IsAny<NotificationDataEntity>()), Times.Once());
+            this.mockContext.Verify(x => x.CallSubOrchestratorWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.SyncRecipientsOrchestrator)), It.IsAny<RetryOptions>(), It.IsAny<NotificationDataEntity>()), Times.Once());
             this.mockContext.Verify(x => x.CallSubOrchestratorWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.TeamsConversationOrchestrator)), It.IsAny<RetryOptions>(), It.IsAny<NotificationDataEntity>()), Times.Once());
             this.mockContext.Verify(x => x.CallSubOrchestratorWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.SendQueueOrchestrator)), It.IsAny<RetryOptions>(), It.IsAny<NotificationDataEntity>()), Times.Once());
         }

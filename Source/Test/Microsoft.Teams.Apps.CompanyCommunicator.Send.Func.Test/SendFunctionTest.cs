@@ -27,7 +27,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
     /// </summary>
     public class SendFunctionTest
     {
-        private IOptions<SendFunctionOptions> options = Options.Create(new SendFunctionOptions() { MaxNumberOfAttempts = 2, SendRetryDelayNumberOfSeconds = 300 });
         private readonly Mock<INotificationService> notificationService = new Mock<INotificationService>();
         private readonly Mock<ISendingNotificationDataRepository> notificationRepo = new Mock<ISendingNotificationDataRepository>();
         private readonly Mock<IMessageService> messageService = new Mock<IMessageService>();
@@ -35,6 +34,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
         private readonly Mock<ILogger> logger = new Mock<ILogger>();
         private readonly int deliveryCount = 0;
+        private readonly DateTime dateTime = DateTime.Now;
+        private IOptions<SendFunctionOptions> options = Options.Create(new SendFunctionOptions() { MaxNumberOfAttempts = 2, SendRetryDelayNumberOfSeconds = 300 });
 
         /// <summary>
         /// Constructor tests.
@@ -75,11 +76,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
             this.notificationService.Setup(x => x.IsPendingNotification(It.IsAny<SendQueueMessageContent>())).ReturnsAsync(false); // Notification is pending
 
             // Act
-            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, new DateTime(), string.Empty, this.logger.Object, new ExecutionContext());
+            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, this.dateTime, string.Empty, this.logger.Object, new ExecutionContext());
 
             // Assert
             await task.Should().NotThrowAsync<Exception>();
-            this.notificationService.Verify(x=>x.IsPendingNotification(It.IsAny<SendQueueMessageContent>()),Times.Once());
+            this.notificationService.Verify(x => x.IsPendingNotification(It.IsAny<SendQueueMessageContent>()), Times.Once());
         }
 
         /// <summary>
@@ -101,7 +102,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, new DateTime(), string.Empty, this.logger.Object, new ExecutionContext());
+            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, this.dateTime, string.Empty, this.logger.Object, new ExecutionContext());
 
             // Assert
             await task.Should().NotThrowAsync<NullReferenceException>();
@@ -132,7 +133,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
             this.sendQueue.Setup(x => x.SendDelayedAsync(It.IsAny<SendQueueMessageContent>(), It.IsAny<double>())).Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, new DateTime(), string.Empty, this.logger.Object, new ExecutionContext());
+            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, this.dateTime, string.Empty, this.logger.Object, new ExecutionContext());
 
             // Assert
             await task.Should().NotThrowAsync<NullReferenceException>();
@@ -168,15 +169,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
 
             var notificatioData = new SendingNotificationDataEntity() { Content = "{\"text\":\"Welcome\",\"displayText\":\"Hello\"}" };
             this.notificationRepo.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(notificatioData);
-            this.messageService.Setup(x => x.SendMessageAsync(It.IsAny<IMessageActivity>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), logger.Object)).ReturnsAsync(sendMessageResponse);
+            this.messageService.Setup(x => x.SendMessageAsync(It.IsAny<IMessageActivity>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), this.logger.Object)).ReturnsAsync(sendMessageResponse);
             this.notificationService.Setup(x => x.UpdateSentNotification(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, new DateTime(), string.Empty, this.logger.Object, new ExecutionContext());
+            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, this.dateTime, string.Empty, this.logger.Object, new ExecutionContext());
 
             // Assert
             await task.Should().NotThrowAsync<NullReferenceException>();
-            this.messageService.Verify(x => x.SendMessageAsync(It.IsAny<IMessageActivity>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), logger.Object));
+            this.messageService.Verify(x => x.SendMessageAsync(It.IsAny<IMessageActivity>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), this.logger.Object));
         }
 
         /// <summary>
@@ -210,11 +211,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
 
             var notificatioData = new SendingNotificationDataEntity() { Content = "{\"text\":\"Welcome\",\"displayText\":\"Hello\"}" };
             this.notificationRepo.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(notificatioData);
-            this.messageService.Setup(x => x.SendMessageAsync(It.IsAny<IMessageActivity>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), logger.Object)).ReturnsAsync(sendMessageResponse);
+            this.messageService.Setup(x => x.SendMessageAsync(It.IsAny<IMessageActivity>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), this.logger.Object)).ReturnsAsync(sendMessageResponse);
             this.notificationService.Setup(x => x.UpdateSentNotification(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, new DateTime(), string.Empty, this.logger.Object, new ExecutionContext());
+            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, this.dateTime, string.Empty, this.logger.Object, new ExecutionContext());
 
             // Assert
             await task.Should().NotThrowAsync<NullReferenceException>();
@@ -244,7 +245,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, new DateTime(), string.Empty, this.logger.Object, new ExecutionContext());
+            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, this.dateTime, string.Empty, this.logger.Object, new ExecutionContext());
 
             // Assert
             await task.Should().ThrowAsync<NullReferenceException>();

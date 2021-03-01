@@ -28,6 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
         /// <summary>
         /// Gets all the pending recipients and ceates conversation with each recipient.
+        /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
         public async Task TeamsConversationRunOrchestratorTest()
@@ -59,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync<Exception>();
-            this.mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x=>x.Equals(FunctionNames.TeamsConversationActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Exactly(notification.Count()));
+            this.mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.TeamsConversationActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Exactly(notification.Count()));
         }
     }
 }

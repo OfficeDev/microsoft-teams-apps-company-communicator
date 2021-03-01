@@ -1,21 +1,22 @@
 ﻿// <copyright file="AuthenticationMetadataControllerTest.cs" company="Microsoft">
 // Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
-
-using Castle.Core.Internal;
-using FluentAssertions;
-using Microsoft.Extensions.Options;
-using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
-using Microsoft.Graph;
-using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
-using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Xunit;
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Castle.Core.Internal;
+    using FluentAssertions;
+    using Microsoft.Extensions.Options;
+    using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
+    using Moq;
+    using Xunit;
+
     /// <summary>
     /// AuthenticationMetadataController test class.
     /// </summary>
@@ -24,6 +25,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         private readonly Mock<IOptions<AuthenticationOptions>> options = new Mock<IOptions<AuthenticationOptions>>();
         private readonly string tenantId = "tenantId";
         private readonly string clientId = "clientId";
+
+        /// <summary>
+        /// Gets GetParams.
+        /// </summary>
+        public static IEnumerable<object[]> GetParams
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { null/*loginHint*/, "windowLocationOriginDomain" },
+                    new object[] { "loginHint", null /*windowLocationOriginDomain */ },
+                };
+            }
+        }
+
         /// <summary>
         /// Constructor test for all parameters.
         /// </summary>
@@ -31,22 +48,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void CreateInstance_AllParameters_ShouldBeSuccess()
         {
             // Arrange
-            options.Setup(x => x.Value).Returns(new AuthenticationOptions() { AzureAdTenantId = tenantId, AzureAdClientId = clientId });
-            Action action = () => new AuthenticationMetadataController(options.Object);
+            this.options.Setup(x => x.Value).Returns(new AuthenticationOptions() { AzureAdTenantId = this.tenantId, AzureAdClientId = this.clientId });
+            Action action = () => new AuthenticationMetadataController(this.options.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
         }
 
-        // <summary>
+        /// <summary>
         /// Constructor test for null parameter.
-        /// </summary> 
+        /// </summary>
         [Fact]
         public void CreateInstance_NullParamter_ThrowsArgumentNullException()
         {
             // Arrange
             Action action = () => new AuthenticationMetadataController(null /*authenticationOptions*/);
-            
+
             // Act and Assert.
             action.Should().Throw<ArgumentNullException>("authenticationOptions is null.");
         }
@@ -58,7 +75,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void GetConsentUrl_ValidInput_ReturnsValidConsentUrl()
         {
             // Arrange
-            var getInstance = GetAuthenticationMetadataController();
+            var getInstance = this.GetAuthenticationMetadataController();
             string windowLocationOriginDomain = "windowLocationOriginDomain";
             string loginHint = "loginHint";
 
@@ -76,25 +93,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void Get_ConsentUrl_ShouldContainAllComponents()
         {
             // Arrange
-            var getInstance = GetAuthenticationMetadataController();
+            var getInstance = this.GetAuthenticationMetadataController();
             string windowLocationOriginDomain = "windowLocationOriginDomain";
             string loginHint = "loginHint";
-            var components = GetComponents();
-            var AllComponentsExists = true;
+            var components = this.GetComponents();
+            var allComponentsExists = true;
 
             // Act
             var consentUrlString = getInstance.GetConsentUrl(windowLocationOriginDomain, loginHint);
-            foreach(var component in components)
+            foreach (var component in components)
             {
-                if(!consentUrlString.Contains(component))
+                if (!consentUrlString.Contains(component))
                 {
-                    AllComponentsExists = false;
+                    allComponentsExists = false;
                     break;
                 }
             }
 
             // Assert
-            Assert.True(AllComponentsExists);
+            Assert.True(allComponentsExists);
         }
 
         /// <summary>
@@ -104,7 +121,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void Get_CorrectMapping_ReturnsConsentUrl()
         {
             // Arrange
-            var getInstance = GetAuthenticationMetadataController();
+            var getInstance = this.GetAuthenticationMetadataController();
             string windowLocationOriginDomain = "windowLocationOriginDomain";
             string loginHint = "loginHint";
             var consentUrlPrefix = $"https://login.microsoftonline.com/";
@@ -116,11 +133,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             var windowLocationOrigin_Domain = redirect_uri.Substring(14, windowLocationOriginDomain.Length);
             var client_id = components.FirstOrDefault(x => x.Contains("client_id")).Split('=')[1];
             var login_hint = components.FirstOrDefault(x => x.Contains("login_hint")).Split('=')[1];
-            var tenant_Id = components.FirstOrDefault(x => x.Contains("redirect_uri")).Substring(consentUrlPrefix.Length, tenantId.Length);
+            var tenant_Id = components.FirstOrDefault(x => x.Contains("redirect_uri")).Substring(consentUrlPrefix.Length, this.tenantId.Length);
 
             // Assert
-            Assert.Equal(client_id , clientId);
-            Assert.Equal(tenant_Id, tenantId);
+            Assert.Equal(client_id, this.clientId);
+            Assert.Equal(tenant_Id, this.tenantId);
             Assert.Equal(login_hint, loginHint);
             Assert.Equal(windowLocationOrigin_Domain, windowLocationOriginDomain);
         }
@@ -128,27 +145,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         /// <summary>
         /// Test case to check if method handles null Parameters.
         /// </summary>
+        /// <param name="loginHint">loginHint.</param>
+        /// <param name="windowLocationOriginDomain">windowLocationOriginDomain.</param>
         [Theory]
         [MemberData(nameof(GetParams))]
         public void GetConsentUrl_NullParameters_ThrowsAgrumentNullException(string loginHint, string windowLocationOriginDomain)
         {
-            //Arrange
-            var getInstance = GetAuthenticationMetadataController();
+            // Arrange
+            var getInstance = this.GetAuthenticationMetadataController();
 
             // Act and Assert
             Assert.Throws<ArgumentNullException>(() => getInstance.GetConsentUrl(windowLocationOriginDomain, loginHint));
-        }
-
-        public static IEnumerable<object[]> GetParams
-        {
-            get
-            {
-                return new[]
-                {
-                    new object[] {null/*loginHint*/, "windowLocationOriginDomain" },
-                    new object[] { "loginHint", null /*windowLocationOriginDomain */}
-                };
-            }
         }
 
         /// <summary>
@@ -158,17 +165,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void GetConsentUrl_ComponentCount_ReturnEigthComponents()
         {
             // Arrange
-            var getInstance = GetAuthenticationMetadataController();
+            var getInstance = this.GetAuthenticationMetadataController();
             string windowLocationOriginDomain = "windowLocationOriginDomain";
             string loginHint = "loginHint";
-            var components = GetComponents();
+            var components = this.GetComponents();
 
             // Act
             var result = getInstance.GetConsentUrl(windowLocationOriginDomain, loginHint);
-            var ConsentUrlcomponents = result.Split('&');
+            var consentUrlcomponents = result.Split('&');
 
             // Assert
-            Assert.Equal(components.Count(),ConsentUrlcomponents.Count());
+            Assert.Equal(components.Count(), consentUrlcomponents.Count());
         }
 
         /// <summary>
@@ -178,7 +185,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void Check_consentUrl_JoinCharaterAmpersand()
         {
             // Arrange
-            var getInstance = GetAuthenticationMetadataController();
+            var getInstance = this.GetAuthenticationMetadataController();
             string windowLocationOriginDomain = "windowLocationOriginDomain";
             string loginHint = "loginHint";
 
@@ -188,7 +195,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             // Assert
             Assert.True(result.Split('&').Count() > 1);
         }
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AuthenticationMetadataController"/> class.
+        /// </summary>
+        /// <returns>return the instance of AuthenticationMetadataController.</returns>
+        public AuthenticationMetadataController GetAuthenticationMetadataController()
+        {
+            this.options.Setup(x => x.Value).Returns(new AuthenticationOptions() { AzureAdTenantId = this.tenantId, AzureAdClientId = this.clientId });
+            return new AuthenticationMetadataController(this.options.Object);
+        }
+
         private List<string> GetComponents()
         {
             return new List<string>()
@@ -200,13 +217,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
                 "scope",
                 "nonce",
                 "state",
-                "login_hint"
+                "login_hint",
             };
-        }
-        public AuthenticationMetadataController GetAuthenticationMetadataController()
-        {
-            options.Setup(x => x.Value).Returns(new AuthenticationOptions() { AzureAdTenantId = tenantId, AzureAdClientId = clientId });
-            return new AuthenticationMetadataController(options.Object);
         }
     }
 }

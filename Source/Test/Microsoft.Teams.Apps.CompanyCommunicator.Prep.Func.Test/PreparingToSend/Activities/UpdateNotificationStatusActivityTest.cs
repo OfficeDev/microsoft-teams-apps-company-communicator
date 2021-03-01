@@ -18,7 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     /// </summary>
     public class UpdateNotificationStatusActivityTest
     {
-        public readonly Mock<INotificationDataRepository> notificationDataRepository = new Mock<INotificationDataRepository>();
+        private readonly Mock<INotificationDataRepository> notificationDataRepository = new Mock<INotificationDataRepository>();
 
         /// <summary>
         /// Constructor tests.

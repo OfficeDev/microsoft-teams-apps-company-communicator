@@ -33,6 +33,37 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         private readonly Mock<ILogger> log = new Mock<ILogger>();
 
         /// <summary>
+        /// Gets RunParameters.
+        /// </summary>
+        public static IEnumerable<object[]> RunParameters
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { null, new NotificationDataEntity(), new ExportDataEntity() },
+                    new object[] { new Mock<IDurableOrchestrationContext>(), null, new ExportDataEntity() },
+                    new object[] { new Mock<IDurableOrchestrationContext>(), new NotificationDataEntity(), null },
+                };
+            }
+        }
+
+        /// <summary>
+        /// GetsParameters.
+        /// </summary>
+        public static IEnumerable<object[]> GetParameters
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { null, new ExportDataEntity() },
+                    new object[] { new NotificationDataEntity(), null },
+                };
+            }
+        }
+
+        /// <summary>
         /// Constructor test for all parameters.
         /// </summary>
         [Fact]
@@ -79,26 +110,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var mockContext = context?.Object;
 
             // Act
-            Func<Task> task = async () => await activityInstance.RunAsync(mockContext, (notificationDataEntity, exportDataEntity), log.Object);
+            Func<Task> task = async () => await activityInstance.RunAsync(mockContext, (notificationDataEntity, exportDataEntity), this.log.Object);
 
             // Assert
             await task.Should().ThrowAsync<ArgumentNullException>();
-        }
-
-        /// <summary>
-        /// Gets RunParameters.
-        /// </summary>
-        public static IEnumerable<object[]> RunParameters
-        {
-            get
-            {
-                return new[]
-                {
-                    new object[] { null, new NotificationDataEntity(), new ExportDataEntity() },
-                    new object[] { new Mock<IDurableOrchestrationContext>(), null, new ExportDataEntity() },
-                    new object[] { new Mock<IDurableOrchestrationContext>(), new NotificationDataEntity(), null },
-                };
-            }
         }
 
         /// <summary>
@@ -113,7 +128,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var context = new Mock<IDurableOrchestrationContext>();
             var notificationDataEntityMock = new Mock<NotificationDataEntity>();
             var exportDataEntityMock = new Mock<ExportDataEntity>();
-            context.Setup(x => x.CallActivityWithRetryAsync<Metadata>(It.IsAny<string>(), It.IsAny<RetryOptions>(), (It.IsAny<Object>()))).ReturnsAsync(new Metadata());
+            context.Setup(x => x.CallActivityWithRetryAsync<Metadata>(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<object>())).ReturnsAsync(new Metadata());
 
             // Act
             var result = await activityInstance.RunAsync(context.Object, (notificationDataEntityMock.Object, exportDataEntityMock.Object), this.log.Object);
@@ -142,21 +157,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
 
             // Assert
             await task.Should().ThrowAsync<ArgumentNullException>();
-        }
-
-        /// <summary>
-        /// GetParameters.
-        /// </summary>
-        public static IEnumerable<object[]> GetParameters
-        {
-            get
-            {
-                return new[]
-                {
-                    new object[] { null, new ExportDataEntity() },
-                    new object[] { new NotificationDataEntity(), null },
-                };
-            }
         }
 
         /// <summary>

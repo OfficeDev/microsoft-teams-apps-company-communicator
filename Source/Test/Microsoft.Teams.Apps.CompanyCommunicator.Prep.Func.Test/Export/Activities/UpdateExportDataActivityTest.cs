@@ -26,6 +26,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         private readonly Mock<IDurableOrchestrationContext> context = new Mock<IDurableOrchestrationContext>();
 
         /// <summary>
+        /// Gets RunParameters.
+        /// </summary>
+        public static IEnumerable<object[]> RunParameters
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { null, new ExportDataEntity() },
+                    new object[] { new Mock<IDurableOrchestrationContext>(), null },
+                };
+            }
+        }
+
+        /// <summary>
         /// Constructor test for all parameters.
         /// </summary>
         [Fact]
@@ -66,24 +81,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             // Arrange
             var activityInstance = this.GetUpdateExportDataActivity();
             var mockContext = context?.Object;
-            
+
             // Act
-            Func<Task> task = async () => await activityInstance.RunAsync(mockContext, exportDataEntity, log.Object);
+            Func<Task> task = async () => await activityInstance.RunAsync(mockContext, exportDataEntity, this.log.Object);
 
             // Assert
             await task.Should().ThrowAsync<ArgumentNullException>();
-        }
-
-        public static IEnumerable<object[]> RunParameters
-        {
-            get
-            {
-                return new[]
-                {
-                    new object[] { null, new ExportDataEntity() },
-                    new object[] { new Mock<IDurableOrchestrationContext>(), null },
-                };
-            }
         }
 
         /// <summary>

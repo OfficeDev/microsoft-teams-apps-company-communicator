@@ -11,11 +11,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
     using FluentAssertions;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
-    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
     using Moq;
     using Xunit;
@@ -31,13 +29,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
 
         /// <summary>
+        /// gets RunParameters.
+        /// </summary>
+        public static IEnumerable<object[]> RunParameters
+        {
+            get
+            {
+                return new[]
+                {
+                    new object[] { null, new Mock<IDurableOrchestrationClient>() },
+                    new object[] { "myQueueItem", null },
+                };
+            }
+        }
+
+        /// <summary>
         /// Constructor test for all parameters.
         /// </summary>
         [Fact]
         public void CreateInstance_AllParameters_ShouldBeSuccess()
         {
             // Arrange
-            Action action = () => new ExportFunction(notificationDataRepository.Object, exportDataRepository.Object, localizer.Object);
+            Action action = () => new ExportFunction(this.notificationDataRepository.Object, this.exportDataRepository.Object, this.localizer.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
@@ -45,14 +58,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
 
         /// <summary>
         /// Constructor test for null parameters.
-        /// </summary> 
+        /// </summary>
         [Fact]
         public void CreateInstance_NullParamters_ThrowsArgumentNullException()
         {
             // Arrange
-            Action action1 = () => new ExportFunction(null /*notificationDataRepository*/, exportDataRepository.Object, localizer.Object);
-            Action action2 = () => new ExportFunction(notificationDataRepository.Object, null /*exportDataRepository*/, localizer.Object);
-            Action action3 = () => new ExportFunction(notificationDataRepository.Object, exportDataRepository.Object, null /*localizer*/);
+            Action action1 = () => new ExportFunction(null /*notificationDataRepository*/, this.exportDataRepository.Object, this.localizer.Object);
+            Action action2 = () => new ExportFunction(this.notificationDataRepository.Object, null /*exportDataRepository*/, this.localizer.Object);
+            Action action3 = () => new ExportFunction(this.notificationDataRepository.Object, this.exportDataRepository.Object, null /*localizer*/);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("notificationDataRepository is null.");
@@ -63,6 +76,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
         /// <summary>
         /// Test case to check if activity handles null paramaters.
         /// </summary>
+        /// <param name="myQueueItem">myQueueItem.</param>
+        /// <param name="starter">starter.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Theory]
         [MemberData(nameof(RunParameters))]
@@ -79,18 +94,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
             await task.Should().ThrowAsync<ArgumentNullException>();
         }
 
-        public static IEnumerable<object[]> RunParameters
-        {
-            get
-            {
-                return new[]
-                {
-                    new object[] {  null, new Mock<IDurableOrchestrationClient>() },
-                    new object[] {  "myQueueItem", null },
-                };
-            }
-        }
-
         /// <summary>
         /// Test case to check if StartNewAsync method is called once to start ExportOrchestration.
         /// </summary>
@@ -99,26 +102,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
         public async Task Export_ForValidData_ShouldInvokeOnce()
         {
             // Arrange
-            var activityInstance = GetExportFunction();
+            var activityInstance = this.GetExportFunction();
             string messageContent = "{\"NotificationId\":\"notificationId\",\"UserId\" : \"userId\"}";
             var notificationdata = new NotificationDataEntity();
             var exportDataEntity = new ExportDataEntity();
             var instanceId = "instanceId";
 
-            notificationDataRepository
+            this.notificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(notificationdata);
-            exportDataRepository
+            this.exportDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(exportDataEntity);
-            starter.Setup(x => x.StartNewAsync(It.IsAny<string>(), It.IsAny<string>()))
+            this.starter.Setup(x => x.StartNewAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(instanceId);
 
             // Act
-            await activityInstance.Run(messageContent, starter.Object);
+            await activityInstance.Run(messageContent, this.starter.Object);
 
             // Assert
-            starter.Verify(x => x.StartNewAsync(It.Is<string>(x => x.Equals("ExportOrchestrationAsync")), It.IsAny<ExportDataRequirement>()), Times.Once());
+            this.starter.Verify(x => x.StartNewAsync(It.Is<string>(x => x.Equals("ExportOrchestrationAsync")), It.IsAny<ExportDataRequirement>()), Times.Once());
         }
 
         /// <summary>
@@ -129,34 +132,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
         public async Task Export_InvalidData_ShouldInvokeNever()
         {
             // Arrange
-            var activityInstance = GetExportFunction();
+            var activityInstance = this.GetExportFunction();
             string messageContent = "{\"NotificationId\":\"notificationId\",\"UserId\" : \"userId\"}";
             var exportDataEntity = new ExportDataEntity();
 
-            notificationDataRepository
+            this.notificationDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(default(NotificationDataEntity)));
-            exportDataRepository
+            this.exportDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(exportDataEntity);
-            starter.Setup(x => x.StartNewAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(It.IsAny<string>());
+            this.starter.Setup(x => x.StartNewAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(It.IsAny<string>());
 
             // Act
-            await activityInstance.Run(messageContent, starter.Object);
+            await activityInstance.Run(messageContent, this.starter.Object);
 
             // Assert
-            starter.Verify(x => x.StartNewAsync(It.Is<string>(x => x.Equals("ExportOrchestrationAsync")), It.IsAny<ExportDataRequirement>()), Times.Never());
+            this.starter.Verify(x => x.StartNewAsync(It.Is<string>(x => x.Equals("ExportOrchestrationAsync")), It.IsAny<ExportDataRequirement>()), Times.Never());
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportFunction"/> class.
         /// </summary>
-        /// <returns>return the instance of ExportFunction</returns>
+        /// <returns>return the instance of ExportFunction.</returns>
         private ExportFunction GetExportFunction()
         {
-            return new ExportFunction(notificationDataRepository.Object, exportDataRepository.Object, localizer.Object);
+            return new ExportFunction(this.notificationDataRepository.Object, this.exportDataRepository.Object, this.localizer.Object);
         }
     }
 }
-
-

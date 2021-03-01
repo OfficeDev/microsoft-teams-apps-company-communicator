@@ -70,14 +70,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             {
                 Id = "notificationId",
                 AllUsers = false,
-                Rosters = new List<string>() { "roaster","roaster1" },
+                Rosters = new List<string>() { "roaster", "roaster1" },
             };
 
             this.mockContext
                 .Setup(x => x.GetInput<NotificationDataEntity>())
                 .Returns(notificationDataEntity);
             this.mockContext
-                .Setup(x => x.CallActivityWithRetryAsync(It.IsAny<string>(), It.IsAny<RetryOptions>(),It.IsAny<object>()))
+                .Setup(x => x.CallActivityWithRetryAsync(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<object>()))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -85,8 +85,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync<ArgumentException>();
-            this.mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x=>x.Equals(FunctionNames.SyncTeamMembersActivity)), It.IsAny<RetryOptions>()
-            , It.IsAny<object>()), Times.Exactly(notificationDataEntity.Rosters.Count()));
+            this.mockContext
+                .Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.SyncTeamMembersActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Exactly(notificationDataEntity.Rosters.Count()));
         }
 
         /// <summary>
@@ -117,8 +117,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync<ArgumentException>();
-            mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.SyncGroupMembersActivity)), It.IsAny<RetryOptions>()
-            , It.IsAny<object>()), Times.Exactly(notificationDataEntity.Groups.Count()));
+            this.mockContext
+                .Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.SyncGroupMembersActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Exactly(notificationDataEntity.Groups.Count()));
         }
 
         /// <summary>
@@ -150,8 +150,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync<ArgumentException>();
-            mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.SyncTeamsActivity)), It.IsAny<RetryOptions>()
-            , It.IsAny<object>()), Times.Exactly(1));
+            this.mockContext
+                .Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.SyncTeamsActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Exactly(1));
         }
 
         /// <summary>
