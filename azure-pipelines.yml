@@ -37,7 +37,7 @@ steps:
   inputs:
     command: publish
     publishWebProjects: false
-    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj
+    projects: Source/CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj
     arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
     zipAfterPublish: True
 
@@ -46,7 +46,7 @@ steps:
   inputs:
     command: publish
     publishWebProjects: false
-    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Data.Func/Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj
+    projects: Source/CompanyCommunicator.Data.Func/Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj
     arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
     zipAfterPublish: True
 
@@ -55,7 +55,7 @@ steps:
   inputs:
     command: publish
     publishWebProjects: false
-    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj
+    projects: Source/CompanyCommunicator.Prep.Func/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj
     arguments: --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)
     zipAfterPublish: True
 
@@ -64,7 +64,7 @@ steps:
   inputs:
     command: publish
     publishWebProjects: false
-    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj
+    projects: Source/CompanyCommunicator.Send.Func/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj
     arguments: --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)
 
 - task: RoslynAnalyzers@2
@@ -82,7 +82,7 @@ steps:
     RuleLibrary: microsoft
     RulesetMicrosoft: skypesdlrequired
     FileSelectionType: projectFile
-    Project: Source/Microsoft.Teams.Apps.CompanyCommunicator/ClientApp/tsconfig.json
+    Project: Source/CompanyCommunicator/ClientApp/tsconfig.json
   
 - task: PoliCheck@1
   displayName: 'Run Policheck'
