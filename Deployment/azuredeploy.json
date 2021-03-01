@@ -64,7 +64,18 @@
     "DefaultCulture": {
       "defaultValue": "en-US",
       "allowedValues": [
-        "en-US"
+        "ar-SA",
+        "de-DE",
+        "en-US",
+        "es-ES",
+        "fr-FR",
+        "he-IL",
+        "ja-JP",
+        "ko-KR",
+        "pt-BR",
+        "ru-RU",
+        "zh-CN",
+        "zh-TW"
       ],
       "minLength": 1,
       "type": "String",
@@ -73,7 +84,7 @@
       }
     },
     "SupportedCultures": {
-      "defaultValue": "en-US",
+      "defaultValue": "ar-SA,de-DE,en-US,es-ES,fr-FR,he-IL,ja-JP,ko-KR,pt-BR,ru-RU,zh-CN,zh-TW",
       "minLength": 1,
       "type": "String",
       "metadata": {
@@ -1039,7 +1050,7 @@
       "type": "string",
       "value": "[parameters('authorClientId')]"
     },
-	"userBotId": {
+    "userBotId": {
       "type": "string",
       "value": "[parameters('userClientId')]"
     },
