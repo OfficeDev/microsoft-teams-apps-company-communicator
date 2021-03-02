@@ -5,7 +5,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { withTranslation, WithTranslation } from "react-i18next";
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
-import { Loader, List, Flex, Text } from '@stardust-ui/react';
+import { Loader, List, Flex, Text } from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
 
 import './draftMessages.scss';
@@ -105,7 +105,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
                         <Flex.Item shrink={0} grow={1}>
                             <Text>{message.title}</Text>
                         </Flex.Item>
-                        <Flex.Item shrink={0} hAlign="end" vAlign="center">
+                        <Flex.Item shrink={0} align="end">
                             <Overflow message={message} title="" />
                         </Flex.Item>
                     </Flex>

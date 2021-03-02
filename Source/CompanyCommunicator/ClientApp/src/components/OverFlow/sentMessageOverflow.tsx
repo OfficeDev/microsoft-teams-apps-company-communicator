@@ -4,7 +4,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { withTranslation, WithTranslation } from "react-i18next";
-import { Menu } from '@stardust-ui/react';
+import { Menu, MoreIcon } from '@fluentui/react-northstar';
 import { getBaseUrl } from '../../configVariables';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { duplicateDraftNotification } from '../../apis/messageListApi';
@@ -52,10 +52,7 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
         const items = [
             {
                 key: 'more',
-                icon: {
-                    name: 'more',
-                    outline: true,
-                },
+                icon: <MoreIcon outline={true} />,
                 menuOpen: this.state.menuOpen,
                 active: this.state.menuOpen,
                 indicator: false,

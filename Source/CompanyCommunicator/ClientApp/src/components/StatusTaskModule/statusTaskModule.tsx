@@ -7,9 +7,8 @@ import './statusTaskModule.scss';
 import { getSentNotification, exportNotification } from '../../apis/messageListApi';
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { TooltipHost } from 'office-ui-fabric-react';
-import { Icon, Loader, List, Image, Button, IconProps } from '@stardust-ui/react';
+import { Loader, List, Image, Button, DownloadIcon, AcceptIcon } from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
@@ -71,7 +70,6 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
 
     constructor(props: StatusTaskModuleProps) {
         super(props);
-        initializeIcons();
 
         this.localize = this.props.t;
 
@@ -144,7 +142,6 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                 </div>
             );
         } else {
-            const downloadIcon: IconProps = { name: 'download', size: "medium" };
             if (this.state.page === "ViewStatus") {
                 return (
                     <div className="taskModule">
@@ -174,7 +171,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                     <br />
                                     {this.state.message.unknown &&
                                         <>
-                                        <label>{this.localize("Unknown", { "UnknownCount": this.state.message.unknown })}</label>
+                                            <label>{this.localize("Unknown", { "UnknownCount": this.state.message.unknown })}</label>
                                         </>
                                     }
                                 </div>
@@ -197,7 +194,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                 <div className="buttonContainer">
                                     <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label={this.localize("ExportLabel")} labelPosition="end" />
                                     <TooltipHost content={!this.state.message.sendingCompleted ? "" : (this.state.message.canDownload ? "" : this.localize("ExportButtonProgressText"))} calloutProps={{ gapSpace: 0 }}>
-                                        <Button icon={downloadIcon} disabled={!this.state.message.canDownload || !this.state.message.sendingCompleted} content={this.localize("ExportButtonText")} id="exportBtn" onClick={this.onExport} primary />
+                                        <Button icon={<DownloadIcon size="medium" />} disabled={!this.state.message.canDownload || !this.state.message.sendingCompleted} content={this.localize("ExportButtonText")} id="exportBtn" onClick={this.onExport} primary />
                                     </TooltipHost>
                                 </div>
                             </div>
@@ -212,7 +209,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                             <div className="displayMessageField">
                                 <br />
                                 <br />
-                                <div><span><Icon className="iconStyle" name="stardust-checkmark" xSpacing="before" size="largest" outline /></span>
+                                <div><span><AcceptIcon className="iconStyle" xSpacing="before" size="largest" outline /></span>
                                     <h1>{this.localize("ExportQueueTitle")}</h1></div>
                                 <span>{this.localize("ExportQueueSuccessMessage1")}</span>
                                 <br />
@@ -238,7 +235,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                             <div className="displayMessageField">
                                 <br />
                                 <br />
-                                <div><span><Icon className="iconStyle" name="stardust-close" xSpacing="before" size="largest" outline /></span>
+                                <div><span></span>
                                     <h1 className="light">{this.localize("ExportErrorTitle")}</h1></div>
                                 <span>{this.localize("ExportErrorMessage")}</span>
                             </div>

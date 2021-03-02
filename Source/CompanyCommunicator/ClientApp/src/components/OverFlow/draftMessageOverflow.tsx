@@ -1,10 +1,7 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 import React from 'react';
 import { connect } from 'react-redux';
 import { withTranslation, WithTranslation } from "react-i18next";
-import { Menu } from '@stardust-ui/react';
+import { Menu, MoreIcon } from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
 
 import { getBaseUrl } from '../../configVariables';
@@ -63,10 +60,7 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
         const items = [
             {
                 key: 'more',
-                icon: {
-                    name: 'more',
-                    outline: true,
-                },
+                icon: <MoreIcon outline={true} />,
                 menuOpen: this.state.menuOpen,
                 active: this.state.menuOpen,
                 indicator: false,

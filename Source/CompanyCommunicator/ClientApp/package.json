@@ -3,8 +3,8 @@
   "version": "4.0.0",
   "private": true,
   "dependencies": {
+    "@fluentui/react-northstar": "^0.52.0",
     "@microsoft/teams-js": "^1.4.2",
-    "@stardust-ui/react": "^0.40.7",
     "adaptivecards": "^1.2.0",
     "axios": "^0.21.1",
     "color-hash": "^1.0.3",

@@ -7,12 +7,12 @@ import { withTranslation, WithTranslation } from "react-i18next";
 import { Input, TextArea, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader, Dropdown, Text } from '@stardust-ui/react';
+import { Button, Loader, Dropdown, Text } from '@fluentui/react-northstar'
 import * as microsoftTeams from "@microsoft/teams-js";
 
 import './newMessage.scss';
 import './teamTheme.scss';
-import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess  } from '../../apis/messageListApi';
+import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess } from '../../apis/messageListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
@@ -420,7 +420,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         multiple
                                         items={this.getItems()}
                                         value={this.state.selectedTeams}
-                                        onSelectedChange={this.onTeamsChange}
+                                        onChange={this.onTeamsChange}
                                         noResultsMessage={this.localize("NoMatchMessage")}
                                     />
                                     <Radiobutton name="grouped" value="rosters" label={this.localize("SendToRosters")} />
@@ -431,7 +431,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         multiple
                                         items={this.getItems()}
                                         value={this.state.selectedRosters}
-                                        onSelectedChange={this.onRostersChange}
+                                        onChange={this.onRostersChange}
                                         unstable_pinned={this.state.unstablePinned}
                                         noResultsMessage={this.localize("NoMatchMessage")}
                                     />
@@ -458,7 +458,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         items={this.getGroupItems()}
                                         value={this.state.selectedGroups}
                                         onSearchQueryChange={this.onGroupSearchQueryChange}
-                                        onSelectedChange={this.onGroupsChange}
+                                        onChange={this.onGroupsChange}
                                         noResultsMessage={this.state.noResultMessage}
                                         unstable_pinned={this.state.unstablePinned}
                                     />

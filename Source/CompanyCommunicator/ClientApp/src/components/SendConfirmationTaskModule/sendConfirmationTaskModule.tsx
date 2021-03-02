@@ -5,7 +5,7 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
 import * as AdaptiveCards from "adaptivecards";
-import { Loader, Button, Text, List, Image } from '@stardust-ui/react';
+import { Loader, Button, Text, List, Image } from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
 
 import './sendConfirmationTaskModule.scss';

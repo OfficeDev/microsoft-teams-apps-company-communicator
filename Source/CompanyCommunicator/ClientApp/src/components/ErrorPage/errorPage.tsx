@@ -4,7 +4,7 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Text } from '@stardust-ui/react';
+import { Text } from '@fluentui/react-northstar';
 import './errorPage.scss';
 
 const ErrorPage: React.FunctionComponent<RouteComponentProps> = props => {
