@@ -30,11 +30,8 @@
   </ItemGroup>
 
   <ItemGroup>
-<<<<<<< HEAD:Source/Test/Microsoft.Teams.Apps.CompanyCommunicator.Test/Microsoft.Teams.Apps.CompanyCommunicator.Test.csproj
-    <ProjectReference Include="..\..\Microsoft.Teams.Apps.CompanyCommunicator\Microsoft.Teams.Apps.CompanyCommunicator.csproj" />
-=======
+
     <ProjectReference Include="..\..\CompanyCommunicator\Microsoft.Teams.Apps.CompanyCommunicator.csproj" />
->>>>>>> 73c646e449076b44644a8e1ba8f87dd10af28f95:Source/Test/CompanyCommunicator.Test/Microsoft.Teams.Apps.CompanyCommunicator.Test.csproj
   </ItemGroup>
 
 </Project>

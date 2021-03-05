@@ -1,17 +1,18 @@
 ﻿// <copyright file="TeamDataControllerTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
 {
-    using FluentAssertions;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
-    using Moq;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using FluentAssertions;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
+    using Moq;
     using Xunit;
 
     /// <summary>
@@ -28,15 +29,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void CreateInstance_AllParameters_ShouldBeSuccess()
         {
             // Arrange
-            Action action = () => new TeamDataController(teamDataRepository.Object);
+            Action action = () => new TeamDataController(this.teamDataRepository.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
         }
 
-        // <summary>
+        /// <summary>
         /// Constructor test for null parameter.
-        /// </summary> 
+        /// </summary>
         [Fact]
         public void CreateInstance_NullParameter_ThrowsArgumentNullException()
         {
@@ -48,19 +49,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         }
 
         /// <summary>
-        /// Test case to verity the get team data with correct mapping returns teamData list object
+        /// Test case to verity the get team data with correct mapping returns teamData list object.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task GetTeamData_CorrectMapping_ReturnsTeamDataListObject()
         {
-            var controller = GetControllerInstance();
+            var controller = this.GetControllerInstance();
             var teamDataEntityList = new List<TeamDataEntity>()
             {
-                new TeamDataEntity(){ TeamId = "teamId", Name = "teamName"}
+                new TeamDataEntity() { TeamId = "teamId", Name = "teamName" },
             };
             var teamDataEntity = teamDataEntityList.FirstOrDefault();
-            teamDataRepository.Setup(x => x.GetAllSortedAlphabeticallyByNameAsync()).ReturnsAsync(teamDataEntityList);
+            this.teamDataRepository.Setup(x => x.GetAllSortedAlphabeticallyByNameAsync()).ReturnsAsync(teamDataEntityList);
 
             // Act
             var result = await controller.GetAllTeamDataAsync();
@@ -75,13 +76,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         /// <summary>
         /// Test case to verify team data response is empty if no items exists in DB.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task GetTeamData_NoItemsExistsInDB_ReturnsEmptyTeamDataList()
         {
-            var controller = GetControllerInstance();
+            var controller = this.GetControllerInstance();
             var teamDataEntityList = new List<TeamDataEntity>();
-            teamDataRepository.Setup(x => x.GetAllSortedAlphabeticallyByNameAsync()).ReturnsAsync(teamDataEntityList);
+            this.teamDataRepository.Setup(x => x.GetAllSortedAlphabeticallyByNameAsync()).ReturnsAsync(teamDataEntityList);
 
             // Act
             var result = await controller.GetAllTeamDataAsync();
@@ -96,7 +97,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         /// </summary>
         private TeamDataController GetControllerInstance()
         {
-            return new TeamDataController(teamDataRepository.Object);
+            return new TeamDataController(this.teamDataRepository.Object);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿// <copyright file="HealthControllerTest.cs" company="Microsoft">
-// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
@@ -9,7 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
     using Xunit;
 
     /// <summary>
-    /// HealthController test class. 
+    /// HealthController test class.
     /// </summary>
     public class HealthControllerTest
     {
@@ -19,11 +20,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         [Fact]
         public void Call_IndexAction_ReturnsStausCodeOk()
         {
-            //Arrage
-            var controller = getHealthControllerInstance();
+            // Arrage
+            var controller = this.GetHealthControllerInstance();
             var statusCodeOk = 200;
 
-            //Act
+            // Act
             var result = controller.Index();
             var statusCode = ((StatusCodeResult)result).StatusCode;
 
@@ -31,7 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             Assert.Equal(statusCode, statusCodeOk);
         }
 
-        private HealthController getHealthControllerInstance()
+        private HealthController GetHealthControllerInstance()
         {
             return new HealthController();
         }
