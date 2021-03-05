@@ -172,7 +172,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddSingleton<IExportQueue, ExportQueue>();
 
             // Add draft notification preview services.
-            services.AddTransient<DraftNotificationPreviewService>();
+            services.AddSingleton<IDraftNotificationPreviewService, DraftNotificationPreviewService>();
 
             // Add microsoft graph services.
             services.AddScoped<IAuthenticationProvider, GraphTokenProvider>();

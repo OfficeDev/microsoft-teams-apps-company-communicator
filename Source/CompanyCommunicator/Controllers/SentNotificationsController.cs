@@ -105,6 +105,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public async Task<IActionResult> CreateSentNotificationAsync(
             [FromBody] DraftNotification draftNotification)
         {
+            if (draftNotification == null)
+            {
+                throw new ArgumentNullException(nameof(draftNotification));
+            }
+
             var draftNotificationDataEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.DraftNotificationsPartition,
                 draftNotification.Id);
@@ -182,6 +187,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSentNotificationByIdAsync(string id)
         {
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
             var notificationEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,
                 id);

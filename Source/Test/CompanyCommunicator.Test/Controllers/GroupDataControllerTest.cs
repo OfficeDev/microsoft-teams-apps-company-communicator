@@ -45,7 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         /// Constructor test for null parameter.
         /// </summary>
         [Fact]
-        public void CreateInstance_NullParamter_ThrowsArgumentNullException()
+        public void CreateInstance_NullParameter_ThrowsArgumentNullException()
         {
             // Arrange
             Action action1 = () => new GroupDataController(null /*notificationDataRepository*/, this.groupsService.Object);

@@ -5,6 +5,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
@@ -28,7 +29,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="teamDataRepository">Team data repository instance.</param>
         public TeamDataController(ITeamDataRepository teamDataRepository)
         {
-            this.teamDataRepository = teamDataRepository;
+            this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
         }
 
         /// <summary>

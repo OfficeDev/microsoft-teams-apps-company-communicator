@@ -71,8 +71,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <returns>The result of an action method.</returns>
         [HttpPut("export")]
         public async Task<IActionResult> ExportNotificationAsync(
-            [FromBody]ExportRequest exportRequest)
+            [FromBody] ExportRequest exportRequest)
         {
+            if (exportRequest == null)
+            {
+                throw new ArgumentNullException(nameof(exportRequest));
+            }
+
             var userId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeUserId);
             var user = await this.userDataRepository.GetAsync(UserDataTableNames.AuthorDataPartition, userId);
             if (user == null)
