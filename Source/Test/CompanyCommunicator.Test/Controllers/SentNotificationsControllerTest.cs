@@ -203,7 +203,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             var controller = this.GetControllerInstance();
             var draftNotification = new DraftNotification() { Id = "id" };
             var sentNotificationId = "notificationId";
-            string appId = null;
+            string appId = "appId";
             var notificationDataEntity = new NotificationDataEntity();
             this.notificationDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(notificationDataEntity);
             this.notificationDataRepository.Setup(x => x.MoveDraftToSentPartitionAsync(It.IsAny<NotificationDataEntity>())).ReturnsAsync(sentNotificationId);
@@ -245,36 +245,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
 
             // Assert
             this.appSettingsService.Verify(x => x.SetUserAppIdAsync(It.IsAny<string>()), Times.Once());
-        }
-
-        /// <summary>
-        /// Test case to verify SetUserAppIdAsync is not called when invalid externalId is passed to GetTeamsAppIdAsync.
-        /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns>
-        [Fact]
-        public async Task GetAppId_GraphServiceError_GotServiceExceptionAndSetUserAppIdShouldInvokedOnce()
-        {
-            // Arrange
-            var controller = this.GetControllerInstance();
-            var draftNotification = new DraftNotification() { Id = "id" };
-            var sentNotificationId = "notificationId";
-            string appId = null;
-            var teamsAppId = "appId";
-            var notificationDataEntity = new NotificationDataEntity();
-            this.notificationDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(notificationDataEntity);
-            this.notificationDataRepository.Setup(x => x.MoveDraftToSentPartitionAsync(It.IsAny<NotificationDataEntity>())).ReturnsAsync(sentNotificationId);
-            this.sentNotificationDataRepository.Setup(x => x.EnsureSentNotificationDataTableExistsAsync()).Returns(Task.CompletedTask);
-            this.appSettingsService.Setup(x => x.GetUserAppIdAsync()).ReturnsAsync(appId);
-            this.appCatalogService.Setup(x => x.GetTeamsAppIdAsync(It.IsAny<string>())).ReturnsAsync(teamsAppId);
-
-            var serviceException = new ServiceException(null, null, HttpStatusCode.Unauthorized);
-            this.appCatalogService.Setup(x => x.GetTeamsAppIdAsync(It.IsAny<string>())).ThrowsAsync(serviceException);
-
-            // Act
-            await controller.CreateSentNotificationAsync(draftNotification);
-
-            // Assert
-            this.appSettingsService.Verify(x => x.SetUserAppIdAsync(It.IsAny<string>()), Times.Never());
         }
 
         /// <summary>
@@ -447,7 +417,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             Mock<ILogger<SentNotificationsController>> log = new Mock<ILogger<SentNotificationsController>>();
             this.loggerFactory.Setup(x => x.CreateLogger("SentNotificationsController")).Returns(log.Object);
             var controller = new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.loggerFactory.Object);
-            var user = new ClaimsPrincipal(new ClaimsIdentity (
+            var user = new ClaimsPrincipal(new ClaimsIdentity(
                 new Claim[]
             {
                 new Claim(Common.Constants.ClaimTypeUserId, "claimTypeUserId"),
