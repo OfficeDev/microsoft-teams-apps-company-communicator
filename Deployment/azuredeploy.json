@@ -596,6 +596,7 @@
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
         "hostingEnvironment": "",
         "clientAffinityEnabled": false,
+        "httpsOnly": true,
         "siteConfig": {
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
@@ -715,6 +716,7 @@
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
         "hostingEnvironment": "",
         "clientAffinityEnabled": false,
+        "httpsOnly": true,
         "siteConfig": {
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
@@ -818,6 +820,7 @@
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
         "hostingEnvironment": "",
         "clientAffinityEnabled": false,
+        "httpsOnly": true,
         "siteConfig": {
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
