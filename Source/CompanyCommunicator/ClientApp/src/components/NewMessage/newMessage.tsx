@@ -602,7 +602,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         else if (itemsData.searchQuery && itemsData.searchQuery.length <= 2) {
             this.setState({
                 loading: false,
-                noResultMessage: "No matches found.",
+                noResultMessage: this.localize("NoMatchMessage"),
             });
         }
         else if (itemsData.searchQuery && itemsData.searchQuery.length > 2) {
@@ -625,7 +625,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 this.setState({
                     groups: response.data,
                     loading: false,
-                    noResultMessage: "No matches found."
+                    noResultMessage: this.localize("NoMatchMessage")
                 });
             }
             catch (error) {
@@ -727,7 +727,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         let url = event.target.value.toLowerCase();
         if (!((url === "") || (url.startsWith("https://") || (url.startsWith("data:image/png;base64,")) || (url.startsWith("data:image/jpeg;base64,")) || (url.startsWith("data:image/gif;base64,"))))) {
             this.setState({
-                errorImageUrlMessage: "URL must start with https://"
+                errorImageUrlMessage: this.localize("ErrorURLMessage")
             });
         } else {
             this.setState({
@@ -821,7 +821,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     private onBtnLinkChanged = (event: any) => {
         if (!(event.target.value === "" || event.target.value.toLowerCase().startsWith("https://"))) {
             this.setState({
-                errorButtonUrlMessage: "URL must start with https://"
+                errorButtonUrlMessage: this.localize("ErrorURLMessage")
             });
         } else {
             this.setState({
