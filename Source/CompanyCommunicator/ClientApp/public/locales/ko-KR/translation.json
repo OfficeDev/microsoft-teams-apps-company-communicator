@@ -72,15 +72,15 @@
   "Warnings": "경고",
   "SignInPromptMessage": "계속하려면 로그인하세요.",
   "SignIn": "로그인",
-  "UnauthorizedErrorMessage": "죄송합니다. 서비스에 액세스하는 동안 오류가 발생했습니다.",
+  "UnauthorizedErrorMessage": "죄송합니다. 이 서비스에 액세스하는 동안 오류가 발생했습니다.",
   "ForbiddenErrorMessage": "이 페이지에 액세스할 수 있는 권한이 없습니다. 권한을 부여하려면 관리자에게 문의하세요.",
   "GeneralErrorMessage": "죄송합니다. 예기치 못한 오류가 발생한 것 같네요. 페이지를 새로 고침해 보시겠어요? 문제가 계속되면 관리자에게 문의하세요.",
   "ExportQueueTitle": "내보내기 대기 중",
   "ExportQueueSuccessMessage1": "파일을 다운로드할 준비가 되면 채팅에서 알림을 받습니다.",
-  "ExportQueueSuccessMessage2": "참고: OneDrive에 업로드할 수 있는 권한을 부여해 채팅 메시지가 표시됩니다.",
+  "ExportQueueSuccessMessage2": "참고: OneDrive에 업로드할 수 있는 권한을 부여하도록 하는 채팅 메시지가 표시됩니다.",
   "ExportQueueSuccessMessage3": "계속하려면 \"허용\"을 선택하세요.",
   "ExportErrorTitle": "문제가 발생했습니다.",
-  "ExportErrorMessage": "결과를 다시 내보내보세요. 문제가 지속되면 IT 관리자에게 도움을 요청하세요.",
+  "ExportErrorMessage": "결과를 다시 내보내 보세요. 문제가 지속되면 IT 관리자에게 도움을 요청하세요.",
   "ExportButtonText": "자세한 결과 내보내기",
   "ExportButtonProgressText": "내보내기 진행 중"
 }

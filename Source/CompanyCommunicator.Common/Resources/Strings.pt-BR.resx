@@ -139,7 +139,7 @@
     <value>Enviar Carimbo de data/hora</value>
   </data>
   <data name="ColumnName_StatusReason" xml:space="preserve">
-    <value>Motivo do status</value>
+    <value>Motivo do Status</value>
   </data>
   <data name="ColumnName_TeamId" xml:space="preserve">
     <value>Identificação da Equipe</value>
