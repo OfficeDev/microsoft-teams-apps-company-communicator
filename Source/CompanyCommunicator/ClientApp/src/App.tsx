@@ -17,6 +17,7 @@ import SignInPage from "./components/SignInPage/signInPage";
 import SignInSimpleStart from "./components/SignInPage/signInSimpleStart";
 import SignInSimpleEnd from "./components/SignInPage/signInSimpleEnd";
 import { updateLocale } from './i18n';
+import i18n from 'i18next';
 
 export interface IAppState {
     theme: string;
@@ -56,9 +57,11 @@ class App extends React.Component<{}, IAppState> {
     }
 
     public setThemeComponent = () => {
+        const rtl = i18n.dir() === "rtl";
+
         if (this.state.theme === "dark") {
             return (
-                <Provider theme={teamsDarkTheme}>
+                <Provider theme={teamsDarkTheme} rtl={rtl}>
                     <div className="darkContainer">
                         {this.getAppDom()}
                     </div>
@@ -67,7 +70,7 @@ class App extends React.Component<{}, IAppState> {
         }
         else if (this.state.theme === "contrast") {
             return (
-                <Provider theme={teamsHighContrastTheme}>
+                <Provider theme={teamsHighContrastTheme} rtl={rtl}>
                     <div className="highContrastContainer">
                         {this.getAppDom()}
                     </div>
@@ -75,7 +78,7 @@ class App extends React.Component<{}, IAppState> {
             );
         } else {
             return (
-                <Provider theme={teamsTheme}>
+                <Provider theme={teamsTheme} rtl={rtl}>
                     <div className="defaultContainer">
                         {this.getAppDom()}
                     </div>
