@@ -82,5 +82,6 @@
   "ExportErrorTitle": "發生錯誤。",
   "ExportErrorMessage": "請試著再次匯出結果。如果問題持續發生，請聯絡您的 IT 管理員以尋求協助。",
   "ExportButtonText": "匯出詳細結果",
-  "ExportButtonProgressText": "匯出進行中"
+  "ExportButtonProgressText": "匯出進行中",
+  "ErrorURLMessage": "網址必須以 https:// 為開頭"
 }

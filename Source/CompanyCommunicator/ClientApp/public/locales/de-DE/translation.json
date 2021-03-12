@@ -82,5 +82,6 @@
   "ExportErrorTitle": "Es ist ein Fehler aufgetreten.",
   "ExportErrorMessage": "Versuchen Sie noch Mal, die Ergebnisse zu exportieren. Wenn das Problem weiterhin besteht, wenden Sie sich wegen Hilfe an Ihren IT-Administrator.",
   "ExportButtonText": "Detaillierte Ergebnisse exportieren",
-  "ExportButtonProgressText": "Export in Bearbeitung"
+  "ExportButtonProgressText": "Export in Bearbeitung",
+  "ErrorURLMessage": "URL muss mit https:// beginnen"
 }

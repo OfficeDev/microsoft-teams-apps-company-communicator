@@ -82,5 +82,6 @@
   "ExportErrorTitle": "هناك خطأ ما.",
   "ExportErrorMessage": "حاول تصدير النتائج مره أخرى. إذا استمرت المشكلة ، اتصل بمسؤول تكنولوجيا المساعدة لديك للمساعدة.",
   "ExportButtonText": "تصدير النتائج التفصيلية",
-  "ExportButtonProgressText": "التصدير قيد التقدم"
+  "ExportButtonProgressText": "التصدير قيد التقدم",
+  "ErrorURLMessage": "يجب أن يبدأ عنوان URL بـ https://"
 }

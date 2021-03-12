@@ -82,5 +82,6 @@
   "ExportErrorTitle": "Désolé... Nous avons rencontré un problème.",
   "ExportErrorMessage": "Réessayez d’exporter les résultats. Si le problème persiste, contactez votre administrateur informatique pour obtenir de l’aide.",
   "ExportButtonText": "Exporter les résultats détaillés",
-  "ExportButtonProgressText": "L’exportation est en cours... Merci de patienter."
+  "ExportButtonProgressText": "L’exportation est en cours... Merci de patienter.",
+  "ErrorURLMessage": "L'URL doit commencer par https://"
 }

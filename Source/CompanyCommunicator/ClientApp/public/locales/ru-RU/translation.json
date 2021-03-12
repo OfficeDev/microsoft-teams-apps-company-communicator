@@ -82,5 +82,6 @@
   "ExportErrorTitle": "Произошла ошибка.",
   "ExportErrorMessage": "Повторите попытку экспорта результатов. Если проблема не устранена, обратитесь за помощью к ИТ-администратору.",
   "ExportButtonText": "Экспорт подробных результатов",
-  "ExportButtonProgressText": "Выполняется экспорт"
+  "ExportButtonProgressText": "Выполняется экспорт",
+  "ErrorURLMessage": "URL-адрес должен начинаться с https://"
 }
