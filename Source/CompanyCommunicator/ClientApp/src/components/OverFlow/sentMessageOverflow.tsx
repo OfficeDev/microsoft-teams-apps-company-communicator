@@ -87,7 +87,7 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                 },
                 onMenuOpenChange: (e: any, { menuOpen }: any) => {
                     this.setState({
-                        menuOpen: !this.state.menuOpen
+                        menuOpen: menuOpen
                     });
                 },
             },
