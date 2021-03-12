@@ -4,10 +4,9 @@
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
-import { Input, TextArea, Radiobutton, RadiobuttonGroup } from 'msteams-ui-components-react';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader, Dropdown, Text } from '@fluentui/react-northstar'
+import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup } from '@fluentui/react-northstar'
 import * as microsoftTeams from "@microsoft/teams-js";
 
 import './newMessage.scss';
@@ -330,155 +329,220 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             if (this.state.page === "CardCreation") {
                 return (
                     <div className="taskModule">
-                        <div className="formContainer">
-                            <div className="formContentContainer" >
-                                <Input
-                                    className="inputField"
-                                    value={this.state.title}
-                                    label={this.localize("TitleText")}
-                                    placeholder={this.localize("PlaceHolderTitle")}
-                                    onChange={this.onTitleChanged}
-                                    autoComplete="off"
-                                    required
-                                />
+                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
+                            <Flex space="evenly" className="scrollableContent">
+                                <Flex.Item size="size.half" variables={{ 'size.half': '46%' }}>
+                                    <Flex column>
+                                        <Input className="inputField"
+                                            value={this.state.title}
+                                            label={this.localize("TitleText")}
+                                            placeholder={this.localize("PlaceHolderTitle")}
+                                            onChange={this.onTitleChanged}
+                                            autoComplete="off"
+                                            fluid
+                                        />
 
-                                <Input
-                                    className="inputField"
-                                    value={this.state.imageLink}
-                                    label={this.localize("ImageURL")}
-                                    placeholder={this.localize("ImageURL")}
-                                    onChange={this.onImageLinkChanged}
-                                    errorLabel={this.state.errorImageUrlMessage}
-                                    autoComplete="off"
-                                />
+                                        <Input fluid className="inputField"
+                                            value={this.state.imageLink}
+                                            label={this.localize("ImageURL")}
+                                            placeholder={this.localize("ImageURL")}
+                                            onChange={this.onImageLinkChanged}
+                                            error={!(this.state.errorImageUrlMessage === "")}
+                                            autoComplete="off"
+                                        />
+                                        <Text className={(this.state.errorImageUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorImageUrlMessage} />
 
-                                <TextArea
-                                    className="inputField textArea"
-                                    autoFocus
-                                    placeholder={this.localize("Summary")}
-                                    label={this.localize("Summary")}
-                                    value={this.state.summary}
-                                    onChange={this.onSummaryChanged}
-                                />
+                                        <div className="textArea">
+                                            <Text content={this.localize("Summary")} />
+                                            <TextArea
+                                                autoFocus
+                                                placeholder={this.localize("Summary")}
+                                                value={this.state.summary}
+                                                onChange={this.onSummaryChanged}
+                                                fluid />
+                                        </div>
 
-                                <Input
-                                    className="inputField"
-                                    value={this.state.author}
-                                    label={this.localize("Author")}
-                                    placeholder={this.localize("Author")}
-                                    onChange={this.onAuthorChanged}
-                                    autoComplete="off"
-                                />
+                                        <Input className="inputField"
+                                            value={this.state.author}
+                                            label={this.localize("Author")}
+                                            placeholder={this.localize("Author")}
+                                            onChange={this.onAuthorChanged}
+                                            autoComplete="off"
+                                            fluid
+                                        />
+                                        <Input className="inputField"
+                                            fluid
+                                            value={this.state.btnTitle}
+                                            label={this.localize("ButtonTitle")}
+                                            placeholder={this.localize("ButtonTitle")}
+                                            onChange={this.onBtnTitleChanged}
+                                            autoComplete="off"
+                                        />
+                                        <Input className="inputField"
+                                            fluid
+                                            value={this.state.btnLink}
+                                            label={this.localize("ButtonURL")}
+                                            placeholder={this.localize("ButtonURL")}
+                                            onChange={this.onBtnLinkChanged}
+                                            error={!(this.state.errorButtonUrlMessage === "")}
+                                            autoComplete="off"
+                                        />
+                                        <Text className={(this.state.errorButtonUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorButtonUrlMessage} />
+                                    </Flex>
+                                </Flex.Item>
+                                <Flex.Item size="size.half" variables={{ 'size.half': '45%' }}>
+                                    <div className="adaptiveCardContainer">
+                                    </div>
+                                </Flex.Item>
+                            </Flex>
 
-                                <Input
-                                    className="inputField"
-                                    value={this.state.btnTitle}
-                                    label={this.localize("ButtonTitle")}
-                                    placeholder={this.localize("ButtonTitle")}
-                                    onChange={this.onBtnTitleChanged}
-                                    autoComplete="off"
-                                />
+                            <Flex className="footerContainer" vAlign="end" hAlign="end">
+                                <Flex className="buttonContainer">
+                                    <Button content={this.localize("Next")} disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
+                                </Flex>
+                            </Flex>
 
-                                <Input
-                                    className="inputField"
-                                    value={this.state.btnLink}
-                                    label={this.localize("ButtonURL")}
-                                    placeholder={this.localize("ButtonURL")}
-                                    onChange={this.onBtnLinkChanged}
-                                    errorLabel={this.state.errorButtonUrlMessage}
-                                    autoComplete="off"
-                                />
-                            </div>
-                            <div className="adaptiveCardContainer">
-                            </div>
-                        </div>
-
-                        <div className="footerContainer">
-                            <div className="buttonContainer">
-                                <Button content={this.localize("Next")} disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
-                            </div>
-                        </div>
+                        </Flex>
                     </div>
                 );
             }
             else if (this.state.page === "AudienceSelection") {
                 return (
                     <div className="taskModule">
-                        <div className="formContainer">
-                            <div className="formContentContainer" >
-                                <h3>{this.localize("SendHeadingText")}</h3>
-                                <RadiobuttonGroup
-                                    className="radioBtns"
-                                    value={this.state.selectedRadioBtn}
-                                    onSelected={this.onGroupSelected}
-                                >
-                                    <Radiobutton name="grouped" value="teams" label={this.localize("SendToGeneralChannel")} />
-                                    <Dropdown
-                                        hidden={!this.state.teamsOptionSelected}
-                                        placeholder={this.localize("SendToGeneralChannelPlaceHolder")}
-                                        search
-                                        multiple
-                                        items={this.getItems()}
-                                        value={this.state.selectedTeams}
-                                        onChange={this.onTeamsChange}
-                                        noResultsMessage={this.localize("NoMatchMessage")}
-                                    />
-                                    <Radiobutton name="grouped" value="rosters" label={this.localize("SendToRosters")} />
-                                    <Dropdown
-                                        hidden={!this.state.rostersOptionSelected}
-                                        placeholder={this.localize("SendToRostersPlaceHolder")}
-                                        search
-                                        multiple
-                                        items={this.getItems()}
-                                        value={this.state.selectedRosters}
-                                        onChange={this.onRostersChange}
-                                        unstable_pinned={this.state.unstablePinned}
-                                        noResultsMessage={this.localize("NoMatchMessage")}
-                                    />
-                                    <Radiobutton name="grouped" value="allUsers" label={this.localize("SendToAllUsers")} />
-                                    <div className={this.state.selectedRadioBtn === "allUsers" ? "" : "hide"}>
-                                        <div className="noteText">
-                                            <Text error content={this.localize("SendToAllUsersNote")} />
-                                        </div>
-                                    </div>
-                                    <Radiobutton name="grouped" value="groups" label={this.localize("SendToGroups")} />
-                                    <div className={this.state.groupsOptionSelected && !this.state.groupAccess ? "" : "hide"}>
-                                        <div className="noteText">
-                                            <Text error content={this.localize("SendToGroupsPermissionNote")} />
-                                        </div>
-                                    </div>
-                                    <Dropdown
-                                        className="hideToggle"
-                                        hidden={!this.state.groupsOptionSelected || !this.state.groupAccess}
-                                        placeholder={this.localize("SendToGroupsPlaceHolder")}
-                                        search={this.onGroupSearch}
-                                        multiple
-                                        loading={this.state.loading}
-                                        loadingMessage={this.localize("LoadingText")}
-                                        items={this.getGroupItems()}
-                                        value={this.state.selectedGroups}
-                                        onSearchQueryChange={this.onGroupSearchQueryChange}
-                                        onChange={this.onGroupsChange}
-                                        noResultsMessage={this.state.noResultMessage}
-                                        unstable_pinned={this.state.unstablePinned}
-                                    />
-                                    <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
-                                        <div className="noteText">
-                                            <Text error content={this.localize("SendToGroupsNote")} />
-                                        </div>
-                                    </div>
-                                </RadiobuttonGroup>
-                            </div>
-                            <div className="adaptiveCardContainer">
-                            </div>
-                        </div>
+                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
+                            <Flex space="evenly" className="scrollableContent">
+                                <Flex.Item size="size.half" variables={{ 'size.half': '46%' }}>
+                                    <Flex column gap="gap.small">
+                                        <h3>{this.localize("SendHeadingText")}</h3>
+                                        <RadioGroup
+                                            className="radioBtns"
+                                            checkedValue={this.state.selectedRadioBtn}
+                                            onCheckedValueChange={this.onGroupSelected}
+                                            vertical={true}
+                                            items={[
+                                                {
+                                                    name: "teams",
+                                                    key: "teams",
+                                                    value: "teams",
+                                                    label: this.localize("SendToGeneralChannel"),
+                                                    children: (Component, { name, ...props }) => {
+                                                        return (
+                                                            <Flex key={name} column>
+                                                                <Component {...props} />
+                                                                <Dropdown
+                                                                    hidden={!this.state.teamsOptionSelected}
+                                                                    placeholder={this.localize("SendToGeneralChannelPlaceHolder")}
+                                                                    search
+                                                                    multiple
+                                                                    items={this.getItems()}
+                                                                    value={this.state.selectedTeams}
+                                                                    onChange={this.onTeamsChange}
+                                                                    noResultsMessage={this.localize("NoMatchMessage")}
+                                                                />
+                                                            </Flex>
+                                                        )
+                                                    },
+                                                },
+                                                {
+                                                    name: "rosters",
+                                                    key: "rosters",
+                                                    value: "rosters",
+                                                    label: this.localize("SendToRosters"),
+                                                    children: (Component, { name, ...props }) => {
+                                                        return (
+                                                            <Flex key={name} column>
+                                                                <Component {...props} />
+                                                                <Dropdown
+                                                                    hidden={!this.state.rostersOptionSelected}
+                                                                    placeholder={this.localize("SendToRostersPlaceHolder")}
+                                                                    search
+                                                                    multiple
+                                                                    items={this.getItems()}
+                                                                    value={this.state.selectedRosters}
+                                                                    onChange={this.onRostersChange}
+                                                                    unstable_pinned={this.state.unstablePinned}
+                                                                    noResultsMessage={this.localize("NoMatchMessage")}
+                                                                />
+                                                            </Flex>
+                                                        )
+                                                    },
+                                                },
+                                                {
+                                                    name: "allUsers",
+                                                    key: "allUsers",
+                                                    value: "allUsers",
+                                                    label: this.localize("SendToAllUsers"),
+                                                    children: (Component, { name, ...props }) => {
+                                                        return (
+                                                            <Flex key={name} column>
+                                                                <Component {...props} />
+                                                                <div className={this.state.selectedRadioBtn === "allUsers" ? "" : "hide"}>
+                                                                    <div className="noteText">
+                                                                        <Text error content={this.localize("SendToAllUsersNote")} />
+                                                                    </div>
+                                                                </div>
+                                                            </Flex>
+                                                        )
+                                                    },
+                                                },
+                                                {
+                                                    name: "groups",
+                                                    key: "groups",
+                                                    value: "groups",
+                                                    label: this.localize("SendToGroups"),
+                                                    children: (Component, { name, ...props }) => {
+                                                        return (
+                                                            <Flex key={name} column>
+                                                                <Component {...props} />
+                                                                <div className={this.state.groupsOptionSelected && !this.state.groupAccess ? "" : "hide"}>
+                                                                    <div className="noteText">
+                                                                        <Text error content={this.localize("SendToGroupsPermissionNote")} />
+                                                                    </div>
+                                                                </div>
+                                                                <Dropdown
+                                                                    className="hideToggle"
+                                                                    hidden={!this.state.groupsOptionSelected || !this.state.groupAccess}
+                                                                    placeholder={this.localize("SendToGroupsPlaceHolder")}
+                                                                    search={this.onGroupSearch}
+                                                                    multiple
+                                                                    loading={this.state.loading}
+                                                                    loadingMessage={this.localize("LoadingText")}
+                                                                    items={this.getGroupItems()}
+                                                                    value={this.state.selectedGroups}
+                                                                    onSearchQueryChange={this.onGroupSearchQueryChange}
+                                                                    onChange={this.onGroupsChange}
+                                                                    noResultsMessage={this.state.noResultMessage}
+                                                                    unstable_pinned={this.state.unstablePinned}
+                                                                />
+                                                                <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
+                                                                    <div className="noteText">
+                                                                        <Text error content={this.localize("SendToGroupsNote")} />
+                                                                    </div>
+                                                                </div>
+                                                            </Flex>
+                                                        )
+                                                    },
+                                                }
+                                            ]}
+                                        >
 
-                        <div className="footerContainer">
-                            <div className="buttonContainer">
-                                <Button content={this.localize("Back")} onClick={this.onBack} secondary />
-                                <Button content={this.localize("SaveAsDraft")} disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
-                            </div>
-                        </div>
+                                        </RadioGroup>
+                                    </Flex>
+                                </Flex.Item>
+                                <Flex.Item size="size.half" variables={{ 'size.half': '45%' }}>
+                                    <div className="adaptiveCardContainer">
+                                    </div>
+                                </Flex.Item>
+                            </Flex>
+                            <Flex className="footerContainer" vAlign="end" hAlign="end">
+                                <Flex className="buttonContainer" gap="gap.small">
+                                    <Flex.Item push>
+                                        <Button content={this.localize("Back")} onClick={this.onBack} secondary />
+                                    </Flex.Item>
+                                    <Button content={this.localize("SaveAsDraft")} disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
+                                </Flex>
+                            </Flex>
+                        </Flex>
                     </div>
                 );
             } else {

@@ -1,28 +1,30 @@
 .taskModule {
+
     .formContainer {
-        overflow-y: auto;
         position: absolute;
         top: 0rem;
         bottom: 8.4rem;
         width: 100%;
 
-        h3 {
-            font-size: 1.6rem;
-            margin: 2rem 3.2rem 0rem 3.2rem;
-        }
+        .scrollableContent {
+            overflow: auto;
+            /* for Firefox */
+            min-height: 0;
 
-        h4 {
-            margin: 0.6rem 3.2rem 1rem 3.2rem;
-            font-size: 1.4rem;
-            font-weight: 100;
-        }
+            h3 {
+                font-size: 1.6rem;
+                margin: 2rem 0 0 0;
+            }
 
-        .formContentContainer {
+            h4 {
+                margin: 0.6rem 3.2rem 1rem 3.2rem;
+                font-size: 1.4rem;
+                font-weight: 100;
+            }
 
             .inputField {
-                margin: 0rem 3.2rem;
 
-                span {
+                label {
                     font-size: 1.2rem;
                     display: block;
                     margin: 0.8rem 0rem 0.4rem 0rem;
@@ -42,7 +44,6 @@
 
 
             .textArea {
-                margin: 0rem 3.2rem;
 
                 span {
                     font-size: 1.2rem;
@@ -65,72 +66,57 @@
                     bottom: 2.5rem;
                 }
             }
-        }
-
-        .boardSelection {
-            padding-left: 2.5rem;
-            display: inline;
-            width: 40%;
-            float: left;
-
-            .dropDown {
-                display: block;
-
-                button {
-                    height: 2.6rem;
-                    font-size: 1.4rem;
-                    margin-right: 0rem;
-                    margin: 0.5rem 0rem;
-                }
-            }
-        }
-
-        .radioBtns {
-            margin: 0rem 3.2rem;
-            display: inline;
-            float: left;
-            width: 70%;
-
-            p {
-                margin: 1.5rem 0rem;
-            }
-
-            .ui-dropdown {
-                margin: 0.6rem 0rem 0.6rem 2.5rem;
-                width: 30rem;
-            }
-
-            .noteText {
-                margin: 1rem 0rem 1rem 2.5rem;
-            }
 
             .hide {
                 display: none;
             }
 
-            .hideToggle {
+            .show {
+                display: inline;
+            }
 
-                .ui-dropdown__toggle-indicator {
-                    visibility: hidden;
+            .radioBtns {
+                width: 70%;
+
+                p {
+                    margin: 1.5rem 0rem;
+                }
+
+                .ui-dropdown {
+                    margin: 0.6rem 0rem 0.6rem 2.5rem;
+                    width: 30rem;
+                }
+
+                .noteText {
+                    margin: 1rem 0rem 1rem 2.5rem;
+                }
+
+                .hide {
+                    display: none;
+                }
+
+                .hideToggle {
+
+                    .ui-dropdown__toggle-indicator {
+                        visibility: hidden;
+                    }
                 }
             }
         }
-    }
 
-    .footerContainer {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        padding: 2rem 0rem 3.2rem 0rem;
-        width: 100%;
+        .footerContainer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 2rem 0rem 3.2rem 0rem;
+            width: 100%;
 
-        .buttonContainer {
-            display: inline;
-            float: right;
-            margin-right: 3.2rem;
+            .buttonContainer {
+                margin-inline-end: 3.2rem;
 
-            #saveBtn {
-                margin-left: 0.8rem;
+                #saveBtn {
+                    margin-inline-start: 0.8rem;
+                }
             }
         }
     }
