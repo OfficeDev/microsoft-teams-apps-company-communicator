@@ -2,15 +2,17 @@
     width: 80rem;
 
     .formContainer {
-        overflow-y: auto;
         position: absolute;
         top: 0rem;
         bottom: 8.4rem;
         width: 100%;
 
-        .formContentContainer {
+        .scrollableContent {
+            overflow: auto;
+            /* for Firefox */
+            min-height: 0;
+
             .contentField {
-                margin: 0rem 3.2rem;
 
                 h3 {
                     margin: 2rem 0rem 0rem 0rem;
@@ -32,8 +34,8 @@
         }
 
         .displayMessageField {
-            margin: 0rem 3.2rem;
             color: #6264A7;
+            margin: 0rem 3.2rem;
 
             h3 {
                 margin: 2rem 0rem 0rem 0rem;
@@ -61,37 +63,34 @@
                 font-weight: lighter;
             }
         }
-    }
 
-    .footerContainer {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        padding: 2rem 0rem 3.2rem 0rem;
-        width: 100%;
+        .footerContainer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 2rem 0rem 3.2rem 0rem;
+            width: 100%;
 
-        .hide {
-            display: none;
-        }
+            .hide {
+                display: none;
+            }
 
-        .hiddenLoader {
-            display: none;
-        }
+            .hiddenLoader {
+                display: none;
+            }
 
-        .exportingLoader {
-            float: left;
-            width: 18rem;
-            margin-right: 2rem;
-            height: 3rem;
-        }
+            .sendingLoader {
+                width: 18rem;
+                margin-right: 2rem;
+                height: 3rem;
+            }
 
-        .buttonContainer {
-            display: inline;
-            float: right;
-            margin-right: 3.2rem;
+            .buttonContainer {
+                margin-inline-end: 3.2rem;
 
-            #exportBtn {
-                margin-left: 0.8rem;
+                #saveBtn {
+                    margin-inline-start: 0.8rem;
+                }
             }
         }
     }

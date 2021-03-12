@@ -5,7 +5,7 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
 import * as AdaptiveCards from "adaptivecards";
-import { Loader, Button, Text, List, Image } from '@fluentui/react-northstar';
+import { Loader, Button, Text, List, Image, Flex } from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
 
 import './sendConfirmationTaskModule.scss';
@@ -140,27 +140,32 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
         } else {
             return (
                 <div className="taskModule">
-                    <div className="formContainer">
-                        <div className="formContentContainer" >
-                            <div className="contentField">
-                                <h3>{this.localize("ConfirmToSend")}</h3>
-                                <span>{this.localize("SendToRecipientsLabel")}</span>
-                            </div>
+                    <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
+                        <Flex space="evenly" className="scrollableContent">
+                            <Flex.Item size="size.half" variables={{ 'size.half': '46%' }}>
+                                <Flex column gap="gap.small">
+                                    <h3>{this.localize("ConfirmToSend")}</h3>
+                                    <span>{this.localize("SendToRecipientsLabel")}</span>
 
-                            <div className="results">
-                                {this.renderAudienceSelection()}
-                            </div>
-                        </div>
-                        <div className="adaptiveCardContainer">
-                        </div>
-                    </div>
-
-                    <div className="footerContainer">
-                        <div className="buttonContainer">
-                            <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label={this.localize("PreparingMessageLabel")} labelPosition="end" />
-                            <Button content={this.localize("Send")} id="sendBtn" onClick={this.onSendMessage} primary />
-                        </div>
-                    </div>
+                                    <div className="results">
+                                        {this.renderAudienceSelection()}
+                                    </div>
+                                </Flex>
+                            </Flex.Item>
+                            <Flex.Item size="size.half" variables={{ 'size.half': '45%' }}>
+                                <div className="adaptiveCardContainer">
+                                </div>
+                            </Flex.Item>
+                        </Flex>
+                        <Flex className="footerContainer" vAlign="end" hAlign="end">
+                            <Flex className="buttonContainer" gap="gap.small">
+                                <Flex.Item push>
+                                    <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label={this.localize("PreparingMessageLabel")} labelPosition="end" />
+                                </Flex.Item>
+                                <Button content={this.localize("Send")} id="sendBtn" onClick={this.onSendMessage} primary />
+                            </Flex>
+                        </Flex>
+                    </Flex>
                 </div>
             );
         }

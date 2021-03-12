@@ -8,7 +8,7 @@ import DraftMessages from '../DraftMessages/draftMessages';
 import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../../configVariables';
-import { Accordion, Button } from '@fluentui/react-northstar';
+import { Accordion, Button, Flex } from '@fluentui/react-northstar';
 import { getDraftMessagesList } from '../../actions';
 import { connect } from 'react-redux';
 import { TFunction } from "i18next";
@@ -65,9 +65,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                 content: {
                     key: 'sent',
                     content: (
-                        <div className="messages">
-                            <DraftMessages></DraftMessages>
-                        </div>
+                        <DraftMessages></DraftMessages>
                     ),
                 },
             },
@@ -76,22 +74,22 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                 content: {
                     key: 'draft',
                     content: (
-                        <div className="messages">
-                            <Messages></Messages>
-                        </div>
+                        <Messages></Messages>
                     ),
                 },
             }
         ]
         return (
-            <div className="tabContainer">
-                <div className="newPostBtn">
+            <Flex className="tabContainer" column fill gap="gap.small">
+                <Flex className="newPostBtn" hAlign="end" vAlign="end">
                     <Button content={this.localize("NewMessage")} onClick={this.onNewMessage} primary />
-                </div>
-                <div className="messageContainer">
-                    <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
-                </div>
-            </div>
+                </Flex>
+                <Flex className="messageContainer">
+                    <Flex.Item grow={1} >
+                        <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
+                    </Flex.Item>
+                </Flex>
+            </Flex>
         );
     }
 

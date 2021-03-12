@@ -8,7 +8,7 @@ import { getSentNotification, exportNotification } from '../../apis/messageListA
 import { RouteComponentProps } from 'react-router-dom';
 import * as AdaptiveCards from "adaptivecards";
 import { TooltipHost } from 'office-ui-fabric-react';
-import { Loader, List, Image, Button, DownloadIcon, AcceptIcon } from '@fluentui/react-northstar';
+import { Loader, List, Image, Button, DownloadIcon, AcceptIcon, Flex } from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
@@ -145,67 +145,76 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             if (this.state.page === "ViewStatus") {
                 return (
                     <div className="taskModule">
-                        <div className="formContainer">
-                            <div className="formContentContainer" >
-                                <div className="contentField">
-                                    <h3>{this.localize("TitleText")}</h3>
-                                    <span>{this.state.message.title}</span>
+                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
+                            <Flex space="evenly" className="scrollableContent">
+                                <Flex.Item size="size.half" variables={{ 'size.half': '46%' }}>
+                                    <Flex column>
+                                        <div className="contentField">
+                                            <h3>{this.localize("TitleText")}</h3>
+                                            <span>{this.state.message.title}</span>
+                                        </div>
+                                        <div className="contentField">
+                                            <h3>{this.localize("SendingStarted")}</h3>
+                                            <span>{this.state.message.sendingStartedDate}</span>
+                                        </div>
+                                        <div className="contentField">
+                                            <h3>{this.localize("Completed")}</h3>
+                                            <span>{this.state.message.sentDate}</span>
+                                        </div>
+                                        <div className="contentField">
+                                            <h3>{this.localize("Duration")}</h3>
+                                            <span>{this.state.message.sendingDuration}</span>
+                                        </div>
+                                        <div className="contentField">
+                                            <h3>{this.localize("Results")}</h3>
+                                            <label>{this.localize("Success", { "SuccessCount": this.state.message.succeeded })}</label>
+                                            <br />
+                                            <label>{this.localize("Failure", { "FailureCount": this.state.message.failed })}</label>
+                                            <br />
+                                            {this.state.message.unknown &&
+                                                <>
+                                                    <label>{this.localize("Unknown", { "UnknownCount": this.state.message.unknown })}</label>
+                                                </>
+                                            }
+                                        </div>
+                                        <div className="contentField">
+                                            {this.renderAudienceSelection()}
+                                        </div>
+                                        <div className="contentField">
+                                            {this.renderErrorMessage()}
+                                        </div>
+                                        <div className="contentField">
+                                            {this.renderWarningMessage()}
+                                        </div>
+                                    </Flex>
+                                </Flex.Item>
+                                <Flex.Item size="size.half" variables={{ 'size.half': '45%' }}>
+                                    <div className="adaptiveCardContainer">
+                                    </div>
+                                </Flex.Item>
+                            </Flex>
+                            <Flex className="footerContainer" vAlign="end" hAlign="end">
+                                <div className={this.state.message.canDownload ? "" : "disabled"}>
+                                    <Flex className="buttonContainer" gap="gap.small">
+                                        <Flex.Item push>
+                                            <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label={this.localize("ExportLabel")} labelPosition="end" />
+                                        </Flex.Item>
+                                        <Flex.Item>
+                                            <TooltipHost content={!this.state.message.sendingCompleted ? "" : (this.state.message.canDownload ? "" : this.localize("ExportButtonProgressText"))} calloutProps={{ gapSpace: 0 }}>
+                                                <Button icon={<DownloadIcon size="medium" />} disabled={!this.state.message.canDownload || !this.state.message.sendingCompleted} content={this.localize("ExportButtonText")} id="exportBtn" onClick={this.onExport} primary />
+                                            </TooltipHost>
+                                        </Flex.Item>
+                                    </Flex>
                                 </div>
-                                <div className="contentField">
-                                    <h3>{this.localize("SendingStarted")}</h3>
-                                    <span>{this.state.message.sendingStartedDate}</span>
-                                </div>
-                                <div className="contentField">
-                                    <h3>{this.localize("Completed")}</h3>
-                                    <span>{this.state.message.sentDate}</span>
-                                </div>
-                                <div className="contentField">
-                                    <h3>{this.localize("Duration")}</h3>
-                                    <span>{this.state.message.sendingDuration}</span>
-                                </div>
-                                <div className="contentField">
-                                    <h3>{this.localize("Results")}</h3>
-                                    <label>{this.localize("Success", { "SuccessCount": this.state.message.succeeded })}</label>
-                                    <br />
-                                    <label>{this.localize("Failure", { "FailureCount": this.state.message.failed })}</label>
-                                    <br />
-                                    {this.state.message.unknown &&
-                                        <>
-                                            <label>{this.localize("Unknown", { "UnknownCount": this.state.message.unknown })}</label>
-                                        </>
-                                    }
-                                </div>
-                                <div className="contentField">
-                                    {this.renderAudienceSelection()}
-                                </div>
-                                <div className="contentField">
-                                    {this.renderErrorMessage()}
-                                </div>
-                                <div className="contentField">
-                                    {this.renderWarningMessage()}
-                                </div>
-                            </div>
-                            <div className="adaptiveCardContainer">
-                            </div>
-                        </div>
-
-                        <div className="footerContainer">
-                            <div className={this.state.message.canDownload ? "" : "disabled"}>
-                                <div className="buttonContainer">
-                                    <Loader id="sendingLoader" className="hiddenLoader sendingLoader" size="smallest" label={this.localize("ExportLabel")} labelPosition="end" />
-                                    <TooltipHost content={!this.state.message.sendingCompleted ? "" : (this.state.message.canDownload ? "" : this.localize("ExportButtonProgressText"))} calloutProps={{ gapSpace: 0 }}>
-                                        <Button icon={<DownloadIcon size="medium" />} disabled={!this.state.message.canDownload || !this.state.message.sendingCompleted} content={this.localize("ExportButtonText")} id="exportBtn" onClick={this.onExport} primary />
-                                    </TooltipHost>
-                                </div>
-                            </div>
-                        </div>
+                            </Flex>
+                        </Flex>
                     </div>
                 );
             }
             else if (this.state.page === "SuccessPage") {
                 return (
                     <div className="taskModule">
-                        <div className="formContainer">
+                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
                             <div className="displayMessageField">
                                 <br />
                                 <br />
@@ -218,20 +227,19 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                 <br />
                                 <span>{this.localize("ExportQueueSuccessMessage3")}</span>
                             </div>
-                        </div>
-                        <div className="footerContainer">
-                            <div className="buttonContainer">
-                                <Button content={this.localize("CloseText")} id="closeBtn" onClick={this.onClose} primary />
-                            </div>
-                        </div>
+                            <Flex className="footerContainer" vAlign="end" hAlign="end" gap="gap.small">
+                                <Flex className="buttonContainer">
+                                    <Button content={this.localize("CloseText")} id="closeBtn" onClick={this.onClose} primary />
+                                </Flex>
+                            </Flex>
+                        </Flex>
                     </div>
-
                 );
             }
             else {
                 return (
                     <div className="taskModule">
-                        <div className="formContainer">
+                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
                             <div className="displayMessageField">
                                 <br />
                                 <br />
@@ -239,12 +247,12 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                     <h1 className="light">{this.localize("ExportErrorTitle")}</h1></div>
                                 <span>{this.localize("ExportErrorMessage")}</span>
                             </div>
-                        </div>
-                        <div className="footerContainer">
-                            <div className="buttonContainer">
-                                <Button content={this.localize("CloseText")} id="closeBtn" onClick={this.onClose} primary />
-                            </div>
-                        </div>
+                            <Flex className="footerContainer" vAlign="end" hAlign="end" gap="gap.small">
+                                <Flex className="buttonContainer">
+                                    <Button content={this.localize("CloseText")} id="closeBtn" onClick={this.onClose} primary />
+                                </Flex>
+                            </Flex>
+                        </Flex>
                     </div>
                 );
             }

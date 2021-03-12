@@ -2,15 +2,17 @@
     width: 80rem;
 
     .formContainer {
-        overflow-y: auto;
         position: absolute;
         top: 0rem;
         bottom: 8.4rem;
         width: 100%;
 
-        .formContentContainer {
+        .scrollableContent {
+            overflow: auto;
+            /* for Firefox */
+            min-height: 0;
+
             .contentField {
-                margin: 0rem 3.2rem;
 
                 h3 {
                     margin: 2rem 0rem 0rem 0rem;
@@ -18,7 +20,6 @@
             }
 
             .results {
-                margin: 0rem 3.2rem;
                 overflow-y: auto;
                 position: relative;
 
@@ -50,19 +51,16 @@
         }
 
         .sendingLoader {
-            float: left;
             width: 18rem;
             margin-right: 2rem;
             height: 3rem;
         }
 
         .buttonContainer {
-            display: inline;
-            float: right;
-            margin-right: 3.2rem;
+            margin-inline-end: 3.2rem;
 
-            #sendBtn {
-                margin-left: 0.8rem;
+            #saveBtn {
+                margin-inline-start: 0.8rem;
             }
         }
     }
