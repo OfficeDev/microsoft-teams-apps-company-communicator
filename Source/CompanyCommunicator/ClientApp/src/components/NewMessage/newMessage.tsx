@@ -330,9 +330,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 return (
                     <div className="taskModule">
                         <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
-                            <Flex space="evenly" className="scrollableContent">
-                                <Flex.Item size="size.half" variables={{ 'size.half': '46%' }}>
-                                    <Flex column>
+                            <Flex className="scrollableContent">
+                                <Flex.Item size="size.half">
+                                    <Flex column className="formContentContainer">
                                         <Input className="inputField"
                                             value={this.state.title}
                                             label={this.localize("TitleText")}
@@ -390,7 +390,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         <Text className={(this.state.errorButtonUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorButtonUrlMessage} />
                                     </Flex>
                                 </Flex.Item>
-                                <Flex.Item size="size.half" variables={{ 'size.half': '45%' }}>
+                                <Flex.Item size="size.half">
                                     <div className="adaptiveCardContainer">
                                     </div>
                                 </Flex.Item>
@@ -410,9 +410,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 return (
                     <div className="taskModule">
                         <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
-                            <Flex space="evenly" className="scrollableContent">
-                                <Flex.Item size="size.half" variables={{ 'size.half': '46%' }}>
-                                    <Flex column gap="gap.small">
+                            <Flex className="scrollableContent">
+                                <Flex.Item size="size.half">
+                                    <Flex column className="formContentContainer">
                                         <h3>{this.localize("SendHeadingText")}</h3>
                                         <RadioGroup
                                             className="radioBtns"
@@ -529,7 +529,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         </RadioGroup>
                                     </Flex>
                                 </Flex.Item>
-                                <Flex.Item size="size.half" variables={{ 'size.half': '45%' }}>
+                                <Flex.Item size="size.half">
                                     <div className="adaptiveCardContainer">
                                     </div>
                                 </Flex.Item>
@@ -551,19 +551,19 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         }
     }
 
-    private onGroupSelected = (value: any) => {
+    private onGroupSelected = (event: any, data: any) => {
         this.setState({
-            selectedRadioBtn: value,
-            teamsOptionSelected: value === 'teams',
-            rostersOptionSelected: value === 'rosters',
-            groupsOptionSelected: value === 'groups',
-            allUsersOptionSelected: value === 'allUsers',
-            selectedTeams: value === 'teams' ? this.state.selectedTeams : [],
-            selectedTeamsNum: value === 'teams' ? this.state.selectedTeamsNum : 0,
-            selectedRosters: value === 'rosters' ? this.state.selectedRosters : [],
-            selectedRostersNum: value === 'rosters' ? this.state.selectedRostersNum : 0,
-            selectedGroups: value === 'groups' ? this.state.selectedGroups : [],
-            selectedGroupsNum: value === 'groups' ? this.state.selectedGroupsNum : 0,
+            selectedRadioBtn: data.value,
+            teamsOptionSelected: data.value === 'teams',
+            rostersOptionSelected: data.value === 'rosters',
+            groupsOptionSelected: data.value === 'groups',
+            allUsersOptionSelected: data.value === 'allUsers',
+            selectedTeams: data.value === 'teams' ? this.state.selectedTeams : [],
+            selectedTeamsNum: data.value === 'teams' ? this.state.selectedTeamsNum : 0,
+            selectedRosters: data.value === 'rosters' ? this.state.selectedRosters : [],
+            selectedRostersNum: data.value === 'rosters' ? this.state.selectedRostersNum : 0,
+            selectedGroups: data.value === 'groups' ? this.state.selectedGroups : [],
+            selectedGroupsNum: data.value === 'groups' ? this.state.selectedGroupsNum : 0,
         });
     }
 

@@ -146,8 +146,8 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                 return (
                     <div className="taskModule">
                         <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
-                            <Flex space="evenly" className="scrollableContent">
-                                <Flex.Item size="size.half" variables={{ 'size.half': '46%' }}>
+                            <Flex className="scrollableContent">
+                                <Flex.Item size="size.half" className="formContentContainer">
                                     <Flex column>
                                         <div className="contentField">
                                             <h3>{this.localize("TitleText")}</h3>
@@ -188,7 +188,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                         </div>
                                     </Flex>
                                 </Flex.Item>
-                                <Flex.Item size="size.half" variables={{ 'size.half': '45%' }}>
+                                <Flex.Item size="size.half">
                                     <div className="adaptiveCardContainer">
                                     </div>
                                 </Flex.Item>

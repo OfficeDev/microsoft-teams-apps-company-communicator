@@ -141,9 +141,9 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
             return (
                 <div className="taskModule">
                     <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
-                        <Flex space="evenly" className="scrollableContent">
-                            <Flex.Item size="size.half" variables={{ 'size.half': '46%' }}>
-                                <Flex column gap="gap.small">
+                        <Flex className="scrollableContent" gap="gap.small">
+                            <Flex.Item size="size.half">
+                                <Flex column className="formContentContainer">
                                     <h3>{this.localize("ConfirmToSend")}</h3>
                                     <span>{this.localize("SendToRecipientsLabel")}</span>
 
@@ -152,7 +152,7 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                                     </div>
                                 </Flex>
                             </Flex.Item>
-                            <Flex.Item size="size.half" variables={{ 'size.half': '45%' }}>
+                            <Flex.Item size="size.half">
                                 <div className="adaptiveCardContainer">
                                 </div>
                             </Flex.Item>

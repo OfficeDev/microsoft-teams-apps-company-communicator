@@ -8,8 +8,9 @@
 
         .scrollableContent {
             overflow: auto;
-            /* for Firefox */
-            min-height: 0;
+            height: 100%;
+            min-height: 100%;
+            margin-inline-start: 3.2rem;
 
             h3 {
                 font-size: 1.6rem;
@@ -22,85 +23,92 @@
                 font-weight: 100;
             }
 
-            .inputField {
+            .formContentContainer {
+                margin-inline-end: 3.5rem;
 
-                label {
-                    font-size: 1.2rem;
-                    display: block;
-                    margin: 0.8rem 0rem 0.4rem 0rem;
-                }
+                .inputField {
 
-                input {
-                    height: 3.2rem;
-                    padding: 0.6rem 1.2rem;
-                    font-size: 1.4rem;
-                    margin: auto 0;
-                }
+                    label {
+                        font-size: 1.2rem;
+                        display: block;
+                        margin: 0.8rem 0rem 0.4rem 0rem;
+                    }
 
-                i {
-                    bottom: 0.5rem;
-                }
-            }
+                    input {
+                        height: 3.2rem;
+                        padding: 0.6rem 1.2rem;
+                        font-size: 1.4rem;
+                        margin: auto 0;
+                    }
 
-
-            .textArea {
-
-                span {
-                    font-size: 1.2rem;
-                    display: block;
-                    margin: 0.8rem 0rem 0.4rem 0rem;
-
-                    &:nth-child(2) {
-                        color: #C4314B;
+                    i {
+                        bottom: 0.5rem;
                     }
                 }
 
-                textarea {
-                    height: 9.6rem;
-                    padding: 0.6rem 1.2rem;
-                    font-size: 1.4rem;
-                    margin: auto 0;
-                }
+                .textArea {
 
-                i {
-                    bottom: 2.5rem;
-                }
-            }
+                    span {
+                        font-size: 1.2rem;
+                        display: block;
+                        margin: 0.8rem 0rem 0.4rem 0rem;
 
-            .hide {
-                display: none;
-            }
+                        &:nth-child(2) {
+                            color: #C4314B;
+                        }
+                    }
 
-            .show {
-                display: inline;
-            }
+                    textarea {
+                        height: 9.6rem;
+                        padding: 0.6rem 1.2rem;
+                        font-size: 1.4rem;
+                        margin: auto 0;
+                    }
 
-            .radioBtns {
-                width: 70%;
-
-                p {
-                    margin: 1.5rem 0rem;
-                }
-
-                .ui-dropdown {
-                    margin: 0.6rem 0rem 0.6rem 2.5rem;
-                    width: 30rem;
-                }
-
-                .noteText {
-                    margin: 1rem 0rem 1rem 2.5rem;
+                    i {
+                        bottom: 2.5rem;
+                    }
                 }
 
                 .hide {
                     display: none;
                 }
 
-                .hideToggle {
+                .show {
+                    display: inline;
+                }
 
-                    .ui-dropdown__toggle-indicator {
-                        visibility: hidden;
+                .radioBtns {
+                    width: 70%;
+
+                    p {
+                        margin: 1.5rem 0rem;
+                    }
+
+                    .ui-dropdown {
+                        margin: 0.6rem 0rem 0.6rem 2.5rem;
+                        width: 30rem;
+                    }
+
+                    .noteText {
+                        margin: 1rem 0rem 1rem 2.5rem;
+                    }
+
+                    .hide {
+                        display: none;
+                    }
+
+                    .hideToggle {
+
+                        .ui-dropdown__toggle-indicator {
+                            visibility: hidden;
+                        }
                     }
                 }
+            }
+
+            .adaptiveCardContainer {
+                margin: 0 2rem;
             }
         }
 

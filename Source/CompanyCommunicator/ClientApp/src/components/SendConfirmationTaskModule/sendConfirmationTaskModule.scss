@@ -9,32 +9,41 @@
 
         .scrollableContent {
             overflow: auto;
-            /* for Firefox */
-            min-height: 0;
+            height: 100%;
+            min-height: 100%;
+            margin-inline-start: 3.2rem;
 
-            .contentField {
+            .formContentContainer {
+                margin-inline-end: 3.5rem;
 
-                h3 {
-                    margin: 2rem 0rem 0rem 0rem;
-                }
-            }
+                .contentField {
 
-            .results {
-                overflow-y: auto;
-                position: relative;
-
-                .label {
-                    font-weight: bold;
+                    h3 {
+                        margin: 2rem 0rem 0rem 0rem;
+                    }
                 }
 
-                ul {
-                    li {
-                        img {
-                            width: 2.5rem;
-                            height: 2.5rem;
+                .results {
+                    overflow-y: auto;
+                    position: relative;
+
+                    .label {
+                        font-weight: bold;
+                    }
+
+                    ul {
+                        li {
+                            img {
+                                width: 2.5rem;
+                                height: 2.5rem;
+                            }
                         }
                     }
                 }
+            }
+
+            .adaptiveCardContainer {
+                margin: 0 2rem;
             }
         }
     }
