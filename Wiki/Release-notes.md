@@ -6,7 +6,8 @@ Cumulative improvements in Company Communicator App.
 
 |Release |Published to <br/> Microsoft Store |
 |---|---|
-| 4.0 | TBD
+| 4.1 | Mar, 2021
+| 4.0 | Dec 30, 2020
 | 3.0 | Oct 29, 2020
 | 2.1 | Oct 16, 2020
 | 2.0 | Aug 20, 2020
@@ -15,7 +16,14 @@ Cumulative improvements in Company Communicator App.
 
 ### Company Communicator feature release notes
 
-#### 4.0 (TBD)
+#### 4.1 (Mar, 2021)
+##### Changes introduced
+- Locale support for multiple languages.
+- Migration to fluent ui northstar.
+- Migrating graph beta apis to v1.0.
+- Improved Test coverage.
+
+#### 4.0 (Dec 30, 2020)
 ##### Changes intoduced
 - Separate Bots for User and Author.
 - Automated deployment using Powershell script.

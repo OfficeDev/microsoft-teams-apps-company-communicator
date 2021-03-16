@@ -48,7 +48,7 @@
     "Description": "Default culture."
   },
   "supportedCultures": {
-    "Value": "en-US",
+    "Value": "ar-SA,de-DE,en-US,es-ES,fr-FR,he-IL,ja-JP,ko-KR,pt-BR,ru-RU,zh-CN,zh-TW",
     "Description": "Comma-delimited list of the supported cultures."
   },
   "hostingPlanSku": {
