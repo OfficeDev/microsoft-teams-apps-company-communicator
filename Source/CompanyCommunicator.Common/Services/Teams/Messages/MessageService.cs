@@ -10,7 +10,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
-    using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -67,9 +66,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             {
                 throw new ArgumentNullException(nameof(log));
             }
-
-            // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
-            MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
 
             var conversationReference = new ConversationReference
             {

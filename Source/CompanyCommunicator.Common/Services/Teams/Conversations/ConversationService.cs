@@ -95,9 +95,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                 throw new ArgumentNullException(nameof(log));
             }
 
-            // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
-            MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
-
             var conversationParameters = new ConversationParameters
             {
                 TenantId = tenantId,

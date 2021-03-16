@@ -11,7 +11,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
     using System.Threading.Tasks;
     using AdaptiveCards;
     using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
@@ -75,12 +74,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
 
             // Create bot conversation reference.
             var conversationReference = this.PrepareConversationReferenceAsync(teamDataEntity, teamsChannelId);
-
-            // Ensure the bot service URL is trusted.
-            if (!MicrosoftAppCredentials.IsTrustedServiceUrl(conversationReference.ServiceUrl))
-            {
-                MicrosoftAppCredentials.TrustServiceUrl(conversationReference.ServiceUrl);
-            }
 
             // Trigger bot to send the adaptive card.
             try

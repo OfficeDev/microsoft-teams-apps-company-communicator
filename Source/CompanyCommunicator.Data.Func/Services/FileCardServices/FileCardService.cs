@@ -10,7 +10,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
-    using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Options;
@@ -63,10 +62,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
         public async Task DeleteAsync(string userId, string fileConsentId)
         {
             var user = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, userId);
-
-            // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
-            MicrosoftAppCredentials.TrustServiceUrl(user.ServiceUrl);
-
             var conversationReference = new ConversationReference
             {
                 ServiceUrl = user.ServiceUrl,

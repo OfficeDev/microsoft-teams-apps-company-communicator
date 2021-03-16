@@ -13,7 +13,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Builder.Teams;
-    using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Extensions.Options;
@@ -57,9 +56,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
 
         private async Task<IEnumerable<UserDataEntity>> GetMembersAsync(string teamId, string tenantId, string serviceUrl, string appId)
         {
-            // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
-            MicrosoftAppCredentials.TrustServiceUrl(serviceUrl);
-
             var conversationReference = new ConversationReference
             {
                 ServiceUrl = serviceUrl,
