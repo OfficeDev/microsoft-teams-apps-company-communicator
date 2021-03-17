@@ -60,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// <summary>
         /// Success Test to Syncs group members to repository.
         /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task SyncGroupMembersActivitySuccessTest()
         {
@@ -93,7 +93,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// <summary>
         /// ArgumentNullException Test.
         /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task ArgumentNullExceptionTest()
         {

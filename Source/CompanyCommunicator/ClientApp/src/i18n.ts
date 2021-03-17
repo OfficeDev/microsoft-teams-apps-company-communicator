@@ -41,12 +41,15 @@ export const formatDate = (date: string) => {
 
 export const formatDuration = (startDate: string, endDate: string) => {
     let result = "";
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const locale = params.get("locale") || defaultLocale();
     if (startDate && endDate) {
         const difference = moment(endDate).diff(moment(startDate));
         const totalDuration = moment.duration(difference);
         // Handling the scenario of duration being more than 24 hrs as it is not done by moment.js.
         const hh = ("0" + Math.floor(totalDuration.asHours())).slice(-2);
-        result = hh + moment.utc(totalDuration.asMilliseconds()).locale(defaultLocale()).format(":mm:ss")
+        result = formatNumber(parseInt(hh)) + moment.utc(totalDuration.asMilliseconds()).locale(locale).format(":mm:ss")
     }
     return result;
 }

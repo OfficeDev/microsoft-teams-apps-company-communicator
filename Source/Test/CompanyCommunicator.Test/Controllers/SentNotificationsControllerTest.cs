@@ -47,12 +47,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         private readonly Mock<IExportDataRepository> exportDataRepository = new Mock<IExportDataRepository>();
         private readonly Mock<IAppCatalogService> appCatalogService = new Mock<IAppCatalogService>();
         private readonly Mock<IAppSettingsService> appSettingsService = new Mock<IAppSettingsService>();
-        // private readonly Mock<UserAppOptions> userAppOptions = new Mock<UserAppOptions>();
         private readonly Mock<IOptions<UserAppOptions>> userAppOptions = new Mock<IOptions<UserAppOptions>>();
-        //private readonly Mock<ILogger<SentNotificationsController>> logger = new Mock<ILogger<SentNotificationsController>>();
         private readonly Mock<ILoggerFactory> loggerFactory = new Mock<ILoggerFactory>();
-
-        //private readonly Mock<IOptions<AuthenticationOptions>> options = new Mock<IOptions<AuthenticationOptions>>();
 
         /// <summary>
         /// Constructor test for all parameters.

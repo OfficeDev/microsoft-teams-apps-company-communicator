@@ -76,7 +76,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// <summary>
         /// Test for send batch messages activity success scenario for Reciepient type "Team data".
         /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task SendBatchMessagesActivitySuccess_ForTeamRecipientTypeTest()
         {
@@ -110,7 +110,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// <summary>
         /// Failure test for Send batch messages as batch is null.
         /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task SendBatchMessagesActivityFailureTest()
         {
