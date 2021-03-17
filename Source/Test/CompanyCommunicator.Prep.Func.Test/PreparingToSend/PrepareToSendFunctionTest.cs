@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test
         /// <summary>
         /// SendNotificationData not found test.
         /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task PrepareToSendFunctionNotificationEntityNotFoundTest()
         {
@@ -78,7 +78,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test
         /// <summary>
         /// PrepareToSendFunctionSuccess test.
         /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task PrepareToSendFunctionSuccessTest()
         {

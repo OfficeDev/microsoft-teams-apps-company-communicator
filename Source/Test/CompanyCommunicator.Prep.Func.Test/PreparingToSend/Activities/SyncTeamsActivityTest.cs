@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// <summary>
         /// Sync Teams activity success test.
         /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task SyncTeamsActivitySuccessTest()
         {
@@ -98,7 +98,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// <summary>
         /// Sync teams data to Sent notification repository. Save warning message logged for each team that is absent in repository.
         /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task SyncTeamsActivitySuccessWithSaveWarningNotificationTest()
         {
@@ -140,7 +140,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// <summary>
         /// SyncTeamsActivity argumentNullException test.
         /// </summary>
-        /// <returns>A task that represents the work queued to execute.</returns
+        /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
         public async Task SyncTeamsActivityNullArgumentTest()
         {

@@ -177,7 +177,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         }
 
         /// <summary>
-        /// Test case to check if consentUrlString join character is '&'.
+        /// Test case to check if consentUrlString join character is Ampersand.
         /// </summary>
         [Fact]
         public void Check_consentUrl_JoinCharaterAmpersand()
