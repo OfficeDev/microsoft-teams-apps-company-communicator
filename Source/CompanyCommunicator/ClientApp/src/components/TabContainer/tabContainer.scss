@@ -1,0 +1,88 @@
+.tabContainer {
+
+    .newPostBtn {
+        margin: 0.5rem 0rem;
+    }
+
+    .messageContainer {
+
+        .ui-accordion__title {
+            margin-top: 1.6rem;
+        }
+    }
+
+    .ms-DetailsRow {
+        height: 4.4rem;
+    }
+
+    .ms-CommandBar {
+        background-color: transparent;
+        height: 2rem;
+    }
+
+    .results {
+        font-weight: bold;
+        margin: 1rem 1rem 1rem 2rem;
+    }
+}
+
+@media only screen and (min-width : 1000px) {
+    .taskModule {
+        .formContainer {
+
+            .adaptiveCardContainer {
+                .ac-container {
+                    margin-left: 0rem !important;
+                }
+            }
+        }
+    }
+}
+
+@media only screen and (min-width : 826px) and (max-width : 999px) {
+    .taskModule {
+        .formContainer {
+            .scrollableContent {
+                flex-direction: column;
+
+                .formContentContainer {
+                    margin-inline-end: 0rem !important;
+                }
+            }
+
+            .adaptiveCardContainer {
+                width: 100% !important;
+                display: block !important;
+                margin: 0rem auto !important;
+
+                .ac-container {
+                    margin: 0rem auto !important;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (min-width : 0px) and (max-width: 825px) {
+    .taskModule {
+        .formContainer {
+            .scrollableContent {
+                flex-direction: column;
+
+                .formContentContainer {
+                    margin-inline-end: 0rem !important;
+                }
+            }
+
+            .adaptiveCardContainer {
+                width: 100% !important;
+                display: block !important;
+                margin: 0rem auto !important;
+
+                .ac-container {
+                    margin: 0rem auto !important;
+                }
+            }
+        }
+    }
+}

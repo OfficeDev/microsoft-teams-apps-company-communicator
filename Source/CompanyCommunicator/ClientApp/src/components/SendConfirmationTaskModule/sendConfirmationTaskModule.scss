@@ -1,0 +1,76 @@
+.taskModule {
+    width: 80rem;
+
+    .formContainer {
+        position: absolute;
+        top: 0rem;
+        bottom: 8.4rem;
+        width: 100%;
+
+        .scrollableContent {
+            overflow: auto;
+            height: 100%;
+            min-height: 100%;
+            margin-inline-start: 3.2rem;
+
+            .formContentContainer {
+                margin-inline-end: 3.5rem;
+
+                .contentField {
+
+                    h3 {
+                        margin: 2rem 0rem 0rem 0rem;
+                    }
+                }
+
+                .results {
+                    overflow-y: auto;
+                    position: relative;
+
+                    .label {
+                        font-weight: bold;
+                    }
+
+                    ul {
+                        li {
+                            img {
+                                width: 2.5rem;
+                                height: 2.5rem;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .adaptiveCardContainer {
+                margin: 0 2rem;
+            }
+        }
+    }
+
+    .footerContainer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        padding: 2rem 0rem 3.2rem 0rem;
+        width: 100%;
+
+        .hiddenLoader {
+            display: none;
+        }
+
+        .sendingLoader {
+            width: 18rem;
+            margin-right: 2rem;
+            height: 3rem;
+        }
+
+        .buttonContainer {
+            margin-inline-end: 3.2rem;
+
+            #saveBtn {
+                margin-inline-start: 0.8rem;
+            }
+        }
+    }
+}

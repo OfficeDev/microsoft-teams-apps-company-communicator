@@ -2,7 +2,7 @@
     - [Prerequisites](#prerequisites)
     - [Steps](#Deployment-Steps)
         - [Deploy to your Azure subscription](#1-deploy-to-your-azure-subscription)
-        - [Update parameters.json file](#2-Update-parameters.json-file)
+        - [Update parameters.json file](#2-Update-parameters-file)
         - [Execute script](#3-Execute-script)
         - [Install the apps in Microsoft Teams](#4-install-the-apps-in-microsoft-teams)
     - [Troubleshooting](#troubleshooting)
@@ -69,7 +69,7 @@ To begin, you will need:
     ```
 
 ---
-# 2. Update parameters.json file
+# 2. Update parameters file
 - You will find a `paramters.json` file under Deployment folder. Please update all the parameters.
 
   ![Powershell deployment guide](images/param_file.png)
@@ -96,10 +96,10 @@ To begin, you will need:
 
     - `customDomainOption` - How the app will be hosted on a domain that is not \*.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs.
     > **NOTE**:  If you plan to use a custom domain name instead of relying on Azure Front Door, read the instructions [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Custom-domain-option) first.
-
+    
     - `proactivelyInstallUserApp`: If proactive app installation should be enabled. Default is true. If enabled, the application will proactively install the User bot for recipients.
     - `userAppExternalId`: Default value is 148a66bb-e83d-425a-927d-09f4299a9274. This is the external Id provided in the User app manifest.
-    - `defaultCulture`: By default the application contains en-US resources. You may add/update the resources for other locales and update this configuration if desired.
+    - `defaultCulture`:  By default the application uses `en-US` locale. You can choose another locale from the list [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Localization), if you wish to use the app in different locale.
     - `hostingPlanSku`: The pricing tier for the hosting plan. Defaul value: Standard. You may choose between Basic, Standard and Premium.
     - `hostingPlanSize`: The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value: 1
     - `gitRepoUrl` - The URL to the GitHub repository to deploy. Default value: [https://github.com/OfficeDev/microsoft-teams-company-communicator-app.git](https://github.com/OfficeDev/microsoft-teams-company-communicator-app.git)
@@ -197,6 +197,8 @@ To begin, you will need:
 
 4. Install the User app (the `cc-users.zip` package) to the users and teams that will be the target audience. 
 > If `proactiveAppInstallation` is enabled, you may skip this step. The service will install the app for all the recipients when authors send a message.
+
+> **NOTE:** If you are deploying a version of Company Communicator prior to version 4, do NOT use app permission policies to restrict the authors app to the members of the authors team. Microsoft Teams does not support applying different policies to the same bot via two different app packages. 
 
 ---
 

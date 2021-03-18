@@ -3,35 +3,37 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator", "Microsoft.Teams.Apps.CompanyCommunicator\Microsoft.Teams.Apps.CompanyCommunicator.csproj", "{1EF4F8A5-2C38-4059-BD5C-E8478DE4779F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator", "CompanyCommunicator\Microsoft.Teams.Apps.CompanyCommunicator.csproj", "{1EF4F8A5-2C38-4059-BD5C-E8478DE4779F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{069D255F-37E5-49DA-90D2-E3942C64970C} = {069D255F-37E5-49DA-90D2-E3942C64970C}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Common", "Microsoft.Teams.Apps.CompanyCommunicator.Common\Microsoft.Teams.Apps.CompanyCommunicator.Common.csproj", "{069D255F-37E5-49DA-90D2-E3942C64970C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Common", "CompanyCommunicator.Common\Microsoft.Teams.Apps.CompanyCommunicator.Common.csproj", "{069D255F-37E5-49DA-90D2-E3942C64970C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Send.Func", "Microsoft.Teams.Apps.CompanyCommunicator.Send.Func\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj", "{3B8D012F-A70D-40E5-AFB7-65BCD90CACBE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Send.Func", "CompanyCommunicator.Send.Func\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj", "{3B8D012F-A70D-40E5-AFB7-65BCD90CACBE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{069D255F-37E5-49DA-90D2-E3942C64970C} = {069D255F-37E5-49DA-90D2-E3942C64970C}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func", "Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj", "{E8831097-3A82-43A4-8122-56A146F70600}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func", "CompanyCommunicator.Prep.Func\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj", "{E8831097-3A82-43A4-8122-56A146F70600}"
 	ProjectSection(ProjectDependencies) = postProject
 		{069D255F-37E5-49DA-90D2-E3942C64970C} = {069D255F-37E5-49DA-90D2-E3942C64970C}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Data.Func", "Microsoft.Teams.Apps.CompanyCommunicator.Data.Func\Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj", "{19DCF1AC-35D3-456B-9F9A-68BC8AC21696}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Data.Func", "CompanyCommunicator.Data.Func\Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj", "{19DCF1AC-35D3-456B-9F9A-68BC8AC21696}"
 	ProjectSection(ProjectDependencies) = postProject
 		{069D255F-37E5-49DA-90D2-E3942C64970C} = {069D255F-37E5-49DA-90D2-E3942C64970C}
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{351E3064-5E5C-4AC4-AB1F-D4FDFF162749}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test", "Test\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.csproj", "{B28BD9B9-BBB0-43E3-8BD1-9F4A0B9841C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test", "Test\CompanyCommunicator.Prep.Func.Test\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.csproj", "{B28BD9B9-BBB0-43E3-8BD1-9F4A0B9841C3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test", "Test\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test.csproj", "{7426FDC6-72E9-41BA-8686-A881F1DCBAAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test", "Test\CompanyCommunicator.Send.Func.Test\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test.csproj", "{7426FDC6-72E9-41BA-8686-A881F1DCBAAC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Teams.App.CompanyCommunicator.Common.Test", "Test\Microsoft.Teams.App.CompanyCommunicator.Common.Test\Microsoft.Teams.App.CompanyCommunicator.Common.Test.csproj", "{B30048CC-3631-49F1-AF01-6A58F645C6EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Test", "Test\CompanyCommunicator.Test\Microsoft.Teams.Apps.CompanyCommunicator.Test.csproj", "{4182F62C-B7FF-4251-8123-CD442C477FB3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Teams.App.CompanyCommunicator.Common.Test", "Test\CompanyCommunicator.Common.Test\Microsoft.Teams.App.CompanyCommunicator.Common.Test.csproj", "{B30048CC-3631-49F1-AF01-6A58F645C6EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +69,10 @@ Global
 		{7426FDC6-72E9-41BA-8686-A881F1DCBAAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7426FDC6-72E9-41BA-8686-A881F1DCBAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7426FDC6-72E9-41BA-8686-A881F1DCBAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4182F62C-B7FF-4251-8123-CD442C477FB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4182F62C-B7FF-4251-8123-CD442C477FB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4182F62C-B7FF-4251-8123-CD442C477FB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4182F62C-B7FF-4251-8123-CD442C477FB3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B30048CC-3631-49F1-AF01-6A58F645C6EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B30048CC-3631-49F1-AF01-6A58F645C6EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B30048CC-3631-49F1-AF01-6A58F645C6EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -78,6 +84,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{B28BD9B9-BBB0-43E3-8BD1-9F4A0B9841C3} = {351E3064-5E5C-4AC4-AB1F-D4FDFF162749}
 		{7426FDC6-72E9-41BA-8686-A881F1DCBAAC} = {351E3064-5E5C-4AC4-AB1F-D4FDFF162749}
+		{4182F62C-B7FF-4251-8123-CD442C477FB3} = {351E3064-5E5C-4AC4-AB1F-D4FDFF162749}
 		{B30048CC-3631-49F1-AF01-6A58F645C6EB} = {351E3064-5E5C-4AC4-AB1F-D4FDFF162749}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

@@ -105,7 +105,8 @@ Register two Azure AD application in your tenant's directory: one for author bot
     5. **Author Client Secret**: The client secret of the Microsoft Teams author bot app. (from Step 1)
     6. **Proactively Install User App [Optional]**: Default value is `true`. You may set it to `false` if you want to disable the feature.
     7. **User App ExternalId [Optional]**: Default value is `148a66bb-e83d-425a-927d-09f4299a9274`. This **MUST** be the same `id` that is in the Teams app manifest for the user app.
-    8. **DefaultCulture, SupportedCultures [Optional]**: By default the application contains `en-US` resources. You may add/update the resources for other locales and update this configuration if desired.
+    8. **DefaultCulture [Optional]**: By default the application uses `en-US` locale. You can choose the locale from the list, if you wish to use the app in different locale.Also, you may add/update the resources for other locales and update this configuration if desired.
+    9. **SupportedCultures [Optional]**: This is the list of locales that application supports currently.You may add/update the resources for other locales and update this configuration if desired.
 
     > **Note:** Make sure that the values are copied as-is, with no extra spaces. The template checks that GUIDs are exactly 36 characters.
 
@@ -274,6 +275,8 @@ Repeat the steps above but with the file `Manifest\manifest_users.json` and use 
 
 4. Install the User app (the `company-communicator-users.zip` package) to the users and teams that will be the target audience.
 > If `proactiveAppInstallation` is enabled, you may skip this step. The service will install the app for all the recipients when authors send a message.
+
+> **NOTE:** If you are deploying a version of Company Communicator prior to version 4, do NOT use app permission policies to restrict the authors app to the members of the authors team. Microsoft Teams does not support applying different policies to the same bot via two different app packages. 
 
 ---
 

@@ -1,3 +1,6 @@
+:: Copyright (c) Microsoft Corporation.
+:: Licensed under the MIT License.
+
 @if "%SCM_TRACE_LEVEL%" NEQ "4" @echo off
 
 :: ----------------------
@@ -73,7 +76,7 @@ IF !ERRORLEVEL! NEQ 0 goto error
 
 :: 2. Restore npm packages
 echo Restoring npm packages (this can take several minutes)
-pushd "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator\ClientApp"
+pushd "%DEPLOYMENT_SOURCE%\Source\CompanyCommunicator\ClientApp"
 
 call :ExecuteCmd npm install --no-audit
 IF !ERRORLEVEL! NEQ 0 (
@@ -85,14 +88,14 @@ IF !ERRORLEVEL! NEQ 0 goto error
 
 :: 3. Build the client app
 echo Building the client app (this can take several minutes)
-pushd "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator\ClientApp"
+pushd "%DEPLOYMENT_SOURCE%\Source\CompanyCommunicator\ClientApp"
 call :ExecuteCmd npm run build
 popd
 IF !ERRORLEVEL! NEQ 0 goto error
 
 :: 4. Build and publish
 echo Building the application
-call :ExecuteCmd dotnet publish "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator\Microsoft.Teams.Apps.CompanyCommunicator.csproj" --output "%DEPLOYMENT_TEMP%" --configuration Release -property:KuduDeployment=1
+call :ExecuteCmd dotnet publish "%DEPLOYMENT_SOURCE%\Source\CompanyCommunicator\Microsoft.Teams.Apps.CompanyCommunicator.csproj" --output "%DEPLOYMENT_TEMP%" --configuration Release -property:KuduDeployment=1
 IF !ERRORLEVEL! NEQ 0 goto error
 
 :: 5. KuduSync
