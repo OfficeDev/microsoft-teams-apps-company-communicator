@@ -376,20 +376,18 @@
         "[resourceId('Microsoft.Web/sites', variables('prepFunctionAppName'))]",
         "[resourceId('Microsoft.Web/sites', variables('sendFunctionAppName'))]",
         "[resourceId('Microsoft.Web/sites', variables('dataFunctionAppName'))]"
-      ],
+      ],      
       "resources": [
         {
-          "apiVersion": "2016-08-01",
-          "name": "web",
-          "type": "sourcecontrols",
-          "condition": "[not(empty(parameters('gitRepoUrl')))]",
+          "name": "MSDeploy",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2018-11-01",
           "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', variables('botAppName'))]"
+            "[concat('Microsoft.Web/sites/', variables('botAppName'))]"
           ],
           "properties": {
-            "RepoUrl": "[parameters('gitRepoUrl')]",
-            "branch": "[parameters('gitBranch')]",
-            "IsManualIntegration": true
+            "packageUri": "[variables('botAppPackageURL')]"
           }
         }
       ]
@@ -687,23 +685,21 @@
         "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
         "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]"
-      ],
+      ],     
       "resources": [
         {
-          "apiVersion": "2015-08-01",
-          "name": "web",
-          "type": "sourcecontrols",
-          "condition": "[not(empty(parameters('gitRepoUrl')))]",
+          "name": "MSDeploy",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2018-11-01",
           "dependsOn": [
             "[resourceId('Microsoft.Web/sites', variables('prepFunctionAppName'))]"
           ],
           "properties": {
-            "RepoUrl": "[parameters('gitRepoUrl')]",
-            "branch": "[parameters('gitBranch')]",
-            "IsManualIntegration": true
+            "packageUri": "[variables('prepFunctionPackageURL')]"
           }
         }
-      ]
+      ] 
     },
     {
       "apiVersion": "2016-08-01",
@@ -791,20 +787,18 @@
         "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
         "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]"
-      ],
+      ],      
       "resources": [
         {
-          "apiVersion": "2015-08-01",
-          "name": "web",
-          "type": "sourcecontrols",
-          "condition": "[not(empty(parameters('gitRepoUrl')))]",
+          "name": "MSDeploy",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2018-11-01",
           "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', variables('sendFunctionAppName'))]"
+            "[concat('Microsoft.Web/sites/', variables('sendFunctionAppName'))]"
           ],
           "properties": {
-            "RepoUrl": "[parameters('gitRepoUrl')]",
-            "branch": "[parameters('gitBranch')]",
-            "IsManualIntegration": true
+            "packageUri": "[variables('sendFunctionPackageURL')]"
           }
         }
       ]
@@ -910,20 +904,18 @@
       ],
       "resources": [
         {
-          "apiVersion": "2015-08-01",
-          "name": "web",
-          "type": "sourcecontrols",
-          "condition": "[not(empty(parameters('gitRepoUrl')))]",
+          "name": "MSDeploy",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2018-11-01",
           "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', variables('dataFunctionAppName'))]"
+            "[concat('Microsoft.Web/sites/', variables('dataFunctionAppName'))]"
           ],
           "properties": {
-            "RepoUrl": "[parameters('gitRepoUrl')]",
-            "branch": "[parameters('gitBranch')]",
-            "IsManualIntegration": true
+            "packageUri": "[variables('dataFunctionPackageURL')]"
           }
         }
-      ]
+      ]      
     },
     {
       "apiVersion": "2019-04-01",
