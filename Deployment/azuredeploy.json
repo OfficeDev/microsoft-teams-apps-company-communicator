@@ -171,7 +171,7 @@
       "metadata": {
         "description": "The URL to the GitHub repository to deploy."
       },
-      "defaultValue": "https://github.com/OfficeDev/microsoft-teams-company-communicator-app.git"
+      "defaultValue": "https://github.com/OfficeDev/microsoft-teams-company-communicator-app"
     },
     "gitBranch": {
       "type": "string",
@@ -179,6 +179,13 @@
         "description": "The branch of the GitHub repository to deploy."
       },
       "defaultValue": "master"
+    },
+    "releaseTag": {
+      "type": "string",
+      "metadata": {
+        "description": "The release to deploy."
+      },
+      "defaultValue": "latest"
     }
   },
   "variables": {
@@ -212,7 +219,11 @@
     "ProactivelyInstallUserApp": "[parameters('ProactivelyInstallUserApp')]",
     "UserAppExternalId": "[parameters('UserAppExternalId')]",
     "i18n:DefaultCulture": "[parameters('DefaultCulture')]",
-    "i18n:SupportedCultures": "[parameters('SupportedCultures')]"
+    "i18n:SupportedCultures": "[parameters('SupportedCultures')]",
+    "sendFunctionPackageURL": "[concat(parameters('gitRepoUrl'), '/releases/download/', parameters('releaseTag'), '/sendFunctionPackage.zip')]",
+    "dataFunctionPackageURL": "[concat(parameters('gitRepoUrl'), '/releases/download/', parameters('releaseTag'), '/dataFunctionPackage.zip')]",
+    "prepFunctionPackageURL": "[concat(parameters('gitRepoUrl'), '/releases/download/', parameters('releaseTag'), '/prepFunctionPackage.zip')]",
+    "botAppPackageURL": "[concat(parameters('gitRepoUrl'), '/releases/download/' , parameters('releaseTag'), '/botAppPackage.zip')]"
   },
   "resources": [
     {
