@@ -610,8 +610,8 @@
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
-              "name": "PROJECT",
-              "value": "Source\\CompanyCommunicator.Prep.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj"
+              "name": "WEBSITE_RUN_FROM_PACKAGE",
+              "value": "1"
             },
             {
               "name": "SITE_ROLE",
@@ -699,7 +699,7 @@
       ],     
       "resources": [
         {
-          "name": "MSDeploy",
+          "name": "ZipDeploy",
           "type": "extensions",
           "location": "[resourceGroup().location]",
           "apiVersion": "2018-11-01",
@@ -728,8 +728,8 @@
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
-              "name": "PROJECT",
-              "value": "Source\\CompanyCommunicator.Send.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj"
+              "name": "WEBSITE_RUN_FROM_PACKAGE",
+              "value": "1"
             },
             {
               "name": "SITE_ROLE",
@@ -801,7 +801,7 @@
       ],      
       "resources": [
         {
-          "name": "MSDeploy",
+          "name": "ZipDeploy",
           "type": "extensions",
           "location": "[resourceGroup().location]",
           "apiVersion": "2018-11-01",
@@ -830,8 +830,8 @@
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
-              "name": "PROJECT",
-              "value": "Source\\CompanyCommunicator.Data.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj"
+              "name": "WEBSITE_RUN_FROM_PACKAGE",
+              "value": "1"
             },
             {
               "name": "SITE_ROLE",
@@ -915,7 +915,7 @@
       ],
       "resources": [
         {
-          "name": "MSDeploy",
+          "name": "ZipDeploy",
           "type": "extensions",
           "location": "[resourceGroup().location]",
           "apiVersion": "2018-11-01",
