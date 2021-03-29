@@ -1,0 +1,431 @@
+/**
+* Global Styles for APP
+*/
+.defaultContainer {
+    background-color: #f3f2f1;
+
+    .configContainer {
+        background-color: #fff;
+    }
+
+    .list {
+        .succeeded {
+            color: #237B4B;
+        }
+
+        .failed {
+            color: #8E192E;
+        }
+
+        .throttled {
+            color: #6264A7;
+        }
+
+        .unknown {
+            color: #6264A7;
+        }
+
+        .ui-list__item:first-child {
+            background-color: #f3f2f1;
+            color: black;
+
+            &:hover {
+                background-color: #f3f2f1;
+                color: black;
+                cursor: context-menu;
+            }
+
+            .menuContainer {
+                visibility: hidden;
+            }
+        }
+
+        .ui-list__item {
+            background-color: white;
+            color: black;
+            padding: 0rem 1.6rem !important;
+
+            &:hover {
+                color: rgb(255, 255, 255);
+                background-color: rgb(139, 140, 199);
+
+                .ui-menu {
+                    background-color: rgb(139, 140, 199);
+                }
+            }
+
+            .ui-menu {
+                margin: 0px;
+                padding: 0px;
+                background-color: white;
+            }
+
+            .menuContainer {
+                .ui-menu {
+                    background-color: white;
+
+                    li:first-child {
+                        margin-top: 0.8rem;
+                    }
+
+                    li:last-child {
+                        margin-bottom: 0.8rem;
+                    }
+
+                    li {
+                        &:hover {
+                            color: white;
+                            background-color: rgb(139, 140, 199);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .Loader {
+        background-color: #fff;
+        width: 100%;
+        margin: 20rem auto;
+    }
+
+    .ac-container {
+        border: 0.2rem solid #c8c6c4 !important;
+        border-top: 0.2rem solid #6265A9 !important;
+        border-radius: 0.3rem;
+        padding: 1.6rem !important;
+        margin-top: 0.6rem !important;
+    }
+}
+
+.darkContainer {
+    background-color: #201f1f;
+
+    .configContainer {
+        background-color: #2d2c2c;
+    }
+
+    .ui-dropdown__container {
+        .ui-button,
+        .ui-dropdown__selected-items,
+        .ui-icon,
+        .ui-list {
+            background-color: #201f1f !important;
+        }
+    }
+
+    .list {
+        .succeeded {
+            color: #92C353;
+        }
+
+        .failed {
+            color: #F9526B;
+        }
+
+        .throttled {
+            color: #E2E2F6;
+        }
+
+        .unknown {
+            color: #E2E2F6;
+        }
+
+        .ui-list__item:first-child {
+            background-color: #201f1f;
+            color: #fff;
+
+            &:hover {
+                background-color: #201f1f;
+                color: #fff;
+                cursor: context-menu;
+            }
+
+            .menuContainer {
+                visibility: hidden;
+            }
+        }
+
+        .ui-list__item {
+            background-color: #2d2c2c;
+            color: #fff;
+            padding: 0rem 1.6rem !important;
+
+            &:hover {
+                color: rgb(255, 255, 255);
+                background-color: rgba(98, 100, 167, .8);
+
+                .ui-menu {
+                    background-color: inherit;
+                    outline: none;
+                }
+            }
+
+            .ui-menu {
+                margin: 0px;
+                padding: 0px;
+                outline: none;
+                background-color: #2d2c2c;
+            }
+
+            .menuContainer {
+                .ii:hover {
+                    color: #fff;
+                }
+
+                .ui-menu {
+                    background-color: #2d2c2c;
+
+                    li:first-child {
+                        margin-top: 0.8rem;
+                    }
+
+                    li:last-child {
+                        margin-bottom: 0.8rem;
+                    }
+
+                    li {
+                        &:hover {
+                            color: white;
+                            background-color: rgba(98, 100, 167, .8);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .Loader {
+        background-color: #2D2C2C;
+        width: 100%;
+        margin: 20rem auto;
+    }
+
+    .ac-container {
+        border: 0.2rem solid #1B1A1A;
+        border-top: 0.2rem solid #6265A9;
+        border-radius: 0.3rem;
+        width: 42rem;
+        padding: 1.6rem !important;
+        background-color: #2D2C2C !important;
+        margin-top: 0.6rem !important;
+    }
+
+    .ac-textBlock {
+        color: #fff !important;
+    }
+
+    .ac-pushButton {
+        padding: 0.4rem 1rem 0.5rem 1rem;
+        height: 3.2rem;
+        background-color: #2D2C2C;
+        color: #A6A7DC;
+        border: 0.2rem solid #E2E2F6;
+        border-radius: 0.4rem;
+    }
+}
+
+.highContrastContainer {
+    background-color: #000;
+
+    .configContainer {
+        background-color: #000;
+    }
+
+    .list {
+        .ui-list__item:first-child {
+            background-color: #000;
+            color: #fff;
+            border: none;
+
+            &:hover {
+                background-color: #000;
+                color: #fff;
+                cursor: context-menu;
+            }
+
+            .menuContainer {
+                visibility: hidden;
+            }
+        }
+
+        .ui-list__item {
+            background-color: #000;
+            color: #fff;
+            border: solid #fff;
+            border-width: 0.1rem;
+            margin-top: 0rem;
+            padding: 0rem 1.6rem !important;
+
+            &:hover {
+                color: #000;
+                background-color: #ffff01;
+
+                .ui-menu {
+                    background-color: inherit;
+                    color: #000;
+                    outline: none;
+                }
+            }
+
+            .ui-menu {
+                margin: 0px;
+                padding: 0px;
+                outline: none;
+                background-color: #000;
+
+                &:hover {
+                    border: 0.1rem solid #000;
+                    color: #000;
+                }
+            }
+
+            .menuContainer {
+                .ii:hover {
+                    color: #fff;
+                }
+
+                .ui-menu {
+                    background-color: #000;
+                    color: #fff;
+
+                    li:first-child {
+                        margin-top: 0.8rem;
+                    }
+
+                    li:last-child {
+                        margin-bottom: 0.8rem;
+                    }
+
+                    li {
+                        &:hover {
+                            color: #000;
+                            background-color: #ffff01;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .Loader {
+        background-color: #000000;
+        width: 100%;
+        margin: 20rem auto;
+    }
+
+    .ac-container {
+        border: 0.2rem solid #fff;
+        border-radius: 0.3rem;
+        width: 42rem;
+        padding: 1.6rem !important;
+        background-color: #000 !important;
+        margin-top: 0.6rem !important;
+    }
+
+    .ac-textBlock {
+        color: #fff !important;
+    }
+
+    .ac-pushButton {
+        padding: 0.4rem 1rem 0.5rem 1rem;
+        height: 3.2rem;
+        background-color: #000;
+        color: #fff;
+        border: 0.2rem solid #fff;
+        border-radius: 0.4rem;
+    }
+}
+
+.appContainer {
+    width: 100%;
+
+    .primaryBtn {
+        min-width: 9.6rem;
+        height: 3.2rem;
+        margin-left: 0.8rem;
+        background-color: #6264A7;
+        color: rgb(255, 2555, 255);
+        border: none;
+        font-size: 1.4rem;
+        box-shadow: 0 0rem 0.2rem 0;
+        border-radius: 0.3rem;
+        padding: 0rem 2rem;
+        vertical-align: middle;
+
+        &:hover {
+            background-color: #464775;
+        }
+
+        &:focus {
+            outline: none;
+        }
+
+        &:disabled,
+        &[disabled] {
+            background-color: #d3d3d3;
+            color: #a7a7a7;
+        }
+    }
+
+    .secondaryBtn {
+        min-width: 9.6rem;
+        height: 3.2rem;
+        margin-left: 0.8rem;
+        background-color: #FFFFFF;
+        font-size: 1.4rem;
+        border: 0.2rem solid #E1DFDD;
+        border-radius: 0.3rem;
+        padding: 0rem 2rem;
+        box-shadow: rgba(0, 0, 0, 0.1) 0 0.2rem 0.4rem 0;
+        vertical-align: middle;
+
+        &:hover {
+            background-color: #EDEBE9;
+            border: 0.125rem solid #C8C6C4;
+        }
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    .radioBtns {
+
+        p {
+            margin: 0.5rem 0rem;
+        }
+
+        [role="radio"] {
+            position: relative;
+            cursor: pointer;
+            line-height: 1.7rem;
+            font-size: 1.2rem;
+        }
+    }
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 0.6rem;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 0.5rem #FFFFFF;
+    border-radius: 1rem;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #c8c6c4;
+    border-radius: 1rem;
+    width: 1rem;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    ::-webkit-scrollbar {
+        width: 1rem;
+    }
+}

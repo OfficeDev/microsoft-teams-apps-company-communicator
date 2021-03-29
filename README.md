@@ -1,7 +1,7 @@
 # Company Communicator App Template
 
-| [Documentation](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki) | [Deployment guide](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide) | [Architecture](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview) |
-| ---- | ---- | ---- |
+| [Documentation](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki) | [Deployment guide](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide) | [Deployment guide powershell](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide-powershell)  | [Architecture](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview) |
+| ---- | ---- | ---- | ---- |
 
 Company Communicator is a custom Teams app that enables corporate teams to create and send messages intended for multiple teams or large number of employees over chat allowing organization to reach employees right where they collaborate. Use this template for multiple scenarios, such as new initiative announcements, employee onboarding, modern learning and development, or organization-wide broadcasts. 
 
@@ -13,12 +13,15 @@ The app provides an easy interface for designated users to create, preview, coll
 * **Message creation:** Easily create messages by using a team tab where team members who are permissioned can collaborate and create messages.
 * **Audience selection:** Pick from four options to target audience. Send to general channel of selected teams, send in 1:1 chat to members of selected teams, send to all users who have the app installed or send to M365 groups, distribution lists or security groups.
 * **Message metrics:** Export messages delivery report.
+* **Localization:** Supports multiple locales.
 ## Get started
 
 Begin with the [Solution overview](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview) to read about what the app does and how it works.
 
-When you're ready to try out Company Communicator, or to use it in your own organization, follow the steps in the [Deployment guide](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide).
-
+When you're ready to try out Company Communicator, or to use it in your own organization, you can choose to follow one of the below guides.
+* [Deployment guide](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide).
+* [Deployment guide powershell](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide-powershell).  
+  
 ## Feedback
 
 Thoughts? Questions? Ideas? Share them with us on [Teams UserVoice](https://microsoftteams.uservoice.com/forums/555103-public)!

@@ -1,0 +1,250 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AdminConsentError" xml:space="preserve">
+    <value>このデータを表示するアクセス許可については、IT 管理者にお問い合わせください。</value>
+  </data>
+  <data name="AppNotInstalled" xml:space="preserve">
+    <value>アプリがインストールされていません</value>
+  </data>
+  <data name="ColumnName_DeliveryStatus" xml:space="preserve">
+    <value>配信状態</value>
+  </data>
+  <data name="ColumnName_ExportedBy" xml:space="preserve">
+    <value>エクスポート実行者</value>
+  </data>
+  <data name="ColumnName_ExportTimeStamp" xml:space="preserve">
+    <value>エクスポートのタイムスタンプ</value>
+  </data>
+  <data name="ColumnName_MessageTitle" xml:space="preserve">
+    <value>メッセージの件名</value>
+  </data>
+  <data name="ColumnName_SentTimeStamp" xml:space="preserve">
+    <value>送信済みタイムスタンプ</value>
+  </data>
+  <data name="ColumnName_StatusReason" xml:space="preserve">
+    <value>状態の理由</value>
+  </data>
+  <data name="ColumnName_TeamId" xml:space="preserve">
+    <value>チーム ID</value>
+  </data>
+  <data name="ColumnName_TeamName" xml:space="preserve">
+    <value>チーム名</value>
+  </data>
+  <data name="ColumnName_Upn" xml:space="preserve">
+    <value>UPN</value>
+  </data>
+  <data name="ColumnName_UserId" xml:space="preserve">
+    <value>ユーザー ID</value>
+  </data>
+  <data name="ColumnName_UserName" xml:space="preserve">
+    <value>名前</value>
+  </data>
+  <data name="DuplicateText" xml:space="preserve">
+    <value>{0} (コピー)</value>
+  </data>
+  <data name="ExportFailureText" xml:space="preserve">
+    <value>問題が発生しました。結果を再度エクスポートしてみてください。</value>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>失敗</value>
+  </data>
+  <data name="UserAppNotFound" xml:space="preserve">
+    <value>ユーザーアプリケーションが見つかりません。ユーザーアプリが組織のアプリカタログにアップロードされていることを確認してください。</value>
+  </data>
+  <data name="FailedToFindUserAppInAppCatalog" xml:space="preserve">
+    <value>組織のアプリカタログでユーザーアプリケーション: {0} が見つかりませんでした。</value>
+    <comment>{0} - app Id. (GUID).</comment>
+  </data>
+  <data name="FailedToCreateConversationFormat" xml:space="preserve">
+    <value>会話を作成できませんでした。エラー メッセージ: {0}</value>
+  </data>
+  <data name="FailedToCreateConversationForUserFormat" xml:space="preserve">
+    <value>Teams ユーザー: {0} を使用して会話を作成できませんでした。例外: {1}</value>
+  </data>
+  <data name="FailedToCreateConversationThrottledFormt" xml:space="preserve">
+    <value>会話を作成できませんでした。要求が調整されました。エラーメッセージ: {0} "</value>
+  </data>
+  <data name="FailedToFindTeamInDbFormat" xml:space="preserve">
+    <value>DB で {0} チームを見つけることができませんでした。</value>
+  </data>
+  <data name="FailedToGetAllUsersFormat" xml:space="preserve">
+    <value>すべてのユーザーを同期できませんでした。状態コード: {0} 例外: {1}</value>
+  </data>
+  <data name="FailedToGetConversationForUserFormat" xml:space="preserve">
+    <value>ユーザー: {0} の会話 id を取得できませんでした。状態コード: {1} 例外: {2}</value>
+  </data>
+  <data name="FailedToGetMembersForGroupFormat" xml:space="preserve">
+    <value>グループ {0} のメンバーを取得できませんでした: {1}</value>
+  </data>
+  <data name="FailedToGetMembersForTeamFormat" xml:space="preserve">
+    <value>チーム {0} のメンバーを取得できませんでした: {1}</value>
+  </data>
+  <data name="FailedToInstallApplicationForUserFormat" xml:space="preserve">
+    <value>ユーザー: {0} のアプリケーションをインストールできませんでした。例外: {1}</value>
+  </data>
+  <data name="FailtoPrepareMessageFormat" xml:space="preserve">
+    <value>送信するメッセージの準備に失敗しました: {0}</value>
+  </data>
+  <data name="FileCardDescription" xml:space="preserve">
+    <value>このファイルにはエクスポートした結果が含まれています。</value>
+  </data>
+  <data name="FileCardExpireText" xml:space="preserve">
+    <value>このダウンロードのリンクの有効期限が切れています。結果を再度エクスポートします。</value>
+  </data>
+  <data name="FileName_ExportData" xml:space="preserve">
+    <value>ExportData</value>
+  </data>
+  <data name="FileName_Message_Delivery" xml:space="preserve">
+    <value>Message_Delivery</value>
+  </data>
+  <data name="FileName_Metadata" xml:space="preserve">
+    <value>メタデータ</value>
+  </data>
+  <data name="FileReadyText" xml:space="preserve">
+    <value>ファイルをダウンロードする準備ができました。コピーは OneDrive でも利用できます。</value>
+  </data>
+  <data name="FileUploadErrorText" xml:space="preserve">
+    <value>問題が発生しました。結果を再度エクスポートしてみてください。</value>
+  </data>
+  <data name="NumberOfGroupsExceededLimitWarningFormat" xml:space="preserve">
+    <value>通知は {0} 件のグループを受信者として持っています。グループの数が {1} 件を超えることはできません。</value>
+  </data>
+  <data name="NumberOfRostersExceededLimitWarningFormat" xml:space="preserve">
+    <value>通知は {0} 件の名簿を受信者として持っています。名簿の数が {1} 件を超えることはできません。</value>
+  </data>
+  <data name="NumberOfTeamsExceededLimitWarningFormat" xml:space="preserve">
+    <value>通知は {0} 件のチームを受信者として持っています。チームの数が {1} 件を超えることはできません。</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="PermissionDeclinedText" xml:space="preserve">
+    <value>アクセス許可が拒否されました。エクスポートは実行されません。</value>
+  </data>
+  <data name="RecipientNotFound" xml:space="preserve">
+    <value>受信者が見つかりません</value>
+  </data>
+  <data name="Succeeded" xml:space="preserve">
+    <value>成功しました</value>
+  </data>
+  <data name="Throttled" xml:space="preserve">
+    <value>調整済み</value>
+  </data>
+</root>

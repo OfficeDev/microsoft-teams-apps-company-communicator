@@ -1,0 +1,250 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AdminConsentError" xml:space="preserve">
+    <value>이 데이터를 볼 수 있는 권한에 대해서는 IT 관리자에게 문의하세요.</value>
+  </data>
+  <data name="AppNotInstalled" xml:space="preserve">
+    <value>앱이 설치되지 않음</value>
+  </data>
+  <data name="ColumnName_DeliveryStatus" xml:space="preserve">
+    <value>배달 상태</value>
+  </data>
+  <data name="ColumnName_ExportedBy" xml:space="preserve">
+    <value>내보낸 사람</value>
+  </data>
+  <data name="ColumnName_ExportTimeStamp" xml:space="preserve">
+    <value>타임스탬프 내보내기</value>
+  </data>
+  <data name="ColumnName_MessageTitle" xml:space="preserve">
+    <value>메시지 제목</value>
+  </data>
+  <data name="ColumnName_SentTimeStamp" xml:space="preserve">
+    <value>보낸 타임스탬프</value>
+  </data>
+  <data name="ColumnName_StatusReason" xml:space="preserve">
+    <value>상태 이유</value>
+  </data>
+  <data name="ColumnName_TeamId" xml:space="preserve">
+    <value>팀 ID</value>
+  </data>
+  <data name="ColumnName_TeamName" xml:space="preserve">
+    <value>팀 이름</value>
+  </data>
+  <data name="ColumnName_Upn" xml:space="preserve">
+    <value>UPN</value>
+  </data>
+  <data name="ColumnName_UserId" xml:space="preserve">
+    <value>사용자 ID</value>
+  </data>
+  <data name="ColumnName_UserName" xml:space="preserve">
+    <value>이름</value>
+  </data>
+  <data name="DuplicateText" xml:space="preserve">
+    <value>{0} (복사)</value>
+  </data>
+  <data name="ExportFailureText" xml:space="preserve">
+    <value>오류가 발생했습니다. 결과를 다시 내보내 보세요.</value>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>실패함</value>
+  </data>
+  <data name="UserAppNotFound" xml:space="preserve">
+    <value>사용자 응용 프로그램을 찾을 수 없습니다. 사용자 앱이 조직의 앱 카탈로그에 업로드되는지 확인하세요.</value>
+  </data>
+  <data name="FailedToFindUserAppInAppCatalog" xml:space="preserve">
+    <value>조직의 앱 카탈로그에서 {0} 사용자 응용 프로그램을 찾지 못했습니다.</value>
+    <comment>{0} - app Id. (GUID).</comment>
+  </data>
+  <data name="FailedToCreateConversationFormat" xml:space="preserve">
+    <value>대화를 만들지 못했습니다. 오류 메시지: {0}</value>
+  </data>
+  <data name="FailedToCreateConversationForUserFormat" xml:space="preserve">
+    <value>팀 사용자가 대화를 만들지 못했습니다({0}.). 예외: {1}</value>
+  </data>
+  <data name="FailedToCreateConversationThrottledFormt" xml:space="preserve">
+    <value>대화를 만들지 못했습니다. 요청이 제한되었습니다. 오류 메시지: {0}"</value>
+  </data>
+  <data name="FailedToFindTeamInDbFormat" xml:space="preserve">
+    <value>DB에서 팀 {0} 찾지 못했습니다.</value>
+  </data>
+  <data name="FailedToGetAllUsersFormat" xml:space="preserve">
+    <value>모든 사용자를 동기화하지 못했습니다. 상태 코드: {0} 예외: {1}</value>
+  </data>
+  <data name="FailedToGetConversationForUserFormat" xml:space="preserve">
+    <value>사용자를 위해 대화 ID를 가져오지 못했습니다. {0}. 상태 코드: {1} 예외: {2}</value>
+  </data>
+  <data name="FailedToGetMembersForGroupFormat" xml:space="preserve">
+    <value>{0} 그룹 구성원을 가져오지 못했습니다. {1}</value>
+  </data>
+  <data name="FailedToGetMembersForTeamFormat" xml:space="preserve">
+    <value>팀 {0} 팀 구성원을 가져오지 못했습니다. {1}</value>
+  </data>
+  <data name="FailedToInstallApplicationForUserFormat" xml:space="preserve">
+    <value>사용자에 대해 응용 프로그램을 설치하지 못했습니다. {0}. 예외: {1}</value>
+  </data>
+  <data name="FailtoPrepareMessageFormat" xml:space="preserve">
+    <value>메시지를 다음을 위해 준비하지 못했습니다.{0}</value>
+  </data>
+  <data name="FileCardDescription" xml:space="preserve">
+    <value>이 파일에는 내보낸 결과가 포함되어 있습니다.</value>
+  </data>
+  <data name="FileCardExpireText" xml:space="preserve">
+    <value>이 다운로드에 대한 링크가 만료되었습니다. 결과를 다시 내보냅니다.</value>
+  </data>
+  <data name="FileName_ExportData" xml:space="preserve">
+    <value>ExportData</value>
+  </data>
+  <data name="FileName_Message_Delivery" xml:space="preserve">
+    <value>Message_Delivery</value>
+  </data>
+  <data name="FileName_Metadata" xml:space="preserve">
+    <value>메타데이터</value>
+  </data>
+  <data name="FileReadyText" xml:space="preserve">
+    <value>파일이 다운로드준비되었습니다. OneDrive에서도 복사본을 사용할 수 있습니다.</value>
+  </data>
+  <data name="FileUploadErrorText" xml:space="preserve">
+    <value>오류가 발생했습니다. 결과를 다시 내보내 보세요.</value>
+  </data>
+  <data name="NumberOfGroupsExceededLimitWarningFormat" xml:space="preserve">
+    <value>알림에 그룹이 {0} 그룹을 받는 사람으로 구성되어 있습니다. {1} 그룹을 넘어와서는 안 됩니다.</value>
+  </data>
+  <data name="NumberOfRostersExceededLimitWarningFormat" xml:space="preserve">
+    <value>알림에 받는 사람으로 {0} 있습니다. {1} 명단을 초과하면 안 됩니다.</value>
+  </data>
+  <data name="NumberOfTeamsExceededLimitWarningFormat" xml:space="preserve">
+    <value>알림에 받는 사람으로 {0}개 팀이 있습니다. {1}개 팀을 초과하면 안 됩니다.</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="PermissionDeclinedText" xml:space="preserve">
+    <value>사용 권한이 거절되었습니다. 내보내기를 진행하지 않습니다.</value>
+  </data>
+  <data name="RecipientNotFound" xml:space="preserve">
+    <value>받는 사람을 찾을 수 없음</value>
+  </data>
+  <data name="Succeeded" xml:space="preserve">
+    <value>성공</value>
+  </data>
+  <data name="Throttled" xml:space="preserve">
+    <value>제한됨</value>
+  </data>
+</root>

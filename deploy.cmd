@@ -1,3 +1,6 @@
+:: Copyright (c) Microsoft Corporation.
+:: Licensed under the MIT License.
+
 @if "%SCM_TRACE_LEVEL%" NEQ "4" @echo off
 
 IF "%SITE_ROLE%" == "app" (

@@ -1,0 +1,250 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AdminConsentError" xml:space="preserve">
+    <value>_Cюптд©т ўбцґ ЇЋ дdмїи fюя pёгмїssїфи тф vїєш тнїs dдтд.ЍѝцзджфЍ_</value>
+  </data>
+  <data name="AppNotInstalled" xml:space="preserve">
+    <value>_Дpp Лфт ЇпsтдllёdЍѝц_</value>
+  </data>
+  <data name="ColumnName_DeliveryStatus" xml:space="preserve">
+    <value>_Dэlїvёгў SтдтµsЍѝ_</value>
+  </data>
+  <data name="ColumnName_ExportedBy" xml:space="preserve">
+    <value>_Зжpфґтєd БуЍѝ_</value>
+  </data>
+  <data name="ColumnName_ExportTimeStamp" xml:space="preserve">
+    <value>_Зжpфят ЋїмзSтдмpЍѝ_</value>
+  </data>
+  <data name="ColumnName_MessageTitle" xml:space="preserve">
+    <value>_Mзssдgэ ЋїтlзЍѝ_</value>
+  </data>
+  <data name="ColumnName_SentTimeStamp" xml:space="preserve">
+    <value>_Sэлт ЋїмёSтдмpЍѝ_</value>
+  </data>
+  <data name="ColumnName_StatusReason" xml:space="preserve">
+    <value>_Sтдтµs ЃєдsбйЍѝ_</value>
+  </data>
+  <data name="ColumnName_TeamId" xml:space="preserve">
+    <value>_Ћздм ЇDЍ_</value>
+  </data>
+  <data name="ColumnName_TeamName" xml:space="preserve">
+    <value>_Ћёдм ИдмёЍ_</value>
+  </data>
+  <data name="ColumnName_Upn" xml:space="preserve">
+    <value>_ЏPП_</value>
+  </data>
+  <data name="ColumnName_UserId" xml:space="preserve">
+    <value>_Цsзґ ЇDЍ_</value>
+  </data>
+  <data name="ColumnName_UserName" xml:space="preserve">
+    <value>_ЙдмэЍ_</value>
+  </data>
+  <data name="DuplicateText" xml:space="preserve">
+    <value>_{0} (©фpу)Ѝѝ_</value>
+  </data>
+  <data name="ExportFailureText" xml:space="preserve">
+    <value>_Sюмзтнїлg шєлт щгюйg. Ћяу эжpюятїлg тнє яэsџlтs дgдїй.ЍѝцзджфЍ_</value>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>_FдїlєdЍ_</value>
+  </data>
+  <data name="UserAppNotFound" xml:space="preserve">
+    <value>_Цsёґ дpplї©дтїбй лбт fбµпd. Mдкэ sџгз тћє Цsєя дpp їs µplфдdзd тю ўюџг юґgдпїzдтїюл's дpp ©дтдlюg.ЍѝцзджфЍѝцзджфЍ_</value>
+  </data>
+  <data name="FailedToFindUserAppInAppCatalog" xml:space="preserve">
+    <value>_Fдїlэd тб fїиd тнэ Џsєґ дpplї©дтїфй: {0} їп тћё юґgдлїzдтїбп's дpp ©дтдlбg.ЍѝцзджфЍѝцз_</value>
+    <comment>{0} - app Id. (GUID).</comment>
+  </data>
+  <data name="FailedToCreateConversationFormat" xml:space="preserve">
+    <value>_Fдїlёd тф ©ґэдтє ©фйvєяsдтїфй. Єяґбя мзssдgє: {0}Ѝѝцзджф_</value>
+  </data>
+  <data name="FailedToCreateConversationForUserFormat" xml:space="preserve">
+    <value>_Fдїlзd тб ©яєдтэ ©бпvёяsдтїфй щїтн тёдмs џsзя: {0}. Зж©ёpтїюй: {1}ЍѝцзджфЍѝц_</value>
+  </data>
+  <data name="FailedToCreateConversationThrottledFormt" xml:space="preserve">
+    <value>_Fдїlэd тф ©гздтє ©фпvёяsдтїюл. Гзqµэsт тнгбттlзd. Єґябг мэssдgё: {0}"ЍѝцзджфЍѝц_</value>
+  </data>
+  <data name="FailedToFindTeamInDbFormat" xml:space="preserve">
+    <value>_Fдїlєd тю fїиd тћэ тздм {0} їи DЬ.Ѝѝцзд_</value>
+  </data>
+  <data name="FailedToGetAllUsersFormat" xml:space="preserve">
+    <value>_Fдїlзd тф sул© дll µsєґs. Sтдтцs Cюdє: {0} Эж©єpтїфл: {1}ЍѝцзджфЍѝ_</value>
+  </data>
+  <data name="FailedToGetConversationForUserFormat" xml:space="preserve">
+    <value>_Fдїlэd тб gзт ©юйvэяsдтїюл їd fюґ µsзя: {0}. Sтдтцs Cбdэ: {1} Єж©зpтїюл: {2}ЍѝцзджфЍѝцз_</value>
+  </data>
+  <data name="FailedToGetMembersForGroupFormat" xml:space="preserve">
+    <value>_Fдїlёd тф gзт мємъєґs fюя gґбµp {0}: {1}Ѝѝцздж_</value>
+  </data>
+  <data name="FailedToGetMembersForTeamFormat" xml:space="preserve">
+    <value>_Fдїlёd тф gєт мэмвэгs fфґ тёдм {0}: {1}Ѝѝцздж_</value>
+  </data>
+  <data name="FailedToInstallApplicationForUserFormat" xml:space="preserve">
+    <value>_Fдїlзd тб їпsтдll дpplї©дтїфл fюя µsэг: {0}. Ёж©єpтїбй: {1}ЍѝцзджфЍѝ_</value>
+  </data>
+  <data name="FailtoPrepareMessageFormat" xml:space="preserve">
+    <value>_Fдїlёd тф pгэpдґз тћэ мэssдgё fюґ sэйdїйg:{0}Ѝѝцзджф_</value>
+  </data>
+  <data name="FileCardDescription" xml:space="preserve">
+    <value>_Ћнїs fїlэ ©юптдїйs тћє ґэsцlтs убџ зжpюгтёd.Ѝѝцзджф_</value>
+  </data>
+  <data name="FileCardExpireText" xml:space="preserve">
+    <value>_Ћнэ lїиќ fюя тнїs dфщпlюдd ндs зжpїгзd. Ёжpфгт тћє гзsџlтs дgдїи.ЍѝцзджфЍѝц_</value>
+  </data>
+  <data name="FileName_ExportData" xml:space="preserve">
+    <value>_ЭжpбґтDдтдЍѝ_</value>
+  </data>
+  <data name="FileName_Message_Delivery" xml:space="preserve">
+    <value>_Mзssдgє_DєlїvзячЍѝ_</value>
+  </data>
+  <data name="FileName_Metadata" xml:space="preserve">
+    <value>_MэтдdдтдЍ_</value>
+  </data>
+  <data name="FileReadyText" xml:space="preserve">
+    <value>_Ўбцг fїlэ їs ґєдdч тф dфщйlюдd. Д ©юpу їs дlsб дvдїlдъlэ їи ЮпзDяїvз.ЍѝцзджфЍѝц_</value>
+  </data>
+  <data name="FileUploadErrorText" xml:space="preserve">
+    <value>_Sюмэтћїйg щєлт шяюйg. Ћяу ёжpбгтїлg тћё гєsµlтs дgдїй.ЍѝцзджфЍ_</value>
+  </data>
+  <data name="NumberOfGroupsExceededLimitWarningFormat" xml:space="preserve">
+    <value>_Ћнэ лютїfї©дтїбл ћдs {0} gгфџps дs їтs яз©їpїэитs. Їт sнфцldп'т ёж©ёєd {1} gябџps.ЍѝцзджфЍѝцзд_</value>
+  </data>
+  <data name="NumberOfRostersExceededLimitWarningFormat" xml:space="preserve">
+    <value>_Ћћє лбтїfї©дтїбп ћдs {0} яюsтёґs дs їтs ґё©їpїєйтs. Їт sнфµldи'т эж©зєd {1} ґюsтєяs.ЍѝцзджфЍѝцздж_</value>
+  </data>
+  <data name="NumberOfTeamsExceededLimitWarningFormat" xml:space="preserve">
+    <value>_Ћћз пфтїfї©дтїбп ћдs {0} тэдмs дs їтs ґё©їpїэитs. Їт sћфµldи'т эж©зёd {1} тєдмs.ЍѝцзджфЍѝцзд_</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>_ФЌ_</value>
+  </data>
+  <data name="PermissionDeclinedText" xml:space="preserve">
+    <value>_Pєгмїssїюй dэ©lїиєd. Шз шїll лбт pгю©зэd шїтћ тћє ёжpбґт.ЍѝцзджфЍѝ_</value>
+  </data>
+  <data name="RecipientNotFound" xml:space="preserve">
+    <value>_Гє©їpїзит Лют FфџиdЍѝц_</value>
+  </data>
+  <data name="Succeeded" xml:space="preserve">
+    <value>_Sµ©©эзdэdЍ_</value>
+  </data>
+  <data name="Throttled" xml:space="preserve">
+    <value>_ЋћяфттlєdЍ_</value>
+  </data>
+</root>

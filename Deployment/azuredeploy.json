@@ -64,7 +64,18 @@
     "DefaultCulture": {
       "defaultValue": "en-US",
       "allowedValues": [
-        "en-US"
+        "ar-SA",
+        "de-DE",
+        "en-US",
+        "es-ES",
+        "fr-FR",
+        "he-IL",
+        "ja-JP",
+        "ko-KR",
+        "pt-BR",
+        "ru-RU",
+        "zh-CN",
+        "zh-TW"
       ],
       "minLength": 1,
       "type": "String",
@@ -73,7 +84,7 @@
       }
     },
     "SupportedCultures": {
-      "defaultValue": "en-US",
+      "defaultValue": "ar-SA,de-DE,en-US,es-ES,fr-FR,he-IL,ja-JP,ko-KR,pt-BR,ru-RU,zh-CN,zh-TW",
       "minLength": 1,
       "type": "String",
       "metadata": {
@@ -258,7 +269,7 @@
           "appSettings": [
             {
               "name": "PROJECT",
-              "value": "Source/Microsoft.Teams.Apps.CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj"
+              "value": "Source/CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj"
             },
             {
               "name": "SITE_ROLE",
@@ -585,12 +596,13 @@
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
         "hostingEnvironment": "",
         "clientAffinityEnabled": false,
+        "httpsOnly": true,
         "siteConfig": {
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
               "name": "PROJECT",
-              "value": "Source\\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj"
+              "value": "Source\\CompanyCommunicator.Prep.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj"
             },
             {
               "name": "SITE_ROLE",
@@ -704,12 +716,13 @@
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
         "hostingEnvironment": "",
         "clientAffinityEnabled": false,
+        "httpsOnly": true,
         "siteConfig": {
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
               "name": "PROJECT",
-              "value": "Source\\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj"
+              "value": "Source\\CompanyCommunicator.Send.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj"
             },
             {
               "name": "SITE_ROLE",
@@ -807,12 +820,13 @@
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
         "hostingEnvironment": "",
         "clientAffinityEnabled": false,
+        "httpsOnly": true,
         "siteConfig": {
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
               "name": "PROJECT",
-              "value": "Source\\Microsoft.Teams.Apps.CompanyCommunicator.Data.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj"
+              "value": "Source\\CompanyCommunicator.Data.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj"
             },
             {
               "name": "SITE_ROLE",
@@ -1039,7 +1053,7 @@
       "type": "string",
       "value": "[parameters('authorClientId')]"
     },
-	"userBotId": {
+    "userBotId": {
       "type": "string",
       "value": "[parameters('userClientId')]"
     },

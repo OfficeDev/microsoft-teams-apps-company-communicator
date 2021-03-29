@@ -1,97 +1,135 @@
 pool:
   name: Azure Pipelines
-  vmImage: 'vs2017-win2016'
+  vmImage: 'windows-latest'
   demands:
   - msbuild
   - visualstudio
+
 variables:
   BuildPlatform: 'Any CPU'
+  Solution: 'Source/Microsoft.Teams.Apps.CompanyCommunicator.sln'
   BuildConfiguration: 'Release'
+
 steps:
-- task: DotNetCoreCLI@2
-  displayName: 'Build CompanyCommunicator'
+- checkout: self
+
+- task: UseDotNet@2 
+  displayName: '.NET Core 3.1.x'
   inputs:
-    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj
-    arguments: '--configuration $(BuildConfiguration)'
+    version: '3.1.x'
+    packageType: sdk
 
 - task: DotNetCoreCLI@2
-  displayName: 'Publish CompanyCommunicator'
+  displayName: Build solution
   inputs:
-    command: publish
-    publishWebProjects: false
-    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj
-    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
-    zipAfterPublish: True
+    projects: $(Solution)
+    arguments: --configuration $(BuildConfiguration)
 
 - task: DotNetCoreCLI@2
-  displayName: 'Build Data Function'
-  inputs:
-    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Data.Func/Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj
-    arguments: '--configuration $(BuildConfiguration)'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Publish Data Function'
-  inputs:
-    command: publish
-    publishWebProjects: false
-    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Data.Func/Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj
-    arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
-    zipAfterPublish: True
-
-- task: DotNetCoreCLI@2
-  displayName: 'Build Prep Function'
-  inputs:
-    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj
-    arguments: '--configuration $(BuildConfiguration)'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Test Prep Function '
+  displayName: 'Run unit tests'
   inputs:
     command: test
-    projects: Source/test/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.csproj
-    arguments: '--configuration $(BuildConfiguration)'
-
-- script: dotnet test Source/test/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.csproj --logger trx --collect "Code coverage"
-- task: PublishTestResults@2
-  inputs:
-    testRunner: VSTest
-    testResultsFiles: '**/*.trx'
-
+    projects: $(Solution)
+    arguments: '--collect "Code coverage"'
+    
 - task: DotNetCoreCLI@2
-  displayName: 'Publish Prep Function'
+  displayName: 'Publish Company Communicator'
   inputs:
     command: publish
     publishWebProjects: false
-    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj
+    projects: Source/CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj
     arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
     zipAfterPublish: True
 
 - task: DotNetCoreCLI@2
-  displayName: 'Build Send Function'
-  inputs:
-    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj
-    arguments: '--configuration $(BuildConfiguration)'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Test Send Function'
-  inputs:
-    command: test
-    projects: Source/test/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test.csproj
-    arguments: '--configuration $(BuildConfiguration)'
-
-- script: dotnet test Source/test/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test.csproj --logger trx --collect "Code coverage"
-- task: PublishTestResults@2
-  inputs:
-    testRunner: VSTest
-    testResultsFiles: '**/*.trx'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Publish Send Function'
+  displayName: 'Publish data function'
   inputs:
     command: publish
     publishWebProjects: false
-    projects: Source/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj
+    projects: Source/CompanyCommunicator.Data.Func/Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj
     arguments: '--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)'
+    zipAfterPublish: True
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish prep function'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: Source/CompanyCommunicator.Prep.Func/Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj
+    arguments: --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)
+    zipAfterPublish: True
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish send function'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: Source/CompanyCommunicator.Send.Func/Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj
+    arguments: --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)
+
+- task: RoslynAnalyzers@2
+  displayName: 'Run Roslyn code analyzers'
+  inputs:
+    userProvideBuildInfo: 'msBuildInfo'
+    msBuildVersion: '16.0'
+    msBuildArchitecture: 'DotNetCore'
+    msBuildCommandline: '$(Agent.ToolsDirectory)\dotnet\dotnet.exe build $(Solution) --configuration $(BuildConfiguration)'
+    rulesetName: 'Skype'
+
+- task: TSLint@1
+  displayName: Run TSLint
+  inputs:
+    RuleLibrary: microsoft
+    RulesetMicrosoft: skypesdlrequired
+    FileSelectionType: projectFile
+    Project: Source/CompanyCommunicator/ClientApp/tsconfig.json
+  
+- task: PoliCheck@1
+  displayName: 'Run Policheck'
+  inputs:
+    inputType: 'Basic'
+    targetType: 'F'
+    targetArgument: '$(Build.SourcesDirectory)'
+    result: 'PoliCheck.xml'
+    optionsUEPATH: '$(Build.SourcesDirectory)\Build\UserExclusion.xml'
+
+- task: SdtReport@1
+  displayName: 'Generate tool reports'
+  inputs:
+    AllTools: true
+    BinSkimBreakOn: 'Error'
+    CodesignValidationBreakOn: 'Error'
+    FxCopBreakOn: 'ErrorAbove'
+    ModernCopBreakOn: 'Error'
+    PoliCheckBreakOn: 'Severity1'
+    RoslynAnalyzersBreakOn: 'Error'
+    SemmleBreakOn: 'Error'
+    TSLintBreakOn: 'Error'
+    ToolLogsNotFoundAction: 'Standard'
+
+- task: PostAnalysis@1
+  displayName: 'Analyze tool results'
+  inputs:
+    AllTools: true
+    BinSkimBreakOn: 'Error'
+    CodesignValidationBreakOn: 'Error'
+    FxCopBreakOn: 'ErrorAbove'
+    ModernCopBreakOn: 'Error'
+    PoliCheckBreakOn: 'Severity1'
+    RoslynAnalyzersBreakOn: 'Error'
+    SemmleBreakOn: 'Error'
+    TSLintBreakOn: 'Error'
+    ToolLogsNotFoundAction: 'Standard'
+
+- task: PublishSecurityAnalysisLogs@2
+  inputs:
+    ArtifactName: 'CodeAnalysisLogs'
+    ArtifactType: 'Container'
+    AllTools: true
+    ToolLogsNotFoundAction: 'Standard'
+
+- task: ComponentGovernanceComponentDetection@0
+  displayName: Component Detection
 
 - task: CopyFiles@2
   displayName: 'Copy Files to: $(build.artifactstagingdirectory)/cc'
@@ -103,3 +141,4 @@ steps:
   displayName: 'Publish Artifact'
   inputs:
     PathtoPublish: '$(build.artifactstagingdirectory)/cc'
+    

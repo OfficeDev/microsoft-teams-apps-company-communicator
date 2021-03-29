@@ -12,8 +12,10 @@ It provides a foundation to build custom targeted communication capabilities suc
     * [Data stores](Data-stores)
     * [Cost estimate](Cost-estimate)
     * [Known limitations](Known-limitations)
+    * [Localization](Localization)
 * Deploying the app
     * [Deployment guide](Deployment-guide)
+    * [Deployment guide powershell](Deployment-guide-powershell)
     * [Troubleshooting](Troubleshooting)
 * Migrating to newer version
   * [v4](v4-migration-guide)
