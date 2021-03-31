@@ -19,8 +19,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class GetRecipientsActivity
     {
+        private const int MaxResultSize = 100000;
+        private const int UserCount = 1000;
+
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
-        private readonly int maxResultSize = 100000;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetRecipientsActivity"/> class.
@@ -44,12 +46,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 throw new ArgumentNullException(nameof(notification));
             }
 
-            var results = await this.sentNotificationDataRepository.GetByCountAsync(notification.Id, 1000);
+            var results = await this.sentNotificationDataRepository.GetPagedAsync(notification.Id, UserCount);
             var recipients = new List<SentNotificationDataEntity>();
             recipients.AddRange(results.Item1);
-            while (results.Item2 != null && recipients.Count < this.maxResultSize)
+            while (results.Item2 != null && recipients.Count < MaxResultSize)
             {
-                results = await this.sentNotificationDataRepository.GetByTokenAsync(results.Item2, notification.Id);
+                results = await this.sentNotificationDataRepository.GetPagedAsync(notification.Id, UserCount, results.Item2);
                 if (results.Item1 != null && results.Item1.Count() > 0)
                 {
                     recipients.AddRange(results.Item1);
@@ -79,9 +81,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             }
 
             var recipients = new List<SentNotificationDataEntity>();
-            while (input.tableContinuationToken != null && recipients.Count < this.maxResultSize)
+            while (input.tableContinuationToken != null && recipients.Count < MaxResultSize)
             {
-                var results = await this.sentNotificationDataRepository.GetByTokenAsync(input.tableContinuationToken, input.notificationId);
+                var results = await this.sentNotificationDataRepository.GetPagedAsync(input.notificationId, UserCount, input.tableContinuationToken);
                 if (results.Item1 != null && results.Item1.Count() > 0)
                 {
                     recipients.AddRange(results.Item1);

@@ -196,29 +196,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// </summary>
         /// <param name="partition">Partition key value.</param>
         /// <param name="count">The max number of desired entities.</param>
+        /// <param name="token">The continuation token.</param>
         /// <returns>All data entities and continuation token.</returns>
-        public async Task<(IEnumerable<T>, TableContinuationToken)> GetByCountAsync(string partition = null, int? count = null)
+        public async Task<(IEnumerable<T>, TableContinuationToken)> GetPagedAsync(string partition = null, int? count = null, TableContinuationToken token = null)
         {
             var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
             var query = new TableQuery<T>().Where(partitionKeyFilter);
             query.TakeCount = count;
-            TableQuerySegment<T> seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, null);
-            return (seg.Results, seg.ContinuationToken);
-        }
+            TableQuerySegment<T> seg;
+            if (token == null)
+            {
+                seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, null);
+                return (seg.Results, seg.ContinuationToken);
+            }
 
-        /// <summary>
-        /// Get data entities from the table storage in a partition using token.
-        /// </summary>
-        /// <param name="token">Continuation token.</param>
-        /// <param name="partition">Partition key value.</param>
-        /// <param name="count">The max number of desired entities.</param>
-        /// <returns>All data entities.</returns>
-        public async Task<(IEnumerable<T>, TableContinuationToken)> GetByTokenAsync(TableContinuationToken token, string partition = null, int? count = null)
-        {
-            var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
-            var query = new TableQuery<T>().Where(partitionKeyFilter);
-            query.TakeCount = count;
-            TableQuerySegment<T> seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, token);
+            seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, token);
             return (seg.Results, seg.ContinuationToken);
         }
 
