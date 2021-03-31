@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
@@ -52,12 +53,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 log.LogInformation("About to get all recipients.");
             }
 
-            var recipients = await context.CallActivityWithRetryAsync<IEnumerable<SentNotificationDataEntity>>(
+            var results = await context.CallActivityWithRetryAsync<(IEnumerable<SentNotificationDataEntity>, TableContinuationToken)>(
                 FunctionNames.GetRecipientsActivity,
                 FunctionSettings.DefaultRetryOptions,
                 notification);
 
-            var recipientsList = recipients.ToList();
+            var recipientsList = results.Item1.ToList();
+
+            while (results.Item2 != null)
+            {
+                results = await context.CallActivityWithRetryAsync<(IEnumerable<SentNotificationDataEntity>, TableContinuationToken)>(
+                FunctionNames.GetRecipientsByTokenActivity,
+                FunctionSettings.DefaultRetryOptions,
+                (notification.Id, results.Item2));
+                if (results.Item1 != null && results.Item1.Count() > 0)
+                {
+                    recipientsList.AddRange(results.Item1);
+                }
+            }
 
             if (!context.IsReplaying)
             {

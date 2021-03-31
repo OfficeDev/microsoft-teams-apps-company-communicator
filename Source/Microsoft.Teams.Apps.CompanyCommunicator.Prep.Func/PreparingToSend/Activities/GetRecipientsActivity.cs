@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -18,6 +19,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     /// </summary>
     public class GetRecipientsActivity
     {
+        private const int MaxResultSize = 100000;
+        private const int UserCount = 1000;
+
         private readonly SentNotificationDataRepository sentNotificationDataRepository;
 
         /// <summary>
@@ -35,10 +39,60 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="notification">notification.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.GetRecipientsActivity)]
-        public async Task<IEnumerable<SentNotificationDataEntity>> GetRecipientsAsync([ActivityTrigger] NotificationDataEntity notification)
+        public async Task<(IEnumerable<SentNotificationDataEntity>, TableContinuationToken)> GetRecipientsAsync([ActivityTrigger] NotificationDataEntity notification)
         {
-            var recipients = await this.sentNotificationDataRepository.GetAllAsync(notification.Id);
-            return recipients;
+            if (notification == null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
+
+            var results = await this.sentNotificationDataRepository.GetPagedAsync(notification.Id, UserCount);
+            var recipients = new List<SentNotificationDataEntity>();
+            recipients.AddRange(results.Item1);
+            while (results.Item2 != null && recipients.Count < MaxResultSize)
+            {
+                results = await this.sentNotificationDataRepository.GetPagedAsync(notification.Id, UserCount, results.Item2);
+                if (results.Item1 != null && results.Item1.Count() > 0)
+                {
+                    recipients.AddRange(results.Item1);
+                }
+            }
+
+            return (recipients, results.Item2);
+        }
+
+        /// <summary>
+        /// Reads all the recipients from Sent notification table.
+        /// </summary>
+        /// <param name="input">Input containing notification id and continuation token.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [FunctionName(FunctionNames.GetRecipientsByTokenActivity)]
+        public async Task<(IEnumerable<SentNotificationDataEntity>, TableContinuationToken)> GetRecipientsByTokenAsync(
+            [ActivityTrigger](string notificationId, TableContinuationToken tableContinuationToken) input)
+        {
+            if (input.notificationId == null)
+            {
+                throw new ArgumentNullException(nameof(input.notificationId));
+            }
+
+            if (input.tableContinuationToken == null)
+            {
+                throw new ArgumentNullException(nameof(input.tableContinuationToken));
+            }
+
+            var recipients = new List<SentNotificationDataEntity>();
+            while (input.tableContinuationToken != null && recipients.Count < MaxResultSize)
+            {
+                var results = await this.sentNotificationDataRepository.GetPagedAsync(input.notificationId, UserCount, input.tableContinuationToken);
+                if (results.Item1 != null && results.Item1.Count() > 0)
+                {
+                    recipients.AddRange(results.Item1);
+                }
+
+                input.tableContinuationToken = results.Item2;
+            }
+
+            return (recipients, input.tableContinuationToken);
         }
 
         /// <summary>
