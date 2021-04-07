@@ -265,6 +265,7 @@
         "dailyMemoryTimeQuota": 0,
         "httpsOnly": true,
         "siteConfig": {
+          "ftpsState": "Disabled",
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
@@ -598,6 +599,7 @@
         "clientAffinityEnabled": false,
         "httpsOnly": true,
         "siteConfig": {
+          "ftpsState": "Disabled",
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
@@ -718,6 +720,7 @@
         "clientAffinityEnabled": false,
         "httpsOnly": true,
         "siteConfig": {
+          "ftpsState": "Disabled",
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
@@ -822,6 +825,7 @@
         "clientAffinityEnabled": false,
         "httpsOnly": true,
         "siteConfig": {
+          "ftpsState": "Disabled",
           "alwaysOn": "[not(variables('isSharedPlan'))]",
           "appSettings": [
             {
