@@ -22,6 +22,7 @@
   "InstallingApp": "Instalando o aplicativo...",
   "SendingMessages": "Enviando... {{SentCount}} de {{TotalCount}}",
   "ImageURL": "URL da imagem",
+  "ImageURLPlaceHolder": "Link da imagem ou clique upload",
   "Summary": "Resumo",
   "Author": "Autor",
   "Author1": "- Autor",
@@ -83,5 +84,7 @@
   "ExportErrorMessage": "Tente exportar os resultados novamente. Se o problema persistir, contate o administrador de ti para obter ajuda.",
   "ExportButtonText": "Resultados detalhados da exportação",
   "ExportButtonProgressText": "Exportação em andamento",
-  "ErrorURLMessage": "URL deve começar com https://"
+  "ErrorURLMessage": "URL deve começar com https://",
+  "ErrorImageTooBig": "A imagem é muito grande!",
+  "UploadImage": "Upload"
 }

@@ -22,6 +22,7 @@
   "InstallingApp": "Installing app...",
   "SendingMessages": "Sending... {{SentCount}} of {{TotalCount}}",
   "ImageURL": "Image URL",
+  "ImageURLPlaceHolder": "Enter image link or click upload",
   "Summary": "Summary",
   "Author": "Author",
   "Author1": "- Author",
@@ -83,5 +84,7 @@
   "ExportErrorMessage": "Try exporting the results again. If the problem persists, contact your IT admin for help.",
   "ExportButtonText": "Export detailed results",
   "ExportButtonProgressText": "Export in progress",
-  "ErrorURLMessage": "URL must start with https://"
+  "ErrorURLMessage": "URL must start with https://",
+  "ErrorImageTooBig": "The image is too big!",
+  "UploadImage": "Upload"
 }
