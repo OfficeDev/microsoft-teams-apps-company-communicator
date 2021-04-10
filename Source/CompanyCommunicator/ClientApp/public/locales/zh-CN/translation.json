@@ -83,5 +83,13 @@
   "ExportErrorMessage": "请再次尝试导出结果。如果问题仍然存在，请与你的 IT 管理员联系以获得帮助。",
   "ExportButtonText": "导出详细结果",
   "ExportButtonProgressText": "正在导出",
-  "ErrorURLMessage": "URL 必须以 https:// 开头"
+  "ErrorURLMessage": "URL 必须以 https:// 开头",
+  "ErrorImageTooBig": "形象太大了！",
+  "UploadImage": "上传",
+  "FutureDateError": "您将来至少需要安排 30 分钟。",
+  "ScheduledSend": "计划发送",
+  "ScheduledMessagesSectionTitle": "计划消息",
+  "EmptyScheduledMessages": "您没有计划的消息。",
+  "SendNow": "立即发送",
+  "ScheduledDate": "计划为"
 }

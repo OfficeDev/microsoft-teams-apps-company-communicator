@@ -86,5 +86,12 @@
   "ExportButtonProgressText": "Exportación en curso",
   "ErrorURLMessage": "La URL debe empezar por https://",
   "ErrorImageTooBig": "¡La imagen es demasiado grande!",
-  "UploadImage": "Subir"
+  "UploadImage": "Subir",
+  "FutureDateError": "Es necesario programar al menos 30 minutos en el futuro.",
+  "ScheduledSend": "Envío programado",
+  "ScheduledMessagesSectionTitle": "Mensajes programados",
+  "EmptyScheduledMessages": "No tiene mensajes enviados.",
+  "SendNow": "Enviar ahora",
+  "ScheduledDate": "Programado para"
 }
+  

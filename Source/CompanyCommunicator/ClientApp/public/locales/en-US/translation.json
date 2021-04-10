@@ -86,5 +86,12 @@
   "ExportButtonProgressText": "Export in progress",
   "ErrorURLMessage": "URL must start with https://",
   "ErrorImageTooBig": "The image is too big!",
-  "UploadImage": "Upload"
+  "UploadImage": "Upload",
+  "FutureDateError": "You need to schedule at least 30 minutes in the future.",
+  "ScheduledSend": "Scheduled Send",
+  "ScheduledMessagesSectionTitle": "Scheduled messages",
+  "EmptyScheduledMessages": "You have no scheduled messages.",
+  "SendNow": "Send Now",
+  "ScheduledDate": "Scheduled to"
+
 }
