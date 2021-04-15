@@ -30,7 +30,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
     {
         private readonly Mock<IUsersService> usersService = new Mock<IUsersService>();
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
-        private readonly Mock<ILogger> log = new Mock<ILogger>();
 
         /// <summary>
         /// Gets RunParameters.
