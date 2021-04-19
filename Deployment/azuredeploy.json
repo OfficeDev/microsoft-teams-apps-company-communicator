@@ -681,6 +681,14 @@
             {
               "name": "ServiceBusConnection",
               "value": "[listkeys(variables('authRuleResourceId'), '2017-04-01').primaryConnectionString]"
+            },
+            {
+              "name": "AzureFunctionsJobHost__extensions__durableTask__maxConcurrentOrchestratorFunctions",
+              "value": "5"
+            },
+            {
+              "name": "AzureFunctionsJobHost__extensions__durableTask__maxConcurrentActivityFunctions",
+              "value": "30"
             }
           ]
         }
