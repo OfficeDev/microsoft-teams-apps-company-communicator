@@ -1,5 +1,5 @@
 - [Deployment Guide](#outlook-web-service-ows)
-    - [Prerequisites](#prerequisites)
+    - [Prerequisites](#prerequisites) 
     - [Steps](#Deployment-Steps)
         - [Register AD Application](#1-register-azure-ad-application)
         - [Deploy to Azure subscription](#2-deploy-to-your-azure-subscription)
@@ -212,7 +212,7 @@ Continuing from the Azure AD app registration page where we ended Step 3.
     * then select **Application permissions** and check the following permissions,
         1. **Group.Read.All**
         2. **User.Read.All**
-        3. **TeamsAppInstallation.ReadWriteForUser.All**
+        3. **TeamsAppInstallation.ReadWriteSelfForUser.All**
 
     * Click on **Add Permissions** to commit your changes.
 
