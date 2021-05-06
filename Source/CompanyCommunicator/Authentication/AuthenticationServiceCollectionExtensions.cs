@@ -139,7 +139,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                 options.AddPolicy(
                     PolicyNames.MSGraphGroupDataPolicy,
                     policyBuilder => policyBuilder
-                    .AddRequirements(new MSGraphScopeRequirement(new string[] { Common.Constants.ScopeGroupReadAll }))
+                    .AddRequirements(new MSGraphScopeRequirement(new string[] { Common.Constants.ScopeGroupMemberReadAll }))
                     .RequireAuthenticatedUser()
                     .Build());
             });

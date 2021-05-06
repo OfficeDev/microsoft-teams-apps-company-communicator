@@ -206,11 +206,11 @@ Continuing from the Azure AD app registration page where we ended Step 3.
     * Under **Commonly used Microsoft APIs**, 
 
     * Select “Microsoft Graph”, then select **Delegated permissions** and check the following permissions,
-        1. **Group.Read.All**
+        1. **GroupMember.Read.All**
         2. **AppCatalog.Read.All**
 
     * then select **Application permissions** and check the following permissions,
-        1. **Group.Read.All**
+        1. **GroupMember.Read.All**
         2. **User.Read.All**
         3. **TeamsAppInstallation.ReadWriteSelfForUser.All**
 

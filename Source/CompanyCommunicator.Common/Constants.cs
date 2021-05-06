@@ -11,9 +11,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
     public static class Constants
     {
         /// <summary>
-        /// get the group read all scope.
+        /// get the groupMember read all scope.
         /// </summary>
-        public const string ScopeGroupReadAll = "Group.Read.All";
+        public const string ScopeGroupMemberReadAll = "GroupMember.Read.All";
 
         /// <summary>
         /// AppCatalog Read All scope.
