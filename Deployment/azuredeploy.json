@@ -39,6 +39,21 @@
         "description": "The client secret of the author bot Azure AD app."
       }
     },
+    "microsoftAppId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "metadata": {
+        "description": "The client ID of the Microsoft app Azure AD app, e.g., 123e4567-e89b-12d3-a456-426655440000."
+      }
+    },
+    "microsoftAppSecret": {
+      "type": "securestring",
+      "minLength": 1,
+      "metadata": {
+        "description": "The client secret of the Microsoft app Azure AD app."
+      }
+    },
     "senderUPNList": {
       "type": "string",
       "minLength": 1,
@@ -298,11 +313,11 @@
             },
             {
               "name": "AzureAd:ClientId",
-              "value": "[parameters('authorClientId')]"
+              "value": "[parameters('microsoftAppId')]"
             },
             {
               "name": "AzureAd:ClientSecret",
-              "value": "[parameters('authorClientSecret')]"
+              "value": "[parameters('microsoftAppSecret')]"
             },
             {
               "name": "AzureAd:ApplicationIdURI",
@@ -323,6 +338,14 @@
             {
               "name": "AuthorAppPassword",
               "value": "[parameters('authorClientSecret')]"
+            },
+            {
+              "name": "MicrosoftAppId",
+              "value": "[parameters('microsoftAppId')]"
+            },
+            {
+              "name": "MicrosoftAppPassword",
+              "value": "[parameters('microsoftAppSecret')]"
             },
             {
               "name": "StorageAccountConnectionString",
@@ -661,6 +684,14 @@
             {
               "name": "AuthorAppPassword",
               "value": "[parameters('authorClientSecret')]"
+            },
+            {
+              "name": "MicrosoftAppId",
+              "value": "[parameters('microsoftAppId')]"
+            },
+            {
+              "name": "MicrosoftAppPassword",
+              "value": "[parameters('microsoftAppSecret')]"
             },
             {
               "name": "UserAppId",
