@@ -148,8 +148,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
                 Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
                 {
-                    confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("AuthorAppId");
-                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("AuthorAppPassword");
+                    confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("MicrosoftAppId");
+                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("MicrosoftAppPassword");
                     confidentialClientApplicationOptions.TenantId = configuration.GetValue<string>("TenantId");
                 });
 
