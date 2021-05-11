@@ -138,7 +138,7 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                                     menuOpen: false,
                                 });
                                 this.deleteDraftMessage(this.props.message.id).then(() => {
-                                    this.props.getDraftMessagesList(); //deleting a scheduled message we move it to the draft collection, need to refresh it
+                                    this.props.getScheduledMessagesList(); 
                                 });
                             }
                         },
