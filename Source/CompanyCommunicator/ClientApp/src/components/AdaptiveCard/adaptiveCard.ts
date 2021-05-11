@@ -2,6 +2,14 @@
 // Licensed under the MIT License.
 
 import { TFunction } from "i18next";
+import * as AdaptiveCards from "adaptivecards";
+import MarkdownIt from "markdown-it";
+
+// process markdown on the adaptive card
+AdaptiveCards.AdaptiveCard.onProcessMarkdown = function (text, result) {
+    result.outputHtml = new MarkdownIt().render(text);
+    result.didProcess = true;
+}
 
 export const getInitAdaptiveCard = (t: TFunction) => {
     const titleTextAsString = t("TitleText");

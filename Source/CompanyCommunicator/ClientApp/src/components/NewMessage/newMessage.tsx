@@ -6,6 +6,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as AdaptiveCards from "adaptivecards";
+import MarkdownIt from "markdown-it";
 import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup, Checkbox, Datepicker } from '@fluentui/react-northstar'
 import * as microsoftTeams from "@microsoft/teams-js";
 import Resizer from 'react-image-file-resizer';
@@ -96,6 +97,12 @@ export interface formState {
     DMYMins: string, //mins selected
     futuredate: boolean //if the date is in the future (valid schedule)
 
+}
+
+// handler to parse the markdown on the newly created adaptive card
+AdaptiveCards.AdaptiveCard.onProcessMarkdown = function (text, result) {
+    result.outputHtml = new MarkdownIt().render(text);
+    result.didProcess = true;
 }
 
 export interface INewMessageProps extends RouteComponentProps, WithTranslation {
