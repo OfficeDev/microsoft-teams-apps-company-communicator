@@ -92,6 +92,7 @@
   "ScheduledMessagesSectionTitle": "Scheduled messages",
   "EmptyScheduledMessages": "You have no scheduled messages.",
   "SendNow": "Send Now",
-  "ScheduledDate": "Scheduled to"
-
+  "ScheduledDate": "Scheduled to",
+  "Important": "Important Message",
+  "ImportantDescription": "This option flags the message as important. Recipients will receive the message and be notified with a Teams alert."
 }
