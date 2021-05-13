@@ -91,5 +91,8 @@
   "ScheduledMessagesSectionTitle": "计划消息",
   "EmptyScheduledMessages": "您没有计划的消息。",
   "SendNow": "立即发送",
-  "ScheduledDate": "计划为"
+  "ScheduledDate": "计划为",
+  "Important": "重要消息",
+  "ImportantDescription": "此选项标记消息非常重要。收件人将收到消息，并收到团队警报通知。",
+  "ScheduledSendDescription": "选择日期和时间来安排您的邮件。请安排至少30分钟的未来。"
 }

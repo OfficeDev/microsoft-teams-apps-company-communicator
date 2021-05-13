@@ -91,5 +91,8 @@
   "ScheduledMessagesSectionTitle": "Geplante Nachrichten",
   "EmptyScheduledMessages": "Sie haben keine geplanten Nachrichten.",
   "SendNow": "Jetzt senden",
-  "ScheduledDate": "Geplant"
+  "ScheduledDate": "Geplant",
+  "Important": "Wichtige Botschaft",
+  "ImportantDescription": "Diese Option kennzeichnet die Nachricht als wichtig. Die Empfänger erhalten die Nachricht und werden mit einer Teams-Warnung benachrichtigt.",
+  "ScheduledSendDescription": "Wählen Sie ein Datum und eine Uhrzeit aus, um Ihre Nachricht zu planen. Bitte planen Sie mindestens 30 Minuten in der Zukunft."
 }

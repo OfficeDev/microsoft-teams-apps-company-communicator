@@ -54,6 +54,7 @@ export interface IDraftMessage {
     rosters: any[],
     groups: any[],
     allUsers: boolean,
+    isImportant: boolean, // indicates if the message is important
     isScheduled: boolean,
     ScheduledDate: Date
 }
@@ -90,12 +91,12 @@ export interface formState {
     errorImageUrlMessage: string,
     errorButtonUrlMessage: string,
     selectedSchedule: boolean, //status of the scheduler checkbox
+    selectedImportant: boolean, //status of the importance selection on the interface
     scheduledDate: string, //stores the scheduled date in string format
     DMY: Date, //scheduled date in date format
     DMYHour: string, //hour selected
     DMYMins: string, //mins selected
     futuredate: boolean //if the date is in the future (valid schedule)
-
 }
 
 export interface INewMessageProps extends RouteComponentProps, WithTranslation {
@@ -143,6 +144,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
             selectedSchedule: false, //scheduler option is disabled by default
+            selectedImportant: false, //important flag for the msg is false by default
             scheduledDate: TempDate.toUTCString(), //current date in UTC string format
             DMY: TempDate, //current date in Date format
             DMYHour: this.getDateHour(TempDate.toUTCString()), //initialize with the current hour (rounded up)
@@ -171,6 +173,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         selectedTeams: selectedTeams,
                         selectedRosters: selectedRosters,
                         selectedSchedule: this.state.selectedSchedule,
+                        selectedImportant: this.state.selectedImportant,
                         scheduledDate: this.state.scheduledDate,
                         DMY: this.getDateObject(this.state.scheduledDate),
                         DMYHour: this.getDateHour(this.state.scheduledDate),
@@ -365,6 +368,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 selectedRosters: draftMessageDetail.rosters,
                 selectedGroups: draftMessageDetail.groups,
                 selectedSchedule: draftMessageDetail.isScheduled,
+                selectedImportant: draftMessageDetail.isImportant,
                 scheduledDate: draftMessageDetail.scheduledDate
             });
 
@@ -430,7 +434,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                             />
                                             <Flex.Item push>
                                                 <Button onClick={this.handleUploadClick}
-                                                    size="smaller"
+                                                    size="small"
                                                     content={this.localize("UploadImage")}
                                                 />
                                             </Flex.Item>
@@ -624,8 +628,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                             label={this.localize("ScheduledSend")}
                                             checked={this.state.selectedSchedule}
                                             toggle
-                                         /></h3>
+                                            /></h3>
                                         </Flex>
+                                        <Text size="small" align="start" content={this.localize('ScheduledSendDescription')} />
                                         <Flex gap="gap.smaller" className="DateTimeSelector">
                                             <Datepicker
                                                 disabled={!this.state.selectedSchedule}
@@ -660,6 +665,17 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                 <Text error content={this.localize('FutureDateError')} />
                                             </div>
                                         </div>
+                                        <Flex hAlign="start">
+                                            <h3><Checkbox
+                                                className="Important"
+                                                labelPosition="start"
+                                                onClick={this.onImportantSelected}
+                                                label={this.localize("Important")}
+                                                checked={this.state.selectedImportant}
+                                                toggle
+                                            /></h3>
+                                        </Flex>
+                                        <Text size="small" align="start" content={this.localize('ImportantDescription')} />
                                     </Flex>
                                 </Flex.Item>
                                 <Flex.Item size="size.half">
@@ -770,6 +786,13 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedSchedule: !this.state.selectedSchedule,
             scheduledDate: TempDate.toUTCString(),
             DMY: TempDate
+        });
+    }
+
+    // handler for the important message checkbox
+    private onImportantSelected = () => {
+        this.setState({
+            selectedImportant: !this.state.selectedImportant
         });
     }
 
@@ -958,6 +981,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             groups: selectedGroups,
             allUsers: this.state.allUsersOptionSelected,
             isScheduled: this.state.selectedSchedule,
+            isImportant: this.state.selectedImportant,
             ScheduledDate: new Date(this.state.scheduledDate)
         };
 

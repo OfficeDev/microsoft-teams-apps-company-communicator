@@ -113,6 +113,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     CreatedDate = draftNotificationEntity.CreatedDate,
                     SentDate = null,
                     IsDraft = false,
+                    IsImportant = draftNotificationEntity.IsImportant,
                     Teams = draftNotificationEntity.Teams,
                     Rosters = draftNotificationEntity.Rosters,
                     Groups = draftNotificationEntity.Groups,

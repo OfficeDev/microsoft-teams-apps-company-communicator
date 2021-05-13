@@ -157,6 +157,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 CreatedDate = DateTime.UtcNow,
                 IsDraft = true,
                 IsScheduled = notification.IsScheduled,
+                IsImportant = notification.IsImportant,
                 ScheduledDate = notification.ScheduledDate,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,
@@ -241,7 +242,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             // sorts the scheduled messages by date from the most recent
             result.Sort((r1, r2) => r1.ScheduledDate.Value.CompareTo(r2.ScheduledDate.Value));
-            
             return result;
         }
 
@@ -283,6 +283,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Groups = notificationEntity.Groups,
                 AllUsers = notificationEntity.AllUsers,
                 IsScheduled = notificationEntity.IsScheduled,
+                IsImportant = notificationEntity.IsImportant,
                 ScheduledDate = notificationEntity.ScheduledDate,
             };
 

@@ -91,5 +91,8 @@
   "ScheduledMessagesSectionTitle": "الرسائل المجدولة",
   "EmptyScheduledMessages": "ليس لديك رسائل مجدولة.",
   "SendNow": "إرسال الآن",
-  "ScheduledDate": "المقررة"
+  "ScheduledDate": "المقررة",
+  "Important": "رسالة هامة",
+  "ImportantDescription": "يشير هذا الخيار إلى الرسالة على أنها مهمة. سيتلقى المستلمون الرسالة وسيتم إعلامهم بتنبيه الفرق.",
+  "ScheduledSendDescription": "حدد تاريخا ووقتا لجدولة رسالتك. يرجى تحديد موعد لا يقل عن 30 دقيقة في المستقبل."
 }

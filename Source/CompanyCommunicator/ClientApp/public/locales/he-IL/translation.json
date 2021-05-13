@@ -91,5 +91,8 @@
   "ScheduledMessagesSectionTitle": "הודעות מתוזמנות",
   "EmptyScheduledMessages": "אין לך הודעות מתוזמנות.",
   "SendNow": "שלח עכשיו",
-  "ScheduledDate": "מתוזמן ל"
+  "ScheduledDate": "מתוזמן ל",
+  "Important": "הודעה חשובה",
+  "ImportantDescription": "אפשרות זו מסמנת את ההודעה כחשובה. הנמענים יקבלו את ההודעה ויודיעו להם באמצעות התראת Teams.",
+  "ScheduledSendDescription": "בחר תאריך ושעה לתזמון ההודעה. נא לתזמן לפחות 30 דקות בעתיד."
 }

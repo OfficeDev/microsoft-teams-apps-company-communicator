@@ -92,6 +92,9 @@
   "ScheduledMessagesSectionTitle": "Mensajes programados",
   "EmptyScheduledMessages": "No tiene mensajes enviados.",
   "SendNow": "Enviar ahora",
-  "ScheduledDate": "Programado para"
+  "ScheduledDate": "Programado para",
+  "Important": "Mensaje Importante",
+  "ImportantDescription": "Esta opción marca el mensaje como importante. Los destinatarios recibirán el mensaje y se le notificará con una alerta de Teams.",
+  "ScheduledSendDescription": "Seleccione una fecha y hora para programar el mensaje. Por favor, programe al menos 30 minutos en el futuro."
 }
   

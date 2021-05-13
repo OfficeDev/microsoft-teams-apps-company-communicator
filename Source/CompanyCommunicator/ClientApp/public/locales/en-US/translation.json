@@ -94,5 +94,6 @@
   "SendNow": "Send Now",
   "ScheduledDate": "Scheduled to",
   "Important": "Important Message",
-  "ImportantDescription": "This option flags the message as important. Recipients will receive the message and be notified with a Teams alert."
+  "ImportantDescription": "This option flags the message as important. Recipients will receive the message and be notified with a Teams alert.",
+  "ScheduledSendDescription": "Select a date and time to schedule your message. Please schedule at least 30 minutes in the future."
 }

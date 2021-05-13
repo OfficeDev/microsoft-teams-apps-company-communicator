@@ -91,5 +91,8 @@
   "ScheduledMessagesSectionTitle": "スケジュールされたメッセージ",
   "EmptyScheduledMessages": "スケジュールされたメッセージがありません。",
   "SendNow": "今すぐ送信",
-  "ScheduledDate": "スケジュール"
+  "ScheduledDate": "スケジュール",
+  "Important": "重要なメッセージ",
+  "ImportantDescription": "このオプションは、メッセージに重要なフラグを付けます。受信者はメッセージを受信し、チームの警告を通知します。",
+  "ScheduledSendDescription": "メッセージをスケジュールする日時を選択します。少なくとも30分は予定してください。"
 }
