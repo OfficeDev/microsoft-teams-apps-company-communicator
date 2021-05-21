@@ -98,16 +98,12 @@ export const getCardBtnLink = (card: any) => {
     return card.actions[0].url;
 }
 
-export const setCardBtn = (card: any, buttonTitle?: string, buttonLink?: string) => {
-    if (buttonTitle && buttonLink) {
-        card.actions = [
-            {
-                "type": "Action.OpenUrl",
-                "title": buttonTitle,
-                "url": buttonLink
-            }
-        ];
+// set the values collection with buttons to the card actions
+export const setCardBtns = (card: any, values: any[]) => {
+    if (values !== null) {
+            card.actions = values;
     } else {
         delete card.actions;
     }
 }
+

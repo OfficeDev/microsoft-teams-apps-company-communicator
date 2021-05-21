@@ -94,5 +94,8 @@
   "ScheduledDate": "Prévu pour",
   "Important": "Message Important",
   "ImportantDescription": "Cette option signale le message comme important. Les destinataires recevront le message et seront informés par une alerte des équipes.",
-  "ScheduledSendDescription": "Sélectionnez une date et une heure pour planifier votre message. Veuillez planifier au moins 30 minutes à l’avenir."
+  "ScheduledSendDescription": "Sélectionnez une date et une heure pour planifier votre message. Veuillez planifier au moins 30 minutes à l’avenir.",
+  "Add": "Ajouter",
+  "Buttons": "Boutons",
+  "NoButtons": "Aucun bouton défini. Cliquez (+) pour inclure des boutons et des actions sur le message."
 }

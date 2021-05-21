@@ -87,6 +87,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public bool IsImportant { get; set; }
 
         /// <summary>
+        /// Gets or sets a value with the JSON describing the buttons for the adaptive card.
+        /// </summary>
+        public string Buttons { get; set; }
+
+        /// <summary>
         /// Gets or sets the TeamsInString value.
         /// This property helps to save the Teams data in the Azure Table storage.
         /// Table storage doesn't support an array type of the property directly

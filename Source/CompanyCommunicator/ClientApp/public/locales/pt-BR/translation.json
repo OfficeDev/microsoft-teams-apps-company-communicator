@@ -95,5 +95,8 @@
   "ScheduledDate": "Agendado para",
   "Important": "Mensagem Importante",
   "ImportantDescription": "Esta opção sinaliza a mensagem como importante. Os destinatários receberão a mensagem e serão notificados com um alerta do Teams.",
-  "ScheduledSendDescription": "Selecione uma data e hora para agendar sua mensagem. Por favor, agende pelo menos 30 minutos no futuro."
+  "ScheduledSendDescription": "Selecione uma data e hora para agendar sua mensagem. Por favor, agende pelo menos 30 minutos no futuro.",
+  "Add": "Incluir",
+  "Buttons": "Botões",
+  "NoButtons": "Sem botões definidos. Clique (+) para incluir botões e ações na mensagem."
 }

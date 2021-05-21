@@ -163,6 +163,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Rosters = notification.Rosters,
                 Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
+                Buttons = notification.Buttons,
             };
 
             await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
@@ -219,7 +220,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
-        /// Get scheduled notifications. Those are draft notifications with a scheduledate
+        /// Get scheduled notifications. Those are draft notifications with a scheduledate.
         /// </summary>
         /// <returns>A list of <see cref="DraftNotificationSummary"/> instances.</returns>
         [HttpGet("scheduled")]
@@ -285,6 +286,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 IsScheduled = notificationEntity.IsScheduled,
                 IsImportant = notificationEntity.IsImportant,
                 ScheduledDate = notificationEntity.ScheduledDate,
+                Buttons = notificationEntity.Buttons,
             };
 
             return this.Ok(result);

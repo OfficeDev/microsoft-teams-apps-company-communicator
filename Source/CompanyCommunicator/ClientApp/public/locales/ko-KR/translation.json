@@ -94,5 +94,8 @@
   "ScheduledDate": "スケジュール",
   "Important": "중요 메시지",
   "ImportantDescription": "이 옵션은 메시지를 중요로 표시합니다. 받는 사람은 메시지를 수신하고 팀 경고로 알림을 받게 됩니다.",
-  "ScheduledSendDescription": "메시지를 예약할 날짜와 시간을 선택합니다. 향후 최소 30분 정도 예약하시기 바랍니다."
+  "ScheduledSendDescription": "메시지를 예약할 날짜와 시간을 선택합니다. 향후 최소 30분 정도 예약하시기 바랍니다.",
+  "Add": "더하다",
+  "Buttons": "단추",
+  "NoButtons": "정의된 버튼이 없습니다. (+)를 클릭하여 메시지에 단추와 작업을 포함합니다."
 }

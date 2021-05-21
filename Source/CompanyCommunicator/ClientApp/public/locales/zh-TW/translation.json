@@ -94,5 +94,8 @@
   "ScheduledDate": "计划为",
   "Important": "重要消息",
   "ImportantDescription": "此选项标记消息非常重要。收件人将收到消息，并收到团队警报通知。",
-  "ScheduledSendDescription": "选择日期和时间来安排您的邮件。请安排至少30分钟的未来。"
+  "ScheduledSendDescription": "选择日期和时间来安排您的邮件。请安排至少30分钟的未来。",
+  "Add": "加",
+  "Buttons": "按钮",
+  "NoButtons": "未定义按钮。单击 （+） 以在邮件上包含按钮和操作。"
 }

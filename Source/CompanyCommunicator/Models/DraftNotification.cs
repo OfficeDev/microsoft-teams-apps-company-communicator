@@ -49,16 +49,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public bool AllUsers { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether a notification is scheduled.
-        /// </summary>
-        public bool IsScheduled { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether a notification is important.
-        /// </summary>
-        public bool IsImportant { get; set; }
-
-        /// <summary>
         /// Gets or sets ScheduledDate value.
         /// </summary>
         public DateTime? ScheduledDate { get; set; }
