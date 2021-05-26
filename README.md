@@ -19,7 +19,7 @@ The app provides an easy interface for designated users to create, preview, coll
 Begin with the [Solution overview](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview) to read about what the app does and how it works.
 
 When you're ready to try out Company Communicator, or to use it in your own organization, you can choose to follow one of the below guides.
-* [Deployment guide](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide).
+* [Deployment guide](https://github.com/cristianoag/microsoft-teams-company-communicator-app/wiki/Deployment-guide).
 * [Deployment guide powershell](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide-powershell).  
   
 ## Feedback
