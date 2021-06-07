@@ -10,19 +10,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 {
     using System;
     using System.Globalization;
-    using global::Azure.Storage.Blobs;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices;
@@ -47,12 +46,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                     // case it needs to be set differently.
                     repositoryOptions.EnsureTableExists =
                         !configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
-                });
-            builder.Services.AddOptions<MessageQueueOptions>()
-                .Configure<IConfiguration>((messageQueueOptions, configuration) =>
-                {
-                    messageQueueOptions.ServiceBusConnection =
-                        configuration.GetValue<string>("ServiceBusConnection");
                 });
             builder.Services.AddOptions<BotOptions>()
                .Configure<IConfiguration>((botOptions, configuration) =>
@@ -87,15 +80,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
 
             builder.Services.AddLocalization();
 
+            var useManagedIdentity = bool.Parse(Environment.GetEnvironmentVariable("UseManagedIdentity"));
+            builder.Services.AddBlobClient(useManagedIdentity);
+            builder.Services.AddServiceBusClient(useManagedIdentity);
+
             // Set current culture.
             var culture = Environment.GetEnvironmentVariable("i18n:DefaultCulture");
             CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(culture);
             CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(culture);
-
-            // Add blob client.
-            builder.Services.AddSingleton(sp => new BlobContainerClient(
-                sp.GetService<IConfiguration>().GetValue<string>("StorageAccountConnectionString"),
-                Common.Constants.BlobContainerName));
 
             // Add bot services.
             builder.Services.AddSingleton<UserAppCredentials>();

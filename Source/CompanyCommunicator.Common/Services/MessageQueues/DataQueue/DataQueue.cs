@@ -5,7 +5,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue
 {
-    using Microsoft.Extensions.Options;
+    using global::Azure.Messaging.ServiceBus;
 
     /// <summary>
     /// The message queue service connected to the "company-communicator-data" queue in Azure service bus.
@@ -20,10 +20,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
         /// <summary>
         /// Initializes a new instance of the <see cref="DataQueue"/> class.
         /// </summary>
-        /// <param name="messageQueueOptions">The message queue options.</param>
-        public DataQueue(IOptions<MessageQueueOptions> messageQueueOptions)
+        /// <param name="serviceBusClient">The service bus client.</param>
+        public DataQueue(ServiceBusClient serviceBusClient)
             : base(
-                  serviceBusConnectionString: messageQueueOptions.Value.ServiceBusConnection,
+                  serviceBusClient: serviceBusClient,
                   queueName: DataQueue.QueueName)
         {
         }

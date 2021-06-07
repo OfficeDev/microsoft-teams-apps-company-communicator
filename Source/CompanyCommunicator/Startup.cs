@@ -6,7 +6,6 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
     using System.Net;
-    using global::Azure.Storage.Blobs;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics;
     using Microsoft.AspNetCore.Hosting;
@@ -21,6 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -30,7 +30,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
@@ -99,12 +98,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     // tables exist.
                     repositoryOptions.EnsureTableExists = true;
                 });
-            services.AddOptions<MessageQueueOptions>()
-                .Configure<IConfiguration>((messageQueueOptions, configuration) =>
-                {
-                    messageQueueOptions.ServiceBusConnection =
-                        configuration.GetValue<string>("ServiceBusConnection");
-                });
             services.AddOptions<DataQueueMessageOptions>()
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
                 {
@@ -140,10 +133,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                 configuration.RootPath = "ClientApp/build";
             });
 
-            // Add blob client.
-            services.AddSingleton(sp => new BlobContainerClient(
-                sp.GetService<IConfiguration>().GetValue<string>("StorageAccountConnectionString"),
-                Common.Constants.BlobContainerName));
+            var useManagedIdentity = this.Configuration.GetValue<bool>("UseManagedIdentity");
+            services.AddBlobClient(useManagedIdentity);
+            services.AddServiceBusClient(useManagedIdentity);
 
             // The bot needs an HttpClient to download and upload files.
             services.AddHttpClient();
