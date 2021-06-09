@@ -50,7 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// Add channel or personal data in Table Storage.
         /// </summary>
         /// <param name="turnContext">The context object for this turn.</param>
-        /// /// <param name="activity">Teams activity instance.</param>
+        /// <param name="activity">Teams activity instance.</param>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects
         /// or threads to receive notice of cancellation.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
