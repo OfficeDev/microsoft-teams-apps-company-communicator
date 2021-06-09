@@ -12,6 +12,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
     using global::Azure.Storage.Blobs;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Options;
+    using Microsoft.Identity.Client;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
 
     /// <summary>
     /// Extension class for registering resources in DI container.
@@ -70,6 +73,41 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
                 // Adding using connection strings.
                 services.AddSingleton(sp => new ServiceBusClient(
                 sp.GetService<IConfiguration>().GetValue<string>("ServiceBusConnection")));
+            }
+        }
+
+        /// <summary>
+        /// Add Confidential client dependency to make graph calls.
+        /// </summary>
+        /// <param name="services">Collection of services.</param>
+        /// <param name="useCertificates">boolean to indicate to use certificates or credentials.</param>
+        public static void AddConfidentialClient(this IServiceCollection services, bool useCertificates)
+        {
+            if (useCertificates)
+            {
+                services.AddSingleton<IConfidentialClientApplication>(provider =>
+                {
+                    var options = provider.GetRequiredService<IOptions<ConfidentialClientApplicationOptions>>();
+                    var certificateProvider = provider.GetRequiredService<ICertificateProvider>();
+                    var cert = certificateProvider.GetCertificate(options.Value.ClientId);
+                    return ConfidentialClientApplicationBuilder
+                        .Create(options.Value.ClientId)
+                        .WithCertificate(cert)
+                        .WithAuthority(new Uri($"https://login.microsoftonline.com/{options.Value.TenantId}"))
+                        .Build();
+                });
+            }
+            else
+            {
+                services.AddSingleton<IConfidentialClientApplication>(provider =>
+                {
+                    var options = provider.GetRequiredService<IOptions<ConfidentialClientApplicationOptions>>();
+                    return ConfidentialClientApplicationBuilder
+                        .Create(options.Value.ClientId)
+                        .WithClientSecret(options.Value.ClientSecret)
+                        .WithAuthority(new Uri($"https://login.microsoftonline.com/{options.Value.TenantId}"))
+                        .Build();
+                });
             }
         }
 

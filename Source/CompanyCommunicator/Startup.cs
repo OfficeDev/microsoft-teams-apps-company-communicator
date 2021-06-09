@@ -76,9 +76,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
                     botOptions.UserAppId = configuration.GetValue<string>("UserAppId");
-                    botOptions.UserAppPassword = configuration.GetValue<string>("UserAppPassword");
+                    botOptions.UserAppPassword = configuration.GetValue<string>("UserAppPassword", string.Empty);
                     botOptions.AuthorAppId = configuration.GetValue<string>("AuthorAppId");
-                    botOptions.AuthorAppPassword = configuration.GetValue<string>("AuthorAppPassword");
+                    botOptions.AuthorAppPassword = configuration.GetValue<string>("AuthorAppPassword", string.Empty);
+                    botOptions.UseCertificate = configuration.GetValue<bool>("UseCertificate", false);
+                    botOptions.AuthorAppThumbprint = configuration.GetValue<string>("AuthorAppThumbprint", string.Empty);
+                    botOptions.UserAppThumbprint = configuration.GetValue<string>("UserAppThumbprint", string.Empty);
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>
@@ -149,6 +152,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<CompanyCommunicatorBotFilterMiddleware>();
             services.AddSingleton<CompanyCommunicatorBotAdapter>();
             services.AddSingleton<BotFrameworkHttpAdapter>();
+            services.AddSingleton<ICertificateProvider, CertificateProvider>();
 
             // Add repositories.
             services.AddSingleton<ITeamDataRepository, TeamDataRepository>();

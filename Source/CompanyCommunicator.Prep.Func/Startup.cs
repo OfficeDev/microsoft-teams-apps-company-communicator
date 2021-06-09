@@ -15,7 +15,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Options;
     using Microsoft.Graph;
     using Microsoft.Identity.Client;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
@@ -64,11 +63,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                     botOptions.UserAppId =
                         configuration.GetValue<string>("UserAppId");
                     botOptions.UserAppPassword =
-                        configuration.GetValue<string>("UserAppPassword");
+                        configuration.GetValue<string>("UserAppPassword", string.Empty);
                     botOptions.AuthorAppId =
                         configuration.GetValue<string>("AuthorAppId");
                     botOptions.AuthorAppPassword =
-                        configuration.GetValue<string>("AuthorAppPassword");
+                        configuration.GetValue<string>("AuthorAppPassword", string.Empty);
+                    botOptions.MicrosoftAppId =
+                        configuration.GetValue<string>("MicrosoftAppId");
+                    botOptions.UseCertificate =
+                        configuration.GetValue<bool>("UseCertificate", false);
+                    botOptions.AuthorAppThumbprint =
+                        configuration.GetValue<string>("AuthorAppThumbprint", string.Empty);
+                    botOptions.UserAppThumbprint =
+                        configuration.GetValue<string>("UserAppThumbprint", string.Empty);
+                    botOptions.MicrosoftAppThumbprint =
+                        configuration.GetValue<string>("MicrosoftAppThumbprint", string.Empty);
                 });
             builder.Services.AddOptions<DataQueueMessageOptions>()
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
@@ -104,6 +113,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             builder.Services.AddSingleton<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
+            builder.Services.AddSingleton<ICertificateProvider, CertificateProvider>();
 
             // Add repositories.
             builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
@@ -145,20 +155,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                 Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
                 {
                     confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("MicrosoftAppId");
-                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("MicrosoftAppPassword");
+                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("MicrosoftAppPassword", string.Empty);
                     confidentialClientApplicationOptions.TenantId = configuration.GetValue<string>("TenantId");
                 });
 
             // Graph Token Services
-            builder.Services.AddSingleton<IConfidentialClientApplication>(provider =>
-            {
-                var options = provider.GetRequiredService<IOptions<ConfidentialClientApplicationOptions>>();
-                return ConfidentialClientApplicationBuilder
-                    .Create(options.Value.ClientId)
-                    .WithClientSecret(options.Value.ClientSecret)
-                    .WithAuthority(new Uri($"https://login.microsoftonline.com/{options.Value.TenantId}"))
-                    .Build();
-            });
+            var useClientCertificates = bool.Parse(Environment.GetEnvironmentVariable("UseCertificate") ?? "false");
+
+            builder.Services.AddConfidentialClient(useClientCertificates);
 
             builder.Services.AddSingleton<IAuthenticationProvider, MsalAuthenticationProvider>();
 

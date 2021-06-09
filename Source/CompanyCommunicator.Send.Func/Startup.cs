@@ -15,6 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -49,7 +50,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         configuration.GetValue<string>("UserAppId");
 
                     botOptions.UserAppPassword =
-                        configuration.GetValue<string>("UserAppPassword");
+                        configuration.GetValue<string>("UserAppPassword", string.Empty);
+
+                    botOptions.UseCertificate =
+                        configuration.GetValue<bool>("UseCertificate", false);
+
+                    botOptions.UserAppThumbprint =
+                        configuration.GetValue<string>("UserAppThumbprint", string.Empty);
                 });
             builder.Services.AddOptions<RepositoryOptions>()
                 .Configure<IConfiguration>((repositoryOptions, configuration) =>
@@ -77,7 +84,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             // Add bot services.
             builder.Services.AddSingleton<UserAppCredentials>();
             builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
+            builder.Services.AddSingleton<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
+            builder.Services.AddSingleton<ICertificateProvider, CertificateProvider>();
 
             // Add teams services.
             builder.Services.AddTransient<IMessageService, MessageService>();
