@@ -117,16 +117,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             var maxParallelism = Math.Min(100, users.Count());
             await Task.WhenAll(users.ForEachAsync(maxParallelism, async user =>
             {
-                var userEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, user.Id);
-                if (userEntity == null)
+                // Skip Guest users.
+                if (!user.UserPrincipalName.ToLower().Contains("#ext#"))
                 {
-                    userEntity = new UserDataEntity()
+                    var userEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, user.Id);
+                    if (userEntity == null)
                     {
-                        AadId = user.Id,
-                    };
-                }
+                        userEntity = new UserDataEntity()
+                        {
+                            AadId = user.Id,
+                        };
+                    }
 
-                recipients.Add(userEntity.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
+                    recipients.Add(userEntity.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
+                }
             }));
 
             return recipients;
