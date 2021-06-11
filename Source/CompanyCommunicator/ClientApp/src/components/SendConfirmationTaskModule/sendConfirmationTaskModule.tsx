@@ -140,7 +140,7 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
         } else {
             return (
                 <div className="taskModule">
-                    <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
+                    <Flex column className="formContainer" vAlign="stretch" gap="gap.small">
                         <Flex className="scrollableContent" gap="gap.small">
                             <Flex.Item size="size.half">
                                 <Flex column className="formContentContainer">
