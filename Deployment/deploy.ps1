@@ -926,7 +926,7 @@ function logout {
 
 # Initialize connections - Azure Az/CLI/Azure AD
     WriteI -message "Login with with your Azure subscription account. Launching Azure sign-in window..."
-    Connect-AzAccount -Subscription $parameters.subscriptionId.Value -ErrorAction Stop
+    Connect-AzAccount -Subscription $parameters.subscriptionId.Value -Tenant $parameters.subscriptionTenantId.value -ErrorAction Stop
     $user = az login --tenant $parameters.subscriptionTenantId.value
     if ($LASTEXITCODE -ne 0) {
         WriteE -message "Login failed for user..."
