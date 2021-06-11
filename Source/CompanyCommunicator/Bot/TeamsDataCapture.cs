@@ -69,8 +69,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     await this.teamDataRepository.SaveTeamDataAsync(activity);
                     break;
                 case TeamsDataCapture.PersonalType:
-                    // Skip Guest users.
-                    TeamsChannelAccount teamsUser = await TeamsInfo.GetMemberAsync(turnContext, activity.Recipient.Id, cancellationToken);
+                    // Skip Guest users
+                    TeamsChannelAccount teamsUser = await TeamsInfo.GetMemberAsync(turnContext, activity.From.Id, cancellationToken);
                     if (!teamsUser.UserPrincipalName.ToLower().Contains("#ext#"))
                     {
                         await this.userDataService.SaveUserDataAsync(activity);
