@@ -45,18 +45,66 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             AuthenticationOptions authenticationOptions)
         {
             AuthenticationServiceCollectionExtensions.ValidateAuthenticationOptions(authenticationOptions);
+            var azureADOptions = new AzureADOptions
+            {
+                Instance = authenticationOptions.AzureAdInstance,
+                TenantId = authenticationOptions.AzureAdTenantId,
+                ClientId = authenticationOptions.AzureAdClientId,
+            };
+            var useCertificate = configuration.GetValue<bool>("UseCertificate");
+            if (useCertificate)
+            {
+                RegisterAuthenticationServicesWithCertificate(services, configuration, authenticationOptions, azureADOptions);
+            }
+            else
+            {
+                RegisterAuthenticationServicesWithSecret(services, configuration, authenticationOptions, azureADOptions);
+            }
+        }
 
-            services.AddProtectedWebApi(configuration)
-                    .AddProtectedWebApiCallsProtectedWebApi(configuration)
-                    .AddInMemoryTokenCaches();
+        private static void RegisterAuthenticationServicesWithCertificate(
+            IServiceCollection services,
+            IConfiguration configuration,
+            AuthenticationOptions authenticationOptions,
+            AzureADOptions azureADOptions)
+        {
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                 .AddMicrosoftIdentityWebApi(
+                 options =>
+                 {
+                     options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
+                     options.SaveToken = true;
+                     options.TokenValidationParameters.ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(authenticationOptions);
+                     options.TokenValidationParameters.AudienceValidator = AuthenticationServiceCollectionExtensions.AudienceValidator;
+                     options.TokenValidationParameters.ValidIssuers = AuthenticationServiceCollectionExtensions.GetValidIssuers(authenticationOptions);
+                 },
+                 microsoftIdentityOptions =>
+                 {
+                     configuration.Bind("AzureAd", microsoftIdentityOptions);
+                     microsoftIdentityOptions.ClientCertificates = new CertificateDescription[]
+                     {
+                            CertificateDescription.FromStoreWithThumbprint(configuration.GetValue<string>("MicrosoftAppThumbprint")),
+                     };
+                 })
+                 .EnableTokenAcquisitionToCallDownstreamApi(
+                 confidentialClientApplicationOptions =>
+                 {
+                     configuration.Bind("AzureAd", confidentialClientApplicationOptions);
+                 })
+                 .AddInMemoryTokenCaches();
+        }
+
+        private static void RegisterAuthenticationServicesWithSecret(
+        IServiceCollection services,
+        IConfiguration configuration,
+        AuthenticationOptions authenticationOptions,
+        AzureADOptions azureADOptions)
+        {
+            services.AddMicrosoftIdentityWebApiAuthentication(configuration)
+                .EnableTokenAcquisitionToCallDownstreamApi()
+                .AddInMemoryTokenCaches();
             services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                var azureADOptions = new AzureADOptions
-                {
-                    Instance = authenticationOptions.AzureAdInstance,
-                    TenantId = authenticationOptions.AzureAdTenantId,
-                    ClientId = authenticationOptions.AzureAdClientId,
-                };
                 options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
                 options.SaveToken = true;
                 options.TokenValidationParameters.ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(authenticationOptions);

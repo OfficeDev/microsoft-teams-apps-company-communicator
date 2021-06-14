@@ -51,7 +51,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
             }
 
             thumbprint = thumbprint ?? throw new InvalidOperationException("No thumbprint found.");
-
             using var clientCertificateStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
             clientCertificateStore.Open(OpenFlags.ReadOnly);
             var certificates = clientCertificateStore.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
@@ -83,7 +82,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
                 thumbprints.Add(botOptions.UserAppId, botOptions.UserAppThumbprint);
             }
 
-            if (!string.IsNullOrEmpty(botOptions.AuthorAppId))
+            if (string.IsNullOrEmpty(botOptions.AuthorAppId))
             {
                 this.logger.LogWarning("Author app id not found.");
             }
@@ -92,7 +91,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
                 thumbprints.Add(botOptions.AuthorAppId, botOptions.AuthorAppThumbprint);
             }
 
-            if (!string.IsNullOrEmpty(botOptions.MicrosoftAppId))
+            if (string.IsNullOrEmpty(botOptions.MicrosoftAppId))
             {
                 this.logger.LogWarning("Microsoft app id not found.");
             }

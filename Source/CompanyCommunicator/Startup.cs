@@ -5,6 +5,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
+    using System;
     using System.Net;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics;
@@ -20,6 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
@@ -52,7 +54,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
         /// <param name="configuration">IConfiguration instance.</param>
         public Startup(IConfiguration configuration)
         {
-            this.Configuration = configuration;
+            this.Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         /// <summary>
@@ -82,6 +84,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     botOptions.UseCertificate = configuration.GetValue<bool>("UseCertificate", false);
                     botOptions.AuthorAppThumbprint = configuration.GetValue<string>("AuthorAppThumbprint", string.Empty);
                     botOptions.UserAppThumbprint = configuration.GetValue<string>("UserAppThumbprint", string.Empty);
+                    botOptions.MicrosoftAppId = configuration.GetValue<string>("MicrosoftAppId");
+                    botOptions.MicrosoftAppThumbprint = configuration.GetValue<string>("MicrosoftAppThumbprint", string.Empty);
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>
@@ -186,6 +190,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<IAppSettingsService, AppSettingsService>();
             services.AddTransient<IUserDataService, UserDataService>();
             services.AddTransient<ITeamMembersService, TeamMembersService>();
+            services.AddTransient<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
         }
 
         /// <summary>

@@ -227,7 +227,10 @@
     "ProactivelyInstallUserApp": "[parameters('ProactivelyInstallUserApp')]",
     "UserAppExternalId": "[parameters('UserAppExternalId')]",
     "i18n:DefaultCulture": "[parameters('DefaultCulture')]",
-    "i18n:SupportedCultures": "[parameters('SupportedCultures')]"
+    "i18n:SupportedCultures": "[parameters('SupportedCultures')]",
+    "keyvaultName": "[concat(variables('botAppName'), 'vault')]",
+    "keyVaultUrl": "[concat('https://',variables('keyvaultName'), '.vault.azure.net')]",
+    "subscriptionTenantId": "[subscription().tenantId]"
   },
   "resources": [
     {
@@ -267,6 +270,9 @@
       "type": "Microsoft.Web/sites",
       "name": "[variables('botAppName')]",
       "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "kind": "app",
       "properties": {
         "name": "[variables('botAppName')]",
@@ -289,7 +295,7 @@
             },
             {
               "name": "SITE_ROLE",
-              "value": "app"
+               "value": "app"
             },
             {
               "name": "i18n:DefaultCulture",
@@ -326,10 +332,6 @@
             {
               "name": "UserAppId",
               "value": "[parameters('userClientId')]"
-            },
-            {
-              "name": "UserAppPassword",
-              "value": "[parameters('userClientSecret')]"
             },
             {
               "name": "AuthorAppId",
@@ -374,6 +376,14 @@
             {
               "name": "DisableCreatorUpnCheck",
               "value": "false"
+            },
+            {
+              "name": "UseKeyVault",
+              "value": true
+            },
+            {
+              "name": "KeyVault:BaseUrl",
+              "value": "[variables('keyVaultUrl')]"
             },
             {
               "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
@@ -614,6 +624,9 @@
       "type": "Microsoft.Web/sites",
       "name": "[variables('prepFunctionAppName')]",
       "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "kind": "functionapp",
       "properties": {
         "name": "[variables('prepFunctionAppName')]",
@@ -683,7 +696,7 @@
             },
             {
               "name": "AuthorAppPassword",
-              "value": "[parameters('authorClientSecret')]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/AuthorAppPassword/)')]"
             },
             {
               "name": "MicrosoftAppId",
@@ -699,7 +712,7 @@
             },
             {
               "name": "UserAppPassword",
-              "value": "[parameters('userClientSecret')]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/UserAppPassword/)')]"
             },
             {
               "name": "TenantId",
@@ -707,11 +720,11 @@
             },
             {
               "name": "StorageAccountConnectionString",
-              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/StorageAccountConnectionString/)')]"
             },
             {
               "name": "ServiceBusConnection",
-              "value": "[listkeys(variables('authRuleResourceId'), '2017-04-01').primaryConnectionString]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/ServiceBusConnection/)')]"
             },
             {
               "name": "AzureFunctionsJobHost__extensions__durableTask__maxConcurrentOrchestratorFunctions",
@@ -751,6 +764,9 @@
       "type": "Microsoft.Web/sites",
       "name": "[variables('sendFunctionAppName')]",
       "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "kind": "functionapp",
       "properties": {
         "name": "[variables('sendFunctionAppName')]",
@@ -816,15 +832,15 @@
             },
             {
               "name": "UserAppPassword",
-              "value": "[parameters('userClientSecret')]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/UserAppPassword/)')]"
             },
             {
               "name": "StorageAccountConnectionString",
-              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/StorageAccountConnectionString/)')]"
             },
             {
               "name": "ServiceBusConnection",
-              "value": "[listkeys(variables('authRuleResourceId'), '2017-04-01').primaryConnectionString]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/ServiceBusConnection/)')]"
             }
           ]
         }
@@ -856,6 +872,9 @@
       "type": "Microsoft.Web/sites",
       "name": "[variables('dataFunctionAppName')]",
       "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "kind": "functionapp",
       "properties": {
         "name": "[variables('dataFunctionAppName')]",
@@ -917,7 +936,7 @@
             },
             {
               "name": "AuthorAppPassword",
-              "value": "[parameters('authorClientSecret')]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/AuthorAppPassword/)')]"
             },
             {
               "name": "UserAppId",
@@ -925,7 +944,7 @@
             },
             {
               "name": "UserAppPassword",
-              "value": "[parameters('userClientSecret')]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/UserAppPassword/)')]"
             },
             {
               "name": "CleanUpScheduleTriggerTime",
@@ -937,11 +956,11 @@
             },
             {
               "name": "StorageAccountConnectionString",
-              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/StorageAccountConnectionString/)')]"
             },
             {
               "name": "ServiceBusConnection",
-              "value": "[listkeys(variables('authRuleResourceId'), '2017-04-01').primaryConnectionString]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/ServiceBusConnection/)')]"
             }
           ]
         }
@@ -1088,6 +1107,138 @@
         ],
         "enabledState": "Enabled",
         "friendlyName": "[variables('frontDoorName')]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[variables('keyvaultName')]",
+      "apiVersion": "2016-10-01",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('botAppName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('prepFunctionAppName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('sendFunctionAppName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('dataFunctionAppName'))]"
+      ],
+      "tags": {
+        "displayName": "KeyVault"
+      },
+      "properties": {
+        "tenantId": "[variables('subscriptionTenantId')]",
+        "accessPolicies": [
+          {
+            "tenantId": "[variables('subscriptionTenantId')]",
+            "objectId": "[reference(concat('Microsoft.Web/sites/', variables('botAppName')), '2018-02-01', 'Full').identity.principalId]",
+            "permissions": {
+              "keys": [],
+              "secrets": [
+                "Get",
+                "Set",
+                "Restore"
+              ],
+              "certificates": []
+            }
+          },
+          {
+            "tenantId": "[variables('subscriptionTenantId')]",
+            "objectId": "[reference(concat('Microsoft.Web/sites/', variables('prepFunctionAppName')), '2018-02-01', 'Full').identity.principalId]",
+            "permissions": {
+              "keys": [],
+              "secrets": [
+                "Get"
+              ],
+              "certificates": []
+            }
+          },
+          {
+            "tenantId": "[variables('subscriptionTenantId')]",
+            "objectId": "[reference(concat('Microsoft.Web/sites/', variables('sendFunctionAppName')), '2018-02-01', 'Full').identity.principalId]",
+            "permissions": {
+              "keys": [],
+              "secrets": [
+                "Get"
+              ],
+              "certificates": []
+            }
+          },
+          {
+            "tenantId": "[variables('subscriptionTenantId')]",
+            "objectId": "[reference(concat('Microsoft.Web/sites/', variables('dataFunctionAppName')), '2018-02-01', 'Full').identity.principalId]",
+            "permissions": {
+              "keys": [],
+              "secrets": [
+                "Get"
+              ],
+              "certificates": []
+            }
+          }
+        ],
+        "sku": {
+          "name": "Standard",
+          "family": "A"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2016-10-01",
+      "name": "[concat(variables('keyVaultName'), '/','StorageAccountConnectionString')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]",
+        "attributes": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2016-10-01",
+      "name": "[concat(variables('keyVaultName'), '/','ServiceBusConnection')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ],
+      "properties": {
+        "value": "[listkeys(variables('authRuleResourceId'), '2017-04-01').primaryConnectionString]",
+        "attributes": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2016-10-01",
+      "name": "[concat(variables('keyvaultName'), '/UserAppPassword')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyvaultName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('userClientSecret')]",
+        "attributes": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2016-10-01",
+      "name": "[concat(variables('keyvaultName'), '/AuthorAppPassword')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyvaultName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('authorClientSecret')]",
+        "attributes": {
+          "enabled": true
+        }
       }
     }
   ],
