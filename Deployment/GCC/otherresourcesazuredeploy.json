@@ -54,12 +54,14 @@
          }
       },
       "ProactivelyInstallUserApp":{
+         "defaultValue": true,
          "type":"Bool",
          "metadata":{
             "description":"If proactive app installation should be enabled."
          }
       },
       "UserAppExternalId":{
+         "defaultValue": "148a66bb-e83d-425a-927d-09f4299a9274",
          "minLength":1,
          "type":"String",
          "metadata":{
