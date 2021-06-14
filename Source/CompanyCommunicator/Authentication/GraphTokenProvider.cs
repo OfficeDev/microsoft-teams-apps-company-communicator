@@ -57,7 +57,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             else
             {
                 // we use MSAL.NET to get a token to call the API On Behalf Of the current user
-                accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] { Common.Constants.ScopeGroupMemberReadAll, Common.Constants.ScopeAppCatalogReadAll });
+                accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] { Common.Constants.ScopeDefault });
             }
 
             return accessToken;

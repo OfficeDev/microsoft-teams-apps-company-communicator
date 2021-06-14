@@ -35,7 +35,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         {
             AuthenticationServiceCollectionExtensions.RegisterAuthenticationServices(services, configuration, authenticationOptions);
 
-            AuthenticationServiceCollectionExtensions.RegisterAuthorizationPolicy(services);
+            AuthenticationServiceCollectionExtensions.RegisterAuthorizationPolicy(services, configuration);
         }
 
         // This method works specifically for single tenant application.
@@ -173,8 +173,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             return validIssuers;
         }
 
-        private static void RegisterAuthorizationPolicy(IServiceCollection services)
+        private static void RegisterAuthorizationPolicy(IServiceCollection services, IConfiguration configuration)
         {
+            var graphGroupDatascope = configuration.GetValue<string>("GroupsGraphScope");
             services.AddAuthorization(options =>
             {
                 var mustContainUpnClaimRequirement = new MustBeValidUpnRequirement();
@@ -187,7 +188,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                 options.AddPolicy(
                     PolicyNames.MSGraphGroupDataPolicy,
                     policyBuilder => policyBuilder
-                    .AddRequirements(new MSGraphScopeRequirement(new string[] { Common.Constants.ScopeGroupMemberReadAll }))
+                    .AddRequirements(new MSGraphScopeRequirement(new string[] { graphGroupDatascope }))
                     .RequireAuthenticatedUser()
                     .Build());
             });
