@@ -54,12 +54,14 @@
          }
       },
       "ProactivelyInstallUserApp":{
+         "defaultValue": true,
          "type":"Bool",
          "metadata":{
             "description":"If proactive app installation should be enabled."
          }
       },
       "UserAppExternalId":{
+         "defaultValue": "148a66bb-e83d-425a-927d-09f4299a9274",
          "minLength":1,
          "type":"String",
          "metadata":{
@@ -231,7 +233,7 @@
                "appSettings":[
                   {
                      "name":"PROJECT",
-                     "value":"Source/Microsoft.Teams.Apps.CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj"
+                     "value":"Source/CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj"
                   },
                   {
                      "name":"SITE_ROLE",
@@ -471,7 +473,7 @@
                "appSettings":[
                   {
                      "name":"PROJECT",
-                     "value":"Source\\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj"
+                     "value":"Source\\CompanyCommunicator.Prep.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj"
                   },
                   {
                      "name":"SITE_ROLE",
@@ -590,7 +592,7 @@
                "appSettings":[
                   {
                      "name":"PROJECT",
-                     "value":"Source\\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj"
+                     "value":"Source\\CompanyCommunicator.Send.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj"
                   },
                   {
                      "name":"SITE_ROLE",
@@ -693,7 +695,7 @@
                "appSettings":[
                   {
                      "name":"PROJECT",
-                     "value":"Source\\Microsoft.Teams.Apps.CompanyCommunicator.Data.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj"
+                     "value":"Source\\CompanyCommunicator.Data.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj"
                   },
                   {
                      "name":"SITE_ROLE",
