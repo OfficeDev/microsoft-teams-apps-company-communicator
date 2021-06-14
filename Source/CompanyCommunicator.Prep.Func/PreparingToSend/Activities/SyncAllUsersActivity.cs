@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -90,13 +91,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             (IEnumerable<User>, string) tuple = (new List<User>(), string.Empty);
             try
             {
-                tuple = await this.usersService.GetAllUsersAsync(deltaLink);
+                tuple = await this.GetAllUsers(notificationId, deltaLink);
             }
-            catch (ServiceException exception)
+            catch (InvalidOperationException)
             {
-                var errorMessage = this.localizer.GetString("FailedToGetAllUsersFormat", exception.StatusCode, exception.Message);
-                await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
-                return;
+                // If delta link is expired, this exception is caught.
+                // re-sync users wthout delta link.
+                tuple = await this.GetAllUsers(notificationId);
             }
 
             // process users.
@@ -111,6 +112,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             if (!string.IsNullOrEmpty(tuple.Item2))
             {
                 await this.userDataRepository.SetDeltaLinkAsync(tuple.Item2);
+            }
+        }
+
+        private async Task<(IEnumerable<User>, string)> GetAllUsers(string notificationId, string deltaLink = null)
+        {
+            try
+            {
+                return await this.usersService.GetAllUsersAsync(deltaLink);
+            }
+            catch (ServiceException serviceException)
+            {
+                if (serviceException.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    // this case is to handle expired delta link.
+                    throw new InvalidOperationException();
+                }
+                else
+                {
+                    var errorMessage = this.localizer.GetString("FailedToGetAllUsersFormat", serviceException.StatusCode, serviceException.Message);
+                    await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
+                    throw serviceException;
+                }
             }
         }
 
