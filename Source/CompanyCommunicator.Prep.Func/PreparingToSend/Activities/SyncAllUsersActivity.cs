@@ -117,7 +117,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private async Task ProcessUserAsync(User user)
         {
             // Delete users who were removed.
-            if (user.AdditionalData?.ContainsKey("@removed") == true)
+            if (user.AdditionalData?.ContainsKey("@removed") == true || string.Equals(user.UserType, "Guest", StringComparison.OrdinalIgnoreCase))
             {
                 var localUser = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, user.Id);
                 if (localUser != null)
