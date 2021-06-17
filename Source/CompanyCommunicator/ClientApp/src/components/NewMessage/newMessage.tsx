@@ -85,7 +85,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     readonly localize: TFunction;
     private card: any;
 
-    constructor(props: INewMessageProps) {
+    constructor(props: INewMessageProps) { 
         super(props);
         initializeIcons();
         this.localize = this.props.t;
