@@ -247,4 +247,13 @@
   <data name="Throttled" xml:space="preserve">
     <value>Limitado</value>
   </data>
+  <data name="ColumnName_UserType" xml:space="preserve">
+    <value>User Type</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>Guest</value>
+  </data>
+  <data name="Member" xml:space="preserve">
+    <value>Member</value>
+  </data>
 </root>
