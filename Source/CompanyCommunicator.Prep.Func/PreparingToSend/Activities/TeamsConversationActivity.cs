@@ -253,6 +253,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 ConversationId = recipient.ConversationId,
                 ServiceUrl = recipient.ServiceUrl,
                 TenantId = recipient.TenantId,
+
+                // Setting the userType value as Member,
+                // since only Member type users is allowed to be stored in Sent Notification Table.
+                // Existing or new Guest users is skipped from recipient list.
+                UserType = UserType.Member,
             };
 
             await this.userDataRepository.InsertOrMergeAsync(user);
