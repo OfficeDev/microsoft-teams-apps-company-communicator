@@ -247,4 +247,13 @@
   <data name="Throttled" xml:space="preserve">
     <value>מווסת</value>
   </data>
+  <data name="ColumnName_UserType" xml:space="preserve">
+    <value>סוג משתמש</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>אורח</value>
+  </data>
+  <data name="Member" xml:space="preserve">
+    <value>חבר</value>
+  </data>
 </root>

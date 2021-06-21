@@ -9,13 +9,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
+    using System.Threading.Tasks;
     using Microsoft.Extensions.Localization;
     using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Extensions;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
     using Newtonsoft.Json;
 
@@ -26,6 +29,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
     {
         private readonly ISentNotificationDataRepository sentNotificationDataRepository;
         private readonly ITeamDataRepository teamDataRepository;
+        private readonly IUserDataRepository userDataRepository;
+        private readonly IUserTypeService userTypeService;
         private readonly IUsersService usersService;
         private readonly IStringLocalizer<Strings> localizer;
 
@@ -34,16 +39,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
         /// </summary>
         /// <param name="sentNotificationDataRepository">the sent notification data repository.</param>
         /// <param name="teamDataRepository">the team data repository.</param>
+        /// <param name="userDataRepository">the user data repository.</param>
+        /// <param name="userTypeService">the user type service.</param>
         /// <param name="usersService">the users service.</param>
         /// <param name="localizer">Localization service.</param>
         public DataStreamFacade(
             ISentNotificationDataRepository sentNotificationDataRepository,
             ITeamDataRepository teamDataRepository,
+            IUserDataRepository userDataRepository,
+            IUserTypeService userTypeService,
             IUsersService usersService,
             IStringLocalizer<Strings> localizer)
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
+            this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
+            this.userTypeService = userTypeService ?? throw new ArgumentNullException(nameof(userTypeService));
             this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
@@ -83,7 +94,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     }
                 }
 
-                yield return this.CreateUserData(sentNotifcations, userList);
+                yield return await this.CreateUserDataAsync(sentNotifcations, userList);
             }
         }
 
@@ -126,7 +137,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
         /// <param name="sentNotificationDataEntities">the list of sent notification data entities.</param>
         /// <param name="users">the user list.</param>
         /// <returns>list of created user data.</returns>
-        private IEnumerable<UserData> CreateUserData(
+        private async Task<IEnumerable<UserData>> CreateUserDataAsync(
             IEnumerable<SentNotificationDataEntity> sentNotificationDataEntities,
             IEnumerable<User> users)
         {
@@ -136,11 +147,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                 var user = users.
                     FirstOrDefault(user => user != null && user.Id.Equals(sentNotification.RowKey));
 
+                // This is to set the UserType of the user.
+                var userDataEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, sentNotification.RowKey);
+                await this.userTypeService.UpdateUserTypeForExistingUserAsync(userDataEntity, user?.UserType);
                 var userData = new UserData
                 {
                     Id = sentNotification.RowKey,
-                    Name = user == null ? this.localizer.GetString("AdminConsentError") : user.DisplayName,
-                    Upn = user == null ? this.localizer.GetString("AdminConsentError") : user.UserPrincipalName,
+                    Name = user?.DisplayName ?? this.localizer.GetString("AdminConsentError"),
+                    Upn = user?.UserPrincipalName ?? this.localizer.GetString("AdminConsentError"),
+                    UserType = this.localizer.GetString(user?.UserType ?? "AdminConsentError"),
                     DeliveryStatus = this.localizer.GetString(sentNotification.DeliveryStatus),
                     StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode.ToString()),
                 };

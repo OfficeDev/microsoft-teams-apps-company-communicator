@@ -15,8 +15,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
     using Moq;
@@ -30,6 +32,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
     {
         private readonly Mock<ISentNotificationDataRepository> sentNotificationDataRepository = new Mock<ISentNotificationDataRepository>();
         private readonly Mock<ITeamDataRepository> teamDataRepository = new Mock<ITeamDataRepository>();
+        private readonly Mock<IUserDataRepository> userDataRepository = new Mock<IUserDataRepository>();
+        private readonly Mock<IUserTypeService> userTypeService = new Mock<IUserTypeService>();
         private readonly Mock<IUsersService> usersService = new Mock<IUsersService>();
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
         private readonly string notificationId = "notificationId";
@@ -65,7 +69,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         public void DataStreamFacadeInstanceCreation_AllParameters_ShouldBeSuccess()
         {
             // Arrange
-            Action action = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.usersService.Object, this.localizer.Object);
+            Action action = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.userDataRepository.Object, this.userTypeService.Object, this.usersService.Object, this.localizer.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
@@ -78,16 +82,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         public void CreateInstance_NullParamters_ThrowsArgumentNullException()
         {
             // Arrange
-            Action action1 = () => new DataStreamFacade(null /*sentNotificationDataRepository*/, this.teamDataRepository.Object, this.usersService.Object, this.localizer.Object);
-            Action action2 = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, null /*teamDataRepository*/, this.usersService.Object, this.localizer.Object);
-            Action action3 = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, null /*usersService*/, this.localizer.Object);
-            Action action4 = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.usersService.Object, null /*localizer*/);
+            Action action1 = () => new DataStreamFacade(null /*sentNotificationDataRepository*/, this.teamDataRepository.Object, this.userDataRepository.Object, this.userTypeService.Object, this.usersService.Object, this.localizer.Object);
+            Action action2 = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, null /*teamDataRepository*/, this.userDataRepository.Object, this.userTypeService.Object, this.usersService.Object, this.localizer.Object);
+            Action action3 = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.userDataRepository.Object, this.userTypeService.Object, null /*usersService*/, this.localizer.Object);
+            Action action4 = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.userDataRepository.Object, this.userTypeService.Object, this.usersService.Object, null /*localizer*/);
+            Action action5 = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, null /*userDataRepository*/, this.userTypeService.Object, this.usersService.Object, this.localizer.Object);
+            Action action6 = () => new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.userDataRepository.Object, null /*userTypeService*/, this.usersService.Object, this.localizer.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("sentNotificationDataRepository is null.");
             action2.Should().Throw<ArgumentNullException>("teamDataRepository is null.");
             action3.Should().Throw<ArgumentNullException>("usersService is null.");
             action4.Should().Throw<ArgumentNullException>("localizer is null.");
+            action5.Should().Throw<ArgumentNullException>("userDataRepository is null.");
+            action6.Should().Throw<ArgumentNullException>("userTypeService is null.");
         }
 
         /// <summary>
@@ -193,6 +201,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             var result = new LocalizedString(ok, ok);
             this.localizer.Setup(_ => _[ok]).Returns(result);
 
+            var userType = "Member";
+            var userTypeString = new LocalizedString(userType, userType);
+            this.localizer.Setup(_ => _[userType]).Returns(userTypeString);
+
             // Act
             var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId).ToListAsync();
             var userData = userDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
@@ -200,8 +212,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
 
             // Assert
             Assert.Equal(userData.Id, sendNotificationData.RowKey);
-            Assert.Equal(userData.Name, userData == null ? adminConsentError : user.DisplayName);
-            Assert.Equal(userData.Upn, userData == null ? adminConsentError : user.UserPrincipalName);
+            Assert.Equal(userData.Name, user.DisplayName);
+            Assert.Equal(userData.Upn, user.UserPrincipalName);
+            Assert.Equal(userData.UserType, userTypeString.Value);
             Assert.Equal(userData.DeliveryStatus, deliveryStatus.Value);
             Assert.Equal(userData.StatusReason, $"{sendNotificationData.StatusCode} : {result.Value}");
         }
@@ -235,6 +248,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             // Assert
             Assert.Equal(userData.Name, adminConsentError);
             Assert.Equal(userData.Upn, adminConsentError);
+            Assert.Equal(userData.UserType, adminConsentError);
         }
 
         /// <summary>
@@ -474,7 +488,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             {
                 new User()
                 {
-                    Id = "RowKey", DisplayName = "UserDisplyName", UserPrincipalName = "UserPrincipalName",
+                    Id = "RowKey", DisplayName = "UserDisplyName", UserPrincipalName = "UserPrincipalName", UserType = "Member",
                 },
             };
         }
@@ -485,7 +499,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         /// <returns>return the instance of DataStreamFacade.</returns>
         private DataStreamFacade GetDataStreamFacadeInstance()
         {
-            return new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.usersService.Object, this.localizer.Object);
+            return new DataStreamFacade(this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.userDataRepository.Object, this.userTypeService.Object, this.usersService.Object, this.localizer.Object);
         }
     }
 }
