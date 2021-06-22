@@ -247,4 +247,13 @@
   <data name="Throttled" xml:space="preserve">
     <value>Отрегулировано</value>
   </data>
+  <data name="ColumnName_UserType" xml:space="preserve">
+    <value>Тип пользователя</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>Гость</value>
+  </data>
+  <data name="Member" xml:space="preserve">
+    <value>Участник</value>
+  </data>
 </root>

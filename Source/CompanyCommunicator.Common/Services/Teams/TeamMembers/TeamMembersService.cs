@@ -16,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
 
@@ -86,6 +87,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                             ServiceUrl = serviceUrl,
                             AadId = member.AadObjectId,
                             TenantId = tenantId,
+                            UserType = member.UserPrincipalName.GetUserType(),
                         };
 
                         return userDataEntity;
@@ -119,10 +121,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                     continuationToken,
                     cancellationToken);
                 continuationToken = currentPage.ContinuationToken;
-
-                // Skip Guest users.
-                var membersWithoutGuests = currentPage.Members.Where(member => !member.UserPrincipalName.ToLower().Contains("#ext#"));
-                members.AddRange(membersWithoutGuests);
+                members.AddRange(currentPage.Members);
             }
             while (continuationToken != null && !cancellationToken.IsCancellationRequested);
 

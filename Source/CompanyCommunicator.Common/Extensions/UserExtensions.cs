@@ -3,9 +3,12 @@
 // Licensed under the MIT License.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Extensions
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
 {
+    using System;
     using System.Collections.Generic;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
 
     /// <summary>
     /// Extensions for User Ids.
@@ -39,6 +42,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Extensions
             {
                 yield return buffer;
             }
+        }
+
+        /// <summary>
+        /// Get the user type for a user.
+        /// </summary>
+        /// <param name="userPrincipalName">the user principal name.</param>
+        /// <returns>the user type such as Member or Guest.</returns>
+        public static string GetUserType(this string userPrincipalName)
+        {
+            if (string.IsNullOrEmpty(userPrincipalName))
+            {
+                throw new ArgumentNullException(nameof(userPrincipalName));
+            }
+
+            return userPrincipalName.ToLower().Contains("#ext#") ? UserType.Guest : UserType.Member;
         }
     }
 }
