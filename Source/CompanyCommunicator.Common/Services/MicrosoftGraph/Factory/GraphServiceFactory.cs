@@ -52,7 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <inheritdoc/>
         public IAppManagerService GetAppManagerService()
         {
-            return new AppManagerService(this.serviceClient);
+            return new AppManagerService(this.serviceClient, this.GetUsersService());
         }
 
         /// <inheritdoc/>

@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     using System.Threading.Tasks;
 
     using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
 
     /// <summary>
@@ -19,15 +20,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     internal class AppManagerService : IAppManagerService
     {
         private readonly IGraphServiceClient graphServiceClient;
+        private readonly IUsersService usersService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AppManagerService"/> class.
         /// </summary>
         /// <param name="graphServiceClient">V1 Graph service client.</param>
+        /// <param name="usersService">users service.</param>
         internal AppManagerService(
-            IGraphServiceClient graphServiceClient)
+            IGraphServiceClient graphServiceClient,
+            IUsersService usersService)
         {
             this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
+            this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
         }
 
         /// <inheritdoc/>
@@ -52,7 +57,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             };
 
             // Skip Guest users.
-            var user = await this.graphServiceClient.Users[userId].Request().GetAsync();
+            var user = await this.usersService.GetUserAsync(userId);
             if (string.Equals(user?.UserType, UserType.Member, StringComparison.OrdinalIgnoreCase))
             {
                 await this.graphServiceClient.Users[userId]
