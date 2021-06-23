@@ -81,7 +81,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             // Get users.
             var users = await this.userDataRepository.GetAllAsync();
 
-            // This is to set user type.
+            // This is to set UserType.
             await this.userTypeService.UpdateUserTypeForExistingUserListAsync(users);
             users = await this.userDataRepository.GetAllAsync();
 

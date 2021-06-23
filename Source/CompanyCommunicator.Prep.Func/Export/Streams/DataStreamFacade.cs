@@ -149,13 +149,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
 
                 // This is to set the UserType of the user.
                 var userDataEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, sentNotification.RowKey);
-                await this.userTypeService.UpdateUserTypeForExistingUserAsync(userDataEntity, user?.UserType);
+                if (user != null && string.IsNullOrEmpty(userDataEntity.UserType))
+                {
+                    await this.userTypeService.UpdateUserTypeForExistingUserAsync(userDataEntity, user.GetUserType());
+                }
+
                 var userData = new UserData
                 {
                     Id = sentNotification.RowKey,
                     Name = user?.DisplayName ?? this.localizer.GetString("AdminConsentError"),
                     Upn = user?.UserPrincipalName ?? this.localizer.GetString("AdminConsentError"),
-                    UserType = this.localizer.GetString(user?.UserType ?? "AdminConsentError"),
+                    UserType = this.localizer.GetString(userDataEntity.UserType ?? (user?.GetUserType() ?? "AdminConsentError")),
                     DeliveryStatus = this.localizer.GetString(sentNotification.DeliveryStatus),
                     StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode.ToString()),
                 };

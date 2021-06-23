@@ -99,7 +99,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User
                     PartitionKey = UserDataTableNames.UserDataPartition,
                     RowKey = user.Id,
                     AadId = user.Id,
-                    UserType = user.UserType,
+                    UserType = user.GetUserType(),
                 });
         }
     }
