@@ -18,6 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
     using Newtonsoft.Json;
@@ -105,6 +106,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             try
             {
+                // Do not send message if the recipient is a guest user.
+                if (string.IsNullOrEmpty(messageContent.RecipientData.UserData.UserType))
+                {
+                    log.LogError($"User type should not be null." +
+                    $"\nRecipient Id: {messageContent.RecipientData.RecipientId}");
+                    throw new ArgumentNullException(nameof(messageContent.RecipientData.UserData.UserType));
+                }
+                else if (messageContent.RecipientData.UserData.UserType.Equals(UserType.Guest, StringComparison.OrdinalIgnoreCase))
+                {
+                    await this.notificationService.UpdateSentNotification(
+                        notificationId: messageContent.NotificationId,
+                        recipientId: messageContent.RecipientData.RecipientId,
+                        totalNumberOfSendThrottles: 0,
+                        statusCode: SentNotificationDataEntity.NotSupportedStatusCode,
+                        allSendStatusCodes: $"{SentNotificationDataEntity.NotSupportedStatusCode},",
+                        errorMessage: this.localizer.GetString("GuestUserNotSupported"));
+                    return;
+                }
+
                 // Check if notification is pending.
                 var isPending = await this.notificationService.IsPendingNotification(messageContent);
                 if (!isPending)

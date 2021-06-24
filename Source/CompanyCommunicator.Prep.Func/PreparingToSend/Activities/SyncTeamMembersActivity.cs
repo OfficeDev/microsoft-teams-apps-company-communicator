@@ -74,7 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.SyncTeamMembersActivity)]
         public async Task RunAsync(
-            [ActivityTrigger](string notificationId, string teamId) input,
+            [ActivityTrigger] (string notificationId, string teamId) input,
             ILogger log)
         {
             if (input.notificationId == null)
@@ -145,14 +145,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             await Task.WhenAll(users.ForEachAsync(maxParallelism, async user =>
             {
                 var userEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, user.AadId);
+                if (userEntity == null && user.UserType.Equals(UserType.Guest, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Skip processing new Guest users.
+                    return;
+                }
 
                 // This is to set the type of user(exisiting only, new ones will be skipped) to identify later if it is member or guest.
                 await this.userTypeService.UpdateUserTypeForExistingUserAsync(userEntity, user.UserType);
-                if (user.UserType.Equals(UserType.Member, StringComparison.OrdinalIgnoreCase))
-                {
-                    user.ConversationId ??= userEntity?.ConversationId;
-                    recipients.Add(user.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
-                }
+                user.ConversationId ??= userEntity?.ConversationId;
+                recipients.Add(user.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
             }));
 
             return recipients;

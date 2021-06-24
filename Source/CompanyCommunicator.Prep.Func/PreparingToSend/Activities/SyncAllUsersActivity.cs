@@ -85,9 +85,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             await this.userTypeService.UpdateUserTypeForExistingUserListAsync(users);
             users = await this.userDataRepository.GetAllAsync();
 
-            // Filter for only Members.
-            users = users?.Where(user => user.UserType.Equals(UserType.Member, StringComparison.OrdinalIgnoreCase));
-
             if (!users.IsNullOrEmpty())
             {
                 // Store in sent notification table.
