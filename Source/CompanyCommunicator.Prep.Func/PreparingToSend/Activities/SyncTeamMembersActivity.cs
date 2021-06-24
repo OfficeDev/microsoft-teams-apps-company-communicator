@@ -74,7 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.SyncTeamMembersActivity)]
         public async Task RunAsync(
-            [ActivityTrigger] (string notificationId, string teamId) input,
+            [ActivityTrigger](string notificationId, string teamId) input,
             ILogger log)
         {
             if (input.notificationId == null)

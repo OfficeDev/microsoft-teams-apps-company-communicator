@@ -69,7 +69,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>It returns the group transitive members first page and next page url.</returns>
         [FunctionName(FunctionNames.SyncGroupMembersActivity)]
         public async Task RunAsync(
-        [ActivityTrigger] (string notificationId, string groupId) input, ILogger log)
+        [ActivityTrigger](string notificationId, string groupId) input, ILogger log)
         {
             if (input.notificationId == null)
             {
