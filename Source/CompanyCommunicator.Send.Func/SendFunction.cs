@@ -106,14 +106,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             try
             {
-                // Do not send message if the recipient is a guest user.
-                if (string.IsNullOrEmpty(messageContent.RecipientData.UserData.UserType))
-                {
-                    log.LogError($"User type should not be null." +
-                    $"\nRecipient Id: {messageContent.RecipientData.RecipientId}");
-                    throw new ArgumentNullException(nameof(messageContent.RecipientData.UserData.UserType));
-                }
-                else if (messageContent.RecipientData.UserData.UserType.Equals(UserType.Guest, StringComparison.OrdinalIgnoreCase))
+                // Check if recipient is a guest user.
+                if (messageContent.IsRecipientGuestUser())
                 {
                     await this.notificationService.UpdateSentNotification(
                         notificationId: messageContent.NotificationId,
