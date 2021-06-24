@@ -107,6 +107,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 UserId = "userId",
                 TenantId = "tenantId",
                 ServiceUrl = "serviceUrl",
+                UserType = "Member",
             };
             CreateConversationResponse response = new CreateConversationResponse()
             {
@@ -154,6 +155,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             {
                 UserId = string.Empty,
                 RecipientId = "recipientId",
+                UserType = "Member",
             };
 
             // Act
@@ -161,6 +163,55 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync();
+        }
+
+        /// <summary>
+        /// Test case to verify that do not process anything in case of guest user.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Fact]
+        public async Task TeamConversation_GuestUser_ShouldNotDoAnything()
+        {
+            // Arrange
+            var activityContext = this.GetTeamsConversationActivity(true/*proactivelyInstallUserApp*/);
+            var notificationId = "notificationId";
+            SentNotificationDataEntity recipient = new SentNotificationDataEntity()
+            {
+                UserId = string.Empty,
+                RecipientId = "recipientId",
+                UserType = "Guest",
+            };
+
+            // Act
+            Func<Task> task = async () => await activityContext.CreateConversationAsync((notificationId, recipient), this.logger.Object);
+
+            // Assert
+            await task.Should().NotThrowAsync();
+            this.appSettingsService.Verify(x => x.GetUserAppIdAsync(), Times.Never);
+        }
+
+        /// <summary>
+        /// Test case to verify that exception is thrown in case of null user type.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Fact]
+        public async Task TeamConversation_NullUserType_ShouldThrowException()
+        {
+            // Arrange
+            var activityContext = this.GetTeamsConversationActivity(false/*proactivelyInstallUserApp*/);
+            var notificationId = "notificationId";
+            SentNotificationDataEntity recipient = new SentNotificationDataEntity()
+            {
+                UserId = string.Empty,
+                RecipientId = "recipientId",
+                UserType = null,
+            };
+
+            // Act
+            Func<Task> task = async () => await activityContext.CreateConversationAsync((notificationId, recipient), this.logger.Object);
+
+            // Assert
+            await task.Should().ThrowAsync<ArgumentNullException>();
         }
 
         /// <summary>
@@ -180,6 +231,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             {
                 UserId = string.Empty,
                 RecipientId = "recipientId",
+                UserType = "Member",
             };
 
             this.appSettingsService

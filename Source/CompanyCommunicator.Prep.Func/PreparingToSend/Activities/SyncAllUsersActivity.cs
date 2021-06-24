@@ -166,7 +166,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             }
 
             // skip Guest users.
-            if (string.Equals(user.UserType, UserType.Guest, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(user.GetUserType(), UserType.Guest, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
@@ -193,7 +193,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     PartitionKey = UserDataTableNames.UserDataPartition,
                     RowKey = user.Id,
                     AadId = user.Id,
-                    UserType = user.UserType,
+                    UserType = user.GetUserType(),
                 });
         }
     }

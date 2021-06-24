@@ -223,11 +223,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         }
 
         /// <summary>
-        /// Test case to verify that existing Guest Users never gets saved in Sent Notification Table.
+        /// Test case to verify that existing Guest Users gets saved in Sent Notification Table.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
-        public async Task SyncGroupMembers_OnlyGuestExistingUsersType_NeverStoreInSentNotificationTable()
+        public async Task SyncGroupMembers_OnlyGuestExistingUsersType_ShouldStoreInSentNotificationTable()
         {
             // Arrange
             var groupId = "Group1";
@@ -261,16 +261,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync();
-            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()), Times.Never);
+            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()), Times.Once);
         }
 
         /// <summary>
-        /// Test case to verify that only Member user type is filtered from list of existing Member user and Guest user,
-        /// and is saved in Sent Notification Table.
+        /// Test case to verify that both existing user is saved in Sent Notification Table.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
-        public async Task SyncGroupMembers_BothUserTypeForExistingUser_StoreOnlyMemberUserType()
+        public async Task SyncGroupMembers_BothUserTypeForExistingUser_ShouldStoreInSentNotificationTable()
         {
             // Arrange
             var groupId = "Group1";
@@ -305,7 +304,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync();
-            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(l => l.Count() == 1)), Times.Once);
+            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(l => l.Count() == 2)), Times.Once);
         }
 
         /// <summary>
