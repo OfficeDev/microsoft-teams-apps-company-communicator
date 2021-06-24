@@ -257,6 +257,6 @@
     <value>구성원</value>
   </data>
   <data name="GuestUserNotSupported" xml:space="preserve">
-    <value>Guest User not supported</value>
+    <value>게스트 사용자가 지원되지 않음</value>
   </data>
 </root>

@@ -257,6 +257,6 @@
     <value>العضو</value>
   </data>
   <data name="GuestUserNotSupported" xml:space="preserve">
-    <value>Guest User not supported</value>
+    <value>المستخدم الضيف غير مدعم</value>
   </data>
 </root>
