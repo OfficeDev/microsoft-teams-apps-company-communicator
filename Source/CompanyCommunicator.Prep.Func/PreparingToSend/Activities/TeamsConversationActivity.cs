@@ -108,6 +108,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 return;
             }
 
+            // Skip Guest users.
+            if (string.IsNullOrEmpty(recipient.UserType))
+            {
+                throw new ArgumentNullException(nameof(recipient.UserType));
+            }
+            else if (recipient.UserType.Equals(UserType.Guest, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             // create conversation.
             string conversationId;
             if (!string.IsNullOrEmpty(recipient.UserId))

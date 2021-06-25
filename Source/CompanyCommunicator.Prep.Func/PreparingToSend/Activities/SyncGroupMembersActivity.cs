@@ -129,19 +129,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
                 // This is to set the type of user(exisiting only, new ones will be skipped) to identify later if it is member or guest.
                 var userType = user.UserPrincipalName.GetUserType();
-                await this.userTypeService.UpdateUserTypeForExistingUserAsync(userEntity, userType);
-                if (userType.Equals(UserType.Member, StringComparison.OrdinalIgnoreCase))
+                if (userEntity == null && userType.Equals(UserType.Guest, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (userEntity == null)
-                    {
-                        userEntity = new UserDataEntity()
-                        {
-                            AadId = user.Id,
-                        };
-                    }
-
-                    recipients.Add(userEntity.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
+                    // Skip processing new Guest users.
+                    return;
                 }
+
+                await this.userTypeService.UpdateUserTypeForExistingUserAsync(userEntity, userType);
+                if (userEntity == null)
+                {
+                    userEntity = new UserDataEntity()
+                    {
+                        AadId = user.Id,
+                        UserType = userType,
+                    };
+                }
+
+                recipients.Add(userEntity.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
             }));
 
             return recipients;

@@ -81,12 +81,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             // Get users.
             var users = await this.userDataRepository.GetAllAsync();
 
-            // This is to set user type.
+            // This is to set UserType.
             await this.userTypeService.UpdateUserTypeForExistingUserListAsync(users);
             users = await this.userDataRepository.GetAllAsync();
-
-            // Filter for only Members.
-            users = users?.Where(user => user.UserType.Equals(UserType.Member, StringComparison.OrdinalIgnoreCase));
 
             if (!users.IsNullOrEmpty())
             {
@@ -169,7 +166,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             }
 
             // skip Guest users.
-            if (string.Equals(user.UserType, UserType.Guest, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(user.GetUserType(), UserType.Guest, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
@@ -196,7 +193,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     PartitionKey = UserDataTableNames.UserDataPartition,
                     RowKey = user.Id,
                     AadId = user.Id,
-                    UserType = user.UserType,
+
+                    // At times userType value from Graph response is null, to avoid null value
+                    // using fallback logic to derive the userType from UserPrincipalName.
+                    UserType = user.GetUserType(),
                 });
         }
     }

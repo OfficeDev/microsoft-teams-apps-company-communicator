@@ -133,6 +133,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                         user.Id,
                         user.DisplayName,
                         user.UserPrincipalName,
+                        user.UserType,
                     })
                     .WithMaxRetry(GraphConstants.MaxRetry)
                     .GetAsync();

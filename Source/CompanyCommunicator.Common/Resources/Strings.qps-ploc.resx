@@ -118,142 +118,145 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AdminConsentError" xml:space="preserve">
-    <value>_Cбйтд©т чфџя ЇЋ дdмїл fфґ pёгмїssїюи тб vїзщ тнїs dдтд.ЍѝцзджфЍ_</value>
+    <value>_Cфйтд©т чфцґ ЇЋ дdмїй fбг pэямїssїбп тю vїзш тнїs dдтд.ЍѝцзджфЍ_</value>
   </data>
   <data name="AppNotInstalled" xml:space="preserve">
-    <value>_Дpp Йфт ЇиsтдllзdЍѝц_</value>
+    <value>_Дpp Лфт ЇпsтдllёdЍѝц_</value>
   </data>
   <data name="ColumnName_DeliveryStatus" xml:space="preserve">
-    <value>_Dэlїvёяу SтдтµsЍѝ_</value>
+    <value>_Dёlїvзґу SтдтµsЍѝ_</value>
   </data>
   <data name="ColumnName_ExportedBy" xml:space="preserve">
-    <value>_Эжpбгтэd БчЍѝ_</value>
+    <value>_Эжpюятзd БўЍѝ_</value>
   </data>
   <data name="ColumnName_ExportTimeStamp" xml:space="preserve">
-    <value>_Эжpфгт ЋїмэSтдмpЍѝ_</value>
+    <value>_Эжpюгт ЋїмзSтдмpЍѝ_</value>
   </data>
   <data name="ColumnName_MessageTitle" xml:space="preserve">
-    <value>_Mэssдgз ЋїтlёЍѝ_</value>
+    <value>_Mёssдgэ ЋїтlёЍѝ_</value>
   </data>
   <data name="ColumnName_SentTimeStamp" xml:space="preserve">
-    <value>_Sєлт ЋїмёSтдмpЍѝ_</value>
+    <value>_Sёпт ЋїмёSтдмpЍѝ_</value>
   </data>
   <data name="ColumnName_StatusReason" xml:space="preserve">
-    <value>_Sтдтµs ЃёдsюпЍѝ_</value>
+    <value>_Sтдтџs ЯєдsблЍѝ_</value>
   </data>
   <data name="ColumnName_TeamId" xml:space="preserve">
-    <value>_Ћёдм ЇDЍ_</value>
+    <value>_Ћздм ЇDЍ_</value>
   </data>
   <data name="ColumnName_TeamName" xml:space="preserve">
-    <value>_Ћёдм ИдмэЍ_</value>
+    <value>_Ћэдм ИдмёЍ_</value>
   </data>
   <data name="ColumnName_Upn" xml:space="preserve">
     <value>_ЦPП_</value>
   </data>
   <data name="ColumnName_UserId" xml:space="preserve">
-    <value>_Џsєя ЇDЍ_</value>
+    <value>_Џsзґ ЇDЍ_</value>
   </data>
   <data name="ColumnName_UserName" xml:space="preserve">
-    <value>_ИдмёЍ_</value>
+    <value>_ПдмзЍ_</value>
   </data>
   <data name="DuplicateText" xml:space="preserve">
-    <value>_{0} (©фpу)Ѝѝ_</value>
+    <value>_{0} (©юpў)Ѝѝ_</value>
   </data>
   <data name="ExportFailureText" xml:space="preserve">
-    <value>_Sбмэтћїпg щэлт шяюпg. Ћґч эжpбґтїйg тнё гёsµlтs дgдїй.ЍѝцзджфЍ_</value>
+    <value>_Sфмєтнїиg щзит щяблg. Ћґў єжpбятїпg тнз яєsџlтs дgдїп.ЍѝцзджфЍ_</value>
   </data>
   <data name="Failed" xml:space="preserve">
-    <value>_FдїlєdЍ_</value>
+    <value>_FдїlэdЍ_</value>
   </data>
   <data name="UserAppNotFound" xml:space="preserve">
-    <value>_Цsёя дpplї©дтїюй лбт fфцпd. Mдкё sџґз тћз Цsэг дpp їs µplбдdэd тб убџґ фґgдлїzдтїбл's дpp ©дтдlфg.ЍѝцзджфЍѝцзджфЍ_</value>
+    <value>_Џsєя дpplї©дтїби пфт fфџйd. Mдкз sцгз тћз Цsєг дpp їs цplюдdзd тф чбџґ фґgдпїzдтїби's дpp ©дтдlюg.ЍѝцзджфЍѝцзджфЍ_</value>
   </data>
   <data name="FailedToFindUserAppInAppCatalog" xml:space="preserve">
-    <value>_Fдїlєd тю fїлd тћэ Џsэґ дpplї©дтїфй: {0} їй тнє югgдиїzдтїюл's дpp ©дтдlбg.ЍѝцзджфЍѝцз_</value>
+    <value>_Fдїlєd тю fїйd тћз Џsёґ дpplї©дтїюп: {0} їп тнє бгgдиїzдтїфй's дpp ©дтдlбg.ЍѝцзджфЍѝцз_</value>
     <comment>{0} - app Id. (GUID).</comment>
   </data>
   <data name="FailedToCreateConversationFormat" xml:space="preserve">
-    <value>_Fдїlєd тф ©гёдтє ©блvзгsдтїюл. Єґябг мєssдgё: {0}Ѝѝцзджф_</value>
+    <value>_Fдїlєd тф ©ґєдтэ ©бпvёґsдтїбл. Єгяфя мєssдgё: {0}Ѝѝцзджф_</value>
   </data>
   <data name="FailedToCreateConversationForUserFormat" xml:space="preserve">
-    <value>_Fдїlєd тф ©гёдтз ©фиvєгsдтїби щїтћ тёдмs цsзя: {0}. Ёж©єpтїюи: {1}ЍѝцзджфЍѝц_</value>
+    <value>_Fдїlєd тф ©яздтё ©юпvєяsдтїбл щїтћ тёдмs џsєг: {0}. Єж©зpтїюп: {1}ЍѝцзджфЍѝц_</value>
   </data>
   <data name="FailedToCreateConversationThrottledFormt" xml:space="preserve">
-    <value>_Fдїlёd тф ©гэдтє ©бйvзгsдтїюй. Гёqµзsт тћгфттlэd. Єягюґ мєssдgё: {0}"ЍѝцзджфЍѝц_</value>
+    <value>_Fдїlєd тю ©ґэдтё ©юлvєґsдтїбй. Язqџзsт тнгюттlзd. Ёггфг мзssдgє: {0}"ЍѝцзджфЍѝц_</value>
   </data>
   <data name="FailedToFindTeamInDbFormat" xml:space="preserve">
-    <value>_Fдїlэd тф fїйd тнз тэдм {0} їй DЪ.Ѝѝцзд_</value>
+    <value>_Fдїlэd тб fїпd тћє тєдм {0} їй DБ.Ѝѝцзд_</value>
   </data>
   <data name="FailedToGetAllUsersFormat" xml:space="preserve">
-    <value>_Fдїlэd тю sул© дll цsєяs. Sтдтџs Cфdз: {0} Ёж©зpтїфп: {1}ЍѝцзджфЍѝ_</value>
+    <value>_Fдїlєd тю sўп© дll цsэґs. Sтдтцs Cбdё: {0} Ёж©зpтїбп: {1}ЍѝцзджфЍѝ_</value>
   </data>
   <data name="FailedToGetConversationForUserFormat" xml:space="preserve">
-    <value>_Fдїlзd тф gёт ©бпvєяsдтїюл їd fбг цsэґ: {0}. Sтдтµs Cюdє: {1} Эж©єpтїюл: {2}ЍѝцзджфЍѝцз_</value>
+    <value>_Fдїlёd тб gёт ©бпvєгsдтїюп їd fбя џsэя: {0}. Sтдтµs Cфdє: {1} Ёж©єpтїфи: {2}ЍѝцзджфЍѝцз_</value>
   </data>
   <data name="FailedToGetMembersForGroupFormat" xml:space="preserve">
-    <value>_Fдїlёd тф gёт мзмьзґs fфґ gгюџp {0}: {1}Ѝѝцздж_</value>
+    <value>_Fдїlєd тф gэт мёмьзяs fюя gябџp {0}: {1}Ѝѝцздж_</value>
   </data>
   <data name="FailedToGetMembersForTeamFormat" xml:space="preserve">
-    <value>_Fдїlёd тб gєт мэмъзґs fюг тэдм {0}: {1}Ѝѝцздж_</value>
+    <value>_Fдїlёd тю gёт мємьэґs fюґ тєдм {0}: {1}Ѝѝцздж_</value>
   </data>
   <data name="FailedToInstallApplicationForUserFormat" xml:space="preserve">
-    <value>_Fдїlєd тб їиsтдll дpplї©дтїюй fюя џsєґ: {0}. Эж©эpтїфл: {1}ЍѝцзджфЍѝ_</value>
+    <value>_Fдїlзd тф їиsтдll дpplї©дтїбй fбг џsзг: {0}. Зж©ёpтїбл: {1}ЍѝцзджфЍѝ_</value>
   </data>
   <data name="FailtoPrepareMessageFormat" xml:space="preserve">
-    <value>_Fдїlэd тб pґзpдгэ тнё мёssдgє fфя sэлdїлg:{0}Ѝѝцзджф_</value>
+    <value>_Fдїlёd тю pґёpдґё тћє мєssдgё fфґ sєлdїлg:{0}Ѝѝцзджф_</value>
   </data>
   <data name="FileCardDescription" xml:space="preserve">
-    <value>_Ћћїs fїlз ©фйтдїпs тнё ґёsџlтs ўфц ёжpбґтёd.Ѝѝцзджф_</value>
+    <value>_Ћћїs fїlэ ©бптдїпs тнё ґєsцlтs чфц ёжpфгтэd.Ѝѝцзджф_</value>
   </data>
   <data name="FileCardExpireText" xml:space="preserve">
-    <value>_Ћћё lїиќ fбг тћїs dфшйlюдd ндs зжpїяєd. Єжpюят тћё яёsцlтs дgдїп.ЍѝцзджфЍѝц_</value>
+    <value>_Ћћё lїиќ fфя тћїs dфшлlбдd ћдs єжpїґєd. Зжpбят тћэ ґєsџlтs дgдїй.ЍѝцзджфЍѝц_</value>
   </data>
   <data name="FileName_ExportData" xml:space="preserve">
-    <value>_ЄжpбятDдтдЍѝ_</value>
+    <value>_ЗжpюгтDдтдЍѝ_</value>
   </data>
   <data name="FileName_Message_Delivery" xml:space="preserve">
-    <value>_Mєssдgє_DэlїvзгуЍѝ_</value>
+    <value>_Mёssдgз_DёlїvэячЍѝ_</value>
   </data>
   <data name="FileName_Metadata" xml:space="preserve">
-    <value>_MзтдdдтдЍ_</value>
+    <value>_MётдdдтдЍ_</value>
   </data>
   <data name="FileReadyText" xml:space="preserve">
-    <value>_Чфµг fїlэ їs яздdч тю dфшиlбдd. Д ©фpч їs дlsб дvдїlдъlэ їп ЮиэDяїvз.ЍѝцзджфЍѝц_</value>
+    <value>_Чфµґ fїlє їs яэдdу тб dющпlбдd. Д ©фpў їs дlsб дvдїlдьlз їй ЮйзDгїvё.ЍѝцзджфЍѝц_</value>
   </data>
   <data name="FileUploadErrorText" xml:space="preserve">
-    <value>_Sюмєтћїлg щёлт щгбиg. Ћяч зжpюґтїиg тнз яэsцlтs дgдїи.ЍѝцзджфЍ_</value>
+    <value>_Sюмєтнїлg шёлт шґбпg. Ћяч єжpфятїиg тнє язsцlтs дgдїй.ЍѝцзджфЍ_</value>
   </data>
   <data name="NumberOfGroupsExceededLimitWarningFormat" xml:space="preserve">
-    <value>_Ћћэ йбтїfї©дтїюи ндs {0} gяюµps дs їтs гё©їpїєйтs. Їт sнбџldл'т єж©эєd {1} gґбµps.ЍѝцзджфЍѝцзд_</value>
+    <value>_Ћћё ифтїfї©дтїюл ћдs {0} gяюцps дs їтs яё©їpїзитs. Їт sнфџldл'т ёж©єэd {1} gябµps.ЍѝцзджфЍѝцзд_</value>
   </data>
   <data name="NumberOfRostersExceededLimitWarningFormat" xml:space="preserve">
-    <value>_Ћнё пбтїfї©дтїюй ндs {0} яфsтєґs дs їтs гз©їpїёптs. Їт sћфцldи'т єж©ззd {1} яюsтзгs.ЍѝцзджфЍѝцздж_</value>
+    <value>_Ћћз йбтїfї©дтїфи ћдs {0} ґюsтзяs дs їтs яє©їpїзптs. Їт sнфџldл'т зж©зєd {1} ґфsтёгs.ЍѝцзджфЍѝцздж_</value>
   </data>
   <data name="NumberOfTeamsExceededLimitWarningFormat" xml:space="preserve">
-    <value>_Ћнє лфтїfї©дтїюи ћдs {0} тєдмs дs їтs яє©їpїёйтs. Їт sнюџldи'т эж©єэd {1} тєдмs.ЍѝцзджфЍѝцзд_</value>
+    <value>_Ћнё йбтїfї©дтїюи ндs {0} тэдмs дs їтs ґє©їpїэйтs. Їт sнфµldй'т зж©єэd {1} тэдмs.ЍѝцзджфЍѝцзд_</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>_ЮЌ_</value>
   </data>
   <data name="PermissionDeclinedText" xml:space="preserve">
-    <value>_Pзґмїssїбл dє©lїлёd. Шё шїll пбт pгб©ёэd шїтн тћё ёжpюгт.ЍѝцзджфЍѝ_</value>
+    <value>_Pёґмїssїбп dз©lїлзd. Щэ щїll лбт pяф©єэd шїтћ тнё зжpфґт.ЍѝцзджфЍѝ_</value>
   </data>
   <data name="RecipientNotFound" xml:space="preserve">
-    <value>_Ґз©їpїёит Ифт FфµйdЍѝц_</value>
+    <value>_Гз©їpїєит Иют FбµпdЍѝц_</value>
   </data>
   <data name="Succeeded" xml:space="preserve">
-    <value>_Sµ©©ёёdзdЍ_</value>
+    <value>_Sџ©©эєdэdЍ_</value>
   </data>
   <data name="Throttled" xml:space="preserve">
-    <value>_ЋћябттlзdЍ_</value>
+    <value>_ЋнґбттlёdЍ_</value>
   </data>
   <data name="ColumnName_UserType" xml:space="preserve">
-    <value>_Цsэґ ЋўpэЍ_</value>
+    <value>_Цsёя ЋўpєЍ_</value>
   </data>
   <data name="Guest" xml:space="preserve">
     <value>_GµёsтЍ_</value>
   </data>
   <data name="Member" xml:space="preserve">
-    <value>_MємьёяЍ_</value>
+    <value>_MзмвэгЍ_</value>
+  </data>
+  <data name="GuestUserNotSupported" xml:space="preserve">
+    <value>_Gµэsт Џsэя йфт sцppфґтэdЍѝцз_</value>
   </data>
 </root>

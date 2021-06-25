@@ -99,7 +99,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User
                     PartitionKey = UserDataTableNames.UserDataPartition,
                     RowKey = user.Id,
                     AadId = user.Id,
-                    UserType = user.UserType,
+
+                    // At times userType value from Graph response is null, to avoid null value
+                    // using fallback logic to derive the userType from UserPrincipalName.
+                    UserType = user.GetUserType(),
                 });
         }
     }

@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
 {
     using System;
     using System.Collections.Generic;
+    using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
 
@@ -45,7 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
         }
 
         /// <summary>
-        /// Get the user type for a user.
+        /// Get the userType for a user.
         /// </summary>
         /// <param name="userPrincipalName">the user principal name.</param>
         /// <returns>the user type such as Member or Guest.</returns>
@@ -57,6 +58,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
             }
 
             return userPrincipalName.ToLower().Contains("#ext#") ? UserType.Guest : UserType.Member;
+        }
+
+        /// <summary>
+        /// Get the userType for a user.
+        /// </summary>
+        /// <param name="user">the microsoft graph user.</param>
+        /// <returns>the user type such as Member or Guest.</returns>
+        public static string GetUserType(this User user)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (!string.IsNullOrEmpty(user.UserType))
+            {
+                return user.UserType;
+            }
+
+            return user.UserPrincipalName.GetUserType();
         }
     }
 }

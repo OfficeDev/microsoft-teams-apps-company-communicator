@@ -113,7 +113,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().NotThrowAsync();
-            this.userDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<UserDataEntity>(x => x.RowKey == tuple.Item1.FirstOrDefault().Id)));
+            this.userDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<UserDataEntity>(x => x.RowKey == tuple.Item1.FirstOrDefault().Id)), Times.AtLeastOnce);
             this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(l => l.Count() == 2)), Times.Once);
         }
 
@@ -166,23 +166,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             // Assert
             await task.Should().NotThrowAsync();
             this.userDataRepository.Verify(x => x.InsertOrMergeAsync(It.IsAny<UserDataEntity>()), Times.Never);
-            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(l => l.Count() == 1)), Times.Once);
         }
 
         /// <summary>
-        /// Test case to verify both guest users from Graph and existing guest users gets filtered and not stored in sentNotificatinData table.
+        /// Test case to verify existing guest users gets stored in sentNotificatinData table.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
-        public async Task SyncAllUsers_AllGuestUsers_ShouldNeverBeSavedInTable()
+        public async Task SyncAllUsers_AllGuestUsersFromDB_ShouldBeSavedInTable()
         {
             // Arrange
             var activityContext = this.GetSyncAllUsersActivity();
             string deltaLink = "deltaLink";
             IEnumerable<UserDataEntity> userDataResponse = new List<UserDataEntity>()
             {
-               new UserDataEntity() { Name = string.Empty, UserType = UserType.Guest },
-               new UserDataEntity() { Name = string.Empty, UserType = UserType.Guest },
+               new UserDataEntity() { Name = "user1", UserType = UserType.Member },
+               new UserDataEntity() { Name = "user2", UserType = UserType.Guest },
             };
             NotificationDataEntity notification = new NotificationDataEntity()
             {
@@ -213,11 +212,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             this.sentNotificationDataRepository.Setup(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()));
 
             // Act
-            await activityContext.RunAsync(notification, this.logger.Object);
+            Func<Task> task = async () => await activityContext.RunAsync(notification, this.logger.Object);
 
             // Assert
-            this.userDataRepository.Verify(x => x.InsertOrMergeAsync(It.IsAny<UserDataEntity>()), Times.Never);
-            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()), Times.Never);
+            await task.Should().NotThrowAsync();
+            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(l => l.Count() == 2)), Times.Once);
         }
 
         /// <summary>
@@ -379,7 +378,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                new UserDataEntity() { Name = "user1", UserType = UserType.Guest },
             };
             var notification = new NotificationDataEntity() { Id = "notificationId1" };
-            var tuple = (new List<User>() { new User() { Id = "101" } }, string.Empty);
+            var tuple = (new List<User>() { new User() { Id = "101", UserType = UserType.Member } }, string.Empty);
 
             this.userDataRepository
                 .Setup(x => x.GetDeltaLinkAsync())

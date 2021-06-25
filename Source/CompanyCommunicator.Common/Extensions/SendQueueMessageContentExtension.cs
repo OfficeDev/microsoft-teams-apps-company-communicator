@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
 {
     using System;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
 
     /// <summary>
     /// Extension class for <see cref="SendQueueMessageContent"/>.
@@ -43,6 +44,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
                 RecipientDataType.Team => recipient.TeamData.TeamId,
                 _ => throw new ArgumentException("Invalid recipient type"),
             };
+        }
+
+        /// <summary>
+        /// Check if recipient guest user.
+        /// </summary>
+        /// <param name="message">Send Queue message.</param>
+        /// <returns>Boolean indicating if it is a guest user.</returns>
+        public static bool IsRecipientGuestUser(this SendQueueMessageContent message)
+        {
+            var recipient = message.RecipientData;
+            if (recipient.RecipientType == RecipientDataType.User)
+            {
+                if (string.IsNullOrEmpty(recipient.UserData.UserType))
+                {
+                    throw new ArgumentNullException(nameof(recipient.UserData.UserType));
+                }
+                else if (recipient.UserData.UserType.Equals(UserType.Guest, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

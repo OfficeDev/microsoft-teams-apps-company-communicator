@@ -105,11 +105,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         }
 
         /// <summary>
-        /// Test case to verify that existing Guest Users never gets saved in Sent Notification Table.
+        /// Test case to verify that existing Guest Users gets saved in Sent Notification Table.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
-        public async Task SyncTeamMembers_OnlyExistingGuestUser_NeverStoreInSentNotificationTable()
+        public async Task SyncTeamMembers_OnlyExistingGuestUser_StoreInSentNotificationTable()
         {
             // Arrange
             var activityContext = this.GetSyncTeamMembersActivity();
@@ -137,16 +137,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             await activityContext.RunAsync((this.notificationId, this.teamId), this.logger.Object);
 
             // Assert
-            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()), Times.Never);
+            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()), Times.Once);
         }
 
         /// <summary>
-        /// Test case to verify that only Member user type is filtered from list of existing Member user and Guest user,
-        /// and is saved in Sent Notification Table.
+        /// Test case to verify that both user type i.e. existing Member user and Guest user
+        /// is saved in Sent Notification Table.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
-        public async Task SyncTeamMembers_BothUserTypeForExistingUser_StoreOnlyMemberUserType()
+        public async Task SyncTeamMembers_BothUserTypeForExistingUser_ShouldStoreBothUserType()
         {
             // Arrange
             var activityContext = this.GetSyncTeamMembersActivity();
@@ -175,7 +175,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             await activityContext.RunAsync((this.notificationId, this.teamId), this.logger.Object);
 
             // Assert
-            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(l => l.Count() == 1)), Times.Once);
+            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(l => l.Count() == 2)), Times.Once);
         }
 
         /// <summary>
