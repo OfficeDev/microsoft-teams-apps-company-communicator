@@ -193,6 +193,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     PartitionKey = UserDataTableNames.UserDataPartition,
                     RowKey = user.Id,
                     AadId = user.Id,
+
+                    // At times userType value from Graph response is null, to avoid null value
+                    // using fallback logic to derive the userType from UserPrincipalName.
                     UserType = user.GetUserType(),
                 });
         }
