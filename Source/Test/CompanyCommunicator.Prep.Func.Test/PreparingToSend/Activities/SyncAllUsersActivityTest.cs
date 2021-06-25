@@ -378,7 +378,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                new UserDataEntity() { Name = "user1", UserType = UserType.Guest },
             };
             var notification = new NotificationDataEntity() { Id = "notificationId1" };
-            var tuple = (new List<User>() { new User() { Id = "101" } }, string.Empty);
+            var tuple = (new List<User>() { new User() { Id = "101", UserType = UserType.Member } }, string.Empty);
 
             this.userDataRepository
                 .Setup(x => x.GetDeltaLinkAsync())

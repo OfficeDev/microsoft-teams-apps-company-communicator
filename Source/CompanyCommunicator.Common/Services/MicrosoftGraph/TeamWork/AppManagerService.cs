@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Policies;
 
     /// <summary>
     /// Manage Teams Apps for a user or a team.
@@ -49,12 +50,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 },
             };
 
-            await this.graphServiceClient.Users[userId]
-            .Teamwork
-            .InstalledApps
-            .Request()
-            .WithMaxRetry(GraphConstants.MaxRetry)
-            .AddAsync(userScopeTeamsAppInstallation);
+            var retryPolicy = PollyPolicy.GetGraphRetryPolicy(GraphConstants.MaxRetry);
+            await retryPolicy.ExecuteAsync(async () =>
+                await this.graphServiceClient.Users[userId]
+                    .Teamwork
+                    .InstalledApps
+                    .Request()
+                    .WithMaxRetry(GraphConstants.MaxRetry)
+                    .AddAsync(userScopeTeamsAppInstallation));
         }
 
         /// <inheritdoc/>
@@ -78,11 +81,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 },
             };
 
-            await this.graphServiceClient.Teams[teamId]
-                .InstalledApps
-                .Request()
-                .WithMaxRetry(GraphConstants.MaxRetry)
-                .AddAsync(userScopeTeamsAppInstallation);
+            var retryPolicy = PollyPolicy.GetGraphRetryPolicy(GraphConstants.MaxRetry);
+            await retryPolicy.ExecuteAsync(async () =>
+                await this.graphServiceClient.Teams[teamId]
+                    .InstalledApps
+                    .Request()
+                    .WithMaxRetry(GraphConstants.MaxRetry)
+                    .AddAsync(userScopeTeamsAppInstallation));
         }
 
         /// <inheritdoc/>
