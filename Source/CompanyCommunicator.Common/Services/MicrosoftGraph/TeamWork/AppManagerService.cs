@@ -103,14 +103,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            var pagedApps = await this.graphServiceClient.Users[userId]
-                .Teamwork
-                .InstalledApps
-                .Request()
-                .Expand("teamsApp")
-                .Filter($"teamsApp/id eq '{appId}'")
-                .WithMaxRetry(GraphConstants.MaxRetry)
-                .GetAsync();
+            var retryPolicy = PollyPolicy.GetGraphRetryPolicy(GraphConstants.MaxRetry);
+            var pagedApps = await retryPolicy.ExecuteAsync(async () =>
+                 await this.graphServiceClient.Users[userId]
+                    .Teamwork
+                    .InstalledApps
+                    .Request()
+                    .Expand("teamsApp")
+                    .Filter($"teamsApp/id eq '{appId}'")
+                    .WithMaxRetry(GraphConstants.MaxRetry)
+                    .GetAsync());
 
             return pagedApps.CurrentPage.Any();
         }
@@ -128,13 +130,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 throw new ArgumentNullException(nameof(teamId));
             }
 
-            var pagedApps = await this.graphServiceClient.Teams[teamId]
-                .InstalledApps
-                .Request()
-                .Expand("teamsApp")
-                .Filter($"teamsApp/id eq '{appId}'")
-                .WithMaxRetry(GraphConstants.MaxRetry)
-                .GetAsync();
+            var retryPolicy = PollyPolicy.GetGraphRetryPolicy(GraphConstants.MaxRetry);
+            var pagedApps = await retryPolicy.ExecuteAsync(async () =>
+                await this.graphServiceClient.Teams[teamId]
+                    .InstalledApps
+                    .Request()
+                    .Expand("teamsApp")
+                    .Filter($"teamsApp/id eq '{appId}'")
+                    .WithMaxRetry(GraphConstants.MaxRetry)
+                    .GetAsync());
 
             return pagedApps.CurrentPage.Any();
         }
@@ -152,14 +156,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            var collection = await this.graphServiceClient.Users[userId]
-                .Teamwork
-                .InstalledApps
-                .Request()
-                .Expand("teamsApp")
-                .Filter($"teamsApp/id eq '{appId}'")
-                .WithMaxRetry(GraphConstants.MaxRetry)
-                .GetAsync();
+            var retryPolicy = PollyPolicy.GetGraphRetryPolicy(GraphConstants.MaxRetry);
+            var collection = await retryPolicy.ExecuteAsync(async () =>
+                await this.graphServiceClient.Users[userId]
+                    .Teamwork
+                    .InstalledApps
+                    .Request()
+                    .Expand("teamsApp")
+                    .Filter($"teamsApp/id eq '{appId}'")
+                    .WithMaxRetry(GraphConstants.MaxRetry)
+                    .GetAsync());
 
             return collection?.FirstOrDefault().Id;
         }
@@ -177,13 +183,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 throw new ArgumentNullException(nameof(teamId));
             }
 
-            var collection = await this.graphServiceClient.Teams[teamId]
-                .InstalledApps
-                .Request()
-                .Expand("teamsApp")
-                .Filter($"teamsApp/id eq '{appId}'")
-                .WithMaxRetry(GraphConstants.MaxRetry)
-                .GetAsync();
+            var retryPolicy = PollyPolicy.GetGraphRetryPolicy(GraphConstants.MaxRetry);
+            var collection = await retryPolicy.ExecuteAsync(async () =>
+                await this.graphServiceClient.Teams[teamId]
+                    .InstalledApps
+                    .Request()
+                    .Expand("teamsApp")
+                    .Filter($"teamsApp/id eq '{appId}'")
+                    .WithMaxRetry(GraphConstants.MaxRetry)
+                    .GetAsync());
 
             return collection?.FirstOrDefault().Id;
         }
