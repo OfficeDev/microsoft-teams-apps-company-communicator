@@ -235,6 +235,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             // Arrange
             var activityInstance = this.GetDataStreamFacadeInstance();
             var userDataList = new List<User>();
+            var error = new Graph.Error()
+            {
+                Code = HttpStatusCode.Forbidden.ToString(),
+                Message = "UnAuthorized",
+            };
+            var forbiddenException = new ServiceException(error, null, HttpStatusCode.Forbidden);
 
             this.sentNotificationDataRepository
                 .Setup(x => x.GetStreamsAsync(this.notificationId, null))
@@ -245,7 +251,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             var sendNotificationData = this.sentNotificationDataWithErrorList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
             this.usersService
                 .Setup(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()))
-                .ReturnsAsync(userDataList);
+                .ThrowsAsync(forbiddenException);
             string adminConsentError = "AdminConsentError";
             var localizedString = new LocalizedString(adminConsentError, adminConsentError);
             this.localizer.Setup(_ => _[adminConsentError]).Returns(localizedString);
@@ -258,6 +264,71 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             Assert.Equal(userData.Name, adminConsentError);
             Assert.Equal(userData.Upn, adminConsentError);
             Assert.Equal(userData.UserType, adminConsentError);
+        }
+
+        /// <summary>
+        /// Test case to check when user is deleted from the Tenant and from the User Data Table should return emty record.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Fact]
+        public async Task Get_UserDeletedFromTenant_ReturnsEmptyRecord()
+        {
+            // Arrange
+            var activityInstance = this.GetDataStreamFacadeInstance();
+            var userDataList = new List<User>();
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataWithErrorList.ToAsyncEnumerable());
+            this.userDataRepository
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(default(UserDataEntity));
+            var sendNotificationData = this.sentNotificationDataWithErrorList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
+            this.usersService
+                .Setup(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()))
+                .ReturnsAsync(userDataList);
+
+            // Act
+            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId).ToListAsync();
+            var userData = userDataStream.FirstOrDefault().FirstOrDefault();
+
+            // Assert
+            Assert.Null(userData.Name);
+            Assert.Null(userData.Upn);
+            Assert.Null(userData.UserType);
+        }
+
+        /// <summary>
+        /// Test case to check when user is deleted from the Tenant and not from the User Data Table should return emty record.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Fact]
+        public async Task Get_UserResponseNullFromGraph_ReturnsEmptyRecord()
+        {
+            // Arrange
+            var activityInstance = this.GetDataStreamFacadeInstance();
+            var userDataList = new List<User>();
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataWithErrorList.ToAsyncEnumerable());
+            this.userDataRepository
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new UserDataEntity() { UserType = UserType.Member });
+            var sendNotificationData = this.sentNotificationDataWithErrorList.Select(x => x.Where(y => y.RowKey == "RowKey").FirstOrDefault()).FirstOrDefault();
+            this.usersService
+                .Setup(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()))
+                .ReturnsAsync(userDataList);
+            string userType = UserType.Member;
+            var localizedString = new LocalizedString(userType, userType);
+            this.localizer.Setup(_ => _[userType]).Returns(localizedString);
+
+            // Act
+            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId).ToListAsync();
+            var userData = userDataStream.FirstOrDefault().FirstOrDefault();
+
+            // Assert
+            Assert.Null(userData.Name);
+            Assert.Null(userData.Upn);
+            Assert.Equal(userData.UserType, UserType.Member);
         }
 
         /// <summary>

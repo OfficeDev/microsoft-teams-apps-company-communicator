@@ -66,26 +66,30 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
         /// <returns>the streams of user data.</returns>
         public async IAsyncEnumerable<IEnumerable<UserData>> GetUserDataStreamAsync(string notificationId)
         {
-            if (notificationId == null)
-            {
-                throw new ArgumentNullException(nameof(notificationId));
-            }
+            _ = notificationId ?? throw new ArgumentNullException(nameof(notificationId));
 
             var sentNotificationDataEntitiesStream = this.sentNotificationDataRepository.GetStreamsAsync(notificationId);
             var isForbidden = false;
+
             await foreach (var sentNotifcations in sentNotificationDataEntitiesStream)
             {
-                List<User> userList = new List<User>();
+                var users = new List<User>();
+
+                // filter the recipient not found users.
+                var recipients = sentNotifcations.Where(sentNotifcation => !sentNotifcation.DeliveryStatus.Equals(SentNotificationDataEntity.RecipientNotFound, StringComparison.CurrentCultureIgnoreCase));
+
                 try
                 {
-                    // filter the recipient not found users.
-                    var users = await this.usersService.GetBatchByUserIds(
-                        sentNotifcations
-                        .Where(sentNotifcation => !sentNotifcation.DeliveryStatus.Equals(SentNotificationDataEntity.RecipientNotFound, StringComparison.CurrentCultureIgnoreCase))
-                        .Select(notitification => notitification.RowKey)
-                        .ToList()
-                        .AsGroups());
-                    userList = users.ToList();
+                    if (!isForbidden)
+                    {
+                        // Group the recipients as per the graph batch api.
+                        var groupRecipientsByAadId = recipients
+                           .Select(notitification => notitification.RowKey)
+                           .ToList()
+                           .AsGroups();
+
+                        users = (await this.usersService.GetBatchByUserIds(groupRecipientsByAadId)).ToList();
+                    }
                 }
                 catch (ServiceException serviceException)
                 {
@@ -98,7 +102,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     isForbidden = true;
                 }
 
-                yield return await this.CreateUserDataAsync(sentNotifcations, userList, isForbidden);
+                if (isForbidden)
+                {
+                    yield return this.CreatePartialUserData(recipients);
+                }
+                else
+                {
+                    yield return await this.CreateUserDataAsync(recipients, users);
+                }
             }
         }
 
@@ -140,21 +151,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
         /// </summary>
         /// <param name="sentNotificationDataEntities">the list of sent notification data entities.</param>
         /// <param name="users">the user list.</param>
-        /// <param name="isForbidden">Indicating if user is forbidden to see .</param>
         /// <returns>list of created user data.</returns>
         private async Task<IEnumerable<UserData>> CreateUserDataAsync(
             IEnumerable<SentNotificationDataEntity> sentNotificationDataEntities,
-            IEnumerable<User> users,
-            bool isForbidden = false)
+            IEnumerable<User> users)
         {
             var userdatalist = new List<UserData>();
             foreach (var sentNotification in sentNotificationDataEntities)
             {
-                var user = users.
-                    FirstOrDefault(user => user != null && user.Id.Equals(sentNotification.RowKey));
+                var user = users.FirstOrDefault(user => user != null && user.Id.Equals(sentNotification.RowKey));
                 string userType = sentNotification.UserType;
 
-                // For version less than CC v4.1.2 fetch from graph or user data table.
+                // For version less than CC v4.1.2 fetch from user data table or graph.
                 if (string.IsNullOrEmpty(userType))
                 {
                     var userDataEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, sentNotification.RowKey);
@@ -168,38 +176,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     }
                 }
 
-                var statusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode.ToString());
-                var userData = this.GetUserData(sentNotification.RowKey, userType, user, sentNotification.DeliveryStatus, statusReason, isForbidden);
+                var userData = new UserData()
+                {
+                    Id = sentNotification.RowKey,
+                    Name = user?.DisplayName,
+                    Upn = user?.UserPrincipalName,
+                    UserType = this.localizer.GetString(userType ?? string.Empty),
+                    DeliveryStatus = this.localizer.GetString(sentNotification.DeliveryStatus ?? string.Empty),
+                    StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode.ToString()),
+                };
                 userdatalist.Add(userData);
             }
 
             return userdatalist;
         }
 
-        private UserData GetUserData(string userId, string userType, User user, string deliveryStatus, string statusReason, bool isForbidden)
+        private IEnumerable<UserData> CreatePartialUserData(IEnumerable<SentNotificationDataEntity> sentNotificationDataEntities)
         {
-            if (isForbidden)
-            {
-                return new UserData()
+            return sentNotificationDataEntities
+                .Select(sentNotification =>
+                new UserData()
                 {
-                    Id = userId,
+                    Id = sentNotification.RowKey,
                     Name = this.localizer.GetString("AdminConsentError"),
                     Upn = this.localizer.GetString("AdminConsentError"),
-                    UserType = this.localizer.GetString(userType ?? "AdminConsentError"),
-                    DeliveryStatus = this.localizer.GetString(deliveryStatus),
-                    StatusReason = statusReason,
-                };
-            }
-
-            return new UserData()
-            {
-                Id = userId,
-                Name = user?.DisplayName,
-                Upn = user?.UserPrincipalName,
-                UserType = userType,
-                DeliveryStatus = this.localizer.GetString(deliveryStatus),
-                StatusReason = statusReason,
-            };
+                    UserType = this.localizer.GetString(sentNotification.UserType ?? "AdminConsentError"),
+                    DeliveryStatus = this.localizer.GetString(sentNotification.DeliveryStatus ?? string.Empty),
+                    StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode.ToString()),
+                }).ToList();
         }
 
         /// <summary>
