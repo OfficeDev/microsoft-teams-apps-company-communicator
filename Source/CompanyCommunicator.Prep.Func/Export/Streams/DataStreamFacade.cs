@@ -72,6 +72,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
             }
 
             var sentNotificationDataEntitiesStream = this.sentNotificationDataRepository.GetStreamsAsync(notificationId);
+            var isForbidden = false;
             await foreach (var sentNotifcations in sentNotificationDataEntitiesStream)
             {
                 List<User> userList = new List<User>();
@@ -92,9 +93,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     {
                         throw serviceException;
                     }
+
+                    // Set isForbidden to true in case of Forbidden exception.
+                    isForbidden = true;
                 }
 
-                yield return await this.CreateUserDataAsync(sentNotifcations, userList);
+                yield return await this.CreateUserDataAsync(sentNotifcations, userList, isForbidden);
             }
         }
 
@@ -136,10 +140,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
         /// </summary>
         /// <param name="sentNotificationDataEntities">the list of sent notification data entities.</param>
         /// <param name="users">the user list.</param>
+        /// <param name="isForbidden">Indicating if user is forbidden to see .</param>
         /// <returns>list of created user data.</returns>
         private async Task<IEnumerable<UserData>> CreateUserDataAsync(
             IEnumerable<SentNotificationDataEntity> sentNotificationDataEntities,
-            IEnumerable<User> users)
+            IEnumerable<User> users,
+            bool isForbidden = false)
         {
             var userdatalist = new List<UserData>();
             foreach (var sentNotification in sentNotificationDataEntities)
@@ -152,27 +158,48 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                 if (string.IsNullOrEmpty(userType))
                 {
                     var userDataEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, sentNotification.RowKey);
-                    userType = userDataEntity.UserType;
+                    userType = userDataEntity?.UserType;
                     if (user != null && string.IsNullOrEmpty(userType))
                     {
+                        userType = user.GetUserType();
+
                         // This is to set the UserType of the user.
-                        await this.userTypeService.UpdateUserTypeForExistingUserAsync(userDataEntity, user.GetUserType());
+                        await this.userTypeService.UpdateUserTypeForExistingUserAsync(userDataEntity, userType);
                     }
                 }
 
-                var userData = new UserData
-                {
-                    Id = sentNotification.RowKey,
-                    Name = user?.DisplayName ?? this.localizer.GetString("AdminConsentError"),
-                    Upn = user?.UserPrincipalName ?? this.localizer.GetString("AdminConsentError"),
-                    UserType = this.localizer.GetString(userType ?? (user?.GetUserType() ?? "AdminConsentError")),
-                    DeliveryStatus = this.localizer.GetString(sentNotification.DeliveryStatus),
-                    StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode.ToString()),
-                };
+                var statusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode.ToString());
+                var userData = this.GetUserData(sentNotification.RowKey, userType, user, sentNotification.DeliveryStatus, statusReason, isForbidden);
                 userdatalist.Add(userData);
             }
 
             return userdatalist;
+        }
+
+        private UserData GetUserData(string userId, string userType, User user, string deliveryStatus, string statusReason, bool isForbidden)
+        {
+            if (isForbidden)
+            {
+                return new UserData()
+                {
+                    Id = userId,
+                    Name = this.localizer.GetString("AdminConsentError"),
+                    Upn = this.localizer.GetString("AdminConsentError"),
+                    UserType = this.localizer.GetString(userType ?? "AdminConsentError"),
+                    DeliveryStatus = this.localizer.GetString(deliveryStatus),
+                    StatusReason = statusReason,
+                };
+            }
+
+            return new UserData()
+            {
+                Id = userId,
+                Name = user?.DisplayName,
+                Upn = user?.UserPrincipalName,
+                UserType = userType,
+                DeliveryStatus = this.localizer.GetString(deliveryStatus),
+                StatusReason = statusReason,
+            };
         }
 
         /// <summary>
