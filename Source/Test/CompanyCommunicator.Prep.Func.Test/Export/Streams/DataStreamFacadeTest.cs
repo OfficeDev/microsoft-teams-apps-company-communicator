@@ -43,7 +43,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
                 {
                     new SentNotificationDataEntity()
                     {
-                        ConversationId = "conversationId", DeliveryStatus = "Succeeded", RowKey = "RowKey", StatusCode = 0, ErrorMessage = string.Empty,
+                        ConversationId = "conversationId", DeliveryStatus = "Succeeded", RowKey = "RowKey", ErrorMessage = string.Empty,
+                    },
+                },
+            };
+
+        private readonly IEnumerable<List<SentNotificationDataEntity>> sentNotificationDataWithRecipientNotFound = new List<List<SentNotificationDataEntity>>()
+            {
+                new List<SentNotificationDataEntity>()
+                {
+                    new SentNotificationDataEntity()
+                    {
+                        ConversationId = "conversationId", DeliveryStatus = "RecipientNotFound", RowKey = "RowKey", StatusCode = 0, ErrorMessage = string.Empty,
                     },
                 },
             };
@@ -164,6 +175,30 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             this.usersService
                 .Setup(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()))
                 .ReturnsAsync(userData);
+
+            // Act
+            var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId);
+
+            await userDataStream.ForEachAsync(x => x.ToList());
+
+            // Assert
+            this.usersService.Verify(x => x.GetBatchByUserIds(It.IsAny<IEnumerable<IEnumerable<string>>>()), Times.Never);
+        }
+
+        /// <summary>
+        /// Test case to check if GetBatchByUserIds method is never called as there is only recipientnotfound status in response.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Fact]
+        public async Task GetUserData_RecipientNotFound_ShouldNeverInvokeBatchByUserIds()
+        {
+            // Arrange
+            var activityInstance = this.GetDataStreamFacadeInstance();
+            var userData = this.GetUserDataList();
+
+            this.sentNotificationDataRepository
+                .Setup(x => x.GetStreamsAsync(this.notificationId, null))
+                .Returns(this.sentNotificationDataWithRecipientNotFound.ToAsyncEnumerable());
 
             // Act
             var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId);

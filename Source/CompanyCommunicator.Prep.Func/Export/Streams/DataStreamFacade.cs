@@ -83,12 +83,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     if (!isForbidden)
                     {
                         // Group the recipients as per the graph batch api.
-                        var groupRecipientsByAadId = recipients
+                        var groupRecipientsByAadId = recipients?
                            .Select(notitification => notitification.RowKey)
                            .ToList()
                            .AsGroups();
 
-                        users = (await this.usersService.GetBatchByUserIds(groupRecipientsByAadId)).ToList();
+                        if (!groupRecipientsByAadId.IsNullOrEmpty())
+                        {
+                            users = (await this.usersService.GetBatchByUserIds(groupRecipientsByAadId)).ToList();
+                        }
                     }
                 }
                 catch (ServiceException serviceException)
@@ -137,7 +140,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                         Id = sentNotificationDataEntity.RowKey,
                         Name = team?.Name,
                         DeliveryStatus = this.localizer.GetString(sentNotificationDataEntity.DeliveryStatus),
-                        StatusReason = this.GetStatusReason(sentNotificationDataEntity.ErrorMessage, sentNotificationDataEntity.StatusCode.ToString()),
+                        StatusReason = this.GetStatusReason(sentNotificationDataEntity.ErrorMessage, sentNotificationDataEntity.StatusCode),
                     };
                     teamDataList.Add(teamData);
                 }
@@ -183,7 +186,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     Upn = user?.UserPrincipalName,
                     UserType = this.localizer.GetString(userType ?? string.Empty),
                     DeliveryStatus = this.localizer.GetString(sentNotification.DeliveryStatus ?? string.Empty),
-                    StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode.ToString()),
+                    StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode),
                 };
                 userdatalist.Add(userData);
             }
@@ -191,6 +194,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
             return userdatalist;
         }
 
+        /// <summary>
+        /// Create partial user data.
+        /// </summary>
+        /// <param name="sentNotificationDataEntities">the list of sent notification data entities.</param>
+        /// <returns>user data list.</returns>
         private IEnumerable<UserData> CreatePartialUserData(IEnumerable<SentNotificationDataEntity> sentNotificationDataEntities)
         {
             return sentNotificationDataEntities
@@ -202,7 +210,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     Upn = this.localizer.GetString("AdminConsentError"),
                     UserType = this.localizer.GetString(sentNotification.UserType ?? "AdminConsentError"),
                     DeliveryStatus = this.localizer.GetString(sentNotification.DeliveryStatus ?? string.Empty),
-                    StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode.ToString()),
+                    StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode),
                 }).ToList();
         }
 
@@ -212,7 +220,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
         /// <param name="errorMessage">the error message.</param>
         /// <param name="statusCode">the status code.</param>
         /// <returns>status code appended error message.</returns>
-        private string GetStatusReason(string errorMessage, string statusCode)
+        private string GetStatusReason(string errorMessage, int statusCode)
         {
             string result;
             if (string.IsNullOrEmpty(errorMessage))
