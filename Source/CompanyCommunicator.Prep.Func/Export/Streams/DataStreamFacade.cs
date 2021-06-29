@@ -139,7 +139,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     {
                         Id = sentNotificationDataEntity.RowKey,
                         Name = team?.Name,
-                        DeliveryStatus = this.localizer.GetString(sentNotificationDataEntity.DeliveryStatus),
+                        DeliveryStatus = sentNotificationDataEntity.DeliveryStatus is null ? sentNotificationDataEntity.DeliveryStatus : this.localizer.GetString(sentNotificationDataEntity.DeliveryStatus),
                         StatusReason = this.GetStatusReason(sentNotificationDataEntity.ErrorMessage, sentNotificationDataEntity.StatusCode),
                     };
                     teamDataList.Add(teamData);
@@ -184,8 +184,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     Id = sentNotification.RowKey,
                     Name = user?.DisplayName,
                     Upn = user?.UserPrincipalName,
-                    UserType = this.localizer.GetString(userType ?? string.Empty),
-                    DeliveryStatus = this.localizer.GetString(sentNotification.DeliveryStatus ?? string.Empty),
+                    UserType = userType is null ? userType : this.localizer.GetString(userType),
+                    DeliveryStatus = sentNotification.DeliveryStatus is null ? sentNotification.DeliveryStatus : this.localizer.GetString(sentNotification.DeliveryStatus),
                     StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode),
                 });
             }
@@ -208,7 +208,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     Name = this.localizer.GetString("AdminConsentError"),
                     Upn = this.localizer.GetString("AdminConsentError"),
                     UserType = this.localizer.GetString(sentNotification.UserType ?? "AdminConsentError"),
-                    DeliveryStatus = this.localizer.GetString(sentNotification.DeliveryStatus ?? string.Empty),
+                    DeliveryStatus = sentNotification.DeliveryStatus is null ? sentNotification.DeliveryStatus : this.localizer.GetString(sentNotification.DeliveryStatus),
                     StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode),
                 }).ToList();
         }
