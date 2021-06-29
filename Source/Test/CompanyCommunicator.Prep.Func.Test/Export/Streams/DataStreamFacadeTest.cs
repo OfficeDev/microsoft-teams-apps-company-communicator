@@ -341,7 +341,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         {
             // Arrange
             var activityInstance = this.GetDataStreamFacadeInstance();
-            var userDataList = new List<User>();
+            List<User> userDataList = null;
             this.sentNotificationDataRepository
                 .Setup(x => x.GetStreamsAsync(this.notificationId, null))
                 .Returns(this.sentNotificationDataWithErrorList.ToAsyncEnumerable());

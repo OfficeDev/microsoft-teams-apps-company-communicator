@@ -90,7 +90,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
 
                         if (!groupRecipientsByAadId.IsNullOrEmpty())
                         {
-                            users = (await this.usersService.GetBatchByUserIds(groupRecipientsByAadId)).ToList();
+                            users = (await this.usersService.GetBatchByUserIds(groupRecipientsByAadId))?.ToList();
                         }
                     }
                 }
@@ -162,7 +162,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
             var userdatalist = new List<UserData>();
             foreach (var sentNotification in sentNotificationDataEntities)
             {
-                var user = users.FirstOrDefault(user => user != null && user.Id.Equals(sentNotification.RowKey));
+                var user = users?.FirstOrDefault(user => user != null && user.Id.Equals(sentNotification.RowKey));
                 string userType = sentNotification.UserType;
 
                 // For version less than CC v4.1.2 fetch from user data table or graph.
@@ -179,7 +179,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     }
                 }
 
-                var userData = new UserData()
+                userdatalist.Add(new UserData()
                 {
                     Id = sentNotification.RowKey,
                     Name = user?.DisplayName,
@@ -187,8 +187,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     UserType = this.localizer.GetString(userType ?? string.Empty),
                     DeliveryStatus = this.localizer.GetString(sentNotification.DeliveryStatus ?? string.Empty),
                     StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode),
-                };
-                userdatalist.Add(userData);
+                });
             }
 
             return userdatalist;
