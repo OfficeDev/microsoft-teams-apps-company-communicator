@@ -71,18 +71,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
             var sentNotificationDataEntitiesStream = this.sentNotificationDataRepository.GetStreamsAsync(notificationId);
             var isForbidden = false;
 
-            await foreach (var sentNotifcations in sentNotificationDataEntitiesStream)
+            await foreach (var sentNotifications in sentNotificationDataEntitiesStream)
             {
                 var users = new List<User>();
 
                 // filter the recipient not found users.
-                var recipients = sentNotifcations.Where(sentNotifcation => !sentNotifcation.DeliveryStatus.Equals(SentNotificationDataEntity.RecipientNotFound, StringComparison.CurrentCultureIgnoreCase));
+                var recipients = sentNotifications.Where(sentNotifcation => !sentNotifcation.DeliveryStatus.Equals(SentNotificationDataEntity.RecipientNotFound, StringComparison.CurrentCultureIgnoreCase));
 
                 try
                 {
                     if (!isForbidden)
                     {
-                        // Group the recipients as per the graph batch api.
+                        // Group the recipients as per the Graph batch api.
                         var groupRecipientsByAadId = recipients?
                            .Select(notitification => notitification.RowKey)
                            .ToList()
@@ -98,7 +98,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                 {
                     if (serviceException.StatusCode != HttpStatusCode.Forbidden)
                     {
-                        throw serviceException;
+                        throw;
                     }
 
                     // Set isForbidden to true in case of Forbidden exception.
@@ -165,7 +165,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                 var user = users?.FirstOrDefault(user => user != null && user.Id.Equals(sentNotification.RowKey));
                 string userType = sentNotification.UserType;
 
-                // For version less than CC v4.1.2 fetch from user data table or graph.
+                // For version less than CC v4.1.2 fetch from user data table or Graph.
                 if (string.IsNullOrEmpty(userType))
                 {
                     var userDataEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, sentNotification.RowKey);
