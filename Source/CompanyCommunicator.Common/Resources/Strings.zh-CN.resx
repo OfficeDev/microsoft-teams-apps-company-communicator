@@ -257,6 +257,6 @@
     <value>成员</value>
   </data>
   <data name="GuestUserNotSupported" xml:space="preserve">
-    <value>Guest User not supported</value>
+    <value>不支持来宾用户</value>
   </data>
 </root>
