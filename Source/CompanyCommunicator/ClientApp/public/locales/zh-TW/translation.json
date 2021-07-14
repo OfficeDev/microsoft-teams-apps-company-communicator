@@ -97,5 +97,6 @@
   "ScheduledSendDescription": "选择日期和时间来安排您的邮件。请安排至少30分钟的未来。",
   "Add": "加",
   "Buttons": "按钮",
-  "NoButtons": "未定义按钮。单击 （+） 以在邮件上包含按钮和操作。"
+  "NoButtons": "未定义按钮。单击 （+） 以在邮件上包含按钮和操作。",
+  "ErrorImageTooBigSize": "请上传最大尺寸的 JPEG（或等效）压缩图像"
 }

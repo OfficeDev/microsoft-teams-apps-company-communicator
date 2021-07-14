@@ -97,5 +97,6 @@
   "ScheduledSendDescription": "Wählen Sie ein Datum und eine Uhrzeit aus, um Ihre Nachricht zu planen. Bitte planen Sie mindestens 30 Minuten in der Zukunft.",
   "Add": "Hinzufügen",
   "Buttons": "Schaltflächen",
-  "NoButtons": "Es wurden keine Schaltflächen definiert. Klicken Sie auf (+), um Schaltflächen und Aktionen in die Nachricht aufzunehmen."
+  "NoButtons": "Es wurden keine Schaltflächen definiert. Klicken Sie auf (+), um Schaltflächen und Aktionen in die Nachricht aufzunehmen.",
+  "ErrorImageTooBigSize": "Bitte laden Sie ein JPEG (oder gleichwertiges) komprimiertes Bild mit einer maximalen Größe von"
 }

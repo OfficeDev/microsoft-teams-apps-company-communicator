@@ -97,5 +97,6 @@
   "ScheduledSendDescription": "Sélectionnez une date et une heure pour planifier votre message. Veuillez planifier au moins 30 minutes à l’avenir.",
   "Add": "Ajouter",
   "Buttons": "Boutons",
-  "NoButtons": "Aucun bouton défini. Cliquez (+) pour inclure des boutons et des actions sur le message."
+  "NoButtons": "Aucun bouton défini. Cliquez (+) pour inclure des boutons et des actions sur le message.",
+  "ErrorImageTooBigSize": "Veuillez télécharger une image compressée JPEG (ou équivalent) avec une taille maximale de"
 }

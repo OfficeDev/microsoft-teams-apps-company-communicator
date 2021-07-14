@@ -98,5 +98,7 @@
   "ScheduledSendDescription": "Select a date and time to schedule your message. Please schedule at least 30 minutes in the future.",
   "Add": "Add",
   "Buttons": "Buttons",
-  "NoButtons": "No buttons defined. Click (+) to include buttons and actions on the message."
+  "NoButtons": "No buttons defined. Click (+) to include buttons and actions on the message.",
+  "ErrorImageTooBigSize": "Please upload a JPEG (or equivalent) compressed image with maximum size of"
+
 }
