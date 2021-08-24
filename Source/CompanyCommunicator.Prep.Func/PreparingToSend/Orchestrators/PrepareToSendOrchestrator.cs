@@ -6,10 +6,12 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Recipients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
     /// <summary>
@@ -61,20 +63,41 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     log.LogInformation("About to sync recipients.");
                 }
 
-                await context.CallSubOrchestratorWithRetryAsync(
+                var recipientsInfo = await context.CallSubOrchestratorWithRetryAsync<RecipientsInfo>(
                     FunctionNames.SyncRecipientsOrchestrator,
                     FunctionSettings.DefaultRetryOptions,
                     notificationDataEntity);
 
-                if (!context.IsReplaying)
-                {
-                    log.LogInformation("About to create conversation for recipients if required.");
-                }
+                recipientsInfo.NotificationId = notificationDataEntity.Id;
 
-                await context.CallSubOrchestratorWithRetryAsync(
-                    FunctionNames.TeamsConversationOrchestrator,
-                    FunctionSettings.DefaultRetryOptions,
-                    notificationDataEntity);
+                // Proactive Installation
+                if (recipientsInfo.IsPendingRecipient)
+                {
+                    if (!context.IsReplaying)
+                    {
+                        log.LogInformation("About to create conversation for recipients if required.");
+                    }
+
+                    // Update notification status.
+                    await context.CallActivityWithRetryAsync(
+                        FunctionNames.UpdateNotificationStatusActivity,
+                        FunctionSettings.DefaultRetryOptions,
+                        (recipientsInfo.NotificationId, NotificationStatus.InstallingApp));
+
+                    // Fan Out/Fan In Conversation orchestrator.
+                    var tasks = new List<Task>();
+                    foreach (var batchKey in recipientsInfo.BatchName)
+                    {
+                        var task = context.CallSubOrchestratorWithRetryAsync(
+                            FunctionNames.TeamsConversationOrchestrator,
+                            FunctionSettings.DefaultRetryOptions,
+                            batchKey);
+                        tasks.Add(task);
+                    }
+
+                    // Fan-out Fan-in.
+                    await Task.WhenAll(tasks);
+                }
 
                 if (!context.IsReplaying)
                 {
@@ -84,7 +107,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 await context.CallSubOrchestratorWithRetryAsync(
                     FunctionNames.SendQueueOrchestrator,
                     FunctionSettings.DefaultRetryOptions,
-                    notificationDataEntity);
+                    recipientsInfo);
 
                 log.LogInformation($"PrepareToSendOrchestrator successfully completed for notification: {notificationDataEntity.Id}!");
             }

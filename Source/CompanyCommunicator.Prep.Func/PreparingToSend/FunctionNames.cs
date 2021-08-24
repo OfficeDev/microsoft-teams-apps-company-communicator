@@ -36,6 +36,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public const string SendQueueOrchestrator = nameof(SendQueueOrchestrator);
 
         /// <summary>
+        /// Send queue orchestrator function.
+        /// </summary>
+        public const string SendQueueSubOrchestrator = nameof(SendQueueSubOrchestrator);
+
+
+        /// <summary>
         /// Process and store message activity function.
         /// </summary>
         public const string StoreMessageActivity = nameof(StoreMessageActivity);

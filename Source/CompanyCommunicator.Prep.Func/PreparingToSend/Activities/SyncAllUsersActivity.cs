@@ -16,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Extensions.Logging;
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Recipients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
@@ -68,7 +69,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.SyncAllUsersActivity)]
-        public async Task RunAsync([ActivityTrigger] NotificationDataEntity notification, ILogger log)
+        public async Task<RecipientsInfo> RunAsync([ActivityTrigger] NotificationDataEntity notification, ILogger log)
         {
             if (notification == null)
             {
@@ -91,7 +92,40 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 var recipients = users.Select(
                     user => user.CreateInitialSentNotificationDataEntity(partitionKey: notification.Id));
                 await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
+
+                // Store in batches and return batch info.
+                return await this.StoreInBatchesAsync(recipients);
             }
+
+            return default;
+        }
+
+        private async Task<RecipientsInfo> StoreInBatchesAsync(IEnumerable<SentNotificationDataEntity> recipients)
+        {
+            var recipientBatches = recipients.ToList().SeparateIntoBatches(1000);
+
+            int batchIndex = 1;
+            var recipientInfo = new RecipientsInfo
+            {
+                BatchName = new List<string>(),
+                TotalRecipientCount = recipients.Count(),
+
+                // Update if there is any recipient which has no conversation id.
+                IsPendingRecipient = recipients.Any(x => string.IsNullOrEmpty(x.ConversationId)),
+            };
+
+            foreach (var recipientBatch in recipientBatches)
+            {
+                // Update PartitionKey to Batch Key
+                recipientBatch.ForEach(s => s.PartitionKey = $"{s.PartitionKey}:{batchIndex}");
+
+                // Store.
+                await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipientBatch);
+                recipientInfo.BatchName.Add(recipientBatch.FirstOrDefault().PartitionKey);
+                batchIndex++;
+            }
+
+            return recipientInfo;
         }
 
         /// <summary>

@@ -41,11 +41,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.SendBatchMessagesActivity)]
         public async Task RunAsync(
-            [ActivityTrigger](NotificationDataEntity notification, List<SentNotificationDataEntity> batch) input)
+            [ActivityTrigger](string notificationId, List<SentNotificationDataEntity> batch) input)
         {
-            if (input.notification == null)
+            if (input.notificationId == null)
             {
-                throw new ArgumentNullException(nameof(input.notification));
+                throw new ArgumentNullException(nameof(input.notificationId));
             }
 
             if (input.batch == null)
@@ -58,7 +58,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 {
                     return new SendQueueMessageContent()
                     {
-                        NotificationId = input.notification.Id,
+                        NotificationId = input.notificationId,
                         RecipientData = this.ConvertToRecipientData(recipient),
                     };
                 });

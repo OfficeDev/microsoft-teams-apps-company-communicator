@@ -11,7 +11,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
 
     /// <summary>
@@ -36,7 +35,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             [OrchestrationTrigger] IDurableOrchestrationContext context,
             ILogger log)
         {
-            var notification = context.GetInput<NotificationDataEntity>();
+            var partitionKey = context.GetInput<string>();
+            var notificationId = partitionKey.Split(':')[0];
 
             if (!context.IsReplaying)
             {
@@ -44,33 +44,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             }
 
             var recipients = await context.CallActivityWithRetryAsync<IEnumerable<SentNotificationDataEntity>>(
-                FunctionNames.GetPendingRecipientsActivity,
-                FunctionSettings.DefaultRetryOptions,
-                notification);
+            FunctionNames.GetPendingRecipientsActivity,
+            FunctionSettings.DefaultRetryOptions,
+            partitionKey);
 
             var count = recipients.Count();
+            if (count < 0)
+            {
+                log.LogInformation("No pending recipients.");
+                return;
+            }
+
             if (!context.IsReplaying)
             {
                 log.LogInformation($"About to create conversation with {count} recipients.");
-            }
-
-            if (count > 0)
-            {
-                // Update notification status.
-                await context.CallActivityWithRetryAsync(
-                    FunctionNames.UpdateNotificationStatusActivity,
-                    FunctionSettings.DefaultRetryOptions,
-                    (notification.Id, NotificationStatus.InstallingApp));
             }
 
             // Create conversation.
             var tasks = new List<Task>();
             foreach (var recipient in recipients)
             {
+                // Update partition key to actual notification Id.
+                recipient.PartitionKey = notificationId;
                 var task = context.CallActivityWithRetryAsync(
                     FunctionNames.TeamsConversationActivity,
                     FunctionSettings.DefaultRetryOptions,
-                    (notification.Id, recipient));
+                    (notificationId, partitionKey, recipient));
                 tasks.Add(task);
             }
 

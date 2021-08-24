@@ -15,6 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Recipients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -73,8 +74,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.SyncTeamMembersActivity)]
-        public async Task RunAsync(
-            [ActivityTrigger](string notificationId, string teamId) input,
+        public async Task<RecipientsInfo> RunAsync(
+            [ActivityTrigger](string notificationId, string teamId, int activityIndex) input,
             ILogger log)
         {
             if (input.notificationId == null)
@@ -94,6 +95,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
             var notificationId = input.notificationId;
             var teamId = input.teamId;
+            var activityIndex = input.activityIndex;
 
             // Read team information.
             var teamInfo = await this.teamDataRepository.GetAsync(TeamDataTableNames.TeamDataPartition, teamId);
@@ -102,7 +104,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 var errorMessage = this.localizer.GetString("FailedToFindTeamInDbFormat", teamId);
                 log.LogWarning($"Notification {notificationId}: {errorMessage}");
                 await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
-                return;
+                return null;
             }
 
             try
@@ -116,18 +118,47 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 // Convert to Recipients.
                 var recipients = await this.GetRecipientsAsync(notificationId, userEntities);
 
-                if (!recipients.IsNullOrEmpty())
-                {
-                    // Store.
-                    await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
-                }
+                // Store.
+                await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
+
+                // Store in batches and return batch info.
+                return await this.StoreInBatchesAsync(recipients, notificationId, activityIndex);
             }
             catch (Exception ex)
             {
                 var errorMessage = this.localizer.GetString("FailedToGetMembersForTeamFormat", teamId, ex.Message);
                 log.LogError(ex, errorMessage);
                 await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
+                return default;
             }
+        }
+
+        private async Task<RecipientsInfo> StoreInBatchesAsync(IEnumerable<SentNotificationDataEntity> recipients, string notificationId, int activityIndex)
+        {
+            var recipientBatches = recipients.ToList().SeparateIntoBatches(1000);
+
+            int batchIndex = 1;
+            var recipientInfo = new RecipientsInfo
+            {
+                BatchName = new List<string>(),
+
+                // Update if there is any recipient which has no conversation id.
+                IsPendingRecipient = recipients.Any(x => string.IsNullOrEmpty(x.ConversationId)),
+            };
+
+            foreach (var recipientBatch in recipientBatches)
+            {
+                // Update PartitionKey to Batch Key
+                recipientBatch.ForEach(s => s.PartitionKey = $"{s.PartitionKey}:{activityIndex}:{batchIndex}");
+                recipientInfo.TotalRecipientCount += recipientBatch.Count();
+
+                // Store.
+                await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipientBatch);
+                recipientInfo.BatchName.Add(recipientBatch.FirstOrDefault().PartitionKey);
+                batchIndex++;
+            }
+
+            return recipientInfo;
         }
 
         /// <summary>
@@ -151,7 +182,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     return;
                 }
 
-                // This is to set the type of user(exisiting only, new ones will be skipped) to identify later if it is member or guest.
+                // This is to set the type of user(existing only, new ones will be skipped) to identify later if it is member or guest.
                 await this.userTypeService.UpdateUserTypeForExistingUserAsync(userEntity, user.UserType);
                 user.ConversationId ??= userEntity?.ConversationId;
                 recipients.Add(user.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
