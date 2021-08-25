@@ -133,6 +133,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                         user.Id,
                         user.DisplayName,
                         user.UserPrincipalName,
+                        user.UserType,
                     })
                     .WithMaxRetry(GraphConstants.MaxRetry)
                     .GetAsync();
@@ -255,7 +256,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 }
 
                 var filterUserIds = this.GetUserIdFilter(userIds);
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://graph.microsoft.com/v1.0/users?$filter={filterUserIds}&$select=id,displayName,userPrincipalName");
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://graph.microsoft.com/v1.0/users?$filter={filterUserIds}&$select=id,displayName,userPrincipalName,userType");
                 batchRequestContent.AddBatchRequestStep(new BatchRequestStep(requestId.ToString(), httpRequestMessage));
 
                 if (batchRequestContent.BatchRequestSteps.Count() % maxNoBatchItems == 0)

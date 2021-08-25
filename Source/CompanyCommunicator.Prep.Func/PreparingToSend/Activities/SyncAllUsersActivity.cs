@@ -13,6 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -20,6 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Extensions;
 
     /// <summary>
@@ -31,6 +33,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private readonly ISentNotificationDataRepository sentNotificationDataRepository;
         private readonly IUsersService usersService;
         private readonly INotificationDataRepository notificationDataRepository;
+        private readonly IUserTypeService userTypeService;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -40,18 +43,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         /// <param name="usersService">Users service.</param>
         /// <param name="notificationDataRepository">Notification data entity repository.</param>
+        /// <param name="userTypeService">User type service.</param>
         /// <param name="localizer">Localization service.</param>
         public SyncAllUsersActivity(
             IUserDataRepository userDataRepository,
             ISentNotificationDataRepository sentNotificationDataRepository,
             IUsersService usersService,
             INotificationDataRepository notificationDataRepository,
+            IUserTypeService userTypeService,
             IStringLocalizer<Strings> localizer)
         {
             this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
+            this.userTypeService = userTypeService ?? throw new ArgumentNullException(nameof(userTypeService));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
@@ -59,9 +65,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// Syncs all users to Sent notification table.
         /// </summary>
         /// <param name="notification">Notification.</param>
+        /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.SyncAllUsersActivity)]
-        public async Task RunAsync([ActivityTrigger] NotificationDataEntity notification)
+        public async Task RunAsync([ActivityTrigger] NotificationDataEntity notification, ILogger log)
         {
             if (notification == null)
             {
@@ -74,10 +81,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             // Get users.
             var users = await this.userDataRepository.GetAllAsync();
 
-            // Store in sent notification table.
-            var recipients = users.Select(
-                user => user.CreateInitialSentNotificationDataEntity(partitionKey: notification.Id));
-            await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
+            // This is to set UserType.
+            await this.userTypeService.UpdateUserTypeForExistingUserListAsync(users);
+            users = await this.userDataRepository.GetAllAsync();
+
+            if (!users.IsNullOrEmpty())
+            {
+                // Store in sent notification table.
+                var recipients = users.Select(
+                    user => user.CreateInitialSentNotificationDataEntity(partitionKey: notification.Id));
+                await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
+            }
         }
 
         /// <summary>
@@ -152,7 +166,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             }
 
             // skip Guest users.
-            if (string.Equals(user.UserType, "Guest", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(user.GetUserType(), UserType.Guest, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
@@ -179,6 +193,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     PartitionKey = UserDataTableNames.UserDataPartition,
                     RowKey = user.Id,
                     AadId = user.Id,
+
+                    // At times userType value from Graph response is null, to avoid null value
+                    // using fallback logic to derive the userType from UserPrincipalName.
+                    UserType = user.GetUserType(),
                 });
         }
     }
