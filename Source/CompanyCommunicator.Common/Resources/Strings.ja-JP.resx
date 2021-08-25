@@ -247,4 +247,16 @@
   <data name="Throttled" xml:space="preserve">
     <value>調整済み</value>
   </data>
+  <data name="ColumnName_UserType" xml:space="preserve">
+    <value>ユーザーの種類</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>ゲスト</value>
+  </data>
+  <data name="Member" xml:space="preserve">
+    <value>メンバー</value>
+  </data>
+  <data name="GuestUserNotSupported" xml:space="preserve">
+    <value>ゲスト ユーザーはサポートされていません</value>
+  </data>
 </root>

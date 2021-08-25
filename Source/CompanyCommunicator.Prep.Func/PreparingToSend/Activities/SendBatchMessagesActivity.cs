@@ -85,6 +85,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                         ConversationId = recipient.ConversationId,
                         ServiceUrl = recipient.ServiceUrl,
                         TenantId = recipient.TenantId,
+                        UserType = recipient.UserType,
                     },
                 };
             }

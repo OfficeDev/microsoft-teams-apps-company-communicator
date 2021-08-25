@@ -247,4 +247,16 @@
   <data name="Throttled" xml:space="preserve">
     <value>Limitado</value>
   </data>
+  <data name="ColumnName_UserType" xml:space="preserve">
+    <value>Tipo de Usuário</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>Convidado</value>
+  </data>
+  <data name="Member" xml:space="preserve">
+    <value>Membro</value>
+  </data>
+  <data name="GuestUserNotSupported" xml:space="preserve">
+    <value>Não há suporte para o Usuário Convidado</value>
+  </data>
 </root>

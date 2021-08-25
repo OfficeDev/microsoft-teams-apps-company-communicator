@@ -7,9 +7,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using FluentAssertions;
+    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -57,8 +57,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 .Returns(Task.CompletedTask);
 
             durableOrchestrationContextMock
-                .Setup(x => x.CallActivityWithRetryAsync<IEnumerable<SentNotificationDataEntity>>(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<NotificationDataEntity>()))
-                .ReturnsAsync(sentNotificationDataEntitiesList);
+                .Setup(x => x.CallActivityWithRetryAsync<(IEnumerable<SentNotificationDataEntity>, TableContinuationToken)>(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<NotificationDataEntity>()))
+                .ReturnsAsync((sentNotificationDataEntitiesList, new TableContinuationToken()));
 
             // Act
             Func<Task> task = async () => await SendQueueOrchestrator.RunOrchestrator(durableOrchestrationContextMock.Object, mockLogger.Object);
@@ -66,7 +66,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             // Assert
             await task.Should().NotThrowAsync<Exception>();
             durableOrchestrationContextMock.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.UpdateNotificationStatusActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Once());
-            durableOrchestrationContextMock.Verify(x => x.CallActivityWithRetryAsync<IEnumerable<SentNotificationDataEntity>>(It.Is<string>(x => x.Equals(FunctionNames.GetRecipientsActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Once());
+            durableOrchestrationContextMock.Verify(x => x.CallActivityWithRetryAsync<(IEnumerable<SentNotificationDataEntity>, TableContinuationToken)>(It.Is<string>(x => x.Equals(FunctionNames.GetRecipientsActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Once());
+            durableOrchestrationContextMock.Verify(x => x.CallActivityWithRetryAsync<(IEnumerable<SentNotificationDataEntity>, TableContinuationToken)>(It.Is<string>(x => x.Equals(FunctionNames.GetRecipientsByTokenActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Once());
             durableOrchestrationContextMock.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.DataAggregationTriggerActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Once());
             durableOrchestrationContextMock.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.SendBatchMessagesActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.AtLeast(1));
         }
