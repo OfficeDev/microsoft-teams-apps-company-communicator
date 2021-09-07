@@ -19,6 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Recipients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Moq;
@@ -35,6 +36,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         private readonly Mock<ISentNotificationDataRepository> sentNotificationDataRepository = new Mock<ISentNotificationDataRepository>();
         private readonly Mock<INotificationDataRepository> notificationDataRepository = new Mock<INotificationDataRepository>();
         private readonly Mock<IUserTypeService> userTypeService = new Mock<IUserTypeService>();
+        private readonly Mock<IRecipientsService> recipientsService = new Mock<IRecipientsService>();
         private readonly Mock<ILogger> logger = new Mock<ILogger>();
 
         /// <summary>
@@ -44,13 +46,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         public void SyncAllUsersActivityConstructorTest()
         {
             // Arrange
-            Action action1 = () => new SyncAllUsersActivity(null /*userDataRepository*/, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, this.userTypeService.Object, this.localizer.Object);
-            Action action2 = () => new SyncAllUsersActivity(this.userDataRepository.Object, null /*sentNotificationDataRepository*/, this.userService.Object, this.notificationDataRepository.Object, this.userTypeService.Object, this.localizer.Object);
-            Action action3 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, null /*userService*/, this.notificationDataRepository.Object, this.userTypeService.Object, this.localizer.Object);
-            Action action4 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, null /*notificationDataRepository*/, this.userTypeService.Object, this.localizer.Object);
-            Action action5 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, null /*userTypeService*/, this.localizer.Object);
-            Action action6 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, this.userTypeService.Object, null /*localizer*/);
-            Action action7 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, this.userTypeService.Object, this.localizer.Object);
+            Action action1 = () => new SyncAllUsersActivity(null /*userDataRepository*/, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, this.userTypeService.Object, this.recipientsService.Object, this.localizer.Object);
+            Action action2 = () => new SyncAllUsersActivity(this.userDataRepository.Object, null /*sentNotificationDataRepository*/, this.userService.Object, this.notificationDataRepository.Object, this.userTypeService.Object, this.recipientsService.Object, this.localizer.Object);
+            Action action3 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, null /*userService*/, this.notificationDataRepository.Object, this.userTypeService.Object, this.recipientsService.Object, this.localizer.Object);
+            Action action4 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, null /*notificationDataRepository*/, this.userTypeService.Object, this.recipientsService.Object, this.localizer.Object);
+            Action action5 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, null /*userTypeService*/, this.recipientsService.Object, this.localizer.Object);
+            Action action6 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, this.userTypeService.Object, null /*recipientsService*/, this.localizer.Object);
+            Action action7 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, this.userTypeService.Object, this.recipientsService.Object, null /*localizer*/);
+            Action action8 = () => new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, this.userTypeService.Object, this.recipientsService.Object, this.localizer.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("userDataRepository is null.");
@@ -58,12 +61,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             action3.Should().Throw<ArgumentNullException>("userService is null.");
             action4.Should().Throw<ArgumentNullException>("notificationDataRepository is null.");
             action5.Should().Throw<ArgumentNullException>("userTypeService is null.");
-            action6.Should().Throw<ArgumentNullException>("localizer is null.");
-            action7.Should().NotThrow();
+            action6.Should().Throw<ArgumentNullException>("recipientsService is null.");
+            action7.Should().Throw<ArgumentNullException>("localizer is null.");
+            action8.Should().NotThrow();
         }
 
         /// <summary>
-        /// Test case to verify all member type users gets stored in sentNotification table.
+        /// Test case to verify all member type users gets stored in sentNotification table and also, get saved as partitions.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
@@ -115,6 +119,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             await task.Should().NotThrowAsync();
             this.userDataRepository.Verify(x => x.InsertOrMergeAsync(It.Is<UserDataEntity>(x => x.RowKey == tuple.Item1.FirstOrDefault().Id)), Times.AtLeastOnce);
             this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(l => l.Count() == 2)), Times.Once);
+            this.recipientsService.Verify(x => x.BatchRecipients(It.IsAny<IEnumerable<SentNotificationDataEntity>>()), Times.Once);
         }
 
         /// <summary>
@@ -217,6 +222,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             // Assert
             await task.Should().NotThrowAsync();
             this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(l => l.Count() == 2)), Times.Once);
+            this.recipientsService.Verify(x => x.BatchRecipients(It.IsAny<IEnumerable<SentNotificationDataEntity>>()), Times.Once);
         }
 
         /// <summary>
@@ -264,6 +270,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             // Assert
             this.userDataRepository.Verify(x => x.InsertOrMergeAsync(It.IsAny<UserDataEntity>()), Times.Never);
             this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()), Times.Never);
+            this.recipientsService.Verify(x => x.BatchRecipients(It.IsAny<IEnumerable<SentNotificationDataEntity>>()), Times.Never);
         }
 
         /// <summary>
@@ -433,7 +440,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// </summary>
         private SyncAllUsersActivity GetSyncAllUsersActivity()
         {
-            return new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, this.userTypeService.Object, this.localizer.Object);
+            return new SyncAllUsersActivity(this.userDataRepository.Object, this.sentNotificationDataRepository.Object, this.userService.Object, this.notificationDataRepository.Object, this.userTypeService.Object, this.recipientsService.Object, this.localizer.Object);
         }
     }
 }

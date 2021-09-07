@@ -16,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Recipients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Moq;
     using Xunit;
@@ -30,6 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         private readonly Mock<ISentNotificationDataRepository> sentNotificationDataRepository = new Mock<ISentNotificationDataRepository>();
         private readonly Mock<INotificationDataRepository> notificationDataRepository = new Mock<INotificationDataRepository>();
         private readonly Mock<ITeamDataRepository> teamDataRepository = new Mock<ITeamDataRepository>();
+        private readonly Mock<IRecipientsService> recipientsService = new Mock<IRecipientsService>();
 
         /// <summary>
         /// Constructor test.
@@ -38,18 +40,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         public void SyncTeamsActivityConstructorTest()
         {
             // Arrange
-            Action action1 = () => new SyncTeamsActivity(null /*teamDataRepository*/, this.sentNotificationDataRepository.Object, this.localier.Object, this.notificationDataRepository.Object);
-            Action action2 = () => new SyncTeamsActivity(this.teamDataRepository.Object, null /*sentNotificationDataRepository*/, this.localier.Object, this.notificationDataRepository.Object);
-            Action action3 = () => new SyncTeamsActivity(this.teamDataRepository.Object, this.sentNotificationDataRepository.Object, null /*localier*/, this.notificationDataRepository.Object);
-            Action action4 = () => new SyncTeamsActivity(this.teamDataRepository.Object, this.sentNotificationDataRepository.Object, this.localier.Object, null /*notificationDataRepository*/);
-            Action action5 = () => new SyncTeamsActivity(this.teamDataRepository.Object, this.sentNotificationDataRepository.Object, this.localier.Object, this.notificationDataRepository.Object);
+            Action action1 = () => new SyncTeamsActivity(null /*teamDataRepository*/, this.sentNotificationDataRepository.Object, this.localier.Object, this.notificationDataRepository.Object, this.recipientsService.Object);
+            Action action2 = () => new SyncTeamsActivity(this.teamDataRepository.Object, null /*sentNotificationDataRepository*/, this.localier.Object, this.notificationDataRepository.Object, this.recipientsService.Object);
+            Action action3 = () => new SyncTeamsActivity(this.teamDataRepository.Object, this.sentNotificationDataRepository.Object, null /*localizer*/, this.notificationDataRepository.Object, this.recipientsService.Object);
+            Action action4 = () => new SyncTeamsActivity(this.teamDataRepository.Object, this.sentNotificationDataRepository.Object, this.localier.Object, null /*notificationDataRepository*/, this.recipientsService.Object);
+            Action action5 = () => new SyncTeamsActivity(this.teamDataRepository.Object, this.sentNotificationDataRepository.Object, this.localier.Object, this.notificationDataRepository.Object, this.recipientsService.Object);
+            Action action6 = () => new SyncTeamsActivity(this.teamDataRepository.Object, this.sentNotificationDataRepository.Object, this.localier.Object, this.notificationDataRepository.Object, null /*recipientsService*/);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("teamDataRepository is null.");
             action2.Should().Throw<ArgumentNullException>("sentNotificationDataRepository is null.");
-            action3.Should().Throw<ArgumentNullException>("localier is null.");
+            action3.Should().Throw<ArgumentNullException>("localizer is null.");
             action4.Should().Throw<ArgumentNullException>("notificationDataRepository is null.");
             action5.Should().NotThrow();
+            action4.Should().Throw<ArgumentNullException>("recipientsService is null.");
         }
 
         /// <summary>
@@ -86,13 +90,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await activityContext.RunAsync(notification, this.log.Object);
+            RecipientsInfo recipientsInfo = default;
+            Func<Task> task = async () =>
+            {
+                recipientsInfo = await activityContext.RunAsync(notification, this.log.Object);
+            };
 
             // Assert
             await task.Should().NotThrowAsync();
-            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(
-                x => x.Count() == 2)));
+            this.sentNotificationDataRepository.Verify(
+                x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(
+                x => x.Count() == 2)), Times.Once);
             this.notificationDataRepository.Verify(x => x.SaveWarningInNotificationDataEntityAsync(It.Is<string>(x => x.Equals(notification.Id)), It.IsAny<string>()), Times.Never());
+            this.recipientsService.Verify(x => x.BatchRecipients(It.IsAny<IEnumerable<SentNotificationDataEntity>>()), Times.Once);
         }
 
         /// <summary>
@@ -132,6 +142,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             // Assert
             await task.Should().NotThrowAsync();
             this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(x => x.Count() == 1)));
+            this.recipientsService.Verify(x => x.BatchRecipients(It.IsAny<IEnumerable<SentNotificationDataEntity>>()), Times.Once);
 
             // Warn message should be logged once for "teamId2".
             this.notificationDataRepository.Verify(x => x.SaveWarningInNotificationDataEntityAsync(It.Is<string>(x => x.Equals(notification.Id)), It.IsAny<string>()), Times.Once);
@@ -169,7 +180,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// </summary>
         private SyncTeamsActivity GetSyncTamActivity()
         {
-            return new SyncTeamsActivity(this.teamDataRepository.Object, this.sentNotificationDataRepository.Object, this.localier.Object, this.notificationDataRepository.Object);
+            return new SyncTeamsActivity(this.teamDataRepository.Object, this.sentNotificationDataRepository.Object, this.localier.Object, this.notificationDataRepository.Object, this.recipientsService.Object);
         }
     }
 }

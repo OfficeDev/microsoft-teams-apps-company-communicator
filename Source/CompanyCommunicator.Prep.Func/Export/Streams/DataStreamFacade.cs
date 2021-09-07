@@ -85,8 +85,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                         // Group the recipients as per the Graph batch api.
                         var groupRecipientsByAadId = recipients?
                            .Select(notitification => notitification.RowKey)
-                           .ToList()
-                           .AsGroups();
+                           .AsBatches(Common.Constants.MaximumGraphAPIBatchSize);
 
                         if (!groupRecipientsByAadId.IsNullOrEmpty())
                         {

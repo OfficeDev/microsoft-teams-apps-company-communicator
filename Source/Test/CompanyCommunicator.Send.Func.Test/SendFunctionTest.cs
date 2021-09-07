@@ -137,7 +137,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         /// </summary>
         /// <returns><see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
-        public async Task SendFunc_NullUserType_ShouldThrowArgumentNullException()
+        public async Task SendFunc_NullUserType_ShouldNotThrowException()
         {
             // Arrange
             var sendFunctionInstance = this.GetSendFunction();
@@ -148,7 +148,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
             Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, this.dateTime, string.Empty, this.logger.Object, new ExecutionContext());
 
             // Assert
-            await task.Should().ThrowAsync<ArgumentNullException>();
+            await task.Should().NotThrowAsync();
         }
 
         /// <summary>

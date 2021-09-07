@@ -13,6 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Recipients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Moq;
     using Xunit;
@@ -38,6 +39,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 Id = "notificationId",
                 AllUsers = true,
             };
+            var recipientsInfo = new RecipientsInfo(notificationDataEntity.Id)
+            {
+                HasRecipientsPendingInstallation = true,
+            };
+            recipientsInfo.BatchKeys.Add("batchKey");
 
             this.mockContext
                 .Setup(x => x.GetInput<NotificationDataEntity>())
@@ -46,16 +52,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 .Setup(x => x.CallActivityWithRetryAsync(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<object>()))
                 .Returns(Task.CompletedTask);
             this.mockContext
-                .Setup(x => x.CallActivityWithRetryAsync(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<NotificationDataEntity>()))
-                .Returns(Task.CompletedTask);
+                .Setup(x => x.CallActivityWithRetryAsync<RecipientsInfo>(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<NotificationDataEntity>()))
+                .ReturnsAsync(recipientsInfo);
 
             // Act
             Func<Task> task = async () => await SyncRecipientsOrchestrator.RunOrchestrator(this.mockContext.Object, this.mockLogger.Object);
 
             // Assert
             await task.Should().NotThrowAsync<ArgumentException>();
-            this.mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.SyncAllUsersActivity)), It.IsAny<RetryOptions>(), It.Is<NotificationDataEntity>(x => x.AllUsers))); // Allusers flag is true
-            this.mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.UpdateNotificationStatusActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()));
+            this.mockContext.Verify(x => x.CallActivityWithRetryAsync<RecipientsInfo>(It.Is<string>(x => x.Equals(FunctionNames.SyncAllUsersActivity)), It.IsAny<RetryOptions>(), It.Is<NotificationDataEntity>(x => x.AllUsers)), Times.Once); // All Users flag is true
+            this.mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.UpdateNotificationStatusActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Once);
         }
 
         /// <summary>
@@ -72,6 +78,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 AllUsers = false,
                 Rosters = new List<string>() { "roaster", "roaster1" },
             };
+            var recipientsInfo = new RecipientsInfo(notificationDataEntity.Id)
+            {
+                HasRecipientsPendingInstallation = false,
+            };
+            recipientsInfo.BatchKeys.Add("batchKey");
 
             this.mockContext
                 .Setup(x => x.GetInput<NotificationDataEntity>())
@@ -79,6 +90,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             this.mockContext
                 .Setup(x => x.CallActivityWithRetryAsync(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<object>()))
                 .Returns(Task.CompletedTask);
+            this.mockContext
+                .Setup(x => x.CallActivityWithRetryAsync<RecipientsInfo>(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<string>()))
+                .ReturnsAsync(recipientsInfo);
 
             // Act
             Func<Task> task = async () => await SyncRecipientsOrchestrator.RunOrchestrator(this.mockContext.Object, this.mockLogger.Object);
@@ -87,6 +101,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             await task.Should().NotThrowAsync<ArgumentException>();
             this.mockContext
                 .Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.SyncTeamMembersActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Exactly(notificationDataEntity.Rosters.Count()));
+            this.mockContext
+                .Verify(x => x.CallActivityWithRetryAsync<RecipientsInfo>(It.Is<string>(x => x.Equals(FunctionNames.BatchRecipientsActivity)), It.IsAny<RetryOptions>(), It.IsAny<string>()), Times.Once);
+            this.mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.UpdateNotificationStatusActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Once);
         }
 
         /// <summary>
@@ -104,6 +121,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 Rosters = new List<string>(),
                 Groups = new List<string>() { "Group1", "Group2" },
             };
+            var recipientsInfo = new RecipientsInfo(notificationDataEntity.Id)
+            {
+                HasRecipientsPendingInstallation = false,
+            };
+            recipientsInfo.BatchKeys.Add("batchKey");
 
             this.mockContext
                 .Setup(x => x.GetInput<NotificationDataEntity>())
@@ -111,6 +133,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             this.mockContext
                 .Setup(x => x.CallActivityWithRetryAsync(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<object>()))
                 .Returns(Task.CompletedTask);
+            this.mockContext
+                .Setup(x => x.CallActivityWithRetryAsync<RecipientsInfo>(It.IsAny<string>(), It.IsAny<RetryOptions>(), It.IsAny<string>()))
+                .ReturnsAsync(recipientsInfo);
 
             // Act
             Func<Task> task = async () => await SyncRecipientsOrchestrator.RunOrchestrator(this.mockContext.Object, this.mockLogger.Object);
@@ -119,12 +144,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             await task.Should().NotThrowAsync<ArgumentException>();
             this.mockContext
                 .Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.SyncGroupMembersActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Exactly(notificationDataEntity.Groups.Count()));
+            this.mockContext
+               .Verify(x => x.CallActivityWithRetryAsync<RecipientsInfo>(It.Is<string>(x => x.Equals(FunctionNames.BatchRecipientsActivity)), It.IsAny<RetryOptions>(), It.IsAny<string>()), Times.Once);
+            this.mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.UpdateNotificationStatusActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Once);
         }
 
         /// <summary>
         /// Syncs Members of general channel to repository.
         /// </summary>
-        /// <returns><see cref="Task"/> representing the asynchffronous operation.</returns>
+        /// <returns><see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
         public async Task SyncRecipientsOrchestratorGetMembersOfGeneralChannelTest()
         {
@@ -151,7 +179,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             // Assert
             await task.Should().NotThrowAsync<ArgumentException>();
             this.mockContext
-                .Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.SyncTeamsActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Exactly(1));
+                .Verify(x => x.CallActivityWithRetryAsync<RecipientsInfo>(It.Is<string>(x => x.Equals(FunctionNames.SyncTeamsActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Exactly(1));
+            this.mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.UpdateNotificationStatusActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Once);
         }
 
         /// <summary>
@@ -180,6 +209,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 
             // Assert
             await task.Should().ThrowAsync<ArgumentException>($"Invalid audience select for notification id: {notificationDataEntity.Id}");
+            this.mockContext.Verify(x => x.CallActivityWithRetryAsync(It.Is<string>(x => x.Equals(FunctionNames.UpdateNotificationStatusActivity)), It.IsAny<RetryOptions>(), It.IsAny<object>()), Times.Once);
         }
     }
 }
