@@ -40,7 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         }
 
         /// <summary>
-        /// Test for send batch messages activity success scenario for Reciepient type "User data".
+        /// Test for send batch messages activity success scenario for Recipient type "User data".
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
@@ -66,7 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await activity.RunAsync((notification, batch));
+            Func<Task> task = async () => await activity.RunAsync((notification.Id, batch));
 
             // Assert
             await task.Should().NotThrowAsync();
@@ -100,7 +100,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await activity.RunAsync((notification, batch));
+            Func<Task> task = async () => await activity.RunAsync((notification.Id, batch));
 
             // Assert
             await task.Should().NotThrowAsync();
@@ -130,7 +130,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             };
 
             // Act
-            Func<Task> task1 = async () => await activity.RunAsync((notification, null /*batch*/));
+            Func<Task> task1 = async () => await activity.RunAsync((notification.Id, null /*batch*/));
             Func<Task> task2 = async () => await activity.RunAsync((null /*notification*/, batch));
             Func<Task> task3 = async () => await activity.RunAsync((null /*notification*/, null /*batch*/));
 

@@ -75,8 +75,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User
             var users = await this.usersService.GetBatchByUserIds(
                       userDataEntitiesWithNoUserType
                       .Select(user => user.AadId)
-                      .ToList()
-                      .AsGroups());
+                      .AsBatches(Common.Constants.MaximumGraphAPIBatchSize));
 
             if (!users.IsNullOrEmpty())
             {

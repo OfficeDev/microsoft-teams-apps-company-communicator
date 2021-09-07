@@ -11,13 +11,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Utilities;
 
     /// <summary>
     /// Teams conversation orchestrator.
     /// Does following:
-    /// 1. Gets all the recipients for whom we do not have conversation Id.
+    /// 1. Gets the batch recipients for whom we do not have conversation Id.
     /// 2. Creates conversation with each recipient.
     /// </summary>
     public static class TeamsConversationOrchestrator
@@ -36,41 +36,44 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             [OrchestrationTrigger] IDurableOrchestrationContext context,
             ILogger log)
         {
-            var notification = context.GetInput<NotificationDataEntity>();
+            var batchPartitionKey = context.GetInput<string>();
+            var notificationId = PartitionKeyUtility.GetNotificationIdFromBatchPartitionKey(batchPartitionKey);
 
             if (!context.IsReplaying)
             {
-                log.LogInformation($"About to get pending recipients (with no conversation id in database.");
+                log.LogInformation($"About to get pending recipients (with no conversation id in database).");
             }
 
             var recipients = await context.CallActivityWithRetryAsync<IEnumerable<SentNotificationDataEntity>>(
-                FunctionNames.GetPendingRecipientsActivity,
-                FunctionSettings.DefaultRetryOptions,
-                notification);
+            FunctionNames.GetPendingRecipientsActivity,
+            FunctionSettings.DefaultRetryOptions,
+            batchPartitionKey);
 
-            var count = recipients.Count();
-            if (!context.IsReplaying)
+            var count = recipients.ToList().Count;
+            if (count == 0)
             {
-                log.LogInformation($"About to create conversation with {count} recipients.");
+                log.LogInformation("No pending recipients.");
+                return;
             }
 
-            if (count > 0)
+            if (!context.IsReplaying)
             {
-                // Update notification status.
-                await context.CallActivityWithRetryAsync(
-                    FunctionNames.UpdateNotificationStatusActivity,
-                    FunctionSettings.DefaultRetryOptions,
-                    (notification.Id, NotificationStatus.InstallingApp));
+                log.LogInformation($"About to create 1:1 conversations with {count} recipients.");
             }
 
             // Create conversation.
             var tasks = new List<Task>();
             foreach (var recipient in recipients)
             {
+                // Update batch partition key to actual notification Id.
+                // Because batch partition key is used only for batching data.
+                // Actual state and data is stored against the notification id record in SentNotificationData Table.
+                recipient.PartitionKey = notificationId;
+
                 var task = context.CallActivityWithRetryAsync(
                     FunctionNames.TeamsConversationActivity,
                     FunctionSettings.DefaultRetryOptions,
-                    (notification.Id, recipient));
+                    (notificationId, batchPartitionKey, recipient));
                 tasks.Add(task);
             }
 

@@ -71,20 +71,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public async Task RunAsync(
         [ActivityTrigger](string notificationId, string groupId) input, ILogger log)
         {
-            if (input.notificationId == null)
-            {
-                throw new ArgumentNullException(nameof(input.notificationId));
-            }
-
-            if (input.groupId == null)
-            {
-                throw new ArgumentNullException(nameof(input.groupId));
-            }
-
-            if (log == null)
-            {
-                throw new ArgumentNullException(nameof(log));
-            }
+            _ = input.notificationId ?? throw new ArgumentNullException(nameof(input.notificationId));
+            _ = input.groupId ?? throw new ArgumentNullException(nameof(input.groupId));
+            _ = log ?? throw new ArgumentNullException(nameof(log));
 
             var notificationId = input.notificationId;
             var groupId = input.groupId;
@@ -97,11 +86,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 // Convert to Recipients
                 var recipients = await this.GetRecipientsAsync(notificationId, users);
 
-                if (!recipients.IsNullOrEmpty())
-                {
-                    // Store.
-                    await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
-                }
+                // Store.
+                await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
             }
             catch (Exception ex)
             {
@@ -127,7 +113,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             {
                 var userEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, user.Id);
 
-                // This is to set the type of user(exisiting only, new ones will be skipped) to identify later if it is member or guest.
+                // This is to set the type of user(existing only, new ones will be skipped) to identify later if it is member or guest.
                 var userType = user.UserPrincipalName.GetUserType();
                 if (userEntity == null && userType.Equals(UserType.Guest, StringComparison.OrdinalIgnoreCase))
                 {
