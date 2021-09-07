@@ -51,5 +51,38 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
                     }
                 }));
         }
+
+        /// <summary>
+        /// Extension method to separate a list of objects into batches (a list of lists).
+        /// </summary>
+        /// <typeparam name="T">An object type.</typeparam>
+        /// <param name="sourceCollection">the source list.</param>
+        /// <param name="batchSize">the batch size.</param>
+        /// <returns>group list of user id list.</returns>
+        public static IEnumerable<IEnumerable<T>> AsBatches<T>(this IEnumerable<T> sourceCollection, int batchSize)
+        {
+            _ = sourceCollection ?? throw new ArgumentNullException(nameof(sourceCollection));
+            if (batchSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(batchSize));
+            }
+
+            var buffer = new List<T>(batchSize);
+            var sourceList = sourceCollection.ToList();
+            for (int i = 0; i < sourceList.Count; i++)
+            {
+                buffer.Add(sourceList[i]);
+                if (((i + 1) % batchSize) == 0 && buffer.Count > 0)
+                {
+                    yield return buffer;
+                    buffer = new List<T>(batchSize);
+                }
+            }
+
+            if (buffer.Count > 0)
+            {
+                yield return buffer;
+            }
+        }
     }
 }

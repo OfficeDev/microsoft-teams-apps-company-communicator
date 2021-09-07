@@ -82,7 +82,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.TeamsConversationActivity)]
         public async Task CreateConversationAsync(
-            [ActivityTrigger](string notificationId, SentNotificationDataEntity recipient) input,
+            [ActivityTrigger](string notificationId, string batchKey, SentNotificationDataEntity recipient) input,
             ILogger log)
         {
             if (input.notificationId == null)
@@ -93,6 +93,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             if (input.recipient == null)
             {
                 throw new ArgumentNullException(nameof(input.recipient));
+            }
+
+            if (string.IsNullOrEmpty(input.batchKey))
+            {
+                throw new ArgumentNullException(nameof(input.batchKey));
             }
 
             if (log == null)
@@ -108,13 +113,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 return;
             }
 
-            // Skip Guest users.
+            // No-op for null user type.
             if (string.IsNullOrEmpty(recipient.UserType))
             {
-                throw new ArgumentNullException(nameof(recipient.UserType));
+                log.LogInformation("Unknown User Type.");
+                return;
             }
             else if (recipient.UserType.Equals(UserType.Guest, StringComparison.OrdinalIgnoreCase))
             {
+                // Skip guest users.
                 return;
             }
 
@@ -155,6 +162,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             // Update sent notification and user entity.
             await this.sentNotificationDataRepository.InsertOrMergeAsync(recipient);
             await this.UpdateUserEntityAsync(recipient);
+
+            // Update Batch entry.
+            recipient.PartitionKey = input.batchKey;
+            await this.sentNotificationDataRepository.InsertOrMergeAsync(recipient);
         }
 
         private async Task<string> CreateConversationWithTeamsUser(
