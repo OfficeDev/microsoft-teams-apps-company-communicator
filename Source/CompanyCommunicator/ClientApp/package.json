@@ -6,7 +6,7 @@
     "@fluentui/react-northstar": "^0.52.0",
     "@microsoft/teams-js": "^1.4.2",
     "adaptivecards": "^1.2.0",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "color-hash": "^1.0.3",
     "faker": "^4.1.0",
     "font-awesome": "^4.7.0",
