@@ -21,6 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Recipients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Extensions;
 
@@ -34,6 +35,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private readonly IUsersService usersService;
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly IUserTypeService userTypeService;
+        private readonly IRecipientsService recipientsService;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -44,6 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="usersService">Users service.</param>
         /// <param name="notificationDataRepository">Notification data entity repository.</param>
         /// <param name="userTypeService">User type service.</param>
+        /// <param name="recipientsService">The recipients service.</param>
         /// <param name="localizer">Localization service.</param>
         public SyncAllUsersActivity(
             IUserDataRepository userDataRepository,
@@ -51,6 +54,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             IUsersService usersService,
             INotificationDataRepository notificationDataRepository,
             IUserTypeService userTypeService,
+            IRecipientsService recipientsService,
             IStringLocalizer<Strings> localizer)
         {
             this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
@@ -58,6 +62,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.userTypeService = userTypeService ?? throw new ArgumentNullException(nameof(userTypeService));
+            this.recipientsService = recipientsService ?? throw new ArgumentNullException(nameof(recipientsService));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
@@ -68,7 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.SyncAllUsersActivity)]
-        public async Task RunAsync([ActivityTrigger] NotificationDataEntity notification, ILogger log)
+        public async Task<RecipientsInfo> RunAsync([ActivityTrigger] NotificationDataEntity notification, ILogger log)
         {
             if (notification == null)
             {
@@ -85,13 +90,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             await this.userTypeService.UpdateUserTypeForExistingUserListAsync(users);
             users = await this.userDataRepository.GetAllAsync();
 
-            if (!users.IsNullOrEmpty())
+            if (users.IsNullOrEmpty())
             {
-                // Store in sent notification table.
-                var recipients = users.Select(
-                    user => user.CreateInitialSentNotificationDataEntity(partitionKey: notification.Id));
-                await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
+                return new RecipientsInfo(notification.Id);
             }
+
+            // Store in sent notification table.
+            var recipients = users.Select(
+                user => user.CreateInitialSentNotificationDataEntity(partitionKey: notification.Id));
+            await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
+
+            // Store in batches and return batch info.
+            return await this.recipientsService.BatchRecipients(recipients);
         }
 
         /// <summary>

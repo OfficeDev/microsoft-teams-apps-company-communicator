@@ -116,11 +116,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 // Convert to Recipients.
                 var recipients = await this.GetRecipientsAsync(notificationId, userEntities);
 
-                if (!recipients.IsNullOrEmpty())
-                {
-                    // Store.
-                    await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
-                }
+                // Store.
+                await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
             }
             catch (Exception ex)
             {
@@ -151,7 +148,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     return;
                 }
 
-                // This is to set the type of user(exisiting only, new ones will be skipped) to identify later if it is member or guest.
+                // This is to set the type of user(existing only, new ones will be skipped) to identify later if it is member or guest.
                 await this.userTypeService.UpdateUserTypeForExistingUserAsync(userEntity, user.UserType);
                 user.ConversationId ??= userEntity?.ConversationId;
                 recipients.Add(user.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
