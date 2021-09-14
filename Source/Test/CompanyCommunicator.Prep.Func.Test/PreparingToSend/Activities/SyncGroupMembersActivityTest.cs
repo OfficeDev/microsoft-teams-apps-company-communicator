@@ -18,6 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Moq;
     using Xunit;
@@ -33,6 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         private readonly Mock<IUserDataRepository> userDataRepository = new Mock<IUserDataRepository>();
         private readonly Mock<ISentNotificationDataRepository> sentNotificationDataRepository = new Mock<ISentNotificationDataRepository>();
         private readonly Mock<INotificationDataRepository> notificationDataRepository = new Mock<INotificationDataRepository>();
+        private readonly Mock<IUserTypeService> userTypeService = new Mock<IUserTypeService>();
 
         /// <summary>
         /// Constructor tests.
@@ -41,12 +43,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         public void ConstructorArgumentNullException_Test()
         {
             // Arrange
-            Action action1 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, null /*userDataRepository*/, this.localier.Object);
-            Action action2 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, null /*localier*/);
-            Action action3 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, null /*groupMembersService*/, this.userDataRepository.Object, this.localier.Object);
-            Action action4 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, null /*notificationDataRepository*/, this.groupMembersService.Object, this.userDataRepository.Object, this.localier.Object);
-            Action action5 = () => new SyncGroupMembersActivity(null /*sentNotificationDataRepository*/, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, this.localier.Object);
-            Action action6 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, this.localier.Object);
+            Action action1 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, null /*userDataRepository*/, this.userTypeService.Object, this.localier.Object);
+            Action action2 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, this.userTypeService.Object, null /*localier*/);
+            Action action3 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, null /*groupMembersService*/, this.userDataRepository.Object, this.userTypeService.Object, this.localier.Object);
+            Action action4 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, null /*notificationDataRepository*/, this.groupMembersService.Object, this.userDataRepository.Object, this.userTypeService.Object, this.localier.Object);
+            Action action5 = () => new SyncGroupMembersActivity(null /*sentNotificationDataRepository*/, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, this.userTypeService.Object, this.localier.Object);
+            Action action6 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, this.userTypeService.Object, this.localier.Object);
+            Action action7 = () => new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, null /*userTypeService*/, this.localier.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("userDataRepository is null.");
@@ -55,14 +58,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             action4.Should().Throw<ArgumentNullException>("notificationDataRepository is null.");
             action5.Should().Throw<ArgumentNullException>("sentNotificationDataRepository is null.");
             action6.Should().NotThrow();
+            action7.Should().Throw<ArgumentNullException>("userTypeService is null.");
         }
 
         /// <summary>
-        /// Success Test to Syncs group members to repository.
+        /// Test case to verify that new Member users is stored in Sent Notification Table.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
-        public async Task SyncGroupMembersActivitySuccessTest()
+        public async Task SyncGroupMembers_OnlyMemberNewUserType_StoreInSentNotificationTable()
         {
             // Arrange
             var groupId = "Group1";
@@ -70,14 +74,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             var activityContext = this.GetSyncGroupMembersActivity();
             var users = new List<User>()
             {
-                new User() { Id = "userId" },
+                new User() { Id = "userId", UserPrincipalName = "userPrincipalName" },
             };
+            UserDataEntity userDataEntity = null;
+
             this.groupMembersService
                 .Setup(x => x.GetGroupMembersAsync(It.IsAny<string>()))
                 .ReturnsAsync(users);
+
             this.userDataRepository
                 .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.FromResult(default(UserDataEntity)));
+                .ReturnsAsync(userDataEntity);
+            this.userTypeService
+                .Setup(x => x.UpdateUserTypeForExistingUserAsync(It.IsAny<UserDataEntity>(), It.IsAny<string>()));
+
             this.sentNotificationDataRepository
                 .Setup(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()))
                 .Returns(Task.CompletedTask);
@@ -91,11 +101,247 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         }
 
         /// <summary>
-        /// ArgumentNullException Test.
+        /// Test case to verify that new Guest Users never gets saved in Sent Notification Table.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
-        public async Task ArgumentNullExceptionTest()
+        public async Task SyncGroupMembers_OnlyGuestNewUsersType_NeverStoreInSentNotificationTable()
+        {
+            // Arrange
+            var groupId = "Group1";
+            var notificationId = "notificaionId";
+            var activityContext = this.GetSyncGroupMembersActivity();
+            var users = new List<User>()
+            {
+                new User() { Id = "userId", UserPrincipalName = "#ext#" },
+            };
+            UserDataEntity userDataEntity = null;
+
+            this.groupMembersService
+                .Setup(x => x.GetGroupMembersAsync(It.IsAny<string>()))
+                .ReturnsAsync(users);
+
+            this.userDataRepository
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(userDataEntity);
+            this.userTypeService
+                .Setup(x => x.UpdateUserTypeForExistingUserAsync(It.IsAny<UserDataEntity>(), It.IsAny<string>()));
+
+            this.sentNotificationDataRepository
+                .Setup(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            Func<Task> task = async () => await activityContext.RunAsync((notificationId, groupId), this.logger.Object);
+
+            // Assert
+            await task.Should().NotThrowAsync();
+            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(x => x.Count() == 0)), Times.Once);
+        }
+
+        /// <summary>
+        /// Test case to verify that only Member user type is filtered from list of new Member user and Guest user,
+        /// and is saved in Sent Notification Table.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Fact]
+        public async Task SyncGroupMembers_BothUserTypeForNewUser_StoreOnlyMemberUserType()
+        {
+            // Arrange
+            var groupId = "Group1";
+            var notificationId = "notificaionId";
+            var activityContext = this.GetSyncGroupMembersActivity();
+            var users = new List<User>()
+            {
+                new User() { Id = "userId1", UserPrincipalName = "userPrincipalName1" },
+                new User() { Id = "userId2", UserPrincipalName = "#ext#" },
+            };
+            UserDataEntity userDataEntity = null;
+
+            this.groupMembersService
+                .Setup(x => x.GetGroupMembersAsync(It.IsAny<string>()))
+                .ReturnsAsync(users);
+
+            this.userDataRepository
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(userDataEntity);
+            this.userTypeService
+                .Setup(x => x.UpdateUserTypeForExistingUserAsync(It.IsAny<UserDataEntity>(), It.IsAny<string>()));
+
+            this.sentNotificationDataRepository
+                .Setup(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            Func<Task> task = async () => await activityContext.RunAsync((notificationId, groupId), this.logger.Object);
+
+            // Assert
+            await task.Should().NotThrowAsync();
+            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(l => l.Count() == 1)), Times.Once);
+        }
+
+        /// <summary>
+        /// Test case to verify that existing Member users is stored in Sent Notification Table.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Fact]
+        public async Task SyncGroupMembers_OnlyMemberExistingUserType_StoreInSentNotificationTable()
+        {
+            // Arrange
+            var groupId = "Group1";
+            var notificationId = "notificaionId";
+            var activityContext = this.GetSyncGroupMembersActivity();
+            var users = new List<User>()
+            {
+                new User() { Id = "userId", UserPrincipalName = "userPrincipalName" },
+            };
+            var userDataEntity = new UserDataEntity()
+            {
+                UserId = "userId",
+            };
+
+            this.groupMembersService
+                .Setup(x => x.GetGroupMembersAsync(It.IsAny<string>()))
+                .ReturnsAsync(users);
+
+            this.userDataRepository
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(userDataEntity);
+            this.userTypeService
+                .Setup(x => x.UpdateUserTypeForExistingUserAsync(It.IsAny<UserDataEntity>(), It.IsAny<string>()));
+
+            this.sentNotificationDataRepository
+                .Setup(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            Func<Task> task = async () => await activityContext.RunAsync((notificationId, groupId), this.logger.Object);
+
+            // Assert
+            await task.Should().NotThrowAsync();
+            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(x => x.FirstOrDefault().PartitionKey == notificationId)));
+        }
+
+        /// <summary>
+        /// Test case to verify that existing Guest Users gets saved in Sent Notification Table.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Fact]
+        public async Task SyncGroupMembers_OnlyGuestExistingUsersType_ShouldStoreInSentNotificationTable()
+        {
+            // Arrange
+            var groupId = "Group1";
+            var notificationId = "notificaionId";
+            var activityContext = this.GetSyncGroupMembersActivity();
+            var users = new List<User>()
+            {
+                new User() { Id = "userId", UserPrincipalName = "#ext#" },
+            };
+            var userDataEntity = new UserDataEntity()
+            {
+                UserId = "userId",
+            };
+
+            this.groupMembersService
+                .Setup(x => x.GetGroupMembersAsync(It.IsAny<string>()))
+                .ReturnsAsync(users);
+
+            this.userDataRepository
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(userDataEntity);
+            this.userTypeService
+                .Setup(x => x.UpdateUserTypeForExistingUserAsync(It.IsAny<UserDataEntity>(), It.IsAny<string>()));
+
+            this.sentNotificationDataRepository
+                .Setup(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            Func<Task> task = async () => await activityContext.RunAsync((notificationId, groupId), this.logger.Object);
+
+            // Assert
+            await task.Should().NotThrowAsync();
+            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()), Times.Once);
+        }
+
+        /// <summary>
+        /// Test case to verify that both existing user is saved in Sent Notification Table.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Fact]
+        public async Task SyncGroupMembers_BothUserTypeForExistingUser_ShouldStoreInSentNotificationTable()
+        {
+            // Arrange
+            var groupId = "Group1";
+            var notificationId = "notificaionId";
+            var activityContext = this.GetSyncGroupMembersActivity();
+            var users = new List<User>()
+            {
+                new User() { Id = "userId1", UserPrincipalName = "userPrincipalName1" },
+                new User() { Id = "userId2", UserPrincipalName = "#ext#" },
+            };
+            var userDataEntity = new UserDataEntity()
+            {
+                UserId = "userId1",
+            };
+
+            this.groupMembersService
+                .Setup(x => x.GetGroupMembersAsync(It.IsAny<string>()))
+                .ReturnsAsync(users);
+
+            this.userDataRepository
+                .Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(userDataEntity);
+            this.userTypeService
+                .Setup(x => x.UpdateUserTypeForExistingUserAsync(It.IsAny<UserDataEntity>(), It.IsAny<string>()));
+
+            this.sentNotificationDataRepository
+                .Setup(x => x.BatchInsertOrMergeAsync(It.IsAny<IEnumerable<SentNotificationDataEntity>>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            Func<Task> task = async () => await activityContext.RunAsync((notificationId, groupId), this.logger.Object);
+
+            // Assert
+            await task.Should().NotThrowAsync();
+            this.sentNotificationDataRepository.Verify(x => x.BatchInsertOrMergeAsync(It.Is<IEnumerable<SentNotificationDataEntity>>(l => l.Count() == 2)), Times.Once);
+        }
+
+        /// <summary>
+        /// Test case to check if exception is caught and logged in case graph returns null reponse.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Fact]
+        public async Task SyncGroupMembers_NullResponseFromGraph_CatchExceptionAndLog()
+        {
+            // Arrange
+            var groupId = "Group1";
+            var notificationId = "notificaionId";
+            var activityContext = this.GetSyncGroupMembersActivity();
+            List<User> users = null;
+            var userDataEntity = new UserDataEntity()
+            {
+                UserId = "userId",
+            };
+
+            this.groupMembersService
+                .Setup(x => x.GetGroupMembersAsync(It.IsAny<string>()))
+                .ReturnsAsync(users);
+
+            // Act
+            Func<Task> task = async () => await activityContext.RunAsync((notificationId, groupId), this.logger.Object);
+
+            // Assert
+            await task.Should().NotThrowAsync();
+            this.notificationDataRepository.Verify(x => x.SaveWarningInNotificationDataEntityAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        /// <summary>
+        /// Test case to check ArgumentNullException is thrown when parameter is null.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Fact]
+        public async Task SyncGroupMembers_NullParameter_ShouldThrowException()
         {
             // Arrange
             var groupId = "GroupId";
@@ -118,7 +364,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// </summary>
         private SyncGroupMembersActivity GetSyncGroupMembersActivity()
         {
-            return new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, this.localier.Object);
+            return new SyncGroupMembersActivity(this.sentNotificationDataRepository.Object, this.notificationDataRepository.Object, this.groupMembersService.Object, this.userDataRepository.Object, this.userTypeService.Object, this.localier.Object);
         }
     }
 }

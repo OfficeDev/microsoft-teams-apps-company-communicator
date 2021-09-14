@@ -17,6 +17,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Recipients;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Utilities;
 
     /// <summary>
     /// Sync teams data to Sent notification table.
@@ -27,6 +29,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private readonly ISentNotificationDataRepository sentNotificationDataRepository;
         private readonly IStringLocalizer<Strings> localizer;
         private readonly INotificationDataRepository notificationDataRepository;
+        private readonly IRecipientsService recipientsService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SyncTeamsActivity"/> class.
@@ -35,16 +38,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         /// <param name="localizer">Localization service.</param>
         /// <param name="notificationDataRepository">Notification data entity repository.</param>
+        /// <param name="recipientsService">Recipients service.</param>
         public SyncTeamsActivity(
             ITeamDataRepository teamDataRepository,
             ISentNotificationDataRepository sentNotificationDataRepository,
             IStringLocalizer<Strings> localizer,
-            INotificationDataRepository notificationDataRepository)
+            INotificationDataRepository notificationDataRepository,
+            IRecipientsService recipientsService)
         {
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
+            this.recipientsService = recipientsService ?? throw new ArgumentNullException(nameof(recipientsService));
         }
 
         /// <summary>
@@ -54,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="log">Logging service.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.SyncTeamsActivity)]
-        public async Task RunAsync([ActivityTrigger] NotificationDataEntity notification, ILogger log)
+        public async Task<RecipientsInfo> RunAsync([ActivityTrigger] NotificationDataEntity notification, ILogger log)
         {
             if (notification == null)
             {
@@ -74,6 +80,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
 
             // Store.
             await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
+
+            // Store in batches and return batch info.
+            return await this.recipientsService.BatchRecipients(recipients);
         }
 
         /// <summary>
