@@ -178,6 +178,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User Type.
+        /// </summary>
+        public static string ColumnName_UserType {
+            get {
+                return ResourceManager.GetString("ColumnName_UserType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} (copy).
         /// </summary>
         public static string DuplicateText {
@@ -363,6 +372,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         public static string FileUploadErrorText {
             get {
                 return ResourceManager.GetString("FileUploadErrorText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Guest.
+        /// </summary>
+        public static string Guest {
+            get {
+                return ResourceManager.GetString("Guest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Guest User not supported.
+        /// </summary>
+        public static string GuestUserNotSupported {
+            get {
+                return ResourceManager.GetString("GuestUserNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Member.
+        /// </summary>
+        public static string Member {
+            get {
+                return ResourceManager.GetString("Member", resourceCulture);
             }
         }
         

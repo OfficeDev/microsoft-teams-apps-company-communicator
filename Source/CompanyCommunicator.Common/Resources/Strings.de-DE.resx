@@ -160,7 +160,7 @@
     <value>{0} (kopieren)</value>
   </data>
   <data name="ExportFailureText" xml:space="preserve">
-    <value>Da hat etwas nicht geklappt. Versuchen Sie noch Mal, die Ergebnisse zu exportieren.</value>
+    <value>Etwas ist schief gegangen. Versuchen Sie noch Mal, die Ergebnisse zu exportieren.</value>
   </data>
   <data name="Failed" xml:space="preserve">
     <value>Fehlgeschlagen</value>
@@ -221,7 +221,7 @@
     <value>Ihre Datei kann jetzt herunter geladen werden. Eine Kopie ist auch auf OneDrive verfügbar.</value>
   </data>
   <data name="FileUploadErrorText" xml:space="preserve">
-    <value>Da hat etwas nicht geklappt. Versuchen Sie noch Mal, die Ergebnisse zu exportieren.</value>
+    <value>Etwas ist schief gegangen. Versuchen Sie noch Mal, die Ergebnisse zu exportieren.</value>
   </data>
   <data name="NumberOfGroupsExceededLimitWarningFormat" xml:space="preserve">
     <value>Die Benachrichtigung hat {0} Gruppen als Ihre Empfänger. Sie sollte {1} Gruppen nicht über schreiten.</value>
@@ -246,5 +246,17 @@
   </data>
   <data name="Throttled" xml:space="preserve">
     <value>Gedrosselt</value>
+  </data>
+  <data name="ColumnName_UserType" xml:space="preserve">
+    <value>Benutzertyp</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>Gast</value>
+  </data>
+  <data name="Member" xml:space="preserve">
+    <value>Mitglied</value>
+  </data>
+  <data name="GuestUserNotSupported" xml:space="preserve">
+    <value>Gastbenutzer nicht unterstützt</value>
   </data>
 </root>

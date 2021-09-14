@@ -16,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
 
@@ -86,6 +87,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                             ServiceUrl = serviceUrl,
                             AadId = member.AadObjectId,
                             TenantId = tenantId,
+                            UserType = member.UserPrincipalName.GetUserType(),
                         };
 
                         return userDataEntity;
