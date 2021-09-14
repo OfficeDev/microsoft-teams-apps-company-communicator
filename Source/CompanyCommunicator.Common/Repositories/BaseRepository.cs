@@ -164,6 +164,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         }
 
         /// <inheritdoc/>
+        public async Task<(IEnumerable<T>, TableContinuationToken)> GetPagedAsync(string partition = null, int? count = null, TableContinuationToken token = null)
+        {
+            var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
+            var query = new TableQuery<T>().Where(partitionKeyFilter);
+            query.TakeCount = count;
+            TableQuerySegment<T> seg;
+            if (token == null)
+            {
+                seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, null);
+                return (seg.Results, seg.ContinuationToken);
+            }
+
+            seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, token);
+            return (seg.Results, seg.ContinuationToken);
+        }
+
+        /// <inheritdoc/>
         public async Task<IEnumerable<T>> GetAllLessThanDateTimeAsync(DateTime dateTime)
         {
             var filterByDate = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.LessThanOrEqual, dateTime);
