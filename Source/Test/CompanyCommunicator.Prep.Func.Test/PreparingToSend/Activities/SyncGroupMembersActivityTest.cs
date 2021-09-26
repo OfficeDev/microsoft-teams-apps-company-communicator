@@ -70,7 +70,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             var activityContext = this.GetSyncGroupMembersActivity();
             var users = new List<User>()
             {
-                new User() { Id = "userId" },
+                new User() { Id = "userId", UserPrincipalName = "userName@example.com" },
             };
             this.groupMembersService
                 .Setup(x => x.GetGroupMembersAsync(It.IsAny<string>()))

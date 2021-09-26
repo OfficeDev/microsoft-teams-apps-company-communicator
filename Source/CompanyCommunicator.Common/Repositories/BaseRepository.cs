@@ -59,7 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         protected ILogger Logger { get; }
 
         /// <inheritdoc/>
-        public async Task CreateOrUpdateAsync(T entity)
+        public virtual async Task CreateOrUpdateAsync(T entity)
         {
             try
             {
@@ -113,7 +113,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<T> GetAsync(string partitionKey, string rowKey)
+        public virtual async Task<T> GetAsync(string partitionKey, string rowKey)
         {
             try
             {
