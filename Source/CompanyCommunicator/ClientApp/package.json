@@ -1,6 +1,6 @@
 {
   "name": "company-communicator",
-  "version": "4.1.4",
+  "version": "4.1.5",
   "private": true,
   "dependencies": {
     "@fluentui/react-northstar": "^0.52.0",
