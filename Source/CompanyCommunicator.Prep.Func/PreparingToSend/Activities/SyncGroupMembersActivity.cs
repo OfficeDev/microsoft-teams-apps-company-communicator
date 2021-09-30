@@ -131,8 +131,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                     };
                 }
 
-                    recipients.Add(userEntity.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
-                }
+                recipients.Add(userEntity.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
             }));
 
             return recipients;

@@ -135,7 +135,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<TableRowKeyGenerator>();
             builder.Services.AddTransient<AdaptiveCardCreator>();
             builder.Services.AddTransient<IAppSettingsService, AppSettingsService>();
-            builder.Services.AddTransient<IStorageClientFactory, StorageClientFactory>();
             builder.Services.AddTransient<IUserTypeService, UserTypeService>();
             builder.Services.AddTransient<IRecipientsService, RecipientsService>();
 
