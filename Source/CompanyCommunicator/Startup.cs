@@ -29,6 +29,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
@@ -82,10 +83,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     botOptions.AuthorAppId = configuration.GetValue<string>("AuthorAppId");
                     botOptions.AuthorAppPassword = configuration.GetValue<string>("AuthorAppPassword", string.Empty);
                     botOptions.UseCertificate = configuration.GetValue<bool>("UseCertificate", false);
-                    botOptions.AuthorAppThumbprint = configuration.GetValue<string>("AuthorAppThumbprint", string.Empty);
-                    botOptions.UserAppThumbprint = configuration.GetValue<string>("UserAppThumbprint", string.Empty);
+                    botOptions.AuthorAppCertName = configuration.GetValue<string>("AuthorAppCertName", string.Empty);
+                    botOptions.UserAppCertName = configuration.GetValue<string>("UserAppAppCertName", string.Empty);
                     botOptions.MicrosoftAppId = configuration.GetValue<string>("MicrosoftAppId");
-                    botOptions.MicrosoftAppThumbprint = configuration.GetValue<string>("MicrosoftAppThumbprint", string.Empty);
+                    botOptions.MicrosoftAppCertName = configuration.GetValue<string>("MicrosoftAppCertName", string.Empty);
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>
@@ -156,7 +157,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<CompanyCommunicatorBotFilterMiddleware>();
             services.AddSingleton<CompanyCommunicatorBotAdapter>();
             services.AddSingleton<BotFrameworkHttpAdapter>();
-            services.AddSingleton<ICertificateProvider, CertificateProvider>();
 
             // Add repositories.
             services.AddSingleton<ITeamDataRepository, TeamDataRepository>();
@@ -173,6 +173,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
             // Add draft notification preview services.
             services.AddSingleton<IDraftNotificationPreviewService, DraftNotificationPreviewService>();
+
+            string keyVaultUrl = this.Configuration.GetValue<string>("KeyVault:Url");
+            services.AddSecretsProvider(keyVaultUrl);
 
             // Add microsoft graph services.
             services.AddScoped<IAuthenticationProvider, GraphTokenProvider>();

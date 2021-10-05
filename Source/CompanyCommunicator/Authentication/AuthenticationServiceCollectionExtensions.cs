@@ -83,7 +83,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                      configuration.Bind("AzureAd", microsoftIdentityOptions);
                      microsoftIdentityOptions.ClientCertificates = new CertificateDescription[]
                      {
-                            CertificateDescription.FromStoreWithThumbprint(configuration.GetValue<string>("MicrosoftAppThumbprint")),
+                            CertificateDescription.FromKeyVault(configuration.GetValue<string>("KeyVault:Url"), configuration.GetValue<string>("MicrosoftAppCertName")),
                      };
                  })
                  .EnableTokenAcquisitionToCallDownstreamApi(

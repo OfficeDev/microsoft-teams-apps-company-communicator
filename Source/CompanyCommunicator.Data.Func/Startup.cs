@@ -23,6 +23,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices;
@@ -64,10 +65,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                        configuration.GetValue<string>("AuthorAppPassword", string.Empty);
                    botOptions.UseCertificate =
                         configuration.GetValue<bool>("UseCertificate", false);
-                   botOptions.AuthorAppThumbprint =
-                       configuration.GetValue<string>("AuthorAppThumbprint", string.Empty);
-                   botOptions.UserAppThumbprint =
-                       configuration.GetValue<string>("UserAppThumbprint", string.Empty);
+                   botOptions.AuthorAppCertName =
+                       configuration.GetValue<string>("AuthorAppCertName", string.Empty);
+                   botOptions.UserAppCertName =
+                       configuration.GetValue<string>("UserAppCertName", string.Empty);
                });
             builder.Services.AddOptions<CleanUpFileOptions>()
                .Configure<IConfiguration>((cleanUpFileOptions, configuration) =>
@@ -101,7 +102,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             builder.Services.AddSingleton<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
-            builder.Services.AddSingleton<ICertificateProvider, CertificateProvider>();
+
+            // Add Secrets.
+            var keyVaultUrl = Environment.GetEnvironmentVariable("KeyVault:Url");
+            builder.Services.AddSecretsProvider(keyVaultUrl);
 
             // Add services.
             builder.Services.AddSingleton<IFileCardService, FileCardService>();

@@ -6,7 +6,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
 {
     /// <summary>
-    /// Options used for holding metadata for the bot.
+    /// Options used for holding meta data for the bot.
     /// </summary>
     public class BotOptions
     {
@@ -36,23 +36,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
         public string MicrosoftAppId { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to use certficates.
+        /// Gets or sets a value indicating whether to use certificates.
         /// </summary>
         public bool UseCertificate { get; set; }
 
         /// <summary>
-        /// Gets or sets the thumbprint of the certificate for the author app.
+        /// Gets or sets the certificate name of the author app.
         /// </summary>
-        public string AuthorAppThumbprint { get; set; }
+        public string AuthorAppCertName { get; set; }
 
         /// <summary>
-        /// Gets or sets the thumbprint of the certificate for the user app.
+        /// Gets or sets the certificate name of the user app.
         /// </summary>
-        public string UserAppThumbprint { get; set; }
+        public string UserAppCertName { get; set; }
 
         /// <summary>
-        /// Gets or sets the thumbprint of the certificate for the graph app.
+        /// Gets or sets the certificate name of the graph app.
         /// </summary>
-        public string MicrosoftAppThumbprint { get; set; }
+        public string MicrosoftAppCertName { get; set; }
     }
 }

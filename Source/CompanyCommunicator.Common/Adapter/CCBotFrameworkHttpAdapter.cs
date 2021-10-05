@@ -12,7 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
 
     /// <summary>
     /// Bot framework http adapter instance.
@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
         /// <inheritdoc/>
         public override async Task CreateConversationAsync(string channelId, string serviceUrl, AppCredentials appCredentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken)
         {
-            var cert = this.certificateProvider.GetCertificate(appCredentials.MicrosoftAppId);
+            var cert = await this.certificateProvider.GetCertificateAsync(appCredentials.MicrosoftAppId);
             var options = new CertificateAppCredentialsOptions()
             {
                 AppId = appCredentials.MicrosoftAppId,
@@ -60,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
 
             if (this.certificateProvider.IsCertificateAuthenticationEnabled())
             {
-                var cert = this.certificateProvider.GetCertificate(appId);
+                var cert = await this.certificateProvider.GetCertificateAsync(appId);
                 var options = new CertificateAppCredentialsOptions()
                 {
                     AppId = appId,

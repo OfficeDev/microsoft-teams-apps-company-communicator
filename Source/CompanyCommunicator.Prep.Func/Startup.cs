@@ -35,6 +35,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Recipients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
 
@@ -74,12 +75,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                         configuration.GetValue<string>("MicrosoftAppId");
                     botOptions.UseCertificate =
                         configuration.GetValue<bool>("UseCertificate", false);
-                    botOptions.AuthorAppThumbprint =
-                        configuration.GetValue<string>("AuthorAppThumbprint", string.Empty);
-                    botOptions.UserAppThumbprint =
-                        configuration.GetValue<string>("UserAppThumbprint", string.Empty);
-                    botOptions.MicrosoftAppThumbprint =
-                        configuration.GetValue<string>("MicrosoftAppThumbprint", string.Empty);
+                    botOptions.AuthorAppCertName =
+                        configuration.GetValue<string>("AuthorAppCertName", string.Empty);
+                    botOptions.UserAppCertName =
+                        configuration.GetValue<string>("UserAppCertName", string.Empty);
+                    botOptions.MicrosoftAppCertName =
+                        configuration.GetValue<string>("MicrosoftAppCertName", string.Empty);
                 });
             builder.Services.AddOptions<DataQueueMessageOptions>()
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
@@ -115,7 +116,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             builder.Services.AddSingleton<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
-            builder.Services.AddSingleton<ICertificateProvider, CertificateProvider>();
 
             // Add repositories.
             builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
@@ -141,6 +141,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             // Add Teams services.
             builder.Services.AddTransient<ITeamMembersService, TeamMembersService>();
             builder.Services.AddTransient<IConversationService, ConversationService>();
+
+            // Add Secrets.
+            var keyVaultUrl = Environment.GetEnvironmentVariable("KeyVault:Url");
+            builder.Services.AddSecretsProvider(keyVaultUrl);
 
             // Add graph services.
             this.AddGraphServices(builder);
