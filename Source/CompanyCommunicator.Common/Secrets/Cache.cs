@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// <copyright file="Cache.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
+// </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
 {
@@ -12,12 +14,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
     /// <summary>
     /// Maintains a cache of <see cref="CachedResponse"/> items.
     ///
-    /// Source: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/keyvault/samples/keyvaultproxy/src
+    /// Source: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/keyvault/samples/keyvaultproxy/src.
     /// </summary>
     internal class Cache : IDisposable
     {
         private readonly Dictionary<string, CachedResponse> cache = new Dictionary<string, CachedResponse>(StringComparer.OrdinalIgnoreCase);
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         private SemaphoreSlim? semaphore = new SemaphoreSlim(1, 1);
+#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
 
         /// <inheritdoc/>
         public void Dispose()

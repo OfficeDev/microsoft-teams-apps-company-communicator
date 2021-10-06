@@ -14,7 +14,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Identity.Web;
-    using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
     using Microsoft.IdentityModel.Tokens;
 
     /// <summary>

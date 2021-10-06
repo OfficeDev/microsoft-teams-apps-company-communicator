@@ -89,7 +89,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
 
             if (string.IsNullOrEmpty(certificateName))
             {
-                throw new InvalidOperationException("No certificate name found.");
+                throw new InvalidOperationException("Certificate name not found.");
             }
 
             try

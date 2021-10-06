@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// <copyright file="CachedResponse.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
+// </copyright>
 
 #nullable disable
 
@@ -15,7 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
     /// <summary>
     /// A cached <see cref="Response"/> that is cloned and returned for subsequent requests.
     ///
-    /// Source: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/keyvault/samples/keyvaultproxy/src
+    /// Source: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/keyvault/samples/keyvaultproxy/src.
     /// </summary>
     internal class CachedResponse : Response
     {

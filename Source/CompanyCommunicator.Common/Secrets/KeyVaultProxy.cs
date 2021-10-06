@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// <copyright file="KeyVaultProxy.cs" company="Microsoft">
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
+// </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
 {
@@ -11,7 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
     /// <summary>
     /// Cache <c>GET</c> requests for secrets, keys, or certificates for Azure Key Vault clients.
     ///
-    /// Source: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/keyvault/samples/keyvaultproxy/src
+    /// Source: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/keyvault/samples/keyvaultproxy/src.
     /// </summary>
     public class KeyVaultProxy : HttpPipelinePolicy, IDisposable
     {
