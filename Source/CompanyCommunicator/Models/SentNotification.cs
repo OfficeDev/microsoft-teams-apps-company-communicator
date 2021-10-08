@@ -77,5 +77,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets a value indicating whether sending is in progress.
         /// </summary>
         public bool SendingCompleted { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating the number of reads for the message.
+        /// </summary>
+        public int Reads { get; set; }
     }
 }

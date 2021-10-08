@@ -228,5 +228,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets or sets notification status.
         /// </summary>
         public string Status { get; set; }
+
+        /// <summary>
+        /// Gets or sets notification reads.
+        /// </summary>
+        public int Reads { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tracking url for the message.
+        /// </summary>
+        public string TrackingUrl { get; set; }
     }
 }

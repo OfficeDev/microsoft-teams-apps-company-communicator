@@ -128,6 +128,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     TotalMessageCount = draftNotificationEntity.TotalMessageCount,
                     SendingStartedDate = DateTime.UtcNow,
                     Status = NotificationStatus.Queued.ToString(),
+                    TrackingUrl = draftNotificationEntity.TrackingUrl,
                 };
                 await this.CreateOrUpdateAsync(sentNotificationEntity);
 
@@ -173,6 +174,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Groups = notificationEntity.Groups,
                     Rosters = notificationEntity.Rosters,
                     AllUsers = notificationEntity.AllUsers,
+                    TrackingUrl = notificationEntity.TrackingUrl,
                 };
 
                 await this.CreateOrUpdateAsync(newNotificationEntity);

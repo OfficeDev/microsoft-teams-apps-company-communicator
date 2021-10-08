@@ -236,6 +236,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 NotificationDataTableNames.SendingNotificationsPartition,
                 message.NotificationId);
 
+            // replacing id and key for read tracking purposes
+            notification.Content = notification.Content.Replace("[ID]", message.NotificationId);
+            notification.Content = notification.Content.Replace("[KEY]", message.RecipientData.RecipientId);
+
             var adaptiveCardAttachment = new Attachment()
             {
                 ContentType = AdaptiveCardContentType,

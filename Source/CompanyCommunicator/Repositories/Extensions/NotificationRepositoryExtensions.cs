@@ -51,6 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 AllUsers = notification.AllUsers,
                 ScheduledDate = notification.ScheduledDate,
                 Buttons = notification.Buttons,
+                TrackingUrl = notification.TrackingUrl,
             };
 
             await notificationRepository.CreateOrUpdateAsync(notificationEntity);

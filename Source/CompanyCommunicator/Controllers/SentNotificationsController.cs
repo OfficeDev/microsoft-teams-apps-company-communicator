@@ -180,6 +180,63 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
+        /// Record a read for the message with a specific id. This web method is used as part of the simple tracking/analytics for CC.
+        /// </summary>
+        /// <param name="id">The id of the sent message where the read is being tracked for analytics.</param>
+        /// <param name="key">The key of the message instance that was sent to a specific user.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        [HttpGet]
+        [Route("tracking")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TrackRead(string id, string key)
+        {
+            // id cannot be null
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            // key cannot be null
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            // gets the sent notification object for the message sent
+            var sentnotificationEntity = await this.sentNotificationDataRepository.GetAsync(id, key);
+
+            // if we have a instance that was sent to a user
+            if (sentnotificationEntity != null)
+            {
+                // if the message was not read yet
+                if (sentnotificationEntity.ReadStatus != true)
+                {
+                    sentnotificationEntity.ReadStatus = true;
+                    sentnotificationEntity.ReadDate = DateTime.UtcNow;
+
+                    await this.sentNotificationDataRepository.CreateOrUpdateAsync(sentnotificationEntity);
+
+                    // gets the sent notification summary that needs to be updated
+                    var notificationEntity = await this.notificationDataRepository.GetAsync(
+                        NotificationDataTableNames.SentNotificationsPartition,
+                        id);
+
+                    // if the notification entity is null it means it doesnt exist or is not a sent message yet
+                    if (notificationEntity != null)
+                    {
+                        // increment the number of reads
+                        notificationEntity.Reads++;
+
+                        // persists the change
+                        await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
+                    }
+                }
+            }
+
+            return this.Ok();
+        }
+
+        /// <summary>
         /// Get a sent notification by Id.
         /// </summary>
         /// <param name="id">Id of the requested sent notification.</param>
@@ -234,6 +291,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 WarningMessage = notificationEntity.WarningMessage,
                 CanDownload = userNotificationDownload == null,
                 SendingCompleted = notificationEntity.IsCompleted(),
+                Reads = notificationEntity.Reads,
             };
 
             return this.Ok(result);

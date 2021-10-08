@@ -86,6 +86,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.Forbid();
             }
 
+            notification.TrackingUrl = this.HttpContext.Request.Scheme + "://" + this.HttpContext.Request.Host + "/api/sentNotifications/tracking";
+
             var notificationId = await this.notificationDataRepository.CreateDraftNotificationAsync(
                 notification,
                 this.HttpContext.User?.Identity?.Name);
