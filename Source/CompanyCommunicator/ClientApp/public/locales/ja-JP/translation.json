@@ -62,6 +62,7 @@
   "Results": "結果",
   "Success": "成功: {{SuccessCount}}",
   "Failure": "エラー: {{FailureCount}}",
+  "Reads": "読み取り済み: {{ReadsCount}}",
   "Unknown": "不明: {{UnknownCount}}",
   "Throttled": "調整済み:",
   "TooltipSuccess": "成功",

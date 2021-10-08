@@ -171,6 +171,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     TotalMessageCount = notificationEntity.TotalMessageCount,
                     SendingStartedDate = notificationEntity.SendingStartedDate,
                     Status = notificationEntity.GetStatus(),
+                    Reads = notificationEntity.Reads,
                 };
 
                 result.Add(summary);

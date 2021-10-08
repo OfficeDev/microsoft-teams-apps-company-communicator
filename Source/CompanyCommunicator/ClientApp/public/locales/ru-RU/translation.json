@@ -62,6 +62,7 @@
   "Results": "Результаты",
   "Success": "Выполнено: {{SuccessCount}}",
   "Failure": "Сбой: {{FailureCount}}",
+  "Reads": "Читать: {{ReadsCount}}",
   "Unknown": "Неизвестно: {{UnknownCount}}",
   "Throttled": "Отрегулировано: ",
   "TooltipSuccess": "Выполнено",

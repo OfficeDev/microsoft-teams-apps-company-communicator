@@ -62,6 +62,7 @@
   "Results": "Résultats",
   "Success": "Réussite : {{SuccessCount}}",
   "Failure": "Échec : {{FailureCount}}",
+  "Reads": "Lu    : {{ReadsCount}}",
   "Unknown": "Inconnu : {{UnknownCount}}",
   "Throttled": "Limité : ",
   "TooltipSuccess": "Réussite",

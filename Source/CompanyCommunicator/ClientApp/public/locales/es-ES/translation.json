@@ -63,6 +63,7 @@
   "Results": "Resultados",
   "Success": "Correcto: {{SuccessCount}}",
   "Failure": "Error: {{FailureCount}}",
+  "Reads": "Leído: {{ReadsCount}}",
   "Unknown": "Desconocido: {{UnknownCount}}",
   "Throttled": "Limitado: ",
   "TooltipSuccess": "Correcto",

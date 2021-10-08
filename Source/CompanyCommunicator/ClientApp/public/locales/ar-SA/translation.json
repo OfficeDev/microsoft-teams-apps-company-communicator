@@ -62,6 +62,7 @@
   "Results": "النتائج",
   "Success": "نجح الأمر:{{SuccessCount}}",
   "Failure": "فشل:{{FailureCount}}",
+  "Reads": "تم القراءة: {{ReadsCount}}",
   "Unknown": "غير معروف:{{UnknownCount}}",
   "Throttled": "مقيّد :",
   "TooltipSuccess": "نجح الأمر",

@@ -62,6 +62,7 @@
   "Results": "結果",
   "Success": "成功 : {{SuccessCount}}",
   "Failure": "失敗 : {{FailureCount}}",
+  "Reads": "已读取 : {{ReadsCount}}",
   "Unknown": "未知 : {{UnknownCount}}",
   "Throttled": "已節流: ",
   "TooltipSuccess": "成功",
