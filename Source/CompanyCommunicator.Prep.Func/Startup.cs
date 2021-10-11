@@ -71,16 +71,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                         configuration.GetValue<string>("AuthorAppId");
                     botOptions.AuthorAppPassword =
                         configuration.GetValue<string>("AuthorAppPassword", string.Empty);
-                    botOptions.MicrosoftAppId =
-                        configuration.GetValue<string>("MicrosoftAppId");
+                    botOptions.GraphAppId =
+                        configuration.GetValue<string>("GraphAppId");
                     botOptions.UseCertificate =
                         configuration.GetValue<bool>("UseCertificate", false);
                     botOptions.AuthorAppCertName =
                         configuration.GetValue<string>("AuthorAppCertName", string.Empty);
                     botOptions.UserAppCertName =
                         configuration.GetValue<string>("UserAppCertName", string.Empty);
-                    botOptions.MicrosoftAppCertName =
-                        configuration.GetValue<string>("MicrosoftAppCertName", string.Empty);
+                    botOptions.GraphAppCertName =
+                        configuration.GetValue<string>("GraphAppCertName", string.Empty);
                 });
             builder.Services.AddOptions<DataQueueMessageOptions>()
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
@@ -162,8 +162,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
                 Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
                 {
-                    confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("MicrosoftAppId");
-                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("MicrosoftAppPassword", string.Empty);
+                    confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("GraphAppId");
+                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("GraphAppPassword", string.Empty);
                     confidentialClientApplicationOptions.TenantId = configuration.GetValue<string>("TenantId");
                 });
 

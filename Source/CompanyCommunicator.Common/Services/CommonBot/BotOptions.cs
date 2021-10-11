@@ -31,9 +31,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
         public string AuthorAppPassword { get; set; }
 
         /// <summary>
-        /// Gets or sets the Microsoft app ID for the author bot.
+        /// Gets or sets the Graph app ID for the author bot.
         /// </summary>
-        public string MicrosoftAppId { get; set; }
+        public string GraphAppId { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to use certificates.
@@ -53,6 +53,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
         /// <summary>
         /// Gets or sets the certificate name of the graph app.
         /// </summary>
-        public string MicrosoftAppCertName { get; set; }
+        public string GraphAppCertName { get; set; }
     }
 }

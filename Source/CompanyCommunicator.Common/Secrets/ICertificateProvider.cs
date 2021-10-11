@@ -21,13 +21,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
         Task<X509Certificate2> GetCertificateAsync(string appId);
 
         /// <summary>
-        /// Gets the certificate for the given app id.
-        /// </summary>
-        /// <param name="appId">The Azure active directory Identifier.</param>
-        /// <returns>Certificate.</returns>
-        X509Certificate2 GetCertificate(string appId);
-
-        /// <summary>
         /// Checks if authentication is to be done using certificate.
         /// </summary>
         /// <returns>Boolean indicating if authentication type is certificate.</returns>

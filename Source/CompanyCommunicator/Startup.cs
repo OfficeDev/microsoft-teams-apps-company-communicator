@@ -85,8 +85,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     botOptions.UseCertificate = configuration.GetValue<bool>("UseCertificate", false);
                     botOptions.AuthorAppCertName = configuration.GetValue<string>("AuthorAppCertName", string.Empty);
                     botOptions.UserAppCertName = configuration.GetValue<string>("UserAppAppCertName", string.Empty);
-                    botOptions.MicrosoftAppId = configuration.GetValue<string>("MicrosoftAppId");
-                    botOptions.MicrosoftAppCertName = configuration.GetValue<string>("MicrosoftAppCertName", string.Empty);
+                    botOptions.GraphAppId = configuration.GetValue<string>("GraphAppId");
+                    botOptions.GraphAppCertName = configuration.GetValue<string>("GraphAppCertName", string.Empty);
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>

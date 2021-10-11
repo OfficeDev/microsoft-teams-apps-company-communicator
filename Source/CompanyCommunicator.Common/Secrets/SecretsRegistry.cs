@@ -14,7 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
     /// <summary>
     /// Register secrets dependencies.
     /// </summary>
-    public static class SecretsRegitsry
+    public static class SecretsRegistry
     {
         /// <summary>
         /// Service Collection extension.

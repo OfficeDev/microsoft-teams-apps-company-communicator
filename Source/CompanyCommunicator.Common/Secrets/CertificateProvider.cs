@@ -81,38 +81,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
         }
 
         /// <inheritdoc/>
-        public X509Certificate2 GetCertificate(string appId)
-        {
-            appId = appId ?? throw new ArgumentNullException(nameof(appId));
-
-            var certificateName = this.certificateNameMap.ContainsKey(appId) ? this.certificateNameMap[appId] : null;
-
-            if (string.IsNullOrEmpty(certificateName))
-            {
-                throw new InvalidOperationException("Certificate name not found.");
-            }
-
-            try
-            {
-                var response = this.certificateClient.DownloadCertificate(certificateName);
-            }
-            catch (InvalidDataException exception)
-            {
-                this.logger.LogError(exception, $"Certificate not found. Cert name: {certificateName} ");
-            }
-            catch (RequestFailedException exception)
-            {
-                this.logger.LogError(exception, $"Failed to fetch certificate. ErrorCode: {exception.ErrorCode} Cert name: {certificateName}.");
-            }
-            catch (Exception exception)
-            {
-                this.logger.LogError(exception, $"Failed to fetch certificate. Cert name: {certificateName}.");
-            }
-
-            throw new Exception($"Certificate not found. Cert name: {certificateName} ");
-        }
-
-        /// <inheritdoc/>
         public bool IsCertificateAuthenticationEnabled()
         {
             return this.useCertificate;
@@ -123,7 +91,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
             var certificateNameMap = new Dictionary<string, string>();
             if (string.IsNullOrEmpty(botOptions.UserAppId))
             {
-                this.logger.LogWarning("User app id not found.");
+                throw new Exception("User app id not found.");
             }
             else
             {
@@ -132,20 +100,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
 
             if (string.IsNullOrEmpty(botOptions.AuthorAppId))
             {
-                this.logger.LogWarning("Author app id not found.");
+                throw new Exception("Author app id not found.");
             }
             else
             {
                 certificateNameMap.Add(botOptions.AuthorAppId, botOptions.AuthorAppCertName);
             }
 
-            if (string.IsNullOrEmpty(botOptions.MicrosoftAppId))
+            if (string.IsNullOrEmpty(botOptions.GraphAppId))
             {
-                this.logger.LogWarning("Microsoft app id not found.");
+                throw new Exception("Graph app id not found.");
             }
             else
             {
-                certificateNameMap.Add(botOptions.MicrosoftAppId, botOptions.MicrosoftAppCertName);
+                certificateNameMap.Add(botOptions.GraphAppId, botOptions.GraphAppCertName);
             }
 
             return certificateNameMap;
