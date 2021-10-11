@@ -63,6 +63,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
             try
             {
                 var response = await this.certificateClient.DownloadCertificateAsync(certificateName);
+                return response.Value;
             }
             catch (InvalidDataException exception)
             {
