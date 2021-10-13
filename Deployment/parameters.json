@@ -7,6 +7,10 @@
     "Value": "<<value>>",
     "Description": "Id of the tenant to deploy to (If you are not sure how to get Tenant ID, please check Azure Active Directory in Azure Portal. Under Manage, click Properties. The tenant ID is shown in the Directory ID box). e.g 98f3ece2-3a5a-428b-aa4f-4c41b3f6eef0. Tenant ID is also in the \"Overview\" section\""
   },
+  "UserObjectId": {
+    "Value": "<<value>>",
+    "Description": "User Object Id."
+  },
   "resourceGroupName": {
     "Value": "<<value>>",
     "Description": "Resource Group"
@@ -26,6 +30,22 @@
   "senderUPNList": {
     "Value": "<<value>>",
     "Description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
+  },
+  "useCertificate": {
+    "Value": false,
+    "Description": "If certificate authentication is being used, then value should be true. Otherwise, false is default (Client-secret will be used)."
+  },
+  "authorAppCertName": {
+    "Value": "<<value>>",
+    "Description": "The X.509 certificate name of the author bot Azure AD app."
+  },
+  "graphAppCertName": {
+    "Value": "<<value>>",
+    "Description": "The X.509 certificate name of the Microsoft Azure AD app."
+  },
+  "userAppCertName": {
+    "Value": "<<value>>",
+    "Description": "The X.509 certificate name of the user bot Azure AD app."
   },
   "isUpgrade": {
     "Value": false,

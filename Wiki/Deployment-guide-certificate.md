@@ -48,18 +48,12 @@ Register two Azure AD application in your tenant's directory: one for author bot
 
     ![Azure AD app overview page](images/multitenant_app_overview_1.png)
 
-1. On the side rail in the Manage section, navigate to the "Certificates & secrets" section. In the Client secrets section, click on "+ New client secret". Add a description for the secret, and choose when the secret will expire. Click "Add".
-
-    ![Azure AD app secret](images/multitenant_app_secret.png)
-
-1. Once the client secret is created, copy its **Value**; we will need it later.
-
-1. Go back to "App registrations", then repeat steps 2-5 to create another Azure AD application for the author bot.
+1. Go back to "App registrations", then repeat step no. 2 to create another Azure AD application for the author bot.
     - **Name**: Name of your Teams App - if you are following the template for a default deployment, we recommend "Company Communicator Author".
     - **Supported account types**: Select "Accounts in any organizational directory".
     - Leave the "Redirect URI" field blank for now.
 
-1. Go back to "App registrations", then repeat steps 2-5 to create another Azure AD application for the Microsoft Graph app.
+1. Go back to "App registrations", then repeat step no. 2 to create another Azure AD application for the Microsoft Graph app.
     - **Name**: Name of your Teams App - if you are following the template for a default deployment, we recommend "Company Communicator App".
     - **Supported account types**: Select "Accounts in any organizational directory".
     - Leave the "Redirect URI" field blank for now.
@@ -67,12 +61,9 @@ Register two Azure AD application in your tenant's directory: one for author bot
 
     At this point you should have the following 7 values:
     1. Application (client) ID for the user bot.
-    2. Client secret for the user bot.
-    3. Directory (tenant) ID.
-    4. Application (client) Id for the author bot.
-    5. Client secret for the author bot.
-    6. Application (client) Id for the Microsoft Graph App.
-    7. Client secret for the Microsoft Graph App.
+    2. Directory (tenant) ID.
+    3. Application (client) Id for the author bot.
+    4. Application (client) Id for the Microsoft Graph App.
 
     We recommend that you copy the values, we will need them later.
 
@@ -81,7 +72,7 @@ Register two Azure AD application in your tenant's directory: one for author bot
 ## 2. Deploy to your Azure subscription
 1. Click on the **Deploy to Azure** button below.
    
-   [![Deploy to Azure](https://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploy.json)
+   [![Deploy to Azure](https://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploywithcert.json)
 
 1. When prompted, log in to your Azure subscription.
 
@@ -106,12 +97,12 @@ Register two Azure AD application in your tenant's directory: one for author bot
 
 1. Update the following fields in the template:
     1. **User Client ID**: The application (client) ID of the Microsoft Teams user bot app. (from Step 1)
-    2. **User Client Secret**: The client secret of the Microsoft Teams user bot app. (from Step 1)
+    2. **User App Certificate Name**:  Provide the name for creating the new certificate of user bot Azure AD app in Azure KeyVault
     3. **Tenant Id**: The tenant ID. (from Step 1)
     4. **Author Client ID**: The application (client) ID of the Microsoft Teams author bot app. (from Step 1)
-    5. **Author Client Secret**: The client secret of the Microsoft Teams author bot app. (from Step 1)
+    5. **Author App Certificate Name**:  Provide the name for creating the new certificate of author bot Azure AD app in Azure KeyVault
     6. **Microsoft Graph App Client ID**: The application (client) ID of the Microsoft Graph Azure AD app. (from Step 1)
-    7. **Microsoft Graph App Secret**: The client secret of the Microsoft Graph Azure AD app. (from Step 1)
+    7. **Microsoft Graph App Certificate Name**:  Provide the name for creating the new certificate of Microsoft Graph Azure AD app in Azure KeyVault
     8. **Proactively Install User App [Optional]**: Default value is `true`. You may set it to `false` if you want to disable the feature.
     9. **User App ExternalId [Optional]**: Default value is `148a66bb-e83d-425a-927d-09f4299a9274`. This **MUST** be the same `id` that is in the Teams app manifest for the user app.
     10. **DefaultCulture [Optional]**: By default the application uses `en-US` locale. You can choose the locale from the list, if you wish to use the app in different locale.Also, you may add/update the resources for other locales and update this configuration if desired.
@@ -136,13 +127,45 @@ Register two Azure AD application in your tenant's directory: one for author bot
     > If the deployment fails, see [this section](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Troubleshooting#1-code-deployment-failure) of the Troubleshooting guide.
 
 1. Once the deployment is successfully completed, go to the deployment's "Outputs" tab, and note down the follwing values. We will need them later.
+    * **keyVaultName:** This is the Key Vault Name for the Company Communicator app. For the following steps, it will be referred to as `%keyVaultName%`.
     * **authorBotId:** This is the Microsoft Application ID for the Company Communicator app. For the following steps, it will be referred to as `%authorBotId%`.
     * **userBotId:** This is the Microsoft Application ID for the Company Communicator app. For the following steps, it will be referred to as `%userBotId%`.
     * **appDomain:** This is the base domain for the Company Communicator app. For the following steps, it will be referred to as `%appDomain%`.
 
 > **IMPORTANT:** If you plan to use a custom domain name instead of relying on Azure Front Door, read the instructions [here](Custom-domain-option) before continuing any further.
 
-## 3. Set-up Authentication
+## 3. Create Key Vault Certificate
+1. On the Key Vault page, select **Certificates**.
+3. Click on **Generate/Import**.
+3. On the **Create a certificate** screen choose the following values:
+    - **Method of Certificate Creation**: Generate.
+    - **Certificate Name**: AuthorAppCertificateName. This should be the same value given in step no. 2.
+    - **Subject**: CN=`%appDomain%`.
+    - Leave the other values to their defaults. (By default, if you don't specify anything special in Advanced policy, it'll be usable as a client auth certificate.)
+4. Click **Create**.
+
+Once that you receive the message that the certificate has been successfully created, you may click on it on the list. You can then see some of the properties. If you click on the current version, you can see the value you specified in the previous step.
+
+![Certificate properties](images/create-certificate.png)
+
+Please repeat the steps for User bot certificate and Microsoft Graph app certificate.
+
+## 4. Export Certificate from Key Vault
+
+Download the certificate for all apps i.e. Author Bot, User Bot, Microsoft Graph app.
+
+You can download by Clicking "Download in CER format" button.
+![Export Certificate](images/export-cert.png)
+
+## 5. Upload Certificate Azure AD App
+
+1. Go to **App Registrations** page [here](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps) and open the Microsoft Graph Azure AD app you created (in Step 1) from the application list.
+
+2. On the side rail in the Manage section, navigate to the "Certificates & secrets" section. In the Certificates section, click on "Upload certificate". Select the certificate file downloaded in Step 4 and click on Add.
+
+3. Please repeat the same for all certificates downloaded in Step 3.
+
+## 6. Set-up Authentication
 
 1. Note that you have the `%authorBotId%`, `%userBotId%` and `%appDomain%` values from the previous step (Step 2).
 
@@ -202,7 +225,7 @@ Register two Azure AD application in your tenant's directory: one for author bot
 
     2. Click **Save** to commit your changes.
 
-## 4. Add Permissions to your app
+## 7. Add Permissions to your app
 
 Continuing from the Azure AD app registration page where we ended Step 3.
 
@@ -236,7 +259,7 @@ Continuing from the Azure AD app registration page where we ended Step 3.
    - Prepare link - https://login.microsoftonline.com/common/adminconsent?client_id=%appId%. Replace the `%appId%` with the `Application (client) ID` of Microsoft Graph Azure AD app (from above).
    - Global Administrator can grant consent using the link above.
 
-## 5. Create the Teams app packages
+## 8. Create the Teams app packages
 
 Company communicator app comes with 2 applications – Author, User. The Author application is intended for employees who create and send messages in the organization, and the User application is intended for employees who receive the messages.
 
@@ -271,7 +294,7 @@ Create two Teams app packages: one to be installed to an Authors team and other 
 
 Repeat the steps above but with the file `Manifest\manifest_users.json` and use `%userBotId%` for `<<botId>>` placeholder. Note: you will not need to change anything for the configurationUrl or webApplicationInfo section because the recipients app does not have the configurable tab. Name the resulting package `company-communicator-users.zip`, so you know that this is the app for the recipients.
 
-## 6. Install the apps in Microsoft Teams
+## 9. Install the apps in Microsoft Teams
 
 1. Install the authors app (the `company-communicator-authors.zip` package) to your team of message authors.
     * Note that even if non-authors install the app, the UPN list in the app configuration will prevent them from accessing the message authoring experience. Only the users in the sender UPN list will be able to compose and send messages. 

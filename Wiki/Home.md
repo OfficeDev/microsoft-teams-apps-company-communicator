@@ -15,6 +15,7 @@ It provides a foundation to build custom targeted communication capabilities suc
     * [Localization](Localization)
 * Deploying the app
     * [Deployment guide](Deployment-guide)
+    * [Deployment guide using certificate](Deployment-guide-certificate)
     * [Deployment guide powershell](Deployment-guide-powershell)
     * [Troubleshooting](Troubleshooting)
 * Migrating to newer version
