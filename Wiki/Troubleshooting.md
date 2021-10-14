@@ -88,5 +88,11 @@ Go to the tenant where app is installed and open **Enterprise Applicationss** pa
 ## 7. When upgrading Company Commmunicator from a version prior to v4, please ensure that the **users** app is installed in the teams to send messages to the team or its members.
 Install the **User** app (the `company-communicator-users.zip` package) to the teams that will be the target audience.
 
+## 8. Messages Queued
+Restart all the components.
+Sync the 
+
 # Didn't find your problem here?
 Please report the issue [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/issues/new)
+
+
