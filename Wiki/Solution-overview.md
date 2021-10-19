@@ -2,7 +2,7 @@
 
 Refer the following image for high level architecture.
 
-![Overview](images/architecture_overview_v2.png)
+![Overview](images/architecture_overview_v4.png)
 
 The **Company Communicator** app has the following main components:
 * **App Service**: The app service implements the message compose experience in the team tab, and the messaging endpoint for the bot.
@@ -93,7 +93,7 @@ App service requires the following `Delegated permission`:
 
 |Sr. No.| Use Case | API|  Delegated permissions| API version
 |--|--|--|--|--|
-| 1. | Search Groups | GET [https://graph.microsoft.com/v1.0/groups?$filter=`condition`](https://docs.microsoft.com/en-us/graph/api/group-list?view=graph-rest-1.0&tabs=http) | Group.Read.All| v1.0
+| 1. | Search Groups | GET [https://graph.microsoft.com/v1.0/groups?$filter=`condition`](https://docs.microsoft.com/en-us/graph/api/group-list?view=graph-rest-1.0&tabs=http) | GroupMember.Read.All| v1.0
 | 2. | Get App Catalog Id | GET [https://graph.microsoft.com/v1.0/appCatalogs/teamsApps?$filter=distributionMethod eq 'organization'](https://docs.microsoft.com/en-us/graph/api/appcatalogs-list-teamsapps?view=graph-rest-1.0&tabs=http) | AppCatalog.Read.All | v1.0
 
 ### App Permissions
@@ -103,7 +103,7 @@ Azure functions require the following `App Permissions` for different use cases:
 |--|--|--|--|--|
 | 1. | Get All Users | GET [https://graph.microsoft.com/v1.0/users/delta](https://docs.microsoft.com/en-us/graph/api/user-delta?view=graph-rest-1.0&tabs=http) | User.Read.All | v1.0
 | 2. | Get User | GET [https://graph.microsoft.com/v1.0/users/`user-id`](https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http) | User.Read.All| v1.0
-| 3. | Get Group Transitive Members | GET [https://graph.microsoft.com/v1.0/groups/`group-id`/transitiveMembers](https://docs.microsoft.com/en-us/graph/api/group-list-transitivemembers?view=graph-rest-1.0&tabs=http) | Group.Read.All| v1.0
+| 3. | Get Group Transitive Members | GET [https://graph.microsoft.com/v1.0/groups/`group-id`/transitiveMembers](https://docs.microsoft.com/en-us/graph/api/group-list-transitivemembers?view=graph-rest-1.0&tabs=http) | GroupMember.Read.All| v1.0
 | 4. | Get Teams App Installation Id | GET [https://graph.microsoft.com/v1.0/users/`user-id`/teamwork/installedApps?$expand=teamsApp&$filter=teamsApp/id eq '`teamsAppId`'](https://docs.microsoft.com/en-us/graph/api/userteamwork-list-installedapps?view=graph-rest-1.0&tabs=http) | TeamsAppInstallation.ReadWriteForUser.All | v1.0
 | 5. | Get Chat Id | GET [https://graph.microsoft.com/v1.0/users/`user-id`/teamwork/installedApps/`teamsAppInstallationId`/chat](https://docs.microsoft.com/en-us/graph/api/userscopeteamsappinstallation-get-chat?view=graph-rest-1.0&tabs=http) | TeamsAppInstallation.ReadWriteForUser.All | v1.0
 | 6. | Install app for user | POST [https://graph.microsoft.com/v1.0/`user-id`/teamwork/installedApps](https://docs.microsoft.com/en-us/graph/api/userteamwork-post-installedapps?view=graph-rest-1.0&tabs=http) | TeamsAppInstallation.ReadWriteForUser.All | v1.0

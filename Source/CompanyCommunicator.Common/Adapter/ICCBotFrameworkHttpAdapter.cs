@@ -19,7 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
     public interface ICCBotFrameworkHttpAdapter : IAdapterIntegration, IBotFrameworkHttpAdapter
     {
         /// <summary>
-        /// Creates a conversation on the specified channel.
+        /// Creates a conversation using app secret on the specified channel.
         /// </summary>
         /// <param name="channelId">The ID for the channel.</param>
         /// <param name="serviceUrl">The channel's service URL endpoint.</param>
@@ -28,11 +28,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
         /// <param name="callback">The method to call for the resulting bot turn.</param>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        Task CreateConversationAsync(string channelId, string serviceUrl, MicrosoftAppCredentials credentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken);
+        Task CreateConversationUsingSecretAsync(string channelId, string serviceUrl, MicrosoftAppCredentials credentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Creates a conversation using app credentials on the specified channel.
-        /// This method can be used to use certificates for authentciation.
+        /// Creates a conversation using app certificate on the specified channel.
+        /// This method can be used to use certificates for authentication.
         /// </summary>
         /// <param name="channelId">The ID for the channel.</param>
         /// <param name="serviceUrl">The channel's service URL endpoint.</param>
@@ -41,6 +41,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
         /// <param name="callback">The method to call for the resulting bot turn.</param>
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
-        Task CreateConversationAsync(string channelId, string serviceUrl, AppCredentials appCredentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken);
+        Task CreateConversationUsingCertificateAsync(string channelId, string serviceUrl, AppCredentials appCredentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken);
     }
 }

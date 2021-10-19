@@ -35,7 +35,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
         }
 
         /// <inheritdoc/>
-        public override async Task CreateConversationAsync(string channelId, string serviceUrl, AppCredentials appCredentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken)
+        public async Task CreateConversationUsingCertificateAsync(string channelId, string serviceUrl, AppCredentials appCredentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken)
         {
             var cert = await this.certificateProvider.GetCertificateAsync(appCredentials.MicrosoftAppId);
             var options = new CertificateAppCredentialsOptions()
@@ -44,13 +44,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
                 ClientCertificate = cert,
             };
 
-            await base.CreateConversationAsync(channelId, serviceUrl, new CertificateAppCredentials(options) as AppCredentials, conversationParameters, callback, cancellationToken);
+            await this.CreateConversationAsync(channelId, serviceUrl, new CertificateAppCredentials(options) as AppCredentials, conversationParameters, callback, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public override async Task CreateConversationAsync(string channelId, string serviceUrl, MicrosoftAppCredentials credentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken)
+        public async Task CreateConversationUsingSecretAsync(string channelId, string serviceUrl, MicrosoftAppCredentials credentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken)
         {
-            await base.CreateConversationAsync(channelId, serviceUrl, credentials, conversationParameters, callback, cancellationToken);
+            await this.CreateConversationAsync(channelId, serviceUrl, credentials, conversationParameters, callback, cancellationToken);
         }
 
         /// <inheritdoc/>

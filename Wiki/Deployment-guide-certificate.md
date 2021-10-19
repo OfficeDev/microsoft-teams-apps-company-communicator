@@ -20,6 +20,12 @@ To begin, you will need:
     * Azure Storage Account
     * Service Bus
     * Application Insights
+    * Azure Key vault
+* An role to assign roles in Azure RBAC. To check if you have permission to do this, 
+    * Goto the subscription page in Azure portal. Then, goto Access Control(IAM) and click on `View my access` button.
+    * Click on your `role` and in search permissions text box, search for `Microsoft.Authorization/roleAssignments/Write`.
+    * If your current role does not have the permission, then you can grant yourself the built in role `User Access Administrator` or create a custom role.
+    * Please follow this [link](https://docs.microsoft.com/en-us/azure/role-based-access-control/custom-roles#steps-to-create-a-custom-role) to create a custom role. Use this action `Microsoft.Authorization/roleAssignments/Write` in the custom role to assign roles in Azure RBAC.
 * A team with the users who will be sending messages with this app. (You can add or remove team members later!)
 * A copy of the Company Communicator app GitHub repo (https://github.com/OfficeDev/microsoft-teams-company-communicator-app)
 
@@ -31,7 +37,7 @@ To begin, you will need:
 
 ## 1. Register Azure AD application
 
-Register two Azure AD application in your tenant's directory: one for author bot, and another for user bot.
+Register three Azure AD application in your tenant's directory: one for author bot, one for user bot and another for graph app.
 
 1. Log in to the Azure Portal for your subscription, and go to the [App registrations](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps) blade.
 
@@ -59,11 +65,11 @@ Register two Azure AD application in your tenant's directory: one for author bot
     - Leave the "Redirect URI" field blank for now.
 
 
-    At this point you should have the following 7 values:
+    At this point you should have the following 4 values:
     1. Application (client) ID for the user bot.
     2. Directory (tenant) ID.
-    3. Application (client) Id for the author bot.
-    4. Application (client) Id for the Microsoft Graph App.
+    3. Application (client) ID for the author bot.
+    4. Application (client) ID for the Microsoft Graph App.
 
     We recommend that you copy the values, we will need them later.
 
@@ -134,8 +140,8 @@ Register two Azure AD application in your tenant's directory: one for author bot
 
 > **IMPORTANT:** If you plan to use a custom domain name instead of relying on Azure Front Door, read the instructions [here](Custom-domain-option) before continuing any further.
 
-## 3. Create Key Vault Certificate
-1. On the Key Vault page, select **Certificates**.
+## 3. Create Key vault Certificate
+1. On the Key vault page, select **Certificates**.
 3. Click on **Generate/Import**.
 3. On the **Create a certificate** screen choose the following values:
     - **Method of Certificate Creation**: Generate.

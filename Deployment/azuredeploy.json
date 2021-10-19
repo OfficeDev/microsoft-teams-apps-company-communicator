@@ -336,7 +336,7 @@
 						},
 						{
 							"name": "AzureAd:ClientSecret",
-							"value": "[[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/GraphAppSecret/)')]"
+							"value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/GraphAppSecret/)')]"
 						},
 						{
 							"name": "AzureAd:ApplicationIdURI",
@@ -355,12 +355,16 @@
 							"value": "[parameters('authorClientId')]"
 						},
 						{
+							"name": "AuthorAppPassword",
+							"value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/AuthorAppPassword/)')]"
+						},
+						{
 							"name": "GraphAppId",
 							"value": "[parameters('graphAppId')]"
 						},
 						{
 							"name": "GraphAppPassword",
-							"value": "[[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/GraphAppSecret/)')]"
+							"value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/GraphAppSecret/)')]"
 						},
 						{
 							"name": "StorageAccountConnectionString",
@@ -752,7 +756,7 @@
 						},
 						{
 							"name": "GraphAppPassword",
-							"value": "[[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/GraphAppSecret/)')]"
+							"value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/GraphAppSecret/)')]"
 						},
 						{
 							"name": "UserAppId",
