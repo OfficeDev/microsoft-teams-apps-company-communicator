@@ -216,21 +216,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     sentnotificationEntity.ReadDate = DateTime.UtcNow;
 
                     await this.sentNotificationDataRepository.CreateOrUpdateAsync(sentnotificationEntity);
-                }
 
-                // gets the sent notification summary that needs to be updated
-                var notificationEntity = await this.notificationDataRepository.GetAsync(
+                    // gets the sent notification summary that needs to be updated
+                    var notificationEntity = await this.notificationDataRepository.GetAsync(
                         NotificationDataTableNames.SentNotificationsPartition,
                         id);
 
-                // if the notification entity is null it means it doesnt exist or is not a sent message yet
-                if (notificationEntity != null)
-                {
-                    // increment the number of reads
-                    notificationEntity.Reads++;
+                    // if the notification entity is null it means it doesnt exist or is not a sent message yet
+                    if (notificationEntity != null)
+                    {
+                        // increment the number of reads
+                        notificationEntity.Reads++;
 
-                    // persists the change
-                    await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
+                        // persists the change
+                        await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
+                    }
                 }
             }
 
