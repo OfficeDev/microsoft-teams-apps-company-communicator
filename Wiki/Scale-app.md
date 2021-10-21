@@ -1,4 +1,5 @@
 # Scale
+If you need to scale the app for large number of users(greater than 200K), please follow the below steps.
 
 ## 1. Create new Storage Account for Durable function.
 
@@ -12,3 +13,14 @@
 1. Now, goto the Company Communicator prep function and click on **Configuration**.
 1. Update the value of **Azure.WebJobsStorage** with the connection string from step 7.
 1. Click on **Save** to commit changes.
+
+    > Please make sure to keep the below value less than 50rps, as going over this rate can get the bot blocked.
+     ```
+        "serviceBus": {
+        "messageHandlerOptions": {
+            "maxConcurrentCalls": 30
+        }
+        }
+    ```
+
+

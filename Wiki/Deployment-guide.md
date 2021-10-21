@@ -1,4 +1,4 @@
-- [Deployment Guide](#outlook-web-service-ows)
+- Deployment Guide
     - [Prerequisites](#prerequisites) 
     - [Steps](#Deployment-Steps)
         - [Register AD Application](#1-register-azure-ad-application)
@@ -11,6 +11,9 @@
 - - -
 
 # Prerequisites
+The recommendation is to use [Deployment guide using powershell](Deployment-guide-powershell).
+
+
 To begin, you will need: 
 * An Azure subscription where you can create the following kinds of resources:  
     * App Service
@@ -67,7 +70,7 @@ Register three Azure AD application in your tenant's directory: one for author b
 
 1. Go back to "App registrations", then repeat steps 2-5 to create another Azure AD application for the Microsoft Graph app.
     - **Name**: Name of your Teams App - if you are following the template for a default deployment, we recommend "Company Communicator App".
-    - **Supported account types**: Select "Accounts in any organizational directory".
+    - **Supported account types**: Select "Accounts in this organizational directory only(Default Directory only - Single tenant)".
     - Leave the "Redirect URI" field blank for now.
 
 
@@ -156,6 +159,8 @@ Register three Azure AD application in your tenant's directory: one for author b
 
 1. Go to **App Registrations** page [here](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps) and open the Microsoft Graph Azure AD app you created (in Step 1) from the application list.
 
+    > NOTE: This step is to set-up authentication for Microsoft Graph Azure AD app.
+
 1. Under **Manage**, click on **Authentication** to bring up authentication settings.
 
     1. Add a new entry to **Redirect URIs**:
@@ -208,9 +213,9 @@ Register three Azure AD application in your tenant's directory: one for author b
 
     2. Click **Save** to commit your changes.
 
-## 4. Add Permissions to your app
+## 4. Add Permissions to your Microsoft Graph Azure AD app
 
-Continuing from the Azure AD app registration page where we ended Step 3.
+Continuing from the Microsoft Graph Azure AD app registration page where we ended Step 3.
 
 1. Select **API Permissions** blade from the left hand side.
 
@@ -227,7 +232,7 @@ Continuing from the Azure AD app registration page where we ended Step 3.
     * then select **Application permissions** and check the following permissions,
         1. **GroupMember.Read.All**
         2. **User.Read.All**
-        3. **TeamsAppInstallation.ReadWriteSelfForUser.All**
+        3. **TeamsAppInstallation.ReadWriteForUser.All**
 
     * Click on **Add Permissions** to commit your changes.
 
