@@ -71,7 +71,7 @@
 		"objectId": {
 			"type": "string",
 			"metadata": {
-			  "description": "Specifies the object ID of a user, service principal or security group in the Azure Active Directory tenant for the vault. The object ID must be unique for the list of access policies. Get it by using Get-AzADUser or Get-AzADServicePrincipal cmdlets."
+				"description": "Object Id of the user to deploy to (If you are not sure how to get Object ID, please check Azure Active Directory in Azure Portal. Under Manage, click Users and select the appropriate user. The Object ID is shown in the Identity section). e.g 98f3ece2-3a5a-428b-aa4f-4c41b3f6eef0."
 			}
 		},
 		"UserAppExternalId": {
@@ -1373,7 +1373,7 @@
 				"tenantId": "[variables('subscriptionTenantId')]",
 				"accessPolicies": [
 				  {
-					"tenantId": "[variables('subscriptionTenantId')]",
+					"tenantId": "[reference(concat('Microsoft.Web/sites/', variables('botAppName')), '2018-02-01', 'Full').identity.tenantId]",
 					"objectId": "[reference(concat('Microsoft.Web/sites/', variables('botAppName')), '2018-02-01', 'Full').identity.principalId]",
 					"permissions": {
 					  "keys": [],
@@ -1388,7 +1388,7 @@
 					}
 				  },
 				  {
-					"tenantId": "[variables('subscriptionTenantId')]",
+					"tenantId": "[reference(concat('Microsoft.Web/sites/', variables('prepFunctionAppName')), '2018-02-01', 'Full').identity.tenantId]",
 					"objectId": "[reference(concat('Microsoft.Web/sites/', variables('prepFunctionAppName')), '2018-02-01', 'Full').identity.principalId]",
 					"permissions": {
 					  "keys": [],
@@ -1401,7 +1401,7 @@
 					}
 				  },
 				  {
-					"tenantId": "[variables('subscriptionTenantId')]",
+					"tenantId": "[reference(concat('Microsoft.Web/sites/', variables('sendFunctionAppName')), '2018-02-01', 'Full').identity.tenantId]",
 					"objectId": "[reference(concat('Microsoft.Web/sites/', variables('sendFunctionAppName')), '2018-02-01', 'Full').identity.principalId]",
 					"permissions": {
 					  "keys": [],
@@ -1414,7 +1414,7 @@
 					}
 				  },
 				  {
-					"tenantId": "[variables('subscriptionTenantId')]",
+					"tenantId": "[reference(concat('Microsoft.Web/sites/', variables('dataFunctionAppName')), '2018-02-01', 'Full').identity.tenantId]",
 					"objectId": "[reference(concat('Microsoft.Web/sites/', variables('dataFunctionAppName')), '2018-02-01', 'Full').identity.principalId]",
 					"permissions": {
 					  "keys": [],
@@ -1427,7 +1427,7 @@
 					}
 				  },
 				  {
-					"tenantId": "[variables('subscriptionTenantId')]",
+					"tenantId": "[reference(concat('Microsoft.Web/sites/', variables('botAppName')), '2018-02-01', 'Full').identity.tenantId]",
 					"objectId": "[parameters('objectId')]",
 					"permissions": {
 					  "certificates": ["get","list","create","update"]

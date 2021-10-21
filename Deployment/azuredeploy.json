@@ -1343,7 +1343,7 @@
 			"tenantId": "[variables('subscriptionTenantId')]",
 			"accessPolicies": [
 			  {
-				"tenantId": "[variables('subscriptionTenantId')]",
+				"tenantId": "[reference(concat('Microsoft.Web/sites/', variables('botAppName')), '2018-02-01', 'Full').identity.tenantId]",
 				"objectId": "[reference(concat('Microsoft.Web/sites/', variables('botAppName')), '2018-02-01', 'Full').identity.principalId]",
 				"permissions": {
 				  "keys": [],
@@ -1356,7 +1356,7 @@
 				}
 			  },
 			  {
-				"tenantId": "[variables('subscriptionTenantId')]",
+				"tenantId": "[reference(concat('Microsoft.Web/sites/', variables('prepFunctionAppName')), '2018-02-01', 'Full').identity.tenantId]",
 				"objectId": "[reference(concat('Microsoft.Web/sites/', variables('prepFunctionAppName')), '2018-02-01', 'Full').identity.principalId]",
 				"permissions": {
 				  "keys": [],
@@ -1369,7 +1369,7 @@
 				}
 			  },
 			  {
-				"tenantId": "[variables('subscriptionTenantId')]",
+				"tenantId": "[reference(concat('Microsoft.Web/sites/', variables('sendFunctionAppName')), '2018-02-01', 'Full').identity.tenantId]",
 				"objectId": "[reference(concat('Microsoft.Web/sites/', variables('sendFunctionAppName')), '2018-02-01', 'Full').identity.principalId]",
 				"permissions": {
 				  "keys": [],
@@ -1382,7 +1382,7 @@
 				}
 			  },
 			  {
-				"tenantId": "[variables('subscriptionTenantId')]",
+				"tenantId": "[reference(concat('Microsoft.Web/sites/', variables('dataFunctionAppName')), '2018-02-01', 'Full').identity.tenantId]",
 				"objectId": "[reference(concat('Microsoft.Web/sites/', variables('dataFunctionAppName')), '2018-02-01', 'Full').identity.principalId]",
 				"permissions": {
 				  "keys": [],

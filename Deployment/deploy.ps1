@@ -587,7 +587,6 @@ function CreateCertificateInKeyVault {
      #Generate new Azure Key Vault Certificate
     Write-Host "Processing creation of Azure Key Vault Certificate" -ForegroundColor Yellow
     $certSubjectName = 'cn=' + $domainName
-    #Set-AzKeyVaultAccessPolicy -VaultName $keyVaultName -ObjectId $parameters.UserObjectId.Value -PermissionsToCertificates get,list,update,create
     $azKeyVaultCertPolicy = New-AzKeyVaultCertificatePolicy -SecretContentType "application/x-pkcs12" -SubjectName $certSubjectName -IssuerName "Self" -ValidityInMonths 24 -ReuseKeyOnRenewal
     $azKeyVaultCertStatus = Add-AzKeyVaultCertificate -VaultName $keyVaultName -Name $CertificateName -CertificatePolicy $azKeyVaultCertPolicy
 
@@ -641,8 +640,8 @@ function GrantAdminConsent {
     $confirmationChoices = "&Yes", "&No" # 0 = Yes, 1 = No
     $consentErrorMessage = "Current user does not have the privilege to consent the below permissions on this app.
     * AppCatalog.Read.All(Delegated)
-    * Group.Read.All(Delegated)
-    * Group.Read.All(Application)
+    * GroupMember.Read.All(Delegated)
+    * GroupMember.Read.All(Application)
     * TeamsAppInstallation.ReadWriteForUser.All(Application)
     * User.Read.All(Delegated)
     * User.Read(Application) 
@@ -1075,7 +1074,7 @@ function logout {
 	
 # Create Company Communicator App
 	$graphApp = $parameters.baseResourceName.Value
-	$graphAppCred = CreateAzureADApp $graphApp
+	$graphAppCred = CreateAzureADApp $graphApp $True $False
 	if ($null -eq $graphAppCred) {
 		WriteE -message "Failed to create or update the main app in Azure Active Directory. Exiting..."
 		logout
