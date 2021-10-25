@@ -63,6 +63,34 @@
     "Value": "148a66bb-e83d-425a-927d-09f4299a9274",
     "Description": "User app external ID."
   },
+  "serviceBusWebAppRoleNameGuid": {
+    "Value": "958380b3-630d-4823-b933-f59d92cdcada",
+    "Description": "A GUID used to identify the role assignment."
+  },
+  "serviceBusPrepFuncRoleNameGuid": {
+    "Value": "ce6ca916-08e9-4639-bfbe-9d098baf42ca",
+    "Description": "A GUID used to identify the role assignment."
+  },
+  "serviceBusSendFuncRoleNameGuid": {
+    "Value": "960365a2-c7bf-4ff3-8887-efa86fe4a163",
+    "Description": "A GUID used to identify the role assignment."
+  },
+  "serviceBusDataFuncRoleNameGuid": {
+    "Value": "d42703bc-421d-4d98-bc4d-cd2bb16e5b0a",
+    "Description": "A GUID used to identify the role assignment."
+  },
+  "storageAccountWebAppRoleNameGuid": {
+    "Value": "edd0cc48-2cf7-490e-99e8-131311e42030",
+    "Description": "A GUID used to identify the role assignment."
+  },
+  "storageAccountPrepFuncRoleNameGuid": {
+    "Value": "9332a9e9-93f4-48d9-8121-d279f30a732e",
+    "Description": "A GUID used to identify the role assignment."
+  },
+  "storageAccountDataFuncRoleNameGuid": {
+    "Value": "5b67af51-4a98-47e1-9d22-745069f51a13",
+    "Description": "A GUID used to identify the role assignment."
+  },
   "defaultCulture": {
     "Value": "en-US",
     "Description": "Default culture."
@@ -76,7 +104,7 @@
     "Description": "The pricing tier for the hosting plan. Default value: Standard. You may choose between Basic, Standard and Premium."
   },
   "hostingPlanSize": {
-    "Value": "1",
+    "Value": "2",
     "Description": "The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value: 1"
   },
   "gitRepoUrl": {
