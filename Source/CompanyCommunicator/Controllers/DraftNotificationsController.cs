@@ -166,6 +166,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
                 Buttons = notification.Buttons,
+                TrackingUrl = this.HttpContext.Request.Scheme + "://" + this.HttpContext.Request.Host + "/api/sentNotifications/tracking",
             };
 
             await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
@@ -289,6 +290,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 IsImportant = notificationEntity.IsImportant,
                 ScheduledDate = notificationEntity.ScheduledDate,
                 Buttons = notificationEntity.Buttons,
+                TrackingUrl = notificationEntity.TrackingUrl,
             };
 
             return this.Ok(result);
