@@ -586,7 +586,7 @@
 						"UserAppExternalId": "[variables('UserAppExternalId')]",
 						"AzureAd:TenantId": "[parameters('tenantId')]",
 						"AzureAd:ClientId": "[parameters('graphAppId')]",
-						"AzureAd:ClientSecret": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/GraphAppSecret)')]",
+						"AzureAd:ClientSecret": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('GraphAppSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
 						"AzureAd:ApplicationIdURI": "[if(variables('useFrontDoor'), concat('api://', variables('frontDoorDomain')), '')]",
 						"UserAppId": "[parameters('userClientId')]",
 						"UserAppPassword": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('UserAppSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
