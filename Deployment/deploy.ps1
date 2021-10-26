@@ -268,6 +268,18 @@ function GetAzureADApp {
     return $app
 }
 
+# To get the Azure AD app detail with new secret. 
+function GetAzureADAppWithSecret {
+    param ($appName)
+    $app = GetAzureADApp $appName
+    
+    #Reset the app credentials to get the secret. The default validity of this secret will be for 1 year from the date its created. 
+    WriteI -message "Retreiving new app with secrets..."
+    $appSecret = az ad app credential reset --id $app.appId --append | ConvertFrom-Json;
+
+    return $appSecret
+}
+
 # Create/re-set Azure AD app.
 function CreateAzureADApp {
     param(
@@ -818,7 +830,7 @@ function ADAppUpdateDisplayName{
     az ad app update --id $appId --set DisplayName=$newName 	
 }
 
-# Removing existing access of user app.
+# Removing existing access of app.
 function ADAppUpdateUser {
     Param(
         [Parameter(Mandatory = $true)] $appId
@@ -840,11 +852,11 @@ function ADAppUpdateUser {
 
     # Do nothing if the app has already been configured
     if ($app.IdentifierUris.Count -eq 0) {
-        WriteS -message "`nUser app already configured."
+        WriteS -message "`n app already configured."
         return
     }
 
-    WriteI -message "`nUpdating user app..."
+    WriteI -message "`nUpdating app..."
     $IdentifierUris = "api://$appId"
 
     $DEFAULT_SCOPE=$(az ad app show --id $appId | jq '.oauth2Permissions[0].isEnabled = false' | jq -r '.oauth2Permissions')
@@ -1041,7 +1053,7 @@ function logout {
 
 	if($parameters.isUpgrade.Value){
         $currentAppName = $parameters.baseresourcename.Value
-		$userAppCred = GetAzureADApp $currentAppName
+		$userAppCred = GetAzureADAppWithSecret $currentAppName
 		ADAppUpdateDisplayName $userAppCred.appId $currentAppName $usersApp
 	}
 	else
@@ -1058,7 +1070,7 @@ function logout {
     $authorsApp = $parameters.baseResourceName.Value + '-authors'
 	$authorAppCred = $null
 	if($parameters.isUpgrade.Value){
-		$authorAppCred = GetAzureADApp $authorsApp
+		$authorAppCred = GetAzureADAppWithSecret $authorsApp
 	}
 	else
 	{
@@ -1072,7 +1084,7 @@ function logout {
 	
 # Create Company Communicator App
 	$graphApp = $parameters.baseResourceName.Value
-	$graphAppCred = CreateAzureADApp $graphApp $True $False
+	$graphAppCred = CreateAzureADApp -AppName $graphApp -ResetAppSecret $True -MultiTenant $False
 	if ($null -eq $graphAppCred) {
 		WriteE -message "Failed to create or update the main app in Azure Active Directory. Exiting..."
 		logout
@@ -1087,7 +1099,7 @@ function logout {
 
         # Reading the deployment output.
         WriteI -message "Reading deployment outputs..."
-        if($null -eq $deploymentOutput)
+        if(($null -eq $deploymentOutput) -or ( $null -eq $deploymentOutput.properties) -or ($null -eq $deploymentOutput.properties.Outputs) -or ($deploymentOutput.properties.Outputs.keyVaultName) -or ($deploymentOutput.properties.Outputs.keyVaultName.Value))
         {
             $keyVaultName = $parameters.BaseResourceName.Value + 'vault'
             if($parameters.customDomainOption.Value -eq 'Azure Front Door')
@@ -1124,7 +1136,7 @@ function logout {
         
         # Reading the deployment output.
         WriteI -message "Reading deployment outputs..."
-        if($null -eq $deploymentOutput)
+        if(($null -eq $deploymentOutput) -or ( $null -eq $deploymentOutput.properties) -or ($null -eq $deploymentOutput.properties.Outputs) -or ($deploymentOutput.properties.Outputs.keyVaultName) -or ($deploymentOutput.properties.Outputs.keyVaultName.Value))
         {
             $keyVaultName = $parameters.BaseResourceName.Value + 'vault'
             if($parameters.customDomainOption.Value -eq 'Azure Front Door')
