@@ -22,6 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardServices;
@@ -51,23 +52,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             builder.Services.AddOptions<BotOptions>()
                .Configure<IConfiguration>((botOptions, configuration) =>
                {
-                   botOptions.UserAppId =
-                       configuration.GetValue<string>("UserAppId");
-
-                   botOptions.UserAppPassword =
-                       configuration.GetValue<string>("UserAppPassword", string.Empty);
-
-                   botOptions.AuthorAppId =
-                       configuration.GetValue<string>("AuthorAppId");
-
-                   botOptions.AuthorAppPassword =
-                       configuration.GetValue<string>("AuthorAppPassword", string.Empty);
-                   botOptions.UseCertificate =
-                        configuration.GetValue<bool>("UseCertificate", false);
-                   botOptions.AuthorAppThumbprint =
-                       configuration.GetValue<string>("AuthorAppThumbprint", string.Empty);
-                   botOptions.UserAppThumbprint =
-                       configuration.GetValue<string>("UserAppThumbprint", string.Empty);
+                   botOptions.UserAppId = configuration.GetValue<string>("UserAppId");
+                   botOptions.UserAppPassword = configuration.GetValue<string>("UserAppPassword", string.Empty);
+                   botOptions.UserAppCertName = configuration.GetValue<string>("UserAppCertName", string.Empty);
+                   botOptions.AuthorAppId = configuration.GetValue<string>("AuthorAppId");
+                   botOptions.AuthorAppCertName = configuration.GetValue<string>("AuthorAppPassword", string.Empty);
+                   botOptions.AuthorAppCertName = configuration.GetValue<string>("AuthorAppCertName", string.Empty);
+                   botOptions.GraphAppId = configuration.GetValue<string>("GraphAppId");
+                   botOptions.GraphAppCertName = configuration.GetValue<string>("GraphAppCertName", string.Empty);
+                   botOptions.UseCertificate = configuration.GetValue<bool>("UseCertificate", false);
                });
             builder.Services.AddOptions<CleanUpFileOptions>()
                .Configure<IConfiguration>((cleanUpFileOptions, configuration) =>
@@ -101,7 +94,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             builder.Services.AddSingleton<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
-            builder.Services.AddSingleton<ICertificateProvider, CertificateProvider>();
+
+            // Add Secrets.
+            var keyVaultUrl = Environment.GetEnvironmentVariable("KeyVault:Url");
+            builder.Services.AddSecretsProvider(keyVaultUrl);
 
             // Add services.
             builder.Services.AddSingleton<IFileCardService, FileCardService>();

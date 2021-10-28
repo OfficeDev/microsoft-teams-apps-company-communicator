@@ -1,0 +1,168 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseResourceName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The base name to use for the resources that will be provisioned."
+      }
+    },
+    "userClientId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "metadata": {
+        "description": "The client ID of the user bot Azure AD app, e.g., 123e4567-e89b-12d3-a456-426655440000."
+      }
+    },
+    "authorClientId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "metadata": {
+        "description": "The client ID of the author bot Azure AD app, e.g., 123e4567-e89b-12d3-a456-426655440000."
+      }
+    },
+    "appDisplayName": {
+      "type": "string",
+      "defaultValue": "CompanyCommunicatorApp",
+      "minLength": 1,
+      "metadata": {
+        "description": "The app (and bot) display name."
+      }
+    },
+    "appDescription": {
+      "type": "string",
+      "defaultValue": "Broadcast messages to multiple teams and people in one go",
+      "minLength": 1,
+      "metadata": {
+        "description": "The app (and bot) description."
+      }
+    },
+    "appIconUrl": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-company-communicator-app/master/Manifest/color.png",
+      "metadata": {
+        "description": "The link to the icon for the app. It must resolve to a PNG file."
+      }
+    }
+  },
+  "variables": {
+    "botName": "[parameters('baseResourceName')]",
+    "authorBotName": "[concat(parameters('baseResourceName'), '-author')]",
+    "botAppName": "[parameters('baseResourceName')]",
+    "botAppDomain": "[concat(variables('botAppName'), '.azurewebsites.us')]",
+    "botAppUrl": "[concat('https://', variables('botAppDomain'))]",
+    "appInsightsName": "[parameters('baseResourceName')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-05-01",
+      "name": "[variables('appInsightsName')]",
+      "type": "Microsoft.Insights/components",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('botAppName'))]": "Resource"
+      },
+      "properties": {
+        "Application_Type": "web",
+        "Request_Source": "rest"
+      }
+    },
+    {
+      "apiVersion": "2018-07-12",
+      "name": "[variables('authorBotName')]",
+      "type": "Microsoft.BotService/botServices",
+      "location": "global",
+      "sku": {
+        "name": "F0"
+      },
+      "kind": "sdk",
+      "properties": {
+        "displayName": "[concat(parameters('appDisplayName'),'-author')]",
+        "description": "[parameters('appDescription')]",
+        "iconUrl": "[parameters('appIconUrl')]",
+        "msaAppId": "[parameters('authorClientId')]",
+        "endpoint": "[concat(variables('botAppUrl'), '/api/messages/author')]",
+        "developerAppInsightKey": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
+      },
+      "resources": [
+        {
+          "name": "[concat(variables('authorBotName'), '/MsTeamsChannel')]",
+          "type": "Microsoft.BotService/botServices/channels",
+          "apiVersion": "2018-07-12",
+          "location": "global",
+          "sku": {
+            "name": "F0"
+          },
+          "properties": {
+            "channelName": "MsTeamsChannel",
+            "location": "global",
+            "properties": {
+              "isEnabled": true
+            }
+          },
+          "dependsOn": [
+            "[concat('Microsoft.BotService/botServices/', variables('authorBotName'))]"
+          ]
+        }
+      ]
+    },
+    {
+      "apiVersion": "2018-07-12",
+      "name": "[variables('botName')]",
+      "type": "Microsoft.BotService/botServices",
+      "location": "global",
+      "sku": {
+        "name": "F0"
+      },
+      "kind": "sdk",
+      "properties": {
+        "displayName": "[parameters('appDisplayName')]",
+        "description": "[parameters('appDescription')]",
+        "iconUrl": "[parameters('appIconUrl')]",
+        "msaAppId": "[parameters('userClientId')]",
+        "endpoint": "[concat(variables('botAppUrl'), '/api/messages/user')]",
+        "developerAppInsightKey": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
+      },
+      "resources": [
+        {
+          "name": "[concat(variables('botName'), '/MsTeamsChannel')]",
+          "type": "Microsoft.BotService/botServices/channels",
+          "apiVersion": "2018-07-12",
+          "location": "global",
+          "sku": {
+            "name": "F0"
+          },
+          "properties": {
+            "channelName": "MsTeamsChannel",
+            "location": "global",
+            "properties": {
+              "isEnabled": true
+            }
+          },
+          "dependsOn": [
+            "[concat('Microsoft.BotService/botServices/', variables('botName'))]"
+          ]
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "authorBotId": {
+      "type": "string",
+      "value": "[parameters('authorClientId')]"
+    },
+    "userBotId": {
+      "type": "string",
+      "value": "[parameters('userClientId')]"
+    },
+    "appDomain": {
+      "type": "string",
+      "value": "[variables('botAppDomain')]"
+    }
+  }
+}

@@ -117,7 +117,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                 if (useCertificate)
                 {
                     await retryPolicy.ExecuteAsync(async () =>
-                    await this.botAdapter.CreateConversationAsync(
+                    await this.botAdapter.CreateConversationUsingCertificateAsync(
                         channelId: ConversationService.MicrosoftTeamsChannelId,
                         serviceUrl: serviceUrl,
                         appCredentials: credentials as AppCredentials,
@@ -136,7 +136,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                 else
                 {
                     await retryPolicy.ExecuteAsync(async () =>
-                    await this.botAdapter.CreateConversationAsync(
+                    await this.botAdapter.CreateConversationUsingSecretAsync(
                         channelId: ConversationService.MicrosoftTeamsChannelId,
                         serviceUrl: serviceUrl,
                         credentials: credentials,

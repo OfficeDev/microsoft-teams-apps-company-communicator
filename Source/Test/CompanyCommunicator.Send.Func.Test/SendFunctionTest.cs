@@ -72,8 +72,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
             // Arrange
             // Notification is already sent or failed
             var sendFunctionInstance = this.GetSendFunction();
-            string data = "{\"NotificationId\":\"notificationId\"}";
+            string data = "{\"NotificationId\":\"notificationId\",\"RecipientData\": {\"RecipientId\" : \"TestResp\", \"UserData\": { \"UserId\" : \"userId\",\"ConversationId\":\"conversationId\",\"UserType\":\"Member\"}}}";
             this.notificationService.Setup(x => x.IsPendingNotification(It.IsAny<SendQueueMessageContent>())).ReturnsAsync(false); // Notification is pending
+            this.notificationService
+                .Setup(x => x.UpdateSentNotification(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.CompletedTask);
 
             // Act
             Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, this.dateTime, string.Empty, this.logger.Object, new ExecutionContext());
@@ -92,7 +95,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         {
             // Arrange
             var sendFunctionInstance = this.GetSendFunction();
-            string data = "{\"NotificationId\":\"notificationId\",\"RecipientData\": {\"RecipientId\" : \"TestResp\", \"UserData\": { \"UserId\" : \"userId\",\"ConversationId\":\"\"}}}";
+            string data = "{\"NotificationId\":\"notificationId\",\"RecipientData\": {\"RecipientId\" : \"TestResp\", \"UserData\": { \"UserId\" : \"userId\",\"ConversationId\":\"\",\"UserType\":\"Member\"}}}";
             SendQueueMessageContent messageContent = JsonConvert.DeserializeObject<SendQueueMessageContent>(data);
             this.notificationService
                 .Setup(x => x.IsPendingNotification(It.IsAny<SendQueueMessageContent>()))
@@ -106,7 +109,46 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
 
             // Assert
             await task.Should().NotThrowAsync<NullReferenceException>();
-            this.notificationService.Verify(x => x.UpdateSentNotification(It.Is<string>(x => x.Equals("notificationId")), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()));
+            this.notificationService.Verify(x => x.UpdateSentNotification(It.Is<string>(x => x.Equals("notificationId")), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        /// <summary>
+        /// Test for send Notification in case of a guest user.
+        /// </summary>
+        /// <returns><see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task SendFunc_GuestUser_ShouldNotSendMessage()
+        {
+            // Arrange
+            var sendFunctionInstance = this.GetSendFunction();
+            string data = "{\"NotificationId\":\"notificationId\",\"RecipientData\": {\"RecipientId\" : \"TestResp\", \"UserData\": { \"UserId\" : \"userId\",\"ConversationId\":\"conversationId\",\"UserType\":\"Guest\"}}}";
+            SendQueueMessageContent messageContent = JsonConvert.DeserializeObject<SendQueueMessageContent>(data);
+
+            // Act
+            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, this.dateTime, string.Empty, this.logger.Object, new ExecutionContext());
+
+            // Assert
+            await task.Should().NotThrowAsync();
+            this.notificationService.Verify(x => x.UpdateSentNotification(It.Is<string>(x => x.Equals("notificationId")), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        /// <summary>
+        /// Test for send Notification when userType is set as null.
+        /// </summary>
+        /// <returns><see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task SendFunc_NullUserType_ShouldNotThrowException()
+        {
+            // Arrange
+            var sendFunctionInstance = this.GetSendFunction();
+            string data = "{\"NotificationId\":\"notificationId\",\"RecipientData\": {\"RecipientId\" : \"TestResp\", \"UserData\": { \"UserId\" : \"userId\",\"ConversationId\":\"conversationId\",\"UserType\":\"\"}}}";
+            SendQueueMessageContent messageContent = JsonConvert.DeserializeObject<SendQueueMessageContent>(data);
+
+            // Act
+            Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, this.dateTime, string.Empty, this.logger.Object, new ExecutionContext());
+
+            // Assert
+            await task.Should().NotThrowAsync();
         }
 
         /// <summary>
@@ -119,7 +161,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
             // Arrange
             // SendNotificationThrottled
             var sendFunctionInstance = this.GetSendFunction();
-            string data = "{\"NotificationId\":\"notificationId\",\"RecipientData\": {\"RecipientId\" : \"TestResp\", \"UserData\": { \"UserId\" : \"userId\",\"ConversationId\":\"conversationId\"}}}";
+            string data = "{\"NotificationId\":\"notificationId\",\"RecipientData\": {\"RecipientId\" : \"TestResp\", \"UserData\": { \"UserId\" : \"userId\",\"ConversationId\":\"conversationId\",\"UserType\":\"Member\"}}}";
             SendQueueMessageContent messageContent = JsonConvert.DeserializeObject<SendQueueMessageContent>(data);
             this.notificationService
                 .Setup(x => x.IsPendingNotification(It.IsAny<SendQueueMessageContent>()))
@@ -153,7 +195,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
             {
                 ResultType = SendMessageResult.Succeeded,
             };
-            string data = "{\"NotificationId\":\"notificationId\",\"RecipientData\": {\"RecipientId\" : \"TestResp\", \"UserData\": { \"UserId\" : \"userId\",\"ConversationId\":\"conversationId\"}}}";
+            string data = "{\"NotificationId\":\"notificationId\",\"RecipientData\": {\"RecipientId\" : \"TestResp\", \"UserData\": { \"UserId\" : \"userId\",\"ConversationId\":\"conversationId\",\"UserType\":\"Member\"}}}";
             SendQueueMessageContent messageContent = JsonConvert.DeserializeObject<SendQueueMessageContent>(data);
             this.notificationService
                 .Setup(x => x.IsPendingNotification(It.IsAny<SendQueueMessageContent>()))
@@ -193,7 +235,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
             {
                 ResultType = SendMessageResult.Throttled,
             };
-            string data = "{\"NotificationId\":\"notificationId\",\"RecipientData\": {\"RecipientId\" : \"TestResp\", \"UserData\": { \"UserId\" : \"userId\",\"ConversationId\":\"conversationId\"}}}";
+            string data = "{\"NotificationId\":\"notificationId\",\"RecipientData\": {\"RecipientId\" : \"TestResp\", \"UserData\": { \"UserId\" : \"userId\",\"ConversationId\":\"conversationId\",\"UserType\":\"Member\"}}}";
             SendQueueMessageContent messageContent = JsonConvert.DeserializeObject<SendQueueMessageContent>(data);
             this.notificationService
                 .Setup(x => x.IsPendingNotification(It.IsAny<SendQueueMessageContent>()))

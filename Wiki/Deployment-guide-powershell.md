@@ -1,4 +1,4 @@
-- [Deployment Guide](#outlook-web-service-ows)
+- Deployment Guide **RECOMMENDED**
     - [Prerequisites](#prerequisites)
     - [Steps](#Deployment-Steps)
         - [Deploy to your Azure subscription](#1-deploy-to-your-azure-subscription)
@@ -9,7 +9,7 @@
 - - -
 
 # Prerequisites
-To begin, you will need:
+To begin, you will need:  
 
 * An Azure subscription where you can create the following kinds of resources:
     * App Service
@@ -19,6 +19,12 @@ To begin, you will need:
     * Azure Storage Account
     * Service Bus
     * Application Insights
+    * Azure Key vault
+* An role to assign roles in Azure RBAC. To check if you have permission to do this, 
+    * Goto the subscription page in Azure portal. Then, goto Access Control(IAM) and click on `View my access` button.
+    * Click on your `role` and in search permissions text box, search for `Microsoft.Authorization/roleAssignments/Write`.
+    * If your current role does not have the permission, then you can grant yourself the built in role `User Access Administrator` or create a custom role.
+    * Please follow this [link](https://docs.microsoft.com/en-us/azure/role-based-access-control/custom-roles#steps-to-create-a-custom-role) to create a custom role. Use this action `Microsoft.Authorization/roleAssignments/Write` in the custom role to assign roles in Azure RBAC.
 * A team with the users who will be sending messages with this app. (You can add and remove team members later!)
 * A copy of the Company Communicator app GitHub repo ([https://github.com/OfficeDev/microsoft-teams-company-communicator-app](https://github.com/OfficeDev/microsoft-teams-company-communicator-app))
 
@@ -79,6 +85,7 @@ To begin, you will need:
 
     - `subscriptionId` - Azure subscription to deploy the solution to (MUST be associated with the Azure AD of the Office 365 tenant that you wish to deploy this solution to.) e.g. 22f602c4-1b8f-46df-8b73-45d7bdfbf58e.
     - `subscriptionTenantId` - Id of the tenant to deploy to (If you are not sure how to get Tenant ID, please check Azure Active Directory in Azure Portal. Under Manage, click Properties. The tenant ID is shown in the Directory ID box). e.g 98f3ece2-3a5a-428b-aa4f-4c41b3f6eef0. Tenant ID is also available in the `Overview` section".
+    - `userObjectId` - Object Id of the user to deploy to (If you are not sure how to get Object ID, please check Azure Active Directory in Azure Portal. Under Manage, click Users and select the appropriate user. The Object ID is shown in the Identity section). e.g 98f3ece2-3a5a-428b-aa4f-4c41b3f6eef0.
     - `resourceGroupName` - Name for a new resource group to deploy the solution to - the script will create this resource group. e.g. CompanyCommunicatorRG.
     - `region` - Azure region in which to create the resources. The internal name should be used e.g. eastus. Run the following command in Powershell to list internal names.
       ```
@@ -94,14 +101,37 @@ To begin, you will need:
        For example, to allow Megan Bowen ([meganb@contoso.com](mailto:meganb@contoso.com)) and Adele Vance ([adelev@contoso.com](mailto:adelev@contoso.com)) to send messages, set this parameter to `meganb@contoso.com;adelev@contoso.com`.
        You can change this list later by going to the `App Service > Configuration` blade.
 
+    - `isUpgrade` - If this is an upgrade for old version of the app template, then value should be true. Otherwise, false is default (First-time deployment).
+
+    - `useCertificate` - If certificate authentication is being used, then value should be true. Otherwise, false is default (Client-secret will be used).
+
+    - `authorAppCertName` - If certificate authentication is being used, then give the name for the new certificate of author bot Azure AD app to be created in Azure Key vault.
+
+    - `userAppCertName` - If certificate authentication is being used, then give the name for the new certificate of user bot Azure AD app to be created in Azure Key vault.
+
+    - `graphAppCertName` - If certificate authentication is being used, then give the name for the new certificate of graph app Azure AD app to be created in Azure Key vault.
+    
     - `customDomainOption` - How the app will be hosted on a domain that is not \*.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs.
     > **NOTE**:  If you plan to use a custom domain name instead of relying on Azure Front Door, read the instructions [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Custom-domain-option) first.
     
     - `proactivelyInstallUserApp`: If proactive app installation should be enabled. Default is true. If enabled, the application will proactively install the User bot for recipients.
     - `userAppExternalId`: Default value is 148a66bb-e83d-425a-927d-09f4299a9274. This is the external Id provided in the User app manifest.
+    - `serviceBusWebAppRoleNameGuid`: Default value is `958380b3-630d-4823-b933-f59d92cdcada`. This **MUST** be the same `id` per app deployment.
+   
+        > **Note:** Make sure to keep the same values for an upgrade. Please change the role name GUIDs in case of another Company Communicator Deployment in same subscription.
+
+    - `serviceBusPrepFuncRoleNameGuid`: Default value is `ce6ca916-08e9-4639-bfbe-9d098baf42ca`. This **MUST** be the same `id` per app deployment.
+    - `serviceBusSendFuncRoleNameGuid`: Default value is `960365a2-c7bf-4ff3-8887-efa86fe4a163`. This **MUST** be the same `id` per app deployment.
+    - `serviceBusDataFuncRoleNameGuid`: Default value is `d42703bc-421d-4d98-bc4d-cd2bb16e5b0a`. This **MUST** be the same `id` per app deployment.
+    - `storageAccountWebAppRoleNameGuid`: Default value is `edd0cc48-2cf7-490e-99e8-131311e42030`. This **MUST** be the same `id` per app deployment.
+    - `storageAccountPrepFuncRoleNameGuid`: Default value is `9332a9e9-93f4-48d9-8121-d279f30a732e`. This **MUST** be the same `id` per app deployment.
+    - `storageAccountDataFuncRoleNameGuid`: Default value is `5b67af51-4a98-47e1-9d22-745069f51a13`. This **MUST** be the same `id` per app deployment.
     - `defaultCulture`:  By default the application uses `en-US` locale. You can choose another locale from the list [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Localization), if you wish to use the app in different locale.
     - `hostingPlanSku`: The pricing tier for the hosting plan. Defaul value: Standard. You may choose between Basic, Standard and Premium.
-    - `hostingPlanSize`: The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value: 1
+    - `hostingPlanSize`: The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value: 2
+    
+        > **Note:** The default value is 2 to minimize the chances of an error during app deployment. After deployment you can choose to change the size of the hosting plan.
+
     - `gitRepoUrl` - The URL to the GitHub repository to deploy. Default value: [https://github.com/OfficeDev/microsoft-teams-company-communicator-app.git](https://github.com/OfficeDev/microsoft-teams-company-communicator-app.git)
     - `gitBranch` - The branch of the GitHub repository to deploy. Default value: master
     - `appDisplayName` - The app (and bot) display name. Default value:Company Communicator.

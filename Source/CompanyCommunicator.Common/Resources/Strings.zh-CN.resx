@@ -247,4 +247,16 @@
   <data name="Throttled" xml:space="preserve">
     <value>限制</value>
   </data>
+  <data name="ColumnName_UserType" xml:space="preserve">
+    <value>用户类型</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>来宾</value>
+  </data>
+  <data name="Member" xml:space="preserve">
+    <value>成员</value>
+  </data>
+  <data name="GuestUserNotSupported" xml:space="preserve">
+    <value>不支持来宾用户</value>
+  </data>
 </root>

@@ -25,6 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
@@ -32,7 +33,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Recipients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
 
@@ -68,16 +71,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                         configuration.GetValue<string>("AuthorAppId");
                     botOptions.AuthorAppPassword =
                         configuration.GetValue<string>("AuthorAppPassword", string.Empty);
-                    botOptions.MicrosoftAppId =
-                        configuration.GetValue<string>("MicrosoftAppId");
+                    botOptions.GraphAppId =
+                        configuration.GetValue<string>("GraphAppId");
                     botOptions.UseCertificate =
                         configuration.GetValue<bool>("UseCertificate", false);
-                    botOptions.AuthorAppThumbprint =
-                        configuration.GetValue<string>("AuthorAppThumbprint", string.Empty);
-                    botOptions.UserAppThumbprint =
-                        configuration.GetValue<string>("UserAppThumbprint", string.Empty);
-                    botOptions.MicrosoftAppThumbprint =
-                        configuration.GetValue<string>("MicrosoftAppThumbprint", string.Empty);
+                    botOptions.AuthorAppCertName =
+                        configuration.GetValue<string>("AuthorAppCertName", string.Empty);
+                    botOptions.UserAppCertName =
+                        configuration.GetValue<string>("UserAppCertName", string.Empty);
+                    botOptions.GraphAppCertName =
+                        configuration.GetValue<string>("GraphAppCertName", string.Empty);
                 });
             builder.Services.AddOptions<DataQueueMessageOptions>()
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
@@ -113,7 +116,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
             builder.Services.AddSingleton<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
-            builder.Services.AddSingleton<ICertificateProvider, CertificateProvider>();
 
             // Add repositories.
             builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
@@ -133,10 +135,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<TableRowKeyGenerator>();
             builder.Services.AddTransient<AdaptiveCardCreator>();
             builder.Services.AddTransient<IAppSettingsService, AppSettingsService>();
+            builder.Services.AddTransient<IUserTypeService, UserTypeService>();
+            builder.Services.AddTransient<IRecipientsService, RecipientsService>();
 
             // Add Teams services.
             builder.Services.AddTransient<ITeamMembersService, TeamMembersService>();
             builder.Services.AddTransient<IConversationService, ConversationService>();
+
+            // Add Secrets.
+            var keyVaultUrl = Environment.GetEnvironmentVariable("KeyVault:Url");
+            builder.Services.AddSecretsProvider(keyVaultUrl);
 
             // Add graph services.
             this.AddGraphServices(builder);
@@ -154,8 +162,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
                 Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
                 {
-                    confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("MicrosoftAppId");
-                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("MicrosoftAppPassword", string.Empty);
+                    confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("GraphAppId");
+                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("GraphAppPassword", string.Empty);
                     confidentialClientApplicationOptions.TenantId = configuration.GetValue<string>("TenantId");
                 });
 

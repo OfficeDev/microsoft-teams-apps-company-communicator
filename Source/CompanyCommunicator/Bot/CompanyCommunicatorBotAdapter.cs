@@ -9,7 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
 
     /// <summary>
     /// The Company Communicator Bot Adapter.
@@ -47,7 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 return await base.BuildCredentialsAsync(appId, oAuthScope);
             }
 
-            var cert = this.certificateProvider.GetCertificate(appId);
+            var cert = await this.certificateProvider.GetCertificateAsync(appId);
             var options = new CertificateAppCredentialsOptions()
             {
                 AppId = appId,

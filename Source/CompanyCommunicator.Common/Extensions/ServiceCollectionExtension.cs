@@ -14,6 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
     using Microsoft.Identity.Client;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
 
     /// <summary>
@@ -89,7 +90,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
                 {
                     var options = provider.GetRequiredService<IOptions<ConfidentialClientApplicationOptions>>();
                     var certificateProvider = provider.GetRequiredService<ICertificateProvider>();
-                    var cert = certificateProvider.GetCertificate(options.Value.ClientId);
+                    var cert = certificateProvider.GetCertificateAsync(options.Value.ClientId).Result;
                     return ConfidentialClientApplicationBuilder
                         .Create(options.Value.ClientId)
                         .WithCertificate(cert)

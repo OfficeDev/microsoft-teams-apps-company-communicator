@@ -82,7 +82,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(FunctionNames.TeamsConversationActivity)]
         public async Task CreateConversationAsync(
-            [ActivityTrigger](string notificationId, SentNotificationDataEntity recipient) input,
+            [ActivityTrigger](string notificationId, string batchKey, SentNotificationDataEntity recipient) input,
             ILogger log)
         {
             if (input.notificationId == null)
@@ -95,6 +95,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 throw new ArgumentNullException(nameof(input.recipient));
             }
 
+            if (string.IsNullOrEmpty(input.batchKey))
+            {
+                throw new ArgumentNullException(nameof(input.batchKey));
+            }
+
             if (log == null)
             {
                 throw new ArgumentNullException(nameof(log));
@@ -105,6 +110,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             // No-op for Team recipient.
             if (recipient.RecipientType == SentNotificationDataEntity.TeamRecipientType)
             {
+                return;
+            }
+
+            // No-op for null user type.
+            if (string.IsNullOrEmpty(recipient.UserType))
+            {
+                log.LogInformation("Unknown User Type.");
+                return;
+            }
+            else if (recipient.UserType.Equals(UserType.Guest, StringComparison.OrdinalIgnoreCase))
+            {
+                // Skip guest users.
                 return;
             }
 
@@ -145,6 +162,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             // Update sent notification and user entity.
             await this.sentNotificationDataRepository.InsertOrMergeAsync(recipient);
             await this.UpdateUserEntityAsync(recipient);
+
+            // Update Batch entry.
+            recipient.PartitionKey = input.batchKey;
+            await this.sentNotificationDataRepository.InsertOrMergeAsync(recipient);
         }
 
         private async Task<string> CreateConversationWithTeamsUser(
@@ -253,6 +274,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 ConversationId = recipient.ConversationId,
                 ServiceUrl = recipient.ServiceUrl,
                 TenantId = recipient.TenantId,
+
+                // Setting the userType value as Member,
+                // since only Member type users is allowed to be stored in Sent Notification Table.
+                // Existing or new Guest users is skipped from recipient list.
+                UserType = UserType.Member,
             };
 
             await this.userDataRepository.InsertOrMergeAsync(user);

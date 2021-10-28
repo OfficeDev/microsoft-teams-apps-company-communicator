@@ -12,7 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
 
     /// <summary>
     /// Bot framework http adapter instance.
@@ -35,22 +35,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
         }
 
         /// <inheritdoc/>
-        public override async Task CreateConversationAsync(string channelId, string serviceUrl, AppCredentials appCredentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken)
+        public async Task CreateConversationUsingCertificateAsync(string channelId, string serviceUrl, AppCredentials appCredentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken)
         {
-            var cert = this.certificateProvider.GetCertificate(appCredentials.MicrosoftAppId);
+            var cert = await this.certificateProvider.GetCertificateAsync(appCredentials.MicrosoftAppId);
             var options = new CertificateAppCredentialsOptions()
             {
                 AppId = appCredentials.MicrosoftAppId,
                 ClientCertificate = cert,
             };
 
-            await base.CreateConversationAsync(channelId, serviceUrl, new CertificateAppCredentials(options) as AppCredentials, conversationParameters, callback, cancellationToken);
+            await this.CreateConversationAsync(channelId, serviceUrl, new CertificateAppCredentials(options) as AppCredentials, conversationParameters, callback, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public override async Task CreateConversationAsync(string channelId, string serviceUrl, MicrosoftAppCredentials credentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken)
+        public async Task CreateConversationUsingSecretAsync(string channelId, string serviceUrl, MicrosoftAppCredentials credentials, ConversationParameters conversationParameters, BotCallbackHandler callback, CancellationToken cancellationToken)
         {
-            await base.CreateConversationAsync(channelId, serviceUrl, credentials, conversationParameters, callback, cancellationToken);
+            await this.CreateConversationAsync(channelId, serviceUrl, credentials, conversationParameters, callback, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -60,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
 
             if (this.certificateProvider.IsCertificateAuthenticationEnabled())
             {
-                var cert = this.certificateProvider.GetCertificate(appId);
+                var cert = await this.certificateProvider.GetCertificateAsync(appId);
                 var options = new CertificateAppCredentialsOptions()
                 {
                     AppId = appId,

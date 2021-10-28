@@ -3,9 +3,10 @@
 // Licensed under the MIT License.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets
 {
     using System.Security.Cryptography.X509Certificates;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// This instance is used to retrieve certificates.
@@ -15,14 +16,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
         /// <summary>
         /// Gets the certificate for the given app id.
         /// </summary>
-        /// <param name="appId">The Azuer active directory Identifier.</param>
+        /// <param name="appId">The Azure active directory Identifier.</param>
         /// <returns>Certificate.</returns>
-        X509Certificate2 GetCertificate(string appId);
+        Task<X509Certificate2> GetCertificateAsync(string appId);
 
         /// <summary>
         /// Checks if authentication is to be done using certificate.
         /// </summary>
-        /// <returns>Boolean indicating if authentication type is certifcate.</returns>
+        /// <returns>Boolean indicating if authentication type is certificate.</returns>
         bool IsCertificateAuthenticationEnabled();
     }
 }
