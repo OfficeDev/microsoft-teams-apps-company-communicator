@@ -20,7 +20,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Extensions;
 
     /// <summary>
@@ -34,6 +36,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         private readonly ISentNotificationDataRepository sentNotificationDataRepository;
         private readonly IStringLocalizer<Strings> localizer;
         private readonly IUserDataRepository userDataRepository;
+        private readonly IUserTypeService userTypeService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SyncTeamMembersActivity"/> class.
@@ -44,13 +47,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         /// <param name="localizer">Localization service.</param>
         /// <param name="userDataRepository">User Data repository.</param>
+        /// <param name="userTypeService">User Type service.</param>
         public SyncTeamMembersActivity(
             ITeamDataRepository teamDataRepository,
             ITeamMembersService memberService,
             INotificationDataRepository notificationDataRepository,
             ISentNotificationDataRepository sentNotificationDataRepository,
             IStringLocalizer<Strings> localizer,
-            IUserDataRepository userDataRepository)
+            IUserDataRepository userDataRepository,
+            IUserTypeService userTypeService)
         {
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.memberService = memberService ?? throw new ArgumentNullException(nameof(memberService));
@@ -58,6 +63,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
             this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
+            this.userTypeService = userTypeService ?? throw new ArgumentNullException(nameof(userTypeService));
         }
 
         /// <summary>
@@ -136,6 +142,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             await Task.WhenAll(users.ForEachAsync(maxParallelism, async user =>
             {
                 var userEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, user.AadId);
+                if (userEntity == null && user.UserType.Equals(UserType.Guest, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Skip processing new Guest users.
+                    return;
+                }
+
+                // This is to set the type of user(existing only, new ones will be skipped) to identify later if it is member or guest.
+                await this.userTypeService.UpdateUserTypeForExistingUserAsync(userEntity, user.UserType);
                 user.ConversationId ??= userEntity?.ConversationId;
                 recipients.Add(user.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
             }));

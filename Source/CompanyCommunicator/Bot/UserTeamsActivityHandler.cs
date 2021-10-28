@@ -60,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
             if (activity.MembersAdded != null)
             {
-                await this.teamsDataCapture.OnBotAddedAsync(activity);
+                await this.teamsDataCapture.OnBotAddedAsync(turnContext, activity, cancellationToken);
             }
 
             if (activity.MembersRemoved != null)

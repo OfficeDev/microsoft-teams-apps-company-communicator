@@ -158,7 +158,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             if (this.state.page === "ViewStatus") {
                 return (
                     <div className="taskModule">
-                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
+                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small">
                             <Flex className="scrollableContent">
                                 <Flex.Item size="size.half" className="formContentContainer">
                                     <Flex column>
@@ -233,7 +233,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             else if (this.state.page === "SuccessPage") {
                 return (
                     <div className="taskModule">
-                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
+                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small">
                             <div className="displayMessageField">
                                 <br />
                                 <br />
@@ -258,7 +258,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             else {
                 return (
                     <div className="taskModule">
-                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small" styles={{ background: "white" }}>
+                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small">
                             <div className="displayMessageField">
                                 <br />
                                 <br />

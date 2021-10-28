@@ -59,7 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         protected ILogger Logger { get; }
 
         /// <inheritdoc/>
-        public async Task CreateOrUpdateAsync(T entity)
+        public virtual async Task CreateOrUpdateAsync(T entity)
         {
             try
             {
@@ -113,7 +113,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<T> GetAsync(string partitionKey, string rowKey)
+        public virtual async Task<T> GetAsync(string partitionKey, string rowKey)
         {
             try
             {
@@ -161,6 +161,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
                 this.Logger.LogError(ex, ex.Message);
                 throw;
             }
+        }
+
+        /// <inheritdoc/>
+        public async Task<(IEnumerable<T>, TableContinuationToken)> GetPagedAsync(string partition = null, int? count = null, TableContinuationToken token = null)
+        {
+            var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
+            var query = new TableQuery<T>().Where(partitionKeyFilter);
+            query.TakeCount = count;
+            TableQuerySegment<T> seg;
+            if (token == null)
+            {
+                seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, null);
+                return (seg.Results, seg.ContinuationToken);
+            }
+
+            seg = await this.Table.ExecuteQuerySegmentedAsync<T>(query, token);
+            return (seg.Results, seg.ContinuationToken);
         }
 
         /// <inheritdoc/>
