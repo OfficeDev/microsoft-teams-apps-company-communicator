@@ -31,8 +31,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         public void SendBatchMessagesActivityConstructorTest()
         {
             // Arrange
-            Action action1 = () => new SendBatchMessagesActivity(null /*sendQueue*/);
-            Action action2 = () => new SendBatchMessagesActivity(this.sendQueue.Object);
+            Action action1 = () => new SendBatchMessagesActivity(null /*sendQueue*/, null);
+            Action action2 = () => new SendBatchMessagesActivity(this.sendQueue.Object, null);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("sendQueue is null.");
@@ -145,7 +145,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// </summary>
         private SendBatchMessagesActivity GetSendBatchMessagesActivity()
         {
-            return new SendBatchMessagesActivity(this.sendQueue.Object);
+            return new SendBatchMessagesActivity(this.sendQueue.Object, null);
         }
     }
 }

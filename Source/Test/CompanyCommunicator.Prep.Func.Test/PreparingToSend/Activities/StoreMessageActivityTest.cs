@@ -53,7 +53,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 Id = "123",
             };
             var activityContext = this.GetStoreMessageActivity();
-            AdaptiveCard adaptiveCard = new AdaptiveCard();
+            AdaptiveCard adaptiveCard = new AdaptiveCard("1.2");
             this.adaptiveCardCreator
                 .Setup(x => x.CreateAdaptiveCard(It.IsAny<NotificationDataEntity>()))
                 .Returns(adaptiveCard);
