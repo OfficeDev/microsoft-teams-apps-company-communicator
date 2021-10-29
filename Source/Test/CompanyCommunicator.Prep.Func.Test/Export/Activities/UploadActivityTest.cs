@@ -15,6 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
     using global::Azure.Storage.Blobs.Models;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Localization;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
@@ -30,6 +31,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
     /// </summary>
     public class UploadActivityTest
     {
+        private readonly Mock<IStorageClientFactory> storageClientFactory = new Mock<IStorageClientFactory>();
         private readonly Mock<IDataStreamFacade> userDataStream = new Mock<IDataStreamFacade>();
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
         private readonly Mock<BlobContainerClient> blobContainerClientMock = new Mock<BlobContainerClient>();
@@ -58,7 +60,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         public void CreateInstance_AllParameters_ShouldBeSuccess()
         {
             // Arrange
-            Action action = () => new UploadActivity(this.blobContainerClientMock.Object, this.userDataStream.Object, this.localizer.Object);
+            Action action = () => new UploadActivity(this.storageClientFactory.Object, this.userDataStream.Object, this.localizer.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
@@ -72,11 +74,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         {
             // Arrange
             Action action1 = () => new UploadActivity(null /*storageClientFactory*/, this.userDataStream.Object, this.localizer.Object);
-            Action action2 = () => new UploadActivity(this.blobContainerClientMock.Object, null/*userDataStream*/, this.localizer.Object);
-            Action action3 = () => new UploadActivity(this.blobContainerClientMock.Object, this.userDataStream.Object, null/*localizer*/);
+            Action action2 = () => new UploadActivity(this.storageClientFactory.Object, null/*userDataStream*/, this.localizer.Object);
+            Action action3 = () => new UploadActivity(this.storageClientFactory.Object, this.userDataStream.Object, null/*localizer*/);
 
             // Act and Assert.
-            action1.Should().Throw<ArgumentNullException>("blobContainerClient is null.");
+            action1.Should().Throw<ArgumentNullException>("storageClientFactory is null.");
             action2.Should().Throw<ArgumentNullException>("userDataStream is null.");
             action3.Should().Throw<ArgumentNullException>("localizer is null.");
         }
@@ -119,7 +121,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var teamData = new List<TeamData>() { new TeamData() { Id = "id" } };
             var teamDatalist = new List<List<TeamData>>() { teamData };
 
-            this.SetupBlobContainerClientMock();
+            var mock = GetBlobContainerClientMock();
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient()).Returns(mock.Object);
             string metaDataFile = "FileName_Metadata";
             var metaDataFileName = new LocalizedString(metaDataFile, metaDataFile);
             this.localizer.Setup(_ => _[metaDataFile]).Returns(metaDataFileName);
@@ -152,7 +155,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var userData = new List<UserData>() { new UserData() { Id = "id" } };
             var userDatalist = new List<List<UserData>>() { userData };
 
-            this.SetupBlobContainerClientMock();
+            var mock = GetBlobContainerClientMock();
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient()).Returns(mock.Object);
             string metaDataFile = "FileName_Metadata";
             var metaDataFileName = new LocalizedString(metaDataFile, metaDataFile);
             this.localizer.Setup(_ => _[metaDataFile]).Returns(metaDataFileName);
@@ -169,13 +173,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             this.userDataStream.Verify(x => x.GetUserDataStreamAsync(It.IsAny<string>()), Times.Once);
         }
 
-        private void SetupBlobContainerClientMock()
+        private static Mock<BlobContainerClient> GetBlobContainerClientMock()
         {
+            var mock = new Mock<BlobContainerClient>();
             var blobClient = new Mock<BlobClient>();
-            this.blobContainerClientMock.Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<BlobContainerEncryptionScopeOptions>(), It.IsAny<CancellationToken>()));
-            this.blobContainerClientMock.Setup(x => x.SetAccessPolicyAsync(It.IsAny<PublicAccessType>(), It.IsAny<IEnumerable<BlobSignedIdentifier>>(), It.IsAny<BlobRequestConditions>(), It.IsAny<CancellationToken>()));
-            this.blobContainerClientMock.Setup(x => x.GetBlobClient(It.IsAny<string>())).Returns(blobClient.Object);
+            mock.Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<BlobContainerEncryptionScopeOptions>(), It.IsAny<CancellationToken>()));
+            mock.Setup(x => x.SetAccessPolicyAsync(It.IsAny<PublicAccessType>(), It.IsAny<IEnumerable<BlobSignedIdentifier>>(), It.IsAny<BlobRequestConditions>(), It.IsAny<CancellationToken>()));
+            mock.Setup(x => x.GetBlobClient(It.IsAny<string>())).Returns(blobClient.Object);
             blobClient.Setup(x => x.UploadAsync(It.IsAny<string>()));
+            return mock;
         }
 
         private ExportDataEntity GetExportData()
@@ -190,7 +196,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
 
         private UploadActivity GetUploadActivity()
         {
-            return new UploadActivity(this.blobContainerClientMock.Object, this.userDataStream.Object, this.localizer.Object);
+            return new UploadActivity(this.storageClientFactory.Object, this.userDataStream.Object, this.localizer.Object);
         }
     }
 }

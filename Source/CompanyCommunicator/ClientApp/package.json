@@ -25,8 +25,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
     "redux": "^4.0.1",
-    "redux-thunk": "^2.3.0",
     "sass": "^1.32.7",
+    "redux-thunk": "^2.3.0",
     "typescript": "3.5.1",
     "typestyle": "^2.0.2"
   },

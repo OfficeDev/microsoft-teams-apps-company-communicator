@@ -1,4 +1,4 @@
-﻿// <copyright file="SecretsRegitsry.cs" company="Microsoft">
+﻿// <copyright file="SecretsRegistry.cs" company="Microsoft">
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 // </copyright>

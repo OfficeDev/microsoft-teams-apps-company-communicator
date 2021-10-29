@@ -72,7 +72,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter
                 return certificateAppCredentials;
             }
             else
-            {
+        {
                 return await base.BuildCredentialsAsync(appId, oAuthScope);
             }
         }

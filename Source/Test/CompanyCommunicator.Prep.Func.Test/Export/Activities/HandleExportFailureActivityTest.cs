@@ -17,6 +17,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
@@ -31,6 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
     public class HandleExportFailureActivityTest
     {
         private readonly Mock<IExportDataRepository> exportDataRepository = new Mock<IExportDataRepository>();
+        private readonly Mock<IStorageClientFactory> storageClientFactory = new Mock<IStorageClientFactory>();
         private readonly Mock<IUserDataRepository> userDataRepository = new Mock<IUserDataRepository>();
         private readonly Mock<IOptions<BotOptions>> botOptions = new Mock<IOptions<BotOptions>>();
         private readonly Mock<ICCBotFrameworkHttpAdapter> botAdapter = new Mock<ICCBotFrameworkHttpAdapter>();
@@ -45,7 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         {
             // Arrange
             this.botOptions.Setup(x => x.Value).Returns(new BotOptions() { AuthorAppId = "AuthorAppId" });
-            Action action = () => new HandleExportFailureActivity(this.exportDataRepository.Object, this.botOptions.Object, this.botAdapter.Object, this.userDataRepository.Object, this.blobContainerClient.Object, this.localizer.Object);
+            Action action = () => new HandleExportFailureActivity(this.exportDataRepository.Object, this.storageClientFactory.Object, this.botOptions.Object, this.botAdapter.Object, this.userDataRepository.Object, this.localizer.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
@@ -58,16 +60,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         public void CreateInstance_NullParamters_ThrowsArgumentNullException()
         {
             // Arrange
-            Action action1 = () => new HandleExportFailureActivity(null/*exportDataRepository*/, this.botOptions.Object, this.botAdapter.Object, this.userDataRepository.Object, this.blobContainerClient.Object, this.localizer.Object);
-            Action action2 = () => new HandleExportFailureActivity(this.exportDataRepository.Object, this.botOptions.Object, this.botAdapter.Object, this.userDataRepository.Object, null/*blobContainerClient*/, this.localizer.Object);
-            Action action3 = () => new HandleExportFailureActivity(this.exportDataRepository.Object, null/*botOptions*/, this.botAdapter.Object, this.userDataRepository.Object, this.blobContainerClient.Object, this.localizer.Object);
-            Action action4 = () => new HandleExportFailureActivity(this.exportDataRepository.Object, this.botOptions.Object, null/*botAdapter*/, this.userDataRepository.Object, this.blobContainerClient.Object, this.localizer.Object);
-            Action action5 = () => new HandleExportFailureActivity(this.exportDataRepository.Object, this.botOptions.Object, this.botAdapter.Object, null/*userDataRepository*/, this.blobContainerClient.Object, this.localizer.Object);
-            Action action6 = () => new HandleExportFailureActivity(this.exportDataRepository.Object, this.botOptions.Object, this.botAdapter.Object, this.userDataRepository.Object, this.blobContainerClient.Object, null/*localizer*/);
+            Action action1 = () => new HandleExportFailureActivity(null/*exportDataRepository*/, this.storageClientFactory.Object, this.botOptions.Object, this.botAdapter.Object, this.userDataRepository.Object, this.localizer.Object);
+            Action action2 = () => new HandleExportFailureActivity(this.exportDataRepository.Object, null/*storageClientFactory*/, this.botOptions.Object, this.botAdapter.Object, this.userDataRepository.Object, this.localizer.Object);
+            Action action3 = () => new HandleExportFailureActivity(this.exportDataRepository.Object, this.storageClientFactory.Object, null/*botOptions*/, this.botAdapter.Object, this.userDataRepository.Object, this.localizer.Object);
+            Action action4 = () => new HandleExportFailureActivity(this.exportDataRepository.Object, this.storageClientFactory.Object, this.botOptions.Object, null/*botAdapter*/, this.userDataRepository.Object, this.localizer.Object);
+            Action action5 = () => new HandleExportFailureActivity(this.exportDataRepository.Object, this.storageClientFactory.Object, this.botOptions.Object, this.botAdapter.Object, null/*userDataRepository*/, this.localizer.Object);
+            Action action6 = () => new HandleExportFailureActivity(this.exportDataRepository.Object, this.storageClientFactory.Object, this.botOptions.Object, this.botAdapter.Object, this.userDataRepository.Object, null/*localizer*/);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("exportDataRepository is null.");
-            action2.Should().Throw<ArgumentNullException>("blobContainerClient is null.");
+            action2.Should().Throw<ArgumentNullException>("storageClientFactory is null.");
             action3.Should().Throw<ArgumentNullException>("botOptions is null.");
             action4.Should().Throw<ArgumentNullException>("botAdapter is null.");
             action5.Should().Throw<ArgumentNullException>("userDataRepository is null.");
@@ -102,15 +104,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var activityInstance = this.GetHandleExportFailureActivity();
             var exportDataEntity = new ExportDataEntity() { FileName = null, PartitionKey = "partitionKey" };
             var userDataEntity = new UserDataEntity() { ServiceUrl = "serviceUrl", ConversationId = "conversationId" };
-            this.blobContainerClient.Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<BlobContainerEncryptionScopeOptions>(), It.IsAny<CancellationToken>()));
-            this.blobContainerClient.Setup(x => x.GetBlobClient(It.IsAny<string>()).DeleteIfExistsAsync(It.IsAny<DeleteSnapshotsOption>(), It.IsAny<BlobRequestConditions>(), It.IsAny<CancellationToken>()));
+            var blobContainerClientmock = GetBlobContainerClientMock();
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient()).Returns(blobContainerClientmock.Object);
             this.userDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(userDataEntity);
 
             // Act
             await activityInstance.HandleFailureActivityAsync(exportDataEntity);
 
             // Assert
-            this.blobContainerClient.Verify(x => x.GetBlobClient(It.IsAny<string>()).DeleteIfExistsAsync(It.IsAny<DeleteSnapshotsOption>(), It.IsAny<BlobRequestConditions>(), It.IsAny<CancellationToken>()), Times.Never);
+            blobContainerClientmock.Verify(x => x.GetBlobClient(It.IsAny<string>()).DeleteIfExistsAsync(It.IsAny<DeleteSnapshotsOption>(), It.IsAny<BlobRequestConditions>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         /// <summary>
@@ -124,15 +126,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var activityInstance = this.GetHandleExportFailureActivity();
             var exportDataEntity = new ExportDataEntity() { FileName = "fileName", PartitionKey = "partitionKey" };
             var userDataEntity = new UserDataEntity() { ServiceUrl = "serviceUrl", ConversationId = "conversationId" };
-            this.blobContainerClient.Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<BlobContainerEncryptionScopeOptions>(), It.IsAny<CancellationToken>()));
-            this.blobContainerClient.Setup(x => x.GetBlobClient(It.IsAny<string>()).DeleteIfExistsAsync(It.IsAny<DeleteSnapshotsOption>(), It.IsAny<BlobRequestConditions>(), It.IsAny<CancellationToken>()));
+            var blobContainerClientmock = GetBlobContainerClientMock();
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient()).Returns(blobContainerClientmock.Object);
             this.userDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(userDataEntity);
 
             // Act
             await activityInstance.HandleFailureActivityAsync(exportDataEntity);
 
             // Assert
-            this.blobContainerClient.Verify(x => x.GetBlobClient(It.IsAny<string>()).DeleteIfExistsAsync(It.IsAny<DeleteSnapshotsOption>(), It.IsAny<BlobRequestConditions>(), It.IsAny<CancellationToken>()), Times.Once);
+            blobContainerClientmock.Verify(x => x.GetBlobClient(It.IsAny<string>()).DeleteIfExistsAsync(It.IsAny<DeleteSnapshotsOption>(), It.IsAny<BlobRequestConditions>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         /// <summary>
@@ -146,6 +148,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var activityInstance = this.GetHandleExportFailureActivity();
             var exportDataEntity = new ExportDataEntity() { FileName = null, PartitionKey = "partitionKey" };
             var userDataEntity = new UserDataEntity() { ServiceUrl = "serviceUrl", ConversationId = "conversationId" };
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient()).Returns(default(BlobContainerClient));
             this.userDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(userDataEntity);
             string failureText = "ExportFailureText";
             var exportFailureString = new LocalizedString(failureText, failureText);
@@ -170,6 +173,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var activityInstance = this.GetHandleExportFailureActivity();
             var exportDataEntity = new ExportDataEntity() { FileName = null, PartitionKey = "partitionKey" };
             var userDataEntity = new UserDataEntity() { ServiceUrl = "serviceUrl", ConversationId = "conversationId" };
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient()).Returns(default(BlobContainerClient));
             this.userDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(userDataEntity);
             string failureText = "ExportFailureText";
             var exportFailureString = new LocalizedString(failureText, failureText);
@@ -184,10 +188,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             this.exportDataRepository.Verify(x => x.DeleteAsync(It.IsAny<ExportDataEntity>()), Times.Once);
         }
 
+        private static Mock<BlobContainerClient> GetBlobContainerClientMock()
+        {
+            var mock = new Mock<BlobContainerClient>();
+            mock.Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<BlobContainerEncryptionScopeOptions>(), It.IsAny<CancellationToken>()));
+            mock.Setup(x => x.GetBlobClient(It.IsAny<string>()).DeleteIfExistsAsync(It.IsAny<DeleteSnapshotsOption>(), It.IsAny<BlobRequestConditions>(), It.IsAny<CancellationToken>()));
+            return mock;
+        }
+
         private HandleExportFailureActivity GetHandleExportFailureActivity()
         {
             this.botOptions.Setup(x => x.Value).Returns(new BotOptions() { AuthorAppId = "AuthorAppId" });
-            return new HandleExportFailureActivity(this.exportDataRepository.Object, this.botOptions.Object, this.botAdapter.Object, this.userDataRepository.Object, this.blobContainerClient.Object, this.localizer.Object);
+            return new HandleExportFailureActivity(this.exportDataRepository.Object, this.storageClientFactory.Object, this.botOptions.Object, this.botAdapter.Object, this.userDataRepository.Object, this.localizer.Object);
         }
     }
 }

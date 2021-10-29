@@ -121,10 +121,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                     continuationToken,
                     cancellationToken);
                 continuationToken = currentPage.ContinuationToken;
-
-                // Skip Guest users.
-                var membersWithoutGuests = currentPage.Members.Where(member => !member.UserPrincipalName.ToLower().Contains("#ext#"));
-                members.AddRange(membersWithoutGuests);
+                members.AddRange(currentPage.Members);
             }
             while (continuationToken != null && !cancellationToken.IsCancellationRequested);
 

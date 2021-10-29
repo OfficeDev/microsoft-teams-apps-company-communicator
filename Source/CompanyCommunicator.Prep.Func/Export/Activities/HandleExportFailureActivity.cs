@@ -8,7 +8,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using global::Azure.Storage.Blobs;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Bot.Builder;
@@ -16,6 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
@@ -30,35 +30,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     public class HandleExportFailureActivity
     {
         private readonly IExportDataRepository exportDataRepository;
+        private readonly IStorageClientFactory storageClientFactory;
         private readonly IUserDataRepository userDataRepository;
         private readonly string authorAppId;
         private readonly ICCBotFrameworkHttpAdapter botAdapter;
         private readonly IStringLocalizer<Strings> localizer;
-        private readonly BlobContainerClient blobContainerClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HandleExportFailureActivity"/> class.
         /// </summary>
         /// <param name="exportDataRepository">the export data respository.</param>
+        /// <param name="storageClientFactory">the storage client factory.</param>
         /// <param name="botOptions">the bot options.</param>
         /// <param name="botAdapter">the users service.</param>
         /// <param name="userDataRepository">the user data repository.</param>
-        /// <param name="blobContainerClient">the blob container client.</param>
         /// <param name="localizer">Localization service.</param>
         public HandleExportFailureActivity(
             IExportDataRepository exportDataRepository,
+            IStorageClientFactory storageClientFactory,
             IOptions<BotOptions> botOptions,
             ICCBotFrameworkHttpAdapter botAdapter,
             IUserDataRepository userDataRepository,
-            BlobContainerClient blobContainerClient,
             IStringLocalizer<Strings> localizer)
         {
             this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
+            this.storageClientFactory = storageClientFactory ?? throw new ArgumentNullException(nameof(storageClientFactory));
             this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
             this.authorAppId = botOptions?.Value?.AuthorAppId ?? throw new ArgumentNullException(nameof(botOptions));
             this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
-            this.blobContainerClient = blobContainerClient ?? throw new ArgumentNullException(nameof(blobContainerClient));
         }
 
         /// <summary>
@@ -89,8 +89,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                 return;
             }
 
-            await this.blobContainerClient.CreateIfNotExistsAsync();
-            await this.blobContainerClient
+            var blobContainerClient = this.storageClientFactory.CreateBlobContainerClient();
+
+            await blobContainerClient.CreateIfNotExistsAsync();
+            await blobContainerClient
                 .GetBlobClient(fileName)
                 .DeleteIfExistsAsync();
         }

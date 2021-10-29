@@ -12,10 +12,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using System.Linq;
     using System.Threading.Tasks;
     using CsvHelper;
-    using global::Azure.Storage.Blobs;
+    using global::Azure.Storage.Blobs.Models;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Mappers;
@@ -28,22 +29,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     /// </summary>
     public class UploadActivity
     {
-        private readonly BlobContainerClient blobContainerClient;
+        private readonly IStorageClientFactory storageClientFactory;
         private readonly IDataStreamFacade userDataStream;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UploadActivity"/> class.
         /// </summary>
-        /// <param name="blobContainerClient">the blob container client.</param>
+        /// <param name="storageClientFactory">the storage client factory.</param>
         /// <param name="userDataStream">the user data stream.</param>
         /// <param name="localizer">Localization service.</param>
         public UploadActivity(
-            BlobContainerClient blobContainerClient,
+            IStorageClientFactory storageClientFactory,
             IDataStreamFacade userDataStream,
             IStringLocalizer<Strings> localizer)
         {
-            this.blobContainerClient = blobContainerClient ?? throw new ArgumentNullException(nameof(blobContainerClient));
+            this.storageClientFactory = storageClientFactory ?? throw new ArgumentNullException(nameof(storageClientFactory));
             this.userDataStream = userDataStream ?? throw new ArgumentNullException(nameof(userDataStream));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
@@ -72,8 +73,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                 throw new ArgumentNullException(nameof(uploadData.fileName));
             }
 
-            await this.blobContainerClient.CreateIfNotExistsAsync();
-            var blob = this.blobContainerClient.GetBlobClient(uploadData.fileName);
+            var blobContainerClient = this.storageClientFactory.CreateBlobContainerClient();
+            await blobContainerClient.CreateIfNotExistsAsync();
+            await blobContainerClient.SetAccessPolicyAsync(PublicAccessType.None);
+            var blob = blobContainerClient.GetBlobClient(uploadData.fileName);
 
             using var memorystream = new MemoryStream();
             using (var archive = new ZipArchive(memorystream, ZipArchiveMode.Create, true))
@@ -97,26 +100,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                 var messageDeliveryFile = archive.CreateEntry(messageDeliveryFileName, CompressionLevel.Optimal);
                 using (var entryStream = messageDeliveryFile.Open())
                 {
-                    using var writer = new StreamWriter(entryStream, System.Text.Encoding.UTF8);
-                    using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-                    if (uploadData.sentNotificationDataEntity.Teams.Any())
+                    using (var writer = new StreamWriter(entryStream, System.Text.Encoding.UTF8))
+                    using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
                     {
-                        var teamDataMap = new TeamDataMap(this.localizer);
-                        csv.Configuration.RegisterClassMap(teamDataMap);
-                        var teamDataStream = this.userDataStream.GetTeamDataStreamAsync(uploadData.sentNotificationDataEntity.Id);
-                        await foreach (var data in teamDataStream)
+                        if (uploadData.sentNotificationDataEntity.Teams.Any())
                         {
-                            await csv.WriteRecordsAsync(data);
+                            var teamDataMap = new TeamDataMap(this.localizer);
+                            csv.Configuration.RegisterClassMap(teamDataMap);
+                            var teamDataStream = this.userDataStream.GetTeamDataStreamAsync(uploadData.sentNotificationDataEntity.Id);
+                            await foreach (var data in teamDataStream)
+                            {
+                                await csv.WriteRecordsAsync(data);
+                            }
                         }
-                    }
-                    else
-                    {
-                        var userDataMap = new UserDataMap(this.localizer);
-                        csv.Configuration.RegisterClassMap(userDataMap);
-                        var userDataStream = this.userDataStream.GetUserDataStreamAsync(uploadData.sentNotificationDataEntity.Id);
-                        await foreach (var data in userDataStream)
+                        else
                         {
-                            await csv.WriteRecordsAsync(data);
+                            var userDataMap = new UserDataMap(this.localizer);
+                            csv.Configuration.RegisterClassMap(userDataMap);
+                            var userDataStream = this.userDataStream.GetUserDataStreamAsync(uploadData.sentNotificationDataEntity.Id);
+                            await foreach (var data in userDataStream)
+                            {
+                                await csv.WriteRecordsAsync(data);
+                            }
                         }
                     }
                 }
