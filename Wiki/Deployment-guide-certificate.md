@@ -180,11 +180,32 @@ You can download by Clicking "Download in CER format" button.
 
 1. Go to **App Registrations** page [here](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps) and open the Microsoft Graph Azure AD app you created (in Step 1) from the application list.
 
-2. On the side rail in the Manage section, navigate to the "Certificates & secrets" section. In the Certificates section, click on "Upload certificate". Select the certificate file downloaded in Step 4 and click on Add.
+2. On the side rail in the Manage section, navigate to the "Certificates & secrets" section. In the Certificates section, click on "Upload certificate". Select the certificate file downloaded in Step 4 for the Graph Azure AD app and click on Add.
 
-3. Please repeat the same for all certificates downloaded in Step 3.
+3. Please repeat the same for Author app and User app and upload the respective certificate downloaded in Step 3.
 
-## 6. Set-up Authentication
+## 6. Import Certificates from Key Vault to app and functions.
+
+1. Go to **App Service** page created as part of this deployment.
+1. From the left navigation of your app, **select TLS/SSL settings > Private Key Certificates (.pfx) > Import Key Vault Certificate**
+![Import Key Vault Certificate](images/import-key-vault-cert.png)
+1. Use the following table to help you select the certificate.
+
+    | Setting | Description |
+    |-|-|
+    | Subscription | The subscription that the Key Vault belongs to. |
+    | Key Vault | The vault with the certificate you want to import. |
+    | Certificate | Select from the list of PKCS12 certificates in the vault. All PKCS12 certificates in the vault are listed with their thumbprints, but not all are supported in App Service. |
+
+1. When the operation completes, you see the certificate in the **Private Key Certificates** list.
+![Import Key Vault certificate finished](images/import-app-service-cert-finished.png)
+
+1. Please import all the certificates from the Key Vault.
+1. Repeat the above steps for the function apps.
+
+> NOTE : If you update your certificate in Key Vault with a new certificate, App Service automatically syncs your certificate within 24 hours.
+
+## 7. Set-up Authentication
 
 1. Note that you have the `%authorBotId%`, `%userBotId%` and `%appDomain%` values from the previous step (Step 2).
 
@@ -246,7 +267,7 @@ You can download by Clicking "Download in CER format" button.
 
     2. Click **Save** to commit your changes.
 
-## 7. Add Permissions to your Microsoft Graph Azure AD app
+## 8. Add Permissions to your Microsoft Graph Azure AD app
 
 Continuing from the Microsoft Graph Azure AD app registration page where we ended Step 3.
 
@@ -280,7 +301,7 @@ Continuing from the Microsoft Graph Azure AD app registration page where we ende
    - Prepare link - https://login.microsoftonline.com/common/adminconsent?client_id=%appId%. Replace the `%appId%` with the `Application (client) ID` of Microsoft Graph Azure AD app (from above).
    - Global Administrator can grant consent using the link above.
 
-## 8. Create the Teams app packages
+## 9. Create the Teams app packages
 
 Company communicator app comes with 2 applications – Author, User. The Author application is intended for employees who create and send messages in the organization, and the User application is intended for employees who receive the messages.
 
@@ -315,7 +336,7 @@ Create two Teams app packages: one to be installed to an Authors team and other 
 
 Repeat the steps above but with the file `Manifest\manifest_users.json` and use `%userBotId%` for `<<botId>>` placeholder. Note: you will not need to change anything for the configurationUrl or webApplicationInfo section because the recipients app does not have the configurable tab. Name the resulting package `company-communicator-users.zip`, so you know that this is the app for the recipients.
 
-## 9. Install the apps in Microsoft Teams
+## 10. Install the apps in Microsoft Teams
 
 1. Install the authors app (the `company-communicator-authors.zip` package) to your team of message authors.
     * Note that even if non-authors install the app, the UPN list in the app configuration will prevent them from accessing the message authoring experience. Only the users in the sender UPN list will be able to compose and send messages. 
