@@ -248,12 +248,15 @@
     <value>Limitado</value>
   </data>
   <data name="ColumnName_UserType" xml:space="preserve">
-    <value>User Type</value>
+    <value>Tipo de Usuário</value>
   </data>
   <data name="Guest" xml:space="preserve">
-    <value>Guest</value>
+    <value>Convidado</value>
   </data>
   <data name="Member" xml:space="preserve">
-    <value>Member</value>
+    <value>Membro</value>
+  </data>
+  <data name="GuestUserNotSupported" xml:space="preserve">
+    <value>Não há suporte para o Usuário Convidado</value>
   </data>
 </root>

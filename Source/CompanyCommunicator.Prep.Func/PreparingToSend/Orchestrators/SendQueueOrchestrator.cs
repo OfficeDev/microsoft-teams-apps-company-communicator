@@ -1,37 +1,35 @@
-// <copyright file="SendQueueOrchestrator.cs" company="Microsoft">
+﻿// <copyright file="SendQueueOrchestrator.cs" company="Microsoft">
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend.Orchestrators
 {
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Utilities;
 
     /// <summary>
     /// Send Queue orchestrator.
     ///
     /// Does following:
     /// 1. Reads all the recipients from Sent notification tables.
-    /// 2. Starts data aggregation.
-    /// 3. Sends messages to Send Queue in batches.
+    /// 2. Sends messages to Send Queue in batches.
     /// </summary>
     public static class SendQueueOrchestrator
     {
         /// <summary>
-        /// SendQueueOrchestrator function.
+        /// SendQueueSubOrchestrator function.
         /// Does following:
-        /// 1. Reads all the recipients from Sent notification tables.
-        /// 2. Starts data aggregation.
-        /// 3. Sends messages to Send Queue in batches.
+        /// 1. Reads the batch recipients from Sent notification tables.
+        /// 2. Sends messages to Send Queue in batches.
         /// </summary>
         /// <param name="context">Durable orchestration context.</param>
         /// <param name="log">Logger.</param>
@@ -41,53 +39,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             [OrchestrationTrigger] IDurableOrchestrationContext context,
             ILogger log)
         {
-            var notification = context.GetInput<NotificationDataEntity>();
-
-            // Update notification status.
-            await context.CallActivityWithRetryAsync(
-                FunctionNames.UpdateNotificationStatusActivity,
-                FunctionSettings.DefaultRetryOptions,
-                (notification.Id, NotificationStatus.Sending));
+            var batchPartitionKey = context.GetInput<string>();
+            var notificationId = PartitionKeyUtility.GetNotificationIdFromBatchPartitionKey(batchPartitionKey);
+            var batchId = PartitionKeyUtility.GetBatchIdFromBatchPartitionKey(batchPartitionKey);
 
             if (!context.IsReplaying)
             {
-                log.LogInformation("About to get all recipients.");
+                log.LogInformation($"About to get recipients from batch {batchId}.");
             }
 
-            var results = await context.CallActivityWithRetryAsync<(IEnumerable<SentNotificationDataEntity>, TableContinuationToken)>(
+            var recipients = await context.CallActivityWithRetryAsync<IEnumerable<SentNotificationDataEntity>>(
                 FunctionNames.GetRecipientsActivity,
                 FunctionSettings.DefaultRetryOptions,
-                notification);
+                batchPartitionKey);
 
-            var recipientsList = new List<SentNotificationDataEntity>();
-            if (results.Item1 != null)
-            {
-                recipientsList.AddRange(results.Item1.ToList());
-            }
-
-            while (results.Item2 != null)
-            {
-                results = await context.CallActivityWithRetryAsync<(IEnumerable<SentNotificationDataEntity>, TableContinuationToken)>(
-                FunctionNames.GetRecipientsByTokenActivity,
-                FunctionSettings.DefaultRetryOptions,
-                (notification.Id, results.Item2));
-                if (results.Item1 != null)
-                {
-                    recipientsList.AddRange(results.Item1);
-                }
-            }
-
-            if (!context.IsReplaying)
-            {
-                log.LogInformation("About to send data aggregration message to data queue.");
-            }
-
-            await context.CallActivityWithRetryAsync(
-                FunctionNames.DataAggregationTriggerActivity,
-                FunctionSettings.DefaultRetryOptions,
-                (notification.Id, recipientsList.Count));
-
-            var batches = SeparateIntoBatches(recipientsList);
+            // Use the SendQueue's maximum number of messages in a batch request number because
+            // the list is being broken into batches in order to be added to that queue.
+            var batches = recipients.AsBatches(SendQueue.MaxNumberOfMessagesInBatchRequest).ToList();
 
             var totalBatchCount = batches.Count;
             if (!context.IsReplaying)
@@ -106,51 +74,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 var task = context.CallActivityWithRetryAsync(
                     FunctionNames.SendBatchMessagesActivity,
                     FunctionSettings.DefaultRetryOptions,
-                    (notification, batches[batchIndex]));
+                    (notificationId, batches[batchIndex]));
 
                 tasks.Add(task);
             }
 
             // Fan-out Fan-in
             await Task.WhenAll(tasks);
-        }
-
-        /// <summary>
-        /// Separate a list of recipients into batches (a list of lists).
-        /// The size of the batch is determined by the maximum allowed size of a batch
-        /// request to the Send queue service bus queue.
-        /// </summary>
-        /// <param name="sourceList">The list to break into batches.</param>
-        /// <returns>The batches (a list of lists).</returns>
-        private static List<List<SentNotificationDataEntity>> SeparateIntoBatches(List<SentNotificationDataEntity> sourceList)
-        {
-            var batches = new List<List<SentNotificationDataEntity>>();
-
-            var totalNumberOfEntities = sourceList.Count;
-
-            // Use the SendQueue's maximum number of messages in a batch request number because
-            // the list is being broken into batches in order to be added to that queue.
-            var batchSize = SendQueue.MaxNumberOfMessagesInBatchRequest;
-            var numberOfCompleteBatches = totalNumberOfEntities / batchSize;
-            var numberOfEntitiesInIncompleteBatch = totalNumberOfEntities % batchSize;
-
-            for (var i = 0; i < numberOfCompleteBatches; i++)
-            {
-                var startingIndex = i * batchSize;
-                var batch = sourceList.GetRange(startingIndex, batchSize);
-                batches.Add(batch);
-            }
-
-            if (numberOfEntitiesInIncompleteBatch != 0)
-            {
-                var incompleteBatchStartingIndex = numberOfCompleteBatches * batchSize;
-                var incompleteBatch = sourceList.GetRange(
-                    incompleteBatchStartingIndex,
-                    numberOfEntitiesInIncompleteBatch);
-                batches.Add(incompleteBatch);
-            }
-
-            return batches;
         }
     }
 }

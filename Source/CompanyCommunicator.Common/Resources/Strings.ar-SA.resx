@@ -248,12 +248,15 @@
     <value>مقيّد</value>
   </data>
   <data name="ColumnName_UserType" xml:space="preserve">
-    <value>User Type</value>
+    <value>نوع المستخدم</value>
   </data>
   <data name="Guest" xml:space="preserve">
-    <value>Guest</value>
+    <value>الضيف</value>
   </data>
   <data name="Member" xml:space="preserve">
-    <value>Member</value>
+    <value>العضو</value>
+  </data>
+  <data name="GuestUserNotSupported" xml:space="preserve">
+    <value>المستخدم الضيف غير مدعم</value>
   </data>
 </root>

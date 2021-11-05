@@ -116,11 +116,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 // Convert to Recipients.
                 var recipients = await this.GetRecipientsAsync(notificationId, userEntities);
 
-                if (!recipients.IsNullOrEmpty())
-                {
-                    // Store.
-                    await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
-                }
+                // Store.
+                await this.sentNotificationDataRepository.BatchInsertOrMergeAsync(recipients);
             }
             catch (Exception ex)
             {
@@ -145,14 +142,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             await Task.WhenAll(users.ForEachAsync(maxParallelism, async user =>
             {
                 var userEntity = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, user.AadId);
-
-                // This is to set the type of user(exisiting only, new ones will be skipped) to identify later if it is member or guest.
-                await this.userTypeService.UpdateUserTypeForExistingUserAsync(userEntity, user.UserType);
-                if (user.UserType.Equals(UserType.Member, StringComparison.OrdinalIgnoreCase))
+                if (userEntity == null && user.UserType.Equals(UserType.Guest, StringComparison.OrdinalIgnoreCase))
                 {
-                    user.ConversationId ??= userEntity?.ConversationId;
-                    recipients.Add(user.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
+                    // Skip processing new Guest users.
+                    return;
                 }
+
+                // This is to set the type of user(existing only, new ones will be skipped) to identify later if it is member or guest.
+                await this.userTypeService.UpdateUserTypeForExistingUserAsync(userEntity, user.UserType);
+                user.ConversationId ??= userEntity?.ConversationId;
+                recipients.Add(user.CreateInitialSentNotificationDataEntity(partitionKey: notificationId));
             }));
 
             return recipients;

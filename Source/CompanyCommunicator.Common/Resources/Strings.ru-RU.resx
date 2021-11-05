@@ -256,4 +256,7 @@
   <data name="Member" xml:space="preserve">
     <value>Участник</value>
   </data>
+  <data name="GuestUserNotSupported" xml:space="preserve">
+    <value>Гостевой пользователь не поддерживается</value>
+  </data>
 </root>

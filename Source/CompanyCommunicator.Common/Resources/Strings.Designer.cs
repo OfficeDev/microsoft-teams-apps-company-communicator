@@ -385,6 +385,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Guest User not supported.
+        /// </summary>
+        public static string GuestUserNotSupported {
+            get {
+                return ResourceManager.GetString("GuestUserNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Member.
         /// </summary>
         public static string Member {
