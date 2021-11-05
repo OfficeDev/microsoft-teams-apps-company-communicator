@@ -19,7 +19,7 @@ It provides a foundation to build custom targeted communication capabilities suc
     * [Deployment guide powershell](Deployment-guide-powershell)
     * [Troubleshooting](Troubleshooting)
 * Migrating to newer version
-  * [v4.2](v4.2-migration-guide)
+  * [v5](v5-migration-guide)
   * [v4](v4-migration-guide)
   * [v3](v3-migration-guide)
   * [v2](v2-migration-guide)

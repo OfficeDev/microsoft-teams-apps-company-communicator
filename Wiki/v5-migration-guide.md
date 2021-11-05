@@ -1,7 +1,7 @@
-## Company Communicator v4.2 Migration Guide
+## Company Communicator v5 Migration Guide
 
-## Upgrading from v4 to v4.2
-If you have the CCv4 deployed and plan to migrate from CCv4 to CCv4.2, perform the following steps:
+## Upgrading from v4 to v5
+If you have the CCv4 deployed and plan to migrate from CCv4 to CCv5, perform the following steps:
 
 ### 1. Read CCv4 deployment parameters:
 Copy all the parameters from the previous deployment (CCv4), and make sure you have the following:
