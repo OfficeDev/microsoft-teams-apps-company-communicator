@@ -127,6 +127,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Teams = draftNotificationEntity.Teams,
                     Rosters = draftNotificationEntity.Rosters,
                     Groups = draftNotificationEntity.Groups,
+                    CsvUsers = draftNotificationEntity.CsvUsers,
                     AllUsers = draftNotificationEntity.AllUsers,
                     MessageVersion = draftNotificationEntity.MessageVersion,
                     Succeeded = 0,
@@ -181,6 +182,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Groups = notificationEntity.Groups,
                     Rosters = notificationEntity.Rosters,
                     AllUsers = notificationEntity.AllUsers,
+                    CsvUsers = notificationEntity.CsvUsers,
                     TrackingUrl = notificationEntity.TrackingUrl,
                 };
 

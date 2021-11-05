@@ -82,5 +82,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets a value indicating the number of reads for the message.
         /// </summary>
         public int Reads { get; set; }
+
+        /// <summary>
+        /// Gets or sets CsvUsers .
+        /// </summary>
+        public string CsvUsers { get; set; }
     }
 }

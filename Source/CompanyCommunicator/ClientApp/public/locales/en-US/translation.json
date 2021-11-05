@@ -100,6 +100,13 @@
   "Add": "Add",
   "Buttons": "Buttons",
   "NoButtons": "No buttons defined. Click (+) to include buttons and actions on the message.",
-  "ErrorImageTooBigSize": "Please upload a JPEG (or equivalent) compressed image with maximum size of"
-
+  "ErrorImageTooBigSize": "Please upload a JPEG (or equivalent) compressed image with maximum size of",
+  "SendToCSV": "Send in chat to a list of users provided in a valid CSV file. UPNs separated by comma (no headers). Non existent or invalid users will be ignored.",
+  "LabelCSV": "Upload a CSV file",
+  "CSVLoaded": "CSV file loaded successfully!",
+  "CSVInvalid": "CSV file is invalid!",
+  "CSVUsersLabel": "User list uploaded by a CSV file",
+  "SendToCSVUsersNote": "Note: This option sends the message to all the users in the uploaded CSV file.",
+  "SentToCSV": "Sent in chat to a list of users provided in a CSV file",
+  "SentToAllUsers": "Sent in chat to everyone"
 }

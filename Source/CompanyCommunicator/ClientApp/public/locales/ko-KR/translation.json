@@ -99,5 +99,13 @@
   "Add": "더하다",
   "Buttons": "단추",
   "NoButtons": "정의된 버튼이 없습니다. (+)를 클릭하여 메시지에 단추와 작업을 포함합니다.",
-  "ErrorImageTooBigSize": "JPEG(또는 이에 상응하는) 압축 된 이미지를 최대 크기로 업로드하십시오."
+  "ErrorImageTooBigSize": "JPEG(또는 이에 상응하는) 압축 된 이미지를 최대 크기로 업로드하십시오.",
+  "SendToCSV": "유효한 CSV 파일에 제공된 사용자 목록으로 채팅을 보냅니다. UPN은 쉼표(헤더 없음)로 구분됩니다. 존재하지 않거나 유효하지 않은 사용자는 무시됩니다.",
+  "LabelCSV": "CSV 파일 업로드",
+  "CSVLoaded": "CSV 파일이 성공적으로 로드되었습니다!",
+  "CSVInvalid": "CSV 파일은 유효하지 않습니다!",
+  "CSVUsersLabel": "CSV 파일에서 업로드한 사용자 목록",
+  "SendToCSVUsersNote": "참고: 이 옵션은 업로드된 CSV 파일의 모든 사용자에게 메시지를 보냅니다.",
+  "SentToCSV": "CSV 파일에 제공된 사용자 목록으로 채팅으로 전송",
+  "SentToAllUsers": "모든 사람에게 채팅으로 전송"
 }

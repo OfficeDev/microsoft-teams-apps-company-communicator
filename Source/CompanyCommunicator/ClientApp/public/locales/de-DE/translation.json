@@ -99,5 +99,13 @@
   "Add": "Hinzufügen",
   "Buttons": "Schaltflächen",
   "NoButtons": "Es wurden keine Schaltflächen definiert. Klicken Sie auf (+), um Schaltflächen und Aktionen in die Nachricht aufzunehmen.",
-  "ErrorImageTooBigSize": "Bitte laden Sie ein JPEG (oder gleichwertiges) komprimiertes Bild mit einer maximalen Größe von"
+  "ErrorImageTooBigSize": "Bitte laden Sie ein JPEG (oder gleichwertiges) komprimiertes Bild mit einer maximalen Größe von",
+  "SendToCSV": "Senden Sie im Chat an eine Liste von Benutzern, die in einer gültigen CSV-Datei bereitgestellt wird. DURCH KOMMAS getrennte UPNs (keine Kopfzeilen). Nicht vorhandene oder ungültige Benutzer werden ignoriert.",
+  "LabelCSV": "Hochladen einer CSV-Datei",
+  "CSVLoaded": "CSV-Datei erfolgreich geladen!",
+  "CSVInvalid": "CSV-Datei ist ungültig!",
+  "CSVUsersLabel": "Benutzerliste, die von einer CSV-Datei hochgeladen wurde",
+  "SendToCSVUsersNote": "Hinweis: Diese Option sendet die Nachricht an alle Benutzer in der hochgeladenen CSV-Datei.",
+  "SentToCSV": "Im Chat an eine Liste von Benutzern gesendet, die in einer CSV-Datei bereitgestellt werden",
+  "SentToAllUsers": "Im Chat an alle gesendet"
 }

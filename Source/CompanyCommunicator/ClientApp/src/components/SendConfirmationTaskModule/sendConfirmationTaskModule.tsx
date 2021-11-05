@@ -39,6 +39,7 @@ export interface IMessage {
     buttonTitle?: string;
     buttons: string;
     isImportant?: boolean;
+    csvUsers: string;
 }
 
 export interface SendConfirmationTaskModuleProps extends RouteComponentProps, WithTranslation {
@@ -59,7 +60,8 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
     private initMessage = {
         id: "",
         title: "",
-        buttons: "[]"
+        buttons: "[]",
+        csvUsers: "",
     };
 
     private card: any;
@@ -77,6 +79,7 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
             groupNames: [],
             allUsers: false,
             messageId: 0,
+            
         };
     }
 
@@ -99,6 +102,7 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                         this.setState({
                             loader: false
                         }, () => {
+
                             setCardTitle(this.card, this.state.message.title);
                             setCardImageLink(this.card, this.state.message.imageLink);
                             setCardSummary(this.card, this.state.message.summary);
@@ -220,6 +224,19 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
         }
     }
 
+    private renderCSV = () => {
+        if (this.state.message.csvUsers.length>0) {
+            return (
+                <label>Yes</label>
+            )
+        } else {
+            return (
+                <label>No</label>
+            )
+        }
+    }
+
+
     private renderAudienceSelection = () => {
         if (this.state.teamNames && this.state.teamNames.length > 0) {
             return (
@@ -237,6 +254,14 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                 <div key="groupNames" > <span className="label">{this.localize("GroupsMembersLabel")}</span>
                     <List items={this.getItemList(this.state.groupNames)} />
                 </div>);
+        } else if (this.state.message.csvUsers.length > 0) {
+            return (
+            <div key="allUsers">
+                <span className="label">{this.localize("CSVUsersLabel")}</span>
+                <div className="noteText">
+                    <Text error content={this.localize("SendToCSVUsersNote")} />
+                </div>
+            </div>);
         } else if (this.state.allUsers) {
             return (
                 <div key="allUsers">

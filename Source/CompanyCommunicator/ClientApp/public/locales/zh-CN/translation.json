@@ -99,5 +99,13 @@
   "Add": "加",
   "Buttons": "按钮",
   "NoButtons": "未定义按钮。单击 （+） 以在邮件上包含按钮和操作。",
-  "ErrorImageTooBigSize": "请上传最大尺寸的 JPEG（或等效）压缩图像"
+  "ErrorImageTooBigSize": "请上传最大尺寸的 JPEG（或等效）压缩图像",
+  "SendToCSV": "将聊天发送到有效 CSV 文件中提供的用户列表。按逗号分离的 UPN（无头）。不存在或无效的用户将被忽略。",
+  "LabelCSV": "上传 CSV 文件",
+  "CSVLoaded": "CSV 文件加载成功！",
+  "CSVInvalid": "CSV 文件无效！",
+  "CSVUsersLabel": "由 CSV 文件上传的用户列表",
+  "SendToCSVUsersNote": "注意：此选项将消息发送到上传的 CSV 文件中的所有用户。",
+  "SentToCSV": "通过聊天发送到 CSV 文件中提供的用户列表",
+  "SentToAllUsers": "发送给每个人聊天"
 }

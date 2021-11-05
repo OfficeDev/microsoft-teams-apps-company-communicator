@@ -293,6 +293,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 CanDownload = userNotificationDownload == null,
                 SendingCompleted = notificationEntity.IsCompleted(),
                 Reads = notificationEntity.Reads,
+                CsvUsers = notificationEntity.CsvUsers,
             };
 
             return this.Ok(result);

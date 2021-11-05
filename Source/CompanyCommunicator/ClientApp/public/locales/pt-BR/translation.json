@@ -63,7 +63,7 @@
   "Results": "Resultados",
   "Success": "Êxito : {{SuccessCount}}",
   "Failure": "Falha : {{FailureCount}}",
-  "Reads":   "Lido  : {{ReadsCount}}",
+  "Reads": "Lido  : {{ReadsCount}}",
   "Unknown": "Não conhecido : {{UnknownCount}}",
   "Throttled": "Limitado : ",
   "TooltipSuccess": "Sucesso",
@@ -100,5 +100,13 @@
   "Add": "Incluir",
   "Buttons": "Botões",
   "NoButtons": "Sem botões definidos. Clique (+) para incluir botões e ações na mensagem.",
-  "ErrorImageTooBigSize": "Por favor, carregue uma imagem compactada JPEG (ou equivalente) com o tamanho máximo de"
+  "ErrorImageTooBigSize": "Por favor, carregue uma imagem compactada JPEG (ou equivalente) com o tamanho máximo de",
+  "SendToCSV": "Envia no chat pessoal de uma lista de usuários fornecidos em um arquivo CSV válido. UPNs separados por vírgula (sem cabeçalhos). Usuários inexistentes ou inválidos serão ignorados.",
+  "LabelCSV": "Carregue um arquivo CSV",
+  "CSVLoaded": "Arquivo CSV carregado com sucesso!",
+  "CSVInvalid": "O arquivo CSV é inválido!",
+  "CSVUsersLabel": "Lista de usuários carregado por um arquivo CSV",
+  "SendToCSVUsersNote": "Nota: Esta opção envia a mensagem para todos os usuários no arquivo CSV carregado.",
+  "SentToCSV": "Enviado no chat para uma lista de usuários fornecidos em um arquivo CSV",
+  "SentToAllUsers": "Enviado no chat pessoal para todos"
 }

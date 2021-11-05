@@ -99,5 +99,13 @@
   "Add": "Ajouter",
   "Buttons": "Boutons",
   "NoButtons": "Aucun bouton défini. Cliquez (+) pour inclure des boutons et des actions sur le message.",
-  "ErrorImageTooBigSize": "Veuillez télécharger une image compressée JPEG (ou équivalent) avec une taille maximale de"
+  "ErrorImageTooBigSize": "Veuillez télécharger une image compressée JPEG (ou équivalent) avec une taille maximale de",
+  "SendToCSV": "Envoyez le chat à une liste d’utilisateurs fournie dans un fichier CSV valide. UPN séparés par des virgules (pas d’en-têtes). Les utilisateurs inexistants ou non valides seront ignorés.",
+  "LabelCSV": "Télécharger un fichier CSV",
+  "CSVLoaded": "Fichier CSV chargé avec succès!",
+  "CSVInvalid": "Le fichier CSV n’est pas valide !",
+  "CSVUsersLabel": "Liste d’utilisateurs téléchargée par un fichier CSV",
+  "SendToCSVUsersNote": "Remarque : Cette option envoie le message à tous les utilisateurs du fichier CSV téléchargé.",
+  "SentToCSV": "Envoyé dans le chat à une liste d’utilisateurs fournie dans un fichier CSV",
+  "SentToAllUsers": "Envoyé dans le chat à tout le monde"
 }
