@@ -15,21 +15,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Options;
     using Microsoft.Graph;
     using Microsoft.Identity.Client;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
@@ -61,23 +61,27 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                     repositoryOptions.EnsureTableExists =
                         !configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", false);
                 });
-            builder.Services.AddOptions<MessageQueueOptions>()
-                .Configure<IConfiguration>((messageQueueOptions, configuration) =>
-                {
-                    messageQueueOptions.ServiceBusConnection =
-                        configuration.GetValue<string>("ServiceBusConnection");
-                });
             builder.Services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
                     botOptions.UserAppId =
                         configuration.GetValue<string>("UserAppId");
                     botOptions.UserAppPassword =
-                        configuration.GetValue<string>("UserAppPassword");
+                        configuration.GetValue<string>("UserAppPassword", string.Empty);
                     botOptions.AuthorAppId =
                         configuration.GetValue<string>("AuthorAppId");
                     botOptions.AuthorAppPassword =
-                        configuration.GetValue<string>("AuthorAppPassword");
+                        configuration.GetValue<string>("AuthorAppPassword", string.Empty);
+                    botOptions.GraphAppId =
+                        configuration.GetValue<string>("GraphAppId");
+                    botOptions.UseCertificate =
+                        configuration.GetValue<bool>("UseCertificate", false);
+                    botOptions.AuthorAppCertName =
+                        configuration.GetValue<string>("AuthorAppCertName", string.Empty);
+                    botOptions.UserAppCertName =
+                        configuration.GetValue<string>("UserAppCertName", string.Empty);
+                    botOptions.GraphAppCertName =
+                        configuration.GetValue<string>("GraphAppCertName", string.Empty);
                 });
             builder.Services.AddOptions<DataQueueMessageOptions>()
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
@@ -97,6 +101,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                 });
 
             builder.Services.AddLocalization();
+
+            var useManagedIdentity = bool.Parse(Environment.GetEnvironmentVariable("UseManagedIdentity"));
+            builder.Services.AddBlobClient(useManagedIdentity);
+            builder.Services.AddServiceBusClient(useManagedIdentity);
 
             // Set current culture.
             var culture = Environment.GetEnvironmentVariable("i18n:DefaultCulture");
@@ -136,6 +144,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<ITeamMembersService, TeamMembersService>();
             builder.Services.AddTransient<IConversationService, ConversationService>();
 
+            // Add Secrets.
+            var keyVaultUrl = Environment.GetEnvironmentVariable("KeyVault:Url");
+            builder.Services.AddSecretsProvider(keyVaultUrl);
+
             // Add graph services.
             this.AddGraphServices(builder);
 
@@ -152,21 +164,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
                 Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
                 {
-                    confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("AuthorAppId");
-                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("AuthorAppPassword");
+                    confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("GraphAppId");
+                    confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("GraphAppPassword", string.Empty);
                     confidentialClientApplicationOptions.TenantId = configuration.GetValue<string>("TenantId");
                 });
 
             // Graph Token Services
-            builder.Services.AddSingleton<IConfidentialClientApplication>(provider =>
-            {
-                var options = provider.GetRequiredService<IOptions<ConfidentialClientApplicationOptions>>();
-                return ConfidentialClientApplicationBuilder
-                    .Create(options.Value.ClientId)
-                    .WithClientSecret(options.Value.ClientSecret)
-                    .WithAuthority(new Uri($"https://login.microsoftonline.com/{options.Value.TenantId}"))
-                    .Build();
-            });
+            var useClientCertificates = bool.Parse(Environment.GetEnvironmentVariable("UseCertificate") ?? "false");
+
+            builder.Services.AddConfidentialClient(useClientCertificates);
 
             builder.Services.AddSingleton<IAuthenticationProvider, MsalAuthenticationProvider>();
 

@@ -15,11 +15,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
@@ -45,11 +47,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
-                    botOptions.UserAppId =
-                        configuration.GetValue<string>("UserAppId");
-
-                    botOptions.UserAppPassword =
-                        configuration.GetValue<string>("UserAppPassword");
+                    botOptions.UserAppId = configuration.GetValue<string>("UserAppId");
+                    botOptions.UserAppPassword = configuration.GetValue<string>("UserAppPassword", string.Empty);
+                    botOptions.UserAppCertName = configuration.GetValue<string>("UserAppCertName", string.Empty);
+                    botOptions.AuthorAppId = configuration.GetValue<string>("AuthorAppId");
+                    botOptions.AuthorAppCertName = configuration.GetValue<string>("AuthorAppCertName", string.Empty);
+                    botOptions.GraphAppId = configuration.GetValue<string>("GraphAppId");
+                    botOptions.GraphAppCertName = configuration.GetValue<string>("GraphAppCertName", string.Empty);
+                    botOptions.UseCertificate = configuration.GetValue<bool>("UseCertificate", false);
                 });
             builder.Services.AddOptions<RepositoryOptions>()
                 .Configure<IConfiguration>((repositoryOptions, configuration) =>
@@ -63,14 +68,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     repositoryOptions.EnsureTableExists =
                         !configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", true);
                 });
-            builder.Services.AddOptions<MessageQueueOptions>()
-                .Configure<IConfiguration>((messageQueueOptions, configuration) =>
-                {
-                    messageQueueOptions.ServiceBusConnection =
-                        configuration.GetValue<string>("ServiceBusConnection");
-                });
 
             builder.Services.AddLocalization();
+
+            var useManagedIdentity = bool.Parse(Environment.GetEnvironmentVariable("UseManagedIdentity"));
+            builder.Services.AddServiceBusClient(useManagedIdentity);
 
             // Set current culture.
             var culture = Environment.GetEnvironmentVariable("i18n:DefaultCulture");
@@ -80,6 +82,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             // Add bot services.
             builder.Services.AddSingleton<UserAppCredentials>();
             builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
+            builder.Services.AddSingleton<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
             builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
 
             // Add teams services.
@@ -95,6 +98,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             // Add the Notification service.
             builder.Services.AddTransient<INotificationService, NotificationService>();
+
+            // Add Secrets.
+            var keyVaultUrl = Environment.GetEnvironmentVariable("KeyVault:Url");
+            builder.Services.AddSecretsProvider(keyVaultUrl);
         }
     }
 }

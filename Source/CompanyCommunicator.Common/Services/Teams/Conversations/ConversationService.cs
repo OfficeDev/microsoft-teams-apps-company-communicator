@@ -53,7 +53,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             int maxAttempts,
             ILogger log)
         {
-            return await this.CreateConversationAsync(teamsUserId, tenantId, serviceUrl, maxAttempts, this.userAppCredentials, log);
+            var useCertificate = this.userAppCredentials.IsCertificateAuthenticationEnabled();
+            return await this.CreateConversationAsync(teamsUserId, tenantId, serviceUrl, maxAttempts, this.userAppCredentials, useCertificate, log);
         }
 
         /// <inheritdoc/>
@@ -64,7 +65,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             int maxAttempts,
             ILogger log)
         {
-            return await this.CreateConversationAsync(teamsUserId, tenantId, serviceUrl, maxAttempts, this.authorAppCredentials, log);
+            var useCertificate = this.authorAppCredentials.IsCertificateAuthenticationEnabled();
+            return await this.CreateConversationAsync(teamsUserId, tenantId, serviceUrl, maxAttempts, this.authorAppCredentials, useCertificate, log);
         }
 
         private async Task<CreateConversationResponse> CreateConversationAsync(
@@ -73,6 +75,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             string serviceUrl,
             int maxAttempts,
             MicrosoftAppCredentials credentials,
+            bool useCertificate,
             ILogger log)
         {
             if (string.IsNullOrEmpty(teamsUserId))
@@ -111,8 +114,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             try
             {
                 var retryPolicy = this.GetRetryPolicy(maxAttempts, log);
-                await retryPolicy.ExecuteAsync(async () =>
-                    await this.botAdapter.CreateConversationAsync(
+                if (useCertificate)
+                {
+                    await retryPolicy.ExecuteAsync(async () =>
+                    await this.botAdapter.CreateConversationUsingCertificateAsync(
+                        channelId: ConversationService.MicrosoftTeamsChannelId,
+                        serviceUrl: serviceUrl,
+                        appCredentials: credentials as AppCredentials,
+                        conversationParameters: conversationParameters,
+                        callback: (turnContext, cancellationToken) =>
+                        {
+                            // Success.
+                            response.Result = Result.Succeeded;
+                            response.StatusCode = (int)HttpStatusCode.Created;
+                            response.ConversationId = turnContext.Activity.Conversation.Id;
+
+                            return Task.CompletedTask;
+                        },
+                        cancellationToken: CancellationToken.None));
+                }
+                else
+                {
+                    await retryPolicy.ExecuteAsync(async () =>
+                    await this.botAdapter.CreateConversationUsingSecretAsync(
                         channelId: ConversationService.MicrosoftTeamsChannelId,
                         serviceUrl: serviceUrl,
                         credentials: credentials,
@@ -127,6 +151,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                             return Task.CompletedTask;
                         },
                         cancellationToken: CancellationToken.None));
+                }
             }
             catch (ErrorResponseException e)
             {

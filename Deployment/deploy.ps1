@@ -268,13 +268,25 @@ function GetAzureADApp {
     return $app
 }
 
+# To get the Azure AD app detail with new secret. 
+function GetAzureADAppWithSecret {
+    param ($appName)
+    $app = GetAzureADApp $appName
+    
+    #Reset the app credentials to get the secret. The default validity of this secret will be for 1 year from the date its created. 
+    WriteI -message "Retreiving new app with secrets..."
+    $appSecret = az ad app credential reset --id $app.appId --append | ConvertFrom-Json;
+
+    return $appSecret
+}
+
 # Create/re-set Azure AD app.
 function CreateAzureADApp {
     param(
         [Parameter(Mandatory = $true)] [string] $AppName,
+		[Parameter(Mandatory = $false)] [bool] $ResetAppSecret = $true,
         [Parameter(Mandatory = $false)] [bool] $MultiTenant = $true,
-        [Parameter(Mandatory = $false)] [bool] $AllowImplicitFlow,
-        [Parameter(Mandatory = $false)] [bool] $ResetAppSecret = $true
+        [Parameter(Mandatory = $false)] [bool] $AllowImplicitFlow
     )
         
     try {
@@ -343,7 +355,13 @@ function CollectARMDeploymentLogs {
 
     $logsFolder = New-Item -ItemType Directory -Force -Path $logsPath
 
+    if($parameters.useCertificate.value)
+    {
+    az deployment operation group list --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --name azuredeploywithcert --query "[?properties.provisioningState=='Failed'].properties.statusMessage.error" | Set-Content $deploymentLogPath
+    }
+    else{
     az deployment operation group list --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --name azuredeploy --query "[?properties.provisioningState=='Failed'].properties.statusMessage.error" | Set-Content $deploymentLogPath
+    }
 
     $activityLog = $null
     $retryCount = 5
@@ -387,7 +405,13 @@ function CollectARMDeploymentLogs {
 }
 
 function IsSourceControlTimeOut {
+    $failedResourcesList = $null
+    if($parameters.useCertificate.Value){
+    $failedResourcesList = az deployment operation group list --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --name azuredeploywithcert --query "[?properties.provisioningState=='Failed']" | ConvertFrom-Json
+    }
+    else{
     $failedResourcesList = az deployment operation group list --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --name azuredeploy --query "[?properties.provisioningState=='Failed']" | ConvertFrom-Json
+    }
     $nonCodeSyncErrors = $failedResourcesList | Where-Object {($null -ne $_.properties.targetResource -and 'Microsoft.Web/sites/sourcecontrols' -ne $_.properties.targetResource.resourceType)}
     return (0 -ne $failedResourcesList.length -and 0 -eq $nonCodeSyncErrors.length)
 }
@@ -427,10 +451,12 @@ function WaitForCodeDeploymentSync {
 
 function DeployARMTemplate {
     Param(
+        [Parameter(Mandatory = $true)] $graphappid,
         [Parameter(Mandatory = $true)] $authorappId,
-        [Parameter(Mandatory = $true)] $authorsecret,
         [Parameter(Mandatory = $true)] $userappId,
-        [Parameter(Mandatory = $true)] $usersecret
+        [Parameter(Mandatory = $false)] $graphappsecret,
+        [Parameter(Mandatory = $false)] $authorsecret,
+        [Parameter(Mandatory = $false)] $usersecret
     )
     try {
         if ((az group exists --name $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value) -eq $false) {
@@ -469,7 +495,12 @@ function DeployARMTemplate {
 
         # Deploy ARM templates
         WriteI -message "`nDeploying app services, Azure function, bot service, and other supporting resources... (this step can take over an hour)"
-        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"
+        if($parameters.useCertificate.Value){
+        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploywithcert.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorAppCertName=$($parameters.authorAppCertName.Value)" "graphAppId=$graphappid" "graphAppCertName=$($parameters.graphAppCertName.Value)" "userClientId=$userappId" "userAppCertName=$($parameters.userAppCertName.Value)" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "objectId=$($parameters.UserObjectId.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)" "serviceBusWebAppRoleNameGuid=$($parameters.serviceBusWebAppRoleNameGuid.Value)" "serviceBusPrepFuncRoleNameGuid=$($parameters.serviceBusPrepFuncRoleNameGuid.Value)" "serviceBusSendFuncRoleNameGuid=$($parameters.serviceBusSendFuncRoleNameGuid.Value)" "serviceBusDataFuncRoleNameGuid=$($parameters.serviceBusDataFuncRoleNameGuid.Value)" "storageAccountWebAppRoleNameGuid=$($parameters.storageAccountWebAppRoleNameGuid.Value)" "storageAccountPrepFuncRoleNameGuid=$($parameters.storageAccountPrepFuncRoleNameGuid.Value)" "storageAccountDataFuncRoleNameGuid=$($parameters.storageAccountDataFuncRoleNameGuid.Value)" 
+        }
+        else{
+        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "graphAppId=$graphappid" "graphAppSecret=$graphappsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"  "serviceBusWebAppRoleNameGuid=$($parameters.serviceBusWebAppRoleNameGuid.Value)" "serviceBusPrepFuncRoleNameGuid=$($parameters.serviceBusPrepFuncRoleNameGuid.Value)" "serviceBusSendFuncRoleNameGuid=$($parameters.serviceBusSendFuncRoleNameGuid.Value)" "serviceBusDataFuncRoleNameGuid=$($parameters.serviceBusDataFuncRoleNameGuid.Value)" "storageAccountWebAppRoleNameGuid=$($parameters.storageAccountWebAppRoleNameGuid.Value)" "storageAccountPrepFuncRoleNameGuid=$($parameters.storageAccountPrepFuncRoleNameGuid.Value)" "storageAccountDataFuncRoleNameGuid=$($parameters.storageAccountDataFuncRoleNameGuid.Value)" 
+        }
 
         $deploymentExceptionMessage = "ERROR: ARM template deployment error."
         if ($LASTEXITCODE -ne 0) {
@@ -484,7 +515,12 @@ function DeployARMTemplate {
                 
                 if($appserviceCodeSyncSuccess){
                     WriteI -message "Re-running deployment to fetch output..."
-                    $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"
+                    if($parameters.useCertificate.Value){
+                        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploywithcert.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorAppCertName=$($parameters.authorAppCertName.Value)" "graphAppId=$graphappid" "graphAppCertName=$($parameters.graphAppCertName.Value)" "userClientId=$userappId" "userAppCertName=$($parameters.userAppCertName.Value)" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "objectId=$($parameters.UserObjectId.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"  "serviceBusWebAppRoleNameGuid=$($parameters.serviceBusWebAppRoleNameGuid.Value)" "serviceBusPrepFuncRoleNameGuid=$($parameters.serviceBusPrepFuncRoleNameGuid.Value)" "serviceBusSendFuncRoleNameGuid=$($parameters.serviceBusSendFuncRoleNameGuid.Value)" "serviceBusDataFuncRoleNameGuid=$($parameters.serviceBusDataFuncRoleNameGuid.Value)" "storageAccountWebAppRoleNameGuid=$($parameters.storageAccountWebAppRoleNameGuid.Value)" "storageAccountPrepFuncRoleNameGuid=$($parameters.storageAccountPrepFuncRoleNameGuid.Value)" "storageAccountDataFuncRoleNameGuid=$($parameters.storageAccountDataFuncRoleNameGuid.Value)" 
+                    }
+                    else{
+                       $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "graphAppId=$graphappid" "graphAppSecret=$graphappsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"  "serviceBusWebAppRoleNameGuid=$($parameters.serviceBusWebAppRoleNameGuid.Value)" "serviceBusPrepFuncRoleNameGuid=$($parameters.serviceBusPrepFuncRoleNameGuid.Value)" "serviceBusSendFuncRoleNameGuid=$($parameters.serviceBusSendFuncRoleNameGuid.Value)" "serviceBusDataFuncRoleNameGuid=$($parameters.serviceBusDataFuncRoleNameGuid.Value)" "storageAccountWebAppRoleNameGuid=$($parameters.storageAccountWebAppRoleNameGuid.Value)" "storageAccountPrepFuncRoleNameGuid=$($parameters.storageAccountPrepFuncRoleNameGuid.Value)" "storageAccountDataFuncRoleNameGuid=$($parameters.storageAccountDataFuncRoleNameGuid.Value)" 
+                    }
                 } else{
                     CollectARMDeploymentLogs
                     Throw $deploymentExceptionMessage
@@ -506,10 +542,18 @@ function DeployARMTemplate {
             }
         }
         WriteS -message "Finished deploying resources. ARM template deployment succeeded."
-        
-        #get the output of current deployment
-        $deploymentOutput = az deployment group show --name azuredeploy --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value | ConvertFrom-Json
 
+        #get the output of current deployment
+        $deploymentOutput = $null
+        if($parameters.useCertificate.value)
+        {
+            $deploymentOutput = az deployment group show --name azuredeploywithcert --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value | ConvertFrom-Json
+        }
+        else
+        {
+            $deploymentOutput = az deployment group show --name azuredeploy --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value | ConvertFrom-Json
+        }
+        
         # Sync only in upgrades & if no source branch conflict detected
         if($parameters.isUpgrade.Value -and (-not $codeSynced)){
             # sync app services code deployment (ARM deployment will not sync automatically)
@@ -533,39 +577,73 @@ function DeployARMTemplate {
     }
 }
 
-# Create Azure AD App principal if app is used in other tenants
-function CreateAdAppPrincipal {
+function CreateCertificateInKeyVault {
     Param(
-        [Parameter(Mandatory = $true)] $tenantId,
-        [Parameter(Mandatory = $true)] $authorAppId,
-        [Parameter(Mandatory = $true)] $userAppId
+        [Parameter(Mandatory= $true)] $certificateName,
+        [Parameter(Mandatory= $true)] $keyVaultName,
+        [Parameter(Mandatory= $true)] $domainName
     )
 
-    WriteI -message "`nPlease login to the tenant where this app template will be used in Microsoft Teams."
-    $user = az login --tenant $tenantId --allow-no-subscriptions
-    
-    $sp = az ad sp list --filter "appId eq '$authorAppId'"
-    if (0 -eq ($sp | ConvertFrom-Json).length) {
-        WriteI -message "Azure AD app principal will be created in tenant: $tenantId"
-        
-        # Delete old service principal for user app
-        $sp = az ad sp list --filter "appId eq '$userAppId'"
-        if (0 -ne ($sp | ConvertFrom-Json).length) {
-            $sp = az ad sp delete --id $userAppId
-        }
-
-        # create new service principal
-        $sp = az ad sp create --id $authorAppId
+     #Get existing Azure Key Vault information
+    $azKeyVault = Get-AzKeyVault -Name $keyVaultName -ErrorAction SilentlyContinue
+    if ($null -eq $azKeyVault)
+    {
+        Write-Host "Didn't find Key Vault with name Azure:- $keyVaultName" -BackgroundColor DarkRed
+        break
     }
-    
-    $logOut = az logout
-    WriteW -message "`nPlease inform your admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/$tenantId/adminconsent?client_id=$authorAppId"
-}    
+    else 
+    {
+        Write-Host "Found Key Vault Name:- $keyVaultName" -BackgroundColor DarkGreen
+    }
+     #Generate new Azure Key Vault Certificate
+    Write-Host "Processing creation of Azure Key Vault Certificate" -ForegroundColor Yellow
+    $certSubjectName = 'cn=' + $domainName
+    $azKeyVaultCertPolicy = New-AzKeyVaultCertificatePolicy -SecretContentType "application/x-pkcs12" -SubjectName $certSubjectName -IssuerName "Self" -ValidityInMonths 24 -ReuseKeyOnRenewal
+    $azKeyVaultCertStatus = Add-AzKeyVaultCertificate -VaultName $keyVaultName -Name $CertificateName -CertificatePolicy $azKeyVaultCertPolicy
+
+    #Wait for certificate to generate
+    $counter = 1
+    While ($azKeyVaultCertStatus.Status -eq 'inProgress') {
+        Start-Sleep -Milliseconds 50
+        Write-Host "`r$counter% creation in progress" -NoNewline -ForegroundColor Yellow
+        $azKeyVaultCertStatus = Get-AzKeyVaultCertificateOperation -VaultName $keyVaultName -Name $CertificateName
+        $counter++
+    }
+    Write-Host "`r100% Completed. Checking status... " -ForegroundColor Yellow
+    if ($azKeyVaultCertStatus.Status -ne 'completed') { 
+        Write-Host $($azKeyVaultCertStatus.StatusDetails) -ForegroundColor Magenta
+    }
+    else {
+        Write-Host "Generated Key Vault Certificate successfully" -BackgroundColor DarkGreen
+        Write-Output $azKeyVaultCertStatus
+    }
+}
+
+function UpdateAadAppWithCertificate {
+        Param(
+        [Parameter(Mandatory = $true)] $appId,
+        [Parameter(Mandatory = $true)] $keyVaultName,
+        [Parameter(Mandatory = $true)] $certificateName
+        )
+        # Update AAD app with keyvault certificate
+        az ad app credential reset --id $appId --keyvault $keyVaultName --cert $certificateName --append
+}
+
+function ImportKeyVaultCertificate{
+    Param(
+        [Parameter(Mandatory = $true)] $keyVaultName,
+        [Parameter(Mandatory = $true)] $appName
+        )
+        Set-AzKeyVaultAccessPolicy -VaultName $keyVaultName -ServicePrincipalName abfa0a7c-a6b6-4736-8310-5855508787cd -PermissionsToSecrets get
+        az webapp config ssl import --resource-group $parameters.resourceGroupName.Value --name $appName --subscription $parameters.subscriptionId.Value --key-vault $keyVaultName --key-vault-certificate-name $parameters.authorAppCertName.Value
+        az webapp config ssl import --resource-group $parameters.resourceGroupName.Value --name $appName --subscription $parameters.subscriptionId.Value --key-vault $keyVaultName --key-vault-certificate-name $parameters.userAppCertName.Value
+        az webapp config ssl import --resource-group $parameters.resourceGroupName.Value --name $appName --subscription $parameters.subscriptionId.Value --key-vault $keyVaultName --key-vault-certificate-name $parameters.graphAppCertName.Value
+}
 
 # Grant Admin consent
 function GrantAdminConsent {
     Param(
-        [Parameter(Mandatory = $true)] $authorAppId
+        [Parameter(Mandatory = $true)] $graphAppId
         )
 
     $confirmationTitle = "Admin consent permissions is required for app registration using CLI"
@@ -573,8 +651,8 @@ function GrantAdminConsent {
     $confirmationChoices = "&Yes", "&No" # 0 = Yes, 1 = No
     $consentErrorMessage = "Current user does not have the privilege to consent the below permissions on this app.
     * AppCatalog.Read.All(Delegated)
-    * Group.Read.All(Delegated)
-    * Group.Read.All(Application)
+    * GroupMember.Read.All(Delegated)
+    * GroupMember.Read.All(Application)
     * TeamsAppInstallation.ReadWriteForUser.All(Application)
     * User.Read.All(Delegated)
     * User.Read(Application) 
@@ -584,16 +662,16 @@ function GrantAdminConsent {
     if ($updateDecision -eq 0) {
         # Grant admin consent for app registration required permissions using CLI
         WriteI -message "Waiting for admin consent to finish..."
-        az ad app permission admin-consent --id $authorAppId
+        az ad app permission admin-consent --id $graphAppId
         
         if ($LASTEXITCODE -ne 0) {
             WriteE -message $consentErrorMessage
-            WriteW -message "`nPlease inform the global admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/$($parameters.tenantId.value)/adminconsent?client_id=$authorAppId"
+            WriteW -message "`nPlease inform the global admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/$($parameters.tenantId.value)/adminconsent?client_id=$graphAppId"
         } else {
             WriteS -message "Admin consent has been granted."
         }
     } else {
-        WriteW -message "`nPlease inform the global admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/$($parameters.tenantId.value)/adminconsent?client_id=$authorAppId"
+        WriteW -message "`nPlease inform the global admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/$($parameters.tenantId.value)/adminconsent?client_id=$graphAppId"
     }
 }
 
@@ -608,7 +686,7 @@ function ADAppUpdate {
             $configAppUrl = "https://$azureDomainBase"
             $RedirectUris = ($configAppUrl + '/signin-simple-end')
             $IdentifierUris = "api://$azureDomainBase"
-            $appName = $parameters.baseResourceName.Value + '-authors'
+            $appName = $parameters.baseResourceName.Value
 
     function CreatePreAuthorizedApplication(
         [string] $applicationIdToPreAuthorize,
@@ -637,11 +715,12 @@ function ADAppUpdate {
         return $scope
     }
 
-    # Grant Admin consent if the subscriptionTenantId and tenantId are same.
-    if ($parameters.tenantId.value -eq $parameters.subscriptionTenantId.value) {
-        GrantAdminConsent $configAppId
-    }
+    # Grant Admin consent
+    GrantAdminConsent $configAppId
     
+    # set subscription
+    az account set --subscription $parameters.subscriptionId.Value
+
     # Assigning graph permissions  
     az ad app update --id $configAppId --required-resource-accesses './AadAppManifest.json'    
 
@@ -661,10 +740,10 @@ function ADAppUpdate {
 
     # Do nothing if the app has already been configured
     if ($app.IdentifierUris.Count -gt 0) {
-        WriteS -message "`Author application is already configured."
+        WriteS -message "`Graph application is already configured."
         return
     }
-    WriteI -message "`nUpdating authors app..."
+    WriteI -message "`nUpdating graph app..."
 
     #Removing default scope user_impersonation
     $DEFAULT_SCOPE=$(az ad app show --id $configAppId | jq '.oauth2Permissions[0].isEnabled = false' | jq -r '.oauth2Permissions')
@@ -728,13 +807,35 @@ function ADAppUpdate {
     WriteI -message "Teams mobile/desktop and web clients applications pre-authorized."
 }
 
-# Removing existing access of user app.
-function ADAppUpdateUser {
-    Param(
-        [Parameter(Mandatory = $true)] $appId
+# update app name
+function ADAppUpdateDisplayName{
+	    Param(
+        [Parameter(Mandatory = $true)] $appId,
+		[Parameter(Mandatory = $true)] $currentName,
+        [Parameter(Mandatory = $true)] $newName
     )
 
-    $appName = $parameters.baseResourceName.Value
+    $apps = Get-AzureADApplication -Filter "DisplayName eq '$currentName'"
+
+    if (0 -eq $apps.Length) {
+        $app = New-AzureADApplication -DisplayName $currentName
+    } else {
+        $app = $apps[0]
+    }
+
+    $applicationObjectId = $app.ObjectId
+
+    $app = Get-AzureADMSApplication -ObjectId $applicationObjectId
+
+    az ad app update --id $appId --set DisplayName=$newName 	
+}
+
+# Removing existing access of app.
+function FormatAADApp {
+    Param(
+        [Parameter(Mandatory = $true)] $appId,
+        [Parameter(Mandatory = $true)] $appName
+    )
 
     $apps = Get-AzureADApplication -Filter "DisplayName eq '$appName'"
 
@@ -750,11 +851,11 @@ function ADAppUpdateUser {
 
     # Do nothing if the app has already been configured
     if ($app.IdentifierUris.Count -eq 0) {
-        WriteS -message "`nUser app already configured."
+        WriteS -message "`n app already configured."
         return
     }
 
-    WriteI -message "`nUpdating user app..."
+    WriteI -message "`nUpdating app..."
     $IdentifierUris = "api://$appId"
 
     $DEFAULT_SCOPE=$(az ad app show --id $appId | jq '.oauth2Permissions[0].isEnabled = false' | jq -r '.oauth2Permissions')
@@ -921,7 +1022,7 @@ function logout {
     }
 
 # Start Deployment.
-    Write-Ascii -InputObject "Company Communicator v4" -ForegroundColor Magenta
+    Write-Ascii -InputObject "Company Communicator v5.0" -ForegroundColor Magenta
     WriteI -message "Starting deployment..."
 
 # Initialize connections - Azure Az/CLI/Azure AD
@@ -944,50 +1045,129 @@ function logout {
         logout
         EXIT
     }
+    
+# Create or Update User App
+	$usersApp = $parameters.baseresourcename.Value + '-users'
+	$userAppCred = $null
 
-# Create User App
-    $userAppCred = CreateAzureADApp $parameters.baseresourcename.Value
-    if ($null -eq $userAppCred) {
-        WriteE -message "Failed to create or update User app in Azure Active Directory. Exiting..."
-        logout
-        Exit
-    }
-
+	if($parameters.isUpgrade.Value){
+        $currentAppName = $parameters.baseresourcename.Value
+		$userAppCred = GetAzureADAppWithSecret $currentAppName
+		ADAppUpdateDisplayName $userAppCred.appId $currentAppName $usersApp
+	}
+	else
+	{
+		$userAppCred = CreateAzureADApp $usersApp
+		if ($null -eq $userAppCred) {
+			WriteE -message "Failed to create or update User app in Azure Active Directory. Exiting..."
+			logout
+			Exit
+		}
+	}
+	
 # Create Author App
     $authorsApp = $parameters.baseResourceName.Value + '-authors'
-    $authorAppCred = CreateAzureADApp $authorsApp
-    if ($null -eq $authorAppCred) {
+	$authorAppCred = $null
+	if($parameters.isUpgrade.Value){
+		$authorAppCred = GetAzureADAppWithSecret $authorsApp
+	}
+	else
+	{
+		$authorAppCred = CreateAzureADApp $authorsApp
+		if ($null -eq $authorAppCred) {
         WriteE -message "Failed to create or update the Author app in Azure Active Directory. Exiting..."
         logout
         Exit
-    }
+		}
+	}
+	
+# Create Company Communicator App
+	$graphApp = $parameters.baseResourceName.Value
+	$graphAppCred = CreateAzureADApp -AppName $graphApp -ResetAppSecret $True -MultiTenant $False
+	if ($null -eq $graphAppCred) {
+		WriteE -message "Failed to create or update the main app in Azure Active Directory. Exiting..."
+		logout
+		Exit
+	}
 
 # Function call to Deploy ARM Template
-    $deploymentOutput = DeployARMTemplate $authorAppCred.appId $authorAppCred.password $userAppCred.appId $userAppCred.password
+    $deploymentOutput = $null
+    $appDisplayName = $null
+    if($parameters.useCertificate.Value){
+        $deploymentOutput = DeployARMTemplate $graphAppCred.appId $authorAppCred.appId $userAppCred.appId
+
+        # Reading the deployment output.
+        WriteI -message "Reading deployment outputs..."
+        if(($null -eq $deploymentOutput) -or ( $null -eq $deploymentOutput.properties) -or ($null -eq $deploymentOutput.properties.Outputs) -or ($deploymentOutput.properties.Outputs.keyVaultName) -or ($deploymentOutput.properties.Outputs.keyVaultName.Value))
+        {
+            $keyVaultName = $parameters.BaseResourceName.Value + 'vault'
+            if($parameters.customDomainOption.Value -eq 'Azure Front Door')
+            {
+               $appdomainName = $parameters.BaseResourceName.Value.ToLower() + '.azurefd.net'
+            }
+            else
+            {
+                $appdomainName = 'Please create a custom domain name for ' + $parameters.BaseResourceName.Value + ' and use that in the manifest'
+            }
+        }
+        else
+        {
+         $keyVaultName = $deploymentOutput.properties.Outputs.keyVaultName.Value
+         $appdomainName = $deploymentOutput.properties.Outputs.appDomain.Value
+        }
+        
+        CreateCertificateInKeyVault $parameters.authorAppCertName.value $keyVaultName $appdomainName
+        CreateCertificateInKeyVault $parameters.userAppCertName.value $keyVaultName $appdomainName
+        CreateCertificateInKeyVault $parameters.graphAppCertName.value $keyVaultName $appdomainName
+        
+        ImportKeyVaultCertificate $keyVaultName $parameters.BaseResourceName.Value
+        ImportKeyVaultCertificate $keyVaultName "$($parameters.BaseResourceName.Value)-prep-function"
+        ImportKeyVaultCertificate $keyVaultName "$($parameters.BaseResourceName.Value)-function"
+        ImportKeyVaultCertificate $keyVaultName "$($parameters.BaseResourceName.Value)-data-function"
+
+        UpdateAadAppWithCertificate $authorAppCred.appId $keyVaultName $parameters.authorAppCertName.value
+        UpdateAadAppWithCertificate $userAppCred.appId $keyVaultName $parameters.userAppCertName.value
+        UpdateAadAppWithCertificate $graphAppCred.appId $keyVaultName $parameters.graphAppCertName.value
+    }
+    else
+    {
+        $deploymentOutput = DeployARMTemplate $graphAppCred.appId $authorAppCred.appId $userAppCred.appId $graphAppCred.password $authorAppCred.password $userAppCred.password
+        
+        # Reading the deployment output.
+        WriteI -message "Reading deployment outputs..."
+        if(($null -eq $deploymentOutput) -or ( $null -eq $deploymentOutput.properties) -or ($null -eq $deploymentOutput.properties.Outputs) -or ($deploymentOutput.properties.Outputs.keyVaultName) -or ($deploymentOutput.properties.Outputs.keyVaultName.Value))
+        {
+            $keyVaultName = $parameters.BaseResourceName.Value + 'vault'
+            if($parameters.customDomainOption.Value -eq 'Azure Front Door')
+            {
+               $appdomainName = $parameters.BaseResourceName.Value.ToLower() + '.azurefd.net'
+            }
+            else
+            {
+                $appdomainName = 'Please create a custom domain name for ' + $parameters.BaseResourceName.Value + ' and use that in the manifest'
+            }
+        }
+        else
+        {
+            # Assigning return values to variable.  
+            $appdomainName = $deploymentOutput.properties.Outputs.appDomain.Value
+        }
+    }
     if ($null -eq $deploymentOutput) {
         WriteE -message "Encountered an error during ARM template deployment. Exiting..."
         logout
         Exit
-    }
-
-# Reading the deployment output.
-    WriteI -message "Reading deployment outputs..."
-
-# Assigning return values to variable. 
-    $appdomainName = $deploymentOutput.properties.Outputs.appDomain.Value
+    }    
 
 # Function call to update reply-urls and uris for registered app.
     WriteI -message "Updating required parameters and urls..."
-    ADAppUpdateUser $userAppCred.appId
-    ADAppUpdate $appdomainName $authorAppCred.appId
+	if($parameters.isUpgrade.Value){
+    FormatAADApp $authorAppCred.appId $authorsApp
+	}
+    ADAppUpdate $appdomainName $graphAppCred.appId
 
 # Log out to avoid tokens caching
     logout
-
-# App template is deployed on tenant A and used in tenant B
-    if ($parameters.tenantId.Value -ne $parameters.subscriptionTenantId.Value){
-        CreateAdAppPrincipal $parameters.tenantId.Value $authorAppCred.appId $userAppCred.appId
-    }
 
 # Function call to generate manifest.zip folder for User and Author. 
     GenerateAppManifestPackage 'authors' $appdomainName $authorAppCred.appId

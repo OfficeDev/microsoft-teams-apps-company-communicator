@@ -14,7 +14,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Identity.Web;
-    using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
     using Microsoft.IdentityModel.Tokens;
 
     /// <summary>
@@ -35,7 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         {
             AuthenticationServiceCollectionExtensions.RegisterAuthenticationServices(services, configuration, authenticationOptions);
 
-            AuthenticationServiceCollectionExtensions.RegisterAuthorizationPolicy(services);
+            AuthenticationServiceCollectionExtensions.RegisterAuthorizationPolicy(services, configuration);
         }
 
         // This method works specifically for single tenant application.
@@ -45,18 +44,66 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             AuthenticationOptions authenticationOptions)
         {
             AuthenticationServiceCollectionExtensions.ValidateAuthenticationOptions(authenticationOptions);
+            var azureADOptions = new AzureADOptions
+            {
+                Instance = authenticationOptions.AzureAdInstance,
+                TenantId = authenticationOptions.AzureAdTenantId,
+                ClientId = authenticationOptions.AzureAdClientId,
+            };
+            var useCertificate = configuration.GetValue<bool>("UseCertificate");
+            if (useCertificate)
+            {
+                RegisterAuthenticationServicesWithCertificate(services, configuration, authenticationOptions, azureADOptions);
+            }
+            else
+            {
+                RegisterAuthenticationServicesWithSecret(services, configuration, authenticationOptions, azureADOptions);
+            }
+        }
 
-            services.AddProtectedWebApi(configuration)
-                    .AddProtectedWebApiCallsProtectedWebApi(configuration)
-                    .AddInMemoryTokenCaches();
+        private static void RegisterAuthenticationServicesWithCertificate(
+            IServiceCollection services,
+            IConfiguration configuration,
+            AuthenticationOptions authenticationOptions,
+            AzureADOptions azureADOptions)
+        {
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                 .AddMicrosoftIdentityWebApi(
+                 options =>
+                 {
+                     options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
+                     options.SaveToken = true;
+                     options.TokenValidationParameters.ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(authenticationOptions);
+                     options.TokenValidationParameters.AudienceValidator = AuthenticationServiceCollectionExtensions.AudienceValidator;
+                     options.TokenValidationParameters.ValidIssuers = AuthenticationServiceCollectionExtensions.GetValidIssuers(authenticationOptions);
+                 },
+                 microsoftIdentityOptions =>
+                 {
+                     configuration.Bind("AzureAd", microsoftIdentityOptions);
+                     microsoftIdentityOptions.ClientCertificates = new CertificateDescription[]
+                     {
+                            CertificateDescription.FromKeyVault(configuration.GetValue<string>("KeyVault:Url"), configuration.GetValue<string>("GraphAppCertName")),
+                     };
+                 })
+                 .EnableTokenAcquisitionToCallDownstreamApi(
+                 confidentialClientApplicationOptions =>
+                 {
+                     configuration.Bind("AzureAd", confidentialClientApplicationOptions);
+                 })
+                 .AddInMemoryTokenCaches();
+        }
+
+        private static void RegisterAuthenticationServicesWithSecret(
+        IServiceCollection services,
+        IConfiguration configuration,
+        AuthenticationOptions authenticationOptions,
+        AzureADOptions azureADOptions)
+        {
+            services.AddMicrosoftIdentityWebApiAuthentication(configuration)
+                .EnableTokenAcquisitionToCallDownstreamApi()
+                .AddInMemoryTokenCaches();
             services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                var azureADOptions = new AzureADOptions
-                {
-                    Instance = authenticationOptions.AzureAdInstance,
-                    TenantId = authenticationOptions.AzureAdTenantId,
-                    ClientId = authenticationOptions.AzureAdClientId,
-                };
                 options.Authority = $"{azureADOptions.Instance}{azureADOptions.TenantId}/v2.0";
                 options.SaveToken = true;
                 options.TokenValidationParameters.ValidAudiences = AuthenticationServiceCollectionExtensions.GetValidAudiences(authenticationOptions);
@@ -125,8 +172,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             return validIssuers;
         }
 
-        private static void RegisterAuthorizationPolicy(IServiceCollection services)
+        private static void RegisterAuthorizationPolicy(IServiceCollection services, IConfiguration configuration)
         {
+            var graphGroupDatascope = configuration.GetValue<string>("GroupsGraphScope");
             services.AddAuthorization(options =>
             {
                 var mustContainUpnClaimRequirement = new MustBeValidUpnRequirement();
@@ -139,7 +187,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                 options.AddPolicy(
                     PolicyNames.MSGraphGroupDataPolicy,
                     policyBuilder => policyBuilder
-                    .AddRequirements(new MSGraphScopeRequirement(new string[] { Common.Constants.ScopeGroupReadAll }))
+                    .AddRequirements(new MSGraphScopeRequirement(new string[] { graphGroupDatascope }))
                     .RequireAuthenticatedUser()
                     .Build());
             });
