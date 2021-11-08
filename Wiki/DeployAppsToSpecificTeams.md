@@ -1,14 +1,3 @@
-# Operational Guidance
-
-## How long should a message take to send
-
-Generally it should be immediate however , it does differ on the selected audience & quantity.
-
-*Estimates*
-
-* e.g. To a 1000 Teams General Channel - 45min.
-* e.g. To 25-1000 users - 10 min.
-
 ## Where do i deploy the user bot to?
 
 It's recommended to deploy the users bot to everyone through the Global Setup Policy in the Teams Admin center.
@@ -24,7 +13,7 @@ What if you only want a specific list of teams to appear in the Search ,further 
 How do we do this , if we have a large amount of teams say 10000.
 
 ## Export a List of Teams Via PowerShell to CSV
-
+>For tenants with a large amount of teams its advised that you add additional filters to the Get-Team command.
 ```
 Connect-MicrosoftTeams -Interactive
 Get-Team| Export-Csv -Path c:\temp\MylistofTeams.csv -NoTypeInformation
@@ -37,6 +26,8 @@ Format your CSV like this:
 |----|----|----|
 |My test team|{guid}|{guid}
 | my first project|b9cc7986-dd56-4b57-ab7d-9c4e5288b775|b9cc7986-dd56-4b57-ab7d-9c4e5288b775|
+
+>For tenants with a large amount of teams its advised that you add perform the below in waves.
 
 ```
 Connect-MicrosoftTeams -Interactive
