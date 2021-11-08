@@ -35,7 +35,7 @@ There are certain issues that can arise that are common to many of the app templ
 ```
 The resource type `Microsoft.Web/sites/sourcecontrols` failed to deploy. The transitive dependency set of the front-end web app pulls in over 1,000 NPM packages, and sometimes there is an error fetching all of the packages.
 
-#### Fix
+## Fix
 ![Screenshot of refreshing code deployment](images/troubleshooting_sourcecontrols.png)
 1. Go to the "Deployment center" section of the app service that failed to deploy.
 2. Click on "Sync" to restart the deployment.
@@ -48,8 +48,25 @@ If you had to do this, you may not have received the **authorBotId**, **userBotI
 
 We are currently looking into how to make this process more resilient to intermittent failures.
 
+### Restart all the components.
+
+  * Azure functions
+  * App service
+* Sync the Deployment from github
+  * Open App service --> Deployment Center --> Sync
+  * Open Azure Data Function --> Deployment Center --> Sync
+  * Open Azure Function --> Deployment Center --> Sync
+  * Open Azure prep Function --> Deployment Center --> Sync
+
+### Verify the logs the status should say "Success (Active)"
+
+* Open App service --> Deployment Center --> Logs (Tab)
+* Open Azure Data Function --> Deployment Center --> Logs (Tab)
+* Open Azure Function --> Deployment Center --> Logs (Tab)
+* Open Azure prep Function --> Deployment Center --> Logs (Tab)
 
 ## 2. Forgetting the botId or appDomain
+
 If you forgot to copy your **authorBotId**, **userBotId** and **appDomain** values from the end of the deployment. You can find them in the "Configuration" section of your Web App.
 
 * **authorBotId:** This is the author Microsoft Application ID for the Company Communicator app. It can be found in the "AuthorAppId" field of your configuration e.g. 5630f8a2-c2a0-4cda-bdfa-c2fa87654321. For the following steps, it will be referred to as %authorBotId%.
@@ -88,10 +105,6 @@ Go to the tenant where app is installed and open **Enterprise Applicationss** pa
 
 ## 7. When upgrading Company Commmunicator from a version prior to v4, please ensure that the **users** app is installed in the teams to send messages to the team or its members.
 Install the **User** app (the `company-communicator-users.zip` package) to the teams that will be the target audience.
-
-## 8. Messages Queued
-Restart all the components.
-Sync the 
 
 # Didn't find your problem here?
 Please report the issue [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/issues/new)
