@@ -6,6 +6,7 @@ There are certain issues that can arise that are common to many of the app templ
 # Problems deploying to Azure
 
 ## 1. Code deployment failure
+
 ```
 {
     "id": "/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Resources/deployments/Microsoft.Template/operations/E46C6DE7BE4DE2F9",
