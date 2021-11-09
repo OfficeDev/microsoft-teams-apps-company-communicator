@@ -470,7 +470,7 @@
         {
           "name": "[concat(variables('authorBotName'), '/MsTeamsChannel')]",
           "type": "Microsoft.BotService/botServices/channels",
-          "apiVersion": "2018-07-12",
+          "apiVersion": "2021-03-01",
           "location": "global",
           "sku": {
             "name": "F0"
