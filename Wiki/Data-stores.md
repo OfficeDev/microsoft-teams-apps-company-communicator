@@ -1,6 +1,7 @@
 The app uses the following data stores:
 1. Azure Storage Account
 1. Application Insights
+1. Azure Key vault
 
 All these resources are created in your Azure subscription. None are hosted directly by Microsoft.
 
@@ -144,3 +145,18 @@ The Export Collection stores the export data.
 ## Application Insights
 
 See [Telemetry](Telemetry)
+
+## Azure Key vault
+
+The key vault stores the following data.
+
+| Value                  | Description
+| ---                    | ---
+| AuthorAppPassword      | The client secret key of author bot.
+| UserAppPassword        | The client secret key of user bot.
+| GraphAppSecret         | The client secret key of graph app.
+| Author app certificate | The Key vault certificate of author bot.
+| User app certificate   | The Key vault certificate of user bot.
+| Graph app certificate  | The Key vault certificate of graph app.
+| ServiceBusConnectionString | The connection string of Service Bus Namespace.
+| StorageAccountConnectionString | The connection string of Storage Account.

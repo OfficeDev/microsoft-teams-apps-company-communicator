@@ -11,9 +11,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
     public static class Constants
     {
         /// <summary>
-        /// get the group read all scope.
+        /// get the groupMember read all scope.
         /// </summary>
-        public const string ScopeGroupReadAll = "Group.Read.All";
+        public const string ScopeGroupMemberReadAll = "GroupMember.Read.All";
 
         /// <summary>
         /// AppCatalog Read All scope.
@@ -69,5 +69,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         /// get the OData next page link.
         /// </summary>
         public const string ODataNextPageLink = "@odata.nextLink";
+
+        /// <summary>
+        /// get the maximum number of recipients in a batch.
+        /// </summary>
+        public const int MaximumNumberOfRecipientsInBatch = 1000;
+
+        /// <summary>
+        /// get the Microsoft Graph api batch request size.
+        /// https://docs.microsoft.com/en-us/graph/known-issues#limit-on-batch-size.
+        /// </summary>
+        public const int MaximumGraphAPIBatchSize = 15;
     }
 }

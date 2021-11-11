@@ -28,6 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Mappers
             this.Map(x => x.Id).Name(this.localizer.GetString("ColumnName_UserId"));
             this.Map(x => x.Upn).Name(this.localizer.GetString("ColumnName_Upn"));
             this.Map(x => x.Name).Name(this.localizer.GetString("ColumnName_UserName"));
+            this.Map(x => x.UserType).Name(this.localizer.GetString("ColumnName_UserType"));
             this.Map(x => x.DeliveryStatus).Name(this.localizer.GetString("ColumnName_DeliveryStatus"));
             this.Map(x => x.StatusReason).Name(this.localizer.GetString("ColumnName_StatusReason"));
         }

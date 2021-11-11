@@ -247,4 +247,16 @@
   <data name="Throttled" xml:space="preserve">
     <value>已節流</value>
   </data>
+  <data name="ColumnName_UserType" xml:space="preserve">
+    <value>使用者類型</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>來賓</value>
+  </data>
+  <data name="Member" xml:space="preserve">
+    <value>成員</value>
+  </data>
+  <data name="GuestUserNotSupported" xml:space="preserve">
+    <value>不支援來賓使用者</value>
+  </data>
 </root>

@@ -247,4 +247,16 @@
   <data name="Throttled" xml:space="preserve">
     <value>제한됨</value>
   </data>
+  <data name="ColumnName_UserType" xml:space="preserve">
+    <value>사용자 유형</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>게스트</value>
+  </data>
+  <data name="Member" xml:space="preserve">
+    <value>구성원</value>
+  </data>
+  <data name="GuestUserNotSupported" xml:space="preserve">
+    <value>게스트 사용자가 지원되지 않음</value>
+  </data>
 </root>

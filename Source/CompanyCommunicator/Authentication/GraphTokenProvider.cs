@@ -52,12 +52,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             if (permissionType.Equals(GraphPermissionType.Application.ToString(), StringComparison.CurrentCultureIgnoreCase))
             {
                 // we use MSAL.NET to get a token to call the API for application
-                accessToken = await this.tokenAcquisition.GetAccessTokenForAppAsync(new string[] { Common.Constants.ScopeDefault });
+                accessToken = await this.tokenAcquisition.GetAccessTokenForAppAsync(Common.Constants.ScopeDefault);
             }
             else
             {
                 // we use MSAL.NET to get a token to call the API On Behalf Of the current user
-                accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] { Common.Constants.ScopeGroupReadAll, Common.Constants.ScopeAppCatalogReadAll });
+                accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] { Common.Constants.ScopeDefault });
             }
 
             return accessToken;

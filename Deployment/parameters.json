@@ -7,6 +7,10 @@
     "Value": "<<value>>",
     "Description": "Id of the tenant to deploy to (If you are not sure how to get Tenant ID, please check Azure Active Directory in Azure Portal. Under Manage, click Properties. The tenant ID is shown in the Directory ID box). e.g 98f3ece2-3a5a-428b-aa4f-4c41b3f6eef0. Tenant ID is also in the \"Overview\" section\""
   },
+  "UserObjectId": {
+    "Value": "<<value>>",
+    "Description": "User Object Id."
+  },
   "resourceGroupName": {
     "Value": "<<value>>",
     "Description": "Resource Group"
@@ -27,8 +31,24 @@
     "Value": "<<value>>",
     "Description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
   },
+  "useCertificate": {
+    "Value": false,
+    "Description": "If certificate authentication is being used, then value should be true. Otherwise, false is default (Client-secret will be used)."
+  },
+  "authorAppCertName": {
+    "Value": "<<value>>",
+    "Description": "The X.509 certificate name of the author bot Azure AD app."
+  },
+  "graphAppCertName": {
+    "Value": "<<value>>",
+    "Description": "The X.509 certificate name of the Microsoft Azure AD app."
+  },
+  "userAppCertName": {
+    "Value": "<<value>>",
+    "Description": "The X.509 certificate name of the user bot Azure AD app."
+  },
   "isUpgrade": {
-    "Value": "false",
+    "Value": false,
     "Description": "If this is an upgrade for old version of the app template, then value should be true. Otherwise, false is default (First-time deployment)."
   },
   "customDomainOption": {
@@ -43,6 +63,34 @@
     "Value": "148a66bb-e83d-425a-927d-09f4299a9274",
     "Description": "User app external ID."
   },
+  "serviceBusWebAppRoleNameGuid": {
+    "Value": "958380b3-630d-4823-b933-f59d92cdcada",
+    "Description": "A GUID used to identify the role assignment. This is Default value."
+  },
+  "serviceBusPrepFuncRoleNameGuid": {
+    "Value": "ce6ca916-08e9-4639-bfbe-9d098baf42ca",
+    "Description": "A GUID used to identify the role assignment. This is Default value."
+  },
+  "serviceBusSendFuncRoleNameGuid": {
+    "Value": "960365a2-c7bf-4ff3-8887-efa86fe4a163",
+    "Description": "A GUID used to identify the role assignment. This is Default value."
+  },
+  "serviceBusDataFuncRoleNameGuid": {
+    "Value": "d42703bc-421d-4d98-bc4d-cd2bb16e5b0a",
+    "Description": "A GUID used to identify the role assignment. This is Default value."
+  },
+  "storageAccountWebAppRoleNameGuid": {
+    "Value": "edd0cc48-2cf7-490e-99e8-131311e42030",
+    "Description": "A GUID used to identify the role assignment. This is Default value."
+  },
+  "storageAccountPrepFuncRoleNameGuid": {
+    "Value": "9332a9e9-93f4-48d9-8121-d279f30a732e",
+    "Description": "A GUID used to identify the role assignment. This is Default value."
+  },
+  "storageAccountDataFuncRoleNameGuid": {
+    "Value": "5b67af51-4a98-47e1-9d22-745069f51a13",
+    "Description": "A GUID used to identify the role assignment. This is Default value."
+  },
   "defaultCulture": {
     "Value": "en-US",
     "Description": "Default culture."
@@ -53,10 +101,10 @@
   },
   "hostingPlanSku": {
     "Value": "Standard",
-    "Description": "The pricing tier for the hosting plan. Defaul value: Standard. You may choose between Basic, Standard and Premium."
+    "Description": "The pricing tier for the hosting plan. Default value: Standard. You may choose between Basic, Standard and Premium."
   },
   "hostingPlanSize": {
-    "Value": "1",
+    "Value": "2",
     "Description": "The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value: 1"
   },
   "gitRepoUrl": {

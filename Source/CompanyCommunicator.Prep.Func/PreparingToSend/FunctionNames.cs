@@ -46,32 +46,32 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public const string SyncAllUsersActivity = nameof(SyncAllUsersActivity);
 
         /// <summary>
-        /// Sync Team members acitivity function.
+        /// Sync Team members activity function.
         /// </summary>
         public const string SyncTeamMembersActivity = nameof(SyncTeamMembersActivity);
 
         /// <summary>
-        /// Sync group members acitivity function.
+        /// Sync group members activity function.
         /// </summary>
         public const string SyncGroupMembersActivity = nameof(SyncGroupMembersActivity);
 
         /// <summary>
-        /// Sync Teams acitivity function.
+        /// Sync Teams activity function.
         /// </summary>
         public const string SyncTeamsActivity = nameof(SyncTeamsActivity);
 
         /// <summary>
-        /// Get recipients acitvity function.
+        /// Get recipients activity function.
         /// </summary>
         public const string GetRecipientsActivity = nameof(GetRecipientsActivity);
 
         /// <summary>
-        /// Get recipients acitvity by token function.
+        /// Batch recipients activity function.
         /// </summary>
-        public const string GetRecipientsByTokenActivity = nameof(GetRecipientsByTokenActivity);
+        public const string BatchRecipientsActivity = nameof(BatchRecipientsActivity);
 
         /// <summary>
-        /// Get pending recipients (ie recipients with no conversation id in the database) acitvity function.
+        /// Get pending recipients (ie recipients with no conversation id in the database) activity function.
         /// </summary>
         public const string GetPendingRecipientsActivity = nameof(GetPendingRecipientsActivity);
 
@@ -126,7 +126,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public const string HandleExportFailureActivity = nameof(HandleExportFailureActivity);
 
         /// <summary>
-        /// Export orechestration function.
+        /// Export orchestration function.
         /// </summary>
         public const string ExportOrchestration = nameof(ExportOrchestration);
     }

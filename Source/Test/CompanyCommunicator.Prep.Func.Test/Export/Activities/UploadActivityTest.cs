@@ -34,6 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         private readonly Mock<IStorageClientFactory> storageClientFactory = new Mock<IStorageClientFactory>();
         private readonly Mock<IDataStreamFacade> userDataStream = new Mock<IDataStreamFacade>();
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
+        private readonly Mock<BlobContainerClient> blobContainerClientMock = new Mock<BlobContainerClient>();
         private readonly string fileName = "fileName";
 
         /// <summary>
