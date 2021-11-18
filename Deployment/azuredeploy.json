@@ -169,7 +169,7 @@
         "2",
         "3"
       ],
-      "defaultValue": "1",
+      "defaultValue": "2",
       "metadata": {
         "description": "The size of the hosting plan (small, medium, or large)."
       }
