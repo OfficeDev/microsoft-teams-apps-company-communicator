@@ -20,12 +20,23 @@ Begin with the [Solution overview](https://github.com/OfficeDev/microsoft-teams-
 
 When you're ready to try out Company Communicator, or to use it in your own organization, you can choose to follow one of the below guides.
 * [Deployment guide powershell](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide-powershell).
-    * **Recommended** Use this option to deploy the Company Communicator using powershell script. The entire set-up is done by the powershell script.
+    * **Recommended** Use this option to deploy the Company Communicator v5.0 using powershell script. The entire set-up is done by the powershell script.
 * [Deployment guide](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide).
-    * Use this option to deploy the Company Communicator with client secrets.
+    * Use this option to deploy the Company Communicator v5.0 with client secrets.
 * [Deployment guide certificate](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide-certificate).
-    * Use this option to deploy the Company Communicator with certificates.
-  
+    * Use this option to deploy the Company Communicator v5.0 with certificates.
+
+## Migration 
+
+If you already have older version of Company Communicator installed, then please use this [v5 migration guide](v5-migration-guide). Please note that deploying the major version update, like Company Communicator version 5.0 involves more than syncing the App Service and Azure Functions, so plan to review the migration guide before migrating to latest. 
+
+Migrating to newer versions. 
+
+ * [v5 migration guide](v5-migration-guide)
+ * [v4 migration guide](v4-migration-guide)
+ * [v3 migration guide](v3-migration-guide)
+ * [v2 migration guide](v2-migration-guide)
+
 ## Feedback
 
 Thoughts? Questions? Ideas? Share them with us on [Teams UserVoice](https://microsoftteams.uservoice.com/forums/555103-public)!
