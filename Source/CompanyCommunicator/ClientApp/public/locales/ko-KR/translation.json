@@ -107,5 +107,13 @@
   "CSVUsersLabel": "CSV 파일에서 업로드한 사용자 목록",
   "SendToCSVUsersNote": "참고: 이 옵션은 업로드된 CSV 파일의 모든 사용자에게 메시지를 보냅니다.",
   "SentToCSV": "CSV 파일에 제공된 사용자 목록으로 채팅으로 전송",
-  "SentToAllUsers": "모든 사람에게 채팅으로 전송"
+  "SentToAllUsers": "모든 사람에게 채팅으로 전송",
+  "TargetingConfig": "타게팅 모드에서 회사 커뮤니케이터를 구성하고 있습니다.",
+  "TargetingTeamChannel": "작성자 앱이 설치된 팀과 채널 아래를 확인하십시오.",
+  "TargetingLoggedUsr": "기록된 사용자:",
+  "ConfigSave": "저장을 클릭하여 시작하십시오.",
+  "TargetingNotAuthorized": "타게팅 모드에서 회사 커뮤니케이터를 설정할 권한이 없습니다. 마스터 관리자 중 한 명에게 문의하십시오.",
+  "ManageGroups": "그룹 관리",
+  "GroupAlreadyIncluded": "그룹이 이미 이 채널에 연결되어 있습니다.",
+  "CSVIsTooBig": "CSV가 너무 큽습니다. 다음보다 작아야 합니다. "
 }

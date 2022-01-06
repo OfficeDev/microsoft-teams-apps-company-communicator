@@ -57,6 +57,38 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <summary>
+        /// Gets  scheduled notifications filtered by specific ChannelId.
+        /// </summary>
+        /// <param name="channelId">Channel Id to filter.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IEnumerable<NotificationDataEntity>> GetChannelScheduledNotificationsAsync(string channelId)
+        {
+            string strFilter1 = TableQuery.GenerateFilterConditionForBool("IsScheduled", QueryComparisons.Equal, true);
+            string strFilter2 = TableQuery.GenerateFilterCondition("ChannelId", QueryComparisons.Equal, channelId);
+            string strFilter = TableQuery.CombineFilters(strFilter1, TableOperators.And, strFilter2);
+
+            var result = await this.GetWithFilterAsync(strFilter, NotificationDataTableNames.DraftNotificationsPartition);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets all draft notifications filtered by specific ChannelId.
+        /// </summary>
+        /// <param name="channelId">Channel Id to filter.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<IEnumerable<NotificationDataEntity>> GetChannelDraftNotificationsAsync(string channelId)
+        {
+            string strFilter1 = TableQuery.GenerateFilterConditionForBool("IsScheduled", QueryComparisons.Equal, false);
+            string strFilter2 = TableQuery.GenerateFilterCondition("ChannelId", QueryComparisons.Equal, channelId);
+            string strFilter = TableQuery.CombineFilters(strFilter1, TableOperators.And, strFilter2);
+
+            var result = await this.GetWithFilterAsync(strFilter, NotificationDataTableNames.DraftNotificationsPartition);
+
+            return result;
+        }
+
+        /// <summary>
         /// Get all scheduled notification entities from the table storage. Scheduled notifications are draft notifications with IsScheduled equal true.
         /// </summary>
         /// <returns>All scheduled notification entities.</returns>
@@ -93,6 +125,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <inheritdoc/>
+        public async Task<IEnumerable<NotificationDataEntity>> GetMostRecentChannelSentNotificationsAsync(string channelId)
+        {
+            string strFilter = TableQuery.GenerateFilterCondition("ChannelId", QueryComparisons.Equal, channelId);
+
+            var result = await this.GetWithFilterAsync(strFilter, NotificationDataTableNames.SentNotificationsPartition, 20);
+
+            return result;
+        }
+
+        /// <inheritdoc/>
         public async Task<string> MoveDraftToSentPartitionAsync(NotificationDataEntity draftNotificationEntity)
         {
             try
@@ -119,6 +161,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     Buttons = draftNotificationEntity.Buttons,
                     CreatedBy = draftNotificationEntity.CreatedBy,
                     CreatedDate = draftNotificationEntity.CreatedDate,
+                    ChannelId = draftNotificationEntity.ChannelId,
+                    ChannelImage = draftNotificationEntity.ChannelImage,
+                    ChannelTitle = draftNotificationEntity.ChannelTitle,
                     SentDate = null,
                     IsDraft = false,
                     IsImportant = draftNotificationEntity.IsImportant,
@@ -184,6 +229,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     AllUsers = notificationEntity.AllUsers,
                     CsvUsers = notificationEntity.CsvUsers,
                     TrackingUrl = notificationEntity.TrackingUrl,
+                    ChannelId = notificationEntity.ChannelId,
+                    ChannelTitle = notificationEntity.ChannelTitle,
+                    ChannelImage = notificationEntity.ChannelImage,
                 };
 
                 await this.CreateOrUpdateAsync(newNotificationEntity);

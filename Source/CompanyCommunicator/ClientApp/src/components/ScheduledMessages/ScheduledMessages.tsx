@@ -9,6 +9,7 @@ import { withTranslation, WithTranslation } from "react-i18next";
 import { initializeIcons } from 'office-ui-fabric-react';
 import { Loader, List, Flex, Text } from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
+import { getAppSettings } from "../../apis/messageListApi";
 import { selectMessage, getScheduledMessagesList, getDraftMessagesList, getMessagesList } from '../../actions';
 import { getBaseUrl } from '../../configVariables';
 import Overflow from '../OverFlow/scheduledMessageOverflow';
@@ -55,12 +56,16 @@ class ScheduledMessages extends React.Component<IMessageProps, IMessageState> {
     readonly localize: TFunction;
     private interval: any;
     private isOpenTaskModuleAllowed: boolean;
+    targetingEnabled: boolean; // property to store value indicating if the targeting mode is enabled or not
+    masterAdminUpns: string; // property to store value with the master admins
 
     constructor(props: IMessageProps) {
         super(props);
         initializeIcons();
         this.localize = this.props.t;
         this.isOpenTaskModuleAllowed = true;
+        this.targetingEnabled = false; // by default targeting is disabled
+        this.masterAdminUpns = "";
         this.state = {
             message: props.messages,
             itemsAccount: this.props.messages.length,
@@ -176,6 +181,15 @@ class ScheduledMessages extends React.Component<IMessageProps, IMessageState> {
             styles: { margin: '0.2rem 0.2rem 0 0' },
         }];
         return out;
+    }
+
+    // get the app configuration values and set targeting mode from app settings
+    private getAppSettings = async () => {
+        let response = await getAppSettings();
+        if (response.data) {
+            this.targetingEnabled = (response.data.targetingEnabled === 'true'); //get the targetingenabled value
+            this.masterAdminUpns = response.data.masterAdminUpns; //get the array of master admins
+        }
     }
 
     private onOpenTaskModule = (event: any, url: string, title: string) => {

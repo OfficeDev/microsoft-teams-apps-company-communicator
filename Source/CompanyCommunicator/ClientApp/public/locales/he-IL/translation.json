@@ -107,5 +107,13 @@
   "CSVUsersLabel": "רשימת משתמשים שהועלתה על-ידי קובץ CSV",
   "SendToCSVUsersNote": "הערה: אפשרות זו שולחת את ההודעה לכל המשתמשים בקובץ ה- CSV שהועלה.",
   "SentToCSV": "נשלח בצ'אט לרשימת משתמשים שסופקו בקובץ CSV",
-  "SentToAllUsers": "נשלח בצ'אט לכולם"
+  "SentToAllUsers": "נשלח בצ'אט לכולם",
+  "TargetingConfig": "אתה קובע את התצורה של Communicator החברה במצב פילוח.",
+  "TargetingTeamChannel": "נא בדוק מתחת לצוות ולערוץ שבו מותקנת האפליקציה 'מחברים':",
+  "TargetingLoggedUsr": "משתמש מחובר:",
+  "ConfigSave": "נא לחץ על שמור כדי להתחיל בעבודה.",
+  "TargetingNotAuthorized": "אינך מורשה להגדיר את 'מתקשר חברה' במצב פילוח. נא פנה לאחד המנהלים הראשיים.",
+  "ManageGroups": "ניהול קבוצות",
+  "GroupAlreadyIncluded": "הקבוצה כבר משויכת לערוץ זה.",
+  "CSVIsTooBig": "CSV הוא גדול מדי. צריך להיות קטן יותר מ: "
 }

@@ -108,5 +108,13 @@
   "CSVUsersLabel": "Lista de usuários carregado por um arquivo CSV",
   "SendToCSVUsersNote": "Nota: Esta opção envia a mensagem para todos os usuários no arquivo CSV carregado.",
   "SentToCSV": "Enviado no chat para uma lista de usuários fornecidos em um arquivo CSV",
-  "SentToAllUsers": "Enviado no chat pessoal para todos"
+  "SentToAllUsers": "Enviado no chat pessoal para todos",
+  "TargetingConfig": "Você está configurando o Company Communicator no modo de segmentação.",
+  "TargetingTeamChannel": "Confira abaixo a equipe e o canal onde o aplicativo Autores está sendo instalado:",
+  "TargetingLoggedUsr": "Usuário registrado:",
+  "ConfigSave": "Clique em Salvar para começar.",
+  "TargetingNotAuthorized": "Você não está autorizado a configurar o Company Communicator no modo de segmentação. Entre em contato com um dos administradores.",
+  "ManageGroups": "Gerenciar Grupos",
+  "GroupAlreadyIncluded": "O grupo já está associado a este canal do Teams.",
+  "CSVIsTooBig": "O CSV é muito grande. Precisa ser menor do que: "
 }

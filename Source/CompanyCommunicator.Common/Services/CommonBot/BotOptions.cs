@@ -29,5 +29,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
         /// Gets or sets the Microsoft app password for the author bot.
         /// </summary>
         public string AuthorAppPassword { get; set; }
+
+        /// <summary>
+        /// Gets or sets the TargetingEnabled flag for the author bot.
+        /// </summary>
+        public string TargetingEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets the MasterAdminUpns flag for the author bot.
+        /// </summary>
+        public string MasterAdminUpns { get; set; }
     }
 }

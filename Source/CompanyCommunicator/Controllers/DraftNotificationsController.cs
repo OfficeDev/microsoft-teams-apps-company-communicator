@@ -155,6 +155,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Author = notification.Author,
                 ButtonTitle = notification.ButtonTitle,
                 ButtonLink = notification.ButtonLink,
+                ChannelId = notification.ChannelId,
+                ChannelImage = notification.ChannelImage,
+                ChannelTitle = notification.ChannelTitle,
                 CreatedBy = this.HttpContext.User?.Identity?.Name,
                 CreatedDate = DateTime.UtcNow,
                 IsDraft = true,
@@ -251,6 +254,59 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
+        /// Get scheduled notifications. Those are draft notifications with a scheduledate.
+        /// </summary>
+        /// <param name="channelId">Channel ID to filter scheduled notifications.</param>
+        /// <returns>A list of <see cref="DraftNotificationSummary"/> instances.</returns>
+        [HttpGet("scheduled/channel/{channelId}")]
+        public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetChannelScheduledNotificationsAsync(string channelId)
+        {
+            var notificationEntities = await this.notificationDataRepository.GetChannelScheduledNotificationsAsync(channelId);
+
+            var result = new List<DraftNotificationSummary>();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                var summary = new DraftNotificationSummary
+                {
+                    Id = notificationEntity.Id,
+                    Title = notificationEntity.Title,
+                    ScheduledDate = notificationEntity.ScheduledDate,
+                };
+
+                result.Add(summary);
+            }
+
+            // sorts the scheduled messages by date from the most recent
+            result.Sort((r1, r2) => r1.ScheduledDate.Value.CompareTo(r2.ScheduledDate.Value));
+            return result;
+        }
+
+        /// <summary>
+        /// Get draft notifications filtered by channel.
+        /// </summary>
+        /// <param name="channelId">Channel Id.</param>
+        /// <returns>A list of <see cref="DraftNotificationSummary"/> instances.</returns>
+        [HttpGet("channel/{channelId}")]
+        public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetChannelDraftNotifications(string channelId)
+        {
+            var notificationEntities = await this.notificationDataRepository.GetChannelDraftNotificationsAsync(channelId);
+
+            var result = new List<DraftNotificationSummary>();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                var summary = new DraftNotificationSummary
+                {
+                    Id = notificationEntity.Id,
+                    Title = notificationEntity.Title,
+                };
+
+                result.Add(summary);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Get a draft notification by Id.
         /// </summary>
         /// <param name="id">Draft notification Id.</param>
@@ -293,6 +349,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ScheduledDate = notificationEntity.ScheduledDate,
                 Buttons = notificationEntity.Buttons,
                 TrackingUrl = notificationEntity.TrackingUrl,
+                ChannelId = notificationEntity.ChannelId,
+                ChannelTitle = notificationEntity.ChannelTitle,
+                ChannelImage = notificationEntity.ChannelImage,
             };
 
             return this.Ok(result);

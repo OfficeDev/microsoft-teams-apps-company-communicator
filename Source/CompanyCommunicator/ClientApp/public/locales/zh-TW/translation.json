@@ -107,5 +107,13 @@
   "CSVUsersLabel": "由 CSV 文件上传的用户列表",
   "SendToCSVUsersNote": "注意：此选项将消息发送到上传的 CSV 文件中的所有用户。",
   "SentToCSV": "通过聊天发送到 CSV 文件中提供的用户列表",
-  "SentToAllUsers": "发送给每个人聊天"
+  "SentToAllUsers": "发送给每个人聊天",
+  "TargetingConfig": "您正在以定位模式配置公司通信器。",
+  "TargetingTeamChannel": "请检查以下的团队和渠道，其中作者应用程序正在安装：",
+  "TargetingLoggedUsr": "已记录的用户：",
+  "ConfigSave": "请单击 保存 以开始。",
+  "TargetingNotAuthorized": "您未授权在定位模式下设置公司通信器。请联系主管理员之一。",
+  "ManageGroups": "管理组",
+  "GroupAlreadyIncluded": "该组已关联到此通道。",
+  "CSVIsTooBig": "CSV太大。 需要小於： "
 }

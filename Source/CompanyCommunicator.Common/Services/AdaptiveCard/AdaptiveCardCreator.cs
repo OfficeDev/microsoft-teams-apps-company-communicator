@@ -31,7 +31,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 notificationDataEntity.ButtonTitle,
                 notificationDataEntity.ButtonLink,
                 notificationDataEntity.Buttons,
-                notificationDataEntity.TrackingUrl);
+                notificationDataEntity.TrackingUrl,
+                notificationDataEntity.ChannelImage,
+                notificationDataEntity.ChannelTitle);
         }
 
         /// <summary>
@@ -45,6 +47,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
         /// <param name="buttonUrl">The adaptive card's button url value.</param>
         /// <param name="buttons">The adaptive card's collection of buttons.</param>
         /// <param name="trackingurl">The adaptive card read tracking url.</param>
+        /// <param name="cardimage">Image for the card when targeting is enabled.</param>
+        /// <param name="cardtitle">Title for the card when targeting is enabled.</param>
         /// <returns>The created adaptive card instance.</returns>
         public AdaptiveCard CreateAdaptiveCard(
             string title,
@@ -54,10 +58,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             string buttonTitle,
             string buttonUrl,
             string buttons,
-            string trackingurl)
+            string trackingurl,
+            string cardimage,
+            string cardtitle)
         {
             var version = new AdaptiveSchemaVersion(1, 0);
             AdaptiveCard card = new AdaptiveCard(version);
+
+            if (!string.IsNullOrWhiteSpace(cardimage))
+            {
+                card.Body.Add(new AdaptiveImage()
+                {
+                    Url = new Uri(cardimage, UriKind.RelativeOrAbsolute),
+                });
+            }
+
+            if (!string.IsNullOrWhiteSpace(cardtitle))
+            {
+                card.Body.Add(new AdaptiveTextBlock()
+                {
+                    Text = cardtitle,
+                    Wrap = true,
+                });
+            }
 
             card.Body.Add(new AdaptiveTextBlock()
             {
@@ -65,6 +88,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 Size = AdaptiveTextSize.ExtraLarge,
                 Weight = AdaptiveTextWeight.Bolder,
                 Wrap = true,
+                Separator = true,
             });
 
             if (!string.IsNullOrWhiteSpace(imageUrl))

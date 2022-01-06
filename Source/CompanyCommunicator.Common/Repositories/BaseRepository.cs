@@ -129,14 +129,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<T>> GetWithFilterAsync(string filter, string partition = null)
+        public async Task<IEnumerable<T>> GetWithFilterAsync(string filter, string partition = null, int? count = null)
         {
             try
             {
                 var partitionKeyFilter = this.GetPartitionKeyFilter(partition);
                 var combinedFilter = this.CombineFilters(filter, partitionKeyFilter);
                 var query = new TableQuery<T>().Where(combinedFilter);
-                var entities = await this.ExecuteQueryAsync(query);
+                var entities = await this.ExecuteQueryAsync(query, count);
                 return entities;
             }
             catch (Exception ex)

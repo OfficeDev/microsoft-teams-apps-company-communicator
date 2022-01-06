@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import Configuration from './components/config';
 import TabContainer from './components/TabContainer/tabContainer';
 import NewMessage from './components/NewMessage/newMessage';
+import ManageGroups from './components/ManageGroups/ManageGroups';
 import StatusTaskModule from './components/StatusTaskModule/statusTaskModule';
 import './App.scss';
 import { Provider, teamsTheme, teamsDarkTheme, teamsHighContrastTheme } from '@fluentui/react-northstar'
@@ -125,6 +126,7 @@ class App extends React.Component<{}, IAppState> {
                                 <Route exact path="/signin" component={SignInPage} />
                                 <Route exact path="/signin-simple-start" component={SignInSimpleStart} />
                                 <Route exact path="/signin-simple-end" component={SignInSimpleEnd} />
+                                <Route exact path="/managegroups" component={ManageGroups} />
                             </Switch>
                         </BrowserRouter>
                     </div>

@@ -181,6 +181,39 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
+        /// Get most recently sent notification summaries.
+        /// </summary>
+        /// <param name="channelId">Channel Id to filter notifications.</param>
+        /// <returns>A list of <see cref="SentNotificationSummary"/> instances.</returns>
+        [HttpGet("channel/{channelId}")]
+        public async Task<IEnumerable<SentNotificationSummary>> GetChannelSentNotificationsAsync(string channelId)
+        {
+            var notificationEntities = await this.notificationDataRepository.GetMostRecentChannelSentNotificationsAsync(channelId);
+
+            var result = new List<SentNotificationSummary>();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                var summary = new SentNotificationSummary
+                {
+                    Id = notificationEntity.Id,
+                    Title = notificationEntity.Title,
+                    CreatedDateTime = notificationEntity.CreatedDate,
+                    SentDate = notificationEntity.SentDate,
+                    Succeeded = notificationEntity.Succeeded,
+                    Failed = notificationEntity.Failed,
+                    Unknown = this.GetUnknownCount(notificationEntity),
+                    TotalMessageCount = notificationEntity.TotalMessageCount,
+                    SendingStartedDate = notificationEntity.SendingStartedDate,
+                    Status = notificationEntity.GetStatus(),
+                };
+
+                result.Add(summary);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Record a read for the message with a specific id. This web method is used as part of the simple tracking/analytics for CC.
         /// </summary>
         /// <param name="id">The id of the sent message where the read is being tracked for analytics.</param>
@@ -276,6 +309,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ButtonTitle = notificationEntity.ButtonTitle,
                 ButtonLink = notificationEntity.ButtonLink,
                 Buttons = notificationEntity.Buttons,
+                ChannelId = notificationEntity.ChannelId,
                 IsScheduled = notificationEntity.IsScheduled,
                 IsImportant = notificationEntity.IsImportant,
                 CreatedDateTime = notificationEntity.CreatedDate,

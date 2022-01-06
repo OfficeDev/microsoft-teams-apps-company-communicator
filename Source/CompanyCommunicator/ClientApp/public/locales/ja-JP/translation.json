@@ -107,5 +107,13 @@
   "CSVUsersLabel": "CSV ファイルでアップロードされたユーザーリスト",
   "SendToCSVUsersNote": "注: このオプションは、アップロードされた CSV ファイル内のすべてのユーザーにメッセージを送信します。",
   "SentToCSV": "CSV ファイルで提供されたユーザーの一覧にチャットで送信",
-  "SentToAllUsers": "チャットですべての人に送信"
+  "SentToAllUsers": "チャットですべての人に送信",
+  "TargetingConfig": "ターゲティング モードで会社のコミュニケータを構成しています。",
+  "TargetingTeamChannel": "Authors アプリがインストールされているチームとチャネルの下を確認してください。",
+  "TargetingLoggedUsr": "ログに記録されたユーザー:",
+  "ConfigSave": "[保存] をクリックして開始してください。",
+  "TargetingNotAuthorized": "ターゲティング モードで会社のコミュニケーターをセットアップする権限がありません。マスター管理者の 1 人に問い合わせてください。",
+  "ManageGroups": "グループの管理",
+  "GroupAlreadyIncluded": "グループは既にこのチャネルに関連付けされています。",
+  "CSVIsTooBig": "CSV が大きすぎます。以下の値より小さくする必要があります。"
 }

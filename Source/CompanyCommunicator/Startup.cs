@@ -22,7 +22,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.GroupAssociationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -80,6 +82,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     botOptions.UserAppPassword = configuration.GetValue<string>("UserAppPassword");
                     botOptions.AuthorAppId = configuration.GetValue<string>("AuthorAppId");
                     botOptions.AuthorAppPassword = configuration.GetValue<string>("AuthorAppPassword");
+                    botOptions.TargetingEnabled = configuration.GetValue<string>("TargetingEnabled");
+                    botOptions.MasterAdminUpns = configuration.GetValue<string>("MasterAdminUpns");
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>
@@ -165,6 +169,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
             services.AddSingleton<IExportDataRepository, ExportDataRepository>();
             services.AddSingleton<IAppConfigRepository, AppConfigRepository>();
+            services.AddSingleton<IGroupAssociationDataRepository, GroupAssociationDataRepository>();
+            services.AddSingleton<IChannelDataRepository, ChannelDataRepository>();
 
             // Add service bus message queues.
             services.AddSingleton<IPrepareToSendQueue, PrepareToSendQueue>();

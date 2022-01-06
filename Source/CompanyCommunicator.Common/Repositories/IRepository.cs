@@ -56,8 +56,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// </summary>
         /// <param name="filter">Filter to the result.</param>
         /// <param name="partition">Partition key value.</param>
+        /// <param name="count">The max number of desired entities.</param>
         /// <returns>All data entities.</returns>
-        public Task<IEnumerable<T>> GetWithFilterAsync(string filter, string partition = null);
+        public Task<IEnumerable<T>> GetWithFilterAsync(string filter, string partition = null, int? count = null);
 
         /// <summary>
         /// Get all data entities from the table storage in a partition.

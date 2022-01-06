@@ -107,5 +107,13 @@
   "CSVUsersLabel": "Benutzerliste, die von einer CSV-Datei hochgeladen wurde",
   "SendToCSVUsersNote": "Hinweis: Diese Option sendet die Nachricht an alle Benutzer in der hochgeladenen CSV-Datei.",
   "SentToCSV": "Im Chat an eine Liste von Benutzern gesendet, die in einer CSV-Datei bereitgestellt werden",
-  "SentToAllUsers": "Im Chat an alle gesendet"
+  "SentToAllUsers": "Im Chat an alle gesendet",
+  "TargetingConfig": "Sie konfigurieren Company Communicator im Targeting-Modus.",
+  "TargetingTeamChannel": "Bitte überprüfen Sie unter dem Team und Kanal, in dem die Authors-App installiert wird:",
+  "TargetingLoggedUsr": "Protokollierter Benutzer:",
+  "ConfigSave": "Klicken Sie auf Speichern, um loszulegen.",
+  "TargetingNotAuthorized": "Sie sind nicht berechtigt, Company Communicator im Targeting-Modus einzurichten. Bitte wenden Sie sich an einen der Master-Administratoren.",
+  "ManageGroups": "Verwalten von Gruppen",
+  "GroupAlreadyIncluded": "Die Gruppe ist diesem Kanal bereits zugeordnet.",
+  "CSVIsTooBig": "Die CSV-Datei ist zu groß. Muss kleiner sein als: "
 }

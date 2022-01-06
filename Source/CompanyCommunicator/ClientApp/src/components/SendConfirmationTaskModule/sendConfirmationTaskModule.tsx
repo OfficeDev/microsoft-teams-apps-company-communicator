@@ -9,10 +9,10 @@ import { Loader, Button, Text, List, Image, Flex } from '@fluentui/react-northst
 import * as microsoftTeams from "@microsoft/teams-js";
 
 import './sendConfirmationTaskModule.scss';
-import { getDraftNotification, getConsentSummaries, sendDraftNotification } from '../../apis/messageListApi';
+import { getDraftNotification, getConsentSummaries, sendDraftNotification, getAppSettings } from '../../apis/messageListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
-    setCardAuthor, setCardBtns
+    setCardAuthor, setCardBtns, setCardTargetImage, setCardTargetTitle, setCardTarget
 } from '../AdaptiveCard/adaptiveCard';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
@@ -23,23 +23,26 @@ export interface IListItem {
 }
 
 export interface IMessage {
-    id: string;
-    title: string;
-    acknowledgements?: number;
-    reactions?: number;
-    responses?: number;
-    succeeded?: number;
-    failed?: number;
-    throttled?: number;
-    sentDate?: string;
-    imageLink?: string;
-    summary?: string;
-    author?: string;
-    buttonLink?: string;
-    buttonTitle?: string;
-    buttons: string;
-    isImportant?: boolean;
-    csvUsers: string;
+    id: string,
+    title: string,
+    acknowledgements?: number,
+    reactions?: number,
+    responses?: number,
+    succeeded?: number,
+    failed?: number,
+    throttled?: number,
+    sentDate?: string,
+    imageLink?: string,
+    summary?: string,
+    author?: string,
+    buttonLink?: string,
+    buttonTitle?: string,
+    buttons: string,
+    isImportant?: boolean,
+    csvUsers: string,
+    channelId?: string,
+    channelTitle?: string,
+    channelImage?: string,
 }
 
 export interface SendConfirmationTaskModuleProps extends RouteComponentProps, WithTranslation {
@@ -57,11 +60,15 @@ export interface IStatusState {
 
 class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskModuleProps, IStatusState> {
     readonly localize: TFunction;
+    targetingEnabled: boolean; // property to store value indicating if the targeting mode is enabled or not
+    masterAdminUpns: string; // property to store value with the master admins
+
     private initMessage = {
         id: "",
         title: "",
         buttons: "[]",
         csvUsers: "",
+        channelId: "",
     };
 
     private card: any;
@@ -88,52 +95,58 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
 
         let params = this.props.match.params;
 
-        if ('id' in params) {
-            let id = params['id'];
-            this.getItem(id).then(() => {
-                getConsentSummaries(id).then((response) => {
-                    this.setState({
-                        teamNames: response.data.teamNames.sort(),
-                        rosterNames: response.data.rosterNames.sort(),
-                        groupNames: response.data.groupNames.sort(),
-                        allUsers: response.data.allUsers,
-                        messageId: id,
-                    }, () => {
+        this.getAppSettings().then(() => {
+            setCardTarget(this.card, this.targetingEnabled);
+            if ('id' in params) {
+                let id = params['id'];
+                this.getItem(id).then(() => {
+                    getConsentSummaries(id).then((response) => {
                         this.setState({
-                            loader: false
+                            teamNames: response.data.teamNames.sort(),
+                            rosterNames: response.data.rosterNames.sort(),
+                            groupNames: response.data.groupNames.sort(),
+                            allUsers: response.data.allUsers,
+                            messageId: id,
                         }, () => {
+                            this.setState({
+                                loader: false
+                            }, () => {
 
-                            setCardTitle(this.card, this.state.message.title);
-                            setCardImageLink(this.card, this.state.message.imageLink);
-                            setCardSummary(this.card, this.state.message.summary);
-                            setCardAuthor(this.card, this.state.message.author);
+                                //alert(this.state.message.channelTitle);
+                                setCardTargetImage(this.card, this.state.message.channelImage);
+                                setCardTargetTitle(this.card, this.state.message.channelTitle);
+                                setCardTitle(this.card, this.state.message.title);
+                                setCardImageLink(this.card, this.state.message.imageLink);
+                                setCardSummary(this.card, this.state.message.summary);
+                                setCardAuthor(this.card, this.state.message.author);
 
-                            if (this.state.message.buttonTitle && this.state.message.buttonLink && !this.state.message.buttons) {
+                                if (this.state.message.buttonTitle && this.state.message.buttonLink && !this.state.message.buttons) {
                                     setCardBtns(this.card, [{
                                         "type": "Action.OpenUrl",
                                         "title": this.state.message.buttonTitle,
                                         "url": this.state.message.buttonLink
                                     }]);
 
-                                    
-                            }
-                            else {
+
+                                }
+                                else {
                                     setCardBtns(this.card, JSON.parse(this.state.message.buttons));
-                            }
-                            
-                            let adaptiveCard = new AdaptiveCards.AdaptiveCard();
-                            adaptiveCard.parse(this.card);
-                            let renderedCard = adaptiveCard.render();
-                            document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
-                            if (this.state.message.buttonLink) {
-                                let link = this.state.message.buttonLink;
-                                adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); };
-                            }
+                                }
+
+                                let adaptiveCard = new AdaptiveCards.AdaptiveCard();
+                                adaptiveCard.parse(this.card);
+                                let renderedCard = adaptiveCard.render();
+                                document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
+                                if (this.state.message.buttonLink) {
+                                    let link = this.state.message.buttonLink;
+                                    adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); };
+                                }
+                            });
                         });
                     });
                 });
-            });
-        }
+            }
+        });
     }
 
     private getItem = async (id: number) => {
@@ -236,6 +249,14 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
         }
     }
 
+    // get the app configuration values and set targeting mode from app settings
+    private getAppSettings = async () => {
+        let response = await getAppSettings();
+        if (response.data) {
+            this.targetingEnabled = (response.data.targetingEnabled === 'true'); //get the targetingenabled value
+            this.masterAdminUpns = response.data.masterAdminUpns; //get the array of master admins
+        }
+    }
 
     private renderAudienceSelection = () => {
         if (this.state.teamNames && this.state.teamNames.length > 0) {

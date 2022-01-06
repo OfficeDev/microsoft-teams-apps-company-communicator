@@ -7,7 +7,6 @@ import { withTranslation, WithTranslation } from "react-i18next";
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { Loader, List, Flex, Text } from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
-
 import './draftMessages.scss';
 import { selectMessage, getDraftMessagesList, getScheduledMessagesList, getMessagesList } from '../../actions';
 import { getBaseUrl } from '../../configVariables';
@@ -55,12 +54,16 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
     readonly localize: TFunction;
     private interval: any;
     private isOpenTaskModuleAllowed: boolean;
+    targetingEnabled: boolean; // property to store value indicating if the targeting mode is enabled or not
+    masterAdminUpns: string; // property to store value with the master admins
 
     constructor(props: IMessageProps) {
         super(props);
         initializeIcons();
         this.localize = this.props.t;
         this.isOpenTaskModuleAllowed = true;
+        this.targetingEnabled = false; // by default targeting is disabled
+        this.masterAdminUpns = "";
         this.state = {
             message: props.messages,
             itemsAccount: this.props.messages.length,

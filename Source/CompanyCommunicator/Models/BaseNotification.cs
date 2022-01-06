@@ -58,6 +58,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public bool IsScheduled { get; set; }
 
         /// <summary>
+        /// Gets or sets the ChannelId value.
+        /// </summary>
+        public string ChannelId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ChannelTitle value.
+        /// </summary>
+        public string ChannelTitle { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ChannelImage value.
+        /// </summary>
+        public string ChannelImage { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether gets or sets the IsImportant value.
         /// </summary>
         public bool IsImportant { get; set; }

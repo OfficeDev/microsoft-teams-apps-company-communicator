@@ -108,5 +108,16 @@
   "CSVUsersLabel": "User list uploaded by a CSV file",
   "SendToCSVUsersNote": "Note: This option sends the message to all the users in the uploaded CSV file.",
   "SentToCSV": "Sent in chat to a list of users provided in a CSV file",
-  "SentToAllUsers": "Sent in chat to everyone"
+  "SentToAllUsers": "Sent in chat to everyone",
+  "TargetingConfig": "You are configuring Company Communicator in targeting mode.",
+  "TargetingTeamChannel": "Please check below the team and channel where the Authors app is being installed:",
+  "TargetingLoggedUsr": "Logged User:",
+  "ConfigSave": "Please click Save to get started.",
+  "TargetingNotAuthorized": "You are not authorized to setup Company Communicator in targeting mode. Please contact one of the master admins.",
+  "ManageGroups": "Manage Groups",
+  "GroupAlreadyIncluded": "The group is already associated to this channel.",
+  "CardTitle": "Card Title",
+  "CardImage": "Card Image",
+  "TargetGroups": "Target Groups",
+  "CSVIsTooBig": "The CSV is too big. Needs to be smaller than: "
 }

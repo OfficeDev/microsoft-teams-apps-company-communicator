@@ -5,15 +5,15 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup, Checkbox, Datepicker } from '@fluentui/react-northstar'
+import { Button, Loader, Dropdown, Label, Text, Flex, Input, TextArea, RadioGroup, Checkbox, Datepicker } from '@fluentui/react-northstar'
 import { TrashCanIcon, AddIcon, FilesUploadIcon } from '@fluentui/react-icons-northstar'
 import * as microsoftTeams from "@microsoft/teams-js";
 import Resizer from 'react-image-file-resizer';
 import Papa from "papaparse";
 import './newMessage.scss';
 import './teamTheme.scss';
-import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess } from '../../apis/messageListApi';
-import { getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary, setCardAuthor, setCardBtns } from '../AdaptiveCard/adaptiveCard';
+import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess, getAppSettings, getChannelConfig } from '../../apis/messageListApi';
+import { getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary, setCardAuthor, setCardBtns, setCardTarget, setCardTargetImage, setCardTargetTitle } from '../AdaptiveCard/adaptiveCard';
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
@@ -30,6 +30,9 @@ const minutes = ["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50
 
 //coeficient to round dates to the next 5 minutes
 const coeff = 1000 * 60 * 5;
+
+//max size of the card 
+const maxCardSize = 30720;
 
 type dropdownItem = {
     key: string,
@@ -57,7 +60,10 @@ export interface IDraftMessage {
     isImportant: boolean, // indicates if the message is important
     isScheduled: boolean, // indicates if the message is scheduled
     ScheduledDate: Date, // stores the scheduled date
-    Buttons: string // stores tha card buttons (JSON)
+    Buttons: string, // stores the card buttons (JSON)
+    channelId?: string, // id of the channel where the message was created
+    channelTitle?: string,
+    channelImage?: string
 }
 
 export interface formState {
@@ -102,7 +108,13 @@ export interface formState {
     DMYHour: string, //hour selected
     DMYMins: string, //mins selected
     futuredate: boolean, //if the date is in the future (valid schedule)
-    values: any[] //button values collection
+    values: any[], //button values collection
+    channelId?: string, //id of the channel where the message was created
+    channelName?: string,
+    teamName?: string,
+    userPrincipalName?: string,
+    channelTitle?: string, //channel title to be used on the customized card, if targeting is enabled
+    channelImage?: string, //channel image to be used on the customized card, if targeting is enabled
 }
 
 export interface INewMessageProps extends RouteComponentProps, WithTranslation {
@@ -114,13 +126,18 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     private card: any;
     fileInput: any;
     CSVfileInput: any;
+    targetingEnabled: boolean; // property to store value indicating if the targeting mode is enabled or not
+    masterAdminUpns: string; // property to store value with the master admins
 
     constructor(props: INewMessageProps) {
         super(props);
         this.localize = this.props.t;
         this.card = getInitAdaptiveCard(this.localize);
         this.setDefaultCard(this.card);
-        var TempDate = this.getRoundedDate(5,this.getDateObject()); //get the current date
+        var TempDate = this.getRoundedDate(5, this.getDateObject()); //get the current date
+        this.targetingEnabled = false; // by default targeting is disabled
+        this.masterAdminUpns = "";
+
         this.state = {
             title: "",
             summary: "",
@@ -160,7 +177,10 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             DMYHour: this.getDateHour(TempDate.toUTCString()), //initialize with the current hour (rounded up)
             DMYMins: this.getDateMins(TempDate.toUTCString()), //initialize with the current minute (rounded up)
             futuredate: false, //by default the date is not in the future
-            values: [] //by default there are no buttons on the adaptive card
+            values: [], //by default there are no buttons on the adaptive card
+            channelId: "", //channel id is empty by default
+            channelTitle: "",
+            channelImage: "",
         }
         this.fileInput = React.createRef();
         this.CSVfileInput = React.createRef();
@@ -170,53 +190,119 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     public async componentDidMount() {
         microsoftTeams.initialize();
+
         //- Handle the Esc key
         document.addEventListener("keydown", this.escFunction, false);
         let params = this.props.match.params;
         this.setGroupAccess();
-        this.getTeamList().then(() => {
-            if ('id' in params) {
-                let id = params['id'];
-                this.getItem(id).then(() => {
-                    const selectedTeams = this.makeDropdownItemList(this.state.selectedTeams, this.state.teams);
-                    const selectedRosters = this.makeDropdownItemList(this.state.selectedRosters, this.state.teams);
-                    this.setState({
-                        exists: true,
-                        messageId: id,
-                        selectedTeams: selectedTeams,
-                        selectedRosters: selectedRosters,
-                        csvusers: this.state.csvusers,
-                        selectedSchedule: this.state.selectedSchedule,
-                        selectedImportant: this.state.selectedImportant,
-                        scheduledDate: this.state.scheduledDate,
-                        DMY: this.getDateObject(this.state.scheduledDate),
-                        DMYHour: this.getDateHour(this.state.scheduledDate),
-                        DMYMins: this.getDateMins(this.state.scheduledDate),
-                        values: this.state.values
-                    })
-                });
-                this.getGroupData(id).then(() => {
-                    const selectedGroups = this.makeDropdownItems(this.state.groups);
-                    this.setState({
-                        selectedGroups: selectedGroups
-                    })
-                });
-            } else {
-                this.setState({
-                    exists: false,
-                    loader: false
-                }, () => {
-                    let adaptiveCard = new AdaptiveCards.AdaptiveCard();
-                    adaptiveCard.parse(this.state.card);
-                    let renderedCard = adaptiveCard.render();
-                    document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
-                    if (this.state.btnLink) {
-                        let link = this.state.btnLink;
-                        adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); };
-                    }
-                })
-            }
+
+        // get teams context variables and store in the state
+        microsoftTeams.getContext(context => {
+            this.setState({
+                channelId: context.channelId,
+                channelName: context.channelName,
+                teamName: context.teamName,
+                userPrincipalName: context.userPrincipalName
+            });
+
+            //get the channel configuration from the database
+            this.GetChannelInfo(context.channelId).then(() => {
+                setCardTargetImage(this.card, this.state.channelImage);
+                setCardTargetTitle(this.card, this.state.channelTitle);
+
+            });
         });
+
+        this.getAppSettings().then(() => {
+            setCardTarget(this.card, this.targetingEnabled);
+            this.getTeamList().then(() => {
+                if ('id' in params) {
+                    let id = params['id'];
+                    this.getItem(id).then(() => {
+                        const selectedTeams = this.makeDropdownItemList(this.state.selectedTeams, this.state.teams);
+                        const selectedRosters = this.makeDropdownItemList(this.state.selectedRosters, this.state.teams);
+                        this.setState({
+                            exists: true,
+                            messageId: id,
+                            selectedTeams: selectedTeams,
+                            selectedRosters: selectedRosters,
+                            csvusers: this.state.csvusers,
+                            selectedSchedule: this.state.selectedSchedule,
+                            selectedImportant: this.state.selectedImportant,
+                            scheduledDate: this.state.scheduledDate,
+                            DMY: this.getDateObject(this.state.scheduledDate),
+                            DMYHour: this.getDateHour(this.state.scheduledDate),
+                            DMYMins: this.getDateMins(this.state.scheduledDate),
+                            values: this.state.values,
+                            channelId: this.state.channelId
+                        })
+                    });
+                    this.getGroupData(id).then(() => {
+                        const selectedGroups = this.makeDropdownItems(this.state.groups);
+                        this.setState({
+                            selectedGroups: selectedGroups
+                        })
+                    });
+                } else {
+                    this.setState({
+                        exists: false,
+                        loader: false
+                    }, () => {
+                        let adaptiveCard = new AdaptiveCards.AdaptiveCard();
+                        adaptiveCard.parse(this.state.card);
+                        let renderedCard = adaptiveCard.render();
+                        document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
+                        if (this.state.btnLink) {
+                            let link = this.state.btnLink;
+                            adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); };
+                        }
+                        microsoftTeams.getContext(context => {
+                            this.setState({
+                                channelId: context.channelId,
+                            });
+                        });
+                    })
+                }
+            });
+        });
+    }
+    
+    // get the app configuration values and set targeting mode from app settings
+    private getAppSettings = async () => {
+            let response = await getAppSettings();
+            if (response.data) {
+                this.targetingEnabled = (response.data.targetingEnabled === 'true'); //get the targetingenabled value
+                this.masterAdminUpns = response.data.masterAdminUpns; //get the array of master admins
+            }
+    }
+
+    //returns true if the userUpn is listed on masterAdminUpns
+    private isMasterAdmin = (masterAdminUpns: string, userUpn?: string) => {
+            var ret = false; // default return value
+            var masterAdmins = masterAdminUpns.toLowerCase().split(/;|,/); //splits the string and convert to lowercase
+            //if we get a userUpn as parameter
+            if (userUpn) {
+                //gets the index of the user on the master admin array
+                if (masterAdmins.indexOf(userUpn.toLowerCase()) >= 0) { ret = true; }
+            }
+            return ret;
+    }
+
+    //get the channel configuration 
+    private GetChannelInfo = async (channelid: string) => {
+        try {
+
+            const response = await getChannelConfig(channelid);
+            const draftChannel = response.data;
+
+            this.setState({
+                channelImage: draftChannel.channelImage,
+                channelTitle: draftChannel.channelTitle,
+            });
+
+        } catch (error) {
+            return error;
+        }
     }
 
     //function to handle the selection of the OS file upload box
@@ -228,7 +314,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             var cardsize = JSON.stringify(this.card).length;
             Resizer.imageFileResizer(file, 400, 400, 'JPEG', 80, 0,
                 uri => {
-                    if (uri.toString().length < 30720) {
+                    if (uri.toString().length < maxCardSize-cardsize) {
                         //everything is ok with the image, lets set it on the card and update
                         setCardImageLink(this.card, uri.toString());
                         this.updateCard();
@@ -238,7 +324,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         }
                         );
                     } else {
-                        var errormsg = this.localize("ErrorImageTooBig") + " " + this.localize("ErrorImageTooBigSize") + " " + (30720 - cardsize) + " bytes.";
+                        var errormsg = this.localize("ErrorImageTooBig") + " " + this.localize("ErrorImageTooBigSize") + " " + (maxCardSize - cardsize) + " bytes.";
                         //images bigger than 32K cannot be saved, set the error message to be presented
                         this.setState({
                             errorImageUrlMessage: errormsg
@@ -256,9 +342,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         const file = this.CSVfileInput.current.files[0];
         //if we have a file
         if (file) {
+            var cardsize = JSON.stringify(this.card).length;
+
             //parses the CSV file using papa parse library
             Papa.parse(file, {
                 complete: ({ errors, data }) => {
+                    
                     if (errors.length > 0) {
                         //file is invalid, show the message for the user
                         this.setState({
@@ -267,12 +356,23 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                             csvusers: ""
                         });
                     } else {
-                        //file loaded
-                        this.setState({
-                            csvLoaded: this.localize("CSVLoaded"),
-                            csvError: false,
-                            csvusers: JSON.stringify(data)
-                        });
+                        var csvfilesize = JSON.stringify(data).length;
+                        if ((cardsize + csvfilesize) < maxCardSize) {
+                            //file loaded
+                            this.setState({
+                                csvLoaded: this.localize("CSVLoaded"),
+                                csvError: false,
+                                csvusers: JSON.stringify(data)
+                            });
+                        } else {
+                            //file is too big, show the message for the user
+                            var errorMessage = this.localize("CSVIsTooBig") + " " + (maxCardSize - cardsize) + " bytes.";
+                            this.setState({
+                                csvLoaded: errorMessage,
+                                csvError: true,
+                                csvusers: ""
+                            });
+                        }
                     }
                 }
             });
@@ -287,6 +387,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             errorImageUrlMessage: "",
             imageLink: ""
         });
+        setCardImageLink(this.card, "");
         //fire the fileinput click event and run the handleimageselection function
         this.fileInput.current.click();
     };
@@ -428,8 +529,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 selectedRadioButton = "allUsers";
             }
 
-            
-
             // set state based on values returned 
             this.setState({
                 teamsOptionSelected: draftMessageDetail.teams.length > 0,
@@ -449,6 +548,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 csvLoaded: csvMsg, //updates the message that will be presented in the text field
                 csvError: !(csvMsg.length > 0), //state that stores the csv syntax analysis status
                 csvOptionSelected: (csvMsg.length > 0), //to show the fields and allow updates
+                channelId: draftMessageDetail.channelId,
             });
 
             // set card properties
@@ -585,7 +685,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     </Flex>
                                 </Flex.Item>
                                 <Flex.Item size="size.half">
-                                    <div className="adaptiveCardContainer">
+                                    <div>
+                                        <Flex hAlign="end">
+                                            <Label content={JSON.stringify(this.card).length + "/" + maxCardSize} />
+                                        </Flex>
+                                        <div className="adaptiveCardContainer">
+                                        </div>
                                     </div>
                                 </Flex.Item>
                             </Flex>
@@ -729,10 +834,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                                 <Flex gap="gap.smaller" debug={false} vAlign="end" className="csvUpload" hidden={!this.state.csvOptionSelected}>
                                                                     <Input
                                                                         value={this.state.csvLoaded}
-                                                                        //value="TESTE"
-                                                                        //label={this.localize("ImageURL")}
-                                                                        //placeholder={this.localize("ImageURLPlaceHolder")}
-                                                                        //onChange={this.onImageLinkChanged}
                                                                         error={this.state.csvError}
                                                                         autoComplete="off"
                                                                         disabled={true}
@@ -817,7 +918,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     </Flex>
                                 </Flex.Item>
                                 <Flex.Item size="size.half">
-                                    <div className="adaptiveCardContainer">
+                                    <div>
+                                        <Flex hAlign="end">
+                                            <Label content={JSON.stringify(this.card).length + "/" + maxCardSize} />
+                                        </Flex>
+                                        <div className="adaptiveCardContainer">
+                                        </div>
                                     </div>
                                 </Flex.Item>
                             </Flex>
@@ -1126,7 +1232,10 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             isScheduled: this.state.selectedSchedule,
             isImportant: this.state.selectedImportant,
             ScheduledDate: new Date(this.state.scheduledDate),
-            Buttons: JSON.stringify(this.state.values)
+            Buttons: JSON.stringify(this.state.values),
+            channelId: this.state.channelId,
+            channelImage: this.state.channelImage,
+            channelTitle: this.state.channelTitle
         };
 
         if (this.state.exists) {
