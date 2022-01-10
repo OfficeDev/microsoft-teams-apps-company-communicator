@@ -132,6 +132,8 @@ class Configuration extends React.Component<ConfigProps, IConfigState> {
             }
 
         } else {
+            //enables the teams save button when targeting is not enabled
+            microsoftTeams.settings.setValidityState(true);
             return (
                 <div>
                     <h3>{this.localize("ConfigSave")}</h3>
