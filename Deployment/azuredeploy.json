@@ -179,6 +179,20 @@
         "description": "The branch of the GitHub repository to deploy."
       },
       "defaultValue": "master"
+    },
+    "ImageUploadBlobStorage": {
+      "defaultValue": false,
+      "type": "bool",
+      "metadata": {
+        "description": "Enable Azure Blob Storage image upload"
+      }
+    },
+    "ImageUploadBlobStorageSasDurationHours": {
+      "defaultValue": 1,
+      "type": "int",
+      "metadata": {
+        "description": "Azure Blob SAS Token duration"
+      }
     }
   },
   "variables": {
@@ -322,6 +336,14 @@
             {
               "name": "AuthorAppPassword",
               "value": "[parameters('authorClientSecret')]"
+            },
+            {
+              "name": "ImageUploadBlobStorage",
+              "value": "[parameters('ImageUploadBlobStorage')]"
+            },
+            {
+              "name": "ImageUploadBlobStorageSasDurationHours",
+              "value": "[parameters('ImageUploadBlobStorageSasDurationHours')]"
             },
             {
               "name": "StorageAccountConnectionString",

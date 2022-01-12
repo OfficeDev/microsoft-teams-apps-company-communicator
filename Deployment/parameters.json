@@ -94,5 +94,13 @@
   "termsOfUseUrl": {
     "Value": "<<value>>",
     "Description": "The https:// URL to the company's terms of use."
+  },
+  "ImageUploadBlobStorage": {
+    "Value": "false",
+    "Description": "Enable Azure Blob Storage image upload"
+  },
+  "ImageUploadBlobStorageSasDurationHours": {
+    "Value": "1",
+    "Description": "Azure Blob SAS Token duration"
   }
 }

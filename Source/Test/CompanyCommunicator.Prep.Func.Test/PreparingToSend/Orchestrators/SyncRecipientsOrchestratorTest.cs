@@ -198,6 +198,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 Rosters = new List<string>(),
                 Groups = new List<string>(),
                 Teams = new List<string>(),
+                CsvUsers = string.Empty,
             };
 
             this.mockContext.Setup(x => x.GetInput<NotificationDataEntity>()).Returns(notificationDataEntity);

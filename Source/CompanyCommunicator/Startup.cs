@@ -3,6 +3,8 @@
 // Licensed under the MIT License.
 // </copyright>
 
+using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
+
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
     using System.Net;
@@ -124,6 +126,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
                     options.UserAppExternalId =
                         configuration.GetValue<string>("UserAppExternalId", "148a66bb-e83d-425a-927d-09f4299a9274");
+
+                    options.ImageUploadBlobStorage =
+                        configuration.GetValue<bool>("ImageUploadBlobStorage", false);
+
+                    options.ImageUploadBlobStorageSasDurationHours =
+                        configuration.GetValue<int>("ImageUploadBlobStorageSasDurationHours", 1);
                 });
 
             services.AddOptions();
@@ -196,6 +204,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<IAppSettingsService, AppSettingsService>();
             services.AddTransient<IUserDataService, UserDataService>();
             services.AddTransient<ITeamMembersService, TeamMembersService>();
+
+            services.AddTransient<IStorageClientFactory, StorageClientFactory>();
         }
 
         /// <summary>

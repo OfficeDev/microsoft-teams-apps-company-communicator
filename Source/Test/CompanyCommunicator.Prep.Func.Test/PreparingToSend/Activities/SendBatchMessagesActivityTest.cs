@@ -23,7 +23,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     public class SendBatchMessagesActivityTest
     {
         private readonly Mock<ISendQueue> sendQueue = new Mock<ISendQueue>();
-
+        private readonly Mock<INotificationDataRepository> notificationDataRepository = new Mock<INotificationDataRepository>();
         /// <summary>
         /// Constructor tests.
         /// </summary>
@@ -31,8 +31,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         public void SendBatchMessagesActivityConstructorTest()
         {
             // Arrange
-            Action action1 = () => new SendBatchMessagesActivity(null /*sendQueue*/, null);
-            Action action2 = () => new SendBatchMessagesActivity(this.sendQueue.Object, null);
+            Action action1 = () => new SendBatchMessagesActivity(null /*sendQueue*/, this.notificationDataRepository.Object);
+            Action action2 = () => new SendBatchMessagesActivity(this.sendQueue.Object, this.notificationDataRepository.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("sendQueue is null.");
@@ -64,6 +64,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             this.sendQueue
                 .Setup(x => x.SendAsync(It.IsAny<IEnumerable<SendQueueMessageContent>>()))
                 .Returns(Task.CompletedTask);
+
+            this.notificationDataRepository
+                .Setup(x => x.GetAsync(NotificationDataTableNames.SentNotificationsPartition, notification.Id))
+                .ReturnsAsync(new NotificationDataEntity());
 
             // Act
             Func<Task> task = async () => await activity.RunAsync((notification.Id, batch));
@@ -98,6 +102,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             this.sendQueue
                 .Setup(x => x.SendAsync(It.IsAny<IEnumerable<SendQueueMessageContent>>()))
                 .Returns(Task.CompletedTask);
+
+            this.notificationDataRepository
+                .Setup(x => x.GetAsync(NotificationDataTableNames.SentNotificationsPartition, notification.Id))
+                .ReturnsAsync(new NotificationDataEntity());
 
             // Act
             Func<Task> task = async () => await activity.RunAsync((notification.Id, batch));
@@ -145,7 +153,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// </summary>
         private SendBatchMessagesActivity GetSendBatchMessagesActivity()
         {
-            return new SendBatchMessagesActivity(this.sendQueue.Object, null);
+            return new SendBatchMessagesActivity(this.sendQueue.Object, this.notificationDataRepository.Object);
         }
     }
 }
