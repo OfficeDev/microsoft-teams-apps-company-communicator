@@ -42,5 +42,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients
                 Constants.BlobContainerName,
                 options);
         }
+
+        /// <inheritdoc/>
+        public BlobContainerClient CreateBlobContainerClient(string blobContainerName)
+        {
+            var options = new BlobClientOptions();
+
+            // configure retries
+            options.Retry.MaxRetries = 5; // default is 3
+            options.Retry.Mode = RetryMode.Exponential; // default is fixed retry policy
+            options.Retry.Delay = TimeSpan.FromSeconds(1); // default is 0.8s
+
+            return new BlobContainerClient(
+                this.storageConnectionString,
+                blobContainerName,
+                options);
+        }
     }
 }

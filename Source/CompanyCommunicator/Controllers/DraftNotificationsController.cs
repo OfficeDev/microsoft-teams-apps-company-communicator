@@ -3,6 +3,14 @@
 // Licensed under the MIT License.
 // </copyright>
 
+using System.IO;
+using System.Net.Mime;
+using Azure.Storage.Blobs.Specialized;
+using Azure.Storage.Sas;
+using Microsoft.Extensions.Options;
+using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
+using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
+
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
@@ -34,6 +42,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly ITeamDataRepository teamDataRepository;
         private readonly IDraftNotificationPreviewService draftNotificationPreviewService;
         private readonly IGroupsService groupsService;
+        private readonly IStorageClientFactory storageClientFactory;
+        private readonly UserAppOptions userAppOptions;
         private readonly IAppSettingsService appSettingsService;
         private readonly IStringLocalizer<Strings> localizer;
 
@@ -46,19 +56,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="appSettingsService">App Settings service.</param>
         /// <param name="localizer">Localization service.</param>
         /// <param name="groupsService">group service.</param>
+        /// <param name="storageClientFactory">Storage Library</param>
         public DraftNotificationsController(
             INotificationDataRepository notificationDataRepository,
             ITeamDataRepository teamDataRepository,
             IDraftNotificationPreviewService draftNotificationPreviewService,
             IAppSettingsService appSettingsService,
             IStringLocalizer<Strings> localizer,
-            IGroupsService groupsService)
+            IGroupsService groupsService,
+            IStorageClientFactory storageClientFactory,
+            IOptions<UserAppOptions> userAppOptions)
         {
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.draftNotificationPreviewService = draftNotificationPreviewService ?? throw new ArgumentNullException(nameof(draftNotificationPreviewService));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
             this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
+            this.storageClientFactory = storageClientFactory ?? throw new ArgumentNullException(nameof(storageClientFactory));
+            this.userAppOptions = userAppOptions?.Value ?? throw new ArgumentNullException(nameof(userAppOptions));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
         }
 
@@ -86,12 +101,46 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.Forbid();
             }
 
+            await this.UploadToBlobStorage(notification);
+            
             notification.TrackingUrl = this.HttpContext.Request.Scheme + "://" + this.HttpContext.Request.Host + "/api/sentNotifications/tracking";
 
             var notificationId = await this.notificationDataRepository.CreateDraftNotificationAsync(
                 notification,
                 this.HttpContext.User?.Identity?.Name);
             return this.Ok(notificationId);
+        }
+
+        private async Task UploadToBlobStorage(DraftNotification notification)
+        {
+            if (this.userAppOptions.ImageUploadBlobStorage && !string.IsNullOrWhiteSpace(notification.ImageLink))
+            {
+                var offset = notification.ImageLink.IndexOf(',') + 1;
+                var imageBytes = Convert.FromBase64String(notification.ImageLink[offset..^0]);
+
+                await using var stream = new MemoryStream(imageBytes, writable: false);
+                var blobContainerClient = this.storageClientFactory.CreateBlobContainerClient("imageupload");
+                await blobContainerClient.CreateIfNotExistsAsync();
+
+                var blob = blobContainerClient.GetBlobClient(Guid.NewGuid().ToString() + ".jpg");
+                await blob.UploadAsync(stream, true);
+
+                if (blobContainerClient.CanGenerateSasUri)
+                {
+                    // Create a SAS token that's valid for one hour.
+                    BlobSasBuilder sasBuilder = new BlobSasBuilder()
+                    {
+                        BlobContainerName = blobContainerClient.Name,
+                        BlobName = blob.Name,
+                        Resource = "b"
+                    };
+
+                    sasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddHours(this.userAppOptions.ImageUploadBlobStorageSasDurationHours);
+                    sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+                    notification.ImageLink = blob.GenerateSasUri(sasBuilder).AbsoluteUri;
+                }
+            }
         }
 
         /// <summary>
@@ -142,6 +191,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             if (!notification.Validate(this.localizer, out string errorMessage))
             {
                 return this.BadRequest(errorMessage);
+            }
+
+            if (!string.IsNullOrWhiteSpace(notification.ImageLink) && notification.ImageLink.StartsWith("data:image/"))
+            {
+                await this.UploadToBlobStorage(notification);
             }
 
             var notificationEntity = new NotificationDataEntity

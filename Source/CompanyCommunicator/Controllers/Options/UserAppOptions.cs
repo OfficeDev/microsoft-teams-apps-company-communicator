@@ -19,5 +19,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options
         /// Gets or sets User app's external Id (id in the manifest).
         /// </summary>
         public string UserAppExternalId { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the images should be uploaded to Azure Blob Storage.
+        /// </summary>
+        public bool ImageUploadBlobStorage { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating how much time the SAS token is valid to access the images uploaded to Azure Blob Storage.
+        /// </summary>
+        public int ImageUploadBlobStorageSasDurationHours { get; set; }
     }
 }

@@ -3,6 +3,16 @@
 // Licensed under the MIT License.
 // </copyright>
 
+using System.IO;
+using System.Threading;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Azure.Storage.Blobs.Specialized;
+using Azure.Storage.Sas;
+using Microsoft.Extensions.Options;
+using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
+using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
+
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
 {
     using System;
@@ -41,6 +51,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
         private readonly string notificationId = "notificationId";
 
+        private readonly Mock<IStorageClientFactory> storageClientFactory = new Mock<IStorageClientFactory>();
+        private readonly Mock<IOptions<UserAppOptions>> userAppOptions = new Mock<IOptions<UserAppOptions>>();
+        private bool imageUploadBlobStorage;
+
         /// <summary>
         /// Gets DraftPreviewPrams.
         /// </summary>
@@ -64,8 +78,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         [Fact]
         public void CreateInstance_AllParameters_ShouldBeSuccess()
         {
+            this.userAppOptions.Setup(x => x.Value).Returns(new UserAppOptions());
+
             // Arrange
-            Action action = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
+            Action action = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.storageClientFactory.Object, this.userAppOptions.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
@@ -78,12 +94,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void CreateInstance_NullParameter_ThrowsArgumentNullException()
         {
             // Arrange
-            Action action1 = () => new DraftNotificationsController(null /*notificationDataRepository*/, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
-            Action action2 = () => new DraftNotificationsController(this.notificationDataRepository.Object, null /*teamDataRepository*/, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
-            Action action3 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, null /*draftNotificationPreviewService*/, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
-            Action action4 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, null /*appSettingsService*/, this.localizer.Object, this.groupsService.Object);
-            Action action5 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, null /*localizer*/, this.groupsService.Object);
-            Action action6 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, null/*groupsService*/);
+            Action action1 = () => new DraftNotificationsController(null /*notificationDataRepository*/, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.storageClientFactory.Object, this.userAppOptions.Object);
+            Action action2 = () => new DraftNotificationsController(this.notificationDataRepository.Object, null /*teamDataRepository*/, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.storageClientFactory.Object, this.userAppOptions.Object);
+            Action action3 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, null /*draftNotificationPreviewService*/, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.storageClientFactory.Object, this.userAppOptions.Object);
+            Action action4 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, null /*appSettingsService*/, this.localizer.Object, this.groupsService.Object, this.storageClientFactory.Object, this.userAppOptions.Object);
+            Action action5 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, null /*localizer*/, this.groupsService.Object, this.storageClientFactory.Object, this.userAppOptions.Object);
+            Action action6 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, null/*groupsService*/, this.storageClientFactory.Object, this.userAppOptions.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("notificationDataRepository is null.");
@@ -955,13 +971,53 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         }
 
         /// <summary>
+        /// Test to verify create draft notfication with valid data return ok result.
+        /// </summary>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        [Fact]
+        public async Task Upload_Image_Blob_Storage_ReturnsOkObjectResult()
+        {
+            // Arrange
+            this.imageUploadBlobStorage = true;
+            var controller = this.GetDraftNotificationsController();
+            this.groupsService.Setup(x => x.ContainsHiddenMembershipAsync(It.IsAny<IEnumerable<string>>())).ReturnsAsync(false);
+            var notification = new DraftNotification() { Groups = new List<string>(), ImageLink = "data:image/jpeg;base64,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" };
+            this.notificationDataRepository.Setup(x => x.CreateOrUpdateAsync(It.IsAny<NotificationDataEntity>())).Returns(Task.CompletedTask);
+
+            
+            var mockBlobClient = new Mock<BlobClient>();
+            mockBlobClient.Setup(x => x.UploadAsync(It.IsAny<MemoryStream>(), true, It.IsAny<CancellationToken>()));
+            mockBlobClient.Setup(x => x.GenerateSasUri(It.IsAny<BlobSasBuilder>())).Returns(new Uri("http://demo.com"));
+            
+            var mockContainerClient = new Mock<BlobContainerClient>();
+            mockContainerClient
+                .Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(),
+                    It.IsAny<IDictionary<string, string>>(), It.IsAny<BlobContainerEncryptionScopeOptions>(),
+                    It.IsAny<CancellationToken>()));
+            mockContainerClient
+                .Setup(x => x.GetBlobClient(It.IsAny<string>())).Returns(mockBlobClient.Object);
+            mockContainerClient
+                .Setup(x => x.CanGenerateSasUri).Returns(true);
+
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient(It.IsAny<string>()))
+                .Returns(mockContainerClient.Object);
+
+            // Act
+            var result = await controller.CreateDraftNotificationAsync(notification);
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result.Result);
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
         /// </summary>
         private DraftNotificationsController GetDraftNotificationsController()
         {
+            this.userAppOptions.Setup(x => x.Value).Returns(new UserAppOptions(){ImageUploadBlobStorage = this.imageUploadBlobStorage});
             this.notificationDataRepository.Setup(x => x.TableRowKeyGenerator).Returns(new TableRowKeyGenerator());
             this.notificationDataRepository.Setup(x => x.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent()).Returns(this.notificationId);
-            var controller = new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
+            var controller = new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.storageClientFactory.Object, this.userAppOptions.Object);
             var user = new ClaimsPrincipal(new ClaimsIdentity());
             controller.ControllerContext = new ControllerContext();
             controller.ControllerContext.HttpContext = new DefaultHttpContext { User = user };
