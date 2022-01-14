@@ -86,6 +86,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     botOptions.AuthorAppPassword = configuration.GetValue<string>("AuthorAppPassword");
                     botOptions.TargetingEnabled = configuration.GetValue<string>("TargetingEnabled");
                     botOptions.MasterAdminUpns = configuration.GetValue<string>("MasterAdminUpns");
+                    botOptions.ImageUploadBlobStorage = configuration.GetValue<bool>("ImageUploadBlobStorage");
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>

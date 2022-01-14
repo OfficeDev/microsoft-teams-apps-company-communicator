@@ -24,5 +24,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets application MasterAdminUpns.
         /// </summary>
         public string MasterAdminUpns { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether gets or sets application ImageUploadBlobStorage.
+        /// </summary>
+        public bool ImageUploadBlobStorage { get; set; }
     }
 }

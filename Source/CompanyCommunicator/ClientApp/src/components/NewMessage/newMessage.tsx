@@ -12,7 +12,7 @@ import Resizer from 'react-image-file-resizer';
 import Papa from "papaparse";
 import './newMessage.scss';
 import './teamTheme.scss';
-import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess, getAppSettings, getChannelConfig } from '../../apis/messageListApi';
+import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess, getAppSettings, getChannelConfig, getGroupAssociations } from '../../apis/messageListApi';
 import { getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary, setCardAuthor, setCardBtns, setCardTarget, setCardTargetImage, setCardTargetTitle } from '../AdaptiveCard/adaptiveCard';
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
@@ -128,6 +128,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     CSVfileInput: any;
     targetingEnabled: boolean; // property to store value indicating if the targeting mode is enabled or not
     masterAdminUpns: string; // property to store value with the master admins
+    imageUploadBlobStorage: boolean; //property to store value indicating if the upload to blob storage is enabled or not
 
     constructor(props: INewMessageProps) {
         super(props);
@@ -137,6 +138,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         var TempDate = this.getRoundedDate(5, this.getDateObject()); //get the current date
         this.targetingEnabled = false; // by default targeting is disabled
         this.masterAdminUpns = "";
+        this.imageUploadBlobStorage = false;
 
         this.state = {
             title: "",
@@ -266,26 +268,28 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             });
         });
     }
-    
+
     // get the app configuration values and set targeting mode from app settings
     private getAppSettings = async () => {
-            let response = await getAppSettings();
-            if (response.data) {
-                this.targetingEnabled = (response.data.targetingEnabled === 'true'); //get the targetingenabled value
-                this.masterAdminUpns = response.data.masterAdminUpns; //get the array of master admins
-            }
+        let response = await getAppSettings();
+        if (response.data) {
+            this.targetingEnabled = (response.data.targetingEnabled === 'true'); //get the targetingenabled value
+            this.masterAdminUpns = response.data.masterAdminUpns; //get the array of master admins
+            this.imageUploadBlobStorage = response.data.imageUploadBlobStorage; //get the value indicating if the image to blob storage option is enabled
+
+        }
     }
 
     //returns true if the userUpn is listed on masterAdminUpns
     private isMasterAdmin = (masterAdminUpns: string, userUpn?: string) => {
-            var ret = false; // default return value
-            var masterAdmins = masterAdminUpns.toLowerCase().split(/;|,/); //splits the string and convert to lowercase
-            //if we get a userUpn as parameter
-            if (userUpn) {
-                //gets the index of the user on the master admin array
-                if (masterAdmins.indexOf(userUpn.toLowerCase()) >= 0) { ret = true; }
-            }
-            return ret;
+        var ret = false; // default return value
+        var masterAdmins = masterAdminUpns.toLowerCase().split(/;|,/); //splits the string and convert to lowercase
+        //if we get a userUpn as parameter
+        if (userUpn) {
+            //gets the index of the user on the master admin array
+            if (masterAdmins.indexOf(userUpn.toLowerCase()) >= 0) { ret = true; }
+        }
+        return ret;
     }
 
     //get the channel configuration 
@@ -314,8 +318,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             var cardsize = JSON.stringify(this.card).length;
             Resizer.imageFileResizer(file, 400, 400, 'JPEG', 80, 0,
                 uri => {
-                    if (uri.toString().length < maxCardSize-cardsize) {
-                        //everything is ok with the image, lets set it on the card and update
+                    //if ImageUploadBlobStorage is enabled we don't need to care with the impact the image in the card size
+                    //this is to leverage code created by henrique.graca@microsoft.com to store images on the Azure blob storage
+                    if (this.imageUploadBlobStorage) {
                         setCardImageLink(this.card, uri.toString());
                         this.updateCard();
                         //lets set the state with the image value
@@ -324,13 +329,24 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         }
                         );
                     } else {
-                        var errormsg = this.localize("ErrorImageTooBig") + " " + this.localize("ErrorImageTooBigSize") + " " + (maxCardSize - cardsize) + " bytes.";
-                        //images bigger than 32K cannot be saved, set the error message to be presented
-                        this.setState({
-                            errorImageUrlMessage: errormsg
-                        });
+                        //this is the case to use when imageUploadBlobStorage is not enabled (the default option)
+                        if (uri.toString().length < maxCardSize - cardsize) {
+                            //everything is ok with the image, lets set it on the card and update
+                            setCardImageLink(this.card, uri.toString());
+                            this.updateCard();
+                            //lets set the state with the image value
+                            this.setState({
+                                imageLink: uri.toString()
+                            }
+                            );
+                        } else {
+                            var errormsg = this.localize("ErrorImageTooBig") + " " + this.localize("ErrorImageTooBigSize") + " " + (maxCardSize - cardsize) + " bytes.";
+                            //images bigger than 32K cannot be saved, set the error message to be presented
+                            this.setState({
+                                errorImageUrlMessage: errormsg
+                            });
+                        }
                     }
-
                 },
                 'base64'); //we need the image in base64
         }
@@ -347,7 +363,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             //parses the CSV file using papa parse library
             Papa.parse(file, {
                 complete: ({ errors, data }) => {
-                    
+
                     if (errors.length > 0) {
                         //file is invalid, show the message for the user
                         this.setState({
@@ -468,6 +484,25 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         }
     }
 
+    private async setAuthorizedGroupItems() {
+        var resultListItems: any[] = [];
+
+        const response = await getGroupAssociations(this.state.channelId);
+        const inputGroups = response.data;
+
+        inputGroups.forEach((element) => {
+            resultListItems.push({
+                mail: element.groupEmail,
+                id: element.groupId,
+                name: element.groupName,
+            });
+        });
+
+        this.setState({
+            groups: resultListItems
+        });
+    }
+
     private getGroupItems() {
         if (this.state.groups) {
             return this.makeDropdownItems(this.state.groups);
@@ -568,7 +603,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         "url": draftMessageDetail.buttonLink
                     }]
                 });
-             }
+            }
             else {
                 // set the values state with the parse of the JSON recovered from the database
                 if (draftMessageDetail.buttons !== null) { //if the database value is not null, parse the JSON to create the button objects
@@ -606,6 +641,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     }
 
     public render(): JSX.Element {
+        var isMaster = this.isMasterAdmin(this.masterAdminUpns, this.state.userPrincipalName);
+
         if (this.state.loader) {
             return (
                 <div className="Loader">
@@ -674,11 +711,11 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                             <Flex gap="gap.large" vAlign="end">
                                                 <Text size="small" align="start" content={this.localize("Buttons")} />
                                                 <Flex.Item push >
-                                                    <Button circular size="small" disabled={(this.state.values.length == 4) || !(this.state.errorButtonUrlMessage === "")} icon={ <AddIcon />} title={this.localize("Add")} onClick={this.addClick.bind(this)} />
+                                                    <Button circular size="small" disabled={(this.state.values.length == 4) || !(this.state.errorButtonUrlMessage === "")} icon={<AddIcon />} title={this.localize("Add")} onClick={this.addClick.bind(this)} />
                                                 </Flex.Item>
                                             </Flex>
                                         </div>
-                                        
+
                                         {this.createUI()}
 
                                         <Text className={(this.state.errorButtonUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorButtonUrlMessage} />
@@ -722,6 +759,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                 {
                                                     name: "teams",
                                                     key: "teams",
+                                                    disabled: (this.targetingEnabled && !isMaster),
                                                     value: "teams",
                                                     label: this.localize("SendToGeneralChannel"),
                                                     children: (Component, { name, ...props }) => {
@@ -735,6 +773,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                                     multiple
                                                                     items={this.getItems()}
                                                                     value={this.state.selectedTeams}
+                                                                    disabled={(this.targetingEnabled && !isMaster)}
                                                                     onChange={this.onTeamsChange}
                                                                     noResultsMessage={this.localize("NoMatchMessage")}
                                                                 />
@@ -745,6 +784,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                 {
                                                     name: "rosters",
                                                     key: "rosters",
+                                                    disabled: (this.targetingEnabled && !isMaster),
                                                     value: "rosters",
                                                     label: this.localize("SendToRosters"),
                                                     children: (Component, { name, ...props }) => {
@@ -769,6 +809,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                 {
                                                     name: "allUsers",
                                                     key: "allUsers",
+                                                    disabled: (this.targetingEnabled && !isMaster),
                                                     value: "allUsers",
                                                     label: this.localize("SendToAllUsers"),
                                                     children: (Component, { name, ...props }) => {
@@ -790,41 +831,62 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                     value: "groups",
                                                     label: this.localize("SendToGroups"),
                                                     children: (Component, { name, ...props }) => {
-                                                        return (
-                                                            <Flex key={name} column>
-                                                                <Component {...props} />
-                                                                <div className={this.state.groupsOptionSelected && !this.state.groupAccess ? "" : "hide"}>
-                                                                    <div className="noteText">
-                                                                        <Text error content={this.localize("SendToGroupsPermissionNote")} />
+                                                        if (this.targetingEnabled && !isMaster) {
+                                                            this.setAuthorizedGroupItems();
+                                                            return (
+                                                                <Flex key={name} column>
+                                                                    <Component {...props} />
+                                                                    <Dropdown
+                                                                        className="hideToggle"
+                                                                        placeholder="Select groups from the authorized list"
+                                                                        multiple
+                                                                        items={this.getGroupItems()}
+                                                                        value={this.state.selectedGroups}
+                                                                        onChange={this.onGroupsChange}
+                                                                        noResultsMessage={this.state.noResultMessage}
+                                                                        unstable_pinned={this.state.unstablePinned}
+                                                                    />
+                                                                </Flex>
+                                                            )
+                                                        }
+                                                        else {
+                                                            return (
+                                                                <Flex key={name} column>
+                                                                    <Component {...props} />
+                                                                    <div className={this.state.groupsOptionSelected && !this.state.groupAccess ? "" : "hide"}>
+                                                                        <div className="noteText">
+                                                                            <Text error content={this.localize("SendToGroupsPermissionNote")} />
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <Dropdown
-                                                                    className="hideToggle"
-                                                                    hidden={!this.state.groupsOptionSelected || !this.state.groupAccess}
-                                                                    placeholder={this.localize("SendToGroupsPlaceHolder")}
-                                                                    search={this.onGroupSearch}
-                                                                    multiple
-                                                                    loading={this.state.loading}
-                                                                    loadingMessage={this.localize("LoadingText")}
-                                                                    items={this.getGroupItems()}
-                                                                    value={this.state.selectedGroups}
-                                                                    onSearchQueryChange={this.onGroupSearchQueryChange}
-                                                                    onChange={this.onGroupsChange}
-                                                                    noResultsMessage={this.state.noResultMessage}
-                                                                    unstable_pinned={this.state.unstablePinned}
-                                                                />
-                                                                <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
-                                                                    <div className="noteText">
-                                                                        <Text error content={this.localize("SendToGroupsNote")} />
+                                                                    <Dropdown
+                                                                        className="hideToggle"
+                                                                        hidden={!this.state.groupsOptionSelected || !this.state.groupAccess}
+                                                                        placeholder={this.localize("SendToGroupsPlaceHolder")}
+                                                                        search={this.onGroupSearch}
+                                                                        multiple
+                                                                        loading={this.state.loading}
+                                                                        loadingMessage={this.localize("LoadingText")}
+                                                                        items={this.getGroupItems()}
+                                                                        value={this.state.selectedGroups}
+                                                                        onSearchQueryChange={this.onGroupSearchQueryChange}
+                                                                        onChange={this.onGroupsChange}
+                                                                        noResultsMessage={this.state.noResultMessage}
+                                                                        unstable_pinned={this.state.unstablePinned}
+                                                                    />
+                                                                    <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
+                                                                        <div className="noteText">
+                                                                            <Text error content={this.localize("SendToGroupsNote")} />
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            </Flex>
-                                                        )
+                                                                </Flex>
+                                                            )
+                                                        }
                                                     },
                                                 },
                                                 {
                                                     name: "csv",
                                                     key: "csv",
+                                                    disabled: (this.targetingEnabled && !isMaster),
                                                     value: "csv",
                                                     label: this.localize("SendToCSV"),
                                                     children: (Component, { name, ...props }) => {
@@ -850,7 +912,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                                             title={this.localize("LabelCSV")}
                                                                         />
                                                                     </Flex.Item>
-                                                                 </Flex>
+                                                                </Flex>
                                                             </Flex>
                                                         )
                                                     },
@@ -860,13 +922,13 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         </RadioGroup>
 
                                         <Flex hAlign="start">
-                                         <h3><Checkbox
-                                            className="ScheduleCheckbox"
-                                            labelPosition="start"
-                                            onClick={this.onScheduleSelected}
-                                            label={this.localize("ScheduledSend")}
-                                            checked={this.state.selectedSchedule}
-                                            toggle
+                                            <h3><Checkbox
+                                                className="ScheduleCheckbox"
+                                                labelPosition="start"
+                                                onClick={this.onScheduleSelected}
+                                                label={this.localize("ScheduledSend")}
+                                                checked={this.state.selectedSchedule}
+                                                toggle
                                             /></h3>
                                         </Flex>
                                         <Text size="small" align="start" content={this.localize('ScheduledSendDescription')} />
@@ -1214,7 +1276,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         this.state.selectedRosters.forEach(x => selctedRosters.push(x.team.id));
         this.state.selectedGroups.forEach(x => selectedGroups.push(x.team.id));
 
-        if (this.state.csvOptionSelected) { selectedCSV = this.state.csvusers;}
+        if (this.state.csvOptionSelected) { selectedCSV = this.state.csvusers; }
 
         const draftMessage: IDraftMessage = {
             id: this.state.messageId,
@@ -1403,7 +1465,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         } else {
             return (
                 < Flex >
-                    <Text size="small" content={this.localize("NoButtons") } />
+                    <Text size="small" content={this.localize("NoButtons")} />
                 </Flex>
             )
         }
