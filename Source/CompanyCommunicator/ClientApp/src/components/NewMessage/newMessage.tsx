@@ -129,6 +129,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     targetingEnabled: boolean; // property to store value indicating if the targeting mode is enabled or not
     masterAdminUpns: string; // property to store value with the master admins
     imageUploadBlobStorage: boolean; //property to store value indicating if the upload to blob storage is enabled or not
+    imageSize: number;
 
     constructor(props: INewMessageProps) {
         super(props);
@@ -139,6 +140,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         this.targetingEnabled = false; // by default targeting is disabled
         this.masterAdminUpns = "";
         this.imageUploadBlobStorage = false;
+        this.imageSize = 0;
 
         this.state = {
             title: "",
@@ -321,6 +323,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                     //if ImageUploadBlobStorage is enabled we don't need to care with the impact the image in the card size
                     //this is to leverage code created by henrique.graca@microsoft.com to store images on the Azure blob storage
                     if (this.imageUploadBlobStorage) {
+                        this.imageSize = uri.toString().length;
                         setCardImageLink(this.card, uri.toString());
                         this.updateCard();
                         //lets set the state with the image value
@@ -724,7 +727,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                 <Flex.Item size="size.half">
                                     <div>
                                         <Flex hAlign="end">
-                                            <Label content={JSON.stringify(this.card).length + "/" + maxCardSize} />
+                                            <Label content={JSON.stringify(this.card).length - this.imageSize + "/" + maxCardSize} />
                                         </Flex>
                                         <div className="adaptiveCardContainer">
                                         </div>
@@ -982,7 +985,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                 <Flex.Item size="size.half">
                                     <div>
                                         <Flex hAlign="end">
-                                            <Label content={JSON.stringify(this.card).length + "/" + maxCardSize} />
+                                            <Label content={JSON.stringify(this.card).length -this.imageSize + "/" + maxCardSize} />
                                         </Flex>
                                         <div className="adaptiveCardContainer">
                                         </div>
