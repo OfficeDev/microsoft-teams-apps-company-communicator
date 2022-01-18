@@ -318,23 +318,21 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         if (file) { //if we have a file
             //resize the image to fit in the adaptivecard
             var cardsize = JSON.stringify(this.card).length;
-            Resizer.imageFileResizer(file, 400, 400, 'JPEG', 80, 0,
-                uri => {
-                    //if ImageUploadBlobStorage is enabled we don't need to care with the impact the image in the card size
-                    //this is to leverage code created by henrique.graca@microsoft.com to store images on the Azure blob storage
-                    if (this.imageUploadBlobStorage) {
+            if (this.imageUploadBlobStorage) {
+                Resizer.imageFileResizer(file, 400, 400, 'JPEG', 100, 0,
+                    uri => {
                         this.imageSize = uri.toString().length;
                         setCardImageLink(this.card, uri.toString());
                         this.updateCard();
                         //lets set the state with the image value
                         this.setState({
                             imageLink: uri.toString()
-                        }
-                        );
-                    } else {
-                        //this is the case to use when imageUploadBlobStorage is not enabled (the default option)
+                        });
+                    }, 'base64'); //we need the image in base64
+            } else {
+                Resizer.imageFileResizer(file, 400, 400, 'JPEG', 80, 0,
+                    uri => {
                         if (uri.toString().length < maxCardSize - cardsize) {
-                            //everything is ok with the image, lets set it on the card and update
                             setCardImageLink(this.card, uri.toString());
                             this.updateCard();
                             //lets set the state with the image value
@@ -349,9 +347,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                 errorImageUrlMessage: errormsg
                             });
                         }
-                    }
-                },
-                'base64'); //we need the image in base64
+                    }, 'base64'); //we need the image in base64
+            }
         }
     }
 
