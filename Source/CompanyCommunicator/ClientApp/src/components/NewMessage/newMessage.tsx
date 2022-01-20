@@ -316,19 +316,22 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         //get the first file selected
         const file = this.fileInput.current.files[0];
         if (file) { //if we have a file
-            //resize the image to fit in the adaptivecard
             var cardsize = JSON.stringify(this.card).length;
             if (this.imageUploadBlobStorage) {
-                Resizer.imageFileResizer(file, 400, 400, 'JPEG', 100, 0,
-                    uri => {
-                        this.imageSize = uri.toString().length;
-                        setCardImageLink(this.card, uri.toString());
-                        this.updateCard();
-                        //lets set the state with the image value
-                        this.setState({
-                            imageLink: uri.toString()
-                        });
-                    }, 'base64'); //we need the image in base64
+                //alert(file.toString('base64'));
+                var that = this;
+                var reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onloadend = function () {
+                    var base64String = reader.result;
+                    //alert(base64String);
+                    that.imageSize = base64String.toString().length;
+                    setCardImageLink(that.card, base64String.toString());
+                    that.updateCard();
+                    that.setState({
+                        imageLink: base64String.toString()
+                    });
+                }
             } else {
                 Resizer.imageFileResizer(file, 400, 400, 'JPEG', 80, 0,
                     uri => {
