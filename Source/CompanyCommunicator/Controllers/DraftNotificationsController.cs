@@ -101,14 +101,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.Forbid();
             }
 
-            await this.UploadToBlobStorage(notification);
-            
+            if (!this.CheckUrl(notification.ImageLink))
+            {
+                await this.UploadToBlobStorage(notification);
+            }
+
             notification.TrackingUrl = this.HttpContext.Request.Scheme + "://" + this.HttpContext.Request.Host + "/api/sentNotifications/tracking";
 
             var notificationId = await this.notificationDataRepository.CreateDraftNotificationAsync(
                 notification,
                 this.HttpContext.User?.Identity?.Name);
             return this.Ok(notificationId);
+        }
+
+        private bool CheckUrl(string urlString)
+        {
+            Uri uriResult;
+
+            if (Uri.TryCreate(urlString, UriKind.Absolute, out uriResult))
+            {
+                return uriResult.Scheme == Uri.UriSchemeHttps;
+            }
+            return false;
         }
 
         private async Task UploadToBlobStorage(DraftNotification notification)
