@@ -60,6 +60,8 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 ## Community Fork Changes
 
+This is the log of changes implemented for Company Communicator.
+
 **v4.22**
 - Fix for the error when saving messages with the targeting mode enabled.
 - Fix for the radiobutton selection issue when targeting mode is enabled. Now authors in targeting mode will get the groups radion item selected by default.
