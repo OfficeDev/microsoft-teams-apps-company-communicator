@@ -47,7 +47,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 var group = new GroupAssociationData
                 {
-                    GroupId = entity.RowKey,
+                    //GroupId = entity.RowKey,
+                    GroupId = entity.GroupId,
                     GroupEmail = entity.Email,
                     GroupName = entity.GroupName,
                     ChannelId = entity.ChannelId,

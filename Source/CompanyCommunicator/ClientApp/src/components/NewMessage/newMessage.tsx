@@ -190,6 +190,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         this.CSVfileInput = React.createRef();
         this.handleImageSelection = this.handleImageSelection.bind(this);
         this.handleCSVSelection = this.handleCSVSelection.bind(this);
+       
     }
 
     public async componentDidMount() {
@@ -218,6 +219,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         });
 
         this.getAppSettings().then(() => {
+            this.radioControl();
             setCardTarget(this.card, this.targetingEnabled);
             this.getTeamList().then(() => {
                 if ('id' in params) {
@@ -833,6 +835,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                     key: "groups",
                                                     value: "groups",
                                                     label: this.localize("SendToGroups"),
+                                                    checked: (this.targetingEnabled && !isMaster),
                                                     children: (Component, { name, ...props }) => {
                                                         if (this.targetingEnabled && !isMaster) {
                                                             this.setAuthorizedGroupItems();
@@ -1016,6 +1019,28 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 return (<div>Error</div>);
             }
         }
+    }
+
+    //function to set the radio control item to the right option depending on the status for
+    //the targetingmode and if the user is a master admin or not
+    private radioControl() {
+
+        var opName = "teams";
+        var isMaster = this.isMasterAdmin(this.masterAdminUpns, this.state.userPrincipalName);
+
+        if (this.targetingEnabled && !isMaster) {
+            opName = "groups";
+        }
+        
+        this.setState({
+            selectedRadioBtn: opName,
+            teamsOptionSelected: opName === 'teams',
+            rostersOptionSelected: opName === 'rosters',
+            groupsOptionSelected: opName === 'groups',
+            csvOptionSelected: opName === 'csv',
+            allUsersOptionSelected: opName === 'allUsers',
+        });
+
     }
 
     //get the next rounded up (ceil) date in minutes
