@@ -57,3 +57,12 @@ provided by the bot. You will only need to do this once across all repos using o
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## Community Fork Changes
+
+**v4.22**
+- Fix for the error when saving messages with the targeting mode enabled.
+- Fix for the radiobutton selection issue when targeting mode is enabled. Now authors in targeting mode will get the groups radion item selected by default.
+
+**v4.21**
+- Change to allow the selection of the same group in multiple instances of the authors app with targeting mode enabled.
