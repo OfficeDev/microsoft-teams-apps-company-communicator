@@ -29,5 +29,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets channelId.
         /// </summary>
         public string ChannelId { get; set; }
+
+        /// <summary>
+        /// Gets or sets rowkey.
+        /// </summary>
+        public string RowKey { get; set; }
     }
 }
