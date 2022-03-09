@@ -22,7 +22,12 @@ While running PowerShell script, you may get an error: `File is not digitally si
 
 `Exception calling AcquireAccessToken with 1 argument(s): multiple\_matching\_tokens\_detected: The cache contains multiple tokens satisfying the requirements`
 
-**Fix** : This means user is logged-in with multiple accounts in the current powershell session. Close the powershell window and re-run the script in a new window.
+**Fix** : This means user is logged-in with multiple accounts in the current powershell session. Close the powershell window and re-run the script in a new window. or clear the cache of the powerShell session with the command.
+Remove all account, subscription, and credential information for any powershell session.
+
+`
+Clear-AzContext -Scope CurrentUser
+`
 
 **4. Authorization failed**
 
@@ -64,7 +69,9 @@ Please ask your tenant administrator to consent the permissions for Azure AD app
 
 `Errors: The resource operation completed with terminal provisioning state "Failed"`
 
-This may happen if the resources were already created or due to conflicts.
+* This may happen if the resources were already created or due to conflicts. 
+* It could also be due to the name you've set in the base resource name, ensure it complies with the values you can set in the GUI. e.g. ***myBaseValue01***. In the deployments section it might have an error like: 
+***The specified service namespace is invalid.***
 
 **Fix**
 

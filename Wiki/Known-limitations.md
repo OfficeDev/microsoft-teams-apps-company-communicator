@@ -6,3 +6,5 @@ The tab where authors/creators of messages create a message is currently not sup
 ## 2. Adaptive card doesn't support RTL
 
 The app supports localization. Only the adaptive card currently doesn't support RTL.
+
+## 3. Multi tenant support
