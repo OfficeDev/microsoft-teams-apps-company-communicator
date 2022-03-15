@@ -30,6 +30,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Controller for the draft notification data.
@@ -107,6 +108,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             notification.TrackingUrl = this.HttpContext.Request.Scheme + "://" + this.HttpContext.Request.Host + "/api/sentNotifications/tracking";
+
+            // TODO: double-check it
+         //   notification.Buttons = this.GetButtonTrackingUrl(notification);
 
             var notificationId = await this.notificationDataRepository.CreateDraftNotificationAsync(
                 notification,
@@ -211,6 +215,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 await this.UploadToBlobStorage(notification);
             }
+
+
+            // TODO: double-check it
+           // notification.Buttons = this.GetButtonTrackingUrl(notification);
+
 
             var notificationEntity = new NotificationDataEntity
             {

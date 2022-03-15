@@ -21,6 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Models;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
     using Newtonsoft.Json;
 
@@ -254,6 +255,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             notification.Content = notification.Content.Replace("[ID]", message.NotificationId);
             notification.Content = notification.Content.Replace("[KEY]", message.RecipientData.RecipientId);
 
+            notification.Content = this.GetButtonTrackingUrl(notification.Content, message.NotificationId,
+                                                             message.RecipientData.RecipientId);
+
             var adaptiveCardAttachment = new Attachment()
             {
                 ContentType = AdaptiveCardContentType,
@@ -261,6 +265,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             };
 
             return MessageFactory.Attachment(adaptiveCardAttachment);
+        }
+
+        private string GetButtonTrackingUrl(string notification, string notificationId, string key)
+        {
+
+            var result = JsonConvert.DeserializeObject<RootSendingAdaptiveCard>(notification);
+
+            var host = result.body[1].url;
+
+            var url = host.Split("/api")[0];
+
+            foreach (var item in result.actions)
+            {
+                var originalUrl = item.url;
+
+                item.url = $"{url}/api/sentnotifications/trackingbutton?id={notificationId}" +
+                           $"&key={key}&buttonid={item.title}&redirecturl={originalUrl}";
+            }
+
+            return JsonConvert.SerializeObject(result);
         }
     }
 }
