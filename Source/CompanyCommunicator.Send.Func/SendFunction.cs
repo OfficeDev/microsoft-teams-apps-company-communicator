@@ -279,7 +279,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             foreach (var item in result.actions)
             {
                 var originalUrl = item.url;
-
+                
                 item.url = $"{url}/api/sentnotifications/trackingbutton?id={notificationId}" +
                            $"&key={key}&buttonid={item.title}&redirecturl={originalUrl}";
             }

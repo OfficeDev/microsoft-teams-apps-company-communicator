@@ -248,7 +248,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 throw new ArgumentNullException(nameof(key));
             }
 
-            // buttonid cannot be null
+            // buttonid actually is the button name
             if (string.IsNullOrWhiteSpace(buttonid))
             {
                 throw new ArgumentNullException(nameof(buttonid));
@@ -261,6 +261,54 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             //code to save the button click event
+
+            // gets the sent notification object for the message sent
+            var sentnotificationEntity = await this.notificationDataRepository.GetAsync(id, id);
+
+            // if we have a instance that was sent to a user
+            if (sentnotificationEntity != null)
+            {
+                    // gets the sent notification summary that needs to be updated
+                    var notificationEntity = await this.notificationDataRepository.GetAsync(
+                        NotificationDataTableNames.SentNotificationsPartition,
+                        id);
+
+                // if the notification entity is null it means it doesnt exist or is not a sent message yet
+                if (notificationEntity != null)
+                {
+
+
+                    var result = JsonConvert.DeserializeObject<List<TrackingButtonClicks>>(notificationEntity.ButtonTrackingClicks);
+
+                    if (result is null)
+                    {
+                        var click = new TrackingButtonClicks { name = buttonid, clicks = 1 };
+                        result = new List<TrackingButtonClicks>();
+                        result.Add(click);
+                    }
+                    else
+                    {
+                        var button = result.Find(p => p.name == buttonid);
+
+                        if (button == null)
+                        {
+                            result.Add(new TrackingButtonClicks { name = buttonid, clicks = 1 });
+                        }
+                        else
+                        {
+                            button.clicks++;
+                        }
+
+                    }
+
+                    notificationEntity.ButtonTrackingClicks = JsonConvert.SerializeObject(result);
+
+                    // persists the change
+                    await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
+                    
+                }
+            }
+
 
 
             //code to save summary of the button click events
