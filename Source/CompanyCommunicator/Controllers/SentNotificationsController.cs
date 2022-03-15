@@ -262,44 +262,44 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             //code to save the button click event
 
-            // gets the sent notification object for the message sent
-            var sentnotificationEntity = await this.notificationDataRepository.GetAsync(id, id);
-
-            // if we have a instance that was sent to a user
-            if (sentnotificationEntity != null)
-            {
-                    // gets the sent notification summary that needs to be updated
-                    var notificationEntity = await this.notificationDataRepository.GetAsync(
-                        NotificationDataTableNames.SentNotificationsPartition,
-                        id);
+            // gets the sent notification summary that needs to be updated
+            var notificationEntity = await this.notificationDataRepository.GetAsync(
+                NotificationDataTableNames.SentNotificationsPartition,
+                id);
 
                 // if the notification entity is null it means it doesnt exist or is not a sent message yet
                 if (notificationEntity != null)
                 {
 
 
-                    var result = JsonConvert.DeserializeObject<List<TrackingButtonClicks>>(notificationEntity.ButtonTrackingClicks);
+                List<TrackingButtonClicks> result;
 
-                    if (result is null)
+                if (notificationEntity.ButtonTrackingClicks is null)
+                {
+
+                    result = new List<TrackingButtonClicks>();
+
+                    var click = new TrackingButtonClicks { name = buttonid, clicks = 1 };
+                    result.Add(click);
+                }
+
+                else
+                {
+
+                    result = JsonConvert.DeserializeObject<List<TrackingButtonClicks>>(notificationEntity.ButtonTrackingClicks);
+
+                    var button = result.Find(p => p.name == buttonid);
+
+                    if (button == null)
                     {
-                        var click = new TrackingButtonClicks { name = buttonid, clicks = 1 };
-                        result = new List<TrackingButtonClicks>();
-                        result.Add(click);
+                        result.Add(new TrackingButtonClicks { name = buttonid, clicks = 1 });
                     }
                     else
                     {
-                        var button = result.Find(p => p.name == buttonid);
-
-                        if (button == null)
-                        {
-                            result.Add(new TrackingButtonClicks { name = buttonid, clicks = 1 });
-                        }
-                        else
-                        {
-                            button.clicks++;
-                        }
-
+                        button.clicks++;
                     }
+
+                }
 
                     notificationEntity.ButtonTrackingClicks = JsonConvert.SerializeObject(result);
 
@@ -307,7 +307,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
                     
                 }
-            }
+            
 
 
 
