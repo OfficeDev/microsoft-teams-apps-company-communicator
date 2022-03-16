@@ -258,5 +258,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets or sets the tracking url for the message.
         /// </summary>
         public string TrackingUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value with the JSON describing the tracking of the buttons clicked.
+        /// </summary>
+        public string ButtonTrackingClicks { get; set; }
+
     }
 }
