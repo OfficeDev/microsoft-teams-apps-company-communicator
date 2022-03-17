@@ -205,5 +205,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// Gets or sets a value indicating when a specific message instance was read by the user.
         /// </summary>
         public DateTime? ReadDate { get; set; }
+
+                /// <summary>
+        /// Gets or sets a value with the JSON describing the tracking of the buttons clicked.
+        /// </summary>
+        public string ButtonTracking { get; set; }
     }
 }
