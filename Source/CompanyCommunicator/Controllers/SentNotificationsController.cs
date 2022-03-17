@@ -475,6 +475,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 SendingCompleted = notificationEntity.IsCompleted(),
                 Reads = notificationEntity.Reads,
                 CsvUsers = notificationEntity.CsvUsers,
+                ButtonTrackingClicks = notificationEntity.ButtonTrackingClicks,
             };
 
             return this.Ok(result);
