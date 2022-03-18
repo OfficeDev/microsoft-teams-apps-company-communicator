@@ -260,16 +260,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 throw new ArgumentNullException(nameof(redirecturl));
             }
 
-            //code to save the button click event
-
+            
             // gets the sent notification summary that needs to be updated
             var notificationEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,
                 id);
 
-                // if the notification entity is null it means it doesnt exist or is not a sent message yet
-                if (notificationEntity != null)
-                {
+            // if the notification entity is null it means it doesnt exist or is not a sent message yet
+            if (notificationEntity != null)
+            {
 
 
                 List<TrackingButtonClicks> result;
@@ -282,7 +281,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     var click = new TrackingButtonClicks { name = buttonid, clicks = 1 };
                     result.Add(click);
                 }
-
                 else
                 {
 
@@ -301,19 +299,65 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
                 }
 
-                    notificationEntity.ButtonTrackingClicks = JsonConvert.SerializeObject(result);
+                notificationEntity.ButtonTrackingClicks = JsonConvert.SerializeObject(result);
 
-                    // persists the change
-                    await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
-                    
-                }
+                // persists the change
+                await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
+
+                // save the user button clicked
+                await this.UpdateButtonClickedByUser(id, key, buttonid);
+
+            }
             
-
-
-
             //code to save summary of the button click events
 
             return this.Redirect(redirecturl);
+        }
+
+        private async Task UpdateButtonClickedByUser(string id, string key, string buttonid)
+        {
+            // gets the sent notification object for the message sent
+            var sentnotificationEntity = await this.sentNotificationDataRepository.GetAsync(id, key);
+
+            // if we have a instance that was sent to a user
+            if (sentnotificationEntity != null)
+            {
+
+                List<TrackingUserClicks> result;
+
+                if (sentnotificationEntity.ButtonTracking is null)
+                {
+
+                    result = new List<TrackingUserClicks>();
+
+                    var click = new TrackingUserClicks { name = buttonid, clicks = 1, datetime = DateTime.Now };
+                    result.Add(click);
+                }
+                else
+                {
+
+                    result = JsonConvert.DeserializeObject<List<TrackingUserClicks>>(sentnotificationEntity.ButtonTracking);
+
+                    var button = result.Find(p => p.name == buttonid);
+
+                    if (button == null)
+                    {
+                        result.Add(new TrackingUserClicks { name = buttonid, clicks = 1, datetime = DateTime.Now });
+                    }
+                    else
+                    {
+                        button.clicks++;
+                        button.datetime = DateTime.Now;
+                    }
+
+                }
+
+                sentnotificationEntity.ButtonTracking = JsonConvert.SerializeObject(result);
+
+                await this.sentNotificationDataRepository.CreateOrUpdateAsync(sentnotificationEntity);
+
+
+            }
         }
 
             /// <summary>
@@ -431,6 +475,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 SendingCompleted = notificationEntity.IsCompleted(),
                 Reads = notificationEntity.Reads,
                 CsvUsers = notificationEntity.CsvUsers,
+                ButtonTrackingClicks = notificationEntity.ButtonTrackingClicks,
             };
 
             return this.Ok(result);
