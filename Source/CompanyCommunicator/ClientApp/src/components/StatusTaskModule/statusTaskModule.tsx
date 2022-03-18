@@ -197,8 +197,14 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                         </div>
 
                                         <div className="contentField">
-                                            <h3>{this.localize("ButtonClicks")}</h3>
-                                            <label>{this.renderButtonClicks()}</label>
+                                            
+                                            <div className="contentField">
+                                                <h3>{
+                                                    this.state.message.buttonTrackingClicks ? this.localize("ButtonClicks") : ""
+                                                }</h3>
+                                                <label>{this.renderButtonClicks()}</label>
+                                            </div>
+
                                         </div>
 
                                         <div className="contentField">
