@@ -272,7 +272,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             var result = JsonConvert.DeserializeObject<RootSendingAdaptiveCard>(notification);
 
-            var host = result.body[1].url;
+            string host = string.Empty;
+
+            foreach (var item in result.body)
+            {
+                if (item.url != null)
+                {
+                    host = item.url;
+                    break;
+                }
+            }
 
             var url = host.Split("/api")[0];
 
