@@ -278,8 +278,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             {
                 if (item.url != null)
                 {
-                    host = item.url;
-                    break;
+                    if (item.url.Contains("sentNotifications/tracking"))
+                    {
+                        host = item.url;
+                        break;
+                    }
                 }
             }
 
