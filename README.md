@@ -62,6 +62,10 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 This is the log of changes implemented for Company Communicator.
 
+**v4.30**
+- Message tracking has been extended to include message button click tracking. 
+- Updating the PBIX file to report on button click tracking.
+
 **v4.23**
 - Fix when deleting group associations. Due to the changes incorporated to support multiple associations for a specific groups the code to delete group associations was not working.
 
