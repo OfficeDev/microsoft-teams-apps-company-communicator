@@ -52,6 +52,7 @@ export interface IMessage {
     isImportant?: boolean;
     reads?: string;
     csvUsers: string;
+    buttonTrackingClicks: string;
 }
 
 export interface IStatusState {
@@ -194,6 +195,18 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                                 </>
                                             }
                                         </div>
+
+                                        <div className="contentField">
+                                            
+                                            <div className="contentField">
+                                                <h3>{
+                                                    this.state.message.buttonTrackingClicks ? this.localize("ButtonClicks") : ""
+                                                }</h3>
+                                                <label>{this.renderButtonClicks()}</label>
+                                            </div>
+
+                                        </div>
+
                                         <div className="contentField">
                                             <h3>{this.localize("Important")}</h3>
                                             <label>{this.renderImportant()}</label>
@@ -382,6 +395,17 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
         } else {
             return (<div></div>);
         }
+    }
+
+    private renderButtonClicks = () => {
+        if (this.state.message.buttonTrackingClicks) {
+            let btnClicks = JSON.parse(this.state.message.buttonTrackingClicks);
+            return (
+            <div>
+                {btnClicks.map((btnClick) =><div> {btnClick.name}: {btnClick.clicks}</div>)}
+            </div>
+            );
+        } 
     }
 }
 

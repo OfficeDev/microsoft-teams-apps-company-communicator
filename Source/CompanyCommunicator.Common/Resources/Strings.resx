@@ -259,4 +259,7 @@
   <data name="GuestUserNotSupported" xml:space="preserve">
     <value>Guest User not supported</value>
   </data>
+  <data name="ButtonClicks" xml:space="preserve">
+    <value>Button Clicks</value>
+  </data>
 </root>

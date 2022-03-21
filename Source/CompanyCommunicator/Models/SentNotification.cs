@@ -34,6 +34,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public int Failed { get; set; }
 
         /// <summary>
+        /// Gets or sets a value with the JSON describing the tracking of the buttons clicked.
+        /// </summary>
+        public string ButtonTrackingClicks { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of recipients whose delivery status is unknown.
         /// </summary>
         public int? Unknown { get; set; }
