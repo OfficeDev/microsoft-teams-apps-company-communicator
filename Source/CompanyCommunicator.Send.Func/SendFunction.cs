@@ -255,8 +255,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             notification.Content = notification.Content.Replace("[ID]", message.NotificationId);
             notification.Content = notification.Content.Replace("[KEY]", message.RecipientData.RecipientId);
 
-            notification.Content = this.GetButtonTrackingUrl(notification.Content, message.NotificationId,
+          
+                notification.Content = this.GetButtonTrackingUrl(notification.Content, message.NotificationId,
                                                              message.RecipientData.RecipientId);
+
 
             var adaptiveCardAttachment = new Attachment()
             {
@@ -272,30 +274,36 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             var result = JsonConvert.DeserializeObject<RootSendingAdaptiveCard>(notification);
 
-            string host = string.Empty;
-
-            foreach (var item in result.body)
+            if (result.actions != null)
             {
-                if (item.url != null)
+                string host = string.Empty;
+
+                foreach (var item in result.body)
                 {
-                    if (item.url.Contains("sentNotifications/tracking"))
+                    if (item.url != null)
                     {
-                        host = item.url;
-                        break;
+                        if (item.url.Contains("sentNotifications/tracking"))
+                        {
+                            host = item.url;
+                            break;
+                        }
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(host) && host.Contains("/api"))
+                {
+                    var url = host.Split("/api")[0];
+
+                    foreach (var item in result.actions)
+                    {
+                        var originalUrl = item.url;
+
+                        item.url = $"{url}/api/sentnotifications/trackingbutton?id={notificationId}" +
+                                   $"&key={key}&buttonid={item.title}&redirecturl={originalUrl}";
                     }
                 }
             }
-
-            var url = host.Split("/api")[0];
-
-            foreach (var item in result.actions)
-            {
-                var originalUrl = item.url;
-                
-                item.url = $"{url}/api/sentnotifications/trackingbutton?id={notificationId}" +
-                           $"&key={key}&buttonid={item.title}&redirecturl={originalUrl}";
-            }
-
+           
             return JsonConvert.SerializeObject(result);
         }
     }
