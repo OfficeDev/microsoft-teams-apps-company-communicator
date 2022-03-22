@@ -62,6 +62,9 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 This is the log of changes implemented for Company Communicator.
 
+**v4.31**
+- Fixed bug for msg without buttons
+
 **v4.30**
 - Message tracking has been extended to include message button click tracking. 
 - Updating the PBIX file to report on button click tracking.
