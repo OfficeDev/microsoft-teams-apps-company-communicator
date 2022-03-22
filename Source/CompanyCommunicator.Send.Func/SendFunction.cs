@@ -277,7 +277,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             {
                 return notification;
             }
-                string host = string.Empty;
+            
+            string host = string.Empty;
 
             foreach (var item in result.body)
             {
