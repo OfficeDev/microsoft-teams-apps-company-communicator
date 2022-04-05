@@ -259,4 +259,7 @@
   <data name="GuestUserNotSupported" xml:space="preserve">
     <value>不支援來賓使用者</value>
   </data>
+  <data name="SentMessage" xml:space="preserve">
+    <value>已發送消息</value>
+  </data>
 </root>

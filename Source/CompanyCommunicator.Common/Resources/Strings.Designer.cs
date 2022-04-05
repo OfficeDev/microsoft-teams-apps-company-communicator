@@ -466,6 +466,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sent Message.
+        /// </summary>
+        public static string SentMessage {
+            get {
+                return ResourceManager.GetString("SentMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Succeeded.
         /// </summary>
         public static string Succeeded {

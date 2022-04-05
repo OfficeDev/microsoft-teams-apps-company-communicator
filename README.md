@@ -62,6 +62,10 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 This is the log of changes implemented for Company Communicator.
 
+**v4.32**
+- Fixed a bug with URL encoding in mobile devices where button with names containing spaces were not working as expected.
+- Customized the alert shown when messare are sent to have a localized message. Instead of the default sent card we now have custom messages in all supported languages.
+
 **v4.31**
 - Fixed bug for msg without buttons
 

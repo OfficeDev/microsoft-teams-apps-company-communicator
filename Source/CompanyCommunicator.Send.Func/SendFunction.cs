@@ -6,6 +6,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
     using System;
+    using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Bot.Builder;
@@ -160,6 +161,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     messageActivity.TeamsNotifyUser();
                 }
 
+                messageActivity.Summary = this.localizer.GetString("SentMessage");
+
                 var response = await this.messageService.SendMessageAsync(
                     message: messageActivity,
                     serviceUrl: messageContent.GetServiceUrl(),
@@ -301,11 +304,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     var originalUrl = item.url;
 
                     item.url = $"{url}/api/sentnotifications/trackingbutton?id={notificationId}" +
-                               $"&key={key}&buttonid={item.title}&redirecturl={originalUrl}";
+                               $"&key={key}&buttonid={WebUtility.UrlEncode(item.title)}&redirecturl={originalUrl}";
                 }
             }
-            
-           
+
             return JsonConvert.SerializeObject(result);
         }
     }

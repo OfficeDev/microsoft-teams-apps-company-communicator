@@ -262,4 +262,7 @@
   <data name="ButtonClicks" xml:space="preserve">
     <value>Button Clicks</value>
   </data>
+  <data name="SentMessage" xml:space="preserve">
+    <value>Sent Message</value>
+  </data>
 </root>
