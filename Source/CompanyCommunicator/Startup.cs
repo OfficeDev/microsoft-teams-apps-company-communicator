@@ -87,6 +87,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     botOptions.TargetingEnabled = configuration.GetValue<string>("TargetingEnabled");
                     botOptions.MasterAdminUpns = configuration.GetValue<string>("MasterAdminUpns");
                     botOptions.ImageUploadBlobStorage = configuration.GetValue<bool>("ImageUploadBlobStorage");
+                    botOptions.DisableReadTracking = configuration.GetValue<bool>("DisableReadTracking");
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>
@@ -133,6 +134,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
                     options.ImageUploadBlobStorageSasDurationHours =
                         configuration.GetValue<int>("ImageUploadBlobStorageSasDurationHours", 1);
+
+                    options.DisableReadTracking =
+                        configuration.GetValue<bool>("DisableReadTracking", false);
                 });
 
             services.AddOptions();

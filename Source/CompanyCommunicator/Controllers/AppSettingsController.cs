@@ -41,12 +41,15 @@ namespace Microsoft.Teams.Apps.DIConnect.Controllers
             var targetingEnabled = this.botOptions.TargetingEnabled;
             var masterAdminUpns = this.botOptions.MasterAdminUpns;
             var imageUploadBlobStorage = this.botOptions.ImageUploadBlobStorage;
+            var disableReadTracking = this.botOptions.DisableReadTracking;
+
             var response = new AppConfigurations()
             {
                 AppId = appId,
                 TargetingEnabled = targetingEnabled,
                 MasterAdminUpns = masterAdminUpns,
                 ImageUploadBlobStorage = imageUploadBlobStorage,
+                DisableReadTracking = disableReadTracking,
             };
 
             return this.Ok(response);

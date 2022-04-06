@@ -62,6 +62,11 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 This is the log of changes implemented for Company Communicator.
 
+**v4.40**
+- Implemented the App Service config variable DisableReadTracking to disable message read tracking. That is because we have some customers that installed CC in a S1/Small instance and that config doesn't support the additional load imposed by the read tracking mechanism.
+- The read tracking code is now inside a try/catch to reduce the risk of crashing the App Service in resource depletion situations caused by running CC in S1/small App Service plans.
+- https://tech-peanuts.com/2022/04/06/company-communicator-in-s1-small-app-service-plans/
+
 **v4.32**
 - Fixed a bug with URL encoding in mobile devices where button with names containing spaces were not working as expected.
 - Customized the alert shown when messare are sent to have a localized message. Instead of the default sent card we now have custom messages in all supported languages.

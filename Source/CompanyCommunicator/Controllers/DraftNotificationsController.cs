@@ -107,10 +107,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 await this.UploadToBlobStorage(notification);
             }
 
-            notification.TrackingUrl = this.HttpContext.Request.Scheme + "://" + this.HttpContext.Request.Host + "/api/sentNotifications/tracking";
-
-            // TODO: double-check it
-         //   notification.Buttons = this.GetButtonTrackingUrl(notification);
+            if (!this.userAppOptions.DisableReadTracking)
+            {
+                notification.TrackingUrl = this.HttpContext.Request.Scheme + "://" + this.HttpContext.Request.Host + "/api/sentNotifications/tracking";
+            }
 
             var notificationId = await this.notificationDataRepository.CreateDraftNotificationAsync(
                 notification,

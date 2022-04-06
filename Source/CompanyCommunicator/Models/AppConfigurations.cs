@@ -29,5 +29,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets a value indicating whether gets or sets application ImageUploadBlobStorage.
         /// </summary>
         public bool ImageUploadBlobStorage { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether gets or sets a value indicating if the tracking is disabled for CC.
+        /// </summary>
+        public bool DisableReadTracking { get; set; }
     }
 }

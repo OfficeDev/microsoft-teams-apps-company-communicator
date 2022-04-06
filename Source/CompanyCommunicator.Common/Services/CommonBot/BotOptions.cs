@@ -44,5 +44,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
         /// Gets or sets a value indicating whether gets or sets the ImageUploadBlobStorage flag for the author bot.
         /// </summary>
         public bool ImageUploadBlobStorage { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether gets or sets the DisableReadTracking flag.
+        /// </summary>
+        public bool DisableReadTracking { get; set; }
     }
 }
