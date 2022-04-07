@@ -1010,6 +1010,12 @@ function logout {
         WriteS -message "All the modules are available!"
     }
 
+# Identify if is running on PowerShell Core, because AzureAD module not support PowerShell Core
+    if ($PSVersionTable.PSEdition -eq 'Core') {
+        WriteE -message "You are using PowerShell Core, please running in Windows PowerShell."
+        EXIT
+    }
+
 # Load Parameters from JSON meta-data file
     $parametersListContent = Get-Content '.\parameters.json' -ErrorAction Stop
 
