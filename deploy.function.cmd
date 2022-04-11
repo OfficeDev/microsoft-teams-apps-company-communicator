@@ -56,11 +56,11 @@ IF NOT DEFINED KUDU_SYNC_CMD (
 echo Handling function App deployment with Msbuild.
 
 :: 1. Restore nuget packages
-call :ExecuteCmd nuget.exe restore "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator.sln" -MSBuildPath "%MSBUILD_16_DIR%"
+call :ExecuteCmd nuget.exe restore "%DEPLOYMENT_SOURCE%\Source\Microsoft.Teams.Apps.CompanyCommunicator.sln" -MSBuildPath "%MSBUILD_1670_DIR%"
 IF !ERRORLEVEL! NEQ 0 goto error
 
 :: 2. Build and publish
-call :ExecuteCmd "%MSBUILD_16_DIR%\MSBuild.exe" "%DEPLOYMENT_SOURCE%\%PROJECT%" /p:DeployOnBuild=true /p:configuration=Release /p:publishurl="%DEPLOYMENT_TEMP%" %SCM_BUILD_ARGS%
+call :ExecuteCmd "%MSBUILD_1670_DIR%\MSBuild.exe" "%DEPLOYMENT_SOURCE%\%PROJECT%" /p:DeployOnBuild=true /p:configuration=Release /p:publishurl="%DEPLOYMENT_TEMP%" %SCM_BUILD_ARGS%
 IF !ERRORLEVEL! NEQ 0 goto error
 
 :: 3. KuduSync

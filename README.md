@@ -62,6 +62,9 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 This is the log of changes implemented for Company Communicator.
 
+**v4.41**
+- Fix to ensure the azure functions are using the right version of MSBuild. Avoid errors when compiling the code during sync process due to updates made to the AdaptiveCard library.
+
 **v4.40**
 - Implemented the App Service config variable DisableReadTracking to disable message read tracking. That is because we have some customers that installed CC in a S1/Small instance and that config doesn't support the additional load imposed by the read tracking mechanism.
 - The read tracking code is now inside a try/catch to reduce the risk of crashing the App Service in resource depletion situations caused by running CC in S1/small App Service plans.
