@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -82,12 +83,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 throw new ArgumentNullException(nameof(notification));
             }
 
-            log.LogDebug("About to process the list of CSV users.");
-            log.LogDebug("notification.CsvUsers: " + notification.CsvUsers);
+            log.LogInformation("About to process the list of CSV users.");
+            log.LogInformation("notification.CsvUsers: " + notification.CsvUsers);
 
             // sync users from the csv file
             List<User> users = new List<User>();
-            string strtp = notification.CsvUsers.Substring(2, notification.CsvUsers.Length - 4);
+            // string strtp = notification.CsvUsers.Substring(2, notification.CsvUsers.Length - 4);
+
+            string strtp = Regex.Replace(notification.CsvUsers, @"\[|\]|\""|\s+", string.Empty);
+
             var csvUsersArray = strtp.Split(",");
 
             string usertp;
@@ -96,19 +100,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             {
                 if (!userst.IsNullOrEmpty())
                 {
-                    usertp = userst.Substring(1, userst.Length - 2);
-                    log.LogDebug("Processing: " + usertp);
+                    // usertp = userst.Substring(1, userst.Length - 2).Trim();
+                    log.LogInformation("Processing: " + userst);
 
                     try
                     {
-                        usr = await this.usersService.GetUserAsync(usertp);
+                        usr = await this.usersService.GetUserAsync(userst);
                         users.Add(usr);
-                        log.LogDebug("User " + usertp + " added to the collection.");
+                        log.LogInformation("User " + userst + " added to the collection.");
                     }
                     catch (Exception ex)
                     {
                         log.LogError("User not added to the collection.");
-                        log.LogError("User " + usertp + " is invalid. " + ex.Message);
+                        log.LogError("User " + userst + " is invalid. " + ex.Message);
                     }
                 }
             }

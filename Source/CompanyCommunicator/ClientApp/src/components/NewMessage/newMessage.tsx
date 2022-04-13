@@ -367,6 +367,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
             //parses the CSV file using papa parse library
             Papa.parse(file, {
+                skipEmptyLines: true,
+                delimiter:"\t",
                 complete: ({ errors, data }) => {
 
                     if (errors.length > 0) {
