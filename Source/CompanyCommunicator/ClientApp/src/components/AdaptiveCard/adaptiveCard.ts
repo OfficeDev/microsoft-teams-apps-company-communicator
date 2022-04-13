@@ -49,7 +49,10 @@ export const getInitAdaptiveCard = (t: TFunction) => {
                     "url": "",
                     "size": "Stretch",
                     "width": "400px",
-                    "altText": ""
+                    "altText": "",
+                    "msTeams": {
+                        "allowExpand": true
+                    }
                 },
                 {
                     "type": "TextBlock",

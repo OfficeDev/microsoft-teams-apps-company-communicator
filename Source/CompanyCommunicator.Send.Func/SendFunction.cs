@@ -158,7 +158,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 // If the message is important, we need to notify the user in Teams
                 if (messageContent.IsImportant)
                 {
-                    messageActivity.TeamsNotifyUser();
+                    messageActivity.TeamsNotifyUser(); // make sure user is alerted
+                    messageActivity.Importance = ActivityImportance.High; // flags the importance flag for the message
                 }
 
                 messageActivity.Summary = this.localizer.GetString("SentMessage");

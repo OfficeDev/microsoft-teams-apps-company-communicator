@@ -62,6 +62,9 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 This is the log of changes implemented for Company Communicator.
 
+**v4.42**
+- Change to allow expansion of images in adaptive cards as described in https://devblogs.microsoft.com/microsoft365dev/five-new-features-enhancing-adaptive-cards-in-microsoft-teams/. This is to allow users better read content in high resolution images.
+
 **v4.41**
 - Fix to ensure the azure functions are using the right version of MSBuild. Avoid errors when compiling the code during sync process due to updates made to the AdaptiveCard library.
 

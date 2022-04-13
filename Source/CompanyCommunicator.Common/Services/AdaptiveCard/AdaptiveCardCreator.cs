@@ -93,12 +93,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 
             if (!string.IsNullOrWhiteSpace(imageUrl))
             {
+                // allows the expansion of images in the card
+                var additionalProperty = new SerializableDictionary<string, object>();
+                additionalProperty.Add("msteams", new
+                {
+                    allowExpand = true,
+                });
+
                 card.Body.Add(new AdaptiveImage()
                 {
                     Url = new Uri(imageUrl, UriKind.RelativeOrAbsolute),
                     Spacing = AdaptiveSpacing.Default,
                     Size = AdaptiveImageSize.Stretch,
                     AltText = string.Empty,
+                    AdditionalProperties = additionalProperty,
                 });
             }
 
