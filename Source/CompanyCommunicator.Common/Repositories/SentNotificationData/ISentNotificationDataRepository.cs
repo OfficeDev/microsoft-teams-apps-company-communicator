@@ -20,5 +20,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public Task EnsureSentNotificationDataTableExistsAsync();
+
+        /// <summary>
+        /// Save exception error message in a notification data entity.
+        /// </summary>
+        /// <param name="notificationId">notification Id.</param>
+        /// <param name="recipientId">recipient Id.</param>
+        /// <param name="errorMessage">Error message.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        public Task SaveExceptionInSentNotificationDataEntityAsync(string notificationId, string recipientId, string errorMessage);
     }
 }

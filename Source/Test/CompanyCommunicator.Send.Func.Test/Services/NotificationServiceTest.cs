@@ -22,6 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
     public class NotificationServiceTest
     {
         private readonly Mock<ISentNotificationDataRepository> sentNotificationDataRepository = new Mock<ISentNotificationDataRepository>();
+        private readonly Mock<INotificationDataRepository> notificationDataReposioty = new Mock<INotificationDataRepository>();
         private readonly Mock<IGlobalSendingNotificationDataRepository> globalSendingNotificationDataRepository = new Mock<IGlobalSendingNotificationDataRepository>();
         private readonly SendQueueMessageContent sendQueueMessageContent = new SendQueueMessageContent()
         {
@@ -44,13 +45,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public void NotificationServiceConstructorTest()
         {
             // Arrange
-            Action action1 = () => new NotificationService(null /*globalSendingNotificationDataRepository*/, this.sentNotificationDataRepository.Object);
-            Action action2 = () => new NotificationService(this.globalSendingNotificationDataRepository.Object, null /*sentNotificationDataRepository*/);
-            Action action3 = () => new NotificationService(this.globalSendingNotificationDataRepository.Object, this.sentNotificationDataRepository.Object);
+            Action action1 = () => new NotificationService(null /*globalSendingNotificationDataRepository*/, this.sentNotificationDataRepository.Object, this.notificationDataReposioty.Object);
+            Action action2 = () => new NotificationService(this.globalSendingNotificationDataRepository.Object, null /*sentNotificationDataRepository*/, this.notificationDataReposioty.Object);
+            Action action3 = () => new NotificationService(this.globalSendingNotificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.notificationDataReposioty.Object);
+            Action action4 = () => new NotificationService(this.globalSendingNotificationDataRepository.Object, this.sentNotificationDataRepository.Object, null /*notificationDataReposioty*/);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("globalSendingNotificationDataRepository is null.");
             action2.Should().Throw<ArgumentNullException>("sentNotificationDataRepository is null.");
+            action4.Should().Throw<ArgumentNullException>("notificationDataRepository is null.");
             action3.Should().NotThrow();
         }
 
@@ -364,7 +367,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         /// </summary>
         private NotificationService GetNotificationService()
         {
-            return new NotificationService(this.globalSendingNotificationDataRepository.Object, this.sentNotificationDataRepository.Object);
+            return new NotificationService(this.globalSendingNotificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.notificationDataReposioty.Object);
         }
     }
 }

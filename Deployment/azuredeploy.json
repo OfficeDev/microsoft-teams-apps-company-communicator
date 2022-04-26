@@ -311,7 +311,8 @@
       "kind": "Storage",
       "properties": {
         "supportsHttpsTrafficOnly": true,
-        "allowBlobPublicAccess": false
+        "allowBlobPublicAccess": false,
+        "minimumTlsVersion": "TLS1_2"
       },
       "sku": {
         "name": "Standard_LRS"
@@ -449,14 +450,14 @@
       }
     },
     {
-      "apiVersion": "2018-07-12",
+      "apiVersion": "2021-03-01",
       "name": "[variables('authorBotName')]",
       "type": "Microsoft.BotService/botServices",
       "location": "global",
       "sku": {
         "name": "F0"
       },
-      "kind": "sdk",
+      "kind": "azurebot",
       "properties": {
         "displayName": "[concat(parameters('appDisplayName'),'-author')]",
         "description": "[parameters('appDescription')]",
@@ -469,7 +470,7 @@
         {
           "name": "[concat(variables('authorBotName'), '/MsTeamsChannel')]",
           "type": "Microsoft.BotService/botServices/channels",
-          "apiVersion": "2018-07-12",
+          "apiVersion": "2021-03-01",
           "location": "global",
           "sku": {
             "name": "F0"
@@ -488,14 +489,14 @@
       ]
     },
     {
-      "apiVersion": "2018-07-12",
+      "apiVersion": "2021-03-01",
       "name": "[variables('botName')]",
       "type": "Microsoft.BotService/botServices",
       "location": "global",
       "sku": {
         "name": "F0"
       },
-      "kind": "sdk",
+      "kind": "azurebot",
       "properties": {
         "displayName": "[parameters('appDisplayName')]",
         "description": "[parameters('appDescription')]",
@@ -508,7 +509,7 @@
         {
           "name": "[concat(variables('botName'), '/MsTeamsChannel')]",
           "type": "Microsoft.BotService/botServices/channels",
-          "apiVersion": "2018-07-12",
+          "apiVersion": "2021-03-01",
           "location": "global",
           "sku": {
             "name": "F0"
@@ -893,6 +894,7 @@
       },
       "properties": {
         "tenantId": "[variables('subscriptionTenantId')]",
+        "enableSoftDelete": true,
         "enabledForDeployment": false,
         "enabledForDiskEncryption": false,
         "enabledForTemplateDeployment": true,

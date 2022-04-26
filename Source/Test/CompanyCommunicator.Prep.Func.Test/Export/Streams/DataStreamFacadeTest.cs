@@ -37,13 +37,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         private readonly Mock<IUsersService> usersService = new Mock<IUsersService>();
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
         private readonly string notificationId = "notificationId";
+        private readonly string notificationStatus = "status";
         private readonly IEnumerable<List<SentNotificationDataEntity>> sentNotificationDataList = new List<List<SentNotificationDataEntity>>()
             {
                 new List<SentNotificationDataEntity>()
                 {
                     new SentNotificationDataEntity()
                     {
-                        ConversationId = "conversationId", DeliveryStatus = "Succeeded", RowKey = "RowKey", ErrorMessage = string.Empty,
+                        ConversationId = "conversationId", DeliveryStatus = "Succeeded", RowKey = "RowKey", ErrorMessage = string.Empty, Exception = "error",
                     },
                 },
             };
@@ -110,7 +111,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         }
 
         /// <summary>
-        /// Test case to check if method handles null paramaters.
+        /// Test case to check if method handles null parameters.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
@@ -120,14 +121,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             var activityInstance = this.GetDataStreamFacadeInstance();
 
             // Act
-            Func<Task> task = async () => await activityInstance.GetTeamDataStreamAsync(null /*notificationId*/).ForEachAsync(x => x.ToList());
+            Func<Task> task = async () => await activityInstance.GetTeamDataStreamAsync(null /*notificationId*/, "foo" /*notificationStatus*/).ForEachAsync(x => x.ToList());
+            Func<Task> task1 = async () => await activityInstance.GetTeamDataStreamAsync("123" /*notificationId*/, null /*notificationStatus*/).ForEachAsync(x => x.ToList());
 
             // Assert
             await task.Should().ThrowAsync<ArgumentNullException>("notificationId is null");
+            await task1.Should().ThrowAsync<ArgumentNullException>("notificationStatus is null");
         }
 
         /// <summary>
-        /// Test case to check if GetBatchByUserIds method is called atleast once based on GetStreamsService Response.
+        /// Test case to check if GetBatchByUserIds method is called at-least once based on GetStreamsService Response.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
@@ -149,7 +152,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
                 .ReturnsAsync(userData);
 
             // Act
-            var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId);
+            var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId, this.notificationStatus);
 
             await userDataStream.ForEachAsync(x => x.ToList());
 
@@ -177,7 +180,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
                 .ReturnsAsync(userData);
 
             // Act
-            var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId);
+            var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId, this.notificationStatus);
 
             await userDataStream.ForEachAsync(x => x.ToList());
 
@@ -201,7 +204,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
                 .Returns(this.sentNotificationDataWithRecipientNotFound.ToAsyncEnumerable());
 
             // Act
-            var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId);
+            var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId, this.notificationStatus);
 
             await userDataStream.ForEachAsync(x => x.ToList());
 
@@ -247,7 +250,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             this.localizer.Setup(_ => _[userType]).Returns(userTypeString);
 
             // Act
-            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId).ToListAsync();
+            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId, this.notificationStatus).ToListAsync();
             var userData = userDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
             var user = userDataList.FirstOrDefault(user => user != null && user.Id.Equals(sendNotificationData.RowKey));
 
@@ -258,6 +261,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             Assert.Equal(userData.UserType, userTypeString.Value);
             Assert.Equal(userData.DeliveryStatus, deliveryStatus.Value);
             Assert.Equal(userData.StatusReason, $"{sendNotificationData.StatusCode} : {result.Value}");
+            Assert.Equal(userData.Error, sendNotificationData.Exception);
         }
 
         /// <summary>
@@ -292,7 +296,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             this.localizer.Setup(_ => _[adminConsentError]).Returns(localizedString);
 
             // Act
-            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId).ToListAsync();
+            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId, this.notificationStatus).ToListAsync();
             var userData = userDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             // Assert
@@ -323,7 +327,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
                 .ReturnsAsync(userDataList);
 
             // Act
-            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId).ToListAsync();
+            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId, this.notificationStatus).ToListAsync();
             var userData = userDataStream.FirstOrDefault().FirstOrDefault();
 
             // Assert
@@ -357,7 +361,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             this.localizer.Setup(_ => _[userType]).Returns(localizedString);
 
             // Act
-            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId).ToListAsync();
+            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId, this.notificationStatus).ToListAsync();
             var userData = userDataStream.FirstOrDefault().FirstOrDefault();
 
             // Assert
@@ -392,7 +396,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             var result = rootMessage.Error.Message;
 
             // Act
-            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId).ToListAsync();
+            var userDataStream = await activityInstance.GetUserDataStreamAsync(this.notificationId, this.notificationStatus).ToListAsync();
             var userData = userDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             // Assert
@@ -419,7 +423,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             this.teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamData);
 
             // Act
-            var teamDataStream = activityInstance.GetTeamDataStreamAsync(this.notificationId);
+            var teamDataStream = activityInstance.GetTeamDataStreamAsync(this.notificationId, this.notificationStatus);
             await teamDataStream.ForEachAsync(x => x.ToList());
 
             // Assert
@@ -443,7 +447,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             this.teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamData);
 
             // Act
-            var teamDataStream = activityInstance.GetTeamDataStreamAsync(this.notificationId);
+            var teamDataStream = activityInstance.GetTeamDataStreamAsync(this.notificationId, this.notificationStatus);
             await teamDataStream.ForEachAsync(x => x.ToList());
 
             // Assert
@@ -475,7 +479,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             this.teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamDataEntity);
 
             // Act
-            var teamDataStream = await activityInstance.GetTeamDataStreamAsync(this.notificationId).ToListAsync();
+            var teamDataStream = await activityInstance.GetTeamDataStreamAsync(this.notificationId, this.notificationStatus).ToListAsync();
             var teamData = teamDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             // Assert
@@ -483,6 +487,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             Assert.Equal(teamData.Name, teamDataEntity.Name);
             Assert.Equal(teamData.DeliveryStatus, deliveryStatus.Value);
             Assert.Equal(teamData.StatusReason, $"{sendNotificationData.StatusCode} : {result.Value}");
+            Assert.Equal(teamData.Error, sendNotificationData.Exception);
         }
 
         /// <summary>
@@ -507,7 +512,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             this.teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(teamDataEntity);
 
             // Act
-            var teamDataStream = await activityInstance.GetTeamDataStreamAsync(this.notificationId).ToListAsync();
+            var teamDataStream = await activityInstance.GetTeamDataStreamAsync(this.notificationId, this.notificationStatus).ToListAsync();
             var teamData = teamDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             // Assert
@@ -536,7 +541,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             var result = rootMessage.Error.Message;
 
             // Act
-            var teamDataStream = await activityInstance.GetTeamDataStreamAsync(this.notificationId).ToListAsync();
+            var teamDataStream = await activityInstance.GetTeamDataStreamAsync(this.notificationId, this.notificationStatus).ToListAsync();
             var teamData = teamDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             // Assert
@@ -561,7 +566,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
             this.teamDataRepository.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(default(TeamDataEntity)));
 
             // Act
-            var userDataStream = await activityInstance.GetTeamDataStreamAsync(this.notificationId).ToListAsync();
+            var userDataStream = await activityInstance.GetTeamDataStreamAsync(this.notificationId, this.notificationStatus).ToListAsync();
             var teamData = userDataStream.Select(x => x.Where(y => y.Id == "RowKey").FirstOrDefault()).FirstOrDefault();
 
             // Assert
@@ -587,7 +592,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
                 .ThrowsAsync(serviceException);
 
             // Act
-            var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId);
+            var userDataStream = activityInstance.GetUserDataStreamAsync(this.notificationId, this.notificationStatus);
             Func<Task> task = async () => await userDataStream.ForEachAsync(x => x.ToList());
 
             // Assert

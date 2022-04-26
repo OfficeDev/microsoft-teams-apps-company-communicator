@@ -92,6 +92,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddSingleton<ISendingNotificationDataRepository, SendingNotificationDataRepository>();
             builder.Services.AddSingleton<IGlobalSendingNotificationDataRepository, GlobalSendingNotificationDataRepository>();
             builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
+            builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
 
             // Add service bus message queues.
             builder.Services.AddSingleton<ISendQueue, SendQueue>();

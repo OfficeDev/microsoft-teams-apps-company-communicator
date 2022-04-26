@@ -5,9 +5,11 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
 
     /// <summary>
     /// Repository of the notification data in the table storage.
@@ -38,6 +40,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
             if (!exists)
             {
                 await this.Table.CreateAsync();
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task SaveExceptionInSentNotificationDataEntityAsync(
+           string notificationId,
+           string recipientId,
+           string errorMessage)
+        {
+            var sentNotificationDataEntity = await this.GetAsync(notificationId, recipientId);
+
+            if (sentNotificationDataEntity == null)
+            {
+                return;
+            }
+
+            var newMessage = sentNotificationDataEntity.ErrorMessage.AppendNewLine(errorMessage);
+
+            // Restrict the total length of stored message to avoid hitting table storage limits
+            if (newMessage.Length <= MaxMessageLengthToSave)
+            {
+                sentNotificationDataEntity.ErrorMessage = newMessage;
+                await this.InsertOrMergeAsync(sentNotificationDataEntity);
             }
         }
     }

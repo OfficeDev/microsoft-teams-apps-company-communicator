@@ -17,7 +17,7 @@ We ignore:
 ## SKU recommendations
 
 The recommended SKUs for a production environment are:
-* App Service: Standard (S1)
+* App Service: Standard (S2)
 * Service Bus: Basic
 
 ## Estimated load
@@ -56,7 +56,7 @@ Min. execution time = 100 ms.
 
 **IMPORTANT:** This is only an estimate, based on the assumptions above. Your actual costs may vary.
 
-Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on 19 October 2020, for the West US 2 region.
+Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on 28 April 2022, for the West US 2 region.
 
 Use the [Azure Pricing Calculator](https://azure.com/e/c3bb51eeb3284a399ac2e9034883fcfa) to model different service tiers and usage patterns.
 
@@ -64,12 +64,12 @@ Resource                                    | Tier          | Load              
 ---                                         | ---           | ---               | --- 
 Storage account (Table)                     | Standard_LRS  | < 1GB data, 45000 operations | $0.045 + $0.01 = $0.05
 Bot Channels Registration                   | F0            | N/A               | Free
-App Service Plan                            | S1            | 744 hours         | $74.40
+App Service Plan                            | S2            | 744 hours         | $148.80
 App Service (Bot + Tab)                     | -             |                   | (charged to App Service Plan) 
 Azure Function                              | Dedicated     | 10000 executions   | (free up to 1 million executions)
 Service Bus                                 | Basic         | 10000 operations  | $0.05
 Application Insights                        | -             | < 5GB data        | (free up to 5 GB)
-**Total**                                   |               |                   | **$74.50**
+**Total**                                   |               |                   | **$148.90**
 
 
 ## Estimated load - 1M messages
@@ -108,7 +108,7 @@ Min. execution time = 100 ms.
 
 **IMPORTANT:** This is only an estimate, based on the assumptions above. Your actual costs may vary.
 
-Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on 19 October 2020, for the West US 2 region.
+Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on 28 April 2022, for the West US 2 region.
 
 Use the [Azure Pricing Calculator](https://azure.com/e/c3bb51eeb3284a399ac2e9034883fcfa) to model different service tiers and usage patterns.
 
@@ -116,12 +116,12 @@ Resource                                    | Tier          | Load              
 ---                                         | ---           | ---               | --- 
 Storage account (Table)                     | Standard_LRS  | < 3GB data, 9M operations | $0.14 + $0.32 = $0.46
 Bot Channels Registration                   | F0            | N/A               | Free
-App Service Plan                            | S1            | 744 hours         | $74.40
+App Service Plan                            | S2            | 744 hours         | $148.80
 App Service (Bot + Tab)                     | -             |                   | (charged to App Service Plan) 
 Azure Function                              | Dedicated     | 1M executions     | (free up to 1 million executions)
 Service Bus                                 | Basic         | 2M operations     | $0.10
 Application Insights                        | -             | < 5GB data        | (free up to 5 GB)
-**Total**                                   |               |                   | **$74.96**
+**Total**                                   |               |                   | **$149.36**
 
 ## Estimated load - 2M messages
 
@@ -159,7 +159,7 @@ Min. execution time = 100 ms.
 
 **IMPORTANT:** This is only an estimate, based on the assumptions above. Your actual costs may vary.
 
-Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on 19 October 2020, for the West US 2 region.
+Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on 28 April 2022, for the West US 2 region.
 
 Use the [Azure Pricing Calculator](https://azure.com/e/c3bb51eeb3284a399ac2e9034883fcfa) to model different service tiers and usage patterns.
 
@@ -167,9 +167,9 @@ Resource                                    | Tier          | Load              
 ---                                         | ---           | ---               | --- 
 Storage account (Table)                     | Standard_LRS  |  < 6GB data, 18M operations | $0.27 + $0.65 = $0.92
 Bot Channels Registration                   | F0            | N/A               | Free
-App Service Plan                            | S1            | 744 hours         | $74.40
+App Service Plan                            | S2            | 744 hours         | $148.80
 App Service (Bot + Tab)                     | -             |                   | (charged to App Service Plan) 
 Azure Function                              | Dedicated     | 2M executions     | $5.80 
 Service Bus                                 | Basic         | 2M operations     | $0.20
 Application Insights                        | -             | < 5GB data        | (free up to 5 GB)
-**Total**                                   |               |                   | **$81.32**
+**Total**                                   |               |                   | **$155.72**
