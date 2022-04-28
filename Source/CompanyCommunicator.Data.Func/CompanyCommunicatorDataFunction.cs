@@ -89,14 +89,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             // If notification is already marked complete, then there is nothing left to do for the data queue trigger.
             if (!notificationDataEntity.IsCompleted())
             {
+                string orchestrationStatus = string.Empty;
+                if (notificationDataEntity.Status.Equals(NotificationStatus.Canceling.ToString()))
+                {
+                    orchestrationStatus = await this.updateNotificationDataService.GetOrchestrationStatusAsync(notificationDataEntity.FunctionInstancePayload);
+                }
+
                 // Get all of the result counts (Successes, Failures, etc.) from the Sent Notification Data.
                 var aggregatedSentNotificationDataResults = await this.aggregateSentNotificationDataService
-                    .AggregateSentNotificationDataResultsAsync(messageContent.NotificationId, log);
+                .AggregateSentNotificationDataResultsAsync(messageContent.NotificationId, log);
 
                 // Use these counts to update the Notification Data accordingly.
                 var notificationDataEntityUpdate = await this.updateNotificationDataService
                     .UpdateNotificationDataAsync(
                         notificationId: messageContent.NotificationId,
+                        orchestrationStatus: orchestrationStatus,
                         shouldForceCompleteNotification: messageContent.ForceMessageComplete,
                         totalExpectedNotificationCount: notificationDataEntity.TotalMessageCount,
                         aggregatedSentNotificationDataResults: aggregatedSentNotificationDataResults,

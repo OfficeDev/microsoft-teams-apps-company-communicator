@@ -195,6 +195,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 var errorMessage = this.localizer.GetString("FailedToCreateConversationForUserFormat", recipient?.UserId, exception.Message);
                 log.LogError(exception, errorMessage);
                 await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
+                var exceptionDetails = this.localizer.GetString("FailedToCreateConversationForUserFormat", recipient?.UserId, exception.ToString());
+                await this.sentNotificationDataRepository.SaveExceptionInSentNotificationDataEntityAsync(notificationId, recipient?.RecipientId, exceptionDetails);
                 return null;
             }
         }
@@ -240,6 +242,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                         var errorMessage = this.localizer.GetString("FailedToInstallApplicationForUserFormat", recipient?.RecipientId, exception.Message);
                         log.LogError(exception, errorMessage);
                         await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
+                        var exceptionDetails = this.localizer.GetString("FailedToInstallApplicationForUserFormat", recipient?.RecipientId, exception.ToString());
+                        await this.sentNotificationDataRepository.SaveExceptionInSentNotificationDataEntityAsync(notificationId, recipient?.RecipientId, exceptionDetails);
                         return string.Empty;
                 }
             }
@@ -254,6 +258,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 var errorMessage = this.localizer.GetString("FailedToGetConversationForUserFormat", recipient?.UserId, exception.StatusCode, exception.Message);
                 log.LogError(exception, errorMessage);
                 await this.notificationDataRepository.SaveWarningInNotificationDataEntityAsync(notificationId, errorMessage);
+                var exceptionDetails = this.localizer.GetString("FailedToGetConversationForUserFormat", recipient?.UserId, exception.StatusCode, exception.ToString());
+                await this.sentNotificationDataRepository.SaveExceptionInSentNotificationDataEntityAsync(notificationId, recipient?.RecipientId, exceptionDetails);
                 return string.Empty;
             }
         }

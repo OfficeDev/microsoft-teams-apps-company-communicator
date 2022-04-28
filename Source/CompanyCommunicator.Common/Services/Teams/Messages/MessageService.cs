@@ -98,15 +98,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                         response.StatusCode = (int)HttpStatusCode.Created;
                         response.AllSendStatusCodes += $"{(int)HttpStatusCode.Created},";
                     }
-                    catch (ErrorResponseException e)
+                    catch (ErrorResponseException exception)
                     {
-                        var errorMessage = $"{e.GetType()}: {e.Message}";
-                        log.LogError(e, $"Failed to send message. Exception message: {errorMessage}");
+                        var errorMessage = $"{exception.GetType()}: {exception.Message}";
+                        log.LogError(exception, $"Failed to send message. Exception message: {errorMessage}");
 
-                        response.StatusCode = (int)e.Response.StatusCode;
-                        response.AllSendStatusCodes += $"{(int)e.Response.StatusCode},";
-                        response.ErrorMessage = e.Response.Content;
-                        switch (e.Response.StatusCode)
+                        response.StatusCode = (int)exception.Response.StatusCode;
+                        response.AllSendStatusCodes += $"{(int)exception.Response.StatusCode},";
+                        response.ErrorMessage = exception.ToString();
+                        switch (exception.Response.StatusCode)
                         {
                             case HttpStatusCode.TooManyRequests:
                                 response.ResultType = SendMessageResult.Throttled;

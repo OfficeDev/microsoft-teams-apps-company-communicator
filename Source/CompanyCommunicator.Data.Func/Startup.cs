@@ -79,6 +79,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                 });
 
             builder.Services.AddLocalization();
+            builder.Services.AddHttpClient();
 
             var useManagedIdentity = bool.Parse(Environment.GetEnvironmentVariable("UseManagedIdentity"));
             builder.Services.AddBlobClient(useManagedIdentity);

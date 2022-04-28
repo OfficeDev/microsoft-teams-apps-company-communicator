@@ -87,7 +87,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                 .Configure<IConfiguration>((dataQueueMessageOptions, configuration) =>
                 {
                     dataQueueMessageOptions.MessageDelayInSeconds =
-                        configuration.GetValue<double>("DataQueueMessageDelayInSeconds", 5);
+                        configuration.GetValue<int>("DataQueueMessageDelayInSeconds", 5);
                 });
 
             builder.Services.AddOptions<TeamsConversationOptions>()

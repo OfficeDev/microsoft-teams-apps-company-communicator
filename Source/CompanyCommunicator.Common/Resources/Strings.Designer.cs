@@ -79,11 +79,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Canceled.
+        /// </summary>
+        public static string Canceled {
+            get {
+                return ResourceManager.GetString("Canceled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delivery Status.
         /// </summary>
         public static string ColumnName_DeliveryStatus {
             get {
                 return ResourceManager.GetString("ColumnName_DeliveryStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string ColumnName_Error {
+            get {
+                return ResourceManager.GetString("ColumnName_Error", resourceCulture);
             }
         }
         

@@ -10,19 +10,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
 
     /// <summary>
     /// Repository of the notification data in the table storage.
     /// </summary>
     public class NotificationDataRepository : BaseRepository<NotificationDataEntity>, INotificationDataRepository
     {
-        /// <summary>
-        /// Maximum length of error and warning messages to save in the entity.
-        /// This limit ensures that we don't hit the Azure table storage limits for the max size of the data
-        /// in a column, and the total size of an entity.
-        /// </summary>
-        public const int MaxMessageLengthToSave = 1024;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationDataRepository"/> class.
         /// </summary>
@@ -179,7 +173,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 notificationDataEntityId);
             if (notificationDataEntity != null)
             {
-                var newMessage = this.AppendNewLine(notificationDataEntity.ErrorMessage, errorMessage);
+                var newMessage = notificationDataEntity.ErrorMessage.AppendNewLine(errorMessage);
 
                 // Restrict the total length of stored message to avoid hitting table storage limits
                 if (newMessage.Length <= MaxMessageLengthToSave)
@@ -208,7 +202,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     notificationDataEntityId);
                 if (notificationDataEntity != null)
                 {
-                    var newMessage = this.AppendNewLine(notificationDataEntity.WarningMessage, warningMessage);
+                    var newMessage = notificationDataEntity.WarningMessage.AppendNewLine(warningMessage);
 
                     // Restrict the total length of stored message to avoid hitting table storage limits
                     if (newMessage.Length <= MaxMessageLengthToSave)
@@ -224,13 +218,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 this.Logger.LogError(ex, ex.Message);
                 throw;
             }
-        }
-
-        private string AppendNewLine(string originalString, string newString)
-        {
-            return string.IsNullOrWhiteSpace(originalString)
-                ? newString
-                : $"{originalString}{Environment.NewLine}{newString}";
         }
     }
 }
