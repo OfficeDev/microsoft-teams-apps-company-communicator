@@ -195,5 +195,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// only the final one will be stored here.
         /// </summary>
         public string ErrorMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the exception details for the user.
+        /// </summary>
+        public string Exception { get; set; }
     }
 }

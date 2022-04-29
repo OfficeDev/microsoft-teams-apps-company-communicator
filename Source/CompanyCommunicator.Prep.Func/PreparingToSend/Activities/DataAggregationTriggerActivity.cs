@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     {
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly IDataQueue dataQueue;
-        private readonly double messageDelayInSeconds;
+        private readonly int messageDelayInSeconds;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataAggregationTriggerActivity"/> class.
@@ -70,7 +70,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             await this.UpdateNotification(input.notificationId, input.recipientCount, log);
 
             // Send message to data queue.
-            await this.SendMessageToDataQueue(input.notificationId);
+            var messageDelay = new TimeSpan(0, 0, this.messageDelayInSeconds);
+            await this.dataQueue.SendMessageAsync(input.notificationId, messageDelay);
         }
 
         /// <summary>
@@ -95,24 +96,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             notificationDataEntity.TotalMessageCount = recipientCount;
 
             await this.notificationDataRepository.CreateOrUpdateAsync(notificationDataEntity);
-        }
-
-        /// <summary>
-        /// Sends message to data queue to trigger Data function.
-        /// </summary>
-        /// <param name="notificationId">Notification id.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task SendMessageToDataQueue(string notificationId)
-        {
-            var dataQueueMessageContent = new DataQueueMessageContent
-            {
-                NotificationId = notificationId,
-                ForceMessageComplete = false,
-            };
-
-            await this.dataQueue.SendDelayedAsync(
-                dataQueueMessageContent,
-                this.messageDelayInSeconds);
         }
     }
 }

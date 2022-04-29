@@ -5,7 +5,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { withTranslation, WithTranslation } from "react-i18next";
 import { TooltipHost } from 'office-ui-fabric-react';
-import { Loader, List, Flex, Text, AcceptIcon, CloseIcon, ExclamationCircleIcon } from '@fluentui/react-northstar';
+import { Loader, List, Flex, Text, AcceptIcon, CloseIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from '@fluentui/react-northstar';
 import * as microsoftTeams from "@microsoft/teams-js";
 
 import { selectMessage, getMessagesList, getDraftMessagesList } from '../../actions';
@@ -180,6 +180,10 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
 
                 text = this.localize("SendingMessages", { "SentCount": formatNumber(sentCount), "TotalCount": formatNumber(message.totalMessageCount) });
                 break;
+            case "Canceling":
+                text = this.localize("Canceling");
+                break;
+            case "Canceled":
             case "Sent":
             case "Failed":
                 text = "";
@@ -212,9 +216,16 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                             <span className="semiBold">{formatNumber(message.failed)}</span>
                         </TooltipHost>
                         {
+                            message.canceled &&
+                            <TooltipHost content="Canceled" calloutProps={{ gapSpace: 0 }}>
+                            <ExclamationCircleIcon xSpacing="both" className="canceled" outline />
+                            <span className="semiBold">{formatNumber(message.canceled)}</span>
+                        </TooltipHost>
+                        }
+                        {
                             message.unknown &&
                             <TooltipHost content="Unknown" calloutProps={{ gapSpace: 0 }}>
-                                <ExclamationCircleIcon xSpacing="both" className="unknown" outline />
+                                <ExclamationTriangleIcon xSpacing="both" className="unknown" outline />
                                 <span className="semiBold">{formatNumber(message.unknown)}</span>
                             </TooltipHost>
                         }

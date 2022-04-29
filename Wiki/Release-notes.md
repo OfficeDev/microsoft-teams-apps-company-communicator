@@ -6,7 +6,8 @@ Cumulative improvements in Company Communicator App.
 
 |Release |Published to <br/> Microsoft Store |
 |---|---|
-| 5.0 | Nov, 2021
+| 5.1 | April 28, 2022
+| 5.0 | Nov 10, 2021
 | 4.1.5 | Sep 29, 2021
 | 4.1.4 | Sep 14, 2021
 | 4.1.3 | Jul 2, 2021
@@ -23,7 +24,13 @@ Cumulative improvements in Company Communicator App.
 
 ### Company Communicator feature release notes
 
-#### 5.0 (Nov, 2021)
+#### 5.1 (April 28, 2022)
+##### Changes introduced
+- Ability to cancel a notification.
+- Export installation errors.
+- Arm fixes.
+
+#### 5.0 (Nov 10, 2021)
 ##### Changes introduced
 - Added Key Vault and Managed Identity.
 - Support certificate authentication.

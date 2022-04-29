@@ -127,8 +127,8 @@ To begin, you will need:
     - `storageAccountPrepFuncRoleNameGuid`: Default value is `9332a9e9-93f4-48d9-8121-d279f30a732e`. This **MUST** be the same `id` per app deployment.
     - `storageAccountDataFuncRoleNameGuid`: Default value is `5b67af51-4a98-47e1-9d22-745069f51a13`. This **MUST** be the same `id` per app deployment.
     - `defaultCulture`:  By default the application uses `en-US` locale. You can choose another locale from the list [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Localization), if you wish to use the app in different locale.
-    - `hostingPlanSku`: The pricing tier for the hosting plan. Defaul value: Standard. You may choose between Basic, Standard and Premium.
-    - `hostingPlanSize`: The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value: 2
+    - `hostingPlanSku`: The pricing tier for the hosting plan. Default value: Standard. You may choose between Basic, Standard and Premium.
+    - `hostingPlanSize`: The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value: 2.
     
         > **Note:** The default value is 2 to minimize the chances of an error during app deployment. After deployment you can choose to change the size of the hosting plan.
 

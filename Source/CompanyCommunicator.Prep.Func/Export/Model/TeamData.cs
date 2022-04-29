@@ -29,5 +29,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model
         /// Gets or sets the status reason value.
         /// </summary>
         public string StatusReason { get; set; }
+
+        /// <summary>
+        /// Gets or sets the error message.
+        /// </summary>
+        public string Error { get; set; }
     }
 }

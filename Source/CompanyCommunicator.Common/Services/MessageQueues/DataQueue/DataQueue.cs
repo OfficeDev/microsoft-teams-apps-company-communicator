@@ -5,6 +5,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue
 {
+    using System;
+    using System.Threading.Tasks;
     using global::Azure.Messaging.ServiceBus;
 
     /// <summary>
@@ -26,6 +28,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
                   serviceBusClient: serviceBusClient,
                   queueName: DataQueue.QueueName)
         {
+        }
+
+        /// <inheritdoc/>
+        public async Task SendMessageAsync(string notificationId, TimeSpan messageDelay)
+        {
+            var dataQueueMessageContent = new DataQueueMessageContent
+            {
+                NotificationId = notificationId,
+                ForceMessageComplete = false,
+            };
+
+            await this.SendDelayedAsync(
+                dataQueueMessageContent,
+                messageDelay.TotalSeconds);
         }
     }
 }
