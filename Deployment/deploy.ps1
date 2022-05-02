@@ -1010,6 +1010,12 @@ function logout {
         WriteS -message "All the modules are available!"
     }
 
+# Identify if is running on PowerShell Core, because AzureAD module not support PowerShell Core
+    if ($PSVersionTable.PSEdition -eq 'Core') {
+        WriteE -message "You are using PowerShell Core, please running in Windows PowerShell."
+        EXIT
+    }
+
 # Load Parameters from JSON meta-data file
     $parametersListContent = Get-Content '.\parameters.json' -ErrorAction Stop
 
@@ -1028,7 +1034,7 @@ function logout {
 # Initialize connections - Azure Az/CLI/Azure AD
     WriteI -message "Login with with your Azure subscription account. Launching Azure sign-in window..."
     Connect-AzAccount -Subscription $parameters.subscriptionId.Value -Tenant $parameters.subscriptionTenantId.value -ErrorAction Stop
-    $user = az login --tenant $parameters.subscriptionTenantId.value
+    $user = az login --tenant $parameters.subscriptionTenantId.value --output=json
     if ($LASTEXITCODE -ne 0) {
         WriteE -message "Login failed for user..."
         EXIT
