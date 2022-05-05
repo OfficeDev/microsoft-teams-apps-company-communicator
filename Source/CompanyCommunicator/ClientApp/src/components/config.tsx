@@ -84,8 +84,7 @@ class Configuration extends React.Component<ConfigProps, IConfigState> {
     //returns true if the userUpn is listed on masterAdminUpns
     private isMasterAdmin = (masterAdminUpns: string, userUpn?: string) => {
         var ret = false; // default return value
-        var masterAdmins = masterAdminUpns.toLowerCase().split(/;|,/); //splits the string and convert to lowercase
-
+        var masterAdmins = masterAdminUpns.toLowerCase().split(/;|,/).map(element => element.trim());
         //if we get a userUpn as parameter
         if (userUpn) {
             //gets the index of the user on the master admin array

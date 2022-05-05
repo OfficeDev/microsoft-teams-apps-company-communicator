@@ -287,7 +287,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     //returns true if the userUpn is listed on masterAdminUpns
     private isMasterAdmin = (masterAdminUpns: string, userUpn?: string) => {
         var ret = false; // default return value
-        var masterAdmins = masterAdminUpns.toLowerCase().split(/;|,/); //splits the string and convert to lowercase
+        var masterAdmins = masterAdminUpns.toLowerCase().split(/;|,/).map(element => element.trim()); //splits the string and convert to lowercase
         //if we get a userUpn as parameter
         if (userUpn) {
             //gets the index of the user on the master admin array
@@ -326,8 +326,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 reader.readAsDataURL(file);
                 reader.onloadend = function () {
                     var base64String = reader.result;
-                    //alert(base64String);
                     that.imageSize = base64String.toString().length;
+                    cardsize = cardsize - that.imageSize;
                     setCardImageLink(that.card, base64String.toString());
                     that.updateCard();
                     that.setState({
@@ -364,7 +364,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         //if we have a file
         if (file) {
             var cardsize = JSON.stringify(this.card).length;
-
+            if (this.imageUploadBlobStorage) {
+                cardsize = cardsize - this.imageSize;
+            }
             //parses the CSV file using papa parse library
             Papa.parse(file, {
                 skipEmptyLines: true,
@@ -380,7 +382,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         });
                     } else {
                         var csvfilesize = JSON.stringify(data).length;
-                        if ((cardsize + csvfilesize) < maxCardSize) {
+                        if ((cardcardsizesize + csvfilesize) < maxCardSize) {
                             //file loaded
                             this.setState({
                                 csvLoaded: this.localize("CSVLoaded"),
