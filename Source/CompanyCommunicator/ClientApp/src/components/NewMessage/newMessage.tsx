@@ -359,14 +359,16 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     //Function to handle the CSV File selection
     private handleCSVSelection() {
-        //get the first file selected
+        //get the first file sealected
         const file = this.CSVfileInput.current.files[0];
         //if we have a file
+        //alert("handling CSV selection");
         if (file) {
             var cardsize = JSON.stringify(this.card).length;
             if (this.imageUploadBlobStorage) {
                 cardsize = cardsize - this.imageSize;
             }
+            //alert("About to execute papa parse");
             //parses the CSV file using papa parse library
             Papa.parse(file, {
                 skipEmptyLines: true,
@@ -382,8 +384,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         });
                     } else {
                         var csvfilesize = JSON.stringify(data).length;
-                        if ((cardcardsizesize + csvfilesize) < maxCardSize) {
+                        if ((cardsize + csvfilesize) < maxCardSize) {
                             //file loaded
+                            //alert("File Loaded");
                             this.setState({
                                 csvLoaded: this.localize("CSVLoaded"),
                                 csvError: false,
@@ -421,11 +424,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     private handleCSVUploadClick = (event: any) => {
         this.setState({
             csvLoaded: "",
-            csvError: true,
+            csvError: false,
             csvusers: ""
         });
 
-        //fire the fileinput click event and run the handle the CSV function
+        //alert("about to simulate the click on the hidden file input");
+        //fire the csvfileinput click event and run the handle the CSV function
         this.CSVfileInput.current.click();
     };
 

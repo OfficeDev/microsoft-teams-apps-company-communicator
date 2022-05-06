@@ -62,6 +62,9 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 This is the log of changes implemented for Company Communicator.
 
+**v4.44**
+- When uploading a CSV file and then a second one to replace the first, the upload box was staying in error state. Fix the error handling when uploading CSV files to allow uploading CSV files multiple times to replace previous versions. Cause by the changes on the way we account the image file size vs the card size. 
+
 **v4.43**
 - Fix to trail spaces after separators (, or ;) when specifying multiple masteradminupns in the app service configuration variable
 - When upload blob storage is enabled, the size of the image was being accounted and blocking the upload of CSV files due to size restrictions. Now when enabling blob storage upload for images, the size of the image is not being discounted from the card size. That allows upload of CSV files up to the limit of the card (~30k).
