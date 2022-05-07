@@ -91,7 +91,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 throw new ArgumentNullException(nameof(notification));
             }
 
-            if (!notification.Validate(this.localizer, out string errorMessage))
+            if (!notification.Validate(this.localizer, out string errorMessage, this.userAppOptions.MaxNumberOfTeams))
             {
                 return this.BadRequest(errorMessage);
             }
@@ -206,7 +206,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.Forbid();
             }
 
-            if (!notification.Validate(this.localizer, out string errorMessage))
+            if (!notification.Validate(this.localizer, out string errorMessage, this.userAppOptions.MaxNumberOfTeams))
             {
                 return this.BadRequest(errorMessage);
             }

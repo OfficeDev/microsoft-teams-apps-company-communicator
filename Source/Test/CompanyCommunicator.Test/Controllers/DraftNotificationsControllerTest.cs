@@ -1017,6 +1017,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             this.userAppOptions.Setup(x => x.Value).Returns(new UserAppOptions(){ImageUploadBlobStorage = this.imageUploadBlobStorage});
             this.notificationDataRepository.Setup(x => x.TableRowKeyGenerator).Returns(new TableRowKeyGenerator());
             this.notificationDataRepository.Setup(x => x.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent()).Returns(this.notificationId);
+            this.userAppOptions.Setup(x => x.Value).Returns(new UserAppOptions() { MaxNumberOfTeams = 20 });
             var controller = new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.storageClientFactory.Object, this.userAppOptions.Object);
             var user = new ClaimsPrincipal(new ClaimsIdentity());
             controller.ControllerContext = new ControllerContext();

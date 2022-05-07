@@ -33,6 +33,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options
         /// <summary>
         /// Gets or sets a value indicating whether get or sets a value indicating if the tracking is disabled or not.
         /// </summary>
-        public bool DisableReadTracking { get; set; } 
+        public bool DisableReadTracking { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number of teams you can select to receive a message.
+        /// </summary>
+        public int MaxNumberOfTeams { get; set; }
     }
 }
