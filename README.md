@@ -64,6 +64,7 @@ This is the log of changes implemented for Company Communicator.
 
 **v4.45**
 - Button urls with multiple parameters on the querystring were being stripped out when clicking on the buttons by the button tracking mechanism. Changed the code to encode the URL when sending the card and decoding it just before redirect inside the tracking code.
+- Fix for the issue that was opening blank pages when clicking buttons during the message preview.
 
 **v4.44**
 - When uploading a CSV file and then a second one to replace the first, the upload box was staying in error state. Fix the error handling when uploading CSV files to allow uploading CSV files multiple times to replace previous versions. Cause by the changes on the way we account the image file size vs the card size. 

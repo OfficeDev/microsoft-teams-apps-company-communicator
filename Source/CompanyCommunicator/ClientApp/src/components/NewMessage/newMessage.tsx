@@ -17,6 +17,7 @@ import { getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary, se
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
+import { OpenUrlAction } from 'adaptivecards';
 
 
 //hours to be chosen when scheduling messages
@@ -623,6 +624,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                     this.setState({
                         values: JSON.parse(draftMessageDetail.buttons)
                     });
+                    alert(draftMessageDetail.buttons);
                 } else { //if the string is null, then initialize the empty collection 
                     this.setState({
                         values: []
@@ -1635,8 +1637,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         } else {
             document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
         }
-        const link = this.state.btnLink;
-        adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
+
+        adaptiveCard.onExecuteAction = function (action: OpenUrlAction) { window.open(action.url, '_blank'); }
     }
 }
 
