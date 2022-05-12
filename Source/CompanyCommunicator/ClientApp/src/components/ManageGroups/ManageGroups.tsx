@@ -397,7 +397,6 @@ class ManageGroups extends React.Component<IManageGroupsProps, formState> {
     private onDeleteGroup(id: number, key: string) {
         //removes from the list
         //this.state.allGroups.splice(id, 1);
-        //alert("Key to delete: " + key);
         this.deleteGroup(key).then(() => {
             this.getAllGroupsAssociated();
         });

@@ -112,7 +112,6 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                                 loader: false
                             }, () => {
 
-                                //alert(this.state.message.channelTitle);
                                 setCardTargetImage(this.card, this.state.message.channelImage);
                                 setCardTargetTitle(this.card, this.state.message.channelTitle);
                                 setCardTitle(this.card, this.state.message.title);
