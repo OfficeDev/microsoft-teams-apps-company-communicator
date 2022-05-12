@@ -321,7 +321,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         if (file) { //if we have a file
             var cardsize = JSON.stringify(this.card).length;
             if (this.imageUploadBlobStorage) {
-                //alert(file.toString('base64'));
                 var that = this;
                 var reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -363,13 +362,11 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         //get the first file sealected
         const file = this.CSVfileInput.current.files[0];
         //if we have a file
-        //alert("handling CSV selection");
         if (file) {
             var cardsize = JSON.stringify(this.card).length;
             if (this.imageUploadBlobStorage) {
                 cardsize = cardsize - this.imageSize;
             }
-            //alert("About to execute papa parse");
             //parses the CSV file using papa parse library
             Papa.parse(file, {
                 skipEmptyLines: true,
@@ -387,7 +384,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         var csvfilesize = JSON.stringify(data).length;
                         if ((cardsize + csvfilesize) < maxCardSize) {
                             //file loaded
-                            //alert("File Loaded");
                             this.setState({
                                 csvLoaded: this.localize("CSVLoaded"),
                                 csvError: false,
@@ -429,7 +425,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             csvusers: ""
         });
 
-        //alert("about to simulate the click on the hidden file input");
         //fire the csvfileinput click event and run the handle the CSV function
         this.CSVfileInput.current.click();
     };
@@ -624,7 +619,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                     this.setState({
                         values: JSON.parse(draftMessageDetail.buttons)
                     });
-                    alert(draftMessageDetail.buttons);
                 } else { //if the string is null, then initialize the empty collection 
                     this.setState({
                         values: []
@@ -1592,7 +1586,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         this.setState({ values });
 
         //set the error message if the links have wrong values
-        //alert(values.findIndex(element => element.includes("https://")));
         if (!(event.target.value === "" || event.target.value.toLowerCase().startsWith("https://"))) {
             this.setState({
                 errorButtonUrlMessage: this.localize("ErrorURLMessage")
