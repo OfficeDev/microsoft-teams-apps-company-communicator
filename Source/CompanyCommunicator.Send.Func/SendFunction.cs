@@ -305,7 +305,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     var originalUrl = item.url;
 
                     item.url = $"{url}/api/sentnotifications/trackingbutton?id={notificationId}" +
-                               $"&key={key}&buttonid={WebUtility.UrlEncode(item.title)}&redirecturl={originalUrl}";
+                               $"&key={key}&buttonid={WebUtility.UrlEncode(item.title)}&redirecturl={WebUtility.UrlEncode(originalUrl)}";
                 }
             }
 
