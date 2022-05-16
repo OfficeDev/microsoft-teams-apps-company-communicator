@@ -17,8 +17,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
     /// </summary>
     public class DraftNotification : BaseNotification
     {
-        private static readonly int MaxSelectedTeamNum = 20;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotification"/> class.
         /// </summary>
@@ -65,36 +63,37 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
 
         /// <summary>
         /// Validates a draft notification.
-        /// Teams and Rosters property should not contain more than 20 items.
+        /// Teams and Rosters property should not contain more than the maximum number of items defined in the app settings.
         /// </summary>
         /// <param name="localizer">The string localizer service.</param>
         /// <param name="errorMessage">It returns the error message found by the method to the callers.</param>
+        /// <param name="maxSelectedTeamNum">The maximum number of supported teams that can receive a message.</param>
         /// <returns>A flag indicates if a draft notification is valid or not.</returns>
-        public bool Validate(IStringLocalizer<Strings> localizer, out string errorMessage)
+        public bool Validate(IStringLocalizer<Strings> localizer, out string errorMessage, int maxSelectedTeamNum)
         {
             var stringBuilder = new StringBuilder();
 
             var teams = this.Teams.ToList();
-            if (teams.Count > DraftNotification.MaxSelectedTeamNum)
+            if (teams.Count > maxSelectedTeamNum)
             {
                 var format = localizer.GetString("NumberOfTeamsExceededLimitWarningFormat");
-                stringBuilder.AppendFormat(format, teams.Count, DraftNotification.MaxSelectedTeamNum);
+                stringBuilder.AppendFormat(format, teams.Count, maxSelectedTeamNum);
                 stringBuilder.AppendLine();
             }
 
             var rosters = this.Rosters.ToList();
-            if (rosters.Count > DraftNotification.MaxSelectedTeamNum)
+            if (rosters.Count > maxSelectedTeamNum)
             {
                 var format = localizer.GetString("NumberOfRostersExceededLimitWarningFormat");
-                stringBuilder.AppendFormat(format, rosters.Count, DraftNotification.MaxSelectedTeamNum);
+                stringBuilder.AppendFormat(format, rosters.Count, maxSelectedTeamNum);
                 stringBuilder.AppendLine();
             }
 
             var groups = this.Groups.ToList();
-            if (groups.Count > DraftNotification.MaxSelectedTeamNum)
+            if (groups.Count > maxSelectedTeamNum)
             {
                 var format = localizer.GetString("NumberOfGroupsExceededLimitWarningFormat");
-                stringBuilder.AppendFormat(format, groups.Count, DraftNotification.MaxSelectedTeamNum);
+                stringBuilder.AppendFormat(format, groups.Count, maxSelectedTeamNum);
                 stringBuilder.AppendLine();
             }
 

@@ -120,5 +120,8 @@
   "CardTitle": "Card Title",
   "CardImage": "Card Image",
   "TargetGroups": "Target Groups",
-  "CSVIsTooBig": "The CSV is too big. Needs to be smaller than: "
+  "CSVIsTooBig": "The CSV is too big. Needs to be smaller than: ",
+  "SelectAll": "Select all",
+  "UnselectAll": "Unselect all",
+  "MaxTeamsError": "You are trying to send the message to too many teams. Please select fewer teams and try again."
 }

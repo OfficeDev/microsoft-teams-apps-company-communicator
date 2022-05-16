@@ -137,6 +137,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
                     options.DisableReadTracking =
                         configuration.GetValue<bool>("DisableReadTracking", false);
+
+                    options.MaxNumberOfTeams = configuration.GetValue<int>("MaxNumberOfTeams", 20);
                 });
 
             services.AddOptions();
