@@ -62,6 +62,9 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 This is the log of changes implemented for Company Communicator.
 
+**v4.5**
+- Merge of PR to implement select/unselect buttons to control the inclusion of multiple Teams that are enabled for posting messages by setting-up the user bot.
+
 **v4.45**
 - Button urls with multiple parameters on the querystring were being stripped out when clicking on the buttons by the button tracking mechanism. Changed the code to encode the URL when sending the card and decoding it just before redirect inside the tracking code.
 - Fix for the issue that was opening blank pages when clicking buttons during the message preview.
