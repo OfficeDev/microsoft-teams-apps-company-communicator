@@ -54,6 +54,9 @@
       "last 1 safari version"
     ]
   },
+  "optionalDependencies": {
+    "fsevents": "2.3.2"
+  },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.8.2",
     "@types/color-hash": "^1.0.0",
