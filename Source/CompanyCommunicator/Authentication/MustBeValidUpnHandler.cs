@@ -55,7 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         }
 
         /// <summary>
-        /// Check whether a upn (or alternate email) is valid or not.
+        /// Check whether a upn (or alternate email for external authors) is valid or not.
         /// This is where we should check against the valid list of UPNs.
         /// </summary>
         /// <param name="context">Authorization handler context instance.</param>
