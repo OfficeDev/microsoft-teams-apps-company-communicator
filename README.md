@@ -62,6 +62,10 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 This is the log of changes implemented for Company Communicator.
 
+**v4.51**
+- Fix for the fsevents issue
+- Fix for the image expansion control when cards with buttons are created
+
 **v4.5**
 - Merge of PR to implement select/unselect buttons to control the inclusion of multiple Teams that are enabled for posting messages by setting-up the user bot.
 
