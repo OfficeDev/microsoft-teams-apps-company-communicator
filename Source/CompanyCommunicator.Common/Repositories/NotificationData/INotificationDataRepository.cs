@@ -25,10 +25,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public Task<IEnumerable<NotificationDataEntity>> GetAllDraftNotificationsAsync();
 
         /// <summary>
+        /// Get all scheduled notification entities from the table storage. Scheduled notifications are draft notifications with IsScheduled equal true.
+        /// </summary>
+        /// <returns>All scheduled notification entities.</returns>
+        public Task<IEnumerable<NotificationDataEntity>> GetAllScheduledNotificationsAsync();
+
+        /// <summary>
+        /// Get all pending scheduled notification entities from the table storage. Pending Scheduled notifications are draft notifications with IsScheduled equal true and scheduled date previous than now.
+        /// </summary>
+        /// <returns>All pending scheduled notification entities.</returns>
+        public Task<IEnumerable<NotificationDataEntity>> GetAllPendingScheduledNotificationsAsync();
+
+        /// <summary>
         /// Get the top 25 most recently sent notification entities from the table storage.
         /// </summary>
         /// <returns>The top 25 most recently sent notification entities.</returns>
         public Task<IEnumerable<NotificationDataEntity>> GetMostRecentSentNotificationsAsync();
+
+        /// <summary>
+        /// Get the top 25 most recently sent notification entities from the table storage filtered by Channel Id.
+        /// </summary>
+        /// <param name="channelId">Channel Id to filter notifications.</param>
+        /// <returns>The top 25 most recently sent notification entities.</returns>
+        public Task<IEnumerable<NotificationDataEntity>> GetMostRecentChannelSentNotificationsAsync(string channelId);
 
         /// <summary>
         /// Move a draft notification from draft to sent partition.
@@ -74,5 +93,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public Task SaveWarningInNotificationDataEntityAsync(
             string notificationDataEntityId,
             string warningMessage);
+
+        /// <summary>
+        /// Get all draft notification entities from the table storage filtered by Channel Id.
+        /// </summary>
+        /// <param name="channelId">Channel Id to filter.</param>
+        /// <returns>All draft notification entities.</returns>
+        public Task<IEnumerable<NotificationDataEntity>> GetChannelDraftNotificationsAsync(string channelId);
+
+        /// <summary>
+        /// Get all scheduled notification entities from the table storage filtered by Channel Id.
+        /// </summary>
+        /// <param name="channelId">Channel Id to filter.</param>
+        /// <returns>All draft notification entities.</returns>
+        public Task<IEnumerable<NotificationDataEntity>> GetChannelScheduledNotificationsAsync(string channelId);
     }
 }

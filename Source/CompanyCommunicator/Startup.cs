@@ -3,6 +3,8 @@
 // Licensed under the MIT License.
 // </copyright>
 
+using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
+
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
     using System;
@@ -24,7 +26,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.GroupAssociationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -87,6 +91,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     botOptions.UserAppCertName = configuration.GetValue<string>("UserAppCertName", string.Empty);
                     botOptions.GraphAppId = configuration.GetValue<string>("GraphAppId");
                     botOptions.GraphAppCertName = configuration.GetValue<string>("GraphAppCertName", string.Empty);
+                    botOptions.TargetingEnabled = configuration.GetValue<string>("TargetingEnabled");
+                    botOptions.MasterAdminUpns = configuration.GetValue<string>("MasterAdminUpns");
+                    botOptions.ImageUploadBlobStorage = configuration.GetValue<bool>("ImageUploadBlobStorage");
+                    botOptions.DisableReadTracking = configuration.GetValue<bool>("DisableReadTracking");
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>
@@ -121,6 +129,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
                     options.UserAppExternalId =
                         configuration.GetValue<string>("UserAppExternalId", "148a66bb-e83d-425a-927d-09f4299a9274");
+
+                    options.ImageUploadBlobStorage =
+                        configuration.GetValue<bool>("ImageUploadBlobStorage", false);
+
+                    options.ImageUploadBlobStorageSasDurationHours =
+                        configuration.GetValue<int>("ImageUploadBlobStorageSasDurationHours", 1);
+
+                    options.DisableReadTracking =
+                        configuration.GetValue<bool>("DisableReadTracking", false);
+
+                    options.MaxNumberOfTeams = configuration.GetValue<int>("MaxNumberOfTeams", 20);
                 });
 
             services.AddOptions();
@@ -165,6 +184,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
             services.AddSingleton<IExportDataRepository, ExportDataRepository>();
             services.AddSingleton<IAppConfigRepository, AppConfigRepository>();
+            services.AddSingleton<IGroupAssociationDataRepository, GroupAssociationDataRepository>();
+            services.AddSingleton<IChannelDataRepository, ChannelDataRepository>();
 
             // Add service bus message queues.
             services.AddSingleton<IPrepareToSendQueue, PrepareToSendQueue>();
@@ -194,6 +215,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<IUserDataService, UserDataService>();
             services.AddTransient<ITeamMembersService, TeamMembersService>();
             services.AddTransient<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
+
+            services.AddTransient<IStorageClientFactory, StorageClientFactory>();
         }
 
         /// <summary>

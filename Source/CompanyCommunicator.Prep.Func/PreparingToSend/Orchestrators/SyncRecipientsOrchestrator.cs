@@ -14,6 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Recipients;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Syncs target set of recipients to Sent notification table.
@@ -65,6 +66,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             {
                 return await context.CallActivityWithRetryAsync<RecipientsInfo>(
                     FunctionNames.SyncTeamsActivity,
+                    FunctionSettings.DefaultRetryOptions,
+                    notification);
+            }
+
+            // CSV Users audience. This is a new feature that allows sending messages to a set of users
+            // defined in a standard CSV file. The CSV is stored in the notification on the CsvUsers field
+            // in the format of a JSON. The file is only checked for syntax, still need to check if users
+            // are valid as part of the synchronization process
+            if (notification.CsvUsers.Length > 0)
+            {
+                log.LogInformation("Processing CSV Users.");
+
+                // option using fan out fan in
+                // var csvUsersArray = JsonConvert.DeserializeObject<string[]>(notification.CsvUsers);
+                // return await FanOutFanInActivityAsync(context, FunctionNames.SyncCSVActivity, csvUsersArray, notification.Id);
+                return await context.CallActivityWithRetryAsync<RecipientsInfo>(
+                    FunctionNames.SyncCSVActivity,
                     FunctionSettings.DefaultRetryOptions,
                     notification);
             }

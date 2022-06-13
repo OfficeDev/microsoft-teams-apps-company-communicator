@@ -1,0 +1,168 @@
+﻿.taskModule {
+
+    .formContainer {
+        position: absolute;
+        top: 0rem;
+        bottom: 8.4rem;
+        width: 100%;
+
+        .nonScrollableContent {
+            height: 100%;
+            min-height: 100%;
+            margin-inline-start: 3.2rem;
+
+            .formContentContainer {
+                margin-inline-end: 3.5rem;
+
+                .hide {
+                    display: none;
+                }
+
+                .show {
+                    display: inline;
+                }
+            }
+        }
+
+
+        .scrollableContent {
+            overflow: auto;
+            height: 100%;
+            min-height: 100%;
+            margin-inline-start: 3.2rem;
+            margin: 0 2rem;
+
+            h3 {
+                font-size: 1.6rem;
+                margin: 2rem 0 0 0;
+            }
+
+            h4 {
+                margin: 0.6rem 3.2rem 1rem 3.2rem;
+                font-size: 1.4rem;
+                font-weight: 100;
+            }
+
+            .formContentContainer {
+                margin-inline-end: 3.5rem;
+
+                .inputField {
+
+                    label {
+                        font-size: 1.2rem;
+                        display: block;
+                        margin: 0.8rem 0rem 0.4rem 0rem;
+                    }
+
+                    input {
+                        height: 3.2rem;
+                        padding: 0.6rem 1.2rem;
+                        font-size: 1.4rem;
+                        margin: auto 0;
+                    }
+
+                    i {
+                        bottom: 0.5rem;
+                    }
+                }
+
+                .textArea {
+
+                    span {
+                        font-size: 1.2rem;
+                        display: block;
+                        margin: 0.8rem 0rem 0.4rem 0rem;
+
+                        &:nth-child(2) {
+                            color: #C4314B;
+                        }
+                    }
+
+                    textarea {
+                        height: 9.6rem;
+                        padding: 0.6rem 1.2rem;
+                        font-size: 1.4rem;
+                        margin: auto 0;
+                    }
+
+                    i {
+                        bottom: 2.5rem;
+                    }
+                }
+
+                .hide {
+                    display: none;
+                }
+
+                .show {
+                    display: inline;
+                }
+
+                .radioBtns {
+                    width: 70%;
+
+                    p {
+                        margin: 1.5rem 0rem;
+                    }
+
+                    .ui-dropdown {
+                        margin: 0.6rem 0rem 0.6rem 2.5rem;
+                        width: 30rem;
+                    }
+
+                    .noteText {
+                        margin: 1rem 0rem 1rem 2.5rem;
+                    }
+
+                    .hide {
+                        display: none;
+                    }
+
+                    .hideToggle {
+
+                        .ui-dropdown__toggle-indicator {
+                            visibility: hidden;
+                        }
+                    }
+                }
+            }
+
+            .adaptiveCardContainer {
+                margin: 0 2rem;
+            }
+        }
+
+        .footerContainer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 2rem 0rem 3.2rem 0rem;
+            width: 100%;
+
+            .buttonContainer {
+                margin-inline-end: 3.2rem;
+
+                #saveBtn {
+                    margin-inline-start: 0.8rem;
+                }
+            }
+        }
+    }
+}
+
+.ms-Dropdown-container {
+    margin: 0rem 0rem 1rem 0rem;
+
+    .ms-Callout-main {
+        max-height: 30rem !important;
+    }
+}
+
+.is-checked {
+    .ms-Checkbox-label {
+        .ms-Checkbox-checkbox {
+            background: #464775 !important;
+            border: #464775 !important;
+        }
+    }
+}

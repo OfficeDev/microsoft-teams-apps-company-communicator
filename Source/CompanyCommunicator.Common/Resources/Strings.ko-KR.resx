@@ -259,4 +259,7 @@
   <data name="GuestUserNotSupported" xml:space="preserve">
     <value>게스트 사용자가 지원되지 않음</value>
   </data>
+  <data name="SentMessage" xml:space="preserve">
+    <value>보낸 메시지</value>
+  </data>
 </root>

@@ -40,13 +40,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 Author = notification.Author,
                 ButtonTitle = notification.ButtonTitle,
                 ButtonLink = notification.ButtonLink,
+                ChannelId = notification.ChannelId,
+                ChannelImage = notification.ChannelImage,
+                ChannelTitle = notification.ChannelTitle,
                 CreatedBy = userName,
                 CreatedDate = DateTime.UtcNow,
                 IsDraft = true,
+                IsScheduled = notification.IsScheduled,
+                IsImportant = notification.IsImportant,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,
                 Groups = notification.Groups,
+                CsvUsers = notification.CsvUsers,
                 AllUsers = notification.AllUsers,
+                ScheduledDate = notification.ScheduledDate,
+                Buttons = notification.Buttons,
+                TrackingUrl = notification.TrackingUrl,
             };
 
             await notificationRepository.CreateOrUpdateAsync(notificationEntity);

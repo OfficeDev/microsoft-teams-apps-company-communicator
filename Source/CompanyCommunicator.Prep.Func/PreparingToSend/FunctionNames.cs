@@ -61,6 +61,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         public const string SyncTeamsActivity = nameof(SyncTeamsActivity);
 
         /// <summary>
+        /// Sync CSV Users activity function.
+        /// </summary>
+        public const string SyncCSVActivity = nameof(SyncCSVActivity);
+
+        /// <summary>
         /// Get recipients activity function.
         /// </summary>
         public const string GetRecipientsActivity = nameof(GetRecipientsActivity);

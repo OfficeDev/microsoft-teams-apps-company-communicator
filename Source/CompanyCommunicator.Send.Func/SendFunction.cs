@@ -6,9 +6,11 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 {
     using System;
+    using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
@@ -19,6 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Models;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
     using Newtonsoft.Json;
 
@@ -158,6 +161,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
                 // Send message.
                 var messageActivity = await this.GetMessageActivity(messageContent);
+
+                // If the message is important, we need to notify the user in Teams
+                if (messageContent.IsImportant)
+                {
+                    messageActivity.TeamsNotifyUser(); // make sure user is alerted
+                    messageActivity.Importance = ActivityImportance.High; // flags the importance flag for the message
+                }
+
+                messageActivity.Summary = this.localizer.GetString("SentMessage");
+
                 var response = await this.messageService.SendMessageAsync(
                     message: messageActivity,
                     serviceUrl: messageContent.GetServiceUrl(),
@@ -254,6 +267,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 NotificationDataTableNames.SendingNotificationsPartition,
                 message.NotificationId);
 
+            // replacing id and key for read tracking purposes
+            notification.Content = notification.Content.Replace("[ID]", message.NotificationId);
+            notification.Content = notification.Content.Replace("[KEY]", message.RecipientData.RecipientId);
+            
+            notification.Content = this.GetButtonTrackingUrl(notification.Content, message.NotificationId,
+                                                             message.RecipientData.RecipientId);
+
+
             var adaptiveCardAttachment = new Attachment()
             {
                 ContentType = AdaptiveCardContentType,
@@ -261,6 +282,46 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             };
 
             return MessageFactory.Attachment(adaptiveCardAttachment);
+        }
+
+        private string GetButtonTrackingUrl(string notification, string notificationId, string key)
+        {
+
+            var result = JsonConvert.DeserializeObject<RootSendingAdaptiveCard>(notification);
+
+            if (result.actions == null)
+            {
+                return notification;
+            }
+            
+            string host = string.Empty;
+
+            foreach (var item in result.body)
+            {
+                if (item.url != null)
+                {
+                    if (item.url.Contains("sentNotifications/tracking"))
+                    {
+                        host = item.url;
+                        break;
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(host))
+            {
+                var url = host.Split("/api")[0];
+
+                foreach (var item in result.actions)
+                {
+                    var originalUrl = item.url;
+
+                    item.url = $"{url}/api/sentnotifications/trackingbutton?id={notificationId}" +
+                               $"&key={key}&buttonid={WebUtility.UrlEncode(item.title)}&redirecturl={WebUtility.UrlEncode(originalUrl)}";
+                }
+            }
+
+            return JsonConvert.SerializeObject(result);
         }
     }
 }

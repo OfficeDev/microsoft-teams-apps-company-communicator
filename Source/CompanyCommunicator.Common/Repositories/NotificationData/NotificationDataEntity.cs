@@ -77,6 +77,36 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public bool IsDraft { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the notification is scheduled.
+        /// </summary>
+        public bool IsScheduled { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the notification is important.
+        /// </summary>
+        public bool IsImportant { get; set; }
+
+        /// <summary>
+        /// Gets or sets channel id for the notification.
+        /// </summary>
+        public string ChannelId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ChannelTitle value.
+        /// </summary>
+        public string ChannelTitle { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ChannelImage value.
+        /// </summary>
+        public string ChannelImage { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value with the JSON describing the buttons for the adaptive card.
+        /// </summary>
+        public string Buttons { get; set; }
+
+        /// <summary>
         /// Gets or sets the TeamsInString value.
         /// This property helps to save the Teams data in the Azure Table storage.
         /// Table storage doesn't support an array type of the property directly
@@ -131,6 +161,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
             get => JsonConvert.DeserializeObject<IEnumerable<string>>(this.GroupsInString.IsNullOrEmpty() ? "[]" : this.GroupsInString);
             set => this.GroupsInString = JsonConvert.SerializeObject(value);
         }
+
+        /// <summary>
+        /// Gets or sets the CsvUsersInString value.
+        /// </summary>
+        public string CsvUsers { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether a notification should be sent to all the
@@ -195,6 +230,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public DateTime? SendingStartedDate { get; set; }
 
         /// <summary>
+        /// Gets or sets the DateTime the notification's was scheduled to be sent.
+        /// </summary>
+        public DateTime? ScheduledDate { get; set; }
+
+        /// <summary>
         /// Gets or sets the error message for the notification if there was a failure in
         /// preparing and sending the notification.
         /// Front-end shows the ExceptionMessage value in the "View status" task module.
@@ -223,5 +263,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets or sets the payload of the durable function instance.
         /// </summary>
         public string FunctionInstancePayload { get; set; }
+
+        /// <summary>
+        /// Gets or sets notification reads.
+        /// </summary>
+        public int Reads { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tracking url for the message.
+        /// </summary>
+        public string TrackingUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value with the JSON describing the tracking of the buttons clicked.
+        /// </summary>
+        public string ButtonTrackingClicks { get; set; }
+
     }
 }

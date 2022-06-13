@@ -3,6 +3,14 @@
 // Licensed under the MIT License.
 // </copyright>
 
+using System.IO;
+using System.Net.Mime;
+using Azure.Storage.Blobs.Specialized;
+using Azure.Storage.Sas;
+using Microsoft.Extensions.Options;
+using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
+using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
+
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
@@ -22,6 +30,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Controller for the draft notification data.
@@ -34,6 +43,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly ITeamDataRepository teamDataRepository;
         private readonly IDraftNotificationPreviewService draftNotificationPreviewService;
         private readonly IGroupsService groupsService;
+        private readonly IStorageClientFactory storageClientFactory;
+        private readonly UserAppOptions userAppOptions;
         private readonly IAppSettingsService appSettingsService;
         private readonly IStringLocalizer<Strings> localizer;
 
@@ -46,19 +57,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="appSettingsService">App Settings service.</param>
         /// <param name="localizer">Localization service.</param>
         /// <param name="groupsService">group service.</param>
+        /// <param name="storageClientFactory">Storage Library</param>
         public DraftNotificationsController(
             INotificationDataRepository notificationDataRepository,
             ITeamDataRepository teamDataRepository,
             IDraftNotificationPreviewService draftNotificationPreviewService,
             IAppSettingsService appSettingsService,
             IStringLocalizer<Strings> localizer,
-            IGroupsService groupsService)
+            IGroupsService groupsService,
+            IStorageClientFactory storageClientFactory,
+            IOptions<UserAppOptions> userAppOptions)
         {
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.draftNotificationPreviewService = draftNotificationPreviewService ?? throw new ArgumentNullException(nameof(draftNotificationPreviewService));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
             this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
+            this.storageClientFactory = storageClientFactory ?? throw new ArgumentNullException(nameof(storageClientFactory));
+            this.userAppOptions = userAppOptions?.Value ?? throw new ArgumentNullException(nameof(userAppOptions));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
         }
 
@@ -75,7 +91,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 throw new ArgumentNullException(nameof(notification));
             }
 
-            if (!notification.Validate(this.localizer, out string errorMessage))
+            if (!notification.Validate(this.localizer, out string errorMessage, this.userAppOptions.MaxNumberOfTeams))
             {
                 return this.BadRequest(errorMessage);
             }
@@ -86,10 +102,63 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.Forbid();
             }
 
+            if (!this.CheckUrl(notification.ImageLink))
+            {
+                await this.UploadToBlobStorage(notification);
+            }
+
+            if (!this.userAppOptions.DisableReadTracking)
+            {
+                notification.TrackingUrl = this.HttpContext.Request.Scheme + "://" + this.HttpContext.Request.Host + "/api/sentNotifications/tracking";
+            }
+
             var notificationId = await this.notificationDataRepository.CreateDraftNotificationAsync(
                 notification,
                 this.HttpContext.User?.Identity?.Name);
             return this.Ok(notificationId);
+        }
+
+        private bool CheckUrl(string urlString)
+        {
+            Uri uriResult;
+
+            if (Uri.TryCreate(urlString, UriKind.Absolute, out uriResult))
+            {
+                return uriResult.Scheme == Uri.UriSchemeHttps;
+            }
+            return false;
+        }
+
+        private async Task UploadToBlobStorage(DraftNotification notification)
+        {
+            if (this.userAppOptions.ImageUploadBlobStorage && !string.IsNullOrWhiteSpace(notification.ImageLink))
+            {
+                var offset = notification.ImageLink.IndexOf(',') + 1;
+                var imageBytes = Convert.FromBase64String(notification.ImageLink[offset..^0]);
+
+                await using var stream = new MemoryStream(imageBytes, writable: false);
+                var blobContainerClient = this.storageClientFactory.CreateBlobContainerClient("imageupload");
+                await blobContainerClient.CreateIfNotExistsAsync();
+
+                var blob = blobContainerClient.GetBlobClient(Guid.NewGuid().ToString() + ".jpg");
+                await blob.UploadAsync(stream, true);
+
+                if (blobContainerClient.CanGenerateSasUri)
+                {
+                    // Create a SAS token that's valid for one hour.
+                    BlobSasBuilder sasBuilder = new BlobSasBuilder()
+                    {
+                        BlobContainerName = blobContainerClient.Name,
+                        BlobName = blob.Name,
+                        Resource = "b"
+                    };
+
+                    sasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddHours(this.userAppOptions.ImageUploadBlobStorageSasDurationHours);
+                    sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+                    notification.ImageLink = blob.GenerateSasUri(sasBuilder).AbsoluteUri;
+                }
+            }
         }
 
         /// <summary>
@@ -137,10 +206,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.Forbid();
             }
 
-            if (!notification.Validate(this.localizer, out string errorMessage))
+            if (!notification.Validate(this.localizer, out string errorMessage, this.userAppOptions.MaxNumberOfTeams))
             {
                 return this.BadRequest(errorMessage);
             }
+
+            if (!string.IsNullOrWhiteSpace(notification.ImageLink) && notification.ImageLink.StartsWith("data:image/"))
+            {
+                await this.UploadToBlobStorage(notification);
+            }
+
+
+            // TODO: double-check it
+           // notification.Buttons = this.GetButtonTrackingUrl(notification);
+
 
             var notificationEntity = new NotificationDataEntity
             {
@@ -153,13 +232,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Author = notification.Author,
                 ButtonTitle = notification.ButtonTitle,
                 ButtonLink = notification.ButtonLink,
+                ChannelId = notification.ChannelId,
+                ChannelImage = notification.ChannelImage,
+                ChannelTitle = notification.ChannelTitle,
                 CreatedBy = this.HttpContext.User?.Identity?.Name,
                 CreatedDate = DateTime.UtcNow,
                 IsDraft = true,
+                IsScheduled = notification.IsScheduled,
+                IsImportant = notification.IsImportant,
+                ScheduledDate = notification.ScheduledDate,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,
                 Groups = notification.Groups,
+                CsvUsers = notification.CsvUsers,
                 AllUsers = notification.AllUsers,
+                Buttons = notification.Buttons,
+                TrackingUrl = this.HttpContext.Request.Scheme + "://" + this.HttpContext.Request.Host + "/api/sentNotifications/tracking",
             };
 
             await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
@@ -216,6 +304,86 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
+        /// Get scheduled notifications. Those are draft notifications with a scheduledate.
+        /// </summary>
+        /// <returns>A list of <see cref="DraftNotificationSummary"/> instances.</returns>
+        [HttpGet("scheduled")]
+        public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetAllScheduledNotificationsAsync()
+        {
+            var notificationEntities = await this.notificationDataRepository.GetAllScheduledNotificationsAsync();
+
+            var result = new List<DraftNotificationSummary>();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                var summary = new DraftNotificationSummary
+                {
+                    Id = notificationEntity.Id,
+                    Title = notificationEntity.Title,
+                    ScheduledDate = notificationEntity.ScheduledDate,
+                };
+
+                result.Add(summary);
+            }
+
+            // sorts the scheduled messages by date from the most recent
+            result.Sort((r1, r2) => r1.ScheduledDate.Value.CompareTo(r2.ScheduledDate.Value));
+            return result;
+        }
+
+        /// <summary>
+        /// Get scheduled notifications. Those are draft notifications with a scheduledate.
+        /// </summary>
+        /// <param name="channelId">Channel ID to filter scheduled notifications.</param>
+        /// <returns>A list of <see cref="DraftNotificationSummary"/> instances.</returns>
+        [HttpGet("scheduled/channel/{channelId}")]
+        public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetChannelScheduledNotificationsAsync(string channelId)
+        {
+            var notificationEntities = await this.notificationDataRepository.GetChannelScheduledNotificationsAsync(channelId);
+
+            var result = new List<DraftNotificationSummary>();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                var summary = new DraftNotificationSummary
+                {
+                    Id = notificationEntity.Id,
+                    Title = notificationEntity.Title,
+                    ScheduledDate = notificationEntity.ScheduledDate,
+                };
+
+                result.Add(summary);
+            }
+
+            // sorts the scheduled messages by date from the most recent
+            result.Sort((r1, r2) => r1.ScheduledDate.Value.CompareTo(r2.ScheduledDate.Value));
+            return result;
+        }
+
+        /// <summary>
+        /// Get draft notifications filtered by channel.
+        /// </summary>
+        /// <param name="channelId">Channel Id.</param>
+        /// <returns>A list of <see cref="DraftNotificationSummary"/> instances.</returns>
+        [HttpGet("channel/{channelId}")]
+        public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetChannelDraftNotifications(string channelId)
+        {
+            var notificationEntities = await this.notificationDataRepository.GetChannelDraftNotificationsAsync(channelId);
+
+            var result = new List<DraftNotificationSummary>();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                var summary = new DraftNotificationSummary
+                {
+                    Id = notificationEntity.Id,
+                    Title = notificationEntity.Title,
+                };
+
+                result.Add(summary);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Get a draft notification by Id.
         /// </summary>
         /// <param name="id">Draft notification Id.</param>
@@ -251,7 +419,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Teams = notificationEntity.Teams,
                 Rosters = notificationEntity.Rosters,
                 Groups = notificationEntity.Groups,
+                CsvUsers = notificationEntity.CsvUsers,
                 AllUsers = notificationEntity.AllUsers,
+                IsScheduled = notificationEntity.IsScheduled,
+                IsImportant = notificationEntity.IsImportant,
+                ScheduledDate = notificationEntity.ScheduledDate,
+                Buttons = notificationEntity.Buttons,
+                TrackingUrl = notificationEntity.TrackingUrl,
+                ChannelId = notificationEntity.ChannelId,
+                ChannelTitle = notificationEntity.ChannelTitle,
+                ChannelImage = notificationEntity.ChannelImage,
             };
 
             return this.Ok(result);

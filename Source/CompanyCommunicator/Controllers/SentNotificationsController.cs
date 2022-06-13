@@ -8,10 +8,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Net.Http;
     using System.Security.Claims;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Web;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -118,6 +120,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 throw new ArgumentNullException(nameof(draftNotification));
             }
 
+            // TODO: double-check it
+           // draftNotification.Buttons = this.GetButtonTrackingUrl(draftNotification);
+
             var draftNotificationDataEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.DraftNotificationsPartition,
                 draftNotification.Id);
@@ -139,6 +144,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 NotificationId = newSentNotificationId,
             };
+
             await this.prepareToSendQueue.SendAsync(prepareToSendQueueMessageContent);
 
             // Send a "force complete" message to the data queue with a delay to ensure that
@@ -180,12 +186,242 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     TotalMessageCount = notificationEntity.TotalMessageCount,
                     SendingStartedDate = notificationEntity.SendingStartedDate,
                     Status = notificationEntity.GetStatus(),
+                    Reads = notificationEntity.Reads,
                 };
 
                 result.Add(summary);
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Get most recently sent notification summaries.
+        /// </summary>
+        /// <param name="channelId">Channel Id to filter notifications.</param>
+        /// <returns>A list of <see cref="SentNotificationSummary"/> instances.</returns>
+        [HttpGet("channel/{channelId}")]
+        public async Task<IEnumerable<SentNotificationSummary>> GetChannelSentNotificationsAsync(string channelId)
+        {
+            var notificationEntities = await this.notificationDataRepository.GetMostRecentChannelSentNotificationsAsync(channelId);
+
+            var result = new List<SentNotificationSummary>();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                var summary = new SentNotificationSummary
+                {
+                    Id = notificationEntity.Id,
+                    Title = notificationEntity.Title,
+                    CreatedDateTime = notificationEntity.CreatedDate,
+                    SentDate = notificationEntity.SentDate,
+                    Succeeded = notificationEntity.Succeeded,
+                    Failed = notificationEntity.Failed,
+                    Unknown = this.GetUnknownCount(notificationEntity),
+                    TotalMessageCount = notificationEntity.TotalMessageCount,
+                    SendingStartedDate = notificationEntity.SendingStartedDate,
+                    Status = notificationEntity.GetStatus(),
+                };
+
+                result.Add(summary);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Record a read for the message with a specific id. This web method is used as part of the simple tracking/analytics for CC.
+        /// </summary>
+        /// <param name="id">The id of the sent message where the read is being tracked for analytics.</param>
+        /// <param name="key">The key of the message instance that was sent to a specific user.</param>
+        /// <param name="buttonid">buttonid.</param>
+        /// <param name="redirecturl">redirecturl.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        [HttpGet]
+        [Route("trackingbutton")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TrackButtonClick(string id, string key, string buttonid, string redirecturl)
+        {
+
+            // id cannot be null
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            // key cannot be null
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            // buttonid actually is the button name
+            if (string.IsNullOrWhiteSpace(buttonid))
+            {
+                throw new ArgumentNullException(nameof(buttonid));
+            }
+
+            // redirecturl cannot be null
+            if (string.IsNullOrWhiteSpace(redirecturl))
+            {
+                throw new ArgumentNullException(nameof(redirecturl));
+            }
+
+            // gets the sent notification summary that needs to be updated
+            var notificationEntity = await this.notificationDataRepository.GetAsync(
+                NotificationDataTableNames.SentNotificationsPartition,
+                id);
+
+            // if the notification entity is null it means it doesnt exist or is not a sent message yet
+            if (notificationEntity != null)
+            {
+
+                List<TrackingButtonClicks> result;
+
+                if (notificationEntity.ButtonTrackingClicks is null)
+                {
+
+                    result = new List<TrackingButtonClicks>();
+
+                    var click = new TrackingButtonClicks { name = buttonid, clicks = 1 };
+                    result.Add(click);
+                }
+                else
+                {
+                    result = JsonConvert.DeserializeObject<List<TrackingButtonClicks>>(notificationEntity.ButtonTrackingClicks);
+
+                    var button = result.Find(p => p.name == buttonid);
+
+                    if (button == null)
+                    {
+                        result.Add(new TrackingButtonClicks { name = buttonid, clicks = 1 });
+                    }
+                    else
+                    {
+                        button.clicks++;
+                    }
+
+                }
+
+                notificationEntity.ButtonTrackingClicks = JsonConvert.SerializeObject(result);
+
+                // persists the change
+                await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
+
+                // save the user button clicked
+                await this.UpdateButtonClickedByUser(id, key, buttonid);
+
+            }
+
+            return this.Redirect(WebUtility.UrlDecode(redirecturl));
+        }
+
+        private async Task UpdateButtonClickedByUser(string id, string key, string buttonid)
+        {
+            // gets the sent notification object for the message sent
+            var sentnotificationEntity = await this.sentNotificationDataRepository.GetAsync(id, key);
+
+            // if we have a instance that was sent to a user
+            if (sentnotificationEntity != null)
+            {
+
+                List<TrackingUserClicks> result;
+
+                if (sentnotificationEntity.ButtonTracking is null)
+                {
+
+                    result = new List<TrackingUserClicks>();
+
+                    var click = new TrackingUserClicks { name = buttonid, clicks = 1, datetime = DateTime.Now };
+                    result.Add(click);
+                }
+                else
+                {
+
+                    result = JsonConvert.DeserializeObject<List<TrackingUserClicks>>(sentnotificationEntity.ButtonTracking);
+
+                    var button = result.Find(p => p.name == buttonid);
+
+                    if (button == null)
+                    {
+                        result.Add(new TrackingUserClicks { name = buttonid, clicks = 1, datetime = DateTime.Now });
+                    }
+                    else
+                    {
+                        button.clicks++;
+                        button.datetime = DateTime.Now;
+                    }
+
+                }
+
+                sentnotificationEntity.ButtonTracking = JsonConvert.SerializeObject(result);
+
+                await this.sentNotificationDataRepository.CreateOrUpdateAsync(sentnotificationEntity);
+            }
+        }
+
+        /// <summary>
+        /// Record a read for the message with a specific id. This web method is used as part of the simple tracking/analytics for CC.
+        /// </summary>
+        /// <param name="id">The id of the sent message where the read is being tracked for analytics.</param>
+        /// <param name="key">The key of the message instance that was sent to a specific user.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        [HttpGet]
+        [Route("tracking")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TrackRead(string id, string key)
+        {
+            // id cannot be null
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            // key cannot be null
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            try
+            {
+                // gets the sent notification object for the message sent
+                var sentnotificationEntity = await this.sentNotificationDataRepository.GetAsync(id, key);
+
+                // if we have a instance that was sent to a user
+                if (sentnotificationEntity != null)
+                {
+                    // if the message was not read yet
+                    if (sentnotificationEntity.ReadStatus != true)
+                    {
+                        sentnotificationEntity.ReadStatus = true;
+                        sentnotificationEntity.ReadDate = DateTime.UtcNow;
+
+                        await this.sentNotificationDataRepository.CreateOrUpdateAsync(sentnotificationEntity);
+
+                        // gets the sent notification summary that needs to be updated
+                        var notificationEntity = await this.notificationDataRepository.GetAsync(
+                            NotificationDataTableNames.SentNotificationsPartition,
+                            id);
+
+                        // if the notification entity is null it means it doesnt exist or is not a sent message yet
+                        if (notificationEntity != null)
+                        {
+                            // increment the number of reads
+                            notificationEntity.Reads++;
+
+                            // persists the change
+                            await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
+                        }
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                // Failed to track the reading.
+                this.logger.LogError(exception, $"Failed to track the reading of the message. Error message: {exception.Message}.");
+            }
+
+            return this.Ok();
         }
 
         /// <summary>
@@ -226,6 +462,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Author = notificationEntity.Author,
                 ButtonTitle = notificationEntity.ButtonTitle,
                 ButtonLink = notificationEntity.ButtonLink,
+                Buttons = notificationEntity.Buttons,
+                ChannelId = notificationEntity.ChannelId,
+                IsScheduled = notificationEntity.IsScheduled,
+                IsImportant = notificationEntity.IsImportant,
                 CreatedDateTime = notificationEntity.CreatedDate,
                 SentDate = notificationEntity.SentDate,
                 Succeeded = notificationEntity.Succeeded,
@@ -241,6 +481,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 WarningMessage = notificationEntity.WarningMessage,
                 CanDownload = userNotificationDownload == null,
                 SendingCompleted = notificationEntity.IsCompleted(),
+                Reads = notificationEntity.Reads,
+                CsvUsers = notificationEntity.CsvUsers,
+                ButtonTrackingClicks = notificationEntity.ButtonTrackingClicks,
             };
 
             return this.Ok(result);

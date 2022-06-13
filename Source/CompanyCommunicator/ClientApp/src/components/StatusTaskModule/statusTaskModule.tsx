@@ -12,7 +12,7 @@ import { Loader, List, Image, Button, DownloadIcon, AcceptIcon, Flex } from '@fl
 import * as microsoftTeams from "@microsoft/teams-js";
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
-    setCardAuthor, setCardBtn
+    setCardAuthor, setCardBtns
 } from '../AdaptiveCard/adaptiveCard';
 import { ImageUtil } from '../../utility/imageutility';
 import { formatDate, formatDuration, formatNumber } from '../../i18n';
@@ -49,6 +49,11 @@ export interface IMessage {
     warningMessage?: string;
     canDownload?: boolean;
     sendingCompleted?: boolean;
+    buttons: string;
+    isImportant?: boolean;
+    reads?: string;
+    csvUsers: string;
+    buttonTrackingClicks: string;
 }
 
 export interface IStatusState {
@@ -64,7 +69,9 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
     readonly localize: TFunction;
     private initMessage = {
         id: "",
-        title: ""
+        title: "",
+        buttons: "[]",
+        csvUsers: "",
     };
 
     private card: any;
@@ -103,8 +110,16 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                     setCardImageLink(this.card, this.state.message.imageLink);
                     setCardSummary(this.card, this.state.message.summary);
                     setCardAuthor(this.card, this.state.message.author);
-                    if (this.state.message.buttonTitle !== "" && this.state.message.buttonLink !== "") {
-                        setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink);
+                        
+                    if (this.state.message.buttonTitle && this.state.message.buttonLink && !this.state.message.buttons) {
+                        setCardBtns(this.card, [{
+                            "type": "Action.OpenUrl",
+                            "title": this.state.message.buttonTitle,
+                            "url": this.state.message.buttonLink,
+                        }]);
+                        }
+                        else {
+                            setCardBtns(this.card, JSON.parse(this.state.message.buttons));
                     }
 
                     let adaptiveCard = new AdaptiveCards.AdaptiveCard();
@@ -126,6 +141,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             response.data.sentDate = formatDate(response.data.sentDate);
             response.data.succeeded = formatNumber(response.data.succeeded);
             response.data.failed = formatNumber(response.data.failed);
+            response.data.reads = formatNumber(response.data.reads);
             response.data.unknown = response.data.unknown && formatNumber(response.data.unknown);
             response.data.canceled = response.data.canceled && formatNumber(response.data.canceled);
             this.setState({
@@ -172,6 +188,9 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                             <label>{this.localize("Success", { "SuccessCount": this.state.message.succeeded })}</label>
                                             <br />
                                             <label>{this.localize("Failure", { "FailureCount": this.state.message.failed })}</label>
+                                            <br />
+                                            <label>{this.localize("Reads", { "ReadsCount": this.state.message.reads })}</label>
+                                            <br />
                                             {this.state.message.canceled &&
                                                 <>
                                                     <br />
@@ -184,6 +203,22 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                                     <label>{this.localize("Unknown", { "UnknownCount": this.state.message.unknown })}</label>
                                                 </>
                                             }
+                                        </div>
+
+                                        <div className="contentField">
+                                            
+                                            <div className="contentField">
+                                                <h3>{
+                                                    this.state.message.buttonTrackingClicks ? this.localize("ButtonClicks") : ""
+                                                }</h3>
+                                                <label>{this.renderButtonClicks()}</label>
+                                            </div>
+
+                                        </div>
+
+                                        <div className="contentField">
+                                            <h3>{this.localize("Important")}</h3>
+                                            <label>{this.renderImportant()}</label>
                                         </div>
                                         <div className="contentField">
                                             {this.renderAudienceSelection()}
@@ -298,6 +333,19 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
         }
         return resultedTeams;
     }
+
+    private renderImportant = () => {
+        if (this.state.message.isImportant) {
+            return (
+                <label>Yes</label>
+            )
+        } else {
+            return (
+                <label>No</label>
+            )
+        }
+    }
+
     private renderAudienceSelection = () => {
         if (this.state.message.teamNames && this.state.message.teamNames.length > 0) {
             return (
@@ -318,10 +366,15 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                     <span>{this.localize("SentToGroups2")}</span>
                     <List items={this.getItemList(this.state.message.groupNames)} />
                 </div>);
+        } else if (this.state.message.csvUsers && this.state.message.csvUsers.length > 0) {
+            return (
+                <div key="allUsers">
+                    <h3>{this.localize("SentToCSV")}</h3>
+                </div>);
         } else if (this.state.message.allUsers) {
             return (
                 <div>
-                    <h3>{this.localize("SendToAllUsers")}</h3>
+                    <h3>{this.localize("SentToAllUsers")}</h3>
                 </div>);
         } else {
             return (<div></div>);
@@ -351,6 +404,17 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
         } else {
             return (<div></div>);
         }
+    }
+
+    private renderButtonClicks = () => {
+        if (this.state.message.buttonTrackingClicks) {
+            let btnClicks = JSON.parse(this.state.message.buttonTrackingClicks);
+            return (
+            <div>
+                {btnClicks.map((btnClick) =><div> {btnClick.name}: {btnClick.clicks}</div>)}
+            </div>
+            );
+        } 
     }
 }
 

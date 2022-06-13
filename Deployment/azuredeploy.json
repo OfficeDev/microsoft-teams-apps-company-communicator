@@ -186,7 +186,7 @@
       "metadata": {
         "description": "The URL to the GitHub repository to deploy."
       },
-      "defaultValue": "https://github.com/OfficeDev/microsoft-teams-company-communicator-app.git"
+      "defaultValue": "https://github.com/cristianoag/microsoft-teams-apps-company-communicator.git"
     },
     "gitBranch": {
       "type": "string",
@@ -249,6 +249,34 @@
       "type": "String",
       "metadata": {
         "description": "A GUID used to identify the role assignment. This is Default value."
+      }
+    },
+    "ImageUploadBlobStorage": {
+      "defaultValue": false,
+      "type": "bool",
+      "metadata": {
+        "description": "Enable Azure Blob Storage image upload"
+      }
+    },
+    "ImageUploadBlobStorageSasDurationHours": {
+      "defaultValue": 1,
+      "type": "int",
+      "metadata": {
+        "description": "Azure Blob SAS Token duration"
+      }
+    },
+    "TargetingEnabled": {
+      "defaultValue": false,
+      "type": "bool",
+      "metadata": {
+        "description": "Enables targeting mode"
+      }
+    },
+    "MasterAdminUpns": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Semicolon-delimited list of the master admins (UPNs) allowed to setup and configure targeting mode."
       }
     }
   },

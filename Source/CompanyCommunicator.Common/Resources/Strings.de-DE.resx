@@ -259,4 +259,7 @@
   <data name="GuestUserNotSupported" xml:space="preserve">
     <value>Gastbenutzer nicht unterstützt</value>
   </data>
+  <data name="SentMessage" xml:space="preserve">
+    <value>Gesendete Nachricht</value>
+  </data>
 </root>

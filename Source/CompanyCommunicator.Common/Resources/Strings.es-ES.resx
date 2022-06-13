@@ -259,4 +259,7 @@
   <data name="GuestUserNotSupported" xml:space="preserve">
     <value>No se admite el usuario invitado</value>
   </data>
+  <data name="SentMessage" xml:space="preserve">
+    <value>Mensaje enviado</value>
+  </data>
 </root>
