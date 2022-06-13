@@ -44,6 +44,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public int? Unknown { get; set; }
 
         /// <summary>
+        /// Gets or sets the number of recipients whose delivery status is canceled.
+        /// </summary>
+        public int? Canceled { get; set; }
+
+        /// <summary>
         /// Gets or sets Teams audience name collection.
         /// </summary>
         public IEnumerable<string> TeamNames { get; set; }

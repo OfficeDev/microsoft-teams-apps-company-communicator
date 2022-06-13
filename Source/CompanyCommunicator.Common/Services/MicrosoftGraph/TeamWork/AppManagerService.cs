@@ -46,7 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             {
                 AdditionalData = new Dictionary<string, object>()
                 {
-                    { "teamsApp@odata.bind", $"{GraphConstants.BetaBaseUrl}/appCatalogs/teamsApps/{appId}" },
+                    { "teamsApp@odata.bind", $"{GraphConstants.V1BaseUrl}/appCatalogs/teamsApps/{appId}" },
                 },
             };
 

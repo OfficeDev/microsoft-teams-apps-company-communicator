@@ -19,9 +19,24 @@ The app provides an easy interface for designated users to create, preview, coll
 Begin with the [Solution overview](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview) to read about what the app does and how it works.
 
 When you're ready to try out Company Communicator, or to use it in your own organization, you can choose to follow one of the below guides.
-* [Deployment guide](https://github.com/cristianoag/microsoft-teams-apps-company-communicator/wiki/Deployment-Guide).
-* [Deployment guide powershell](https://github.com/cristianoag/microsoft-teams-apps-company-communicator/wiki/Deployment-guide-powershell).  
-  
+* [Deployment guide powershell](https://github.com/cristianoag/microsoft-teams-company-communicator-app/wiki/Deployment-guide-powershell).
+    * **Recommended** Use this option to deploy the Company Communicator v5.0 using powershell script. The entire set-up is done by the powershell script.
+* [Deployment guide](https://github.com/cristianoag/microsoft-teams-company-communicator-app/wiki/Deployment-guide).
+    * Use this option to deploy the Company Communicator v5.0 with client secrets.
+* [Deployment guide certificate](https://github.com/cristianoag/microsoft-teams-company-communicator-app/wiki/Deployment-guide-certificate).
+    * Use this option to deploy the Company Communicator v5.0 with certificates.
+
+## Migration 
+
+If you already have older version of Company Communicator installed, then please use this [v5 migration guide](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/v5-migration-guide). Please note that deploying the major version update, like Company Communicator version 5.0 involves more than syncing the App Service and Azure Functions, so plan to review the migration guide before migrating to latest. 
+
+Migrating to newer versions. 
+
+ * [v5 migration guide](https://github.com/cristianoag/microsoft-teams-apps-company-communicator/wiki/v5-migration-guide)
+ * [v4 migration guide](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/v4-migration-guide)
+ * [v3 migration guide](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/v3-migration-guide)
+ * [v2 migration guide](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/v2-migration-guide)
+
 ## Feedback
 
 Thoughts? Questions? Ideas? Share them with us on [Teams UserVoice](https://microsoftteams.uservoice.com/forums/555103-public)!
@@ -61,6 +76,10 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 ## Community Fork Changes
 
 This is the log of changes implemented for Company Communicator.
+
+**v5.11**
+  - ATTENTION!!! - Merge of v5.1. If you have a deployment based on v4.XX you need to follow instructions [v5 migration guide](https://github.com/cristianoag/microsoft-teams-apps-company-communicator/wiki/v5-migration-guide) to update your setup.
+  - Inclusion of the MasterAdminUpns and TargetingEnabled variables to the deployment template, those variables will be available during setup moving forward.
 
 **v4.51**
 - Fix for the fsevents issue

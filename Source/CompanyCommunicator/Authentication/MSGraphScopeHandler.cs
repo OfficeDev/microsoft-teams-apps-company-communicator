@@ -51,7 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// <returns>Indicate if access token has scope.</returns>
         private async Task<bool> HasScopesAsync(string[] scopes)
         {
-            var accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new[] { Common.Constants.ScopeGroupReadAll });
+            var accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(scopes);
             var tokenHandler = new JwtSecurityTokenHandler();
             var securityToken = tokenHandler.ReadToken(accessToken) as JwtSecurityToken;
             var claimValue = securityToken.Claims

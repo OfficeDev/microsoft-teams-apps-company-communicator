@@ -45,5 +45,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Failed to send the message. This is an end state.
         /// </summary>
         Failed,
+
+        /// <summary>
+        /// In process of canceling the message.
+        /// </summary>
+        Canceling,
+
+        /// <summary>
+        /// Canceled the message. This is an end state.
+        /// </summary>
+        Canceled,
     }
 }

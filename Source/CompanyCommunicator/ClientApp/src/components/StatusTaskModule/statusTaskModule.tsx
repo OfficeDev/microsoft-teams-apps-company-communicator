@@ -32,6 +32,7 @@ export interface IMessage {
     succeeded?: string;
     failed?: string;
     unknown?: string;
+    canceled?: string;
     sentDate?: string;
     imageLink?: string;
     summary?: string;
@@ -142,6 +143,7 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
             response.data.failed = formatNumber(response.data.failed);
             response.data.reads = formatNumber(response.data.reads);
             response.data.unknown = response.data.unknown && formatNumber(response.data.unknown);
+            response.data.canceled = response.data.canceled && formatNumber(response.data.canceled);
             this.setState({
                 message: response.data
             });
@@ -189,8 +191,15 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                             <br />
                                             <label>{this.localize("Reads", { "ReadsCount": this.state.message.reads })}</label>
                                             <br />
+                                            {this.state.message.canceled &&
+                                                <>
+                                                    <br />
+                                                    <label>{this.localize("Canceled", { "CanceledCount": this.state.message.canceled })}</label>
+                                                </>
+                                            }
                                             {this.state.message.unknown &&
                                                 <>
+                                                    <br />
                                                     <label>{this.localize("Unknown", { "UnknownCount": this.state.message.unknown })}</label>
                                                 </>
                                             }

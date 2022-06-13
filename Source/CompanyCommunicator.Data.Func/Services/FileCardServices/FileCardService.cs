@@ -9,10 +9,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
     {
         private readonly IUserDataRepository userDataRepository;
         private readonly string authorAppId;
-        private readonly BotFrameworkHttpAdapter botAdapter;
+        private readonly ICCBotFrameworkHttpAdapter botAdapter;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
         /// <param name="localizer">Localization service.</param>
         public FileCardService(
             IOptions<BotOptions> botOptions,
-            BotFrameworkHttpAdapter botAdapter,
+            ICCBotFrameworkHttpAdapter botAdapter,
             IUserDataRepository userDataRepository,
             IStringLocalizer<Strings> localizer)
         {
@@ -74,7 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
 
             int maxNumberOfAttempts = 10;
             await this.botAdapter.ContinueConversationAsync(
-               botAppId: this.authorAppId,
+               botId: this.authorAppId,
                reference: conversationReference,
                callback: async (turnContext, cancellationToken) =>
                {

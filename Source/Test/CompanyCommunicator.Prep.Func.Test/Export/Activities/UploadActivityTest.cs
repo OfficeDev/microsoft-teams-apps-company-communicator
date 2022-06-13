@@ -34,6 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         private readonly Mock<IStorageClientFactory> storageClientFactory = new Mock<IStorageClientFactory>();
         private readonly Mock<IDataStreamFacade> userDataStream = new Mock<IDataStreamFacade>();
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
+        private readonly Mock<BlobContainerClient> blobContainerClientMock = new Mock<BlobContainerClient>();
         private readonly string fileName = "fileName";
 
         /// <summary>
@@ -129,13 +130,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             string fileNameMessage = "FileName_Message_Delivery";
             var fileNameMessageString = new LocalizedString(fileNameMessage, fileNameMessage);
             this.localizer.Setup(_ => _[fileNameMessageString]).Returns(metaDataFileName);
-            this.userDataStream.Setup(x => x.GetTeamDataStreamAsync(It.IsAny<string>())).Returns(teamDatalist.ToAsyncEnumerable);
+            this.userDataStream.Setup(x => x.GetTeamDataStreamAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(teamDatalist.ToAsyncEnumerable);
 
             // Act
             await activityInstance.UploadActivityAsync((notificationData, metaData, this.fileName));
 
             // Assert
-            this.userDataStream.Verify(x => x.GetTeamDataStreamAsync(It.IsAny<string>()), Times.Once);
+            this.userDataStream.Verify(x => x.GetTeamDataStreamAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         /// <summary>
@@ -163,13 +164,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             string fileNameMessage = "FileName_Message_Delivery";
             var fileNameMessageString = new LocalizedString(fileNameMessage, fileNameMessage);
             this.localizer.Setup(_ => _[fileNameMessageString]).Returns(metaDataFileName);
-            this.userDataStream.Setup(x => x.GetUserDataStreamAsync(It.IsAny<string>())).Returns(userDatalist.ToAsyncEnumerable);
+            this.userDataStream.Setup(x => x.GetUserDataStreamAsync(It.IsAny<string>(), It.IsAny<string>())).Returns(userDatalist.ToAsyncEnumerable);
 
             // Act
             await activityInstance.UploadActivityAsync((notificationData, metaData, this.fileName));
 
             // Assert
-            this.userDataStream.Verify(x => x.GetUserDataStreamAsync(It.IsAny<string>()), Times.Once);
+            this.userDataStream.Verify(x => x.GetUserDataStreamAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         private static Mock<BlobContainerClient> GetBlobContainerClientMock()

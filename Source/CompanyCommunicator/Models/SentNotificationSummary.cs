@@ -49,6 +49,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public int? Unknown { get; set; }
 
         /// <summary>
+        /// Gets or sets the number of recipients whose delivery status is canceled.
+        /// </summary>
+        public int? Canceled { get; set; }
+
+        /// <summary>
         /// Gets or sets the total number of messages to be sent.
         /// </summary>
         public int TotalMessageCount { get; set; }

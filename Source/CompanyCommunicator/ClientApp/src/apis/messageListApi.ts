@@ -124,6 +124,11 @@ export const getTeams = async (): Promise<any> => {
     return await axios.get(url);
 }
 
+export const cancelSentNotification = async (id: number): Promise<any> => {
+    let url = baseAxiosUrl + "/sentnotifications/cancel/" + id;
+    return await axios.post(url);
+}
+
 export const getAppSettings = async (): Promise<any> => {
     let url = baseAxiosUrl + "/settings";
     return await axios.get(url);

@@ -197,6 +197,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public string ErrorMessage { get; set; }
 
         /// <summary>
+        /// Gets or sets the exception details for the user.
+        /// </summary>
+        public string Exception { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether a specific message instance was read by the user.
         /// </summary>
         public bool ReadStatus { get; set; }

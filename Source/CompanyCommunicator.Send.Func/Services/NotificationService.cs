@@ -20,18 +20,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
     {
         private readonly IGlobalSendingNotificationDataRepository globalSendingNotificationDataRepository;
         private readonly ISentNotificationDataRepository sentNotificationDataRepository;
+        private readonly INotificationDataRepository notificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationService"/> class.
         /// </summary>
         /// <param name="globalSendingNotificationDataRepository">The global sending notification data repository.</param>
         /// <param name="sentNotificationDataRepository">The sent notification data repository.</param>
+        /// <param name="notificationDataRepository">The notification data repository.</param>
         public NotificationService(
             IGlobalSendingNotificationDataRepository globalSendingNotificationDataRepository,
-            ISentNotificationDataRepository sentNotificationDataRepository)
+            ISentNotificationDataRepository sentNotificationDataRepository,
+            INotificationDataRepository notificationDataRepository)
         {
             this.globalSendingNotificationDataRepository = globalSendingNotificationDataRepository ?? throw new ArgumentNullException(nameof(globalSendingNotificationDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
         }
 
         /// <inheritdoc/>
@@ -74,6 +78,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
         }
 
         /// <inheritdoc/>
+        public async Task<bool> IsNotificationCanceled(SendQueueMessageContent message)
+        {
+            // Check notification status.
+            var notification = await this.notificationDataRepository.GetAsync(
+                partitionKey: NotificationDataTableNames.SentNotificationsPartition,
+                rowKey: message.NotificationId);
+
+            // Check if the Status is Canceled.
+            if (notification.Status.Equals(nameof(NotificationStatus.Canceled)) ||
+                notification.Status.Equals(nameof(NotificationStatus.Canceling)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc/>
         public async Task SetSendNotificationThrottled(double sendRetryDelayNumberOfSeconds)
         {
             // Ensure global retry timestamp is less re-queue delay time for the message.
@@ -93,7 +115,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
             int totalNumberOfSendThrottles,
             int statusCode,
             string allSendStatusCodes,
-            string errorMessage)
+            string errorMessage,
+            string exception = null)
         {
             // Current time as sent date time.
             var sentDateTime = DateTime.UtcNow;
@@ -108,6 +131,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
             notification.IsStatusCodeFromCreateConversation = false;
             notification.StatusCode = (int)statusCode;
             notification.ErrorMessage = errorMessage;
+            if (!string.IsNullOrEmpty(exception))
+            {
+                notification.Exception = exception;
+            }
+
             notification.NumberOfFunctionAttemptsToSend = notification.NumberOfFunctionAttemptsToSend + 1;
             notification.AllSendStatusCodes = $"{notification.AllSendStatusCodes ?? string.Empty}{allSendStatusCodes}";
 

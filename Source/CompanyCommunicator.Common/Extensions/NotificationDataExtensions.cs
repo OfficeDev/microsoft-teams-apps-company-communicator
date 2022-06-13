@@ -23,6 +23,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
         {
             return NotificationStatus.Failed.ToString().Equals(entity.Status) ||
                 NotificationStatus.Sent.ToString().Equals(entity.Status) ||
+                NotificationStatus.Canceled.ToString().Equals(entity.Status) ||
                 entity.IsCompleted;
         }
 

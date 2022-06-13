@@ -49,13 +49,13 @@ namespace Microsoft.Teams.App.CompanyCommunicator.Common.Test.Repositories.Notif
                     },
                     new SaveMessageTestData
                     {
-                        InitialMessage = new string('x', NotificationDataRepository.MaxMessageLengthToSave - 1),
+                        InitialMessage = new string('x', BaseRepository<NotificationDataEntity>.MaxMessageLengthToSave - 1),
                         ShouldUpdateMessage = false,
                         FailMessage = "Should not update message that will exceed max length.",
                     },
                     new SaveMessageTestData
                     {
-                        InitialMessage = new string('x', NotificationDataRepository.MaxMessageLengthToSave),
+                        InitialMessage = new string('x', BaseRepository<NotificationDataEntity>.MaxMessageLengthToSave),
                         ShouldUpdateMessage = false,
                         FailMessage = "Should not update message that is already at max length.",
                     },
