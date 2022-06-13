@@ -32,7 +32,7 @@ If you already have older version of Company Communicator installed, then please
 
 Migrating to newer versions. 
 
- * [v5 migration guide](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/v5-migration-guide)
+ * [v5 migration guide](https://github.com/cristianoag/microsoft-teams-apps-company-communicator/wiki/v5-migration-guide)
  * [v4 migration guide](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/v4-migration-guide)
  * [v3 migration guide](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/v3-migration-guide)
  * [v2 migration guide](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/v2-migration-guide)
@@ -76,6 +76,10 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 ## Community Fork Changes
 
 This is the log of changes implemented for Company Communicator.
+
+**v5.11**
+  - ATTENTION!!! - Merge of v5.1. If you have a deployment based on v4.XX you need to follow instructions [v5 migration guide](https://github.com/cristianoag/microsoft-teams-apps-company-communicator/wiki/v5-migration-guide) to update your setup.
+  - Inclusion of the MasterAdminUpns and TargetingEnabled variables to the deployment template, those variables will be available during setup moving forward.
 
 **v4.51**
 - Fix for the fsevents issue

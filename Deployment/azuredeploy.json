@@ -250,8 +250,6 @@
       "metadata": {
         "description": "A GUID used to identify the role assignment. This is Default value."
       }
-    }
-  },
     },
     "ImageUploadBlobStorage": {
       "defaultValue": false,
@@ -265,6 +263,20 @@
       "type": "int",
       "metadata": {
         "description": "Azure Blob SAS Token duration"
+      }
+    },
+    "TargetingEnabled": {
+      "defaultValue": false,
+      "type": "bool",
+      "metadata": {
+        "description": "Enables targeting mode"
+      }
+    },
+    "MasterAdminUpns": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Semicolon-delimited list of the master admins (UPNs) allowed to setup and configure targeting mode."
       }
     }
   },
