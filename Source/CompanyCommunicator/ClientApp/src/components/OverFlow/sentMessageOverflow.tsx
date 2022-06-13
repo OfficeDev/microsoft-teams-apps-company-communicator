@@ -7,7 +7,7 @@ import { withTranslation, WithTranslation } from "react-i18next";
 import { Menu, MoreIcon } from '@fluentui/react-northstar';
 import { getBaseUrl } from '../../configVariables';
 import * as microsoftTeams from "@microsoft/teams-js";
-import { duplicateDraftNotification } from '../../apis/messageListApi';
+import { duplicateDraftNotification, cancelSentNotification } from '../../apis/messageListApi';
 import { selectMessage, getMessagesList, getDraftMessagesList } from '../../actions';
 import { TFunction } from "i18next";
 
@@ -49,6 +49,12 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
     }
 
     public render(): JSX.Element {
+        let shouldNotShowCancel;
+        if (this.props.message != undefined && this.props.message.status != undefined) {
+            const status = this.props.message.status.toUpperCase();
+            shouldNotShowCancel = status === "SENT" || status === "UNKNOWN" || status === "FAILED" || status === "CANCELED" || status === "CANCELING";
+        }
+
         const items = [
             {
                 key: 'more',
@@ -83,6 +89,20 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                                 });
                             }
                         },
+                        {
+                            key: 'cancel',
+                            content: this.localize("Cancel"),
+                            hidden: shouldNotShowCancel,
+                            onClick: (event: any) => {
+                                event.stopPropagation();
+                                this.setState({
+                                    menuOpen: false,
+                                });
+                                this.cancelSentMessage(this.props.message.id).then(() => {
+                                    this.props.getMessagesList();
+                                });
+                            }
+                        },
                     ],
                 },
                 onMenuOpenChange: (e: any, { menuOpen }: any) => {
@@ -112,6 +132,14 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
     private duplicateDraftMessage = async (id: number) => {
         try {
             await duplicateDraftNotification(id);
+        } catch (error) {
+            return error;
+        }
+    }
+
+    private cancelSentMessage = async (id: number) => {
+        try {
+            await cancelSentNotification(id);
         } catch (error) {
             return error;
         }

@@ -14,17 +14,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
     public interface IDataStreamFacade
     {
         /// <summary>
-        /// get the users data streams.
+        /// Get the user data list, which can be iterated asynchronously.
         /// </summary>
         /// <param name="notificationId">the notification id.</param>
+        /// <param name="notificationStatus">the notification status.</param>
         /// <returns>the streams of user data.</returns>
-        IAsyncEnumerable<IEnumerable<UserData>> GetUserDataStreamAsync(string notificationId);
+        IAsyncEnumerable<IEnumerable<UserData>> GetUserDataStreamAsync(string notificationId, string notificationStatus);
 
         /// <summary>
-        /// get the team data streams.
+        /// Get the team data list, which can be iterated asynchronously.
         /// </summary>
         /// <param name="notificationId">the notification id.</param>
+        /// <param name="notificationStatus">the notification status.</param>
         /// <returns>the streams of team data.</returns>
-        IAsyncEnumerable<IEnumerable<TeamData>> GetTeamDataStreamAsync(string notificationId);
+        IAsyncEnumerable<IEnumerable<TeamData>> GetTeamDataStreamAsync(string notificationId, string notificationStatus);
     }
 }

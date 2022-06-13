@@ -1,0 +1,1278 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseResourceName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The base name to use for the resources that will be provisioned."
+      }
+    },
+    "userClientId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "metadata": {
+        "description": "The client ID of the user bot Azure AD app, e.g., 123e4567-e89b-12d3-a456-426655440000."
+      }
+    },
+    "userAppCertName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The X.509 certificate name of the user bot Azure AD app."
+      }
+    },
+    "authorClientId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "metadata": {
+        "description": "The client ID of the author bot Azure AD app, e.g., 123e4567-e89b-12d3-a456-426655440000."
+      }
+    },
+    "authorAppCertName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The X.509 certificate name of the author bot Azure AD app."
+      }
+    },
+    "graphAppId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "metadata": {
+        "description": "The client ID of the Microsoft Graph Azure AD app, e.g., 123e4567-e89b-12d3-a456-426655440000."
+      }
+    },
+    "graphAppCertName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The X.509 certificate name of the Microsoft Graph Azure AD app."
+      }
+    },
+    "senderUPNList": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
+      }
+    },
+    "ProactivelyInstallUserApp": {
+      "defaultValue": true,
+      "type": "Bool",
+      "metadata": {
+        "description": "If proactive app installation should be enabled."
+      }
+    },
+    "objectId": {
+      "type": "string",
+      "metadata": {
+        "description": "Object Id of the user to deploy to (If you are not sure how to get Object ID, please check Azure Active Directory in Azure Portal. Under Manage, click Users and select the appropriate user. The Object ID is shown in the Identity section). e.g 98f3ece2-3a5a-428b-aa4f-4c41b3f6eef0."
+      }
+    },
+    "UserAppExternalId": {
+      "defaultValue": "148a66bb-e83d-425a-927d-09f4299a9274",
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "User app external ID."
+      }
+    },
+    "DefaultCulture": {
+      "defaultValue": "en-US",
+      "allowedValues": [
+        "ar-SA",
+        "de-DE",
+        "en-US",
+        "es-ES",
+        "fr-FR",
+        "he-IL",
+        "ja-JP",
+        "ko-KR",
+        "pt-BR",
+        "ru-RU",
+        "zh-CN",
+        "zh-TW"
+      ],
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "Default culture."
+      }
+    },
+    "SupportedCultures": {
+      "defaultValue": "ar-SA,de-DE,en-US,es-ES,fr-FR,he-IL,ja-JP,ko-KR,pt-BR,ru-RU,zh-CN,zh-TW",
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "Comma-delimited list of the supported cultures."
+      }
+    },
+    "customDomainOption": {
+      "type": "string",
+      "allowedValues": [
+        "Custom domain name (recommended)",
+        "Azure Front Door"
+      ],
+      "defaultValue": "Azure Front Door",
+      "metadata": {
+        "description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs. "
+      }
+    },
+    "appDisplayName": {
+      "type": "string",
+      "defaultValue": "Company Communicator",
+      "minLength": 1,
+      "metadata": {
+        "description": "The app (and bot) display name."
+      }
+    },
+    "appDescription": {
+      "type": "string",
+      "defaultValue": "Broadcast messages to multiple teams and people in one go",
+      "minLength": 1,
+      "metadata": {
+        "description": "The app (and bot) description."
+      }
+    },
+    "appIconUrl": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-company-communicator-app/master/Manifest/color.png",
+      "metadata": {
+        "description": "The link to the icon for the app. It must resolve to a PNG file."
+      }
+    },
+    "tenantId": {
+      "type": "string",
+      "defaultValue": "[subscription().tenantId]",
+      "minLength": 1,
+      "maxLength": 36,
+      "metadata": {
+        "description": "The ID of the tenant to which the app will be deployed."
+      }
+    },
+    "hostingPlanSku": {
+      "type": "string",
+      "allowedValues": [
+        "Basic",
+        "Standard",
+        "Premium"
+      ],
+      "defaultValue": "Standard",
+      "metadata": {
+        "description": "The pricing tier for the hosting plan."
+      }
+    },
+    "hostingPlanSize": {
+      "type": "string",
+      "allowedValues": [
+        "1",
+        "2",
+        "3"
+      ],
+      "defaultValue": "2",
+      "metadata": {
+        "description": "The size of the hosting plan (small, medium, or large)."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "gitRepoUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "The URL to the GitHub repository to deploy."
+      },
+      "defaultValue": "https://github.com/OfficeDev/microsoft-teams-company-communicator-app.git"
+    },
+    "gitBranch": {
+      "type": "string",
+      "metadata": {
+        "description": "The branch of the GitHub repository to deploy."
+      },
+      "defaultValue": "master"
+    },
+    "serviceBusWebAppRoleNameGuid": {
+      "defaultValue": "958380b3-630d-4823-b933-f59d92cdcada",
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "A GUID used to identify the role assignment. This is Default value."
+      }
+    },
+    "serviceBusPrepFuncRoleNameGuid": {
+      "defaultValue": "ce6ca916-08e9-4639-bfbe-9d098baf42ca",
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "A GUID used to identify the role assignment. This is Default value."
+      }
+    },
+    "serviceBusSendFuncRoleNameGuid": {
+      "defaultValue": "960365a2-c7bf-4ff3-8887-efa86fe4a163",
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "A GUID used to identify the role assignment. This is Default value."
+      }
+    },
+    "serviceBusDataFuncRoleNameGuid": {
+      "defaultValue": "d42703bc-421d-4d98-bc4d-cd2bb16e5b0a",
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "A GUID used to identify the role assignment. This is Default value."
+      }
+    },
+    "storageAccountWebAppRoleNameGuid": {
+      "defaultValue": "edd0cc48-2cf7-490e-99e8-131311e42030",
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "A GUID used to identify the role assignment. This is Default value."
+      }
+    },
+    "storageAccountPrepFuncRoleNameGuid": {
+      "defaultValue": "9332a9e9-93f4-48d9-8121-d279f30a732e",
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "A GUID used to identify the role assignment. This is Default value."
+      }
+    },
+    "storageAccountDataFuncRoleNameGuid": {
+      "defaultValue": "5b67af51-4a98-47e1-9d22-745069f51a13",
+      "minLength": 1,
+      "type": "String",
+      "metadata": {
+        "description": "A GUID used to identify the role assignment. This is Default value."
+      }
+    }
+  },
+  "variables": {
+    "botName": "[parameters('baseResourceName')]",
+    "authorBotName": "[concat(parameters('baseResourceName'), '-author')]",
+    "botAppName": "[parameters('baseResourceName')]",
+    "botAppDomain": "[concat(variables('botAppName'), '.azurewebsites.net')]",
+    "botAppUrl": "[concat('https://', variables('botAppDomain'))]",
+    "hostingPlanName": "[parameters('baseResourceName')]",
+    "storageAccountName": "[uniquestring(concat(resourceGroup().id, parameters('baseResourceName')))]",
+    "appInsightsName": "[parameters('baseResourceName')]",
+    "prepFunctionAppName": "[concat(parameters('baseResourceName'), '-prep-function')]",
+    "sendFunctionAppName": "[concat(parameters('baseResourceName'), '-function')]",
+    "dataFunctionAppName": "[concat(parameters('baseResourceName'), '-data-function')]",
+    "serviceBusNamespaceName": "[parameters('baseResourceName')]",
+    "serviceBusSendQueueName": "company-communicator-send",
+    "serviceBusDataQueueName": "company-communicator-data",
+    "serviceBusPrepareToSendQueueName": "company-communicator-prep",
+    "serviceBusExportQueueName": "company-communicator-export",
+    "defaultSASKeyName": "RootManageSharedAccessKey",
+    "authRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('serviceBusNamespaceName'), variables('defaultSASKeyName'))]",
+    "sharedSkus": [
+      "Free",
+      "Shared"
+    ],
+    "isSharedPlan": "[contains(variables('sharedSkus'), parameters('hostingPlanSku'))]",
+    "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]",
+    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]",
+    "frontDoorName": "[parameters('baseResourceName')]",
+    "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.net'))]",
+    "ProactivelyInstallUserApp": "[parameters('ProactivelyInstallUserApp')]",
+    "UserAppExternalId": "[parameters('UserAppExternalId')]",
+    "i18n:DefaultCulture": "[parameters('DefaultCulture')]",
+    "i18n:SupportedCultures": "[parameters('SupportedCultures')]",
+    "AzureserviceBusDataOwner": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '090c5cfd-751d-490a-894a-3ce6f1109419')]",
+    "StorageBlobDataContributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+    "keyvaultName": "[concat(variables('botAppName'), 'vault')]",
+    "keyVaultUrl": "[concat('https://',variables('keyvaultName'), '.vault.azure.net')]",
+    "subscriptionTenantId": "[subscription().tenantId]",
+    "StorageAccountSecretName": "[concat(variables('keyVaultName'), 'StorageAccountConnectionString')]",
+    "ServiceBusSecretName": "[concat(variables('keyVaultName'), 'ServiceBusConnectionString')]",
+    "AppInsightsSecretName": "[concat(variables('keyVaultName'),'AppInsightsKey')]",
+    "StorageAccountSecretResourceId": "[resourceId(resourceGroup().name, 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('StorageAccountSecretName'))]",
+    "ServiceBusSecretResourceId": "[resourceId(resourceGroup().name, 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('ServiceBusSecretName'))]",
+    "AppInsightsSecretResourceId": "[resourceId(resourceGroup().name, 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('AppInsightsSecretName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('storageAccountName')]",
+      "apiVersion": "2019-06-01",
+      "location": "[parameters('location')]",
+      "kind": "Storage",
+      "properties": {
+        "supportsHttpsTrafficOnly": true,
+        "allowBlobPublicAccess": false,
+        "minimumTlsVersion": "TLS1_2"
+      },
+      "sku": {
+        "name": "Standard_LRS"
+      }
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces",
+      "apiVersion": "2017-04-01",
+      "name": "[variables('serviceBusNamespaceName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Basic",
+        "tier": "Basic"
+      },
+      "resources": [
+        {
+          "type": "Queues",
+          "apiVersion": "2017-04-01",
+          "name": "[variables('serviceBusSendQueueName')]",
+          "dependsOn": [
+            "[concat('Microsoft.ServiceBus/namespaces/', variables('serviceBusNamespaceName'))]"
+          ],
+          "properties": {
+            "lockDuration": "PT5M",
+            "maxSizeInMegabytes": 1024,
+            "requiresDuplicateDetection": false,
+            "requiresSession": false,
+            "defaultMessageTimeToLive": "P14D",
+            "deadLetteringOnMessageExpiration": false,
+            "enableBatchedOperations": true,
+            "duplicateDetectionHistoryTimeWindow": "PT10M",
+            "maxDeliveryCount": 10,
+            "status": "Active",
+            "enablePartitioning": false,
+            "enableExpress": false
+          }
+        },
+        {
+          "type": "Queues",
+          "apiVersion": "2017-04-01",
+          "name": "[variables('serviceBusDataQueueName')]",
+          "dependsOn": [
+            "[concat('Microsoft.ServiceBus/namespaces/', variables('serviceBusNamespaceName'))]"
+          ],
+          "properties": {
+            "lockDuration": "PT5M",
+            "maxSizeInMegabytes": 1024,
+            "requiresDuplicateDetection": false,
+            "requiresSession": false,
+            "defaultMessageTimeToLive": "P14D",
+            "deadLetteringOnMessageExpiration": false,
+            "enableBatchedOperations": true,
+            "duplicateDetectionHistoryTimeWindow": "PT10M",
+            "maxDeliveryCount": 10,
+            "status": "Active",
+            "enablePartitioning": false,
+            "enableExpress": false
+          }
+        },
+        {
+          "type": "Queues",
+          "apiVersion": "2017-04-01",
+          "name": "[variables('serviceBusPrepareToSendQueueName')]",
+          "dependsOn": [
+            "[concat('Microsoft.ServiceBus/namespaces/', variables('serviceBusNamespaceName'))]"
+          ],
+          "properties": {
+            "lockDuration": "PT5M",
+            "maxSizeInMegabytes": 1024,
+            "requiresDuplicateDetection": false,
+            "requiresSession": false,
+            "defaultMessageTimeToLive": "P14D",
+            "deadLetteringOnMessageExpiration": false,
+            "enableBatchedOperations": true,
+            "duplicateDetectionHistoryTimeWindow": "PT10M",
+            "maxDeliveryCount": 10,
+            "status": "Active",
+            "enablePartitioning": false,
+            "enableExpress": false
+          }
+        },
+        {
+          "type": "Queues",
+          "apiVersion": "2017-04-01",
+          "name": "[variables('serviceBusExportQueueName')]",
+          "dependsOn": [
+            "[concat('Microsoft.ServiceBus/namespaces/', variables('serviceBusNamespaceName'))]"
+          ],
+          "properties": {
+            "lockDuration": "PT5M",
+            "maxSizeInMegabytes": 1024,
+            "requiresDuplicateDetection": false,
+            "requiresSession": false,
+            "defaultMessageTimeToLive": "P14D",
+            "deadLetteringOnMessageExpiration": false,
+            "enableBatchedOperations": true,
+            "duplicateDetectionHistoryTimeWindow": "PT10M",
+            "maxDeliveryCount": 10,
+            "status": "Active",
+            "enablePartitioning": false,
+            "enableExpress": false
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2016-09-01",
+      "name": "[variables('hostingPlanName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "name": "[variables('hostingPlanName')]",
+        "hostingEnvironment": "",
+        "numberOfWorkers": 1
+      },
+      "sku": {
+        "name": "[if(variables('isSharedPlan'), concat(variables('skuFamily'), '1'), concat(variables('skuFamily'), parameters('hostingPlanSize')))]",
+        "tier": "[parameters('hostingPlanSku')]",
+        "size": "[concat(variables('skuFamily'), parameters('hostingPlanSize'))]",
+        "family": "[variables('skuFamily')]",
+        "capacity": 0
+      }
+    },
+    {
+      "apiVersion": "2015-05-01",
+      "name": "[variables('appInsightsName')]",
+      "type": "Microsoft.Insights/components",
+      "location": "[parameters('location')]",
+      "tags": {
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('botAppName'))]": "Resource"
+      },
+      "properties": {
+        "Application_Type": "web",
+        "Request_Source": "rest"
+      }
+    },
+    {
+      "apiVersion": "2021-03-01",
+      "name": "[variables('authorBotName')]",
+      "type": "Microsoft.BotService/botServices",
+      "location": "global",
+      "sku": {
+        "name": "F0"
+      },
+      "kind": "azurebot",
+      "properties": {
+        "displayName": "[concat(parameters('appDisplayName'),'-author')]",
+        "description": "[parameters('appDescription')]",
+        "iconUrl": "[parameters('appIconUrl')]",
+        "msaAppId": "[parameters('authorClientId')]",
+        "endpoint": "[concat(variables('botAppUrl'), '/api/messages/author')]",
+        "developerAppInsightKey": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
+      },
+      "resources": [
+        {
+          "name": "[concat(variables('authorBotName'), '/MsTeamsChannel')]",
+          "type": "Microsoft.BotService/botServices/channels",
+          "apiVersion": "2021-03-01",
+          "location": "global",
+          "sku": {
+            "name": "F0"
+          },
+          "properties": {
+            "channelName": "MsTeamsChannel",
+            "location": "global",
+            "properties": {
+              "isEnabled": true
+            }
+          },
+          "dependsOn": [
+            "[concat('Microsoft.BotService/botServices/', variables('authorBotName'))]"
+          ]
+        }
+      ]
+    },
+    {
+      "apiVersion": "2021-03-01",
+      "name": "[variables('botName')]",
+      "type": "Microsoft.BotService/botServices",
+      "location": "global",
+      "sku": {
+        "name": "F0"
+      },
+      "kind": "azurebot",
+      "properties": {
+        "displayName": "[parameters('appDisplayName')]",
+        "description": "[parameters('appDescription')]",
+        "iconUrl": "[parameters('appIconUrl')]",
+        "msaAppId": "[parameters('userClientId')]",
+        "endpoint": "[concat(variables('botAppUrl'), '/api/messages/user')]",
+        "developerAppInsightKey": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
+      },
+      "resources": [
+        {
+          "name": "[concat(variables('botName'), '/MsTeamsChannel')]",
+          "type": "Microsoft.BotService/botServices/channels",
+          "apiVersion": "2021-03-01",
+          "location": "global",
+          "sku": {
+            "name": "F0"
+          },
+          "properties": {
+            "channelName": "MsTeamsChannel",
+            "location": "global",
+            "properties": {
+              "isEnabled": true
+            }
+          },
+          "dependsOn": [
+            "[concat('Microsoft.BotService/botServices/', variables('botName'))]"
+          ]
+        }
+      ]
+    },
+    {
+      "apiVersion": "2016-08-01",
+      "type": "Microsoft.Web/sites",
+      "name": "[variables('botAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "app",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "name": "[variables('botAppName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "enabled": true,
+        "reserved": false,
+        "clientAffinityEnabled": true,
+        "clientCertEnabled": false,
+        "hostNamesDisabled": false,
+        "containerSize": 0,
+        "dailyMemoryTimeQuota": 0,
+        "httpsOnly": true,
+        "siteConfig": {
+          "ftpsState": "Disabled",
+          "alwaysOn": "[not(variables('isSharedPlan'))]",
+          "cors": {
+            "supportCredentials": true,
+            "allowedOrigins": [
+              "[concat('https://', variables('frontDoorDomain'))]"
+            ]
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
+        "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('prepFunctionAppName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('sendFunctionAppName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('dataFunctionAppName'))]"
+      ],
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "appsettings",
+          "type": "config",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('botAppName'))]",
+            "[resourceId('Microsoft.KeyVault/vaults/', variables('keyVaultName'))]",
+            "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('StorageAccountSecretName'))]",
+            "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('ServiceBusSecretName'))]"
+          ],
+          "properties": {
+            "PROJECT": "Source/CompanyCommunicator/Microsoft.Teams.Apps.CompanyCommunicator.csproj",
+            "SITE_ROLE": "app",
+            "i18n:DefaultCulture": "[variables('i18n:DefaultCulture')]",
+            "i18n:SupportedCultures": "[variables('i18n:SupportedCultures')]",
+            "ProactivelyInstallUserApp": "[variables('ProactivelyInstallUserApp')]",
+            "UserAppExternalId": "[variables('UserAppExternalId')]",
+            "AzureAd:TenantId": "[parameters('tenantId')]",
+            "AzureAd:ClientId": "[parameters('graphAppId')]",
+            "AzureAd:ClientSecret": "",
+            "AzureAd:ApplicationIdURI": "[if(variables('useFrontDoor'), concat('api://', variables('frontDoorDomain')), '')]",
+            "UserAppId": "[parameters('userClientId')]",
+            "UserAppCertName": "[parameters('userAppCertName')]",
+            "AuthorAppId": "[parameters('authorClientId')]",
+            "AuthorAppCertName": "[parameters('authorAppCertName')]",
+            "GraphAppId": "[parameters('graphAppId')]",
+            "GraphAppCertName": "[parameters('graphAppCertName')]",
+            "StorageAccountConnectionString": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('StorageAccountSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
+            "ServiceBusConnection": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('ServiceBusSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
+            "ServiceBusNamespace": "[concat(variables('serviceBusNamespaceName'),'.servicebus.windows.net')]",
+            "StorageAccountName": "[variables('storageAccountName')]",
+            "UseManagedIdentity": "true",
+            "AllowedTenants": "[parameters('tenantId')]",
+            "DisableTenantFilter": "false",
+            "AuthorizedCreatorUpns": "[parameters('senderUPNList')]",
+            "UseCertificate": "true",
+            "DisableAuthentication": "false",
+            "DisableCreatorUpnCheck": "false",
+            "WEBSITE_LOAD_CERTIFICATES": "*",
+            "APPINSIGHTS_INSTRUMENTATIONKEY": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('AppInsightsSecretResourceId'), '2015-06-01').secretUriWithVersion, ')')]",
+            "WEBSITE_NODE_DEFAULT_VERSION": "10.15.2",
+            "KeyVault:Url": "[variables('keyVaultUrl')]",
+            "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false"
+          }
+        },
+        {
+          "apiVersion": "2016-08-01",
+          "name": "web",
+          "type": "sourcecontrols",
+          "condition": "[not(empty(parameters('gitRepoUrl')))]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('botAppName'))]",
+            "[resourceId('Microsoft.Web/sites/config', variables('botAppName'), 'appsettings')]"
+          ],
+          "properties": {
+            "RepoUrl": "[parameters('gitRepoUrl')]",
+            "branch": "[parameters('gitBranch')]",
+            "IsManualIntegration": true
+          }
+        }
+      ]
+    },
+    {
+      "apiVersion": "2016-08-01",
+      "type": "Microsoft.Web/sites",
+      "name": "[variables('prepFunctionAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "name": "[variables('prepFunctionAppName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "hostingEnvironment": "",
+        "clientAffinityEnabled": false,
+        "httpsOnly": true,
+        "siteConfig": {
+          "ftpsState": "Disabled",
+          "alwaysOn": "[not(variables('isSharedPlan'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]"
+      ],
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "appsettings",
+          "type": "config",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('prepFunctionAppName'))]",
+            "[resourceId('Microsoft.KeyVault/vaults/', variables('keyVaultName'))]",
+            "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('StorageAccountSecretName'))]",
+            "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('ServiceBusSecretName'))]"
+          ],
+          "properties": {
+            "PROJECT": "Source\\CompanyCommunicator.Prep.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.csproj",
+            "SITE_ROLE": "function",
+            "i18n:DefaultCulture": "[variables('i18n:DefaultCulture')]",
+            "i18n:SupportedCultures": "[variables('i18n:SupportedCultures')]",
+            "ProactivelyInstallUserApp": "[variables('ProactivelyInstallUserApp')]",
+            "UserAppExternalId": "[variables('UserAppExternalId')]",
+            "TenantId": "[parameters('tenantId')]",
+            "UserAppId": "[parameters('userClientId')]",
+            "UserAppCertName": "[parameters('userAppCertName')]",
+            "AuthorAppId": "[parameters('authorClientId')]",
+            "AuthorAppCertName": "[parameters('authorAppCertName')]",
+            "GraphAppId": "[parameters('graphAppId')]",
+            "GraphAppCertName": "[parameters('graphAppCertName')]",
+            "StorageAccountConnectionString": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('StorageAccountSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
+            "ServiceBusConnection": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('ServiceBusSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
+            "ServiceBusNamespace": "[concat(variables('serviceBusNamespaceName'),'.servicebus.windows.net')]",
+            "StorageAccountName": "[variables('storageAccountName')]",
+            "UseManagedIdentity": "true",
+            "UseCertificate": "true",
+            "WEBSITE_LOAD_CERTIFICATES": "*",
+            "APPINSIGHTS_INSTRUMENTATIONKEY": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('AppInsightsSecretResourceId'), '2015-06-01').secretUriWithVersion, ')')]",
+            "KeyVault:Url": "[variables('keyVaultUrl')]",
+            "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]",
+            "AzureWebJobsDashboard": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('StorageAccountSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
+            "FUNCTIONS_EXTENSION_VERSION": "~3",
+            "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+            "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]",
+            "WEBSITE_CONTENTSHARE": "[toLower(variables('prepFunctionAppName'))]",
+            "AzureFunctionsJobHost__extensions__durableTask__maxConcurrentOrchestratorFunctions": "3",
+            "AzureFunctionsJobHost__extensions__durableTask__maxConcurrentActivityFunctions": "10",
+            "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
+            "WEBSITE_NODE_DEFAULT_VERSION": "10.15.2"
+          }
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "web",
+          "type": "sourcecontrols",
+          "condition": "[not(empty(parameters('gitRepoUrl')))]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('prepFunctionAppName'))]",
+            "[resourceId('Microsoft.Web/sites/config', variables('prepFunctionAppName'), 'appsettings')]"
+          ],
+          "properties": {
+            "RepoUrl": "[parameters('gitRepoUrl')]",
+            "branch": "[parameters('gitBranch')]",
+            "IsManualIntegration": true
+          }
+        }
+      ]
+    },
+    {
+      "apiVersion": "2016-08-01",
+      "type": "Microsoft.Web/sites",
+      "name": "[variables('sendFunctionAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "name": "[variables('sendFunctionAppName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "hostingEnvironment": "",
+        "clientAffinityEnabled": false,
+        "httpsOnly": true,
+        "siteConfig": {
+          "ftpsState": "Disabled",
+          "alwaysOn": "[not(variables('isSharedPlan'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]"
+      ],
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "appsettings",
+          "type": "config",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('sendFunctionAppName'))]",
+            "[resourceId('Microsoft.KeyVault/vaults/', variables('keyVaultName'))]",
+            "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('StorageAccountSecretName'))]",
+            "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('ServiceBusSecretName'))]"
+          ],
+          "properties": {
+            "PROJECT": "Source\\CompanyCommunicator.Send.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.csproj",
+            "SITE_ROLE": "function",
+            "i18n:DefaultCulture": "[variables('i18n:DefaultCulture')]",
+            "i18n:SupportedCultures": "[variables('i18n:SupportedCultures')]",
+            "ProactivelyInstallUserApp": "[variables('ProactivelyInstallUserApp')]",
+            "UserAppId": "[parameters('userClientId')]",
+            "UserAppCertName": "[parameters('userAppCertName')]",
+            "AuthorAppId": "[parameters('authorClientId')]",
+            "AuthorAppCertName": "[parameters('authorAppCertName')]",
+            "GraphAppId": "[parameters('graphAppId')]",
+            "GraphAppCertName": "[parameters('graphAppCertName')]",
+            "StorageAccountConnectionString": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('StorageAccountSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
+            "ServiceBusConnection": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('ServiceBusSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
+            "ServiceBusNamespace": "[concat(variables('serviceBusNamespaceName'),'.servicebus.windows.net')]",
+            "StorageAccountName": "[variables('storageAccountName')]",
+            "UseManagedIdentity": "true",
+            "UseCertificate": "true",
+            "WEBSITE_LOAD_CERTIFICATES": "*",
+            "MaxNumberOfAttempts": "5",
+            "APPINSIGHTS_INSTRUMENTATIONKEY": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('AppInsightsSecretResourceId'), '2015-06-01').secretUriWithVersion, ')')]",
+            "KeyVault:Url": "[variables('keyVaultUrl')]",
+            "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]",
+            "AzureWebJobsDashboard": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('StorageAccountSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
+            "FUNCTIONS_EXTENSION_VERSION": "~3",
+            "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+            "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]",
+            "WEBSITE_CONTENTSHARE": "[toLower(variables('sendFunctionAppName'))]",
+            "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
+            "WEBSITE_NODE_DEFAULT_VERSION": "10.15.2"
+          }
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "web",
+          "type": "sourcecontrols",
+          "condition": "[not(empty(parameters('gitRepoUrl')))]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('sendFunctionAppName'))]",
+            "[resourceId('Microsoft.Web/sites/config', variables('sendFunctionAppName'), 'appsettings')]"
+          ],
+          "properties": {
+            "RepoUrl": "[parameters('gitRepoUrl')]",
+            "branch": "[parameters('gitBranch')]",
+            "IsManualIntegration": true
+          }
+        }
+      ]
+    },
+    {
+      "apiVersion": "2016-08-01",
+      "type": "Microsoft.Web/sites",
+      "name": "[variables('dataFunctionAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "name": "[variables('dataFunctionAppName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "hostingEnvironment": "",
+        "clientAffinityEnabled": false,
+        "httpsOnly": true,
+        "siteConfig": {
+          "ftpsState": "Disabled",
+          "alwaysOn": "[not(variables('isSharedPlan'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]"
+      ],
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "appsettings",
+          "type": "config",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('dataFunctionAppName'))]",
+            "[resourceId('Microsoft.KeyVault/vaults/', variables('keyVaultName'))]",
+            "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('StorageAccountSecretName'))]",
+            "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('ServiceBusSecretName'))]"
+          ],
+          "properties": {
+            "PROJECT": "Source\\CompanyCommunicator.Data.Func\\Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.csproj",
+            "SITE_ROLE": "function",
+            "i18n:DefaultCulture": "[variables('i18n:DefaultCulture')]",
+            "i18n:SupportedCultures": "[variables('i18n:SupportedCultures')]",
+            "ProactivelyInstallUserApp": "[variables('ProactivelyInstallUserApp')]",
+            "UserAppId": "[parameters('userClientId')]",
+            "UserAppCertName": "[parameters('userAppCertName')]",
+            "AuthorAppId": "[parameters('authorClientId')]",
+            "AuthorAppCertName": "[parameters('authorAppCertName')]",
+            "GraphAppId": "[parameters('graphAppId')]",
+            "GraphAppCertName": "[parameters('graphAppCertName')]",
+            "StorageAccountConnectionString": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('StorageAccountSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
+            "ServiceBusConnection": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('ServiceBusSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
+            "ServiceBusNamespace": "[concat(variables('serviceBusNamespaceName'),'.servicebus.windows.net')]",
+            "StorageAccountName": "[variables('storageAccountName')]",
+            "UseManagedIdentity": "true",
+            "UseCertificate": "true",
+            "WEBSITE_LOAD_CERTIFICATES": "*",
+            "APPINSIGHTS_INSTRUMENTATIONKEY": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('AppInsightsSecretResourceId'), '2015-06-01').secretUriWithVersion, ')')]",
+            "KeyVault:Url": "[variables('keyVaultUrl')]",
+            "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]",
+            "AzureWebJobsDashboard": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('StorageAccountSecretResourceId'),'2015-06-01').secretUriWithVersion, ')')]",
+            "FUNCTIONS_EXTENSION_VERSION": "~3",
+            "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+            "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]",
+            "WEBSITE_CONTENTSHARE": "[toLower(variables('dataFunctionAppName'))]",
+            "CleanUpScheduleTriggerTime": "30 23 * * *",
+            "CleanUpFile": "1",
+            "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
+            "WEBSITE_NODE_DEFAULT_VERSION": "10.15.2"
+          }
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "web",
+          "type": "sourcecontrols",
+          "condition": "[not(empty(parameters('gitRepoUrl')))]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('dataFunctionAppName'))]",
+            "[resourceId('Microsoft.Web/sites/config', variables('dataFunctionAppName'), 'appsettings')]"
+          ],
+          "properties": {
+            "RepoUrl": "[parameters('gitRepoUrl')]",
+            "branch": "[parameters('gitBranch')]",
+            "IsManualIntegration": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[variables('keyvaultName')]",
+      "apiVersion": "2016-10-01",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "KeyVault"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('botAppName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('prepFunctionAppName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('sendFunctionAppName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('dataFunctionAppName'))]"
+      ],
+      "properties": {
+        "tenantId": "[variables('subscriptionTenantId')]",
+        "enableSoftDelete": true,
+        "accessPolicies": [
+          {
+            "tenantId": "[reference(concat('Microsoft.Web/sites/', variables('botAppName')), '2018-02-01', 'Full').identity.tenantId]",
+            "objectId": "[reference(concat('Microsoft.Web/sites/', variables('botAppName')), '2018-02-01', 'Full').identity.principalId]",
+            "permissions": {
+              "keys": [],
+              "secrets": [
+                "Get",
+                "Set",
+                "Restore"
+              ],
+              "certificates": [
+                "Get"
+              ]
+            }
+          },
+          {
+            "tenantId": "[reference(concat('Microsoft.Web/sites/', variables('prepFunctionAppName')), '2018-02-01', 'Full').identity.tenantId]",
+            "objectId": "[reference(concat('Microsoft.Web/sites/', variables('prepFunctionAppName')), '2018-02-01', 'Full').identity.principalId]",
+            "permissions": {
+              "keys": [],
+              "secrets": [
+                "Get"
+              ],
+              "certificates": [
+                "Get"
+              ]
+            }
+          },
+          {
+            "tenantId": "[reference(concat('Microsoft.Web/sites/', variables('sendFunctionAppName')), '2018-02-01', 'Full').identity.tenantId]",
+            "objectId": "[reference(concat('Microsoft.Web/sites/', variables('sendFunctionAppName')), '2018-02-01', 'Full').identity.principalId]",
+            "permissions": {
+              "keys": [],
+              "secrets": [
+                "Get"
+              ],
+              "certificates": [
+                "Get"
+              ]
+            }
+          },
+          {
+            "tenantId": "[reference(concat('Microsoft.Web/sites/', variables('dataFunctionAppName')), '2018-02-01', 'Full').identity.tenantId]",
+            "objectId": "[reference(concat('Microsoft.Web/sites/', variables('dataFunctionAppName')), '2018-02-01', 'Full').identity.principalId]",
+            "permissions": {
+              "keys": [],
+              "secrets": [
+                "Get"
+              ],
+              "certificates": [
+                "Get"
+              ]
+            }
+          },
+          {
+            "tenantId": "[reference(concat('Microsoft.Web/sites/', variables('botAppName')), '2018-02-01', 'Full').identity.tenantId]",
+            "objectId": "[parameters('objectId')]",
+            "permissions": {
+              "certificates": [ "get", "list", "create", "update" ]
+            }
+          }
+        ],
+        "sku": {
+          "name": "Standard",
+          "family": "A"
+        },
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "Allow"
+        }
+      },
+      "resources": [
+        {
+          "type": "secrets",
+          "apiVersion": "2016-10-01",
+          "name": "[variables('StorageAccountSecretName')]",
+          "location": "[parameters('location')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+          ],
+          "properties": {
+            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]",
+            "attributes": {
+              "enabled": true
+            }
+          }
+        },
+        {
+          "type": "secrets",
+          "apiVersion": "2016-10-01",
+          "name": "[variables('ServiceBusSecretName')]",
+          "location": "[parameters('location')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+            "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]"
+          ],
+          "properties": {
+            "value": "[listkeys(variables('authRuleResourceId'), '2017-04-01').primaryConnectionString]",
+            "attributes": {
+              "enabled": true
+            }
+          }
+        },
+        {
+          "type": "secrets",
+          "name": "[variables('AppInsightsSecretName')]",
+          "location": "[parameters('location')]",
+          "apiVersion": "2018-02-14",
+          "dependsOn": [
+            "[resourceId('Microsoft.KeyVault/vaults/', variables('keyVaultName'))]",
+            "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+          ],
+          "properties": {
+            "value": "[reference(resourceId('Microsoft.Insights/components/', variables('appInsightsName')), '2015-05-01').InstrumentationKey]",
+            "attributes": {
+              "enabled": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[parameters('ServiceBusWebAppRoleNameGuid')]",
+      "scope": "[concat('Microsoft.ServiceBus/namespaces', '/', variables('serviceBusNamespaceName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('botAppName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('AzureserviceBusDataOwner')]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('botAppName')), '2019-08-01', 'Full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[parameters('ServiceBusPrepFuncRoleNameGuid')]",
+      "scope": "[concat('Microsoft.ServiceBus/namespaces', '/', variables('serviceBusNamespaceName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('prepFunctionAppName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('AzureserviceBusDataOwner')]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('prepFunctionAppName')), '2019-08-01', 'Full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[parameters('ServiceBusSendFuncRoleNameGuid')]",
+      "scope": "[concat('Microsoft.ServiceBus/namespaces', '/', variables('serviceBusNamespaceName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('sendFunctionAppName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('AzureserviceBusDataOwner')]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('sendFunctionAppName')), '2019-08-01', 'Full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[parameters('ServiceBusDataFuncRoleNameGuid')]",
+      "scope": "[concat('Microsoft.ServiceBus/namespaces', '/', variables('serviceBusNamespaceName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespaceName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('dataFunctionAppName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('AzureserviceBusDataOwner')]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('dataFunctionAppName')), '2019-08-01', 'Full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[parameters('StorageAccountWebAppRoleNameGuid')]",
+      "scope": "[concat('Microsoft.Storage/storageAccounts', '/', variables('storageAccountName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('botAppName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('StorageBlobDataContributor')]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('botAppName')), '2019-08-01', 'Full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[parameters('StorageAccountPrepFuncRoleNameGuid')]",
+      "scope": "[concat('Microsoft.Storage/storageAccounts', '/', variables('storageAccountName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('prepFunctionAppName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('StorageBlobDataContributor')]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('prepFunctionAppName')), '2019-08-01', 'Full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[parameters('StorageAccountDataFuncRoleNameGuid')]",
+      "scope": "[concat('Microsoft.Storage/storageAccounts', '/', variables('storageAccountName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('dataFunctionAppName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('StorageBlobDataContributor')]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('dataFunctionAppName')), '2019-08-01', 'Full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "apiVersion": "2019-04-01",
+      "type": "Microsoft.Network/frontDoors",
+      "name": "[variables('frontDoorName')]",
+      "condition": "[variables('useFrontDoor')]",
+      "location": "Global",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('botAppName'))]"
+      ],
+      "properties": {
+        "backendPools": [
+          {
+            "name": "backendPool1",
+            "properties": {
+              "backends": [
+                {
+                  "address": "[variables('botAppDomain')]",
+                  "backendHostHeader": "[variables('botAppDomain')]",
+                  "httpPort": 80,
+                  "httpsPort": 443,
+                  "priority": 1,
+                  "weight": 50,
+                  "enabledState": "Enabled"
+                }
+              ],
+              "healthProbeSettings": {
+                "id": "[resourceId('Microsoft.Network/frontDoors/healthProbeSettings', variables('frontDoorName'), 'healthProbeSettings1')]"
+              },
+              "loadBalancingSettings": {
+                "id": "[resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', variables('frontDoorName'), 'loadBalancingSettings1')]"
+              },
+              "resourceState": "Enabled"
+            }
+          }
+        ],
+        "healthProbeSettings": [
+          {
+            "name": "healthProbeSettings1",
+            "properties": {
+              "intervalInSeconds": 255,
+              "path": "/health",
+              "protocol": "Https",
+              "resourceState": "Enabled"
+            }
+          }
+        ],
+        "frontendEndpoints": [
+          {
+            "name": "frontendEndpoint1",
+            "properties": {
+              "hostName": "[variables('frontDoorDomain')]",
+              "sessionAffinityEnabledState": "Disabled",
+              "sessionAffinityTtlSeconds": 0
+            }
+          }
+        ],
+        "loadBalancingSettings": [
+          {
+            "name": "loadBalancingSettings1",
+            "properties": {
+              "additionalLatencyMilliseconds": 0,
+              "sampleSize": 4,
+              "successfulSamplesRequired": 2
+            }
+          }
+        ],
+        "routingRules": [
+          {
+            "name": "routingRule1",
+            "properties": {
+              "frontendEndpoints": [
+                {
+                  "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', variables('frontDoorName'), 'frontendEndpoint1')]"
+                }
+              ],
+              "acceptedProtocols": [
+                "Https"
+              ],
+              "patternsToMatch": [
+                "/*"
+              ],
+              "routeConfiguration": {
+                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",
+                "forwardingProtocol": "HttpsOnly",
+                "backendPool": {
+                  "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', variables('frontDoorName'), 'backendPool1')]"
+                }
+              },
+              "enabledState": "Enabled"
+            }
+          },
+          {
+            "name": "routingRule2",
+            "properties": {
+              "frontendEndpoints": [
+                {
+                  "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', variables('frontDoorName'), 'frontendEndpoint1')]"
+                }
+              ],
+              "acceptedProtocols": [
+                "Https"
+              ],
+              "patternsToMatch": [
+                "/api/*"
+              ],
+              "routeConfiguration": {
+                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorRedirectConfiguration",
+                "customFragment": null,
+                "customHost": "[variables('botAppDomain')]",
+                "customPath": "",
+                "redirectProtocol": "HttpsOnly",
+                "customQueryString": null,
+                "redirectType": "PermanentRedirect"
+              },
+              "enabledState": "Enabled"
+            }
+          }
+        ],
+        "enabledState": "Enabled",
+        "friendlyName": "[variables('frontDoorName')]"
+      }
+    }
+  ],
+  "outputs": {
+    "keyVaultName": {
+      "type": "string",
+      "value": "[variables('keyvaultName')]"
+    },
+    "authorBotId": {
+      "type": "string",
+      "value": "[parameters('authorClientId')]"
+    },
+    "userBotId": {
+      "type": "string",
+      "value": "[parameters('userClientId')]"
+    },
+    "appDomain": {
+      "type": "string",
+      "value": "[if(variables('useFrontDoor'), variables('frontDoorDomain'), concat('Please create a custom domain name for ', variables('botAppDomain'), ' and use that in the manifest'))]"
+    }
+  }
+}

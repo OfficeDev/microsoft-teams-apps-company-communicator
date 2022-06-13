@@ -15,8 +15,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
     /// overwrite unset non-nullable values from the full NotificationDataEntity and remove
     /// unexpected data from the existing database row e.g. not setting TotalMessageCount for this
     /// entity will not result in the value being set to 0 in the database by mistake.
-    ///
-    /// TODO(guptaa): Remove this file.
     /// </summary>
     public class UpdateNotificationDataEntity : TableEntity
     {
@@ -54,6 +52,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.Notificati
         /// Gets or sets Notification status.
         /// </summary>
         public string Status { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number or recipients who have canceled status.
+        /// </summary>
+        public int? Canceled { get; set; }
 
         /// <summary>
         /// Checks if the notification is completed.

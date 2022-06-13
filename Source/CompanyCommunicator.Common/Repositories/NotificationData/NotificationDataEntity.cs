@@ -197,11 +197,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public int Throttled { get; set; }
 
         /// <summary>
+        /// Gets or sets the number of not found recipients.
+        /// </summary>
+        public int? RecipientNotFound { get; set; }
+
+        /// <summary>
         /// Gets or sets the number or recipients who have an unknown status - this means a status
         /// that has not changed from the initial initialization status after the notification has
         /// been force completed.
         /// </summary>
         public int Unknown { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number or recipients who have canceled status.
+        /// </summary>
+        public int? Canceled { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the sending process is completed.
@@ -248,6 +258,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets or sets notification status.
         /// </summary>
         public string Status { get; set; }
+
+        /// <summary>
+        /// Gets or sets the payload of the durable function instance.
+        /// </summary>
+        public string FunctionInstancePayload { get; set; }
 
         /// <summary>
         /// Gets or sets notification reads.
