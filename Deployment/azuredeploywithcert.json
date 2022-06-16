@@ -608,7 +608,7 @@
             "DisableCreatorUpnCheck": "false",
             "WEBSITE_LOAD_CERTIFICATES": "*",
             "APPINSIGHTS_INSTRUMENTATIONKEY": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('AppInsightsSecretResourceId'), '2015-06-01').secretUriWithVersion, ')')]",
-            "WEBSITE_NODE_DEFAULT_VERSION": "10.15.2",
+            "WEBSITE_NODE_DEFAULT_VERSION": "16.13.0",
             "KeyVault:Url": "[variables('keyVaultUrl')]",
             "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false"
           }
@@ -698,7 +698,7 @@
             "AzureFunctionsJobHost__extensions__durableTask__maxConcurrentOrchestratorFunctions": "3",
             "AzureFunctionsJobHost__extensions__durableTask__maxConcurrentActivityFunctions": "10",
             "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
-            "WEBSITE_NODE_DEFAULT_VERSION": "10.15.2"
+            "WEBSITE_NODE_DEFAULT_VERSION": "16.13.0"
           }
         },
         {
@@ -783,7 +783,7 @@
             "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2015-05-01-preview').key1)]",
             "WEBSITE_CONTENTSHARE": "[toLower(variables('sendFunctionAppName'))]",
             "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
-            "WEBSITE_NODE_DEFAULT_VERSION": "10.15.2"
+            "WEBSITE_NODE_DEFAULT_VERSION": "16.13.0"
           }
         },
         {
@@ -869,7 +869,7 @@
             "CleanUpScheduleTriggerTime": "30 23 * * *",
             "CleanUpFile": "1",
             "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
-            "WEBSITE_NODE_DEFAULT_VERSION": "10.15.2"
+            "WEBSITE_NODE_DEFAULT_VERSION": "16.13.0"
           }
         },
         {
