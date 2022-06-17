@@ -1,5 +1,5 @@
-- [Deployment Guide](#outlook-web-service-ows)
-    - [Prerequisites](#prerequisites)
+- Deployment Guide
+    - [Prerequisites](#prerequisites) 
     - [Steps](#Deployment-Steps)
         - [Register AD Application](#1-register-azure-ad-application)
         - [Deploy to Azure subscription](#2-deploy-to-your-azure-subscription)
@@ -11,6 +11,9 @@
 - - -
 
 # Prerequisites
+>    * The recommendation is to use [Deployment guide using powershell](Deployment-guide-powershell).
+>    * If you already have previous version of Company Communicator installed, then please use this [v5 migration guide](v5-migration-guide).
+
 To begin, you will need: 
 * An Azure subscription where you can create the following kinds of resources:  
     * App Service
@@ -20,6 +23,12 @@ To begin, you will need:
     * Azure Storage Account
     * Service Bus
     * Application Insights
+    * Azure Key vault
+* An role to assign roles in Azure RBAC. To check if you have permission to do this, 
+    * Goto the subscription page in Azure portal. Then, goto Access Control(IAM) and click on `View my access` button.
+    * Click on your `role` and in search permissions text box, search for `Microsoft.Authorization/roleAssignments/Write`.
+    * If your current role does not have the permission, then you can grant yourself the built in role `User Access Administrator` or create a custom role.
+    * Please follow this [link](https://docs.microsoft.com/en-us/azure/role-based-access-control/custom-roles#steps-to-create-a-custom-role) to create a custom role. Use this action `Microsoft.Authorization/roleAssignments/Write` in the custom role to assign roles in Azure RBAC.
 * A team with the users who will be sending messages with this app. (You can add or remove team members later!)
 * A copy of the Company Communicator app GitHub repo (https://github.com/OfficeDev/microsoft-teams-company-communicator-app)
 
@@ -31,12 +40,12 @@ To begin, you will need:
 
 ## 1. Register Azure AD application
 
-Register two Azure AD application in your tenant's directory: one for author bot, and another for user bot.
+Register three Azure AD application in your tenant's directory: one for author bot, one for user bot and another for graph app.
 
 1. Log in to the Azure Portal for your subscription, and go to the [App registrations](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps) blade.
 
 1. Click **New registration** to create an Azure AD application.
-    - **Name**: Name of your Teams App - if you are following the template for a default deployment, we recommend "Company Communicator".
+    - **Name**: Name of your Teams App - if you are following the template for a default deployment, we recommend "Company Communicator User".
     - **Supported account types**: Select "Accounts in any organizational directory" (*refer image below*).
     - Leave the "Redirect URI" field blank for now.
 
@@ -59,13 +68,20 @@ Register two Azure AD application in your tenant's directory: one for author bot
     - **Supported account types**: Select "Accounts in any organizational directory".
     - Leave the "Redirect URI" field blank for now.
 
+1. Go back to "App registrations", then repeat steps 2-5 to create another Azure AD application for the Microsoft Graph app.
+    - **Name**: Name of your Teams App - if you are following the template for a default deployment, we recommend "Company Communicator App".
+    - **Supported account types**: Select "Accounts in this organizational directory only(Default Directory only - Single tenant)".
+    - Leave the "Redirect URI" field blank for now.
 
-    At this point you should have the following 5 values:
+
+    At this point you should have the following 7 values:
     1. Application (client) ID for the user bot.
     2. Client secret for the user bot.
     3. Directory (tenant) ID.
     4. Application (client) Id for the author bot.
     5. Client secret for the author bot.
+    6. Application (client) Id for the Microsoft Graph App.
+    7. Client secret for the Microsoft Graph App.
 
     We recommend that you copy the values, we will need them later.
 
@@ -74,7 +90,7 @@ Register two Azure AD application in your tenant's directory: one for author bot
 ## 2. Deploy to your Azure subscription
 1. Click on the **Deploy to Azure** button below.
    
-   [![Deploy to Azure](https://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploy.json)
+   [![Deploy to Azure](images/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploy.json)
 
 1. When prompted, log in to your Azure subscription.
 
@@ -103,10 +119,26 @@ Register two Azure AD application in your tenant's directory: one for author bot
     3. **Tenant Id**: The tenant ID. (from Step 1)
     4. **Author Client ID**: The application (client) ID of the Microsoft Teams author bot app. (from Step 1)
     5. **Author Client Secret**: The client secret of the Microsoft Teams author bot app. (from Step 1)
-    6. **Proactively Install User App [Optional]**: Default value is `true`. You may set it to `false` if you want to disable the feature.
-    7. **User App ExternalId [Optional]**: Default value is `148a66bb-e83d-425a-927d-09f4299a9274`. This **MUST** be the same `id` that is in the Teams app manifest for the user app.
-    8. **DefaultCulture [Optional]**: By default the application uses `en-US` locale. You can choose the locale from the list, if you wish to use the app in different locale.Also, you may add/update the resources for other locales and update this configuration if desired.
-    9. **SupportedCultures [Optional]**: This is the list of locales that application supports currently.You may add/update the resources for other locales and update this configuration if desired.
+    6. **Microsoft Graph App Client ID**: The application (client) ID of the Microsoft Graph Azure AD app. (from Step 1)
+    7. **Microsoft Graph App Secret**: The client secret of the Microsoft Graph Azure AD app. (from Step 1)
+    8. **Proactively Install User App [Optional]**: Default value is `true`. You may set it to `false` if you want to disable the feature.
+    9. **User App ExternalId [Optional]**: Default value is `148a66bb-e83d-425a-927d-09f4299a9274`. This **MUST** be the same `id` that is in the Teams app manifest for the user app.
+    10. **Hosting Plan SKU  [Optional]**: The pricing tier for the hosting plan. Default value is `Standard`. You may choose between Basic, Standard and Premium.
+    11. **Hosting Plan Size  [Optional]**: The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value is `2`.
+    
+        > **Note:** The default value is 2 to minimize the chances of an error during app deployment. After deployment you can choose to change the size of the hosting plan.
+    12. **Service Bus Web App Role Name Guid [Optional]**: Default value is `958380b3-630d-4823-b933-f59d92cdcada`. This **MUST** be the same `id` per app deployment.
+   
+        > **Note:** Make sure to keep the same values for an upgrade. Please change the role name GUIDs in case of another Company Communicator Deployment in same subscription.
+
+    13. **Service Bus Prep Func Role Name Guid [Optional]**: Default value is `ce6ca916-08e9-4639-bfbe-9d098baf42ca`. This **MUST** be the same `id` per app deployment.
+    14. **Service Bus Send Func Role Name Guid [Optional]**: Default value is `960365a2-c7bf-4ff3-8887-efa86fe4a163`. This **MUST** be the same `id` per app deployment.
+    15. **Service Bus Data Func Role Name Guid [Optional]**: Default value is `d42703bc-421d-4d98-bc4d-cd2bb16e5b0a`. This **MUST** be the same `id` per app deployment.
+    16. **Storage Account Web App Role Name Guid [Optional]**: Default value is `edd0cc48-2cf7-490e-99e8-131311e42030`. This **MUST** be the same `id` per app deployment.
+    17. **Storage Account Prep Func Role Name Guid [Optional]**: Default value is `9332a9e9-93f4-48d9-8121-d279f30a732e`. This **MUST** be the same `id` per app deployment.
+    18. **Storage Account Data Func Role Name Guid [Optional]**: Default value is `5b67af51-4a98-47e1-9d22-745069f51a13`. This **MUST** be the same `id` per app deployment.
+    19. **DefaultCulture [Optional]**: By default the application uses `en-US` locale. You can choose the locale from the list, if you wish to use the app in different locale.Also, you may add/update the resources for other locales and update this configuration if desired.
+    20. **SupportedCultures [Optional]**: This is the list of locales that application supports currently.You may add/update the resources for other locales and update this configuration if desired.
 
     > **Note:** Make sure that the values are copied as-is, with no extra spaces. The template checks that GUIDs are exactly 36 characters.
 
@@ -139,7 +171,9 @@ Register two Azure AD application in your tenant's directory: one for author bot
 
     > If do not have these values, refer [this section](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Troubleshooting#2-forgetting-the-botId-or-appDomain) of the Troubleshooting guide for steps to get these values.
 
-1. Go to **App Registrations** page [here](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps) and open the author app you created (in Step 1) from the application list.
+1. Go to **App Registrations** page [here](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps) and open the Microsoft Graph Azure AD app you created (in Step 1) from the application list.
+
+    > NOTE: This step is to set-up authentication for Microsoft Graph Azure AD app.
 
 1. Under **Manage**, click on **Authentication** to bring up authentication settings.
 
@@ -193,9 +227,9 @@ Register two Azure AD application in your tenant's directory: one for author bot
 
     2. Click **Save** to commit your changes.
 
-## 4. Add Permissions to your app
+## 4. Add Permissions to your Microsoft Graph Azure AD app
 
-Continuing from the Azure AD app registration page where we ended Step 3.
+Continuing from the Microsoft Graph Azure AD app registration page where we ended Step 3.
 
 1. Select **API Permissions** blade from the left hand side.
 
@@ -206,11 +240,11 @@ Continuing from the Azure AD app registration page where we ended Step 3.
     * Under **Commonly used Microsoft APIs**, 
 
     * Select “Microsoft Graph”, then select **Delegated permissions** and check the following permissions,
-        1. **Group.Read.All**
+        1. **GroupMember.Read.All**
         2. **AppCatalog.Read.All**
 
     * then select **Application permissions** and check the following permissions,
-        1. **Group.Read.All**
+        1. **GroupMember.Read.All**
         2. **User.Read.All**
         3. **TeamsAppInstallation.ReadWriteForUser.All**
 
@@ -224,7 +258,7 @@ Continuing from the Azure AD app registration page where we ended Step 3.
 4. If you are logged in as the Global Administrator, click on the “Grant admin consent for %tenant-name%” button to grant admin consent, else inform your Admin to do the same through the portal.
    <br/>
    Alternatively you may follow the steps below:
-   - Prepare link - https://login.microsoftonline.com/common/adminconsent?client_id=%appId%. Replace the `%appId%` with the `Application (client) ID` of Microsoft Teams author bot app (from above).
+   - Prepare link - https://login.microsoftonline.com/common/adminconsent?client_id=%appId%. Replace the `%appId%` with the `Application (client) ID` of Microsoft Graph Azure AD app (from above).
    - Global Administrator can grant consent using the link above.
 
 ## 5. Create the Teams app packages

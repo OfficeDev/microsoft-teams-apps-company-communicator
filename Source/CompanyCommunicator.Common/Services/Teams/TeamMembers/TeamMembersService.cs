@@ -11,11 +11,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
-    using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     /// </summary>
     public class TeamMembersService : ITeamMembersService
     {
-        private readonly BotFrameworkHttpAdapter botAdapter;
+        private readonly ICCBotFrameworkHttpAdapter botAdapter;
         private readonly string userAppId;
         private readonly string authorAppId;
 
@@ -35,7 +35,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         /// <param name="botAdapter">Bot adapter.</param>
         /// <param name="botOptions">Bot options.</param>
         public TeamMembersService(
-            BotFrameworkHttpAdapter botAdapter,
+            ICCBotFrameworkHttpAdapter botAdapter,
             IOptions<BotOptions> botOptions)
         {
             this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));

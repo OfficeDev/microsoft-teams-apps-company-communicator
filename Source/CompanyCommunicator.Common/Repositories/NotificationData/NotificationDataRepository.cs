@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
 
     /// <summary>
     /// Repository of the notification data in the table storage.
@@ -172,8 +173,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 notificationDataEntityId);
             if (notificationDataEntity != null)
             {
-                notificationDataEntity.ErrorMessage =
-                    this.AppendNewLine(notificationDataEntity.ErrorMessage, errorMessage);
+                var newMessage = notificationDataEntity.ErrorMessage.AppendNewLine(errorMessage);
+
+                // Restrict the total length of stored message to avoid hitting table storage limits
+                if (newMessage.Length <= MaxMessageLengthToSave)
+                {
+                    notificationDataEntity.ErrorMessage = newMessage;
+                }
+
                 notificationDataEntity.Status = NotificationStatus.Failed.ToString();
 
                 // Set the end date as current date.
@@ -195,8 +202,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     notificationDataEntityId);
                 if (notificationDataEntity != null)
                 {
-                    notificationDataEntity.WarningMessage =
-                        this.AppendNewLine(notificationDataEntity.WarningMessage, warningMessage);
+                    var newMessage = notificationDataEntity.WarningMessage.AppendNewLine(warningMessage);
+
+                    // Restrict the total length of stored message to avoid hitting table storage limits
+                    if (newMessage.Length <= MaxMessageLengthToSave)
+                    {
+                        notificationDataEntity.WarningMessage = newMessage;
+                    }
+
                     await this.CreateOrUpdateAsync(notificationDataEntity);
                 }
             }
@@ -205,13 +218,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                 this.Logger.LogError(ex, ex.Message);
                 throw;
             }
-        }
-
-        private string AppendNewLine(string originalString, string newString)
-        {
-            return string.IsNullOrWhiteSpace(originalString)
-                ? newString
-                : $"{originalString}{Environment.NewLine}{newString}";
         }
     }
 }

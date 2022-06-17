@@ -5,7 +5,6 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
-    using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Hosting;
 

@@ -15,11 +15,14 @@ It provides a foundation to build custom targeted communication capabilities suc
     * [Localization](Localization)
 * Deploying the app
     * [Deployment guide](Deployment-guide)
+    * [Deployment guide certificate](Deployment-guide-certificate)
     * [Deployment guide powershell](Deployment-guide-powershell)
     * [Troubleshooting](Troubleshooting)
 * Migrating to newer version
+  * [v5](v5-migration-guide)
   * [v4](v4-migration-guide)
   * [v3](v3-migration-guide)
   * [v2](v2-migration-guide)
+* [Scaling Company Communicator](Scale-app)
 * [Extending Company Communicator](Taking-it-further)
 * [Release Notes](Release-notes)

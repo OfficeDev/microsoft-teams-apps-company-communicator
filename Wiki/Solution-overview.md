@@ -2,12 +2,16 @@
 
 Refer the following image for high level architecture.
 
-![Overview](images/architecture_overview_v2.png)
+![Overview](images/architecture_overview_v4.png)
 
 The **Company Communicator** app has the following main components:
 * **App Service**: The app service implements the message compose experience in the team tab, and the messaging endpoint for the bot.
 * **Service Bus**: The individual messages sent by the bot to the recipients are enqueued on a service bus queue, to be processed by an Azure Function. This queue decouples the message composition experience from the process that delivers the message to recipients.
 * **Azure Function**: The Azure Functions picks up the messages from the queues, prepares the recipients and delivers them.
+* **Azure Key vault**: The Azure Key vault stores the secrets, certificates and connection strings. For more information about the data stored, please check [this](Data-stores.md).
+* **Author Bot Registration**: The Author Bot registration is used for author's app. The application is separated from the User application so that different teams policies can be applied.
+* **User Bot Registration**: The User Bot registration is used for user's app, which is installed by users to receive messages send by Company Communicator application.
+* **Graph App Registration**: The Graph application registration is used for Microsoft Graph api's. The recommended approach is to have a different application registered for managing Microsoft Graph API permissions.
 * **Microsoft Graph API**: The app leverages Microsoft graph api's to [Search Groups](https://docs.microsoft.com/en-us/graph/api/group-list?view=graph-rest-1.0&tabs=http), [Get Group Transitive Members](https://docs.microsoft.com/en-us/graph/api/group-list-transitivemembers?view=graph-rest-1.0&tabs=http), [Get Users](https://docs.microsoft.com/en-us/graph/api/user-list?view=graph-rest-1.0&tabs=http) and [proactively install the User application for a user](https://docs.microsoft.com/en-us/graph/api/user-add-teamsappinstallation?view=graph-rest-beta&tabs=http).
 
 ---
@@ -93,7 +97,7 @@ App service requires the following `Delegated permission`:
 
 |Sr. No.| Use Case | API|  Delegated permissions| API version
 |--|--|--|--|--|
-| 1. | Search Groups | GET [https://graph.microsoft.com/v1.0/groups?$filter=`condition`](https://docs.microsoft.com/en-us/graph/api/group-list?view=graph-rest-1.0&tabs=http) | Group.Read.All| v1.0
+| 1. | Search Groups | GET [https://graph.microsoft.com/v1.0/groups?$filter=`condition`](https://docs.microsoft.com/en-us/graph/api/group-list?view=graph-rest-1.0&tabs=http) | GroupMember.Read.All| v1.0
 | 2. | Get App Catalog Id | GET [https://graph.microsoft.com/v1.0/appCatalogs/teamsApps?$filter=distributionMethod eq 'organization'](https://docs.microsoft.com/en-us/graph/api/appcatalogs-list-teamsapps?view=graph-rest-1.0&tabs=http) | AppCatalog.Read.All | v1.0
 
 ### App Permissions
@@ -103,7 +107,7 @@ Azure functions require the following `App Permissions` for different use cases:
 |--|--|--|--|--|
 | 1. | Get All Users | GET [https://graph.microsoft.com/v1.0/users/delta](https://docs.microsoft.com/en-us/graph/api/user-delta?view=graph-rest-1.0&tabs=http) | User.Read.All | v1.0
 | 2. | Get User | GET [https://graph.microsoft.com/v1.0/users/`user-id`](https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http) | User.Read.All| v1.0
-| 3. | Get Group Transitive Members | GET [https://graph.microsoft.com/v1.0/groups/`group-id`/transitiveMembers](https://docs.microsoft.com/en-us/graph/api/group-list-transitivemembers?view=graph-rest-1.0&tabs=http) | Group.Read.All| v1.0
+| 3. | Get Group Transitive Members | GET [https://graph.microsoft.com/v1.0/groups/`group-id`/transitiveMembers](https://docs.microsoft.com/en-us/graph/api/group-list-transitivemembers?view=graph-rest-1.0&tabs=http) | GroupMember.Read.All| v1.0
 | 4. | Get Teams App Installation Id | GET [https://graph.microsoft.com/v1.0/users/`user-id`/teamwork/installedApps?$expand=teamsApp&$filter=teamsApp/id eq '`teamsAppId`'](https://docs.microsoft.com/en-us/graph/api/userteamwork-list-installedapps?view=graph-rest-1.0&tabs=http) | TeamsAppInstallation.ReadWriteForUser.All | v1.0
 | 5. | Get Chat Id | GET [https://graph.microsoft.com/v1.0/users/`user-id`/teamwork/installedApps/`teamsAppInstallationId`/chat](https://docs.microsoft.com/en-us/graph/api/userscopeteamsappinstallation-get-chat?view=graph-rest-1.0&tabs=http) | TeamsAppInstallation.ReadWriteForUser.All | v1.0
 | 6. | Install app for user | POST [https://graph.microsoft.com/v1.0/`user-id`/teamwork/installedApps](https://docs.microsoft.com/en-us/graph/api/userteamwork-post-installedapps?view=graph-rest-1.0&tabs=http) | TeamsAppInstallation.ReadWriteForUser.All | v1.0

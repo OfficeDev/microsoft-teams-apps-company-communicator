@@ -107,7 +107,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                         {
                             var teamDataMap = new TeamDataMap(this.localizer);
                             csv.Configuration.RegisterClassMap(teamDataMap);
-                            var teamDataStream = this.userDataStream.GetTeamDataStreamAsync(uploadData.sentNotificationDataEntity.Id);
+                            var teamDataStream = this.userDataStream.GetTeamDataStreamAsync(uploadData.sentNotificationDataEntity.Id, uploadData.sentNotificationDataEntity.Status);
                             await foreach (var data in teamDataStream)
                             {
                                 await csv.WriteRecordsAsync(data);
@@ -117,7 +117,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                         {
                             var userDataMap = new UserDataMap(this.localizer);
                             csv.Configuration.RegisterClassMap(userDataMap);
-                            var userDataStream = this.userDataStream.GetUserDataStreamAsync(uploadData.sentNotificationDataEntity.Id);
+                            var userDataStream = this.userDataStream.GetUserDataStreamAsync(uploadData.sentNotificationDataEntity.Id, uploadData.sentNotificationDataEntity.Status);
                             await foreach (var data in userDataStream)
                             {
                                 await csv.WriteRecordsAsync(data);

@@ -27,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         private readonly int messageDelayInSeconds = 20;
 
         /// <summary>
-        /// Consturctor tests.
+        /// Constructor tests.
         /// </summary>
         [Fact]
         public void DataAggregationTriggerActivityConstructorTest()
@@ -46,7 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         }
 
         /// <summary>
-        /// Test to check update notificatin and send message to data queue.
+        /// Test to check update notification and send message to data queue.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
@@ -68,8 +68,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 .Setup(x => x.CreateOrUpdateAsync(It.IsAny<NotificationDataEntity>()))
                 .Returns(Task.CompletedTask);
             this.dataQueue
-                .Setup(x => x.SendDelayedAsync(It.IsAny<DataQueueMessageContent>(), It.IsAny<double>()))
+                .Setup(x => x.SendMessageAsync(It.IsAny<string>(), It.IsAny<TimeSpan>()))
                 .Returns(Task.CompletedTask);
+            var messageDelayInTimeSpan = new TimeSpan(0, 0, this.messageDelayInSeconds);
 
             // Act
             Func<Task> task = async () => await dataAggregationTriggerActivity.RunAsync((notificationId, recipientCount), logger.Object);
@@ -78,7 +79,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             await task.Should().NotThrowAsync();
             this.notificationDataRepository.Verify(x => x.GetAsync(It.IsAny<string>(), It.Is<string>(x => x.Equals(notificationId))), Times.Once());
             this.notificationDataRepository.Verify(x => x.CreateOrUpdateAsync(It.Is<NotificationDataEntity>(x => x.TotalMessageCount == recipientCount)));
-            this.dataQueue.Verify(x => x.SendDelayedAsync(It.Is<DataQueueMessageContent>(x => x.NotificationId == notificationId), It.Is<double>(x => x.Equals(this.messageDelayInSeconds))));
+            this.dataQueue.Verify(x => x.SendMessageAsync(It.Is<string>(x => x.Equals(notificationId)), It.Is<TimeSpan>(x => x.Equals(messageDelayInTimeSpan))));
         }
 
         /// <summary>
@@ -102,8 +103,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 .Setup(x => x.CreateOrUpdateAsync(It.IsAny<NotificationDataEntity>()))
                 .Returns(Task.CompletedTask);
             this.dataQueue
-                .Setup(x => x.SendDelayedAsync(It.IsAny<DataQueueMessageContent>(), It.IsAny<double>()))
+                .Setup(x => x.SendMessageAsync(It.IsAny<string>(), It.IsAny<TimeSpan>()))
                 .Returns(Task.CompletedTask);
+            var messageDelayInTimeSpan = new TimeSpan(0, 0, this.messageDelayInSeconds);
 
             // Act
             Func<Task> task = async () => await dataAggregationTriggerActivity.RunAsync((notificationId, recipientCount), logger.Object);
@@ -112,7 +114,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
             await task.Should().NotThrowAsync();
             this.notificationDataRepository.Verify(x => x.GetAsync(It.IsAny<string>(), It.Is<string>(x => x.Equals(notificationId))), Times.Once());
             this.notificationDataRepository.Verify(x => x.CreateOrUpdateAsync(It.Is<NotificationDataEntity>(x => x.TotalMessageCount == recipientCount)), Times.Never());
-            this.dataQueue.Verify(x => x.SendDelayedAsync(It.Is<DataQueueMessageContent>(x => x.NotificationId == notificationId), It.Is<double>(x => x.Equals(this.messageDelayInSeconds))));
+            this.dataQueue.Verify(x => x.SendMessageAsync(It.Is<string>(x => x.Equals(notificationId)), It.Is<TimeSpan>(x => x.Equals(messageDelayInTimeSpan))));
         }
 
         /// <summary>

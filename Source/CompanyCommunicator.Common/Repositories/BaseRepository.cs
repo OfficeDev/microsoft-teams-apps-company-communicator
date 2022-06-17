@@ -20,6 +20,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
     public abstract class BaseRepository<T> : IRepository<T>
         where T : TableEntity, new()
     {
+        /// <summary>
+        /// Maximum length of error and warning messages to save in the entity.
+        /// This limit ensures that we don't hit the Azure table storage limits for the max size of the data
+        /// in a column, and the total size of an entity.
+        /// </summary>
+        public const int MaxMessageLengthToSave = 1024;
+
         private readonly string defaultPartitionKey;
 
         /// <summary>
@@ -59,7 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         protected ILogger Logger { get; }
 
         /// <inheritdoc/>
-        public async Task CreateOrUpdateAsync(T entity)
+        public virtual async Task CreateOrUpdateAsync(T entity)
         {
             try
             {
@@ -113,7 +120,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<T> GetAsync(string partitionKey, string rowKey)
+        public virtual async Task<T> GetAsync(string partitionKey, string rowKey)
         {
             try
             {

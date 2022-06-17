@@ -9,6 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
+    using System.Net.Http;
     using System.Security.Claims;
     using System.Text;
     using System.Threading.Tasks;
@@ -48,6 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         private readonly Mock<IAppCatalogService> appCatalogService = new Mock<IAppCatalogService>();
         private readonly Mock<IAppSettingsService> appSettingsService = new Mock<IAppSettingsService>();
         private readonly Mock<IOptions<UserAppOptions>> userAppOptions = new Mock<IOptions<UserAppOptions>>();
+        private readonly Mock<IHttpClientFactory> httpClientFactory = new Mock<IHttpClientFactory>();
         private readonly Mock<ILoggerFactory> loggerFactory = new Mock<ILoggerFactory>();
 
         /// <summary>
@@ -72,18 +74,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             // Arrange
             this.dataQueueMessageOptions.Setup(x => x.Value).Returns(new DataQueueMessageOptions() { ForceCompleteMessageDelayInSeconds = 100 });
             this.userAppOptions.Setup(x => x.Value).Returns(new UserAppOptions() { ProactivelyInstallUserApp = false });
-            Action action1 = () => new SentNotificationsController(null /*notificationDataRepository*/, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.loggerFactory.Object);
-            Action action2 = () => new SentNotificationsController(this.notificationDataRepository.Object, null /*sentNotificationDataRepository*/, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.loggerFactory.Object);
-            Action action3 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, null/*teamDataRepository*/, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.loggerFactory.Object);
-            Action action4 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, null/*prepareToSendQueue*/, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.loggerFactory.Object);
-            Action action5 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, null/*dataQueue*/, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.loggerFactory.Object);
-            Action action6 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, null/*dataQueueMessageOptions*/, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.loggerFactory.Object);
-            Action action7 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, null/*groupsService*/, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.loggerFactory.Object);
-            Action action8 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, null/*exportDataRepository*/, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.loggerFactory.Object);
-            Action action9 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, null/*appCatalogServicet*/, this.appSettingsService.Object, this.userAppOptions.Object, this.loggerFactory.Object);
-            Action action10 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, null/*appSettingsService*/, this.userAppOptions.Object, this.loggerFactory.Object);
-            Action action11 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, null/*userAppOptions*/, this.loggerFactory.Object);
-            Action action12 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, null/*loggerFactory*/);
+            Action action1 = () => new SentNotificationsController(null /*notificationDataRepository*/, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.httpClientFactory.Object, this.loggerFactory.Object);
+            Action action2 = () => new SentNotificationsController(this.notificationDataRepository.Object, null /*sentNotificationDataRepository*/, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.httpClientFactory.Object, this.loggerFactory.Object);
+            Action action3 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, null/*teamDataRepository*/, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.httpClientFactory.Object, this.loggerFactory.Object);
+            Action action4 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, null/*prepareToSendQueue*/, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.httpClientFactory.Object, this.loggerFactory.Object);
+            Action action5 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, null/*dataQueue*/, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.httpClientFactory.Object, this.loggerFactory.Object);
+            Action action6 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, null/*dataQueueMessageOptions*/, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.httpClientFactory.Object, this.loggerFactory.Object);
+            Action action7 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, null/*groupsService*/, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.httpClientFactory.Object, this.loggerFactory.Object);
+            Action action8 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, null/*exportDataRepository*/, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.httpClientFactory.Object, this.loggerFactory.Object);
+            Action action9 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, null/*appCatalogServicet*/, this.appSettingsService.Object, this.userAppOptions.Object, this.httpClientFactory.Object, this.loggerFactory.Object);
+            Action action10 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, null/*appSettingsService*/, this.userAppOptions.Object, this.httpClientFactory.Object, this.loggerFactory.Object);
+            Action action11 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, null/*userAppOptions*/, this.httpClientFactory.Object, this.loggerFactory.Object);
+            Action action12 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.httpClientFactory.Object, null/*loggerFactory*/);
+            Action action13 = () => new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, null /*httpClientFactory*/, this.loggerFactory.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("notificationDataRepository is null.");
@@ -98,6 +101,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             action10.Should().Throw<ArgumentNullException>("appSettingsService is null.");
             action11.Should().Throw<ArgumentNullException>("userAppOptions is null.");
             action12.Should().Throw<ArgumentNullException>("authenticationOptions is null.");
+            action13.Should().Throw<ArgumentNullException>("clientFactory is null.");
         }
 
         /// <summary>
@@ -302,6 +306,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             Assert.Equal(notification.SendingStartedDate, sentNotificationSummary.SendingStartedDate);
             Assert.Equal(notification.Status, sentNotificationSummary.Status);
             Assert.Equal(notification.Unknown, sentNotificationSummary.Unknown);
+            Assert.Equal(notification.Canceled, sentNotificationSummary.Canceled);
         }
 
         /// <summary>
@@ -341,7 +346,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         }
 
         /// <summary>
-        /// Test case to pass valid parameter gives sataus code 200.
+        /// Test case to pass valid parameter gives status code 200.
         /// </summary>
         /// <returns>A task that represents the work queued to execute.</returns>
         [Fact]
@@ -412,7 +417,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             this.userAppOptions.Setup(x => x.Value).Returns(new UserAppOptions() { ProactivelyInstallUserApp = proactivelyInstallUserApp, UserAppExternalId = "externalId" });
             Mock<ILogger<SentNotificationsController>> log = new Mock<ILogger<SentNotificationsController>>();
             this.loggerFactory.Setup(x => x.CreateLogger("SentNotificationsController")).Returns(log.Object);
-            var controller = new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.loggerFactory.Object);
+            var controller = new SentNotificationsController(this.notificationDataRepository.Object, this.sentNotificationDataRepository.Object, this.teamDataRepository.Object, this.prepareToSendQueue.Object, this.dataQueue.Object, this.dataQueueMessageOptions.Object, this.groupsService.Object, this.exportDataRepository.Object, this.appCatalogService.Object, this.appSettingsService.Object, this.userAppOptions.Object, this.httpClientFactory.Object, this.loggerFactory.Object);
             var user = new ClaimsPrincipal(new ClaimsIdentity(
                 new Claim[]
             {
@@ -429,7 +434,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             return new NotificationDataEntity()
             {
                 Id = "id",
-                Title = "titile",
+                Title = "title",
                 ImageLink = "imageLink",
                 Summary = "summary",
                 Author = "author",
@@ -449,6 +454,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
                 SendingStartedDate = DateTime.Now,
                 Status = "success",
                 Unknown = 1,
+                Canceled = 2,
                 TeamsInString = "['item1','item2']",
                 RostersInString = "['item1','item2']",
                 GroupsInString = "['group1','group2']",
