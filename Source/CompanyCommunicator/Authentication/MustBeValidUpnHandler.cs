@@ -55,21 +55,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         }
 
         /// <summary>
-        /// Check whether a upn is valid or not.
+        /// Check whether a upn (or alternate email for external authors) is valid or not.
         /// This is where we should check against the valid list of UPNs.
         /// </summary>
         /// <param name="context">Authorization handler context instance.</param>
         /// <returns>Indicate if a upn is valid or not.</returns>
         private bool IsValidUpn(AuthorizationHandlerContext context)
         {
-            var claim = context.User?.Claims?.FirstOrDefault(p => p.Type == ClaimTypes.Upn);
-            var upn = claim?.Value;
-            if (string.IsNullOrWhiteSpace(upn))
+            var claimupn = context.User?.Claims?.FirstOrDefault(p => p.Type == ClaimTypes.Upn);
+            var upn = claimupn?.Value;
+
+            var claimemail = context.User?.Claims?.FirstOrDefault(p => p.Type == ClaimTypes.Email);
+            var email = claimemail?.Value;
+
+            if (string.IsNullOrWhiteSpace(upn) && string.IsNullOrWhiteSpace(email))
             {
                 return false;
             }
 
-            return this.authorizedCreatorUpnsSet.Contains(upn, StringComparer.OrdinalIgnoreCase);
+            bool upncheck = this.authorizedCreatorUpnsSet.Contains(upn, StringComparer.OrdinalIgnoreCase);
+            bool emailcheck = this.authorizedCreatorUpnsSet.Contains(email, StringComparer.OrdinalIgnoreCase);
+
+            if (upncheck || emailcheck)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
