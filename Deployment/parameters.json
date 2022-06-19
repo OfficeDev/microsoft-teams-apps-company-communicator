@@ -112,7 +112,7 @@
     "Description": "The URL to the GitHub repository to deploy."
   },
   "gitBranch": {
-    "Value": "master",
+    "Value": "main",
     "Description": "The branch of the GitHub repository to deploy."
   },
   "appDisplayName": {
@@ -124,7 +124,7 @@
     "Description": "The app (and bot) description."
   },
   "appIconUrl": {
-    "Value": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-company-communicator-app/master/Manifest/color.png",
+    "Value": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-company-communicator-app/main/Manifest/color.png",
     "Description": "The link to the icon for the app. It must resolve to a PNG file."
   },
   "companyName": {
