@@ -78,6 +78,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
             });
         });
         this.props.getDraftMessagesList();
+        // tslint:disable-next-line no-string-based-set-interval
         this.interval = setInterval(() => {
             this.props.getDraftMessagesList();
         }, 60000);

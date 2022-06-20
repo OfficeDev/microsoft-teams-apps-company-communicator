@@ -90,7 +90,7 @@ Register three Azure AD application in your tenant's directory: one for author b
 ## 2. Deploy to your Azure subscription
 1. Click on the **Deploy to Azure** button below.
    
-   [![Deploy to Azure](images/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploy.json)
+   [![Deploy to Azure](images/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmain%2FDeployment%2Fazuredeploy.json)
 
 1. When prompted, log in to your Azure subscription.
 
@@ -111,6 +111,7 @@ Register three Azure AD application in your tenant's directory: one for author b
 
 1. Enter a **Base Resource Name**, which the template uses to generate names for the other resources.
    * The `[Base Resource Name]` must be available. For example, if you select `contosocommunicator` as the base name, the name `contosocommunicator` must be available (not taken); otherwise, the deployment will fail with a Conflict error.
+   * Please make sure to limit the base resource name with maximum of 18 characters.
    * Remember the base resource name that you selected. We will need it later.
 
 1. Update the following fields in the template:
