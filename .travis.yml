@@ -14,7 +14,7 @@ stages:
 jobs:
   include:
     - stage: WikiUpdate
-      if: (branch = master) AND (type = push)
+      if: (branch = main) AND (type = push)
       script:
         - rm -rf ${REPO_SOURCE}
         - rm -rf ${REPO_DEST}
@@ -37,5 +37,5 @@ jobs:
             git add .
             git commit -m "${REPO_SOURCE} Wiki Update | Travis CI build number $TRAVIS_BUILD_NUMBER"
             git remote add origin-wiki "https://${USER}:${GITHUB_TOKEN}@${GH_REPO_DEST}"
-            git push origin-wiki master
+            git push origin-wiki main
           fi

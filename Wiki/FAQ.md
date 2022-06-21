@@ -24,7 +24,7 @@ Yes. Bot Channels Registration only supports multi-tenant account types. Please 
 ### 4. How to clone the GitHub repository?
 Please follow this [link](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository) for detailed instructions on cloning GitHub repository to create a local copy on your computer and sync between the two locations.
 
-### 5. I'm using v4.1 Company Communicator. When I resync the Company Communicator, can I set up the v4.1 branch instead of master or v4.1.x?
+### 5. I'm using v4.1 Company Communicator. When I resync the Company Communicator, can I set up the v4.1 branch instead of main or v4.1.x?
 If you're planning to deploy version ~4, you can select the branch as v4.x but it will not point to the specific 4.1 version. Instead, it will have the highest 4.x version i.e., v4.1.5. 
 
 ### 6. Can I change the app service plan without any issues? 

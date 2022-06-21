@@ -45,7 +45,7 @@ Please report bugs and other code issues [here](https://github.com/OfficeDev/mic
 
 ## Legal notice
 
-This app template is provided under the [MIT License](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/blob/master/LICENSE) terms.  In addition to these terms, by using this app template you agree to the following:
+This app template is provided under the [MIT License](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/blob/main/LICENSE) terms.  In addition to these terms, by using this app template you agree to the following:
 
 - You, not Microsoft, will license the use of your app to users or organization. 
 

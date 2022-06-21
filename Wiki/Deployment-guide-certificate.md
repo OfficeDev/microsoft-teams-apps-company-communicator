@@ -81,7 +81,7 @@ Register three Azure AD application in your tenant's directory: one for author b
 ## 2. Deploy to your Azure subscription
 1. Click on the **Deploy to Azure** button below.
    
-   [![Deploy to Azure](images/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploywithcert.json)
+   [![Deploy to Azure](images/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmain%2FDeployment%2Fazuredeploywithcert.json)
 
 1. When prompted, log in to your Azure subscription.
 

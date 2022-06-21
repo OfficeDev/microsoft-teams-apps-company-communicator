@@ -140,7 +140,7 @@ This issue occurs when attempting multiple times node modules are installed by c
 3. Once the disconnection is completed. Go to Settings and select External Git and add below URL and branch name.
     
     * Repository : https://github.com/OfficeDev/microsoft-teams-apps-company-communicator.git
-    * Branch     : master (If you are using older version of CC, please select the branch name accordingly.)
+    * Branch     : main (If you are using older version of CC, please select the branch name accordingly.)
 
     ![Screenshot of troubleshooting app service deployment](images/troubleshooting_appservicesyncerror_3.png)
 
@@ -222,6 +222,20 @@ If you forgot to copy your **authorBotId**, **userBotId** and **appDomain** valu
 * **userBotId:** This is the user Microsoft Application ID for the Company Communicator app. It can be found in the "UserAppId" field of your configuration e.g. 5630f8a2-c2a0-4cda-bdfa-c2fa87654321. For the following steps, it will be referred to as %userBotId%.
 * **appDomain:** This is the base domain for the Company Communicator app. It is the value in the "AzureAd:ApplicationIdURI" field of your configuration without the "api://" e.g. appName.azurefd.net. For the following steps, it will be referred to as %appDomain%.
 
+## 13. App service deployment fails with the error message "Input string was not in a correct format" due to fsevents package.
+App Service deployment failed recently due to deprecation of package version used in the application, the issue is already fixed and released to GitHub. However, if you've performed the deployment already and wanted to fix the failed deployment, then use the below mentioned work around.
+
+#### Fix
+
+- Go to portal.azure.com. Navigate to resource group where all CC resources are deployed.
+- Click on the app service -> click on Configuration
+- Click on **WEBSITE_NODE_DEFAULT_VERSION.**
+- Update the default value to **16.13.0** (previous value -> 10.15.2) and save.
+- Click on overview and re-start the app service.
+- Once the app service is restarted, navigate to Deployment Center and click on Sync.
+- Wait till the deployment is completed. You can validate this once the status changes to Success under logs. 
 
 # Didn't find your problem here?
 Please report the issue [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/issues/new)
+
+
