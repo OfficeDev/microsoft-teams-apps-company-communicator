@@ -38,7 +38,7 @@ https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deplo
 6. Global Administrator can also grant consent using following link: https://login.microsoftonline.com/common/adminconsent?client_id=%appId%. Please replace the `%appId%` with the `bot client id` of Microsoft Teams bot app (from above).
 
 ##### 3. Click on the "Deploy to Azure" button below
-[![Deploy to Azure](images/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploy.json)
+[![Deploy to Azure](images/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmain%2FDeployment%2Fazuredeploy.json)
   * When prompted, log in to the Azure subscription.
   
     > Please use the same subscription being used for your Company Communicator v1 deployment.

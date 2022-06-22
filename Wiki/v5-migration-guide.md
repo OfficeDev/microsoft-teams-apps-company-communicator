@@ -99,7 +99,7 @@ Please refer [step 2](https://github.com/OfficeDev/microsoft-teams-company-commu
 ### 4. Deploy to your Azure subscription
 1. Click on the **Deploy to Azure** button below.
    
-   [![Deploy to Azure](images/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploy.json)
+   [![Deploy to Azure](images/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmain%2FDeployment%2Fazuredeploy.json)
 
 1. When prompted, log in to your Azure subscription.
     > Please use the same subscription being used for your Company Communicator v4 deployment (from step 1).
@@ -260,6 +260,55 @@ Continuing from the Azure AD author app registration page where we ended Step 3.
    Alternatively you may follow the steps below:
    - Prepare link - https://login.microsoftonline.com/common/adminconsent?client_id=%appId%. Replace the `%appId%` with the `Application (client) ID` of Microsoft Graph Azure AD app (from above).
    - Global Administrator can grant consent using the link above.
+
+## 7. Create the Teams app packages
+
+Company communicator app comes with 2 applications – Author, User. The Author application is intended for employees who create and send messages in the organization, and the User application is intended for employees who receive the messages.
+
+Create two Teams app packages: one to be installed to an Authors team and other for recipients to install personally and/or to teams.
+
+1. Make sure you have cloned the app repository locally.
+
+1. Open the `Manifest\manifest_authors.json` file in a text editor.
+
+1. Change the placeholder fields in the manifest to values appropriate for your organization.
+    * `developer.name` ([What's this?](https://docs.microsoft.com/en-us/microsoftteams/platform/resources/schema/manifest-schema#developer))
+    * `developer.websiteUrl`
+    * `developer.privacyUrl`
+    * `developer.termsOfUseUrl`
+
+1. Change the `<<appDomain>>` placholder in the configurationUrl setting to be the `%appDomain%` value e.g. "`https://appName.azurefd.net/configtab`".
+
+1. Change the `<<botId>>` placeholder in the botId setting to be the `%authorBotId%` value - this is your author Azure AD application's ID from above. This is the same GUID that you entered in the template under "Author Client ID". Please note that there are two places in the manifest (for authors) where you will need to update Bot ID.
+
+1. Change the `<<appDomain>>` placeholder in the validDomains setting to be the `%appDomain%` value e.g. "`appName.azurefd.net`".
+
+1. Change the `<<botId>>` placeholder in the id setting of the webApplicationInfo section to be the `%authorBotId%` value. Change the `<<appDomain>>` placeholder in the resource setting of the webApplicationInfo section to be the `%appDomain%` value e.g. "`api://appName.azurefd.net`".
+
+1. Copy the `manifest_authors.json` file to a file named `manifest.json`.
+
+1. Create a ZIP package with the `manifest.json`,`color.png`, and `outline.png`. The two image files are the icons for your app in Teams.
+    * Name this package `company-communicator-authors.zip`, so you know that this is the app for the author teams.
+    * Make sure that the 3 files are the _top level_ of the ZIP package, with no nested folders.  
+    ![image10](images/file-explorer.png)
+
+1. Delete the `manifest.json` file.
+
+Repeat the steps above but with the file `Manifest\manifest_users.json` and use `%userBotId%` for `<<botId>>` placeholder. Note: you will not need to change anything for the configurationUrl or webApplicationInfo section because the recipients app does not have the configurable tab. Name the resulting package `company-communicator-users.zip`, so you know that this is the app for the recipients.
+
+## 8. Install the lastest apps in Microsoft Teams
+
+1. Delete the v4.x apps and re-upload the latest v.5 manifest. Install the authors app (the `company-communicator-authors.zip` package) to your team of message authors.
+    * Note that even if non-authors install the app, the UPN list in the app configuration will prevent them from accessing the message authoring experience. Only the users in the sender UPN list will be able to compose and send messages. 
+    * If your tenant has sideloading apps enabled, you can install your app by following the instructions [here](https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/apps/apps-upload#load-your-package-into-teams).
+
+2. Add the configurable tab to the team of authors, so that they can compose and send messages.
+
+3. [Upload](https://docs.microsoft.com/en-us/microsoftteams/tenant-apps-catalog-teams) the User app to your tenant's app catalog so that it is available for everyone in your tenant to install.
+> **IMPORTANT:** Proactive app installation will work only if you upload the User app to your tenant's app catalog.
+
+4. Install the User app (the `company-communicator-users.zip` package) to the users and teams that will be the target audience.
+> If `proactiveAppInstallation` is enabled, you may skip this step. The service will install the app for all the recipients when authors send a message.
 
 ### Migration Status
 If you have performed all the steps, migration completes after successful deployment.

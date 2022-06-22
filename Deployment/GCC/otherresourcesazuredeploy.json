@@ -149,7 +149,7 @@
          "metadata":{
             "description":"The branch of the GitHub repository to deploy."
          },
-         "defaultValue":"master"
+         "defaultValue":"main"
       }
    },
    "variables":{

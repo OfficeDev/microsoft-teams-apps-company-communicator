@@ -21,7 +21,7 @@ Please refer [step 2](https://github.com/OfficeDev/microsoft-teams-company-commu
 
 1. Click on the **Deploy to Azure** button below.
    
-   [![Deploy to Azure](images/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmaster%2FDeployment%2Fazuredeploy.json)
+   [![Deploy to Azure](images/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmain%2FDeployment%2Fazuredeploy.json)
 
 2. When prompted, log in to your Azure subscription.
     > Please use the same subscription being used for your Company Communicator v1 deployment (from step 1).

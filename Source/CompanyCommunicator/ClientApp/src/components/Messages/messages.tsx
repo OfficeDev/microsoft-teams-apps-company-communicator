@@ -65,6 +65,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         microsoftTeams.initialize();
         this.props.getMessagesList();
         document.addEventListener("keydown", this.escFunction, false);
+        // tslint:disable-next-line no-string-based-set-interval
         this.interval = setInterval(() => {
             this.props.getMessagesList();
         }, 60000);

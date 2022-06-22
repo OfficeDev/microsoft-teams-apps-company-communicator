@@ -12,7 +12,7 @@ export const defaultLocale = () => {
 } 
 
 i18n
-  // load translation using http -> see /public/locales (i.e. https://github.com/i18next/react-i18next/tree/master/example/react/public/locales)
+  // load translation using http -> see /public/locales (i.e. https://github.com/i18next/react-i18next/tree/main/example/react/public/locales)
   // learn more: https://github.com/i18next/i18next-http-backend
   .use(Backend)
   // pass the i18n instance to react-i18next.
