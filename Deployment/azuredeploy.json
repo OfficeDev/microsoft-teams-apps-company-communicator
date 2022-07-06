@@ -274,7 +274,7 @@
     },
     "MasterAdminUpns": {
       "type": "string",
-      "minLength": 1,
+      "minLength": 0,
       "metadata": {
         "description": "Semicolon-delimited list of the master admins (UPNs) allowed to setup and configure targeting mode."
       }
