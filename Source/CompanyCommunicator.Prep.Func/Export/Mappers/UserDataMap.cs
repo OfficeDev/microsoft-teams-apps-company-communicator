@@ -31,7 +31,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Mappers
             this.Map(x => x.UserType).Name(this.localizer.GetString("ColumnName_UserType"));
             this.Map(x => x.DeliveryStatus).Name(this.localizer.GetString("ColumnName_DeliveryStatus"));
             this.Map(x => x.StatusReason).Name(this.localizer.GetString("ColumnName_StatusReason"));
+            // extending the CSV with reading and button click operations - crisag
+            this.Map(x => x.ReadStatus).Name(this.localizer.GetString("ColumnName_ReadStatus"));
+            this.Map(x => x.ButtonTracking).Name(this.localizer.GetString("ColumnName_ButtonTracking"));
             this.Map(x => x.Error).Name(this.localizer.GetString("ColumnName_Error"));
+
         }
     }
 }

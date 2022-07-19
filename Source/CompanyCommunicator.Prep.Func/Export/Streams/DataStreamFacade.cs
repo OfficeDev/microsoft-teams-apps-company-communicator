@@ -189,9 +189,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     Upn = user?.UserPrincipalName,
                     UserType = userType is null ? userType : this.localizer.GetString(userType),
                     DeliveryStatus = sentNotification.DeliveryStatus is null ? sentNotification.DeliveryStatus : this.localizer.GetString(sentNotification.DeliveryStatus),
+                    ReadStatus = sentNotification.ReadStatus.ToString(),
+                    ButtonTracking = sentNotification.ButtonTracking,
                     StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode, notificationStatus),
                     Error = sentNotification.Exception,
-                });
+                }) ;
             }
 
             return userdatalist;
@@ -214,6 +216,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     Upn = this.localizer.GetString("AdminConsentError"),
                     UserType = this.localizer.GetString(sentNotification.UserType ?? "AdminConsentError"),
                     DeliveryStatus = sentNotification.DeliveryStatus is null ? sentNotification.DeliveryStatus : this.localizer.GetString(sentNotification.DeliveryStatus),
+                    ReadStatus = sentNotification.ReadStatus.ToString(),
                     StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode, notificationStatus),
                     Error = sentNotification.Exception,
                 }).ToList();

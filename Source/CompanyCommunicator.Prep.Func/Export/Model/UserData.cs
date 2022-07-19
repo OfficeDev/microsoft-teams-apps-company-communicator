@@ -44,5 +44,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model
         /// Gets or sets the error message.
         /// </summary>
         public string Error { get; set; }
+
+        /// <summary>
+        /// Gets or sets the read status value.
+        /// </summary>
+        public string ReadStatus { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ButtonTracking value.
+        /// </summary>
+        public string ButtonTracking { get; set; }
     }
 }

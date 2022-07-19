@@ -262,4 +262,10 @@
   <data name="SentMessage" xml:space="preserve">
     <value>Gesendete Nachricht</value>
   </data>
+  <data name="ColumnName_ReadStatus" xml:space="preserve">
+    <value>Status lesen</value>
+  </data>
+  <data name="ColumnName_ButtonTracking" xml:space="preserve">
+    <value>Schaltflächen-Tracking</value>
+  </data>
 </root>

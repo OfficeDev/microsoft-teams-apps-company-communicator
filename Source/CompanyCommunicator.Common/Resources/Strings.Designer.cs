@@ -79,6 +79,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Button Clicks.
+        /// </summary>
+        public static string ButtonClicks {
+            get {
+                return ResourceManager.GetString("ButtonClicks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Canceled.
         /// </summary>
         public static string Canceled {
@@ -88,11 +97,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Button Clicks.
+        ///   Looks up a localized string similar to Button Tracking.
         /// </summary>
-        public static string ButtonClicks {
+        public static string ColumnName_ButtonTracking {
             get {
-                return ResourceManager.GetString("ButtonClicks", resourceCulture);
+                return ResourceManager.GetString("ColumnName_ButtonTracking", resourceCulture);
             }
         }
         
@@ -138,6 +147,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         public static string ColumnName_MessageTitle {
             get {
                 return ResourceManager.GetString("ColumnName_MessageTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Read Status.
+        /// </summary>
+        public static string ColumnName_ReadStatus {
+            get {
+                return ResourceManager.GetString("ColumnName_ReadStatus", resourceCulture);
             }
         }
         

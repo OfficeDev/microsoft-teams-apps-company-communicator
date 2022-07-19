@@ -262,4 +262,10 @@
   <data name="SentMessage" xml:space="preserve">
     <value>送信済みメッセージ</value>
   </data>
+  <data name="ColumnName_ReadStatus" xml:space="preserve">
+    <value>読み取りステータス</value>
+  </data>
+  <data name="ColumnName_ButtonTracking" xml:space="preserve">
+    <value>ボタントラッキング</value>
+  </data>
 </root>

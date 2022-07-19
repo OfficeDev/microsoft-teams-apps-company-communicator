@@ -262,4 +262,10 @@
   <data name="SentMessage" xml:space="preserve">
     <value>הודעה שנשלחה</value>
   </data>
+  <data name="ColumnName_ReadStatus" xml:space="preserve">
+    <value>מצב קריאה</value>
+  </data>
+  <data name="ColumnName_ButtonTracking" xml:space="preserve">
+    <value>מעקב אחר לחצנים</value>
+  </data>
 </root>

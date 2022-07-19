@@ -262,4 +262,10 @@
   <data name="SentMessage" xml:space="preserve">
     <value>已發送消息</value>
   </data>
+  <data name="ColumnName_ReadStatus" xml:space="preserve">
+    <value>讀取狀態</value>
+  </data>
+  <data name="ColumnName_ButtonTracking" xml:space="preserve">
+    <value>按鈕跟蹤</value>
+  </data>
 </root>
