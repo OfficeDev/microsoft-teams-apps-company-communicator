@@ -8,7 +8,7 @@ import DraftMessages from '../DraftMessages/draftMessages';
 import './tabContainer.scss';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { getBaseUrl } from '../../configVariables';
-import { Accordion, Button, Flex } from '@fluentui/react-northstar';
+import { Accordion, Button, Flex, FlexItem, Tooltip } from '@fluentui/react-northstar';
 import { getDraftMessagesList } from '../../actions';
 import { connect } from 'react-redux';
 import { TFunction } from "i18next";
@@ -79,17 +79,72 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                 },
             }
         ]
+         const buttonId = 'callout-button';
+         const customHeaderImagePath = process.env.REACT_APP_HEADERIMAGE;
+         const customHeaderText = process.env.REACT_APP_HEADERTEXT == null ? 
+                                    this.localize("CompanyCommunicator") 
+                                        : this.localize(process.env.REACT_APP_HEADERTEXT);
+       
+
         return (
-            <Flex className="tabContainer" column fill gap="gap.small">
-                <Flex className="newPostBtn" hAlign="end" vAlign="end">
-                    <Button content={this.localize("NewMessage")} onClick={this.onNewMessage} primary />
+            <>
+                <div className='cc-header'>
+                    <Flex gap="gap.small" space='between'>
+                        <Flex gap="gap.small" vAlign="center">
+                            <img
+                                src={ customHeaderImagePath == null ? 
+                                            require("../../assets/Images/mslogo.png").default 
+                                            : customHeaderImagePath}
+                                alt="Ms Logo"
+                                className="ms-logo"
+                                title={customHeaderText}
+                            />
+                            <span className="header-text" title={customHeaderText}>{customHeaderText}</span>
+                        </Flex>
+                        <Flex gap="gap.large" vAlign="center">
+                            <FlexItem>
+                                <a
+                                    href="https://aka.ms/M365CCIssues"
+                                    target="_blank" rel="noreferrer"
+                                >
+                                    <Tooltip
+                                        trigger={<img
+                                            src={require("../../assets/Images/HelpIcon.svg").default}
+                                            alt="Help"
+                                            className="support-icon"
+                                        />}
+                                        content={this.localize("Support")}
+                                        pointing={false}
+                                    />
+                                </a>
+                            </FlexItem>
+                            <FlexItem>
+                                <a href="https://aka.ms/M365CCFeedback" target="_blank" rel="noreferrer">
+                                    <Tooltip
+                                        trigger={<img
+                                            src={require("../../assets/Images/FeedbackIcon.svg").default}
+                                            alt="Feedback"
+                                            className='feedback-icon'
+                                        />}
+                                        content={this.localize("Feedback")}
+                                        pointing={false}
+                                    />
+                                </a>
+                            </FlexItem>
+                        </Flex>
+                    </Flex>
+                </div>
+                <Flex className="tabContainer" column fill gap="gap.small">
+                    <Flex className="newPostBtn" hAlign="end" vAlign="end">
+                        <Button content={this.localize("NewMessage")} onClick={this.onNewMessage} primary />
+                    </Flex>
+                    <Flex className="messageContainer">
+                        <Flex.Item grow={1} >
+                            <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
+                        </Flex.Item>
+                    </Flex>
                 </Flex>
-                <Flex className="messageContainer">
-                    <Flex.Item grow={1} >
-                        <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
-                    </Flex.Item>
-                </Flex>
-            </Flex>
+            </>
         );
     }
 

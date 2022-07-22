@@ -5,6 +5,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
@@ -74,5 +75,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public Task SaveWarningInNotificationDataEntityAsync(
             string notificationDataEntityId,
             string warningMessage);
+
+        /// <summary>
+        /// Save image to external storage.
+        /// </summary>
+        /// <param name="blobName">Blob name.</param>
+        /// <param name="base64Image">Image in base64 format without prefix.</param>
+        /// <returns>Prefix with mime-type, ex: data:image/png;base64,.</returns>
+        public Task<string> SaveImageAsync(string blobName, string base64Image);
+
+        /// <summary>
+        /// Get image from external storage in base64 format.
+        /// </summary>
+        /// <param name="prefix">Prefix with mime-type, ex: data:image/png;base64,.</param>
+        /// <param name="blobName">Blob name.</param>
+        /// <returns>Image in base64 format.</returns>
+        public Task<string> GetImageAsync(string prefix, string blobName);
     }
 }

@@ -47,14 +47,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 throw new ArgumentNullException(nameof(notification));
             }
 
+            // In case we have blob name instead of URL to public image.
+            if (!string.IsNullOrEmpty(notification.ImageBase64BlobName)
+                && notification.ImageLink.StartsWith(Common.Constants.ImageBase64Format))
+            {
+                notification.ImageLink += await this.sendingNotificationDataRepository.GetImageAsync(notification.ImageBase64BlobName);
+            }
+
             var serializedContent = this.adaptiveCardCreator.CreateAdaptiveCard(notification).ToJson();
+
+            // Save Adaptive Card with data uri into blob storage. Blob name = notification.Id.
+            await this.sendingNotificationDataRepository.SaveAdaptiveCardAsync(notification.Id, serializedContent);
 
             var sendingNotification = new SendingNotificationDataEntity
             {
                 PartitionKey = NotificationDataTableNames.SendingNotificationsPartition,
                 RowKey = notification.RowKey,
                 NotificationId = notification.Id,
-                Content = serializedContent,
+                Content = notification.Id,
             };
 
             await this.sendingNotificationDataRepository.CreateOrUpdateAsync(sendingNotification);

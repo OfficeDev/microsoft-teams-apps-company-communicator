@@ -15,6 +15,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
     using global::Azure.Storage.Blobs.Models;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Localization;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -122,7 +123,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var teamDatalist = new List<List<TeamData>>() { teamData };
 
             var mock = GetBlobContainerClientMock();
-            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient()).Returns(mock.Object);
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient(Constants.BlobContainerName)).Returns(mock.Object);
             string metaDataFile = "FileName_Metadata";
             var metaDataFileName = new LocalizedString(metaDataFile, metaDataFile);
             this.localizer.Setup(_ => _[metaDataFile]).Returns(metaDataFileName);
@@ -156,7 +157,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
             var userDatalist = new List<List<UserData>>() { userData };
 
             var mock = GetBlobContainerClientMock();
-            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient()).Returns(mock.Object);
+            this.storageClientFactory.Setup(x => x.CreateBlobContainerClient(Constants.BlobContainerName)).Returns(mock.Object);
             string metaDataFile = "FileName_Metadata";
             var metaDataFileName = new LocalizedString(metaDataFile, metaDataFile);
             this.localizer.Setup(_ => _[metaDataFile]).Returns(metaDataFileName);

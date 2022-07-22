@@ -141,6 +141,22 @@
         "description": "The link to the icon for the app. It must resolve to a PNG file."
       }
     },
+    "headerText": {
+      "type": "string",
+      "defaultValue": "Company Communicator",
+      "minLength": 1,
+      "metadata": {
+        "description": "The header banner text."
+      }
+    },
+    "headerLogoUrl": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-company-communicator-app/main/Source/CompanyCommunicator/ClientApp/src/assets/Images/mslogo.png",
+      "metadata": {
+        "description": "The link to the logo for the app. It must resolve to a PNG file."
+      }
+    },
     "tenantId": {
       "type": "string",
       "defaultValue": "[subscription().tenantId]",
@@ -610,7 +626,10 @@
             "APPINSIGHTS_INSTRUMENTATIONKEY": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('AppInsightsSecretResourceId'), '2015-06-01').secretUriWithVersion, ')')]",
             "WEBSITE_NODE_DEFAULT_VERSION": "16.13.0",
             "KeyVault:Url": "[variables('keyVaultUrl')]",
-            "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false"
+            "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
+            "REACT_APP_HEADERTEXT": "[parameters('headerText')]",
+            "REACT_APP_HEADERIMAGE": "[parameters('headerLogoUrl')]"
+
           }
         },
         {

@@ -319,7 +319,7 @@ function CreateAzureADApp {
             }
         } else {
             # Create Azure AD app registration using CLI
-            az ad app create --display-name $appName --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow
+             az ad app create --display-name $appName --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow
 
             WriteI -message "Waiting for app creation to finish..."
 
@@ -496,10 +496,10 @@ function DeployARMTemplate {
         # Deploy ARM templates
         WriteI -message "`nDeploying app services, Azure function, bot service, and other supporting resources... (this step can take over an hour)"
         if($parameters.useCertificate.Value){
-        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploywithcert.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorAppCertName=$($parameters.authorAppCertName.Value)" "graphAppId=$graphappid" "graphAppCertName=$($parameters.graphAppCertName.Value)" "userClientId=$userappId" "userAppCertName=$($parameters.userAppCertName.Value)" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "objectId=$($parameters.UserObjectId.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)" "serviceBusWebAppRoleNameGuid=$($parameters.serviceBusWebAppRoleNameGuid.Value)" "serviceBusPrepFuncRoleNameGuid=$($parameters.serviceBusPrepFuncRoleNameGuid.Value)" "serviceBusSendFuncRoleNameGuid=$($parameters.serviceBusSendFuncRoleNameGuid.Value)" "serviceBusDataFuncRoleNameGuid=$($parameters.serviceBusDataFuncRoleNameGuid.Value)" "storageAccountWebAppRoleNameGuid=$($parameters.storageAccountWebAppRoleNameGuid.Value)" "storageAccountPrepFuncRoleNameGuid=$($parameters.storageAccountPrepFuncRoleNameGuid.Value)" "storageAccountDataFuncRoleNameGuid=$($parameters.storageAccountDataFuncRoleNameGuid.Value)" 
+        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploywithcert.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorAppCertName=$($parameters.authorAppCertName.Value)" "graphAppId=$graphappid" "graphAppCertName=$($parameters.graphAppCertName.Value)" "userClientId=$userappId" "userAppCertName=$($parameters.userAppCertName.Value)" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "headerText=$($parameters.headerText.Value)" "headerLogoUrl=$($parameters.headerLogoUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "objectId=$($parameters.UserObjectId.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)" "serviceBusWebAppRoleNameGuid=$($parameters.serviceBusWebAppRoleNameGuid.Value)" "serviceBusPrepFuncRoleNameGuid=$($parameters.serviceBusPrepFuncRoleNameGuid.Value)" "serviceBusSendFuncRoleNameGuid=$($parameters.serviceBusSendFuncRoleNameGuid.Value)" "serviceBusDataFuncRoleNameGuid=$($parameters.serviceBusDataFuncRoleNameGuid.Value)" "storageAccountWebAppRoleNameGuid=$($parameters.storageAccountWebAppRoleNameGuid.Value)" "storageAccountPrepFuncRoleNameGuid=$($parameters.storageAccountPrepFuncRoleNameGuid.Value)" "storageAccountDataFuncRoleNameGuid=$($parameters.storageAccountDataFuncRoleNameGuid.Value)" 
         }
         else{
-        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "graphAppId=$graphappid" "graphAppSecret=$graphappsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"  "serviceBusWebAppRoleNameGuid=$($parameters.serviceBusWebAppRoleNameGuid.Value)" "serviceBusPrepFuncRoleNameGuid=$($parameters.serviceBusPrepFuncRoleNameGuid.Value)" "serviceBusSendFuncRoleNameGuid=$($parameters.serviceBusSendFuncRoleNameGuid.Value)" "serviceBusDataFuncRoleNameGuid=$($parameters.serviceBusDataFuncRoleNameGuid.Value)" "storageAccountWebAppRoleNameGuid=$($parameters.storageAccountWebAppRoleNameGuid.Value)" "storageAccountPrepFuncRoleNameGuid=$($parameters.storageAccountPrepFuncRoleNameGuid.Value)" "storageAccountDataFuncRoleNameGuid=$($parameters.storageAccountDataFuncRoleNameGuid.Value)" 
+        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "graphAppId=$graphappid" "graphAppSecret=$graphappsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "headerText=$($parameters.headerText.Value)" "headerLogoUrl=$($parameters.headerLogoUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"  "serviceBusWebAppRoleNameGuid=$($parameters.serviceBusWebAppRoleNameGuid.Value)" "serviceBusPrepFuncRoleNameGuid=$($parameters.serviceBusPrepFuncRoleNameGuid.Value)" "serviceBusSendFuncRoleNameGuid=$($parameters.serviceBusSendFuncRoleNameGuid.Value)" "serviceBusDataFuncRoleNameGuid=$($parameters.serviceBusDataFuncRoleNameGuid.Value)" "storageAccountWebAppRoleNameGuid=$($parameters.storageAccountWebAppRoleNameGuid.Value)" "storageAccountPrepFuncRoleNameGuid=$($parameters.storageAccountPrepFuncRoleNameGuid.Value)" "storageAccountDataFuncRoleNameGuid=$($parameters.storageAccountDataFuncRoleNameGuid.Value)" 
         }
 
         $deploymentExceptionMessage = "ERROR: ARM template deployment error."
@@ -516,10 +516,10 @@ function DeployARMTemplate {
                 if($appserviceCodeSyncSuccess){
                     WriteI -message "Re-running deployment to fetch output..."
                     if($parameters.useCertificate.Value){
-                        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploywithcert.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorAppCertName=$($parameters.authorAppCertName.Value)" "graphAppId=$graphappid" "graphAppCertName=$($parameters.graphAppCertName.Value)" "userClientId=$userappId" "userAppCertName=$($parameters.userAppCertName.Value)" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "objectId=$($parameters.UserObjectId.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"  "serviceBusWebAppRoleNameGuid=$($parameters.serviceBusWebAppRoleNameGuid.Value)" "serviceBusPrepFuncRoleNameGuid=$($parameters.serviceBusPrepFuncRoleNameGuid.Value)" "serviceBusSendFuncRoleNameGuid=$($parameters.serviceBusSendFuncRoleNameGuid.Value)" "serviceBusDataFuncRoleNameGuid=$($parameters.serviceBusDataFuncRoleNameGuid.Value)" "storageAccountWebAppRoleNameGuid=$($parameters.storageAccountWebAppRoleNameGuid.Value)" "storageAccountPrepFuncRoleNameGuid=$($parameters.storageAccountPrepFuncRoleNameGuid.Value)" "storageAccountDataFuncRoleNameGuid=$($parameters.storageAccountDataFuncRoleNameGuid.Value)" 
+                        $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploywithcert.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorAppCertName=$($parameters.authorAppCertName.Value)" "graphAppId=$graphappid" "graphAppCertName=$($parameters.graphAppCertName.Value)" "userClientId=$userappId" "userAppCertName=$($parameters.userAppCertName.Value)" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "headerText=$($parameters.headerText.Value)" "headerLogoUrl=$($parameters.headerLogoUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "objectId=$($parameters.UserObjectId.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"  "serviceBusWebAppRoleNameGuid=$($parameters.serviceBusWebAppRoleNameGuid.Value)" "serviceBusPrepFuncRoleNameGuid=$($parameters.serviceBusPrepFuncRoleNameGuid.Value)" "serviceBusSendFuncRoleNameGuid=$($parameters.serviceBusSendFuncRoleNameGuid.Value)" "serviceBusDataFuncRoleNameGuid=$($parameters.serviceBusDataFuncRoleNameGuid.Value)" "storageAccountWebAppRoleNameGuid=$($parameters.storageAccountWebAppRoleNameGuid.Value)" "storageAccountPrepFuncRoleNameGuid=$($parameters.storageAccountPrepFuncRoleNameGuid.Value)" "storageAccountDataFuncRoleNameGuid=$($parameters.storageAccountDataFuncRoleNameGuid.Value)" 
                     }
                     else{
-                       $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "graphAppId=$graphappid" "graphAppSecret=$graphappsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"  "serviceBusWebAppRoleNameGuid=$($parameters.serviceBusWebAppRoleNameGuid.Value)" "serviceBusPrepFuncRoleNameGuid=$($parameters.serviceBusPrepFuncRoleNameGuid.Value)" "serviceBusSendFuncRoleNameGuid=$($parameters.serviceBusSendFuncRoleNameGuid.Value)" "serviceBusDataFuncRoleNameGuid=$($parameters.serviceBusDataFuncRoleNameGuid.Value)" "storageAccountWebAppRoleNameGuid=$($parameters.storageAccountWebAppRoleNameGuid.Value)" "storageAccountPrepFuncRoleNameGuid=$($parameters.storageAccountPrepFuncRoleNameGuid.Value)" "storageAccountDataFuncRoleNameGuid=$($parameters.storageAccountDataFuncRoleNameGuid.Value)" 
+                       $armDeploymentResult = az deployment group create --resource-group $parameters.resourceGroupName.Value --subscription $parameters.subscriptionId.Value --template-file 'azuredeploy.json' --parameters "baseResourceName=$($parameters.baseResourceName.Value)" "authorClientId=$authorappId" "authorClientSecret=$authorsecret" "graphAppId=$graphappid" "graphAppSecret=$graphappsecret" "userClientId=$userappId" "userClientSecret=$usersecret" "senderUPNList=$($parameters.senderUPNList.Value)" "customDomainOption=$($parameters.customDomainOption.Value)" "appDisplayName=$($parameters.appDisplayName.Value)" "appDescription=$($parameters.appDescription.Value)" "appIconUrl=$($parameters.appIconUrl.Value)" "headerText=$($parameters.headerText.Value)" "headerLogoUrl=$($parameters.headerLogoUrl.Value)" "tenantId=$($parameters.tenantId.Value)" "hostingPlanSku=$($parameters.hostingPlanSku.Value)" "hostingPlanSize=$($parameters.hostingPlanSize.Value)" "location=$($parameters.region.Value)" "gitRepoUrl=$($parameters.gitRepoUrl.Value)" "gitBranch=$($parameters.gitBranch.Value)" "ProactivelyInstallUserApp=$($parameters.proactivelyInstallUserApp.Value)" "UserAppExternalId=$($parameters.userAppExternalId.Value)" "DefaultCulture=$($parameters.defaultCulture.Value)" "SupportedCultures=$($parameters.supportedCultures.Value)"  "serviceBusWebAppRoleNameGuid=$($parameters.serviceBusWebAppRoleNameGuid.Value)" "serviceBusPrepFuncRoleNameGuid=$($parameters.serviceBusPrepFuncRoleNameGuid.Value)" "serviceBusSendFuncRoleNameGuid=$($parameters.serviceBusSendFuncRoleNameGuid.Value)" "serviceBusDataFuncRoleNameGuid=$($parameters.serviceBusDataFuncRoleNameGuid.Value)" "storageAccountWebAppRoleNameGuid=$($parameters.storageAccountWebAppRoleNameGuid.Value)" "storageAccountPrepFuncRoleNameGuid=$($parameters.storageAccountPrepFuncRoleNameGuid.Value)" "storageAccountDataFuncRoleNameGuid=$($parameters.storageAccountDataFuncRoleNameGuid.Value)" 
                     }
                 } else{
                     CollectARMDeploymentLogs
@@ -726,15 +726,16 @@ function ADAppUpdate {
 
     Import-Module AzureAD
 
+
     $apps = Get-AzureADApplication -Filter "DisplayName eq '$appName'"
 
     if (0 -eq $apps.Length) {
-        $app = New-AzureADApplication -DisplayName $appName
+        $eachApp = New-AzureADApplication -DisplayName $appName
     } else {
-        $app = $apps[0]
+        $eachApp = $apps[0]
     }
 
-    $applicationObjectId = $app.ObjectId
+    $applicationObjectId = $eachApp.ObjectId
 
     $app = Get-AzureADMSApplication -ObjectId $applicationObjectId
 
@@ -756,12 +757,12 @@ function ADAppUpdate {
     $apps = Get-AzureADApplication -Filter "DisplayName eq '$appName'"
 
     if (0 -eq $apps.Length) {
-        $app = New-AzureADApplication -DisplayName $appName
+        $eachApp = New-AzureADApplication -DisplayName $appName
     } else {
-        $app = $apps[0]
+        $eachApp = $apps[0]
     }
 
-    $applicationObjectId = $app.ObjectId
+    $applicationObjectId = $eachApp.ObjectId
 
     $app = Get-AzureADMSApplication -ObjectId $applicationObjectId
 
@@ -820,10 +821,10 @@ function ADAppUpdateDisplayName{
     if (0 -eq $apps.Length) {
         $app = New-AzureADApplication -DisplayName $currentName
     } else {
-        $app = $apps[0]
+        $eachApp = $apps[0]
     }
 
-    $applicationObjectId = $app.ObjectId
+    $applicationObjectId = $eachApp.ObjectId
 
     $app = Get-AzureADMSApplication -ObjectId $applicationObjectId
 
@@ -840,12 +841,12 @@ function FormatAADApp {
     $apps = Get-AzureADApplication -Filter "DisplayName eq '$appName'"
 
     if (0 -eq $apps.Length) {
-        $app = New-AzureADApplication -DisplayName $appName
+        $eachApp = New-AzureADApplication -DisplayName $appName
     } else {
-        $app = $apps[0]
+        $eachApp = $apps[0]
     }
 
-    $applicationObjectId = $app.ObjectId
+    $applicationObjectId = $eachApp.ObjectId
 
     $app = Get-AzureADMSApplication -ObjectId $applicationObjectId
 
@@ -945,7 +946,7 @@ function logout {
         $updatedecision = $host.ui.promptforchoice($confirmationtitle, $confirmationquestion, $confirmationchoices, 1)
         if ($updatedecision -eq 0) {
             WriteI -message "Installing Azure CLI ..."
-            Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; rm .\AzureCLI.msi
+            Invoke-WebRequest -Uri https://azcliprod.blob.core.windows.net/msi/azure-cli-2.30.0.msi -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; rm .\AzureCLI.msi
             WriteS -message "Azure CLI is installed! Please close this PowerShell window and re-run this script in a new PowerShell session."
             EXIT
         } else {
@@ -1022,7 +1023,7 @@ function logout {
     }
 
 # Start Deployment.
-    Write-Ascii -InputObject "Company Communicator v5.0" -ForegroundColor Magenta
+    Write-Ascii -InputObject "Company Communicator v5.2" -ForegroundColor Magenta
     WriteI -message "Starting deployment..."
 
 # Initialize connections - Azure Az/CLI/Azure AD
@@ -1035,11 +1036,8 @@ function logout {
     }
 
     WriteI -message "Azure AD sign-in..."
-    $context = [Microsoft.Azure.Commands.Common.Authentication.Abstractions.AzureRmProfileProvider]::Instance.Profile.DefaultContext
-    $aadToken = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($context.Account, $context.Environment, $context.Tenant.Id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, "https://graph.windows.net").AccessToken
-    $ADaccount = Connect-AzureAD -AadAccessToken $aadToken -AccountId $context.Account.Id -TenantId $context.tenant.id -ErrorAction Stop
+    $ADaccount = Connect-AzureAD -Tenant $parameters.subscriptionTenantId.Value -ErrorAction Stop
     $userAlias = (($user | ConvertFrom-Json) | where {$_.id -eq $parameters.subscriptionId.Value}).user.name
-
 
 # Validate the name of resources to be created.
     if (-not(validateresourcesnames)) {
@@ -1048,7 +1046,7 @@ function logout {
         EXIT
     }
     
-# Create or Update User App
+	# Create or Update User App
 	$usersApp = $parameters.baseresourcename.Value + '-users'
 	$userAppCred = $null
 
@@ -1082,7 +1080,7 @@ function logout {
         Exit
 		}
 	}
-	
+
 # Create Company Communicator App
 	$graphApp = $parameters.baseResourceName.Value
 	$graphAppCred = CreateAzureADApp -AppName $graphApp -ResetAppSecret $True -MultiTenant $False
@@ -1126,7 +1124,7 @@ function logout {
         ImportKeyVaultCertificate $keyVaultName "$($parameters.BaseResourceName.Value)-prep-function"
         ImportKeyVaultCertificate $keyVaultName "$($parameters.BaseResourceName.Value)-function"
         ImportKeyVaultCertificate $keyVaultName "$($parameters.BaseResourceName.Value)-data-function"
-
+        
         UpdateAadAppWithCertificate $authorAppCred.appId $keyVaultName $parameters.authorAppCertName.value
         UpdateAadAppWithCertificate $userAppCred.appId $keyVaultName $parameters.userAppCertName.value
         UpdateAadAppWithCertificate $graphAppCred.appId $keyVaultName $parameters.graphAppCertName.value
@@ -1160,7 +1158,7 @@ function logout {
         logout
         Exit
     }    
-
+  
 # Function call to update reply-urls and uris for registered app.
     WriteI -message "Updating required parameters and urls..."
 	if($parameters.isUpgrade.Value){

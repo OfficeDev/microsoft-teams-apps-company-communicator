@@ -254,10 +254,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 NotificationDataTableNames.SendingNotificationsPartition,
                 message.NotificationId);
 
+            // Download serialized AC from blob storage.
+            var jsonAC = await this.notificationRepo.GetAdaptiveCardAsync(message.NotificationId);
+
             var adaptiveCardAttachment = new Attachment()
             {
                 ContentType = AdaptiveCardContentType,
-                Content = JsonConvert.DeserializeObject(notification.Content),
+                Content = JsonConvert.DeserializeObject(jsonAC),
             };
 
             return MessageFactory.Attachment(adaptiveCardAttachment);

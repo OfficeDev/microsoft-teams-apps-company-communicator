@@ -83,5 +83,7 @@
   "ExportErrorMessage": "結果を再度エクスポートしてみてください。問題が解決しない場合は、IT 管理者にお問い合わせください。",
   "ExportButtonText": "詳細な結果のエクスポート",
   "ExportButtonProgressText": "エクスポートが進行中",
-  "ErrorURLMessage": "URL は https:// で開始する必要があります。"
+  "ErrorURLMessage": "URL は https:// で開始する必要があります。",
+  "Support": "サポート",
+  "Feedback": "フィードバック"
 }

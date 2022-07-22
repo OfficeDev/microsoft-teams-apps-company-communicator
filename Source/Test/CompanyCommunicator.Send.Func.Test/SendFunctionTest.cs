@@ -190,6 +190,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public async Task SendNotificationSuccess_Test()
         {
             // Arrange
+            var adaptiveCardContent = "{\n  \"type\": \"AdaptiveCard\",\n  \"version\": \"1.0\",\n  \"body\": [\n    {\n      \"type\": \"TextBlock\",\n      \"size\": \"extraLarge\",\n      \"weight\": \"bolder\",\n      \"text\": \"hkhkj\",\n      \"wrap\": true\n    },\n    {\n      \"type\": \"TextBlock\",\n      \"text\": \"iuyuiy\",\n      \"wrap\": true\n    }\n  ],\n  \"msteams\": {\n    \"width\": \"full\"\n  }\n}";
             var sendFunctionInstance = this.GetSendFunction();
             SendMessageResponse sendMessageResponse = new SendMessageResponse()
             {
@@ -211,6 +212,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
 
             var notificatioData = new SendingNotificationDataEntity() { Content = "{\"text\":\"Welcome\",\"displayText\":\"Hello\"}" };
             this.notificationRepo.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(notificatioData);
+            this.notificationRepo.Setup(x => x.GetAdaptiveCardAsync(It.IsAny<string>())).Returns(Task.FromResult(adaptiveCardContent));
             this.messageService.Setup(x => x.SendMessageAsync(It.IsAny<IMessageActivity>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), this.logger.Object)).ReturnsAsync(sendMessageResponse);
             this.notificationService.Setup(x => x.UpdateSentNotification(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
 
@@ -230,6 +232,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public async Task SendNotificationResponseThrottledTest()
         {
             // Arrange
+            var adaptiveCardContent = "{\n  \"type\": \"AdaptiveCard\",\n  \"version\": \"1.0\",\n  \"body\": [\n    {\n      \"type\": \"TextBlock\",\n      \"size\": \"extraLarge\",\n      \"weight\": \"bolder\",\n      \"text\": \"hkhkj\",\n      \"wrap\": true\n    },\n    {\n      \"type\": \"TextBlock\",\n      \"text\": \"iuyuiy\",\n      \"wrap\": true\n    }\n  ],\n  \"msteams\": {\n    \"width\": \"full\"\n  }\n}";
             var sendFunctionInstance = this.GetSendFunction();
             SendMessageResponse sendMessageResponse = new SendMessageResponse()
             {
@@ -253,6 +256,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
 
             var notificatioData = new SendingNotificationDataEntity() { Content = "{\"text\":\"Welcome\",\"displayText\":\"Hello\"}" };
             this.notificationRepo.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(notificatioData);
+            this.notificationRepo.Setup(x => x.GetAdaptiveCardAsync(It.IsAny<string>())).Returns(Task.FromResult(adaptiveCardContent));
+
             this.messageService.Setup(x => x.SendMessageAsync(It.IsAny<IMessageActivity>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), this.logger.Object)).ReturnsAsync(sendMessageResponse);
             this.notificationService.Setup(x => x.UpdateSentNotification(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
 

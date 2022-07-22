@@ -47,4 +47,29 @@ The default app service plan for CC deployment is Windows, if you want to use Li
 ### 10. How do I know the version of the app? 
 ![Version of the app](images/version_app.png)
 
+### 11. Can I update the list of authors after deploying the app?
+Yes, you can update the list of authors after deploying the Company Communicator app by going to the deployed Azure App Service.
+1. Go to deployed Azure Resource Group -> Azure App Service.
+2. Select the configuration blade from the Azure App service and updated the AuthorizedCreatorsUpns app setting value.
+3. Save and then restart the App.
+
+    ![Update author list](images/update_author_list.png)
+
+### 12. How to update the banner title and the logo?
+You can update the banner title and the logo by updating the configuration in Azure app service
+
+1. Go to deployed Azure Resource Group -> Azure App Service.
+1. Select the configuration blade from the Azure App service and update the 'REACT_APP_HEADERIMAGE' and 'REACT_APP_HEADERTEXT' configuration values.
+
+    ![Update banner](images/update_banner_title_logo.png)
+
+1. Save the changes
+1. Navigate to 'Deployment Center' and click 'Sync'
+1. Check the status of the deployment in the 'Logs' tab, once the status is success, the changes will reflect automatically.
+
+    ![Sync changes](images/sync_changes.png)
+
+### 13. Is it possible to format the message in the summary field?
+Yes, you can use markdown tags for formatting the message in the summary. CC v5.2 supports this feature, you can refer [here](https://docs.microsoft.com/en-us/adaptive-cards/authoring-cards/text-features) to know the list of styles supported.
+
   

@@ -222,20 +222,20 @@ If you forgot to copy your **authorBotId**, **userBotId** and **appDomain** valu
 * **userBotId:** This is the user Microsoft Application ID for the Company Communicator app. It can be found in the "UserAppId" field of your configuration e.g. 5630f8a2-c2a0-4cda-bdfa-c2fa87654321. For the following steps, it will be referred to as %userBotId%.
 * **appDomain:** This is the base domain for the Company Communicator app. It is the value in the "AzureAd:ApplicationIdURI" field of your configuration without the "api://" e.g. appName.azurefd.net. For the following steps, it will be referred to as %appDomain%.
 
-## 13. App service deployment fails with the error message "Input string was not in a correct format" due to fsevents package.
-App Service deployment failed recently due to deprecation of package version used in the application, the issue is already fixed and released to GitHub. However, if you've performed the deployment already and wanted to fix the failed deployment, then use the below mentioned work around.
+### 13. PowerShell deployment is successful with the below error?
+
+#### Issue
+   
+![Update author list](images/powershell_deployment_error.png)
 
 #### Fix
 
-- Go to portal.azure.com. Navigate to resource group where all CC resources are deployed.
-- Click on the app service -> click on Configuration
-- Click on **WEBSITE_NODE_DEFAULT_VERSION.**
-- Update the default value to **16.13.0** (previous value -> 10.15.2) and save.
-- Click on overview and re-start the app service.
-- Once the app service is restarted, navigate to Deployment Center and click on Sync.
-- Wait till the deployment is completed. You can validate this once the status changes to Success under logs. 
+If this error occurs, authentication set up might not be completed fully. Please make sure to complete the [set up the authentication](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/Deployment-guide#3-set-up-authentication) step manually.
+
+The above error occurs due to the mismatch in Azure CLI version. There are two ways to resolve this issue in future,
+
+1. Install [Azure CLI v2.30.0](https://azcliprod.blob.core.windows.net/msi/azure-cli-2.30.0.msi).
+2. Uninstall the Azure CLI from your system and re-run the powershell script in future, the script will automatically install Azure CLI v2.30.0 and authentication steps will be completed.
 
 # Didn't find your problem here?
 Please report the issue [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/issues/new)
-
-

@@ -83,5 +83,7 @@
   "ExportErrorMessage": "请再次尝试导出结果。如果问题仍然存在，请与你的 IT 管理员联系以获得帮助。",
   "ExportButtonText": "导出详细结果",
   "ExportButtonProgressText": "正在导出",
-  "ErrorURLMessage": "URL 必须以 https:// 开头"
+  "ErrorURLMessage": "URL 必须以 https:// 开头",
+  "Support": "支持",
+  "Feedback": "反馈"
 }

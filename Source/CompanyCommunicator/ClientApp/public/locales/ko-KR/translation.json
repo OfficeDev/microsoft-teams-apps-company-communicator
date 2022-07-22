@@ -83,5 +83,7 @@
   "ExportErrorMessage": "결과를 다시 내보내 보세요. 문제가 지속되면 IT 관리자에게 도움을 요청하세요.",
   "ExportButtonText": "자세한 결과 내보내기",
   "ExportButtonProgressText": "내보내기 진행 중",
-  "ErrorURLMessage": "URL은 https://로 시작해야 합니다."
+  "ErrorURLMessage": "URL은 https://로 시작해야 합니다.",
+  "Support": "지원",
+  "Feedback": "피드백"
 }

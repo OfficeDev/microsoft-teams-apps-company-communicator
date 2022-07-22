@@ -127,6 +127,14 @@
     "Value": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-company-communicator-app/main/Manifest/color.png",
     "Description": "The link to the icon for the app. It must resolve to a PNG file."
   },
+  "headerText": {
+    "Value": "Company Communicator",
+    "Description": "The header banner text."
+  },
+  "headerLogoUrl": {
+    "Value": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-company-communicator-app/main/Source/CompanyCommunicator/ClientApp/src/assets/Images/mslogo.png",
+    "Description": "The link to the logo for the app. It must resolve to a PNG file."
+  },
   "companyName": {
     "Value": "<<value>>",
     "Description": "The display name for the company."
