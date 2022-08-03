@@ -82,7 +82,7 @@ This is the log of changes implemented for Company Communicator.
   - The CSV report exported by authors now includes information on Reactions.
 
 **v5.12**
-  - The CSV report exported by authors now includes information on ReadStatus and ButtonTracking. That will make easier for author to create simple reports without PowerBI or accessing directly the database. 
+  - The CSV report exported by authors now includes information on ReadStatus and ButtonTracking. That will make easier for author to create simple reports without Power BI or accessing directly the database. 
 
 **v5.11**
   - ATTENTION!!! - Merge of v5.1. If you have a deployment based on v4.XX you need to follow instructions [v5 migration guide](https://github.com/cristianoag/microsoft-teams-apps-company-communicator/wiki/v5-migration-guide) to update your setup.
