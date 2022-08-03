@@ -268,4 +268,7 @@
   <data name="ColumnName_ButtonTracking" xml:space="preserve">
     <value>تتبع الأزرار</value>
   </data>
+  <data name="ColumnName_Reactions" xml:space="preserve">
+    <value>ردود الفعل</value>
+  </data>
 </root>

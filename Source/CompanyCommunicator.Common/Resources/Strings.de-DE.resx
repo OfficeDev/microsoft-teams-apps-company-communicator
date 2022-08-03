@@ -268,4 +268,7 @@
   <data name="ColumnName_ButtonTracking" xml:space="preserve">
     <value>Schaltflächen-Tracking</value>
   </data>
+  <data name="ColumnName_Reactions" xml:space="preserve">
+    <value>Reaktionen</value>
+  </data>
 </root>

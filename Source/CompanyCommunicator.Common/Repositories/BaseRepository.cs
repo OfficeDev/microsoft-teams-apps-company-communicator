@@ -154,6 +154,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         }
 
         /// <inheritdoc/>
+        public async Task<IEnumerable<T>> GetWithFilterWithoutPartitionAsync(string filter)
+        {
+            try
+            {
+                var query = new TableQuery<T>().Where(filter);
+                var entities = await this.ExecuteQueryAsync(query);
+                return entities;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
+
+        /// <inheritdoc/>
         public async Task<IEnumerable<T>> GetAllAsync(string partition = null, int? count = null)
         {
             try

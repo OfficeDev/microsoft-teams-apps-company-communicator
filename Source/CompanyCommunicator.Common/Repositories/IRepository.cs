@@ -61,6 +61,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         public Task<IEnumerable<T>> GetWithFilterAsync(string filter, string partition = null, int? count = null);
 
         /// <summary>
+        /// Get entities from the table storage with a filter.
+        /// </summary>
+        /// <param name="filter">Filter to the result.</param>
+        /// <returns>All data entities.</returns>
+        public Task<IEnumerable<T>> GetWithFilterWithoutPartitionAsync(string filter);
+
+        /// <summary>
         /// Get all data entities from the table storage in a partition.
         /// </summary>
         /// <param name="partition">Partition key value.</param>

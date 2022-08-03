@@ -121,6 +121,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 {
                     await this.notificationService.UpdateSentNotification(
                         notificationId: messageContent.NotificationId,
+                        activityId: string.Empty,
                         recipientId: messageContent.RecipientData.RecipientId,
                         totalNumberOfSendThrottles: 0,
                         statusCode: SentNotificationDataEntity.NotSupportedStatusCode,
@@ -142,6 +143,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 {
                     await this.notificationService.UpdateSentNotification(
                         notificationId: messageContent.NotificationId,
+                        activityId: string.Empty,
                         recipientId: messageContent.RecipientData.RecipientId,
                         totalNumberOfSendThrottles: 0,
                         statusCode: SentNotificationDataEntity.FinalFaultedStatusCode,
@@ -202,6 +204,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 // Update sent notification table.
                 await this.notificationService.UpdateSentNotification(
                     notificationId: messageContent.NotificationId,
+                    activityId: string.Empty,
                     recipientId: messageContent.RecipientData.RecipientId,
                     totalNumberOfSendThrottles: 0,
                     statusCode: statusCode,
@@ -242,6 +245,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             await this.notificationService.UpdateSentNotification(
                     notificationId: messageContent.NotificationId,
+                    activityId: sendMessageResponse.ActivityId,
                     recipientId: messageContent.RecipientData.RecipientId,
                     totalNumberOfSendThrottles: sendMessageResponse.TotalNumberOfSendThrottles,
                     statusCode: sendMessageResponse.StatusCode,
@@ -270,10 +274,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             // replacing id and key for read tracking purposes
             notification.Content = notification.Content.Replace("[ID]", message.NotificationId);
             notification.Content = notification.Content.Replace("[KEY]", message.RecipientData.RecipientId);
-            
-            notification.Content = this.GetButtonTrackingUrl(notification.Content, message.NotificationId,
-                                                             message.RecipientData.RecipientId);
-
+            notification.Content = this.GetButtonTrackingUrl(notification.Content, message.NotificationId, message.RecipientData.RecipientId);
 
             var adaptiveCardAttachment = new Attachment()
             {

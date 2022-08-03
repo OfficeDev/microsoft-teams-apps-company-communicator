@@ -77,6 +77,10 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 This is the log of changes implemented for Company Communicator.
 
+**v5.13**
+  - Reactions to messages sent by the bot are now tracked to the database. Reports can be created using Power BI connected directly to the Azure Storage Account or the CSV file with the information can be exported to be analized on Excel. 
+  - The CSV report exported by authors now includes information on Reactions.
+
 **v5.12**
   - The CSV report exported by authors now includes information on ReadStatus and ButtonTracking. That will make easier for author to create simple reports without PowerBI or accessing directly the database. 
 

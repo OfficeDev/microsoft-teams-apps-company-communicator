@@ -44,6 +44,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
         /// Updates sent notification for the recipient.
         /// </summary>
         /// <param name="notificationId">The notification Id.</param>
+        /// <param name="activityId">The activity Id.</param>
         /// <param name="recipientId">The recipient's unique identifier.
         ///     If the recipient is a user, this should be the AAD Id.
         ///     If the recipient is a team, this should be the team Id.</param>
@@ -56,6 +57,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public Task UpdateSentNotification(
             string notificationId,
+            string activityId,
             string recipientId,
             int totalNumberOfSendThrottles,
             int statusCode,

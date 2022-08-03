@@ -24,6 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Mappers
         /// <param name="localizer">Localization service.</param>
         public UserDataMap(IStringLocalizer<Strings> localizer)
         {
+            // 8/3/22 - extending the CSV with reading and button click operations and reactions
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
             this.Map(x => x.Id).Name(this.localizer.GetString("ColumnName_UserId"));
             this.Map(x => x.Upn).Name(this.localizer.GetString("ColumnName_Upn"));
@@ -31,8 +32,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Mappers
             this.Map(x => x.UserType).Name(this.localizer.GetString("ColumnName_UserType"));
             this.Map(x => x.DeliveryStatus).Name(this.localizer.GetString("ColumnName_DeliveryStatus"));
             this.Map(x => x.StatusReason).Name(this.localizer.GetString("ColumnName_StatusReason"));
-            // extending the CSV with reading and button click operations - crisag
             this.Map(x => x.ReadStatus).Name(this.localizer.GetString("ColumnName_ReadStatus"));
+            this.Map(x => x.Reactions).Name(this.localizer.GetString("ColumnName_Reactions"));
             this.Map(x => x.ButtonTracking).Name(this.localizer.GetString("ColumnName_ButtonTracking"));
             this.Map(x => x.Error).Name(this.localizer.GetString("ColumnName_Error"));
 

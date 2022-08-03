@@ -91,7 +91,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                     try
                     {
                         // Send message.
-                        await policy.ExecuteAsync(async () => await turnContext.SendActivityAsync(message));
+                        // await policy.ExecuteAsync(async () => await turnContext.SendActivityAsync(message));
+                        await policy.ExecuteAsync(async () =>
+                        {
+                            var resp = await turnContext.SendActivityAsync(message);
+                            response.ActivityId = resp.Id;
+                        });
 
                         // Success.
                         response.ResultType = SendMessageResult.Succeeded;

@@ -191,6 +191,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     DeliveryStatus = sentNotification.DeliveryStatus is null ? sentNotification.DeliveryStatus : this.localizer.GetString(sentNotification.DeliveryStatus),
                     ReadStatus = sentNotification.ReadStatus.ToString(),
                     ButtonTracking = sentNotification.ButtonTracking,
+                    Reactions = sentNotification.Reactions,
                     StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode, notificationStatus),
                     Error = sentNotification.Exception,
                 }) ;
@@ -217,6 +218,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     UserType = this.localizer.GetString(sentNotification.UserType ?? "AdminConsentError"),
                     DeliveryStatus = sentNotification.DeliveryStatus is null ? sentNotification.DeliveryStatus : this.localizer.GetString(sentNotification.DeliveryStatus),
                     ReadStatus = sentNotification.ReadStatus.ToString(),
+                    Reactions = sentNotification.Reactions.ToString(),
                     StatusReason = this.GetStatusReason(sentNotification.ErrorMessage, sentNotification.StatusCode, notificationStatus),
                     Error = sentNotification.Exception,
                 }).ToList();

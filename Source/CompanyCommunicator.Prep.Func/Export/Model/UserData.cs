@@ -54,5 +54,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model
         /// Gets or sets the ButtonTracking value.
         /// </summary>
         public string ButtonTracking { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Reaction value.
+        /// </summary>
+        public string Reactions { get; internal set; }
     }
 }

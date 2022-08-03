@@ -111,6 +111,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
         /// <inheritdoc/>
         public async Task UpdateSentNotification(
             string notificationId,
+            string activityId,
             string recipientId,
             int totalNumberOfSendThrottles,
             int statusCode,
@@ -126,6 +127,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
                 rowKey: recipientId);
 
             // Update notification.
+            notification.ActivityId = activityId;
             notification.TotalNumberOfSendThrottles = totalNumberOfSendThrottles;
             notification.SentDate = sentDateTime;
             notification.IsStatusCodeFromCreateConversation = false;

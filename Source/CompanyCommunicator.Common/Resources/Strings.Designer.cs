@@ -151,6 +151,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reactions.
+        /// </summary>
+        public static string ColumnName_Reactions {
+            get {
+                return ResourceManager.GetString("ColumnName_Reactions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Read Status.
         /// </summary>
         public static string ColumnName_ReadStatus {

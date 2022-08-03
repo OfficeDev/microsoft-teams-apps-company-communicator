@@ -277,4 +277,7 @@
   <data name="ColumnName_ReadStatus" xml:space="preserve">
     <value>Read Status</value>
   </data>
+  <data name="ColumnName_Reactions" xml:space="preserve">
+    <value>Reactions</value>
+  </data>
 </root>
