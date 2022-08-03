@@ -85,5 +85,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         /// prefix for data uri image.
         /// </summary>
         public const string ImageBase64Format = "data:image/";
+
+        /// <summary>
+        /// cache duration in hours.
+        /// </summary>
+        public const int CacheDurationInHours = 6;
     }
 }

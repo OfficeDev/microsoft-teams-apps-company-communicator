@@ -103,7 +103,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, $"Error while uploading image to Azure Blob Storage.");
+                this.logger.LogError(ex, $"Error while uploading image to Azure Blob Storage. Blob name : {blobName}, Error details: {ex.Message}");
                 throw;
             }
         }
@@ -129,7 +129,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, $"Error while downloading image from Azure Blob Storage.");
+                this.logger.LogError(ex, $"Error while downloading image from Azure Blob Storage. Image blob container name : {ImagesBlobContainerName}, Error details: {ex.Message}");
                 throw;
             }
         }
@@ -156,7 +156,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, $"Error while uploading AC to Azure Blob Storage.");
+                this.logger.LogError(ex, $"Error while uploading AC to Azure Blob Storage. Blob name : {blobName}, Error details: {ex.Message}");
                 throw;
             }
         }
@@ -179,7 +179,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, $"Error while downloading AC from Azure Blob Storage.");
+                this.logger.LogError(ex, $"Error while downloading AC from Azure Blob Storage. Blob name : {blobName} , Error details: {ex.Message}");
                 throw;
             }
         }
@@ -206,7 +206,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, $"Error while deleting blob from Azure Blob Storage.");
+                this.logger.LogError(ex, $"Error while deleting blob from Azure Blob Storage. Error details: {ex.Message}");
                 throw;
             }
         }

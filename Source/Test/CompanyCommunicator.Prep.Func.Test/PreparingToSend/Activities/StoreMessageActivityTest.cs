@@ -9,6 +9,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     using System.Threading.Tasks;
     using AdaptiveCards;
     using FluentAssertions;
+    using Microsoft.Extensions.Caching.Memory;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
@@ -22,6 +24,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     {
         private readonly Mock<AdaptiveCardCreator> adaptiveCardCreator = new Mock<AdaptiveCardCreator>();
         private readonly Mock<ISendingNotificationDataRepository> sendingNotificationDataRepository = new Mock<ISendingNotificationDataRepository>();
+        private readonly Mock<IMemoryCache> memoryCache = new Mock<IMemoryCache>();
+        private readonly Mock<ILogger> logger = new Mock<ILogger>();
+
 
         /// <summary>
         /// Constructor tests.
@@ -30,9 +35,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         public void StoreMessageActivityConstructorTest()
         {
             // Arrange
-            Action action1 = () => new StoreMessageActivity(null /*notificationRepo*/, this.adaptiveCardCreator.Object);
-            Action action2 = () => new StoreMessageActivity(this.sendingNotificationDataRepository.Object, null /*cardCreator*/);
-            Action action3 = () => new StoreMessageActivity(this.sendingNotificationDataRepository.Object, this.adaptiveCardCreator.Object);
+            Action action1 = () => new StoreMessageActivity(null /*notificationRepo*/, this.adaptiveCardCreator.Object, this.memoryCache.Object);
+            Action action2 = () => new StoreMessageActivity(this.sendingNotificationDataRepository.Object, null /*cardCreator*/, this.memoryCache.Object);
+            Action action3 = () => new StoreMessageActivity(this.sendingNotificationDataRepository.Object, this.adaptiveCardCreator.Object, this.memoryCache.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("notificationRepo is null.");
@@ -62,7 +67,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await activityContext.RunAsync(notification);
+            Func<Task> task = async () => await activityContext.RunAsync(notification, this.logger.Object);
 
             // Assert
             await task.Should().NotThrowAsync();
@@ -88,7 +93,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> task = async () => await activityContext.RunAsync(null);
+            Func<Task> task = async () => await activityContext.RunAsync(null, this.logger.Object);
 
             // Assert
             await task.Should().ThrowAsync<ArgumentNullException>("notification is null");
@@ -101,7 +106,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// <returns>return the instance of StoreMessageActivity.</returns>
         private StoreMessageActivity GetStoreMessageActivity()
         {
-            return new StoreMessageActivity(this.sendingNotificationDataRepository.Object, this.adaptiveCardCreator.Object);
+            return new StoreMessageActivity(this.sendingNotificationDataRepository.Object, this.adaptiveCardCreator.Object, this.memoryCache.Object);
         }
     }
 }
