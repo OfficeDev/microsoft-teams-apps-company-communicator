@@ -26,6 +26,47 @@
     }
 }
 
+div[class="cc-header"] {
+    width: 100%;
+    height: auto;
+    max-height: 100vh;
+    background: #464775 0% 0% no-repeat padding-box;
+    opacity: 1;
+    padding: 12px 25px;
+
+    img[class="ms-logo"] {
+        width: 32px;
+        height: 32px;
+    }
+
+    span[class="header-text"] {
+        text-align: left;
+        font: normal normal bold 24px/32px Segoe UI;
+        letter-spacing: 0px;
+        color: #FFFFFF;
+    }
+
+    img[class="header-icon"],
+    img[class="support-icon"],
+    img[class="feedback-icon"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    img[class="support-icon"],
+    img[class="feedback-icon"] {
+        position: relative;
+        bottom: -2px;
+    }
+
+}
+
+div[role="tooltip"]>div {
+    background-color: white;
+    color: black;
+}
+
 @media only screen and (min-width : 1000px) {
     .taskModule {
         .formContainer {

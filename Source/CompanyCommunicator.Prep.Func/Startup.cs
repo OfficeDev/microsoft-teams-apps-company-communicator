@@ -29,6 +29,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
@@ -139,6 +140,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<IStorageClientFactory, StorageClientFactory>();
             builder.Services.AddTransient<IUserTypeService, UserTypeService>();
             builder.Services.AddTransient<IRecipientsService, RecipientsService>();
+            builder.Services.AddTransient<IStorageClientFactory, StorageClientFactory>();
+            builder.Services.AddTransient<IBlobStorageProvider, BlobStorageProvider>();
 
             // Add Teams services.
             builder.Services.AddTransient<ITeamMembersService, TeamMembersService>();

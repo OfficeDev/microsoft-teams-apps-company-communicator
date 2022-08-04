@@ -27,7 +27,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 notificationDataEntity.Summary,
                 notificationDataEntity.Author,
                 notificationDataEntity.ButtonTitle,
-                notificationDataEntity.ButtonLink);
+                notificationDataEntity.ButtonLink,
+                notificationDataEntity.Id);
         }
 
         /// <summary>
@@ -39,6 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
         /// <param name="author">The adaptive card's author value.</param>
         /// <param name="buttonTitle">The adaptive card's button title value.</param>
         /// <param name="buttonUrl">The adaptive card's button url value.</param>
+        /// <param name="notificationId">The notification id.</param>
         /// <returns>The created adaptive card instance.</returns>
         public AdaptiveCard CreateAdaptiveCard(
             string title,
@@ -46,7 +48,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             string summary,
             string author,
             string buttonTitle,
-            string buttonUrl)
+            string buttonUrl,
+            string notificationId)
         {
             var version = new AdaptiveSchemaVersion(1, 0);
             AdaptiveCard card = new AdaptiveCard(version);
@@ -61,13 +64,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 
             if (!string.IsNullOrWhiteSpace(imageUrl))
             {
-                card.Body.Add(new AdaptiveImage()
+                var img = new AdaptiveImageWithLongUrl()
                 {
-                    Url = new Uri(imageUrl, UriKind.RelativeOrAbsolute),
+                    LongUrl = imageUrl,
                     Spacing = AdaptiveSpacing.Default,
                     Size = AdaptiveImageSize.Stretch,
                     AltText = string.Empty,
-                });
+                };
+
+                // Image enlarge support for Teams web/desktop client.
+                img.AdditionalProperties.Add("msteams", new { AllowExpand = true });
+
+                card.Body.Add(img);
             }
 
             if (!string.IsNullOrWhiteSpace(summary))
@@ -100,6 +108,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 });
             }
 
+            // Full width Adaptive card.
+            card.AdditionalProperties.Add("msteams", new { width = "full" });
             return card;
         }
     }

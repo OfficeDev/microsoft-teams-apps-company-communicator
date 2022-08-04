@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
     using FluentAssertions;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Bot.Schema;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -33,6 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         private readonly Mock<ISendQueue> sendQueue = new Mock<ISendQueue>();
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
         private readonly Mock<ILogger> logger = new Mock<ILogger>();
+        private readonly Mock<IMemoryCache> memoryCache = new Mock<IMemoryCache>();
         private readonly int deliveryCount = 0;
         private readonly DateTime dateTime = DateTime.Now;
         private IOptions<SendFunctionOptions> options = Options.Create(new SendFunctionOptions() { MaxNumberOfAttempts = 2, SendRetryDelayNumberOfSeconds = 300 });
@@ -44,13 +46,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public void SendFunctionConstructorTest()
         {
             // Arrange
-            Action action1 = () => new SendFunction(null /*options*/, this.notificationService.Object, this.messageService.Object, this.notificationRepo.Object, this.sendQueue.Object, this.localizer.Object);
-            Action action2 = () => new SendFunction(this.options, null /*notificationService*/, this.messageService.Object, this.notificationRepo.Object, this.sendQueue.Object, this.localizer.Object);
-            Action action3 = () => new SendFunction(this.options, this.notificationService.Object, null /*messageService*/, this.notificationRepo.Object, this.sendQueue.Object, this.localizer.Object);
-            Action action4 = () => new SendFunction(this.options, this.notificationService.Object, this.messageService.Object, null /*notificationRepo*/, this.sendQueue.Object, this.localizer.Object);
-            Action action5 = () => new SendFunction(this.options, this.notificationService.Object, this.messageService.Object, this.notificationRepo.Object, null /*sendQueue*/, this.localizer.Object);
-            Action action6 = () => new SendFunction(this.options, this.notificationService.Object, this.messageService.Object, this.notificationRepo.Object, this.sendQueue.Object, null /*localizer*/);
-            Action action7 = () => new SendFunction(this.options, this.notificationService.Object, this.messageService.Object, this.notificationRepo.Object, this.sendQueue.Object, this.localizer.Object);
+            Action action1 = () => new SendFunction(null /*options*/, this.notificationService.Object, this.messageService.Object, this.notificationRepo.Object, this.sendQueue.Object, this.localizer.Object,this.memoryCache.Object);
+            Action action2 = () => new SendFunction(this.options, null /*notificationService*/, this.messageService.Object, this.notificationRepo.Object, this.sendQueue.Object, this.localizer.Object, this.memoryCache.Object);
+            Action action3 = () => new SendFunction(this.options, this.notificationService.Object, null /*messageService*/, this.notificationRepo.Object, this.sendQueue.Object, this.localizer.Object, this.memoryCache.Object);
+            Action action4 = () => new SendFunction(this.options, this.notificationService.Object, this.messageService.Object, null /*notificationRepo*/, this.sendQueue.Object, this.localizer.Object, this.memoryCache.Object);
+            Action action5 = () => new SendFunction(this.options, this.notificationService.Object, this.messageService.Object, this.notificationRepo.Object, null /*sendQueue*/, this.localizer.Object, this.memoryCache.Object);
+            Action action6 = () => new SendFunction(this.options, this.notificationService.Object, this.messageService.Object, this.notificationRepo.Object, this.sendQueue.Object, null /*localizer*/, this.memoryCache.Object);
+            Action action7 = () => new SendFunction(this.options, this.notificationService.Object, this.messageService.Object, this.notificationRepo.Object, this.sendQueue.Object, this.localizer.Object, this.memoryCache.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("options is null.");
@@ -190,6 +192,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public async Task SendNotificationSuccess_Test()
         {
             // Arrange
+            var adaptiveCardContent = "{\n  \"type\": \"AdaptiveCard\",\n  \"version\": \"1.0\",\n  \"body\": [\n    {\n      \"type\": \"TextBlock\",\n      \"size\": \"extraLarge\",\n      \"weight\": \"bolder\",\n      \"text\": \"hkhkj\",\n      \"wrap\": true\n    },\n    {\n      \"type\": \"TextBlock\",\n      \"text\": \"iuyuiy\",\n      \"wrap\": true\n    }\n  ],\n  \"msteams\": {\n    \"width\": \"full\"\n  }\n}";
             var sendFunctionInstance = this.GetSendFunction();
             SendMessageResponse sendMessageResponse = new SendMessageResponse()
             {
@@ -211,8 +214,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
 
             var notificatioData = new SendingNotificationDataEntity() { Content = "{\"text\":\"Welcome\",\"displayText\":\"Hello\"}" };
             this.notificationRepo.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(notificatioData);
+            this.notificationRepo.Setup(x => x.GetAdaptiveCardAsync(It.IsAny<string>())).Returns(Task.FromResult(adaptiveCardContent));
             this.messageService.Setup(x => x.SendMessageAsync(It.IsAny<IMessageActivity>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), this.logger.Object)).ReturnsAsync(sendMessageResponse);
             this.notificationService.Setup(x => x.UpdateSentNotification(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+            
+            // Extension methods are static methods and they cannot be mocked using moq. Mocking methods used by the extension instead.
+            this.memoryCache.Setup(x => x.CreateEntry(It.IsAny<object>())).Returns(Mock.Of<ICacheEntry>);
 
             // Act
             Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, this.dateTime, string.Empty, this.logger.Object, new ExecutionContext());
@@ -230,6 +237,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public async Task SendNotificationResponseThrottledTest()
         {
             // Arrange
+            var adaptiveCardContent = "{\n  \"type\": \"AdaptiveCard\",\n  \"version\": \"1.0\",\n  \"body\": [\n    {\n      \"type\": \"TextBlock\",\n      \"size\": \"extraLarge\",\n      \"weight\": \"bolder\",\n      \"text\": \"hkhkj\",\n      \"wrap\": true\n    },\n    {\n      \"type\": \"TextBlock\",\n      \"text\": \"iuyuiy\",\n      \"wrap\": true\n    }\n  ],\n  \"msteams\": {\n    \"width\": \"full\"\n  }\n}";
             var sendFunctionInstance = this.GetSendFunction();
             SendMessageResponse sendMessageResponse = new SendMessageResponse()
             {
@@ -253,8 +261,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
 
             var notificatioData = new SendingNotificationDataEntity() { Content = "{\"text\":\"Welcome\",\"displayText\":\"Hello\"}" };
             this.notificationRepo.Setup(x => x.GetAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(notificatioData);
+            this.notificationRepo.Setup(x => x.GetAdaptiveCardAsync(It.IsAny<string>())).Returns(Task.FromResult(adaptiveCardContent));
+
             this.messageService.Setup(x => x.SendMessageAsync(It.IsAny<IMessageActivity>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), this.logger.Object)).ReturnsAsync(sendMessageResponse);
             this.notificationService.Setup(x => x.UpdateSentNotification(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+
+            // Extension methods are static methods and they cannot be mocked using moq. Mocking methods used by the extension instead.
+            this.memoryCache.Setup(x => x.CreateEntry(It.IsAny<object>())).Returns(Mock.Of<ICacheEntry>);
 
             // Act
             Func<Task> task = async () => await sendFunctionInstance.Run(data, this.deliveryCount, this.dateTime, string.Empty, this.logger.Object, new ExecutionContext());
@@ -298,7 +311,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         /// </summary>
         private SendFunction GetSendFunction()
         {
-            return new SendFunction(this.options, this.notificationService.Object, this.messageService.Object, this.notificationRepo.Object, this.sendQueue.Object, this.localizer.Object);
+            return new SendFunction(this.options, this.notificationService.Object, this.messageService.Object, this.notificationRepo.Object, this.sendQueue.Object, this.localizer.Object, this.memoryCache.Object);
         }
     }
 }

@@ -83,5 +83,7 @@
   "ExportErrorMessage": "حاول تصدير النتائج مره أخرى. إذا استمرت المشكلة ، اتصل بمسؤول تكنولوجيا المساعدة لديك للمساعدة.",
   "ExportButtonText": "تصدير النتائج التفصيلية",
   "ExportButtonProgressText": "التصدير قيد التقدم",
-  "ErrorURLMessage": "يجب أن يبدأ عنوان URL بـ https://"
+  "ErrorURLMessage": "يجب أن يبدأ عنوان URL بـ https://",
+  "Support": "الدعم",
+  "Feedback": "ملاحظات"
 }

@@ -10,9 +10,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Azure.WebJobs;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Schema;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -28,6 +30,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     /// </summary>
     public class SendFunction
     {
+
         /// <summary>
         /// This is set to 10 because the default maximum delivery count from the service bus
         /// message queue before the service bus will automatically put the message in the Dead Letter
@@ -35,6 +38,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// </summary>
         private static readonly int MaxDeliveryCountForDeadLetter = 10;
         private static readonly string AdaptiveCardContentType = "application/vnd.microsoft.card.adaptive";
+        private static readonly string CachePrefixSentCards = "sentcard_";
 
         private readonly int maxNumberOfAttempts;
         private readonly double sendRetryDelayNumberOfSeconds;
@@ -43,6 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly IMessageService messageService;
         private readonly ISendQueue sendQueue;
         private readonly IStringLocalizer<Strings> localizer;
+        private readonly IMemoryCache memoryCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SendFunction"/> class.
@@ -59,7 +64,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             IMessageService messageService,
             ISendingNotificationDataRepository notificationRepo,
             ISendQueue sendQueue,
-            IStringLocalizer<Strings> localizer)
+            IStringLocalizer<Strings> localizer,
+            IMemoryCache memoryCache)
         {
             if (options is null)
             {
@@ -74,6 +80,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.notificationRepo = notificationRepo ?? throw new ArgumentNullException(nameof(notificationRepo));
             this.sendQueue = sendQueue ?? throw new ArgumentNullException(nameof(sendQueue));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
+            this.memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+
         }
 
         /// <summary>
@@ -157,7 +165,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                 }
 
                 // Send message.
-                var messageActivity = await this.GetMessageActivity(messageContent);
+                var messageActivity = await this.GetMessageActivity(messageContent, log);
                 var response = await this.messageService.SendMessageAsync(
                     message: messageActivity,
                     serviceUrl: messageContent.GetServiceUrl(),
@@ -248,16 +256,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             }
         }
 
-        private async Task<IMessageActivity> GetMessageActivity(SendQueueMessageContent message)
+        private async Task<IMessageActivity> GetMessageActivity(SendQueueMessageContent message, ILogger log)
         {
-            var notification = await this.notificationRepo.GetAsync(
-                NotificationDataTableNames.SendingNotificationsPartition,
-                message.NotificationId);
+            var cacheKeySentCard = CachePrefixSentCards + message.NotificationId;
+            bool isCacheEntryExists = this.memoryCache.TryGetValue(cacheKeySentCard, out string jsonAC);
+
+            if (!isCacheEntryExists)
+            {
+                // Download serialized AC from blob storage.
+                jsonAC = await this.notificationRepo.GetAdaptiveCardAsync(message.NotificationId);
+                this.memoryCache.Set(cacheKeySentCard, jsonAC, TimeSpan.FromHours(Constants.CacheDurationInHours));
+
+                log.LogInformation($"Successfully cached the sent card data." +
+                                $"\nNotificationId Id: {message.NotificationId}");
+            }
 
             var adaptiveCardAttachment = new Attachment()
             {
                 ContentType = AdaptiveCardContentType,
-                Content = JsonConvert.DeserializeObject(notification.Content),
+                Content = JsonConvert.DeserializeObject(jsonAC),
             };
 
             return MessageFactory.Attachment(adaptiveCardAttachment);

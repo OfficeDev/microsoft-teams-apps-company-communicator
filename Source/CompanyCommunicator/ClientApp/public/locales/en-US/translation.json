@@ -54,6 +54,7 @@
   "TeamsMembersLabel": "Team(s) members: ",
   "GroupsMembersLabel": "Group(s) members: ",
   "PreparingMessageLabel": "preparing message",
+  "DraftingMessageLabel": "drafting message",
   "ExportLabel": "exporting",
   "CloseText": "Close",
   "AllUsersLabel": "All users",
@@ -86,5 +87,11 @@
   "ExportErrorMessage": "Try exporting the results again. If the problem persists, contact your IT admin for help.",
   "ExportButtonText": "Export detailed results",
   "ExportButtonProgressText": "Export in progress",
-  "ErrorURLMessage": "URL must start with https://"
+  "CompanyCommunicator" : "Company Communicator",
+  "Support" : "Support",
+  "Feedback" :"Feedback",
+  "ErrorURLMessage": "URL must start with https://",
+  "ErrorImageTypesMessage": "Supported file types are .jpg, .jpeg, .png, .gif",
+  "ErrorImageSizeMessage": "Maximum allowed size of image via upload is ~1 MB.",
+  "ImageSizeInfoContent": "Maximum allowed size of image via upload is ~1 MB. It's recommended to use image upload functionality for smaller size images."
 }

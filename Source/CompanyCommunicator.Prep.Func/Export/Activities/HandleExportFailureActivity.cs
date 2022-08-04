@@ -14,6 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
@@ -89,7 +90,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                 return;
             }
 
-            var blobContainerClient = this.storageClientFactory.CreateBlobContainerClient();
+            var blobContainerClient = this.storageClientFactory.CreateBlobContainerClient(Constants.BlobContainerName);
 
             await blobContainerClient.CreateIfNotExistsAsync();
             await blobContainerClient

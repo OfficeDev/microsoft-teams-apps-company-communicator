@@ -14,6 +14,7 @@ namespace Microsoft.Teams.App.CompanyCommunicator.Common.Test.Repositories.Notif
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob;
     using Moq;
     using Xunit;
 
@@ -25,6 +26,7 @@ namespace Microsoft.Teams.App.CompanyCommunicator.Common.Test.Repositories.Notif
         private Mock<ILogger<NotificationDataRepository>> logger = new Mock<ILogger<NotificationDataRepository>>();
         private Mock<IOptions<RepositoryOptions>> repositoryOptions = new Mock<IOptions<RepositoryOptions>>();
         private TableRowKeyGenerator rowKeyGenerator = new TableRowKeyGenerator();
+        private Mock<IBlobStorageProvider> storageProvider = new Mock<IBlobStorageProvider>();
 
         /// <summary>
         /// Gets data for SaveExceptionInNotificationDataEntityAsync_SavesExceptionInfo and SaveWarningInNotificationDataEntityAsync_SavesWarningInfo.
@@ -76,7 +78,7 @@ namespace Microsoft.Teams.App.CompanyCommunicator.Common.Test.Repositories.Notif
                 StorageAccountConnectionString = "UseDevelopmentStorage=true",
                 EnsureTableExists = false,
             });
-            Action action = () => new NotificationDataRepository(this.logger.Object, this.repositoryOptions.Object, this.rowKeyGenerator);
+            Action action = () => new NotificationDataRepository(this.storageProvider.Object, this.logger.Object, this.repositoryOptions.Object, this.rowKeyGenerator);
 
             // Act and Assert.
             action.Should().NotThrow();
@@ -185,7 +187,7 @@ namespace Microsoft.Teams.App.CompanyCommunicator.Common.Test.Repositories.Notif
                 EnsureTableExists = false,
             });
 
-            var mock = new Mock<NotificationDataRepository>(this.logger.Object, this.repositoryOptions.Object, this.rowKeyGenerator);
+            var mock = new Mock<NotificationDataRepository>(this.storageProvider.Object, this.logger.Object, this.repositoryOptions.Object, this.rowKeyGenerator);
             mock.CallBase = true;
 
             return mock;

@@ -45,7 +45,7 @@
                         bottom: 0.5rem;
                     }
                 }
-
+                
                 .textArea {
 
                     span {
@@ -126,6 +126,16 @@
                     margin-inline-start: 0.8rem;
                 }
             }
+
+            .hiddenLoader {
+                display: none;
+            }
+
+            .drfatingLoader {
+                width: 18rem;
+                margin-right: 2rem;
+                height: 3rem;
+            }
         }
     }
 }
@@ -145,4 +155,13 @@
             border: #464775 !important;
         }
     }
+}
+
+.tooltipHostStyles {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.tooltipHostStylesInsideContent {
+    padding-left: 5px;
 }

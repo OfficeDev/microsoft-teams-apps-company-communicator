@@ -13,14 +13,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Connector.Authentication;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
@@ -99,6 +102,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             // Add the Notification service.
             builder.Services.AddTransient<INotificationService, NotificationService>();
+            builder.Services.AddTransient<IStorageClientFactory, StorageClientFactory>();
+            builder.Services.AddTransient<IBlobStorageProvider, BlobStorageProvider>();
+
+            // Add the cache services
+            builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
 
             // Add Secrets.
             var keyVaultUrl = Environment.GetEnvironmentVariable("KeyVault:Url");

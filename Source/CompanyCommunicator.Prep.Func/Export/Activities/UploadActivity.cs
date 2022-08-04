@@ -16,6 +16,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
@@ -73,7 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                 throw new ArgumentNullException(nameof(uploadData.fileName));
             }
 
-            var blobContainerClient = this.storageClientFactory.CreateBlobContainerClient();
+            var blobContainerClient = this.storageClientFactory.CreateBlobContainerClient(Constants.BlobContainerName);
             await blobContainerClient.CreateIfNotExistsAsync();
             await blobContainerClient.SetAccessPolicyAsync(PublicAccessType.None);
             var blob = blobContainerClient.GetBlobClient(uploadData.fileName);

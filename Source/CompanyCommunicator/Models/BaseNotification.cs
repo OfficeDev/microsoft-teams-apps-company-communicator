@@ -28,6 +28,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public string ImageLink { get; set; }
 
         /// <summary>
+        /// Gets or sets the blob name for the image in base64 format.
+        /// </summary>
+        public string ImageBase64BlobName { get; set; }
+
+        /// <summary>
         /// Gets or sets the Summary value.
         /// </summary>
         public string Summary { get; set; }

@@ -6,14 +6,14 @@ Cumulative improvements in Company Communicator App.
 
 |Release |Published to <br/> Microsoft Store |
 |---|---|
-| 5.1 | April 28, 2022
+| 5.2 | Jul 26, 2022
+| 5.1 | Apr 28, 2022
 | 5.0 | Nov 10, 2021
 | 4.1.5 | Sep 29, 2021
 | 4.1.4 | Sep 14, 2021
 | 4.1.3 | Jul 2, 2021
 | 4.1.2 | Jun 25, 2021
 | 4.1.1 | Jun 12, 2021
-| 4.1 | Mar 19, 2021
 | 4.1 | Mar 19, 2021
 | 4.0 | Dec 30, 2020
 | 3.0 | Oct 29, 2020
@@ -24,7 +24,14 @@ Cumulative improvements in Company Communicator App.
 
 ### Company Communicator feature release notes
 
-#### 5.1 (April 28, 2022)
+#### 5.2 (Jul 26, 2022)
+##### Changes introduced
+- Ability to upload image.
+- Ability to format the text.
+- New header banner with logo, support and feedback option.
+- Fix for PS deployment failure
+
+#### 5.1 (Apr 28, 2022)
 ##### Changes introduced
 - Ability to cancel a notification.
 - Export installation errors.

@@ -80,5 +80,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         /// https://docs.microsoft.com/en-us/graph/known-issues#limit-on-batch-size.
         /// </summary>
         public const int MaximumGraphAPIBatchSize = 15;
+
+        /// <summary>
+        /// prefix for data uri image.
+        /// </summary>
+        public const string ImageBase64Format = "data:image/";
+
+        /// <summary>
+        /// cache duration in hours.
+        /// </summary>
+        public const int CacheDurationInHours = 6;
     }
 }

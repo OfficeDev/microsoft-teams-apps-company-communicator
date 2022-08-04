@@ -83,5 +83,7 @@
   "ExportErrorMessage": "נסה שוב לייצא את התוצאות. אם הבעיה נמשכת, פנה למנהל ה-IT לקבלת עזרה.",
   "ExportButtonText": "הצג תוצאות מפורטות",
   "ExportButtonProgressText": "מתבצע ייצוא",
-  "ErrorURLMessage": "כתובת URL חייבת להתחיל ב- https://‏"
+  "ErrorURLMessage": "כתובת URL חייבת להתחיל ב- https://‏",
+  "Support": "תמיכה",
+  "Feedback": "משוב"
 }

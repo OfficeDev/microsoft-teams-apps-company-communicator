@@ -14,10 +14,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
@@ -36,6 +38,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly IGroupsService groupsService;
         private readonly IAppSettingsService appSettingsService;
         private readonly IStringLocalizer<Strings> localizer;
+        private readonly IBlobStorageProvider blobStorageProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
@@ -45,14 +48,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="draftNotificationPreviewService">Draft notification preview service.</param>
         /// <param name="appSettingsService">App Settings service.</param>
         /// <param name="localizer">Localization service.</param>
-        /// <param name="groupsService">group service.</param>
+        /// <param name="groupsService">Group Service.</param>
+        /// <param name="blobStorageProvider">Blob Storage Provider.</param>
         public DraftNotificationsController(
             INotificationDataRepository notificationDataRepository,
             ITeamDataRepository teamDataRepository,
             IDraftNotificationPreviewService draftNotificationPreviewService,
             IAppSettingsService appSettingsService,
             IStringLocalizer<Strings> localizer,
-            IGroupsService groupsService)
+            IGroupsService groupsService,
+            IBlobStorageProvider blobStorageProvider)
         {
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
@@ -60,6 +65,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
             this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
+            this.blobStorageProvider = blobStorageProvider ?? throw new ArgumentException(nameof(blobStorageProvider));
         }
 
         /// <summary>
@@ -162,6 +168,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 AllUsers = notification.AllUsers,
             };
 
+            if (!string.IsNullOrEmpty(notification.ImageLink) && notification.ImageLink.StartsWith(Constants.ImageBase64Format))
+            {
+                notificationEntity.ImageLink = await this.notificationDataRepository.SaveImageAsync(notification.Id, notificationEntity.ImageLink);
+                notificationEntity.ImageBase64BlobName = notification.Id;
+            }
+
             await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);
             return this.Ok();
         }
@@ -185,6 +197,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             if (notificationEntity == null)
             {
                 return this.NotFound();
+            }
+
+            if (!string.IsNullOrWhiteSpace(notificationEntity.ImageBase64BlobName))
+            {
+                await this.blobStorageProvider.DeleteImageBlobAsync(notificationEntity.ImageBase64BlobName);
             }
 
             await this.notificationDataRepository.DeleteAsync(notificationEntity);
@@ -243,6 +260,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Id = notificationEntity.Id,
                 Title = notificationEntity.Title,
                 ImageLink = notificationEntity.ImageLink,
+                ImageBase64BlobName = notificationEntity.ImageBase64BlobName,
                 Summary = notificationEntity.Summary,
                 Author = notificationEntity.Author,
                 ButtonTitle = notificationEntity.ButtonTitle,
@@ -253,6 +271,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Groups = notificationEntity.Groups,
                 AllUsers = notificationEntity.AllUsers,
             };
+
+            // In case we have blob name instead of URL to public image.
+            if (!string.IsNullOrEmpty(notificationEntity.ImageBase64BlobName))
+            {
+                result.ImageLink = await this.notificationDataRepository.GetImageAsync(notificationEntity.ImageLink, notificationEntity.ImageBase64BlobName);
+            }
 
             return this.Ok(result);
         }
@@ -329,6 +353,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var teamDataEntity = new TeamDataEntity();
             teamDataEntity.TenantId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeTenantId);
             teamDataEntity.ServiceUrl = await this.appSettingsService.GetServiceUrlAsync();
+
+            // Download base64 data from blob convert to base64 string.
+            if (!string.IsNullOrEmpty(notificationEntity.ImageBase64BlobName))
+            {
+                notificationEntity.ImageLink = await this.notificationDataRepository.GetImageAsync(notificationEntity.ImageLink, notificationEntity.ImageBase64BlobName);
+            }
+
             var result = await this.draftNotificationPreviewService.SendPreview(
                 notificationEntity,
                 teamDataEntity,

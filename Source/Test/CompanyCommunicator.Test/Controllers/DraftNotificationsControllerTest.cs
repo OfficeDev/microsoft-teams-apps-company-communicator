@@ -21,6 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
     using Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview;
@@ -39,6 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         private readonly Mock<IGroupsService> groupsService = new Mock<IGroupsService>();
         private readonly Mock<IAppSettingsService> appSettingsService = new Mock<IAppSettingsService>();
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
+        private readonly Mock<IBlobStorageProvider> storageProvider = new Mock<IBlobStorageProvider>();
         private readonly string notificationId = "notificationId";
 
         /// <summary>
@@ -65,7 +67,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void CreateInstance_AllParameters_ShouldBeSuccess()
         {
             // Arrange
-            Action action = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
+            Action action = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.storageProvider.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
@@ -78,12 +80,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void CreateInstance_NullParameter_ThrowsArgumentNullException()
         {
             // Arrange
-            Action action1 = () => new DraftNotificationsController(null /*notificationDataRepository*/, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
-            Action action2 = () => new DraftNotificationsController(this.notificationDataRepository.Object, null /*teamDataRepository*/, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
-            Action action3 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, null /*draftNotificationPreviewService*/, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
-            Action action4 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, null /*appSettingsService*/, this.localizer.Object, this.groupsService.Object);
-            Action action5 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, null /*localizer*/, this.groupsService.Object);
-            Action action6 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, null/*groupsService*/);
+            Action action1 = () => new DraftNotificationsController(null /*notificationDataRepository*/, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.storageProvider.Object);
+            Action action2 = () => new DraftNotificationsController(this.notificationDataRepository.Object, null /*teamDataRepository*/, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.storageProvider.Object);
+            Action action3 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, null /*draftNotificationPreviewService*/, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.storageProvider.Object);
+            Action action4 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, null /*appSettingsService*/, this.localizer.Object, this.groupsService.Object, this.storageProvider.Object);
+            Action action5 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, null /*localizer*/, this.groupsService.Object, this.storageProvider.Object);
+            Action action6 = () => new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, null/*groupsService*/, this.storageProvider.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("notificationDataRepository is null.");
@@ -961,7 +963,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         {
             this.notificationDataRepository.Setup(x => x.TableRowKeyGenerator).Returns(new TableRowKeyGenerator());
             this.notificationDataRepository.Setup(x => x.TableRowKeyGenerator.CreateNewKeyOrderingOldestToMostRecent()).Returns(this.notificationId);
-            var controller = new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object);
+            var controller = new DraftNotificationsController(this.notificationDataRepository.Object, this.teamDataRepository.Object, this.draftNotificationPreviewService.Object, this.appSettingsService.Object, this.localizer.Object, this.groupsService.Object, this.storageProvider.Object);
             var user = new ClaimsPrincipal(new ClaimsIdentity());
             controller.ControllerContext = new ControllerContext();
             controller.ControllerContext.HttpContext = new DefaultHttpContext { User = user };
