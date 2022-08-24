@@ -150,5 +150,14 @@
   "ImageUploadBlobStorageSasDurationHours": {
     "Value": "1",
     "Description": "Azure Blob SAS Token duration"
+  },
+  "TargetingEnabled":{
+    "Value": "false",
+    "Description": "[true/false] Enables/disables the CC targeting feature"
+  },
+  "MasterAdminUpns": {
+    "Value": "<<value>>",
+    "Description": "Semicolon-delimited list of all upns for the master admins if using the targeting feature"
   }
+
 }
