@@ -65,7 +65,7 @@
     "@types/react-redux": "^7.1.1",
     "@types/react-router-dom": "^4.3.3",
     "@types/redux": "^3.6.0",
-    "react-scripts": "^4.0.3",
+    "react-scripts": "^5.0.1",
     "tslint": "^5.20.0",
     "tslint-microsoft-contrib": "6.2.0"
   }
