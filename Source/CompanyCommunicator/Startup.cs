@@ -7,6 +7,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
     using System;
     using System.Net;
+    using System.Net.Http;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics;
     using Microsoft.AspNetCore.Hosting;
@@ -182,7 +183,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
             // Add microsoft graph services.
             services.AddScoped<IAuthenticationProvider, GraphTokenProvider>();
-            services.AddScoped<IGraphServiceClient, GraphServiceClient>();
+            services.AddScoped<IHttpProvider, HttpProvider>();
+            services.AddScoped<IGraphServiceClient>(sp => new GraphServiceClient(sp.GetService<IAuthenticationProvider>(), sp.GetService<IHttpProvider>()));
             services.AddScoped<IGraphServiceFactory, GraphServiceFactory>();
             services.AddScoped<IGroupsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupsService());
             services.AddScoped<IAppCatalogService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetAppCatalogService());

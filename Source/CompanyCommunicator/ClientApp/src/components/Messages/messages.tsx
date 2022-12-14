@@ -124,7 +124,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             key: "labels",
             content: (
                 <Flex vAlign="center" fill gap="gap.small">
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} grow={1} >
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '20%' }} grow={1} >
                         <Text
                             truncated
                             weight="bold"
@@ -132,10 +132,10 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                         >
                         </Text>
                     </Flex.Item>
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '20%' }}>
                         <Text></Text>
                     </Flex.Item>
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '20%' }} shrink={false}>
                         <Text
                             truncated
                             content={this.localize("Recipients")}
@@ -143,10 +143,18 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                         >
                         </Text>
                     </Flex.Item>
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} >
                         <Text
                             truncated
                             content={this.localize("Sent")}
+                            weight="bold"
+                        >
+                        </Text>
+                    </Flex.Item>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} >
+                        <Text
+                            truncated
+                            content={this.localize("CreatedBy")}
                             weight="bold"
                         >
                         </Text>
@@ -196,17 +204,17 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
     private messageContent = (message: any) => {
         return (
             <Flex className="listContainer" vAlign="center" fill gap="gap.small">
-                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} grow={1}>
+                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '20%' }} grow={1}>
                     <Text
                         truncated
                         content={message.title}
                     >
                     </Text>
                 </Flex.Item>
-                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
+                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '20%' }}>
                     {this.renderSendingText(message)}
                 </Flex.Item>
-                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
+                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '20%' }} shrink={false}>
                     <div>
                         <TooltipHost content={this.props.t("TooltipSuccess")} calloutProps={{ gapSpace: 0 }}>
                             <AcceptIcon xSpacing="after" className="succeeded" outline />
@@ -219,9 +227,9 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                         {
                             message.canceled &&
                             <TooltipHost content="Canceled" calloutProps={{ gapSpace: 0 }}>
-                            <ExclamationCircleIcon xSpacing="both" className="canceled" outline />
-                            <span className="semiBold">{formatNumber(message.canceled)}</span>
-                        </TooltipHost>
+                                <ExclamationCircleIcon xSpacing="both" className="canceled" outline />
+                                <span className="semiBold">{formatNumber(message.canceled)}</span>
+                            </TooltipHost>
                         }
                         {
                             message.unknown &&
@@ -232,11 +240,18 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                         }
                     </div>
                 </Flex.Item>
-                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
+                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '16%' }} >
                     <Text
                         truncated
                         className="semiBold"
                         content={message.sentDate}
+                    />
+                </Flex.Item>
+                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '20%' }} >
+                    <Text
+                        truncated
+                        className="semiBold"
+                        content={message.createdBy}
                     />
                 </Flex.Item>
                 <Flex.Item shrink={0}>

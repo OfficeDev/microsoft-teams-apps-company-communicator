@@ -124,7 +124,7 @@ Register three Azure AD application in your tenant's directory: one for author b
     7. **Microsoft Graph App Secret**: The client secret of the Microsoft Graph Azure AD app. (from Step 1)
     8. **Proactively Install User App [Optional]**: Default value is `true`. You may set it to `false` if you want to disable the feature.
     9. **User App ExternalId [Optional]**: Default value is `148a66bb-e83d-425a-927d-09f4299a9274`. This **MUST** be the same `id` that is in the Teams app manifest for the user app.
-    10. **Header Text [Optional]**: Default value is `Company Communicator`. This is the banner text that will appear starting v5.2, you will have the option to modify later.
+    10. **Header Text [Optional]**: Default value is `Company Communicator`. This is the banner text that will appear starting v5.2 and later, you will have the option to modify later.
     11. **Header Logo Url [Optional]**: Default image is Microsoft logo. You will have the option to modify later.
     12. **Hosting Plan SKU  [Optional]**: The pricing tier for the hosting plan. Default value is `Standard`. You may choose between Basic, Standard and Premium.
     13. **Hosting Plan Size  [Optional]**: The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value is `2`.

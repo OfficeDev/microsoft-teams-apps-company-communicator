@@ -6,6 +6,7 @@ Cumulative improvements in Company Communicator App.
 
 |Release |Published to <br/> Microsoft Store |
 |---|---|
+| 5.3 | Dec 14, 2022
 | 5.2 | Jul 26, 2022
 | 5.1 | Apr 28, 2022
 | 5.0 | Nov 10, 2021
@@ -23,6 +24,13 @@ Cumulative improvements in Company Communicator App.
 | 1.0 | Dec 20, 2019
 
 ### Company Communicator feature release notes
+#### 5.3 (Dec 14, 2022)
+##### Changes introduced
+- .NET upgrade from .NET Core 3.1 to .NET 6.0
+- Updated Azure App Service app to use .NET 6.0.
+- Updated Azure Function apps to use runtime version 4.x.
+- Capture the sender info in the Author app.
+- Bug fix for the issue with clean up function. 
 
 #### 5.2 (Jul 26, 2022)
 ##### Changes introduced

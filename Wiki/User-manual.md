@@ -21,7 +21,7 @@ Click 'New Message' to draft the message to be sent,
 
 - **Title:**  Title of the message in few words.
 - **Image URL:**  The image to be attached to the message, they are 2 ways the image can be attached.
-    1. Click 'Upload' button and select the image from the local machine, image should not be more than 1 MB in size
+    1. Click 'Upload' button and select the image from the local machine, image should not be more than ~1 MB in size
     1. Upload the image to public site and paste the image URL in the field, remember the URL should be publicly accessible
 - **Summary:**  You can provide the summary of the message, you can also format the message using markdown tags, refer [here](https://docs.microsoft.com/en-us/adaptive-cards/authoring-cards/text-features) to know the list of styles supported. 
 - **Author:** Name of the author who sends the message.

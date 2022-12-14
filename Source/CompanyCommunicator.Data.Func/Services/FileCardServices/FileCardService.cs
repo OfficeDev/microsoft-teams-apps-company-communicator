@@ -61,7 +61,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task DeleteAsync(string userId, string fileConsentId)
         {
-            var user = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, userId);
+            var user = await this.userDataRepository.GetAsync(UserDataTableNames.AuthorDataPartition, userId);
+            if (user == null)
+            {
+                user = await this.userDataRepository.GetAsync(UserDataTableNames.UserDataPartition, userId);
+            }
+
             var conversationReference = new ConversationReference
             {
                 ServiceUrl = user.ServiceUrl,
@@ -74,21 +79,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardSe
 
             int maxNumberOfAttempts = 10;
             await this.botAdapter.ContinueConversationAsync(
-               botId: this.authorAppId,
-               reference: conversationReference,
-               callback: async (turnContext, cancellationToken) =>
-               {
-                   // Retry it in addition to the original call.
-                   var retryPolicy = Policy.Handle<Exception>().WaitAndRetryAsync(maxNumberOfAttempts, p => TimeSpan.FromSeconds(p));
-                   await retryPolicy.ExecuteAsync(async () =>
-                   {
-                       await turnContext.DeleteActivityAsync(fileConsentId, cancellationToken);
-                       var deleteMessage = MessageFactory.Text(deleteText);
-                       deleteMessage.TextFormat = "xml";
-                       await turnContext.SendActivityAsync(deleteMessage, cancellationToken);
-                   });
-               },
-               cancellationToken: CancellationToken.None);
+                           botId: this.authorAppId,
+                           reference: conversationReference,
+                           callback: async (turnContext, cancellationToken) =>
+                           {
+                               // Retry it in addition to the original call.
+                               var retryPolicy = Policy.Handle<Exception>().WaitAndRetryAsync(maxNumberOfAttempts, p => TimeSpan.FromSeconds(p));
+                               await retryPolicy.ExecuteAsync(async () =>
+                               {
+                                   await turnContext.DeleteActivityAsync(fileConsentId, cancellationToken);
+                                   var deleteMessage = MessageFactory.Text(deleteText);
+                                   deleteMessage.TextFormat = "xml";
+                                   await turnContext.SendActivityAsync(deleteMessage, cancellationToken);
+                               });
+                           },
+                           cancellationToken: CancellationToken.None);
         }
     }
 }

@@ -307,6 +307,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             Assert.Equal(notification.Status, sentNotificationSummary.Status);
             Assert.Equal(notification.Unknown, sentNotificationSummary.Unknown);
             Assert.Equal(notification.Canceled, sentNotificationSummary.Canceled);
+            Assert.Equal(notification.CreatedBy, sentNotificationSummary.CreatedBy);
         }
 
         /// <summary>
@@ -409,6 +410,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             Assert.Equal(notificationEntity.SendingStartedDate, sentNotification.SendingStartedDate);
             Assert.Equal(notificationEntity.ErrorMessage, sentNotification.ErrorMessage);
             Assert.Equal(notificationEntity.WarningMessage, sentNotification.WarningMessage);
+            Assert.Equal(notificationEntity.CreatedBy, sentNotification.CreatedBy);
         }
 
         private SentNotificationsController GetControllerInstance(bool proactivelyInstallUserApp = true)
@@ -458,6 +460,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
                 TeamsInString = "['item1','item2']",
                 RostersInString = "['item1','item2']",
                 GroupsInString = "['group1','group2']",
+                CreatedBy = "createdBy",
             };
         }
     }
