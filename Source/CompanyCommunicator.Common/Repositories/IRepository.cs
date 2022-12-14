@@ -79,9 +79,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         /// <summary>
         /// Get filtered data entities by date time from the table storage.
         /// </summary>
-        /// <param name="dateTime">less than date time.</param>
+        /// <param name="startDateTime">Start date time.</param>
+        /// <param name="endDateTime">End date time.</param>
         /// <returns>Filtered data entities.</returns>
-        public Task<IEnumerable<T>> GetAllLessThanDateTimeAsync(DateTime dateTime);
+        public Task<IEnumerable<T>> GetAllBetweenDateTimesAsync(DateTime startDateTime, DateTime endDateTime);
 
         /// <summary>
         /// Get all data stream from the table storage in a partition.

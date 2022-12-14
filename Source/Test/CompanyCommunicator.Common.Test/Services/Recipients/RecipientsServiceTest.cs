@@ -42,7 +42,7 @@ namespace Microsoft.Teams.App.CompanyCommunicator.Common.Test.Services.Recipient
         /// Test case to check if argument null exception is thrown when parameters are null.
         /// </summary>
         [Fact]
-        public void BatchRecipients_NullParameters_ShouldThrowArgumentNullException()
+        public async void BatchRecipients_NullParameters_ShouldThrowArgumentNullException()
         {
             // Arrange
             var recipientService = this.GetRecipientsService();
@@ -51,7 +51,7 @@ namespace Microsoft.Teams.App.CompanyCommunicator.Common.Test.Services.Recipient
             Func<Task> task1 = async () => await recipientService.BatchRecipients(null /*recipients*/);
 
             // Assert
-            task1.Should().Throw<ArgumentNullException>();
+            await task1.Should().ThrowAsync<ArgumentNullException>();
         }
 
         /// <summary>

@@ -56,12 +56,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
         [FunctionName("CompanyCommunicatorCleanUpFunction")]
         public async Task Run([TimerTrigger("%CleanUpScheduleTriggerTime%")] TimerInfo myTimer, ILogger log)
         {
-            var cleanUpDateTime = DateTime.UtcNow.AddDays(-this.cleanUpFileOlderThanDays);
-            var exportDataEntities = await this.exportDataRepository.GetAllLessThanDateTimeAsync(cleanUpDateTime);
+            var cleanUpStartDateTime = DateTime.UtcNow.AddDays(-this.cleanUpFileOlderThanDays);
+            var cleanUpEndDateTime = DateTime.UtcNow.AddDays(-7);
+            var exportDataEntities = await this.exportDataRepository.GetAllBetweenDateTimesAsync(cleanUpStartDateTime, cleanUpEndDateTime);
             exportDataEntities = exportDataEntities.Where(exportDataEntity => exportDataEntity.Status.Equals(ExportStatus.Completed.ToString()));
             await this.DeleteFilesAndCards(exportDataEntities);
-            await this.exportDataRepository.BatchDeleteAsync(exportDataEntities);
+            log.LogInformation($"Company Communicator Clean Up function deleted the files and cards at: {DateTime.Now}");
 
+            await this.exportDataRepository.BatchDeleteAsync(exportDataEntities);
             log.LogInformation($"Company Communicator Clean Up function executed at: {DateTime.Now}");
         }
 

@@ -37,6 +37,7 @@ export interface IMessage {
     author?: string;
     buttonLink?: string;
     buttonTitle?: string;
+    createdBy?: string;
 }
 
 export interface SendConfirmationTaskModuleProps extends RouteComponentProps, WithTranslation {

@@ -72,4 +72,7 @@ You can update the banner title and the logo by updating the configuration in Az
 ### 13. Is it possible to format the message in the summary field?
 Yes, you can use markdown tags for formatting the message in the summary. CC v5.2 supports this feature, you can refer [here](https://docs.microsoft.com/en-us/adaptive-cards/authoring-cards/text-features) to know the list of styles supported.
 
+### 14. Latest changes does not reflect after upgrading the app to v5.3.0?
+Teams client default behavior is to use client app resources (js/css/ images) from teams cache. To reflect the latest changes please sign out and sign in again to the teams client or clear the teams cache with the steps mentioned [here](https://docs.microsoft.com/en-us/microsoftteams/troubleshoot/teams-administration/clear-teams-cache).
+
   

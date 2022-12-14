@@ -237,5 +237,24 @@ The above error occurs due to the mismatch in Azure CLI version. There are two w
 1. Install [Azure CLI v2.30.0](https://azcliprod.blob.core.windows.net/msi/azure-cli-2.30.0.msi).
 2. Uninstall the Azure CLI from your system and re-run the powershell script in future, the script will automatically install Azure CLI v2.30.0 and authentication steps will be completed.
 
+### 14. App service deployment failed while Sync operation with below error?
+
+Error Logs: 
+
+![appservice sync deployment error](images/appservice_sync_deployment_error.png)
+
+#### Fix
+
+The above error occurs when default node version of app service points to the older versions. 
+
+1. Go to portal.azure.com. Navigate to resource group where all CC resources are deployed. 
+2. Click on the App service -> Click on Configuration. 
+3. Click on WEBSITE_NODE_DEFAULT_VERSION. 
+4. Update the default value to 16.13.0 (previous value ->10.15.2). 
+5. Click on Overview and Re-start the app service. 
+6. Once the app service is restarted. Navigate to Deployment Center and click on Sync. Once deployment is successful. Re-start the app service.
+
+![appservice sync deployment error fix](images/appservice_sync_error_fix.png)
+
 # Didn't find your problem here?
 Please report the issue [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/issues/new)

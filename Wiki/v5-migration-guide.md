@@ -1,5 +1,71 @@
 ## Company Communicator v5 Migration Guide
 
+## Upgrading from v5.x to latest version
+If you have CC v5.0, v5.1 or v5.2 deployed and plan to migrate to the latest version, please perform the following steps:
+
+### 1. Update the .Net version of Azure Functions and App Service to support .NET 6.0 :
+
+- Download the whole solution folder from [GitHub](https://github.com/OfficeDev/microsoft-teams-company-communicator-app)
+- Unzip the Content to a folder. (say companyCommunicator)
+- Open a PowerShell window in **administrator** mode and navigate to the folder where you unzipped the content.
+- Navigate to Deployment folder.
+    ```  
+    cd microsoft-teams-apps-company-communicator-main\Deployment
+    ```
+
+- Run the below command. This will allow you to run dotnet6-migration.ps1. By default, the execution policy is restricted. You may change it to back restricted after deployment is completed.
+    ```
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+    ```
+- Run the below command to unblock the deployment script.
+    ```
+    Unblock-File -Path .\dotnet6-migration.ps1
+    ```
+
+#### Execute script
+
+- Open a PowerShell window in **administrator** mode and navigate to Deployment folder
+    ```  
+    cd microsoft-teams-apps-company-communicator-main\Deployment
+    ```
+- Execute the `dotnet6-migration.ps1` script in the Powershell window:
+    ```
+    .\dotnet6-migration.ps1
+    ```
+- During execution of script you will be asked to provide below input parameters,
+    * Subscription Id : Please enter the subscription id of the resources where Company Communicator deployed.
+    * Resource Group Name : Please enter the resource group name where the previous resources were created.
+    * Base Resource Name : Please enter the base resource name used in the previous deployment. Base resource name is same as the app service name. 
+
+![DotNet Upgrade](images/dotnet_upgrade_execution.png)
+
+#### Validate .NET 6 upgrade
+- Go to portal.azure.com. Navigate to resource group where all CC resources are deployed. 
+- Click on the App service -> Click on Configuration -> Click on General Settings
+- Check and confirm the .NET version to be .NET 6 (LTS) 
+
+![App Service .NET Version ](images/appservice-dotnet-version.png)
+
+- Click on *-prep-function -> Click on Configuration -> Click on Function runtime settings.
+- Select the runtime version to be ~4. Similary select for ***-function** and ***-data-function**. 
+
+![App Functions Runtime Version ](images/azurefunctions_runtime_version.png)
+
+### 2. Validate and update the config settings and sync to the lastest code :
+
+1. Go to app service --> Configuration--> Click on New application setting and add below name and values. You can update the value for the header text and the header image as per your organization needs.
+    * REACT_APP_HEADERTEXT : Company Communicator
+    * REACT_APP_HEADERIMAGE : https://raw.githubusercontent.com/OfficeDev/microsoft-teams-company-communicator-app/main/Source/CompanyCommunicator/ClientApp/src/assets/Images/mslogo.png
+
+        ![Update banner](images/update_banner_title_logo.png)
+
+1. Verify the WEBSITE_NODE_DEFAULT_VERSION value should be 16.13.0. Please update it to 16.13.0 if any other value is shown.
+1. Save the configuration.
+1. Restart the app service and sync to the latest changes.
+1. For all azure functions verify if the WEBSITE_NODE_DEFAULT_VERSION to be 16.13.0. Please update it if any other value is shown and sync the changes.
+1. Restart the functions. 
+1. Sign out from teams and sign in again to see the latest changes.
+
 ## Upgrading from v4 to v5
 If you have the CCv4 deployed and plan to migrate from CCv4 to CCv5, perform the following steps:
 
@@ -36,17 +102,17 @@ Please refer [step 2](https://github.com/OfficeDev/microsoft-teams-company-commu
     - **Supported account types**: Select "Accounts in this organizational directory only(Default Directory only - Single tenant)".
     - Leave the "Redirect URI" field blank for now.
 
-    ![Azure AD app registration page](images/multitenant_app_creation.png)
+        ![Azure AD app registration page](images/single_tenant_app_creation.png)
 
 6. Click **Register** to complete the registration.
 
-7. When the app is registered, you'll be taken to the app's "Overview" page. Copy the **Application (client) ID**; we will need it later. Verify that the "Supported account types" is set to **Multiple organizations**.
+7. When the app is registered, you'll be taken to the app's "Overview" page. Copy the **Application (client) ID**; we will need it later. Verify that the "Supported account types" is set to **My organization only**.
 
-    ![Azure AD app overview page](images/multitenant_app_overview_1.png)
+    ![Azure AD app overview page](images/single_tenant_app_overview.png)
 
 8. On the side rail in the Manage section, navigate to the "Certificates & secrets" section. In the Client secrets section, click on "+ New client secret". Add a description for the secret, and choose when the secret will expire. Click "Add".
 
-    ![Azure AD app secret](images/multitenant_app_secret.png)
+    ![Azure AD app secret](images/single_tenant_app_secret.png)
 
 9. Once the client secret is created, copy its **Value**; we will need it later.
 
@@ -124,19 +190,24 @@ Please refer [step 2](https://github.com/OfficeDev/microsoft-teams-company-commu
     7. **Microsoft Graph App Secret**: The client secret of the Microsoft Graph Azure AD app. (from Step 2)
     8. **Proactively Install User App [Optional]**: Default value is `true`. You may set it to `false` if you want to disable the feature.
     9. **User App ExternalId [Optional]**: Default value is `148a66bb-e83d-425a-927d-09f4299a9274`. This **MUST** be the same `id` that is in the Teams app manifest for the user app.
-     10. **Service Bus Web App Role Name Guid [Optional]**: Default value is `958380b3-630d-4823-b933-f59d92cdcada`. This **MUST** be the same `id` per app deployment.
+    10. **Header Text [Optional]**: Default value is `Company Communicator`. This is the banner text that will appear starting v5.2 and later, you will have the option to modify later.
+    11. **Header Logo Url [Optional]**: Default image is Microsoft logo. You will have the option to modify later.
+    12. **Hosting Plan SKU  [Optional]**: The pricing tier for the hosting plan. Default value is `Standard`. You may choose between Basic, Standard and Premium.
+    13. **Hosting Plan Size  [Optional]**: The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value is `2`.
+    
+        > **Note:** The default value is 2 to minimize the chances of an error during app deployment. After deployment you can choose to change the size of the hosting plan.
+    14. **Service Bus Web App Role Name Guid [Optional]**: Default value is `958380b3-630d-4823-b933-f59d92cdcada`. This **MUST** be the same `id` per app deployment.
    
         > **Note:** Make sure to keep the same values for an upgrade. Please change the role name GUIDs in case of another Company Communicator Deployment in same subscription.
 
-    11. **Service Bus Prep Func Role Name Guid [Optional]**: Default value is `ce6ca916-08e9-4639-bfbe-9d098baf42ca`. This **MUST** be the same `id` per app deployment.
-    12. **Service Bus Send Func Role Name Guid [Optional]**: Default value is `960365a2-c7bf-4ff3-8887-efa86fe4a163`. This **MUST** be the same `id` per app deployment.
-    13. **Service Bus Data Func Role Name Guid [Optional]**: Default value is `d42703bc-421d-4d98-bc4d-cd2bb16e5b0a`. This **MUST** be the same `id` per app deployment.
-    14. **Storage Account Web App Role Name Guid [Optional]**: Default value is `edd0cc48-2cf7-490e-99e8-131311e42030`. This **MUST** be the same `id` per app deployment.
-    15. **Storage Account Prep Func Role Name Guid [Optional]**: Default value is `9332a9e9-93f4-48d9-8121-d279f30a732e`. This **MUST** be the same `id` per app deployment.
-    16. **Storage Account Data Func Role Name Guid [Optional]**: Default value is `5b67af51-4a98-47e1-9d22-745069f51a13`. This **MUST** be the same `id` per app deployment.
-    17. **DefaultCulture [Optional]**: By default the application uses `en-US` locale. You can choose the locale from the list, if you wish to use the app in different locale.Also, you may add/update the resources for other locales and update this configuration if desired.
-    18. **SupportedCultures [Optional]**: This is the list of locales that application supports currently.You may add/update the resources for other locales and update this configuration if desired.
-
+    15. **Service Bus Prep Func Role Name Guid [Optional]**: Default value is `ce6ca916-08e9-4639-bfbe-9d098baf42ca`. This **MUST** be the same `id` per app deployment.
+    16. **Service Bus Send Func Role Name Guid [Optional]**: Default value is `960365a2-c7bf-4ff3-8887-efa86fe4a163`. This **MUST** be the same `id` per app deployment.
+    17. **Service Bus Data Func Role Name Guid [Optional]**: Default value is `d42703bc-421d-4d98-bc4d-cd2bb16e5b0a`. This **MUST** be the same `id` per app deployment.
+    18. **Storage Account Web App Role Name Guid [Optional]**: Default value is `edd0cc48-2cf7-490e-99e8-131311e42030`. This **MUST** be the same `id` per app deployment.
+    19. **Storage Account Prep Func Role Name Guid [Optional]**: Default value is `9332a9e9-93f4-48d9-8121-d279f30a732e`. This **MUST** be the same `id` per app deployment.
+    20. **Storage Account Data Func Role Name Guid [Optional]**: Default value is `5b67af51-4a98-47e1-9d22-745069f51a13`. This **MUST** be the same `id` per app deployment.
+    21. **DefaultCulture [Optional]**: By default the application uses `en-US` locale. You can choose the locale from the list, if you wish to use the app in different locale.Also, you may add/update the resources for other locales and update this configuration if desired.
+    22. **SupportedCultures [Optional]**: This is the list of locales that application supports currently.You may add/update the resources for other locales and update this configuration if desired.
 
     > **Note:** Make sure that the values are copied as-is, with no extra spaces. The template checks that GUIDs are exactly 36 characters.
 
@@ -147,6 +218,8 @@ Please refer [step 2](https://github.com/OfficeDev/microsoft-teams-company-commu
     * You can change this list later by going to the App Service's "Configuration" blade.
 
 1. If you wish to change the app name, description, and icon from the defaults, modify the corresponding template parameters.
+
+1. If you wish to change the header/banner text and logo, refer to FAQ in the Wiki.
 
 1. Agree to the Azure terms and conditions by clicking on the check box "I agree to the terms and conditions stated above" located at the bottom of the page.
 
@@ -167,7 +240,7 @@ Please refer [step 2](https://github.com/OfficeDev/microsoft-teams-company-commu
     * **userBotId:** This is the Microsoft Application ID for the Company Communicator app. For the following steps, it will be referred to as `%userBotId%`.
     * **appDomain:** This is the base domain for the Company Communicator app. For the following steps, it will be referred to as `%appDomain%`.
 
-## 5. Set-up Authentication
+### 5. Set-up Authentication
 
 1. Note that you have the `%authorBotId%`, `%userBotId%` and `%appDomain%` values from the previous step (Step 2).
 
@@ -227,7 +300,7 @@ Please refer [step 2](https://github.com/OfficeDev/microsoft-teams-company-commu
 
 1. Click **Save** to commit your changes.
 
-## 6. Add Permissions to your app
+### 6. Add Permissions to your app
 
 Continuing from the Azure AD author app registration page where we ended Step 3.
 
@@ -261,7 +334,7 @@ Continuing from the Azure AD author app registration page where we ended Step 3.
    - Prepare link - https://login.microsoftonline.com/common/adminconsent?client_id=%appId%. Replace the `%appId%` with the `Application (client) ID` of Microsoft Graph Azure AD app (from above).
    - Global Administrator can grant consent using the link above.
 
-## 7. Create the Teams app packages
+### 7. Create the Teams app packages
 
 Company communicator app comes with 2 applications – Author, User. The Author application is intended for employees who create and send messages in the organization, and the User application is intended for employees who receive the messages.
 
@@ -296,7 +369,7 @@ Create two Teams app packages: one to be installed to an Authors team and other 
 
 Repeat the steps above but with the file `Manifest\manifest_users.json` and use `%userBotId%` for `<<botId>>` placeholder. Note: you will not need to change anything for the configurationUrl or webApplicationInfo section because the recipients app does not have the configurable tab. Name the resulting package `company-communicator-users.zip`, so you know that this is the app for the recipients.
 
-## 8. Install the lastest apps in Microsoft Teams
+### 8. Install the lastest apps in Microsoft Teams
 
 1. Delete the v4.x apps and re-upload the latest v.5 manifest. Install the authors app (the `company-communicator-authors.zip` package) to your team of message authors.
     * Note that even if non-authors install the app, the UPN list in the app configuration will prevent them from accessing the message authoring experience. Only the users in the sender UPN list will be able to compose and send messages. 
@@ -312,3 +385,5 @@ Repeat the steps above but with the file `Manifest\manifest_users.json` and use 
 
 ### Migration Status
 If you have performed all the steps, migration completes after successful deployment.
+
+> **Note:** If latest changes doesn't reflect after upgrading the app, please sign out and sign in again to the teams client or clear the teams cache with the steps mentioned [here](https://docs.microsoft.com/en-us/microsoftteams/troubleshoot/teams-administration/clear-teams-cache).

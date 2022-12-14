@@ -188,9 +188,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<T>> GetAllLessThanDateTimeAsync(DateTime dateTime)
+        public async Task<IEnumerable<T>> GetAllBetweenDateTimesAsync(DateTime startDateTime, DateTime endDateTime)
         {
-            var filterByDate = TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.LessThanOrEqual, dateTime);
+            var filterByDate = TableQuery.CombineFilters(
+                TableQuery.GenerateFilterConditionForDate(
+                    "Timestamp", QueryComparisons.LessThanOrEqual, startDateTime), TableOperators.And,
+                TableQuery.GenerateFilterConditionForDate(
+                    "Timestamp", QueryComparisons.GreaterThanOrEqual, endDateTime));
 
             var query = new TableQuery<T>().Where(filterByDate);
 

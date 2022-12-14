@@ -38,7 +38,7 @@ namespace Microsoft.Teams.App.CompanyCommunicator.Common.Test.Services.Mock
         {
             string key = request.Method.ToString() + ":" + request.RequestUri.ToString();
             var response = new HttpResponseMessage();
-            if (this.Responses.ContainsKey(key) && response.Content == null)
+            if (this.Responses.ContainsKey(key))
             {
                 response.Content = new StringContent(this.Serializer.SerializeObject(this.Responses[key]));
             }

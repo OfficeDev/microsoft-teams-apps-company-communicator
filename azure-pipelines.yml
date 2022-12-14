@@ -1,6 +1,6 @@
 pool:
   name: Azure Pipelines
-  vmImage: 'windows-latest'
+  vmImage: 'windows-2022'
   demands:
   - msbuild
   - visualstudio
@@ -14,16 +14,18 @@ steps:
 - checkout: self
 
 - task: UseDotNet@2 
-  displayName: '.NET Core 3.1.x'
+  displayName: 'Use .NET 6.0.x'
   inputs:
-    version: '3.1.x'
     packageType: sdk
+    version: '6.0.x'
+    includePreviewVersions: true
 
 - task: DotNetCoreCLI@2
-  displayName: Build solution
+  displayName: 'Build solution'
   inputs:
+    command: build
     projects: $(Solution)
-    arguments: --configuration $(BuildConfiguration)
+    arguments: '--configuration $(BuildConfiguration)'
 
 - task: DotNetCoreCLI@2
   displayName: 'Run unit tests'
@@ -31,7 +33,7 @@ steps:
     command: test
     projects: $(Solution)
     arguments: '--collect "Code coverage"'
-    
+
 - task: DotNetCoreCLI@2
   displayName: 'Publish Company Communicator'
   inputs:

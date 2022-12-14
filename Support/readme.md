@@ -7,9 +7,7 @@ This script is designed for the purpose of testing the chat functionality of the
 * $tenantId = "tenant.onmicrosoft.com" #or in GUID format "00000000-0000-0000-0000-000000000000"
 * $teamsAppId = "00000000-0000-0000-0000-000000000000" # AppId of the Teams App Manifest 
 * $graphAppId = "00000000-0000-0000-0000-000000000000"
-* $graphAppSecret= "secret"
 * $userAppId = "00000000-0000-0000-0000-000000000000"
-* $userAppSecret = "secret" 
 
 For the secrets, I recommend to an extra secret per App which you can delete after using this script. This way, it won't interfere with the configuration of the application. And as an added bonus, it's more secure because the script will only run with the newly created secrets.
 

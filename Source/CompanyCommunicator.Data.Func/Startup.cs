@@ -58,7 +58,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                    botOptions.UserAppPassword = configuration.GetValue<string>("UserAppPassword", string.Empty);
                    botOptions.UserAppCertName = configuration.GetValue<string>("UserAppCertName", string.Empty);
                    botOptions.AuthorAppId = configuration.GetValue<string>("AuthorAppId");
-                   botOptions.AuthorAppCertName = configuration.GetValue<string>("AuthorAppPassword", string.Empty);
+                   botOptions.AuthorAppPassword = configuration.GetValue<string>("AuthorAppPassword", string.Empty);
                    botOptions.AuthorAppCertName = configuration.GetValue<string>("AuthorAppCertName", string.Empty);
                    botOptions.GraphAppId = configuration.GetValue<string>("GraphAppId");
                    botOptions.GraphAppCertName = configuration.GetValue<string>("GraphAppCertName", string.Empty);

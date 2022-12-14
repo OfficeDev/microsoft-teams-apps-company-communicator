@@ -23,15 +23,15 @@ Begin with the [Solution overview](https://github.com/OfficeDev/microsoft-teams-
 
 When you're ready to try out Company Communicator, or to use it in your own organization, you can choose to follow one of the below guides.
 * [Deployment guide powershell](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide-powershell).
-    * **Recommended** Use this option to deploy the Company Communicator v5.2 using powershell script. The entire set-up is done by the powershell script.
+    * **Recommended** Use this option to deploy the latest version of Company Communicator using powershell script. The entire set-up is done by the powershell script.
 * [Deployment guide](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide).
-    * Use this option to deploy the Company Communicator v5.2 with client secrets.
+    * Use this option to deploy the latest version of Company Communicator with client secrets.
 * [Deployment guide certificate](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide-certificate).
-    * Use this option to deploy the Company Communicator v5.2 with certificates.
+    * Use this option to deploy the latest version of Company Communicator with certificates.
 
 ## Migration 
 
-If you already have older version of Company Communicator installed, then please use this [v5 migration guide](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/v5-migration-guide). Please note that deploying the major version update, like Company Communicator version 5.2 involves more than syncing the App Service and Azure Functions, so plan to review the migration guide before migrating to latest. 
+If you already have older version of Company Communicator installed, then please use this [v5 migration guide](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/v5-migration-guide). Please note that deploying the major version update, like Company Communicator version 5.3 involves more than syncing the App Service and Azure Functions, so plan to review the migration guide before migrating to latest. 
 
 Migrating to newer versions. 
 
