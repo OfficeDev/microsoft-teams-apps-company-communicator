@@ -306,7 +306,7 @@ function CreateAzureADApp {
             if ($updateDecision -eq 0) {
                 WriteI -message "Updating the existing app..."
 
-                az ad app update --id $app.appId --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow
+                az ad app update --display-name $appName --sign-in-audience AzureADMultipleOrgs
 
                 WriteI -message "Waiting for app update to finish..."
 
@@ -319,7 +319,7 @@ function CreateAzureADApp {
             }
         } else {
             # Create Azure AD app registration using CLI
-            az ad app create --display-name $appName --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow
+            az ad app create --display-name $appName --sign-in-audience AzureADMultipleOrgs
 
             WriteI -message "Waiting for app creation to finish..."
 
