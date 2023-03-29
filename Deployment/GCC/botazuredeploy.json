@@ -102,7 +102,11 @@
             "channelName": "MsTeamsChannel",
             "location": "global",
             "properties": {
-              "isEnabled": true
+               "enableCalling": false,
+                    "incomingCallRoute": "graphPma",
+                    "isEnabled": true,
+                    "deploymentEnvironment": "GCCModerateDeployment",
+                    "acceptedTerms": true
             }
           },
           "dependsOn": [
@@ -141,7 +145,11 @@
             "channelName": "MsTeamsChannel",
             "location": "global",
             "properties": {
-              "isEnabled": true
+               "enableCalling": false,
+                    "incomingCallRoute": "graphPma",
+                    "isEnabled": true,
+                    "deploymentEnvironment": "GCCModerateDeployment",
+                    "acceptedTerms": true
             }
           },
           "dependsOn": [
