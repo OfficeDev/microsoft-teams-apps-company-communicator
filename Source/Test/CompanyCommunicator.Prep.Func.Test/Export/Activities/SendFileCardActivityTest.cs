@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
     using System.Threading.Tasks;
     using FluentAssertions;
     using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
@@ -18,6 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities;
@@ -30,7 +32,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
     public class SendFileCardActivityTest
     {
         private readonly Mock<IOptions<BotOptions>> botOptions = new Mock<IOptions<BotOptions>>();
-        private readonly Mock<ICCBotFrameworkHttpAdapter> botAdapter = new Mock<ICCBotFrameworkHttpAdapter>();
         private readonly Mock<IUserDataRepository> userDataRepository = new Mock<IUserDataRepository>();
         private readonly Mock<IConversationService> conversationService = new Mock<IConversationService>();
         private readonly Mock<IOptions<TeamsConversationOptions>> options = new Mock<IOptions<TeamsConversationOptions>>();
@@ -38,6 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Activit
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
         private readonly Mock<ILogger> log = new Mock<ILogger>();
         private readonly Mock<ITurnContext> turnContext = new Mock<ITurnContext>();
+        private readonly Mock<CCBotAdapter> botAdapter = new Mock<CCBotAdapter>(new Mock<ICertificateProvider>().Object, new Mock<BotFrameworkAuthentication>().Object);
 
         /// <summary>
         /// Constructor test for all parameters.

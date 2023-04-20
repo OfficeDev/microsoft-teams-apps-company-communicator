@@ -34,7 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         private readonly IStorageClientFactory storageClientFactory;
         private readonly IUserDataRepository userDataRepository;
         private readonly string authorAppId;
-        private readonly ICCBotFrameworkHttpAdapter botAdapter;
+        private readonly CCBotAdapterBase botAdapter;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             IExportDataRepository exportDataRepository,
             IStorageClientFactory storageClientFactory,
             IOptions<BotOptions> botOptions,
-            ICCBotFrameworkHttpAdapter botAdapter,
+            CCBotAdapterBase botAdapter,
             IUserDataRepository userDataRepository,
             IStringLocalizer<Strings> localizer)
         {
@@ -114,7 +114,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
 
             int maxNumberOfAttempts = 10;
             await this.botAdapter.ContinueConversationAsync(
-               botId: this.authorAppId,
+               botAppId: this.authorAppId,
                reference: conversationReference,
                callback: async (turnContext, cancellationToken) =>
                {

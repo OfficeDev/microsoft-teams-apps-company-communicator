@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     using System.Threading.Tasks;
     using Microsoft.Graph;
     using Microsoft.Identity.Web;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
 
     /// <summary>
@@ -20,14 +21,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     public class GraphTokenProvider : IAuthenticationProvider
     {
         private readonly ITokenAcquisition tokenAcquisition;
+        private readonly IAppConfiguration appConfiguration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GraphTokenProvider"/> class.
         /// </summary>
         /// <param name="tokenAcquisition">MSAL.NET token acquisition service.</param>
-        public GraphTokenProvider(ITokenAcquisition tokenAcquisition)
+        /// <param name="appConfiguration">Ap configuration.</param>
+        public GraphTokenProvider(
+            ITokenAcquisition tokenAcquisition,
+            IAppConfiguration appConfiguration)
         {
             this.tokenAcquisition = tokenAcquisition ?? throw new ArgumentNullException(nameof(tokenAcquisition));
+            this.appConfiguration = appConfiguration ?? throw new ArgumentNullException(nameof(appConfiguration));
         }
 
         /// <summary>
@@ -52,12 +58,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             if (permissionType.Equals(GraphPermissionType.Application.ToString(), StringComparison.CurrentCultureIgnoreCase))
             {
                 // we use MSAL.NET to get a token to call the API for application
-                accessToken = await this.tokenAcquisition.GetAccessTokenForAppAsync(Common.Constants.ScopeDefault);
+                accessToken = await this.tokenAcquisition.GetAccessTokenForAppAsync(this.appConfiguration.GraphDefaultScope);
             }
             else
             {
                 // we use MSAL.NET to get a token to call the API On Behalf Of the current user
-                accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] { Common.Constants.ScopeDefault });
+                accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] { this.appConfiguration.GraphDefaultScope });
             }
 
             return accessToken;

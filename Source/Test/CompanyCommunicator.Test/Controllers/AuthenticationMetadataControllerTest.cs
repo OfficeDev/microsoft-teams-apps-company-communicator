@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
     using FluentAssertions;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers;
     using Moq;
     using Xunit;
@@ -21,6 +22,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
     public class AuthenticationMetadataControllerTest
     {
         private readonly Mock<IOptions<AuthenticationOptions>> options = new Mock<IOptions<AuthenticationOptions>>();
+        private readonly Mock<IAppConfiguration> appConfigurationMock = new Mock<IAppConfiguration>();
+
         private readonly string tenantId = "tenantId";
         private readonly string clientId = "clientId";
 
@@ -47,7 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         {
             // Arrange
             this.options.Setup(x => x.Value).Returns(new AuthenticationOptions() { AzureAdTenantId = this.tenantId, AzureAdClientId = this.clientId });
-            Action action = () => new AuthenticationMetadataController(this.options.Object);
+            Action action = () => new AuthenticationMetadataController(this.options.Object, this.appConfigurationMock.Object);
 
             // Act and Assert.
             action.Should().NotThrow();
@@ -60,7 +63,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public void CreateInstance_NullParameter_ThrowsArgumentNullException()
         {
             // Arrange
-            Action action = () => new AuthenticationMetadataController(null /*authenticationOptions*/);
+            Action action = () => new AuthenticationMetadataController(null /*authenticationOptions*/, null);
 
             // Act and Assert.
             action.Should().Throw<ArgumentNullException>("authenticationOptions is null.");
@@ -201,7 +204,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
         public AuthenticationMetadataController GetAuthenticationMetadataController()
         {
             this.options.Setup(x => x.Value).Returns(new AuthenticationOptions() { AzureAdTenantId = this.tenantId, AzureAdClientId = this.clientId });
-            return new AuthenticationMetadataController(this.options.Object);
+            return new AuthenticationMetadataController(this.options.Object, new CommericalConfiguration("tenant Id"));
         }
 
         private List<string> GetComponents()

@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="4.3.1" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Host.Storage" Version="3.0.14" />
-    <PackageReference Include="Microsoft.Bot.Builder.Integration.AspNet.Core" Version="4.12.1" />
+    <PackageReference Include="Microsoft.Bot.Builder.Integration.AspNet.Core" Version="4.19.2" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="3.1.8" />
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="3.1.8" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.3" />
