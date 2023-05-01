@@ -13,8 +13,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Identity.Client;
     using Microsoft.Identity.Web;
     using Microsoft.IdentityModel.Tokens;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
 
     /// <summary>
     /// Extension class for registering auth services in DI container.
@@ -89,6 +92,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                  confidentialClientApplicationOptions =>
                  {
                      configuration.Bind("AzureAd", confidentialClientApplicationOptions);
+                     confidentialClientApplicationOptions.AzureCloudInstance = configuration.GetAzureCloudInstance();
                  })
                  .AddInMemoryTokenCaches();
         }

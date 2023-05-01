@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     using System.Threading.Tasks;
     using Microsoft.Graph;
     using Microsoft.Identity.Client;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Configuration;
 
     /// <summary>
     /// MSAL Authentication provider for graph calls.
@@ -19,14 +20,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     public class MsalAuthenticationProvider : IAuthenticationProvider
     {
         private readonly IConfidentialClientApplication clientApplication;
+        private readonly IAppConfiguration appConfiguration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MsalAuthenticationProvider"/> class.
         /// </summary>
         /// <param name="clientApplication">MSAL.NET token acquisition service for confidential clients.</param>
-        public MsalAuthenticationProvider(IConfidentialClientApplication clientApplication)
+        /// <param name="appConfiguration">App configuration.</param>
+        public MsalAuthenticationProvider(
+            IConfidentialClientApplication clientApplication,
+            IAppConfiguration appConfiguration)
         {
             this.clientApplication = clientApplication ?? throw new ArgumentNullException(nameof(clientApplication));
+            this.appConfiguration = appConfiguration ?? throw new ArgumentNullException(nameof(appConfiguration));
         }
 
         /// <inheritdoc/>
@@ -45,7 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <returns>The access token.</returns>
         private async Task<string> GetAccesTokenAsync()
         {
-            var scopes = new List<string> { Common.Constants.ScopeDefault, };
+            var scopes = new List<string> { this.appConfiguration.GraphDefaultScope, };
             var result = await this.clientApplication.AcquireTokenForClient(scopes)
                 .ExecuteAsync();
 

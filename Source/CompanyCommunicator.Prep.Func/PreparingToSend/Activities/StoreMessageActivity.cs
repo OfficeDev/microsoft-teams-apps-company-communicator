@@ -39,7 +39,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             this.sendingNotificationDataRepository = notificationRepo ?? throw new ArgumentNullException(nameof(notificationRepo));
             this.adaptiveCardCreator = cardCreator ?? throw new ArgumentNullException(nameof(cardCreator));
             this.memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-
         }
 
         /// <summary>
@@ -75,7 +74,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 }
 
                 notification.ImageLink += imageLink;
-
             }
 
             var serializedContent = this.adaptiveCardCreator.CreateAdaptiveCard(notification).ToJson();

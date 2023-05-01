@@ -61,11 +61,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common
         public const string PermissionTypeKey = "x-api-permission";
 
         /// <summary>
-        /// get the default graph scope.
-        /// </summary>
-        public const string ScopeDefault = "https://graph.microsoft.com/.default";
-
-        /// <summary>
         /// get the OData next page link.
         /// </summary>
         public const string ODataNextPageLink = "@odata.nextLink";

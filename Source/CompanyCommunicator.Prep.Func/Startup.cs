@@ -17,8 +17,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Graph;
     using Microsoft.Identity.Client;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
@@ -62,6 +64,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                     repositoryOptions.EnsureTableExists =
                         !configuration.GetValue<bool>("IsItExpectedThatTableAlreadyExists", false);
                 });
+
+            builder.Services.AddAppConfiguration(builder.GetContext().Configuration);
+
             builder.Services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
@@ -115,9 +120,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             // Add bot services.
             builder.Services.AddSingleton<UserAppCredentials>();
             builder.Services.AddSingleton<AuthorAppCredentials>();
-            builder.Services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
-            builder.Services.AddSingleton<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
-            builder.Services.AddSingleton<BotFrameworkHttpAdapter>();
+            builder.Services.AddSingleton<ServiceClientCredentialsFactory, ConfigurationCredentialProvider>();
+            builder.Services.AddSingleton<BotFrameworkAuthentication, ConfigurationBotFrameworkAuthentication>();
+            builder.Services.AddSingleton<CCBotAdapterBase, CCBotAdapter>();
 
             // Add repositories.
             builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
@@ -167,6 +172,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddOptions<ConfidentialClientApplicationOptions>().
                 Configure<IConfiguration>((confidentialClientApplicationOptions, configuration) =>
                 {
+                    confidentialClientApplicationOptions.AzureCloudInstance = configuration.GetAzureCloudInstance();
                     confidentialClientApplicationOptions.ClientId = configuration.GetValue<string>("GraphAppId");
                     confidentialClientApplicationOptions.ClientSecret = configuration.GetValue<string>("GraphAppPassword", string.Empty);
                     confidentialClientApplicationOptions.TenantId = configuration.GetValue<string>("TenantId");
@@ -182,7 +188,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             // Add Graph Clients.
             builder.Services.AddSingleton<IGraphServiceClient>(
                 serviceProvider =>
-                new GraphServiceClient(serviceProvider.GetRequiredService<IAuthenticationProvider>()));
+                new GraphServiceClient(
+                    serviceProvider.GetRequiredService<IAppConfiguration>().GraphBaseUrl,
+                    serviceProvider.GetRequiredService<IAuthenticationProvider>()));
 
             // Add Service Factory
             builder.Services.AddSingleton<IGraphServiceFactory, GraphServiceFactory>();

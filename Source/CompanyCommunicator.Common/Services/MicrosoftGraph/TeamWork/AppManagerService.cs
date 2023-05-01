@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Policies;
 
     /// <summary>
@@ -18,15 +19,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     internal class AppManagerService : IAppManagerService
     {
         private readonly IGraphServiceClient graphServiceClient;
+        private readonly IAppConfiguration appConfiguration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AppManagerService"/> class.
         /// </summary>
         /// <param name="graphServiceClient">V1 Graph service client.</param>
+        /// <param name="appConfiguration">App configuration.</param>
         internal AppManagerService(
-            IGraphServiceClient graphServiceClient)
+            IGraphServiceClient graphServiceClient,
+            IAppConfiguration appConfiguration)
         {
             this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
+            this.appConfiguration = appConfiguration ?? throw new ArgumentNullException(nameof(appConfiguration));
         }
 
         /// <inheritdoc/>
@@ -46,7 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             {
                 AdditionalData = new Dictionary<string, object>()
                 {
-                    { "teamsApp@odata.bind", $"{GraphConstants.V1BaseUrl}/appCatalogs/teamsApps/{appId}" },
+                    { "teamsApp@odata.bind", $"{this.appConfiguration.GraphBaseUrl}/appCatalogs/teamsApps/{appId}" },
                 },
             };
 
@@ -77,7 +82,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             {
                 AdditionalData = new Dictionary<string, object>()
                 {
-                    { "teamsApp@odata.bind", $"{GraphConstants.V1BaseUrl}/appCatalogs/teamsApps/{appId}" },
+                    { "teamsApp@odata.bind", $"{this.appConfiguration.GraphBaseUrl}/appCatalogs/teamsApps/{appId}" },
                 },
             };
 
