@@ -6,7 +6,7 @@ Cumulative improvements in Company Communicator App.
 
 |Version |Release Date |
 |---|---|
-| 5.4 | May 02, 2023
+| 5.4 | May 10, 2023
 | 5.3 | Dec 14, 2022
 | 5.2 | Jul 26, 2022
 | 5.1 | Apr 28, 2022
@@ -25,7 +25,7 @@ Cumulative improvements in Company Communicator App.
 | 1.0 | Dec 20, 2019
 
 ### Company Communicator feature release notes
-#### 5.4 (May 02, 2023)
+#### 5.4 (May 10, 2023)
 ##### Changes introduced
 - Code changes to support Government Community Cloud High (GCCH) environment.
 

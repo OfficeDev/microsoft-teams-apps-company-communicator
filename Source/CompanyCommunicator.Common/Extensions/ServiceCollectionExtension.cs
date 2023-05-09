@@ -42,7 +42,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
             {
                 // Add using managed identities.
                 services.AddSingleton(sp => new BlobContainerClient(
-                   GetBlobContainerUri(sp.GetService<IConfiguration>().GetValue<string>("StorageAccountName")),
+                   GetBlobContainerUri(sp.GetService<IConfiguration>().GetValue<string>("TeamsEnvironment", "Commerical"/*default*/), sp.GetService<IConfiguration>().GetValue<string>("StorageAccountName")),
                    new DefaultAzureCredential(),
                    options));
             }
@@ -154,12 +154,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
             return teamsEnvironment;
         }
 
-        private static Uri GetBlobContainerUri(string storageAccountName)
+        private static Uri GetBlobContainerUri(string envString, string storageAccountName)
         {
-            return new Uri(string.Format(
+            Enum.TryParse(envString, out TeamsEnvironment teamsEnvironment);
+            switch (teamsEnvironment)
+            {
+                case TeamsEnvironment.Commercial:
+                case TeamsEnvironment.GCC:
+                    return new Uri(string.Format(
                     "https://{0}.blob.core.windows.net/{1}",
                     storageAccountName,
                     Common.Constants.BlobContainerName));
+                case TeamsEnvironment.GCCH:
+                    return new Uri(string.Format(
+                    "https://{0}.blob.core.usgovcloudapi.net/{1}",
+                    storageAccountName,
+                    Common.Constants.BlobContainerName));
+                default:
+                    return new Uri(string.Format(
+                    "https://{0}.blob.core.windows.net/{1}",
+                    storageAccountName,
+                    Common.Constants.BlobContainerName));
+            }
         }
     }
 }
