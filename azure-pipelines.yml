@@ -13,6 +13,26 @@ variables:
 steps:
 - checkout: self
 
+- task: NodeTool@0
+  displayName: 'Use Node =16.x'
+  inputs:
+    versionSpec: '=16.x'
+
+- task: Npm@1
+  displayName: 'npm install'
+  inputs:
+    command: custom
+    workingDir: Source\CompanyCommunicator\ClientApp
+    verbose: false
+    customCommand: 'install --save --legacy-peer-deps'
+
+- task: Npm@1
+  displayName: 'npm build'
+  inputs:
+    command: custom
+    workingDir: Source\CompanyCommunicator\ClientApp
+    verbose: false
+    customCommand: 'run build'
 - task: UseDotNet@2 
   displayName: 'Use .NET 6.0.x'
   inputs:

@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Configuration;
 
     /// <summary>
     /// Controller for the authentication sign in data.
@@ -21,12 +22,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly string tenantId;
         private readonly string clientId;
+        private readonly IAppConfiguration appConfiguration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticationMetadataController"/> class.
         /// </summary>
         /// <param name="authenticationOptions">The authentication options.</param>
-        public AuthenticationMetadataController(IOptions<AuthenticationOptions> authenticationOptions)
+        /// <param name="appConfiguration">App configuration.</param>
+        public AuthenticationMetadataController(
+            IOptions<AuthenticationOptions> authenticationOptions,
+            IAppConfiguration appConfiguration)
         {
             if (authenticationOptions is null)
             {
@@ -35,6 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             this.tenantId = authenticationOptions.Value.AzureAdTenantId;
             this.clientId = authenticationOptions.Value.AzureAdClientId;
+            this.appConfiguration = appConfiguration ?? throw new ArgumentNullException(nameof(appConfiguration));
         }
 
         /// <summary>
@@ -64,7 +70,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ["client_id"] = this.clientId,
                 ["response_type"] = "id_token",
                 ["response_mode"] = "fragment",
-                ["scope"] = "https://graph.microsoft.com/User.Read openid profile",
+                ["scope"] = this.appConfiguration.GraphUserReadScope,
                 ["nonce"] = Guid.NewGuid().ToString(),
                 ["state"] = Guid.NewGuid().ToString(),
                 ["login_hint"] = loginHint,
@@ -73,7 +79,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 .Select(p => $"{p.Key}={HttpUtility.UrlEncode(p.Value)}")
                 .ToList();
 
-            var consentUrlPrefix = $"https://login.microsoftonline.com/{this.tenantId}/oauth2/v2.0/authorize?";
+            var consentUrlPrefix = $"{this.appConfiguration.AzureAd_Instance}/{this.tenantId}/oauth2/v2.0/authorize?";
 
             var consentUrlString = consentUrlPrefix + string.Join('&', consentUrlComponentList);
 

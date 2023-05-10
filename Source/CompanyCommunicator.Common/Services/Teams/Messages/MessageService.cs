@@ -24,7 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     public class MessageService : IMessageService
     {
         private readonly string microsoftAppId;
-        private readonly ICCBotFrameworkHttpAdapter botAdapter;
+        private readonly CCBotAdapterBase botAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageService"/> class.
@@ -33,7 +33,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         /// <param name="botAdapter">The bot adapter.</param>
         public MessageService(
             IOptions<BotOptions> botOptions,
-            ICCBotFrameworkHttpAdapter botAdapter)
+            CCBotAdapterBase botAdapter)
         {
             this.microsoftAppId = botOptions?.Value?.UserAppId ?? throw new ArgumentNullException(nameof(botOptions));
             this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
@@ -83,7 +83,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             };
 
             await this.botAdapter.ContinueConversationAsync(
-                botId: this.microsoftAppId,
+                botAppId: this.microsoftAppId,
                 reference: conversationReference,
                 callback: async (turnContext, cancellationToken) =>
                 {

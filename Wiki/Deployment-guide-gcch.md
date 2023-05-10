@@ -11,8 +11,6 @@
 - - -
 
 # Prerequisites
->    * The recommendation is to use [Deployment guide using powershell](Deployment-guide-powershell).
->    * If you already have previous version of Company Communicator installed, then please use this [v5 migration guide](v5-migration-guide).
 
 To begin, you will need: 
 * An Azure subscription where you can create the following kinds of resources:  
@@ -32,7 +30,6 @@ To begin, you will need:
 * A team with the users who will be sending messages with this app. (You can add or remove team members later!)
 * A copy of the Company Communicator app GitHub repo (https://github.com/OfficeDev/microsoft-teams-company-communicator-app)
 
-> **NOTE:** If you plan to use a custom domain name instead of relying on Azure Front Door, read the instructions [here](Custom-domain-option) first.
 
 - - -
 
@@ -42,7 +39,7 @@ To begin, you will need:
 
 Register three Azure AD application in your tenant's directory: one for author bot, one for user bot and another for graph app.
 
-1. Log in to the Azure Portal for your subscription, and go to the [App registrations](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps) blade.
+1. Log in to the Azure Portal for your subscription, and go to the [App registrations](https://portal.azure.us/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps) blade.
 
 1. Click **New registration** to create an Azure AD application.
     - **Name**: Name of your Teams App - if you are following the template for a default deployment, we recommend "Company Communicator User".
@@ -90,7 +87,7 @@ Register three Azure AD application in your tenant's directory: one for author b
 ## 2. Deploy to your Azure subscription
 1. Click on the **Deploy to Azure** button below.
    
-   [![Deploy to Azure](images/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-company-communicator-app%2Fmain%2FDeployment%2Fazuredeploy.json)
+   [![Deploy to Azure](images/deploybutton.png)](https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOfficeDev%2Fmicrosoft-teams-apps-company-communicator%2Fmain%2FDeployment%2FGCCH%2Fazuredeploy.json)
 
 1. When prompted, log in to your Azure subscription.
 
@@ -106,8 +103,6 @@ Register three Azure AD application in your tenant's directory: one for author b
      * Azure Functions
      * Service Bus
      * App Service
-
-    For an up-to-date list of datacenters that support the above, click [here](https://azure.microsoft.com/en-us/global-infrastructure/services/?products=storage,app-service,monitor,service-bus,functions)
 
 1. Enter a **Base Resource Name**, which the template uses to generate names for the other resources.
    * The `[Base Resource Name]` must be available. For example, if you select `contosocommunicator` as the base name, the name `contosocommunicator` must be available (not taken); otherwise, the deployment will fail with a Conflict error.
@@ -125,7 +120,7 @@ Register three Azure AD application in your tenant's directory: one for author b
     8. **Proactively Install User App [Optional]**: Default value is `true`. You may set it to `false` if you want to disable the feature.
     9. **User App ExternalId [Optional]**: Default value is `148a66bb-e83d-425a-927d-09f4299a9274`. This **MUST** be the same `id` that is in the Teams app manifest for the user app.
     10. **Header Text [Optional]**: Default value is `Company Communicator`. This is the banner text that will appear starting v5.2 and later, you will have the option to modify later.
-    11. **Header Logo Url [Optional]**: Default image is Microsoft logo. You will have the option to modify later.
+    11. **Header Logo URL [Optional]**: Default image is Microsoft logo. You will have the option to modify later.
     12. **Hosting Plan SKU  [Optional]**: The pricing tier for the hosting plan. Default value is `Standard`. You may choose between Basic, Standard and Premium.
     13. **Hosting Plan Size  [Optional]**: The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value is `2`.
     
@@ -145,8 +140,6 @@ Register three Azure AD application in your tenant's directory: one for author b
 
     > **Note:** Make sure that the values are copied as-is, with no extra spaces. The template checks that GUIDs are exactly 36 characters.
 
-    > **Note:** If your Azure subscription is in a different tenant than the tenant where you want to install the Teams App, please update the `Tenant Id` field with the tenant where you want to install the Teams App.
-
 1. Update the "Sender UPN List", which is a semicolon-delimited list of users (Authors) who will be allowed to send messages using the Company Communicator.
     * For example, to allow Megan Bowen (meganb@contoso.com) and Adele Vance (adelev@contoso.com) to send messages, set this parameter to `meganb@contoso.com;adelev@contoso.com`.
     * You can change this list later by going to the App Service's "Configuration" blade.
@@ -159,6 +152,22 @@ Register three Azure AD application in your tenant's directory: one for author b
 
 1. Click on "Purchase" to start the deployment.
 
+    > **Note:** The Bot Service will fail initially. Follow the steps below to resolve the issue.
+
+1. While the deployment is still in progress, go to the Resource group. Search for Author Bot Service created by ARM template. Name of Bot Service will be base resource name which was provided earlier.
+
+1. Click on Channels in Settings section of Bot Services and click on "Microsoft Teams" under Available Channels.
+
+    ![Add channel to bot](images/botchannelgovernment_3.png)
+
+1.  Accept the Terms of Service.
+
+    ![Add channel to bot](images/botchannelgovernment_2.png)
+
+1. Select "Microsoft Teams for GCC High" and click on Apply. Repeat the above steps for User Bot Service.
+
+    ![Add channel to bot](images/botchannelgovernment_1.png)
+
 1. Wait for the deployment to finish. You can check the progress of the deployment from the "Notifications" pane of the Azure Portal. It may take **up to an hour** for the deployment to finish.
 
     > If the deployment fails, see [this section](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Troubleshooting#1-code-deployment-failure) of the Troubleshooting guide.
@@ -167,8 +176,6 @@ Register three Azure AD application in your tenant's directory: one for author b
     * **authorBotId:** This is the Microsoft Application ID for the Company Communicator app. For the following steps, it will be referred to as `%authorBotId%`.
     * **userBotId:** This is the Microsoft Application ID for the Company Communicator app. For the following steps, it will be referred to as `%userBotId%`.
     * **appDomain:** This is the base domain for the Company Communicator app. For the following steps, it will be referred to as `%appDomain%`.
-
-> **IMPORTANT:** If you plan to use a custom domain name instead of relying on Azure Front Door, read the instructions [here](Custom-domain-option) before continuing any further.
 
 ## 3. Set-up Authentication
 
@@ -184,7 +191,7 @@ Register three Azure AD application in your tenant's directory: one for author b
 
     1. Add a new entry to **Redirect URIs**:
         - **Type**: Web
-        - **Redirect URI**: Enter `https://%appDomain%/signin-simple-end` for the URL e.g. `https://appName.azurefd.net/signin-simple-end`
+        - **Redirect URI**: Enter `https://%appDomain%/signin-simple-end` for the URL e.g. `https://appName.azurefd.us/signin-simple-end`
 
     1. Under **Implicit grant**, check **ID tokens**.
 
@@ -192,7 +199,7 @@ Register three Azure AD application in your tenant's directory: one for author b
 
 1. Back under **Manage**, click on **Expose an API**.
 
-    1. Click on the **Set** link next to **Application ID URI**, and change the value to `api://%appDomain%` e.g. `api://appName.azurefd.net`.
+    1. Click on the **Set** link next to **Application ID URI**, and change the value to `api://%appDomain%` e.g. `api://appName.azurefd.us`.
 
     1. Click **Save** to commit your changes.
 
@@ -244,7 +251,7 @@ Continuing from the Microsoft Graph Azure AD app registration page where we ende
 
     * Under **Commonly used Microsoft APIs**, 
 
-    * Select “Microsoft Graph”, then select **Delegated permissions** and check the following permissions,
+    * Select Microsoft Graph, then select **Delegated permissions** and check the following permissions,
         1. **GroupMember.Read.All**
         2. **AppCatalog.Read.All**
 
@@ -260,15 +267,11 @@ Continuing from the Microsoft Graph Azure AD app registration page where we ende
 
     > Please refer to [Solution overview](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview#microsoft-graph-api) for more details about the above permissions.
 
-4. If you are logged in as the Global Administrator, click on the “Grant admin consent for %tenant-name%” button to grant admin consent, else inform your Admin to do the same through the portal.
-   <br/>
-   Alternatively you may follow the steps below:
-   - Prepare link - https://login.microsoftonline.com/common/adminconsent?client_id=%appId%. Replace the `%appId%` with the `Application (client) ID` of Microsoft Graph Azure AD app (from above).
-   - Global Administrator can grant consent using the link above.
+4. If you are logged in as the Global Administrator, click on the Grant admin consent for %tenant-name% button to grant admin consent, else inform your Admin to do the same through the portal.
 
 ## 5. Create the Teams app packages
 
-Company communicator app comes with 2 applications – Author, User. The Author application is intended for employees who create and send messages in the organization, and the User application is intended for employees who receive the messages.
+Company communicator app comes with 2 applications Author, User. The Author application is intended for employees who create and send messages in the organization, and the User application is intended for employees who receive the messages.
 
 Create two Teams app packages: one to be installed to an Authors team and other for recipient’s to install personally and/or to teams.
 
@@ -282,13 +285,13 @@ Create two Teams app packages: one to be installed to an Authors team and other 
     * `developer.privacyUrl`
     * `developer.termsOfUseUrl`
 
-1. Change the `<<appDomain>>` placholder in the configurationUrl setting to be the `%appDomain%` value e.g. "`https://appName.azurefd.net/configtab`".
+1. Change the `<<appDomain>>` placholder in the configurationUrl setting to be the `%appDomain%` value e.g. "`https://appName.azurefd.us/configtab`".
 
 1. Change the `<<botId>>` placeholder in the botId setting to be the `%authorBotId%` value - this is your author Azure AD application's ID from above. This is the same GUID that you entered in the template under "Author Client ID". Please note that there are two places in the manifest (for authors) where you will need to update Bot ID.
 
-1. Change the `<<appDomain>>` placeholder in the validDomains setting to be the `%appDomain%` value e.g. "`appName.azurefd.net`".
+1. Change the `<<appDomain>>` placeholder in the validDomains setting to be the `%appDomain%` value e.g. "`appName.azurefd.us`".
 
-1. Change the `<<botId>>` placeholder in the id setting of the webApplicationInfo section to be the `%authorBotId%` value. Change the `<<appDomain>>` placeholder in the resource setting of the webApplicationInfo section to be the `%appDomain%` value e.g. "`api://appName.azurefd.net`".
+1. Change the `<<botId>>` placeholder in the id setting of the webApplicationInfo section to be the `%authorBotId%` value. Change the `<<appDomain>>` placeholder in the resource setting of the webApplicationInfo section to be the `%appDomain%` value e.g. "`api://appName.azurefd.us`".
 
 1. Copy the `manifest_authors.json` file to a file named `manifest.json`.
 
@@ -309,14 +312,11 @@ Repeat the steps above but with the file `Manifest\manifest_users.json` and use 
 
 2. Add the configurable tab to the team of authors, so that they can compose and send messages.
 
-3. [Upload](https://docs.microsoft.com/en-us/microsoftteams/tenant-apps-catalog-teams) the User app to your tenant's app catalog so that it is available for everyone in your tenant to install.
+3. Upload the User app to your tenant's app catalog so that it is available for everyone in your tenant to install.
 > **IMPORTANT:** Proactive app installation will work only if you upload the User app to your tenant's app catalog.
 
 4. Install the User app (the `company-communicator-users.zip` package) to the users and teams that will be the target audience.
 > If `proactiveAppInstallation` is enabled, you may skip this step. The service will install the app for all the recipients when authors send a message.
-
-> **NOTE:** If you are deploying a version of Company Communicator prior to version 4, do NOT use app permission policies to restrict the authors app to the members of the authors team. Microsoft Teams does not support applying different policies to the same bot via two different app packages. 
-
 ---
 
 # Troubleshooting

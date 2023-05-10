@@ -4,8 +4,9 @@ Cumulative improvements in Company Communicator App.
 
 ### Version history
 
-|Release |Published to <br/> Microsoft Store |
+|Version |Release Date |
 |---|---|
+| 5.4 | May 10, 2023
 | 5.3 | Dec 14, 2022
 | 5.2 | Jul 26, 2022
 | 5.1 | Apr 28, 2022
@@ -24,6 +25,10 @@ Cumulative improvements in Company Communicator App.
 | 1.0 | Dec 20, 2019
 
 ### Company Communicator feature release notes
+#### 5.4 (May 10, 2023)
+##### Changes introduced
+- Code changes to support Government Community Cloud High (GCCH) environment.
+
 #### 5.3 (Dec 14, 2022)
 ##### Changes introduced
 - .NET upgrade from .NET Core 3.1 to .NET 6.0

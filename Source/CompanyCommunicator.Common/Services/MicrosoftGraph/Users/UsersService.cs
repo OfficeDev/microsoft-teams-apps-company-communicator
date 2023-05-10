@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Configuration;
     using Newtonsoft.Json.Linq;
 
     /// <summary>
@@ -19,17 +20,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
     /// </summary>
     internal class UsersService : IUsersService
     {
-        private const string TeamsLicenseId = "57ff2da0-773e-42df-b2af-ffb7a2317929";
-
         private readonly IGraphServiceClient graphServiceClient;
+        private readonly IAppConfiguration appConfiguration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UsersService"/> class.
         /// </summary>
         /// <param name="graphServiceClient">graph service client.</param>
-        internal UsersService(IGraphServiceClient graphServiceClient)
+        /// <param name="appConfiguration">App configuration.</param>
+        internal UsersService(
+            IGraphServiceClient graphServiceClient,
+            IAppConfiguration appConfiguration)
         {
             this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
+            this.appConfiguration = appConfiguration ?? throw new ArgumentNullException(nameof(appConfiguration));
         }
 
         /// <inheritdoc/>
@@ -256,7 +260,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                 }
 
                 var filterUserIds = this.GetUserIdFilter(userIds);
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://graph.microsoft.com/v1.0/users?$filter={filterUserIds}&$select=id,displayName,userPrincipalName,userType");
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"{this.appConfiguration.GraphBaseUrl}/users?$filter={filterUserIds}&$select=id,displayName,userPrincipalName,userType");
                 batchRequestContent.AddBatchRequestStep(new BatchRequestStep(requestId.ToString(), httpRequestMessage));
 
                 if (batchRequestContent.BatchRequestSteps.Count() % maxNoBatchItems == 0)
@@ -285,7 +289,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                     continue;
                 }
 
-                if (license.ServicePlans.Any(sp => string.Equals(sp.ServicePlanId?.ToString(), TeamsLicenseId)))
+                if (license.ServicePlans.Any(sp => string.Equals(sp.ServicePlanId?.ToString(), this.appConfiguration.TeamsLicenseId)))
                 {
                     return true;
                 }
