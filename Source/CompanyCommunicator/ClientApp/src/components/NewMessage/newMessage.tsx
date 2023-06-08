@@ -475,10 +475,10 @@ export const NewMessage = () => {
   };
 
   const onBtnLinkChanged = (event: any) => {
-    if (validator.isURL(event.target.value) || event.target.value === '') {
+    if (validator.isURL(event.target.value, { require_protocol: true, protocols: ['https'] }) || event.target.value === '') {
       setBtnLinkErrorMessage('');
     } else {
-      setBtnLinkErrorMessage(`${event.target.value} is invalid. Please enter a valid URL`);
+      setBtnLinkErrorMessage(`${event.target.value} is invalid. Please enter a valid https URL`);
     }
     setCardBtn(card, messageState.buttonTitle, event.target.value);
     setMessageState({ ...messageState, buttonLink: event.target.value });
