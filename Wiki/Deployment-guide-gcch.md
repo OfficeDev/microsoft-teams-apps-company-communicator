@@ -269,6 +269,8 @@ Continuing from the Microsoft Graph Azure AD app registration page where we ende
 
 4. If you are logged in as the Global Administrator, click on the Grant admin consent for %tenant-name% button to grant admin consent, else inform your Admin to do the same through the portal.
 
+    > **Note:** If admin consent is not provided, the third and fourth options to send messages to security groups and to everyone within the organization will not work. Additionally, the fourth option will appear as disabled.
+
 ## 5. Create the Teams app packages
 
 Company communicator app comes with 2 applications Author, User. The Author application is intended for employees who create and send messages in the organization, and the User application is intended for employees who receive the messages.

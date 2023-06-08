@@ -109,8 +109,8 @@
     "customDomainOption": {
       "type": "string",
       "allowedValues": [
-        "Custom domain name (recommended)",
-        "Azure Front Door"
+        "Custom domain name ",
+        "Azure Front Door (recommended)"
       ],
       "defaultValue": "Azure Front Door",
       "metadata": {
@@ -638,7 +638,6 @@
             "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
             "REACT_APP_HEADERTEXT": "[parameters('headerText')]",
             "REACT_APP_HEADERIMAGE": "[parameters('headerLogoUrl')]"
-
           }
         },
         {
@@ -919,7 +918,6 @@
       "name": "[variables('keyvaultName')]",
       "apiVersion": "2016-10-01",
       "location": "[parameters('location')]",
-
       "tags": {
         "displayName": "KeyVault"
       },

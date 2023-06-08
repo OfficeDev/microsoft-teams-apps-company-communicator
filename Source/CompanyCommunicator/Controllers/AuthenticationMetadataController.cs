@@ -8,6 +8,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Web;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Options;
@@ -51,17 +52,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <returns>Conset Url.</returns>
         [HttpGet("consentUrl")]
         public string GetConsentUrl(
-            [FromQuery]string windowLocationOriginDomain,
-            [FromQuery]string loginHint)
+            [FromQuery] string windowLocationOriginDomain,
+            [FromQuery] string loginHint)
         {
+            string loginHintPattern = @"[a-z0-9+/^_`|~-]+(?:\.[a-z0-9+/^_`|~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
             if (windowLocationOriginDomain == null)
             {
                 throw new ArgumentNullException(nameof(windowLocationOriginDomain));
             }
 
-            if (loginHint == null)
+            if (string.IsNullOrEmpty(loginHint))
             {
                 throw new ArgumentNullException(nameof(loginHint));
+            }
+
+            if (!Regex.IsMatch(loginHint, loginHintPattern))
+            {
+                throw new ArgumentException("Invalid loginHint parameter.");
             }
 
             var consentUrlComponentDictionary = new Dictionary<string, string>

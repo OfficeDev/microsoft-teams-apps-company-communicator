@@ -109,8 +109,8 @@
     "customDomainOption": {
       "type": "string",
       "allowedValues": [
-        "Custom domain name (recommended)",
-        "Azure Front Door"
+        "Custom domain name",
+        "Azure Front Door (recommended)"
       ],
       "defaultValue": "Azure Front Door",
       "metadata": {
@@ -648,7 +648,6 @@
             "WEBSITE_LOAD_CERTIFICATES": "*",
             "APPINSIGHTS_INSTRUMENTATIONKEY": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('AppInsightsSecretResourceId'), '2015-06-01').secretUriWithVersion, ')')]",
             "WEBSITE_NODE_DEFAULT_VERSION": "16.13.0",
-            "WEBSITE_NPM_DEFAULT_VERSION": "8.19.2",
             "KeyVault:Url": "[variables('keyVaultUrl')]",
             "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
             "REACT_APP_HEADERTEXT": "[parameters('headerText')]",

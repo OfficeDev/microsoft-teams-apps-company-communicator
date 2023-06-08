@@ -115,8 +115,8 @@
     "customDomainOption": {
       "type": "string",
       "allowedValues": [
-        "Custom domain name (recommended)",
-        "Azure Front Door"
+        "Custom domain name",
+        "Azure Front Door (recommended)"
       ],
       "defaultValue": "Azure Front Door",
       "metadata": {
@@ -995,7 +995,7 @@
             "tenantId": "[reference(concat('Microsoft.Web/sites/', variables('botAppName')), '2018-02-01', 'Full').identity.tenantId]",
             "objectId": "[parameters('objectId')]",
             "permissions": {
-              "certificates": [ "get", "list", "create", "update" ]
+              "certificates": ["get", "list", "create", "update"]
             }
           }
         ],

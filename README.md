@@ -7,7 +7,7 @@ Company Communicator is a custom Teams app that enables corporate teams to creat
 
 The app provides an easy interface for designated users to create, preview, collaborate and send messages. It's also a foundation for building custom targeted communication capabilities, such as custom telemetry on how many users acknowledged or interacted with a message.
 
-![Company Communicator compose message screen](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/images/CompanyCommunicatorCompose.png)
+![Company Communicator compose message screen](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/images/company-communicator-compose.png)
 
 ## Key features
 
@@ -15,6 +15,7 @@ The app provides an easy interface for designated users to create, preview, coll
 * **Audience selection:** Pick from four options to target audience. Send to general channel of selected teams, send in 1:1 chat to members of selected teams, send to all users who have the app installed or send to M365 groups, distribution lists or security groups.
 * **Message metrics:** Export messages delivery report.
 * **Localization:** Supports multiple locales.
+* **Accessibility Compliant:** Company Communicator v5.4.1 is in compliant with Microsoft accessibility standards for Web, Windows and Mac OS.
 * **Feedback:** Submit your feedback to the product team.
 
 ## Get started
@@ -31,7 +32,7 @@ When you're ready to try out Company Communicator, or to use it in your own orga
 
 ## Migration 
 
-If you already have older version of Company Communicator installed, then please use this [v5 migration guide](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/v5-migration-guide). Please note that deploying the major version update, like Company Communicator version 5.3 involves more than syncing the App Service and Azure Functions, so plan to review the migration guide before migrating to latest. 
+If you already have older version of Company Communicator installed, then please use this [v5 migration guide](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/v5-migration-guide). Please note that deploying the major version update, like the latest version of Company Communicator involves more than syncing the App Service and Azure Functions, so plan to review the migration guide before migrating to latest. 
 
 Migrating to newer versions. 
 
