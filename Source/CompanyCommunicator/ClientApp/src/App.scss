@@ -29,6 +29,7 @@
         min-height: 500px;
         padding: 2rem 2rem 8rem 2rem;
         grid-template-rows: auto 1fr;
+        grid-template-columns: 1fr;
         grid-template-areas:
             'form-area card-area'
     }
