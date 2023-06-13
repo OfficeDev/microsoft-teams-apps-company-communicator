@@ -148,6 +148,21 @@ export const NewMessage = () => {
     }
   }, [t]);
 
+  React.useEffect(
+    () => {
+      setCardTitle(card, messageState.title);
+      setCardImageLink(card, messageState.imageLink);
+      setCardSummary(card, messageState.summary);
+      setCardAuthor(card, messageState.author);
+      setCardBtn(card, messageState.buttonTitle, messageState.buttonLink);
+      if (!messageState.title && !messageState.imageLink && !messageState.summary && !messageState.author && !messageState.buttonTitle && !messageState.buttonLink) {
+        card = getInitAdaptiveCard(t('TitleText') ?? '');
+        setDefaultCard(card);
+      }
+      updateAdaptiveCard();
+    },
+    [messageState]);
+
   React.useEffect(() => {
     if (id) {
       GetGroupsAction(dispatch, { id });
