@@ -56,7 +56,7 @@ Min. execution time = 100 ms.
 
 **IMPORTANT:** This is only an estimate, based on the above usage assumptions. Your actual costs may vary (might be less) depending on the usage.
 
-Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on June 13 2023, for the West US 2 region.
+Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on June 14 2023, for the West US 2 region.
 
 Use the [Azure Pricing Calculator](https://azure.com/e/c3bb51eeb3284a399ac2e9034883fcfa) to model different service tiers and usage patterns.
 
@@ -110,7 +110,7 @@ Min. execution time = 100 ms.
 
 **IMPORTANT:** This is only an estimate, based on the above usage assumptions. Your actual costs may vary.
 
-Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on 13 June 2023, for the West US 2 region.
+Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on June 14 2023, for the West US 2 region.
 
 Use the [Azure Pricing Calculator](https://azure.com/e/c3bb51eeb3284a399ac2e9034883fcfa) to model different service tiers and usage patterns.
 
@@ -163,7 +163,7 @@ Min. execution time = 100 ms.
 
 **IMPORTANT:** This is only an estimate, based on the above usage assumptions. Your actual costs may vary.
 
-Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on 13 June 2023, for the West US 2 region.
+Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on June 14 2023, for the West US 2 region.
 
 Use the [Azure Pricing Calculator](https://azure.com/e/c3bb51eeb3284a399ac2e9034883fcfa) to model different service tiers and usage patterns.
 
