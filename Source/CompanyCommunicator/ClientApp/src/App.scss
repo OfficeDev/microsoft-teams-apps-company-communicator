@@ -1,431 +1,130 @@
-/**
-* Global Styles for APP
-*/
-.defaultContainer {
-    background-color: #f3f2f1;
-
-    .configContainer {
-        background-color: #fff;
+@media screen and (min-width: 768px) {
+    .adaptive-task-grid {
+        display: grid;
+        min-height: 500px;
+        padding: 2rem 2rem 8rem 2rem;
+        grid-template-columns: 50% 50%;
+        grid-template-areas:
+            'form-area card-area'
     }
 
-    .list {
-        .succeeded {
-            color: #237B4B;
-        }
-
-        .failed {
-            color: #8E192E;
-        }
-
-        .throttled {
-            color: #6264A7;
-        }
-
-        .unknown {
-            color: #6264A7;
-        }
-
-        .ui-list__item:first-child {
-            background-color: #f3f2f1;
-            color: black;
-
-            &:hover {
-                background-color: #f3f2f1;
-                color: black;
-                cursor: context-menu;
-            }
-
-            .menuContainer {
-                visibility: hidden;
-            }
-        }
-
-        .ui-list__item {
-            background-color: white;
-            color: black;
-            padding: 0rem 1.6rem !important;
-
-            &:hover {
-                color: rgb(255, 255, 255);
-                background-color: rgb(139, 140, 199);
-
-                .ui-menu {
-                    background-color: rgb(139, 140, 199);
-                }
-            }
-
-            .ui-menu {
-                margin: 0px;
-                padding: 0px;
-                background-color: white;
-            }
-
-            .menuContainer {
-                .ui-menu {
-                    background-color: white;
-
-                    li:first-child {
-                        margin-top: 0.8rem;
-                    }
-
-                    li:last-child {
-                        margin-bottom: 0.8rem;
-                    }
-
-                    li {
-                        &:hover {
-                            color: white;
-                            background-color: rgb(139, 140, 199);
-                        }
-                    }
-                }
-            }
-        }
+    .form-area {
+        grid-column: 1;
+        padding: 1rem;
     }
 
-    .Loader {
-        background-color: #fff;
-        width: 100%;
-        margin: 20rem auto;
+    .card-area {
+        grid-column: 2;
+        padding: 1rem;
     }
 
-    .ac-container {
-        border: 0.2rem solid #c8c6c4 !important;
-        border-top: 0.2rem solid #6265A9 !important;
-        border-radius: 0.3rem;
-        padding: 1.6rem !important;
-        margin-top: 0.6rem !important;
+    .big-screen-visible {
+        display: block;
     }
 }
 
-.darkContainer {
-    background-color: #201f1f;
-
-    .configContainer {
-        background-color: #2d2c2c;
+@media screen and (max-width: 767px) {
+    .adaptive-task-grid {
+        display: grid;
+        min-height: 500px;
+        padding: 2rem 2rem 8rem 2rem;
+        grid-template-rows: auto 1fr;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            'form-area card-area'
     }
 
-    .ui-dropdown__container {
-        .ui-button,
-        .ui-dropdown__selected-items,
-        .ui-icon,
-        .ui-list {
-            background-color: #201f1f !important;
-        }
+    .form-area {
+        grid-row: 1;
+        padding: 1rem;
     }
 
-    .list {
-        .succeeded {
-            color: #92C353;
-        }
-
-        .failed {
-            color: #F9526B;
-        }
-
-        .throttled {
-            color: #E2E2F6;
-        }
-
-        .unknown {
-            color: #E2E2F6;
-        }
-
-        .ui-list__item:first-child {
-            background-color: #201f1f;
-            color: #fff;
-
-            &:hover {
-                background-color: #201f1f;
-                color: #fff;
-                cursor: context-menu;
-            }
-
-            .menuContainer {
-                visibility: hidden;
-            }
-        }
-
-        .ui-list__item {
-            background-color: #2d2c2c;
-            color: #fff;
-            padding: 0rem 1.6rem !important;
-
-            &:hover {
-                color: rgb(255, 255, 255);
-                background-color: rgba(98, 100, 167, .8);
-
-                .ui-menu {
-                    background-color: inherit;
-                    outline: none;
-                }
-            }
-
-            .ui-menu {
-                margin: 0px;
-                padding: 0px;
-                outline: none;
-                background-color: #2d2c2c;
-            }
-
-            .menuContainer {
-                .ii:hover {
-                    color: #fff;
-                }
-
-                .ui-menu {
-                    background-color: #2d2c2c;
-
-                    li:first-child {
-                        margin-top: 0.8rem;
-                    }
-
-                    li:last-child {
-                        margin-bottom: 0.8rem;
-                    }
-
-                    li {
-                        &:hover {
-                            color: white;
-                            background-color: rgba(98, 100, 167, .8);
-                        }
-                    }
-                }
-            }
-        }
+    .card-area {
+        grid-row: 2;
+        padding: 1rem;
+        max-width: 767px;
     }
 
-    .Loader {
-        background-color: #2D2C2C;
-        width: 100%;
-        margin: 20rem auto;
-    }
-
-    .ac-container {
-        border: 0.2rem solid #1B1A1A;
-        border-top: 0.2rem solid #6265A9;
-        border-radius: 0.3rem;
-        width: 42rem;
-        padding: 1.6rem !important;
-        background-color: #2D2C2C !important;
-        margin-top: 0.6rem !important;
-    }
-
-    .ac-textBlock {
-        color: #fff !important;
-    }
-
-    .ac-pushButton {
-        padding: 0.4rem 1rem 0.5rem 1rem;
-        height: 3.2rem;
-        background-color: #2D2C2C;
-        color: #A6A7DC;
-        border: 0.2rem solid #E2E2F6;
-        border-radius: 0.4rem;
+    .big-screen-visible {
+        display: none;
     }
 }
 
-.highContrastContainer {
-    background-color: #000;
-
-    .configContainer {
-        background-color: #000;
-    }
-
-    .list {
-        .ui-list__item:first-child {
-            background-color: #000;
-            color: #fff;
-            border: none;
-
-            &:hover {
-                background-color: #000;
-                color: #fff;
-                cursor: context-menu;
-            }
-
-            .menuContainer {
-                visibility: hidden;
-            }
-        }
-
-        .ui-list__item {
-            background-color: #000;
-            color: #fff;
-            border: solid #fff;
-            border-width: 0.1rem;
-            margin-top: 0rem;
-            padding: 0rem 1.6rem !important;
-
-            &:hover {
-                color: #000;
-                background-color: #ffff01;
-
-                .ui-menu {
-                    background-color: inherit;
-                    color: #000;
-                    outline: none;
-                }
-            }
-
-            .ui-menu {
-                margin: 0px;
-                padding: 0px;
-                outline: none;
-                background-color: #000;
-
-                &:hover {
-                    border: 0.1rem solid #000;
-                    color: #000;
-                }
-            }
-
-            .menuContainer {
-                .ii:hover {
-                    color: #fff;
-                }
-
-                .ui-menu {
-                    background-color: #000;
-                    color: #fff;
-
-                    li:first-child {
-                        margin-top: 0.8rem;
-                    }
-
-                    li:last-child {
-                        margin-bottom: 0.8rem;
-                    }
-
-                    li {
-                        &:hover {
-                            color: #000;
-                            background-color: #ffff01;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    .Loader {
-        background-color: #000000;
-        width: 100%;
-        margin: 20rem auto;
-    }
-
-    .ac-container {
-        border: 0.2rem solid #fff;
-        border-radius: 0.3rem;
-        width: 42rem;
-        padding: 1.6rem !important;
-        background-color: #000 !important;
-        margin-top: 0.6rem !important;
-    }
-
-    .ac-textBlock {
-        color: #fff !important;
-    }
-
-    .ac-pushButton {
-        padding: 0.4rem 1rem 0.5rem 1rem;
-        height: 3.2rem;
-        background-color: #000;
-        color: #fff;
-        border: 0.2rem solid #fff;
-        border-radius: 0.4rem;
-    }
+.card-area-border {
+    border: 2px solid var(--colorNeutralBackground5Hover);
+    border-top-color: var(--colorBrandForegroundInvertedPressed);
 }
 
-.appContainer {
+.wizard-page {
+    padding: 2rem 2rem 8rem 2rem;
+}
+
+.delete-confirmation-task {
+    padding: 2rem 2rem 8rem 2rem;
+}
+
+.fixed-footer {
+    display: inline;
+    // position: fixed;
+    left: 0;
+    bottom: 0;
     width: 100%;
+    padding-bottom: 2rem;
+}
 
-    .primaryBtn {
-        min-width: 9.6rem;
-        height: 3.2rem;
-        margin-left: 0.8rem;
-        background-color: #6264A7;
-        color: rgb(255, 2555, 255);
-        border: none;
-        font-size: 1.4rem;
-        box-shadow: 0 0rem 0.2rem 0;
-        border-radius: 0.3rem;
-        padding: 0rem 2rem;
-        vertical-align: middle;
+.footer-actions-flex {
+    display: inline-flex;
+}
 
-        &:hover {
-            background-color: #464775;
-        }
+.footer-action-right {
+    float: right;
+    margin: 2.5rem;
+}
 
-        &:focus {
-            outline: none;
-        }
+.footer-action-left {
+    float: left;
+    margin: 2.5rem;
+}
 
-        &:disabled,
-        &[disabled] {
-            background-color: #d3d3d3;
-            color: #a7a7a7;
-        }
-    }
+.ac-pushButton {
+    padding: 1rem;
+    height: 4rem;
+    color: var(--colorNeutralForeground2BrandHover);
+    border: 0.2rem solid var(--colorNeutralForeground2BrandHover);
+    border-radius: 0.4rem;
+    cursor: pointer;
 
-    .secondaryBtn {
-        min-width: 9.6rem;
-        height: 3.2rem;
-        margin-left: 0.8rem;
-        background-color: #FFFFFF;
-        font-size: 1.4rem;
-        border: 0.2rem solid #E1DFDD;
-        border-radius: 0.3rem;
-        padding: 0rem 2rem;
-        box-shadow: rgba(0, 0, 0, 0.1) 0 0.2rem 0.4rem 0;
-        vertical-align: middle;
-
-        &:hover {
-            background-color: #EDEBE9;
-            border: 0.125rem solid #C8C6C4;
-        }
-
-        &:focus {
-            outline: none;
-        }
-    }
-
-    .radioBtns {
-
-        p {
-            margin: 0.5rem 0rem;
-        }
-
-        [role="radio"] {
-            position: relative;
-            cursor: pointer;
-            line-height: 1.7rem;
-            font-size: 1.2rem;
-        }
+    &:hover {
+        background: var(--colorBrandBackgroundInvertedSelected);
     }
 }
 
-/* width */
-::-webkit-scrollbar {
-    width: 0.6rem;
+.ul-no-bullets {
+    list-style-type: none;
+    padding: 5px;
 }
 
-/* Track */
-::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 0.5rem #FFFFFF;
-    border-radius: 1rem;
+.info-text {
+    color: var(--colorPalettePumpkinForeground2);
 }
 
-/* Handle */
-::-webkit-scrollbar-thumb {
-    background: #c8c6c4;
-    border-radius: 1rem;
-    width: 1rem;
+.recipient-text {
+    vertical-align: middle;
+    padding-left: 1px;
+    display: inline-block;
+    width: 32px;
+    padding-right: 8px;
 }
 
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-    ::-webkit-scrollbar {
-        width: 1rem;
+// this can be removed in future. setting this as fluent_ui table has offset issues.
+.fui-TableCell {
+    outline-offset: -2px;
+}
+
+.sent-messages {
+    .fui-Persona__primaryText {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        width: 100%;
     }
 }

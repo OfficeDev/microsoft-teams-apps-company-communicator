@@ -109,10 +109,10 @@
     "customDomainOption": {
       "type": "string",
       "allowedValues": [
-        "Custom domain name (recommended)",
-        "Azure Front Door"
+        "Custom domain name",
+        "Azure Front Door (recommended)"
       ],
-      "defaultValue": "Azure Front Door",
+      "defaultValue": "Azure Front Door (recommended)",
       "metadata": {
         "description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs. "
       }
@@ -293,7 +293,7 @@
     ],
     "isSharedPlan": "[contains(variables('sharedSkus'), parameters('hostingPlanSku'))]",
     "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]",
-    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]",
+    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door (recommended)')]",
     "frontDoorName": "[parameters('baseResourceName')]",
     "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.net'))]",
     "ProactivelyInstallUserApp": "[parameters('ProactivelyInstallUserApp')]",
@@ -638,7 +638,6 @@
             "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
             "REACT_APP_HEADERTEXT": "[parameters('headerText')]",
             "REACT_APP_HEADERIMAGE": "[parameters('headerLogoUrl')]"
-
           }
         },
         {
@@ -919,7 +918,6 @@
       "name": "[variables('keyvaultName')]",
       "apiVersion": "2016-10-01",
       "location": "[parameters('location')]",
-
       "tags": {
         "displayName": "KeyVault"
       },

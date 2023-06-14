@@ -2,12 +2,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 // </copyright>
-
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Web;
     using FluentAssertions;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
@@ -78,7 +78,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             // Arrange
             var getInstance = this.GetAuthenticationMetadataController();
             string windowLocationOriginDomain = "windowLocationOriginDomain";
-            string loginHint = "loginHint";
+            string loginHint = "firstname.lastname@testname.com";
 
             // Act
             var result = getInstance.GetConsentUrl(windowLocationOriginDomain, loginHint);
@@ -96,7 +96,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             // Arrange
             var getInstance = this.GetAuthenticationMetadataController();
             string windowLocationOriginDomain = "windowLocationOriginDomain";
-            string loginHint = "loginHint";
+            string loginHint = "firstname.lastname@testname.com";
             var components = this.GetComponents();
             var allComponentsExists = true;
 
@@ -124,7 +124,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             // Arrange
             var getInstance = this.GetAuthenticationMetadataController();
             string windowLocationOriginDomain = "windowLocationOriginDomain";
-            string loginHint = "loginHint";
+            string loginHint = "firstname.lastname@testname.com";
             var consentUrlPrefix = $"https://login.microsoftonline.com/";
 
             // Act
@@ -133,7 +133,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             var redirect_uri = components.FirstOrDefault(x => x.Contains("redirect_uri")).Split('=')[1];
             var windowLocationOrigin_Domain = redirect_uri.Substring(14, windowLocationOriginDomain.Length);
             var client_id = components.FirstOrDefault(x => x.Contains("client_id")).Split('=')[1];
-            var login_hint = components.FirstOrDefault(x => x.Contains("login_hint")).Split('=')[1];
+            var login_hint = HttpUtility.UrlDecode(components.FirstOrDefault(x => x.Contains("login_hint")).Split('=')[1]);
             var tenant_Id = components.FirstOrDefault(x => x.Contains("redirect_uri")).Substring(consentUrlPrefix.Length, this.tenantId.Length);
 
             // Assert
@@ -168,7 +168,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             // Arrange
             var getInstance = this.GetAuthenticationMetadataController();
             string windowLocationOriginDomain = "windowLocationOriginDomain";
-            string loginHint = "loginHint";
+            string loginHint = "firstname.lastname@testname.com";
             var components = this.GetComponents();
 
             // Act
@@ -188,7 +188,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Test.Controllers
             // Arrange
             var getInstance = this.GetAuthenticationMetadataController();
             string windowLocationOriginDomain = "windowLocationOriginDomain";
-            string loginHint = "loginHint";
+            string loginHint = "firstname.lastname@testname.com";
 
             // Act
             var result = getInstance.GetConsentUrl(windowLocationOriginDomain, loginHint);

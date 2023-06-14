@@ -1,145 +1,84 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import React, { Suspense } from 'react';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import Configuration from './components/config';
-import TabContainer from './components/TabContainer/tabContainer';
-import NewMessage from './components/NewMessage/newMessage';
-import StatusTaskModule from './components/StatusTaskModule/statusTaskModule';
 import './App.scss';
-import { Provider, teamsTheme, teamsDarkTheme, teamsHighContrastTheme } from '@fluentui/react-northstar'
-import SendConfirmationTaskModule from './components/SendConfirmationTaskModule/sendConfirmationTaskModule';
-import * as microsoftTeams from "@microsoft/teams-js";
-import { TeamsThemeContext, getContext, ThemeStyle } from 'msteams-ui-components-react';
-import ErrorPage from "./components/ErrorPage/errorPage";
-import SignInPage from "./components/SignInPage/signInPage";
-import SignInSimpleStart from "./components/SignInPage/signInSimpleStart";
-import SignInSimpleEnd from "./components/SignInPage/signInSimpleEnd";
-import { updateLocale } from './i18n';
 import i18n from 'i18next';
+import React, { Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import {
+    FluentProvider, teamsDarkTheme, teamsHighContrastTheme, teamsLightTheme
+} from '@fluentui/react-components';
+import * as microsoftTeams from '@microsoft/teams-js';
 
-export interface IAppState {
-    theme: string;
-    themeStyle: number;
-}
+import Configuration from './components/config';
+import ErrorPage from './components/ErrorPage/errorPage';
+import { MainContainer } from './components/MainContainer/mainContainer';
+import { NewMessage } from './components/NewMessage/newMessage';
+import { SendConfirmationTask } from './components/SendConfirmationTask/sendConfirmationTask';
+import SignInPage from './components/SignInPage/signInPage';
+import SignInSimpleEnd from './components/SignInPage/signInSimpleEnd';
+import SignInSimpleStart from './components/SignInPage/signInSimpleStart';
+import { ViewStatusTask } from './components/ViewStatusTask/viewStatusTask';
+import { ROUTE_PARAMS, ROUTE_PARTS } from './routes';
 
-class App extends React.Component<{}, IAppState> {
+export const App = () => {
+  const [fluentUITheme, setFluentUITheme] = React.useState(teamsLightTheme);
+  const [locale, setLocale] = React.useState("en-US");
+  const { t } = useTranslation();
 
-    constructor(props: {}) {
-        super(props);
-        this.state = {
-            theme: "",
-            themeStyle: ThemeStyle.Light,
-        }
+  React.useEffect(() => {
+    microsoftTeams.getContext((context: microsoftTeams.Context) => {
+      const theme = context.theme || "default";
+      setLocale(context.locale);
+      i18n.changeLanguage(context.locale);
+      updateTheme(theme);
+    });
+
+    microsoftTeams.registerOnThemeChangeHandler((theme: string) => {
+      updateTheme(theme);
+    });
+  }, []);
+
+  const updateTheme = (theme: string) => {
+    switch (theme.toLocaleLowerCase()) {
+      case "default":
+        setFluentUITheme(teamsLightTheme);
+        break;
+      case "dark":
+        setFluentUITheme(teamsDarkTheme);
+        break;
+      case "contrast":
+        setFluentUITheme(teamsHighContrastTheme);
+        break;
     }
+  };
 
-    public componentDidMount() {
-        microsoftTeams.initialize();
-        microsoftTeams.getContext((context) => {
-            let theme = context.theme || "";
-            this.updateTheme(theme);
-            this.setState({
-                theme: theme
-            });
-        });
-
-        microsoftTeams.registerOnThemeChangeHandler((theme) => {
-            this.updateTheme(theme);
-            this.setState({
-                theme: theme,
-            }, () => {
-                this.forceUpdate();
-            });
-        });
-
-        updateLocale();
-    }
-
-    public setThemeComponent = () => {
-        const rtl = i18n.dir() === "rtl";
-
-        if (this.state.theme === "dark") {
-            return (
-                <Provider theme={teamsDarkTheme} rtl={rtl}>
-                    <div className="darkContainer">
-                        {this.getAppDom()}
-                    </div>
-                </Provider>
-            );
-        }
-        else if (this.state.theme === "contrast") {
-            return (
-                <Provider theme={teamsHighContrastTheme} rtl={rtl}>
-                    <div className="highContrastContainer">
-                        {this.getAppDom()}
-                    </div>
-                </Provider>
-            );
-        } else {
-            return (
-                <Provider theme={teamsTheme} rtl={rtl}>
-                    <div className="defaultContainer">
-                        {this.getAppDom()}
-                    </div>
-                </Provider>
-            );
-        }
-    }
-
-    private updateTheme = (theme: string) => {
-        if (theme === "dark") {
-            this.setState({
-                themeStyle: ThemeStyle.Dark
-            });
-        } else if (theme === "contrast") {
-            this.setState({
-                themeStyle: ThemeStyle.HighContrast
-            });
-        } else {
-            this.setState({
-                themeStyle: ThemeStyle.Light
-            });
-        }
-    }
-
-    public getAppDom = () => {
-        const context = getContext({
-            baseFontSize: 10,
-            style: this.state.themeStyle
-        });
-        return (
-            <TeamsThemeContext.Provider value={context}>
-                <Suspense fallback={<div></div>}>
-                    <div className="appContainer">
-                        <BrowserRouter>
-                            <Switch>
-                                <Route exact path="/configtab" component={Configuration} />
-                                <Route exact path="/messages" component={TabContainer} />
-                                <Route exact path="/newmessage" component={NewMessage} />
-                                <Route exact path="/newmessage/:id" component={NewMessage} />
-                                <Route exact path="/viewstatus/:id" component={StatusTaskModule} />
-                                <Route exact path="/sendconfirmation/:id" component={SendConfirmationTaskModule} />
-                                <Route exact path="/errorpage" component={ErrorPage} />
-                                <Route exact path="/errorpage/:id" component={ErrorPage} />
-                                <Route exact path="/signin" component={SignInPage} />
-                                <Route exact path="/signin-simple-start" component={SignInSimpleStart} />
-                                <Route exact path="/signin-simple-end" component={SignInSimpleEnd} />
-                            </Switch>
-                        </BrowserRouter>
-                    </div>
-                </Suspense>
-            </TeamsThemeContext.Provider>
-        );
-    }
-
-    public render(): JSX.Element {
-        return (
-            <div>
-                {this.setThemeComponent()}
-            </div>
-        );
-    }
-}
-
-export default App;
+  return (
+    <>
+      <FluentProvider theme={fluentUITheme} dir={i18n.dir(locale)}>
+        <Suspense fallback={<div></div>}>
+          <BrowserRouter>
+            <Switch>
+              <Route exact path={`/${ROUTE_PARTS.CONFIG_TAB}`} component={Configuration} />
+              <Route exact path={`/${ROUTE_PARTS.MESSAGES}`} render={() => <MainContainer theme={fluentUITheme} />} />
+              <Route exact path={`/${ROUTE_PARTS.NEW_MESSAGE}`} component={NewMessage} />
+              <Route exact path={`/${ROUTE_PARTS.NEW_MESSAGE}/:${ROUTE_PARAMS.ID}`} component={NewMessage} />
+              <Route exact path={`/${ROUTE_PARTS.VIEW_STATUS}/:${ROUTE_PARAMS.ID}`} component={ViewStatusTask} />
+              <Route
+                exact
+                path={`/${ROUTE_PARTS.SEND_CONFIRMATION}/:${ROUTE_PARAMS.ID}`}
+                component={SendConfirmationTask}
+              />
+              <Route exact path={`/${ROUTE_PARTS.ERROR_PAGE}`} component={ErrorPage} />
+              <Route exact path={`/${ROUTE_PARTS.ERROR_PAGE}/:${ROUTE_PARAMS.ID}`} component={ErrorPage} />
+              <Route exact path={`/${ROUTE_PARTS.SIGN_IN}`} component={SignInPage} />
+              <Route exact path={`/${ROUTE_PARTS.SIGN_IN_SIMPLE_START}`} component={SignInSimpleStart} />
+              <Route exact path={`/${ROUTE_PARTS.SIGN_IN_SIMPLE_END}`} component={SignInSimpleEnd} />
+            </Switch>
+          </BrowserRouter>
+        </Suspense>
+      </FluentProvider>
+    </>
+  );
+};

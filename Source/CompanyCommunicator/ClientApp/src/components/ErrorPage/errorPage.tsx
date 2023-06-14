@@ -1,31 +1,34 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { Text } from '@fluentui/react-northstar';
-import './errorPage.scss';
+import "./errorPage.scss";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { RouteComponentProps } from "react-router-dom";
 
-const ErrorPage: React.FunctionComponent<RouteComponentProps> = props => {
-    const { t } = useTranslation();
+import { Text } from "@fluentui/react-components";
 
-    function parseErrorMessage(): string {
-        const params = props.match.params;
-        if ('id' in params) {
-            const id = params['id'];
-            if (id === "401") {
-                return t("UnauthorizedErrorMessage");
-            } else if (id === "403") {
-                return t("ForbiddenErrorMessage");
-            }
-        }
-        return t("GeneralErrorMessage");
+const ErrorPage: React.FunctionComponent<RouteComponentProps> = (props) => {
+  const { t } = useTranslation();
+
+  function parseErrorMessage(): string {
+    const params = props.match.params;
+    if ("id" in params) {
+      const id = params["id"];
+      if (id === "401") {
+        return t("UnauthorizedErrorMessage");
+      } else if (id === "403") {
+        return t("ForbiddenErrorMessage");
+      }
     }
+    return t("GeneralErrorMessage");
+  }
 
-    return (
-        <Text content={parseErrorMessage()} className="error-message" error size="medium" />
-    );
+  return (
+    <Text className="error-message" size={500}>
+      {parseErrorMessage()}
+    </Text>
+  );
 };
 
 export default ErrorPage;

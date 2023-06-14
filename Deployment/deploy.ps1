@@ -1101,7 +1101,7 @@ function logout {
         if(($null -eq $deploymentOutput) -or ( $null -eq $deploymentOutput.properties) -or ($null -eq $deploymentOutput.properties.Outputs) -or ($deploymentOutput.properties.Outputs.keyVaultName) -or ($deploymentOutput.properties.Outputs.keyVaultName.Value))
         {
             $keyVaultName = $parameters.BaseResourceName.Value + 'vault'
-            if($parameters.customDomainOption.Value -eq 'Azure Front Door')
+            if($parameters.customDomainOption.Value -eq 'Azure Front Door (recommended)')
             {
                $appdomainName = $parameters.BaseResourceName.Value.ToLower() + '.azurefd.net'
             }
@@ -1138,7 +1138,7 @@ function logout {
         if(($null -eq $deploymentOutput) -or ( $null -eq $deploymentOutput.properties) -or ($null -eq $deploymentOutput.properties.Outputs) -or ($deploymentOutput.properties.Outputs.keyVaultName) -or ($deploymentOutput.properties.Outputs.keyVaultName.Value))
         {
             $keyVaultName = $parameters.BaseResourceName.Value + 'vault'
-            if($parameters.customDomainOption.Value -eq 'Azure Front Door')
+            if($parameters.customDomainOption.Value -eq 'Azure Front Door (recommended)')
             {
                $appdomainName = $parameters.BaseResourceName.Value.ToLower() + '.azurefd.net'
             }

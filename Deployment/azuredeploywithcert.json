@@ -115,10 +115,10 @@
     "customDomainOption": {
       "type": "string",
       "allowedValues": [
-        "Custom domain name (recommended)",
-        "Azure Front Door"
+        "Custom domain name",
+        "Azure Front Door (recommended)"
       ],
-      "defaultValue": "Azure Front Door",
+      "defaultValue": "Azure Front Door (recommended)",
       "metadata": {
         "description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs. "
       }
@@ -299,7 +299,7 @@
     ],
     "isSharedPlan": "[contains(variables('sharedSkus'), parameters('hostingPlanSku'))]",
     "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]",
-    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]",
+    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door (recommended)')]",
     "frontDoorName": "[parameters('baseResourceName')]",
     "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.net'))]",
     "ProactivelyInstallUserApp": "[parameters('ProactivelyInstallUserApp')]",
@@ -995,7 +995,7 @@
             "tenantId": "[reference(concat('Microsoft.Web/sites/', variables('botAppName')), '2018-02-01', 'Full').identity.tenantId]",
             "objectId": "[parameters('objectId')]",
             "permissions": {
-              "certificates": [ "get", "list", "create", "update" ]
+              "certificates": ["get", "list", "create", "update"]
             }
           }
         ],

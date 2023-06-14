@@ -76,5 +76,13 @@ Yes, you can use markdown tags for formatting the message in the summary. CC v5.
 Teams client default behavior is to use client app resources (js/css/ images) from teams cache. To reflect the latest changes please sign out and sign in again to the teams client or clear the teams cache with the steps mentioned [here](https://docs.microsoft.com/en-us/microsoftteams/troubleshoot/teams-administration/clear-teams-cache).
 
 ### 15. Does the app works in GCC/GCCH tenant?
-Yes, Company Communicator v5.4 works in Commercial, GCC and GCCH tenants.
-  
+Yes, Company Communicator v5.4 and above versions works in Commercial, GCC and GCCH tenants.
+
+### 16. How to change the author app tab name of Company Communicator?
+It can be changed by selecting the rename option from the dropdown of company communicator tab. 
+![Author app tab name change](images/tab_name_change_cc.png)
+
+### 17. Does the app supports accessibility standards?
+Yes, Company Communicator v5.4.1 complies with Microsoft accessibility standards and guidelines for Web, Windows and Mac OS.
+
+

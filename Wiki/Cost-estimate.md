@@ -54,22 +54,24 @@ Min. execution time = 100 ms.
 
 ## Estimated cost
 
-**IMPORTANT:** This is only an estimate, based on the assumptions above. Your actual costs may vary.
+**IMPORTANT:** This is only an estimate, based on the above usage assumptions. Your actual costs may vary (might be less) depending on the usage.
 
-Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on 28 April 2022, for the West US 2 region.
+Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on June 14 2023, for the West US 2 region.
 
 Use the [Azure Pricing Calculator](https://azure.com/e/c3bb51eeb3284a399ac2e9034883fcfa) to model different service tiers and usage patterns.
 
 Resource                                    | Tier          | Load              | Monthly price
 ---                                         | ---           | ---               | --- 
 Storage account (Table)                     | Standard_LRS  | < 1GB data, 45000 operations | $0.045 + $0.01 = $0.05
+Storage account (Blob)                      | Standard_LRS  | < 1GB data        | $0.29 + $0.02 + $0.02 = $0.34
 Bot Channels Registration                   | F0            | N/A               | Free
-App Service Plan                            | S2            | 744 hours         | $148.80
+App Service Plan                            | S2            | 730 hours         | $146.00
 App Service (Bot + Tab)                     | -             |                   | (charged to App Service Plan) 
 Azure Function                              | Dedicated     | 10000 executions   | (free up to 1 million executions)
-Service Bus                                 | Basic         | 10000 operations  | $0.05
-Application Insights                        | -             | < 5GB data        | (free up to 5 GB)
-**Total**                                   |               |                   | **$148.90**
+Service Bus                                 | Basic         | 10000 operations  | $0.01
+Azure Front Door                            | Azure Front Door Classic          | < 1GB data transfer, 2 routing rules        | $0.50 + $0.01 + $43.65 = $44.16
+Application Insights                        | -             | < 5GB data        | $0.02
+**Total**                                   |               |                   | **$190.58**
 
 
 ## Estimated load - 1M messages
@@ -106,22 +108,24 @@ Min. execution time = 100 ms.
 
 ## Estimated cost - 1M messages
 
-**IMPORTANT:** This is only an estimate, based on the assumptions above. Your actual costs may vary.
+**IMPORTANT:** This is only an estimate, based on the above usage assumptions. Your actual costs may vary.
 
-Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on 28 April 2022, for the West US 2 region.
+Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on June 14 2023, for the West US 2 region.
 
 Use the [Azure Pricing Calculator](https://azure.com/e/c3bb51eeb3284a399ac2e9034883fcfa) to model different service tiers and usage patterns.
 
 Resource                                    | Tier          | Load              | Monthly price
 ---                                         | ---           | ---               | --- 
 Storage account (Table)                     | Standard_LRS  | < 3GB data, 9M operations | $0.14 + $0.32 = $0.46
+Storage account (Blob)                      | Standard_LRS  | < 1GB data        | $0.29 + $0.02 + $0.02 = $0.34
 Bot Channels Registration                   | F0            | N/A               | Free
-App Service Plan                            | S2            | 744 hours         | $148.80
+App Service Plan                            | S2            | 730 hours         | $146.00
 App Service (Bot + Tab)                     | -             |                   | (charged to App Service Plan) 
 Azure Function                              | Dedicated     | 1M executions     | (free up to 1 million executions)
-Service Bus                                 | Basic         | 2M operations     | $0.10
-Application Insights                        | -             | < 5GB data        | (free up to 5 GB)
-**Total**                                   |               |                   | **$149.36**
+Service Bus                                 | Basic         | 2M executions     | $0.10
+Azure Front Door                            | Azure Front Door Classic          | < 3GB data transfer, 2 routing rules        | $0.50 + $0.03 + $43.65 = $44.18
+Application Insights                        | -             | < 5GB data        | $0.02
+**Total**                                   |               |                   | **$191.10**
 
 ## Estimated load - 2M messages
 
@@ -157,19 +161,21 @@ Min. execution time = 100 ms.
 
 ## Estimated cost - 2M messages
 
-**IMPORTANT:** This is only an estimate, based on the assumptions above. Your actual costs may vary.
+**IMPORTANT:** This is only an estimate, based on the above usage assumptions. Your actual costs may vary.
 
-Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on 28 April 2022, for the West US 2 region.
+Prices were taken from the [Azure Pricing Overview](https://azure.microsoft.com/en-us/pricing/) on June 14 2023, for the West US 2 region.
 
 Use the [Azure Pricing Calculator](https://azure.com/e/c3bb51eeb3284a399ac2e9034883fcfa) to model different service tiers and usage patterns.
 
 Resource                                    | Tier          | Load              | Monthly price
 ---                                         | ---           | ---               | --- 
 Storage account (Table)                     | Standard_LRS  |  < 6GB data, 18M operations | $0.27 + $0.65 = $0.92
+Storage account (Blob)                      | Standard_LRS  | < 1GB data        | $0.29 + $0.02 + $0.02 = $0.34
 Bot Channels Registration                   | F0            | N/A               | Free
-App Service Plan                            | S2            | 744 hours         | $148.80
+App Service Plan                            | S2            | 730 hours         | $146.00
 App Service (Bot + Tab)                     | -             |                   | (charged to App Service Plan) 
-Azure Function                              | Dedicated     | 2M executions     | $5.80 
-Service Bus                                 | Basic         | 2M operations     | $0.20
-Application Insights                        | -             | < 5GB data        | (free up to 5 GB)
-**Total**                                   |               |                   | **$155.72**
+Azure Function                              | Dedicated     | 2M executions     | $5.80
+Service Bus                                 | Basic         | 2M executions     | $0.10
+Azure Front Door                            | Azure Front Door Classic          | < 3GB data transfer, 2 routing rules        | $0.50 + $0.03 + $43.65 = $44.18
+Application Insights                        | -             | < 5GB data        | $0.02
+**Total**                                   |               |                   | **$197.36**

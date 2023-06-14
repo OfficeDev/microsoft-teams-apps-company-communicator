@@ -109,10 +109,10 @@
     "customDomainOption": {
       "type": "string",
       "allowedValues": [
-        "Custom domain name (recommended)",
-        "Azure Front Door"
+        "Custom domain name",
+        "Azure Front Door (recommended)"
       ],
-      "defaultValue": "Azure Front Door",
+      "defaultValue": "Azure Front Door (recommended)",
       "metadata": {
         "description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs. "
       }
@@ -293,7 +293,7 @@
     ],
     "isSharedPlan": "[contains(variables('sharedSkus'), parameters('hostingPlanSku'))]",
     "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]",
-    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]",
+    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door (recommended)')]",
     "frontDoorName": "[parameters('baseResourceName')]",
     "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.us'))]",
     "ProactivelyInstallUserApp": "[parameters('ProactivelyInstallUserApp')]",
@@ -648,7 +648,6 @@
             "WEBSITE_LOAD_CERTIFICATES": "*",
             "APPINSIGHTS_INSTRUMENTATIONKEY": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('AppInsightsSecretResourceId'), '2015-06-01').secretUriWithVersion, ')')]",
             "WEBSITE_NODE_DEFAULT_VERSION": "16.13.0",
-            "WEBSITE_NPM_DEFAULT_VERSION": "8.19.2",
             "KeyVault:Url": "[variables('keyVaultUrl')]",
             "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
             "REACT_APP_HEADERTEXT": "[parameters('headerText')]",
