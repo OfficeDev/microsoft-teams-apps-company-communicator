@@ -932,7 +932,7 @@ function logout {
 # Check if Azure CLI is installed.
     WriteI -message "Checking if Azure CLI is installed."
     $localPath = [Environment]::GetEnvironmentVariable("ProgramFiles(x86)")
-    if ($localPath -eq $null) {
+    if ($null -eq $localPath) {
         $localPath = "C:\Program Files (x86)"
     }
 
@@ -945,8 +945,16 @@ function logout {
             
         $updatedecision = $host.ui.promptforchoice($confirmationtitle, $confirmationquestion, $confirmationchoices, 1)
         if ($updatedecision -eq 0) {
-            WriteI -message "Installing Azure CLI ..."
-            Invoke-WebRequest -Uri https://azcliprod.blob.core.windows.net/msi/azure-cli-2.30.0.msi -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; rm .\AzureCLI.msi
+            WriteI -message "Installing Latest Azure CLI ..."
+            try {
+                Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
+                Start-Process ("{0}\msiexec.exe" -f [Environment]::GetFolderPath([System.Environment+SpecialFolder]::System)) -Wait -ArgumentList '/I AzureCLI.msi /quiet'
+                Remove-Item .\AzureCLI.msi
+            } catch {
+                WriteE -message "Error occurred while downloading or installing Azure CLI"
+                throw                        
+            }
+            
             WriteS -message "Azure CLI is installed! Please close this PowerShell window and re-run this script in a new PowerShell session."
             EXIT
         } else {
@@ -970,8 +978,12 @@ function logout {
     if ((Get-Module -ListAvailable -Name "AzureAD")) {
         WriteI -message "AzureAD module is available."
     } else {
-        WriteW -message "AzureAD module is missing."
-        $isAvailable = $false
+        if ((Get-Module -ListAvailable -Name "AzureADPreview")) {
+            WriteW -message "AzureAD module is missing, but AzureADPreview module is available."            
+        } else {      
+            WriteW -message "AzureAD module is missing."
+            $isAvailable = $false
+        }
     }
 
     if ((Get-Module -ListAvailable -Name "WriteAscii")) {
@@ -1037,7 +1049,7 @@ function logout {
 
     WriteI -message "Azure AD sign-in..."
     $ADaccount = Connect-AzureAD -Tenant $parameters.subscriptionTenantId.Value -ErrorAction Stop
-    $userAlias = (($user | ConvertFrom-Json) | where {$_.id -eq $parameters.subscriptionId.Value}).user.name
+    $userAlias = (($user | ConvertFrom-Json) | Where-Object {$_.id -eq $parameters.subscriptionId.Value}).user.name
 
 # Validate the name of resources to be created.
     if (-not(validateresourcesnames)) {
