@@ -1,24 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import React from "react";
-import ReactDOM from "react-dom";
-import { Provider } from "react-redux";
-import * as microsoftTeams from "@microsoft/teams-js";
-import { App } from "./App";
-import * as serviceWorker from "./serviceWorker";
-import { store } from "./store";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { App } from './App';
+import { store } from './store';
 
-microsoftTeams.initialize();
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
-ReactDOM.render(
+root.render(
+  <React.StrictMode>
     <Provider store={store}>
       <App />
-    </Provider>,
-  document.getElementById("root")
+    </Provider>
+  </React.StrictMode>
 );
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();

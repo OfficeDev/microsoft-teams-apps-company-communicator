@@ -166,6 +166,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Rosters = notification.Rosters,
                 Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
+                IsScheduled = notification.IsScheduled,
+                ScheduledDate = notification.ScheduledDate,
             };
 
             if (!string.IsNullOrEmpty(notification.ImageLink) && notification.ImageLink.StartsWith(Constants.ImageBase64Format))
@@ -270,6 +272,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Rosters = notificationEntity.Rosters,
                 Groups = notificationEntity.Groups,
                 AllUsers = notificationEntity.AllUsers,
+                IsScheduled = notificationEntity.IsScheduled,
+                ScheduledDate = notificationEntity.ScheduledDate,
             };
 
             // In case we have blob name instead of URL to public image.
@@ -365,6 +369,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 teamDataEntity,
                 draftNotificationPreviewRequest.TeamsChannelId);
             return this.StatusCode((int)result);
+        }
+
+        /// <summary>
+        /// Get scheduled notifications. Those are draft notifications with a schedule date.
+        /// </summary>
+        /// <returns>A list of <see cref="DraftNotificationSummary"/> instances.</returns>
+        [HttpGet("scheduledDrafts")]
+        public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetAllScheduledNotificationsAsync()
+        {
+            var notificationEntities = await this.notificationDataRepository.GetAllScheduledNotificationsAsync();
+
+            var result = new List<DraftNotificationSummary>();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                var summary = new DraftNotificationSummary
+                {
+                    Id = notificationEntity.Id,
+                    Title = notificationEntity.Title,
+                    ScheduledDate = notificationEntity.ScheduledDate,
+                };
+
+                result.Add(summary);
+            }
+
+            // sorts the scheduled draft messages by date from the most recent
+            result = result.OrderBy(r => r.ScheduledDate).ToList();
+            return result;
         }
 
         private async Task<NotificationDataEntity> FindNotificationToDuplicate(string notificationId)

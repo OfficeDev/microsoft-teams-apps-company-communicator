@@ -98,13 +98,18 @@ steps:
     msBuildCommandline: '$(Agent.ToolsDirectory)\dotnet\dotnet.exe build $(Solution) --configuration $(BuildConfiguration)'
     rulesetName: 'Skype'
 
-- task: TSLint@1
-  displayName: Run TSLint
+- task: ESLint@1
+  displayName: 'Run ESLint'
   inputs:
-    RuleLibrary: microsoft
-    RulesetMicrosoft: skypesdlrequired
-    FileSelectionType: projectFile
-    Project: Source/CompanyCommunicator/ClientApp/tsconfig.json
+    Configuration: required
+    EnableExclusions: true
+    ExclusionPatterns: |
+     *.d.ts
+     *.spec.js
+     *.spec.jsx
+     *.spec.ts
+     *.spec.tsx
+    TargetsESLint: $(Build.SourcesDirectory)/Source/CompanyCommunicator/ClientApp/src/**/*.{js,ts, jsx, tsx}  
   
 - task: PoliCheck@1
   displayName: 'Run Policheck'
@@ -126,7 +131,7 @@ steps:
     PoliCheckBreakOn: 'Severity1'
     RoslynAnalyzersBreakOn: 'Error'
     SemmleBreakOn: 'Error'
-    TSLintBreakOn: 'Error'
+    ESLintBreakOn: 'Error'
     ToolLogsNotFoundAction: 'Standard'
 
 - task: PostAnalysis@1
@@ -140,7 +145,7 @@ steps:
     PoliCheckBreakOn: 'Severity1'
     RoslynAnalyzersBreakOn: 'Error'
     SemmleBreakOn: 'Error'
-    TSLintBreakOn: 'Error'
+    ESLintBreakOn: 'Error'
     ToolLogsNotFoundAction: 'Standard'
 
 - task: PublishSecurityAnalysisLogs@2

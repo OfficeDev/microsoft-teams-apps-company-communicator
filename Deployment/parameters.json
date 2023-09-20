@@ -31,6 +31,10 @@
     "Value": "<<value>>",
     "Description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
   },
+  "deleteAdminUPNList": {
+    "Value": "<<value>>",
+    "Description": "Semicolon-delimited list of the user principal names (UPNs) allowed to delete historical messages."
+  },
   "useCertificate": {
     "Value": false,
     "Description": "If certificate authentication is being used, then value should be true. Otherwise, false is default (Client-secret will be used)."

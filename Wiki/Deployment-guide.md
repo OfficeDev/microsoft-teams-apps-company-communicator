@@ -151,6 +151,10 @@ Register three Azure AD application in your tenant's directory: one for author b
     * For example, to allow Megan Bowen (meganb@contoso.com) and Adele Vance (adelev@contoso.com) to send messages, set this parameter to `meganb@contoso.com;adelev@contoso.com`.
     * You can change this list later by going to the App Service's "Configuration" blade.
 
+1. Update the "Delete Admin UPN List", which is a semicolon-delimited list of users (Authors) who will be allowed to delete historical messages.
+    * For example, to allow Megan Bowen (meganb@contoso.com) and Adele Vance (adelev@contoso.com) to delete historical messages, set this parameter to `meganb@contoso.com;adelev@contoso.com`.
+    * You can change this list later by going to the App Service's "Configuration" blade.
+
 1. If you wish to change the app name, description, and icon from the defaults, modify the corresponding template parameters.
 
 1. If you wish to change the header/banner text and logo, refer to FAQ in the Wiki.

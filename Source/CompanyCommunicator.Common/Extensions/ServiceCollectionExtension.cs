@@ -137,6 +137,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
                     return AzureCloudInstance.AzurePublic;
                 case TeamsEnvironment.GCCH:
                     return AzureCloudInstance.AzureUsGovernment;
+                case TeamsEnvironment.DOD:
+                    return AzureCloudInstance.AzureUsGovernment;
                 default:
                     return AzureCloudInstance.AzurePublic;
             }
@@ -166,6 +168,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
                     storageAccountName,
                     Common.Constants.BlobContainerName));
                 case TeamsEnvironment.GCCH:
+                case TeamsEnvironment.DOD:
                     return new Uri(string.Format(
                     "https://{0}.blob.core.usgovcloudapi.net/{1}",
                     storageAccountName,

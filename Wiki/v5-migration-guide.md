@@ -56,7 +56,12 @@ If you have CC v5.0, v5.1 or v5.2 deployed and plan to migrate to the latest ver
 1. Go to app service --> Configuration--> Click on New application setting and add below name and values. You can update the value for the header text and the header image as per your organization needs.
     * REACT_APP_HEADERTEXT : Company Communicator
     * REACT_APP_HEADERIMAGE : https://raw.githubusercontent.com/OfficeDev/microsoft-teams-company-communicator-app/main/Source/CompanyCommunicator/ClientApp/src/assets/Images/mslogo.png
-
+    * REACT_APP_AUTHORIZED_USERS_EMAIL : Semicolon-delimited list of the user principal names (UPNs) allowed to delete historical messages.
+    * DisableDeleteUpnCheck : True or False to enable to delete historical messages feature.
+    * AuthorizedDeleteUpns : Semicolon-delimited list of the user principal names (UPNs) allowed to delete historical messages.
+    * DataFunctionUrl :
+     <br> Commercial Tenant - https://[BASE_RESOURCE_NAME]-data-function.azurewebsites.net/api/CompanyCommunicatorDataCleanUpFunction
+     <br> GCC/GCCH/DoD Tenant - https://[BASE_RESOURCE_NAME]-data-function.azurewebsites.us/api/CompanyCommunicatorDataCleanUpFunction
         ![Update banner](images/update_banner_title_logo.png)
 
 1. Verify the WEBSITE_NODE_DEFAULT_VERSION value should be 16.13.0. Please update it to 16.13.0 if any other value is shown.

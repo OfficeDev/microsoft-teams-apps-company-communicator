@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as React from "react";
-import { useTranslation } from "react-i18next";
-import { Spinner } from "@fluentui/react-components";
-import { GetSentMessagesAction, GetSentMessagesSilentAction } from "../../actions";
-import { RootState, useAppDispatch, useAppSelector } from "../../store";
-import { SentMessageDetail } from "../MessageDetail/sentMessageDetail";
-import * as CustomHooks from "../../useInterval";
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Spinner } from '@fluentui/react-components';
+import { GetSentMessagesAction, GetSentMessagesSilentAction } from '../../actions';
+import { RootState, useAppDispatch, useAppSelector } from '../../store';
+import { SentMessageDetail } from './sentMessageDetail';
+import * as CustomHooks from '../../useInterval';
 
 export const SentMessages = () => {
   const { t } = useTranslation();
@@ -20,7 +20,7 @@ export const SentMessages = () => {
     if (sentMessages && sentMessages.length === 0) {
       GetSentMessagesAction(dispatch);
     }
-  }, []);
+  }, [sentMessages]);
 
   CustomHooks.useInterval(() => {
     GetSentMessagesSilentAction(dispatch);
@@ -28,8 +28,8 @@ export const SentMessages = () => {
 
   return (
     <>
-      {loader && <Spinner labelPosition="below" label="Fetching..." />}
-      {sentMessages && sentMessages.length === 0 && !loader && <div>{t("EmptySentMessages")}</div>}
+      {loader && <Spinner labelPosition='below' label={t('fetching')} />}
+      {sentMessages && sentMessages.length === 0 && !loader && <div>{t('EmptySentMessages')}</div>}
       {sentMessages && sentMessages.length > 0 && !loader && <SentMessageDetail sentMessages={sentMessages} />}
     </>
   );

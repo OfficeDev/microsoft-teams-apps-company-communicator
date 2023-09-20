@@ -19,5 +19,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// The name of the authorization policy, MSGraphGroupDataPolicy.
         /// </summary>
         public const string MSGraphGroupDataPolicy = "MSGraphGroupDataPolicy";
+
+        /// <summary>
+        /// The name of the authorization policy, MustHaveDeleteUpnClaimPolicy.
+        /// </summary>
+        public const string MustBeValidDeleteUpnPolicy = "MustBeValidDeleteUpnPolicy";
     }
 }
