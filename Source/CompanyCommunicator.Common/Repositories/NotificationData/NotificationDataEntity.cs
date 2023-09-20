@@ -228,5 +228,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets or sets the payload of the durable function instance.
         /// </summary>
         public string FunctionInstancePayload { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the notification is a Scheduled notification.
+        /// </summary>
+        public bool IsScheduled { get; set; }
+
+        /// <summary>
+        /// Gets or sets the DateTime of the notification which was scheduled to be sent.
+        /// </summary>
+        public DateTime? ScheduledDate { get; set; }
+
     }
 }

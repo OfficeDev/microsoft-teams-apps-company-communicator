@@ -1,23 +1,22 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import React, { useEffect } from "react";
-import * as microsoftTeams from "@microsoft/teams-js";
-import { getAuthenticationConsentMetadata } from "../../apis/messageListApi";
+import React, { useEffect } from 'react';
+import { app } from '@microsoft/teams-js';
+import { getAuthenticationConsentMetadata } from '../../apis/messageListApi';
 
 const SignInSimpleStart: React.FunctionComponent = () => {
   useEffect(() => {
-    microsoftTeams.initialize();
-
-    microsoftTeams.getContext((context) => {
-      const windowLocationOriginDomain = window.location.origin.replace("https://", "");
-      const login_hint = context.upn ? context.upn : "";
-
-      getAuthenticationConsentMetadata(windowLocationOriginDomain, login_hint).then((result) => {
-        window.location.assign(result.data);
+    void app.initialize().then(() => {
+      void app.getContext().then((context) => {
+        const windowLocationOriginDomain = window.location.origin.replace('https://', '');
+        const loginHint = context.user?.userPrincipalName ? context.user.userPrincipalName : '';
+        void getAuthenticationConsentMetadata(windowLocationOriginDomain, loginHint).then((result) => {
+          window.location.assign(result);
+        });
       });
     });
-  });
+  }, []);
 
   return <></>;
 };

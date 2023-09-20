@@ -19,6 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.CleanUpHistory;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -27,6 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.DataCleanUpServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.FileCardServices;
     using Microsoft.Teams.Apps.CompanyCommunicator.Data.Func.Services.NotificationDataServices;
 
@@ -108,12 +110,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
             // Add notification data services.
             builder.Services.AddTransient<AggregateSentNotificationDataService>();
             builder.Services.AddTransient<UpdateNotificationDataService>();
+            builder.Services.AddTransient<IPartitionKeyHandler, PartitionKeyHandlerService>();
 
             // Add repositories.
             builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
             builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
             builder.Services.AddSingleton<IUserDataRepository, UserDataRepository>();
             builder.Services.AddSingleton<IExportDataRepository, ExportDataRepository>();
+            builder.Services.AddSingleton<ICleanUpHistoryRepository, CleanUpHistoryRepository>();
+            builder.Services.AddTransient<TableRowKeyGenerator>();
 
             // Add service bus message queues.
             builder.Services.AddSingleton<IDataQueue, DataQueue>();

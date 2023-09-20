@@ -1,0 +1,62 @@
+.new-messages {
+  div[class~='schedulesend-datetime'] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    column-gap: 6px;
+    width: 100%;
+    margin-left: 36px;
+
+    div[class~='schedule-datepicker'] {
+      height: 40px;
+      width: 45%;
+      display: inline-block;
+    }
+    div[class~='schedule-datepicker']:focus {
+      outline: 2px solid #414156;
+    }
+
+    div[class~='schedule-timepicker'] {
+      width: 45%;
+      display: inline-block;
+      margin-left: 7px;
+      margin-right: 36px;
+
+      div[class~='ms-ComboBox'] {
+        height: 32px;
+        margin-bottom: 8px;
+      }
+      div[class~='ms-ComboBox-callout'] {
+        height: 150px;
+      }
+    }
+  }
+  div[class~='validationText'] {
+    margin-left: 36px;
+    display: flex;
+    color: red;
+  }
+
+  .flex-container {
+    display: flex;
+    flex-direction: row;
+  }
+  @media screen and (max-width: 767px) {
+    div[class~='schedulesend-datetime'] {
+      align-items: start;
+      div[class~='schedule-timepicker'] {
+        margin-left: 0px;
+        width: 65%;
+      }
+      div[class~='schedule-datepicker'] {
+        width: 65%;
+        div[class~='ms-TextField-wrapper']{
+            height: 40px;
+        }
+      }
+    }
+    .flex-container {
+      flex-direction: column;
+    }
+  }
+}

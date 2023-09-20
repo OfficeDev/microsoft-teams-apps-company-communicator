@@ -6,6 +6,7 @@ Cumulative improvements in Company Communicator App.
 
 |Version |Release Date |
 |---|---|
+| 5.5 | Sep 20, 2023
 | 5.4.1 | June 14, 2023
 | 5.4 | May 10, 2023
 | 5.3 | Dec 14, 2022
@@ -26,6 +27,14 @@ Cumulative improvements in Company Communicator App.
 | 1.0 | Dec 20, 2019
 
 ### Company Communicator feature release notes
+#### 5.5 (September 14, 2023)
+##### Changes introduced
+- Mobile Support for Android and iOS.
+- Historical Data Purge Functionality for Enhanced Performance.
+- Scheduled Message Sending feature.
+- Code Changes to Support Government Cloud for Department of Defense.
+- Minor UI improvements.
+
 #### 5.4.1 (June 14, 2023)
 ##### Changes introduced
 - Enhanced user interface.

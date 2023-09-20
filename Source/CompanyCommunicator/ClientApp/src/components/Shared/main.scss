@@ -57,9 +57,9 @@
     }
 }
 
-.cc-new-message {
+.cc-button {
     float: right;
-    padding: 2rem 0.5rem 2rem 0rem;
+    margin: 2rem 0.5rem 2rem 0rem !important;
 }
 
 .cc-accordion-panel {
@@ -67,8 +67,8 @@
     padding-bottom: 1rem;
 }
 
-
 #newMessageButtonId {
+
     &:focus,
     &:focus-visible {
         outline: -webkit-focus-ring-color auto;

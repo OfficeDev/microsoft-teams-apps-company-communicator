@@ -10,7 +10,7 @@
 
 # Prerequisites
 To begin, you will need:  
-
+* An Azure CLI need to be installed. If the azure cli is not installed, please click [here](https://azcliprod.blob.core.windows.net/msi/azure-cli-2.49.0.msi) 
 * An Azure subscription where you can create the following kinds of resources:
     * App Service
     * App Service Plan
@@ -37,7 +37,6 @@ To begin, you will need:
 ## 1. Deploy to your Azure subscription
 
   Please follow below steps to deploy app template:
-
 - Download the whole solution folder from [GitHub](https://github.com/OfficeDev/microsoft-teams-company-communicator-app)
 - Unzip the Content to a folder. (say companyCommunicator)
 - Open a PowerShell window in **administrator** mode and navigate to the folder where you unzipped the content.
@@ -45,7 +44,13 @@ To begin, you will need:
     ```  
     cd microsoft-teams-apps-company-communicator-main\Deployment
     ```
+- Run the below command to check if the required azure cli version is installed or not.
+    ```
+    az --version
+    ```
+- If az is not installed, you can install [azure cli](https://azcliprod.blob.core.windows.net/msi/azure-cli-2.49.0.msi).
 
+    >**Note** : Restart the Powershell after Azure CLI is installed. If it is already installed, make sure its `v2.49.0` or later.
 - Run the below command to check if jq is installed or not.
     ```
     jq --version
@@ -99,6 +104,10 @@ To begin, you will need:
     > **Note**: If your Azure subscription is in a different tenant than the tenant where you want to install the Teams App, please update the Tenant Id field with the tenant where you want to install the Teams App.
     - `senderUPNList` - this is a semicolon-delimited list of users (Authors) who will be allowed to send messages using the Company Communicator.
        For example, to allow Megan Bowen ([meganb@contoso.com](mailto:meganb@contoso.com)) and Adele Vance ([adelev@contoso.com](mailto:adelev@contoso.com)) to send messages, set this parameter to `meganb@contoso.com;adelev@contoso.com`.
+       You can change this list later by going to the `App Service > Configuration` blade.
+
+    - `deleteAdminUPNList` - this is a semicolon-delimited list of users (Authors) who will be allowed to delete historical messages using the Company Communicator.
+       For example, to allow Megan Bowen ([meganb@contoso.com](mailto:meganb@contoso.com)) and Adele Vance ([adelev@contoso.com](mailto:adelev@contoso.com)) to delete historical messages, set this parameter to `meganb@contoso.com;adelev@contoso.com`.
        You can change this list later by going to the `App Service > Configuration` blade.
 
     - `isUpgrade` - If this is an upgrade for old version of the app template, then value should be true. Otherwise, false is default (First-time deployment).
@@ -166,7 +175,7 @@ To begin, you will need:
 - If the azure CLI application is already installed, the script will check if the following modules are installed.
   ![Powershell deployment guide](images/check_modules.png)
 
-> Note: The script requires Azure CLI `v.2.2` or later. The script will install Azure CLI if its not already installed. If it is already installed, make sure its `v2.2` or later.
+> Note: The script requires Azure CLI `v.2.49.0` or later. The script will install Azure CLI if its not already installed. If it is already installed, make sure its `v2.49.0` or later.
 
 - The script will prompt *twice* for authentication during execution, once to get access to the Azure subscription, and the other to get access to Azure Active Directory. Please login using an account that has **contributor** role or higher.
 

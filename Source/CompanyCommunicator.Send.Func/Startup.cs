@@ -25,6 +25,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Secrets;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Blob;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services;
@@ -96,6 +98,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddSingleton<IGlobalSendingNotificationDataRepository, GlobalSendingNotificationDataRepository>();
             builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
             builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
+            builder.Services.AddSingleton<IPrepareToSendQueue, PrepareToSendQueue>();
+            builder.Services.AddSingleton<IDataQueue, DataQueue>();
 
             // Add service bus message queues.
             builder.Services.AddSingleton<ISendQueue, SendQueue>();
@@ -104,6 +108,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddTransient<INotificationService, NotificationService>();
             builder.Services.AddTransient<IStorageClientFactory, StorageClientFactory>();
             builder.Services.AddTransient<IBlobStorageProvider, BlobStorageProvider>();
+            builder.Services.AddTransient<TableRowKeyGenerator>();
 
             // Add the cache services
             builder.Services.AddSingleton<IMemoryCache, MemoryCache>();

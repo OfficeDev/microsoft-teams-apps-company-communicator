@@ -53,6 +53,13 @@
             "description":"Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
          }
       },
+      "deleteAdminUPNList": {
+        "type": "string",
+        "minLength": 1,
+        "metadata": {
+          "description": "Semicolon-delimited list of the user principal names (UPNs) allowed to delete historical messages."
+        }
+      },
       "ProactivelyInstallUserApp":{
          "defaultValue": true,
          "type":"Bool",
@@ -308,6 +315,10 @@
                      "value":"[parameters('senderUPNList')]"
                   },
                   {
+                     "name":"AuthorizedDeleteUpns",
+                     "value":"[parameters('deleteAdminUPNList')]"
+                  },
+                  {
                      "name":"DisableAuthentication",
                      "value":"false"
                   },
@@ -316,13 +327,21 @@
                      "value":"false"
                   },
                   {
+                    "name": "DisableDeleteUpnCheck",
+                    "value":"false"
+                  },
+                  {
                      "name":"APPINSIGHTS_INSTRUMENTATIONKEY",
                      "value":"[parameters('botAppInsightsKey')]"
                   },
                   {
                      "name":"WEBSITE_NODE_DEFAULT_VERSION",
                      "value":"10.15.2"
-                  }
+                  },
+				      {
+					      "name":"DataFunctionUrl",
+					      "value":"[concat('https://', variables('dataFunctionAppName'), '.azurewebsites.net/api/CompanyCommunicatorDataCleanUpFunction')]"
+				      }
                ],
                "cors":{
                   "supportCredentials":true,

@@ -85,4 +85,7 @@ It can be changed by selecting the rename option from the dropdown of company co
 ### 17. Does the app supports accessibility standards?
 Yes, Company Communicator v5.4.1 complies with Microsoft accessibility standards and guidelines for Web, Windows and Mac OS.
 
+### 18. Does the app works in DOD tenant?
+Yes, Company Communicator v5.5 and above versions works in DOD tenant with hybrid deployment scenario, where app registrations are done in DoD tenant & deployment of resources within Azure Gov Cloud tenant.
+
 

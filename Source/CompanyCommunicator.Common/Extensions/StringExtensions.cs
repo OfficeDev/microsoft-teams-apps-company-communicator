@@ -6,6 +6,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
 {
     using System;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Extension class for strings.
@@ -25,6 +26,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions
                 : string.IsNullOrWhiteSpace(originalString)
                 ? newString
                 : $"{originalString}{Environment.NewLine}{newString}";
+        }
+
+        /// <summary>
+        /// Adds spaces between camel-case characters in a string.
+        /// </summary>
+        /// <param name="input">The input string.</param>
+        /// <returns>A new string with spaces added between camel-case characters.</returns>
+        public static string AddSpacesToCamelCase(this string input)
+        {
+            string pattern = @"(?<=[a-z])(?=[A-Z])";
+            string replacement = " ";
+            string result = Regex.Replace(input, pattern, replacement);
+            return result;
         }
     }
 }

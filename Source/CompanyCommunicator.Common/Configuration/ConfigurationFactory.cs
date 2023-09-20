@@ -30,6 +30,8 @@
                     return new CommericalConfiguration(this.tenantId);
                 case TeamsEnvironment.GCCH:
                     return new GCCHConfiguration(this.tenantId);
+                case TeamsEnvironment.DOD:
+                    return new DODConfiguration(this.tenantId);
                 default:
                     return new CommericalConfiguration(this.tenantId);
             }
