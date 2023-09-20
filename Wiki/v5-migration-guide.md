@@ -61,7 +61,7 @@ If you have CC v5.0, v5.1 or v5.2 deployed and plan to migrate to the latest ver
     * AuthorizedDeleteUpns : Semicolon-delimited list of the user principal names (UPNs) allowed to delete historical messages.
     * DataFunctionUrl :
      <br> Commercial Tenant - https://[BASE_RESOURCE_NAME]-data-function.azurewebsites.net/api/CompanyCommunicatorDataCleanUpFunction
-     <br> GCC/GCCH/DoD Tenant - https://[BASE_RESOURCE_NAME]-data-function.azurewebsites.us/api/CompanyCommunicatorDataCleanUpFunction
+     <br> GCCH/DoD Tenant - https://[BASE_RESOURCE_NAME]-data-function.azurewebsites.us/api/CompanyCommunicatorDataCleanUpFunction
         ![Update banner](images/update_banner_title_logo.png)
 
 1. Verify the WEBSITE_NODE_DEFAULT_VERSION value should be 16.13.0. Please update it to 16.13.0 if any other value is shown.
