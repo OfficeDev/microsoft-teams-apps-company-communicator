@@ -7,6 +7,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
+    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Security.Claims;
@@ -30,7 +32,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Newtonsoft.Json;
-
+    using System.Drawing.Imaging;
+    
     /// <summary>
     /// Controller for the sent notification data.
     /// </summary>
@@ -413,7 +416,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 this.logger.LogError(exception, $"Failed to track the reading of the message. Error message: {exception.Message}.");
             }
 
-            return this.Ok();
+            // Create a fake image with a white background 1x1 px to allows us to track the readings
+            using var bitmap = new Bitmap(1, 1);
+
+            using var graphics = Graphics.FromImage(bitmap);
+
+            graphics.Clear(Color.White);
+
+
+            // Convert the image to a MemoryStream
+            using var stream = new MemoryStream();
+
+            bitmap.Save(stream, ImageFormat.Png);
+
+            // Convert the MemoryStream to a byte array
+            byte[] imageBytes = stream.ToArray();
+
+
+            // Return the fake image data as JSON
+            return File(imageBytes, "image/png");
         }
 
         /// <summary>
