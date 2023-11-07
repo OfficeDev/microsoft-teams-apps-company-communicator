@@ -163,7 +163,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                     Url = new Uri(trul, UriKind.RelativeOrAbsolute),
                     Spacing = AdaptiveSpacing.Small,
                     Size = AdaptiveImageSize.Small,
-                    IsVisible = false,
+                    IsVisible = true,
                     AltText = string.Empty,
                 });
             }
