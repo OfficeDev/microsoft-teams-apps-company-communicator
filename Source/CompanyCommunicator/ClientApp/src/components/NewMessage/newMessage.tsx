@@ -20,7 +20,10 @@ import { TFunction } from "i18next";
 import { OpenUrlAction } from 'adaptivecards';
 
 import axios from '../../apis/axiosJWTDecorator';
-let baseAxiosUrl = getBaseUrl() + '/api';
+//let baseAxiosUrl = getBaseUrl() + '/api';
+//Temporary fix to bypass Front Door due to the recent changes in the authentication flow that removed
+//authentication headers from all calls to the APIs
+let baseAxiosUrl = getBaseUrl().replace("azurefd", "azurewebsites") + '/api';
 
 //hours to be chosen when scheduling messages
 const hours = ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11",
