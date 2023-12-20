@@ -782,10 +782,9 @@ export const NewMessage = () => {
                       paddingTop: '8px',
                       color: 'darkgray',
                     }}
-                    placeholder="{t('FieldSeperator')}"
                   >
                     {' '}
-                    (Or){' '}
+                    {t('FieldSeperator')}{' '}
                   </div>
                   {
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
