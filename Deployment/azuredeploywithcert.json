@@ -290,6 +290,8 @@
     "hostingPlanName": "[parameters('baseResourceName')]",
     "storageAccountName": "[uniquestring(concat(resourceGroup().id, parameters('baseResourceName')))]",
     "appInsightsName": "[parameters('baseResourceName')]",
+	  "workspaceAnalyticsName": "[concat(parameters('baseResourceName'), '-log-analytics')]",
+	  "workspaceAnalyticsSku": "pergb2018",
     "prepFunctionAppName": "[concat(parameters('baseResourceName'), '-prep-function')]",
     "sendFunctionAppName": "[concat(parameters('baseResourceName'), '-function')]",
     "dataFunctionAppName": "[concat(parameters('baseResourceName'), '-data-function')]",
@@ -460,19 +462,34 @@
         "capacity": 0
       }
     },
-    {
-      "apiVersion": "2015-05-01",
-      "name": "[variables('appInsightsName')]",
-      "type": "Microsoft.Insights/components",
+	  {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2017-03-15-preview",
+      "name": "[variables('workspaceAnalyticsName')]",
       "location": "[parameters('location')]",
-      "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('botAppName'))]": "Resource"
-      },
       "properties": {
-        "Application_Type": "web",
-        "Request_Source": "rest"
+          "sku": {
+              "name": "[variables('workspaceAnalyticsSku')]"
+          }
       }
     },
+    {
+	    "type": "Microsoft.Insights/components",
+	    "apiVersion": "2020-02-02-preview",
+	    "name": "[variables('appInsightsName')]",
+	    "location": "[parameters('location')]",
+	    "dependsOn": [
+		    "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceAnalyticsName'))]"
+		  ],
+	    "tags": {
+		    "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('botAppName'))]": "Resource"
+		  },
+	    "properties": {
+		  "Application_Type": "web",
+		  "Request_Source": "rest",
+		  "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceAnalyticsName'))]"
+	    }
+	  },
     {
       "apiVersion": "2021-03-01",
       "name": "[variables('authorBotName')]",

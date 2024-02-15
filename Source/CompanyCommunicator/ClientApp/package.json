@@ -1,6 +1,6 @@
 {
   "name": "company-communicator",
-  "version": "5.4.1",
+  "version": "5.5.1",
   "private": true,
   "dependencies": {
     "@fluentui/react": "^8.110.3",
