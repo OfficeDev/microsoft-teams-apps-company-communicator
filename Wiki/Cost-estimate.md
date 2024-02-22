@@ -19,6 +19,11 @@ We ignore:
 The recommended SKUs for a production environment are:
 * App Service: Standard (S2)
 * Service Bus: Basic
+* Workspace-basd Application Insights:
+    This Application Insights resource is sending its data to a Log Analytics workspace.
+    The log Analytics workspace offers Pay-as-you-go pricing tier as it offers flexible consumption pricing in which charged per GB of data ingested - 
+    * Analytics Logs data ingestion - **$2.30/GB** of data ingested per month
+    * Basic Logs data ingestion - **$0.50/GB** of data ingested per month
 
 ## Estimated load
 
@@ -70,8 +75,8 @@ App Service (Bot + Tab)                     | -             |                   
 Azure Function                              | Dedicated     | 10000 executions   | (free up to 1 million executions)
 Service Bus                                 | Basic         | 10000 operations  | $0.01
 Azure Front Door                            | Azure Front Door Classic          | < 1GB data transfer, 2 routing rules        | $0.50 + $0.01 + $43.65 = $44.16
-Application Insights                        | -             | < 5GB data        | $0.02
-**Total**                                   |               |                   | **$190.58**
+Log Analytics Workspace (App Insights)                        | -             |  < 1GB data ingested        | $2.30
+**Total**                                   |               |                   | **$192.86**
 
 
 ## Estimated load - 1M messages
@@ -124,8 +129,8 @@ App Service (Bot + Tab)                     | -             |                   
 Azure Function                              | Dedicated     | 1M executions     | (free up to 1 million executions)
 Service Bus                                 | Basic         | 2M executions     | $0.10
 Azure Front Door                            | Azure Front Door Classic          | < 3GB data transfer, 2 routing rules        | $0.50 + $0.03 + $43.65 = $44.18
-Application Insights                        | -             | < 5GB data        | $0.02
-**Total**                                   |               |                   | **$191.10**
+Log Analytics Workspace (App Insights)                        | -             |  < 1GB data ingested        | $2.30
+**Total**                                   |               |                   | **$193.38**
 
 ## Estimated load - 2M messages
 
@@ -177,5 +182,5 @@ App Service (Bot + Tab)                     | -             |                   
 Azure Function                              | Dedicated     | 2M executions     | $5.80
 Service Bus                                 | Basic         | 2M executions     | $0.10
 Azure Front Door                            | Azure Front Door Classic          | < 3GB data transfer, 2 routing rules        | $0.50 + $0.03 + $43.65 = $44.18
-Application Insights                        | -             | < 5GB data        | $0.02
-**Total**                                   |               |                   | **$197.36**
+Log Analytics Workspace (App Insights)                        | -             |  < 1GB data ingested        | $2.30
+**Total**                                   |               |                   | **$199.64**
