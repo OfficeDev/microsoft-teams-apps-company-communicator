@@ -6,6 +6,7 @@ Cumulative improvements in Company Communicator App.
 
 |Version |Release Date |
 |---|---|
+| 5.5.2 | Apr 1, 2024
 | 5.5.1 | Feb 22, 2024
 | 5.5 | Sep 20, 2023
 | 5.4.1 | June 14, 2023
@@ -28,6 +29,11 @@ Cumulative improvements in Company Communicator App.
 | 1.0 | Dec 20, 2019
 
 ### Company Communicator feature release notes
+#### 5.5.2 (April 1, 2024)
+##### Changes introduced
+- Updated libraries to address critical and high security alerts.
+- Permanent fix for the authorization issue in the CC author app.
+
 #### 5.5.1 (February 22, 2024)
 ##### Changes introduced
 - Migration of classic Application Insights to workspace-based Application Insights.
