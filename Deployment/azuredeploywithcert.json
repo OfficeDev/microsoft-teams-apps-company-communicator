@@ -1282,32 +1282,6 @@
               },
               "enabledState": "Enabled"
             }
-          },
-          {
-            "name": "routingRule2",
-            "properties": {
-              "frontendEndpoints": [
-                {
-                  "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', variables('frontDoorName'), 'frontendEndpoint1')]"
-                }
-              ],
-              "acceptedProtocols": [
-                "Https"
-              ],
-              "patternsToMatch": [
-                "/api/*"
-              ],
-              "routeConfiguration": {
-                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorRedirectConfiguration",
-                "customFragment": null,
-                "customHost": "[variables('botAppDomain')]",
-                "customPath": "",
-                "redirectProtocol": "HttpsOnly",
-                "customQueryString": null,
-                "redirectType": "PermanentRedirect"
-              },
-              "enabledState": "Enabled"
-            }
           }
         ],
         "enabledState": "Enabled",
