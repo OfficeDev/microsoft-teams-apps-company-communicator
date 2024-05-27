@@ -162,9 +162,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 {
                     Url = new Uri(trul, UriKind.RelativeOrAbsolute),
                     Spacing = AdaptiveSpacing.Small,
-                    Size = AdaptiveImageSize.Small,
                     IsVisible = true,
                     AltText = string.Empty,
+                    PixelWidth = 1,
                 });
             }
 
