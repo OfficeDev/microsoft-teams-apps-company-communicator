@@ -64,8 +64,8 @@ The Notification Collection stores the notification data.
 | ButtonLink        | The button link of the notification's content.
 | ButtonTitle       | The button title of the notification's content.
 | TotalMessageCount | The total number of messages to send.
-| Succeeded         | The number of recipients who have received the notification succesfully.
-| Failed            | The number of recipients who failed to receive the notification succesfully.
+| Succeeded         | The number of recipients who have received the notification successfully.
+| Failed            | The number of recipients who failed to receive the notification successfully.
 | AllUsers          | Indicating if the notification should be sent to all known users.
 | TeamsInString     | The list of team identifiers.
 | RostersInString   | The list of roster identifiers.
