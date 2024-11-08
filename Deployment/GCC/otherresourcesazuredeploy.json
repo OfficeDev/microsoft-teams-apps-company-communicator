@@ -472,6 +472,7 @@
                      "name": "CURRENT_STACK",
                      "value": "dotnet"
                   }
+
                ],
                "netFrameworkVersion": "v6.0.100"
             }
@@ -531,7 +532,6 @@
                   "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
                   "REACT_APP_HEADERTEXT": "[parameters('headerText')]",
                   "REACT_APP_HEADERIMAGE": "[parameters('headerLogoUrl')]"
-
                }
             },
             {

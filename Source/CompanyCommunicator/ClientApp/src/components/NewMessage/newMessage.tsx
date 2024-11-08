@@ -1,1061 +1,1199 @@
+/* eslint-disable @typescript-eslint/dot-notation */
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { withTranslation, WithTranslation } from "react-i18next";
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
-import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader, Dropdown, Text, Flex, Input, TextArea, RadioGroup } from '@fluentui/react-northstar'
-import * as microsoftTeams from "@microsoft/teams-js";
-
 import './newMessage.scss';
-import './teamTheme.scss';
-import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, searchGroups, getGroups, verifyGroupAccess } from '../../apis/messageListApi';
+import * as AdaptiveCards from 'adaptivecards';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import validator from 'validator';
 import {
-    getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
-    setCardAuthor, setCardBtn
-} from '../AdaptiveCard/adaptiveCard';
+  Button,
+  Combobox,
+  ComboboxProps,
+  Field,
+  Input,
+  Label,
+  LabelProps,
+  makeStyles,
+  Option,
+  Persona,
+  Radio,
+  RadioGroup,
+  RadioGroupOnChangeData,
+  shorthands,
+  Spinner,
+  Text,
+  Textarea,
+  tokens,
+  useId,
+  Checkbox,
+} from '@fluentui/react-components';
+import { InfoLabel } from '@fluentui/react-components/unstable';
+import { TimePicker, DatePicker, IComboBox } from '@fluentui/react';
+import { initializeIcons } from '@fluentui/react/lib/Icons';
+import { ArrowUpload24Regular, Dismiss12Regular } from '@fluentui/react-icons';
+import { dialog } from '@microsoft/teams-js';
+import {
+  GetDraftMessagesSilentAction,
+  GetGroupsAction,
+  GetTeamsDataAction,
+  SearchGroupsAction,
+  VerifyGroupAccessAction,
+  GetScheduledMessagesSilentAction,
+} from '../../actions';
+import { createDraftNotification, getDraftNotification, updateDraftNotification } from '../../apis/messageListApi';
 import { getBaseUrl } from '../../configVariables';
-import { ImageUtil } from '../../utility/imageutility';
-import { TFunction } from "i18next";
-import { Icon, TooltipHost } from 'office-ui-fabric-react';
+import { RootState, useAppDispatch, useAppSelector } from '../../store';
+import {
+  getInitAdaptiveCard,
+  setCardAuthor,
+  setCardBtn,
+  setCardImageLink,
+  setCardSummary,
+  setCardTitle,
+} from '../AdaptiveCard/adaptiveCard';
 
-const validImageTypes = ['image/gif', 'image/jpeg', 'image/png','image/jpg'];
+const validImageTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/jpg'];
 
-
-type dropdownItem = {
-    key: string,
-    header: string,
-    content: string,
-    image: string,
-    team: {
-        id: string,
-    },
+interface IMessageState {
+  id?: string;
+  title: string;
+  imageLink?: string;
+  summary?: string;
+  author?: string;
+  buttonTitle?: string;
+  buttonLink?: string;
+  teams: any[];
+  rosters: any[];
+  groups: any[];
+  allUsers: boolean;
+  isScheduled?: boolean;
+  scheduledDate?: string;
 }
 
-export interface IDraftMessage {
-    id?: string,
-    title: string,
-    imageLink?: string,
-    summary?: string,
-    author: string,
-    buttonTitle?: string,
-    buttonLink?: string,
-    teams: any[],
-    rosters: any[],
-    groups: any[],
-    allUsers: boolean
+interface ITeamTemplate {
+  id: string;
+  name: string;
 }
 
-export interface formState {
-    title: string,
-    summary?: string,
-    btnLink?: string,
-    imageLink?: string,
-    localImagePath?: string,
-    btnTitle?: string,
-    author: string,
-    card?: any,
-    page: string,
-    teamsOptionSelected: boolean,
-    rostersOptionSelected: boolean,
-    allUsersOptionSelected: boolean,
-    groupsOptionSelected: boolean,
-    teams?: any[],
-    groups?: any[],
-    exists?: boolean,
-    messageId: string,
-    loader: boolean,
-    groupAccess: boolean,
-    loading: boolean,
-    noResultMessage: string,
-    unstablePinned?: boolean,
-    selectedTeamsNum: number,
-    selectedRostersNum: number,
-    selectedGroupsNum: number,
-    selectedRadioBtn: string,
-    selectedTeams: dropdownItem[],
-    selectedRosters: dropdownItem[],
-    selectedGroups: dropdownItem[],
-    errorImageUrlMessage: string,
-    errorButtonUrlMessage: string,
+const useComboboxStyles = makeStyles({
+  root: {
+    // Stack the label above the field with a gap
+    display: 'grid',
+    gridTemplateRows: 'repeat(1fr)',
+    justifyItems: 'start',
+    ...shorthands.gap('2px'),
+    paddingLeft: '36px',
+  },
+  tagsList: {
+    listStyleType: 'none',
+    marginBottom: tokens.spacingVerticalXXS,
+    marginTop: 0,
+    paddingLeft: 0,
+    // display: "flex",
+    gridGap: tokens.spacingHorizontalXXS,
+  },
+});
+
+const useFieldStyles = makeStyles({
+  styles: {
+    marginBottom: tokens.spacingVerticalM,
+    gridGap: tokens.spacingHorizontalXXS,
+  },
+});
+
+enum AudienceSelection {
+  Teams = 'Teams',
+  Rosters = 'Rosters',
+  Groups = 'Groups',
+  AllUsers = 'AllUsers',
+  None = 'None',
 }
 
-export interface INewMessageProps extends RouteComponentProps, WithTranslation {
-    getDraftMessagesList?: any;
+enum CurrentPageSelection {
+  CardCreation = 'CardCreation',
+  AudienceSelection = 'AudienceSelection',
 }
 
-class NewMessage extends React.Component<INewMessageProps, formState> {
-    readonly localize: TFunction;
-    private card: any;
-    private fileInput: any;
+let card: any;
 
-    constructor(props: INewMessageProps) {
-        super(props);
-        initializeIcons();
-        this.localize = this.props.t;
-        this.card = getInitAdaptiveCard(this.localize);
-        this.setDefaultCard(this.card);
+const MAX_SELECTED_TEAMS_NUM: number = 20;
 
-        this.state = {
-            title: "",
-            summary: "",
-            author: "",
-            btnLink: "",
-            imageLink: "",
-            localImagePath:"",
-            btnTitle: "",
-            card: this.card,
-            page: "CardCreation",
-            teamsOptionSelected: true,
-            rostersOptionSelected: false,
-            allUsersOptionSelected: false,
-            groupsOptionSelected: false,
-            messageId: "",
-            loader: true,
-            groupAccess: false,
-            loading: false,
-            noResultMessage: "",
-            unstablePinned: true,
-            selectedTeamsNum: 0,
-            selectedRostersNum: 0,
-            selectedGroupsNum: 0,
-            selectedRadioBtn: "teams",
-            selectedTeams: [],
-            selectedRosters: [],
-            selectedGroups: [],
-            errorImageUrlMessage: "",
-            errorButtonUrlMessage: "",
-        }
+initializeIcons(/* optional base url */);
 
-        this.fileInput = React.createRef();
-        this.handleImageSelection = this.handleImageSelection.bind(this);
+export const NewMessage = () => {
+  const fileInput = React.createRef<any>();
+  const { t } = useTranslation();
+  const { id } = useParams() as any;
+  const dispatch = useAppDispatch();
+  const teams = useAppSelector((state: RootState) => state.messages).teamsData.payload;
+  const groups = useAppSelector((state: RootState) => state.messages).groups.payload;
+  const queryGroups = useAppSelector((state: RootState) => state.messages).queryGroups.payload;
+  const canAccessGroups = useAppSelector((state: RootState) => state.messages).verifyGroup.payload;
+  const [selectedRadioButton, setSelectedRadioButton] = React.useState(AudienceSelection.None);
+  const [pageSelection, setPageSelection] = React.useState(CurrentPageSelection.CardCreation);
+  const [allUsersState, setAllUsersState] = React.useState(false);
+  const [imageFileName, setImageFileName] = React.useState('');
+  const [imageUploadErrorMessage, setImageUploadErrorMessage] = React.useState('');
+  const [titleErrorMessage, setTitleErrorMessage] = React.useState('');
+  const [btnLinkErrorMessage, setBtnLinkErrorMessage] = React.useState('');
+  const [showMsgDraftingSpinner, setShowMsgDraftingSpinner] = React.useState(false);
+  const [allUsersAria, setAllUserAria] = React.useState('none');
+  const [groupsAria, setGroupsAria] = React.useState('none');
+  const [cardAreaBorderClass, setCardAreaBorderClass] = React.useState('');
+  const [messageState, setMessageState] = React.useState<IMessageState>({
+    title: '',
+    teams: [],
+    rosters: [],
+    groups: [],
+    allUsers: false,
+  });
+
+  // Handle selectedOptions both when an option is selected or deselected in the Combobox,
+  // and when an option is removed by clicking on a tag
+  const [teamsSelectedOptions, setTeamsSelectedOptions] = React.useState<ITeamTemplate[]>([]);
+  const [rostersSelectedOptions, setRostersSelectedOptions] = React.useState<ITeamTemplate[]>([]);
+  const [searchSelectedOptions, setSearchSelectedOptions] = React.useState<ITeamTemplate[]>([]);
+  const [scheduleSendCheckBox, setScheduleSendCheckBox] = React.useState(false);
+  const [scheduledDatePicker, setScheduledDatePicker] = React.useState(
+    new Date(new Date().setMinutes(new Date().getMinutes() + 30))
+  );
+  const [scheduledTimePicker, setScheduledTimePicker] = React.useState(
+    new Date(new Date().setMinutes(new Date().getMinutes() + 30))
+  );
+  const [dbscheduledDate, setDbscheduledDate] = React.useState('');
+  const [scheduledSendValidation, setscheduledSendValidation] = React.useState(true);
+  const [scheduledSendTimeValidation, setscheduledSendTimeValidation] = React.useState(false);
+
+  React.useEffect(() => {
+    GetTeamsDataAction(dispatch);
+    VerifyGroupAccessAction(dispatch);
+  }, []);
+
+  React.useEffect(() => {
+    if (
+      !messageState.title &&
+      !messageState.imageLink &&
+      !messageState.summary &&
+      !messageState.author &&
+      !messageState.buttonTitle &&
+      !messageState.buttonLink
+    ) {
+      card = getInitAdaptiveCard(t('TitleText') ?? '');
+      setDefaultCard(card);
+    } else {
+      setCardTitle(card, messageState.title);
+      setCardImageLink(card, messageState.imageLink);
+      setCardSummary(card, messageState.summary);
+      setCardAuthor(card, messageState.author);
+      setCardBtn(card, messageState.buttonTitle, messageState.buttonLink);
     }
+    updateAdaptiveCard();
+  }, [t, pageSelection, messageState]);
 
-    public async componentDidMount() {
-        microsoftTeams.initialize();
-        //- Handle the Esc key
-        document.addEventListener("keydown", this.escFunction, false);
-        let params = this.props.match.params;
-        this.setGroupAccess();
-        this.getTeamList().then(() => {
-            if ('id' in params) {
-                let id = params['id'];
-                this.getItem(id).then(() => {
-                    const selectedTeams = this.makeDropdownItemList(this.state.selectedTeams, this.state.teams);
-                    const selectedRosters = this.makeDropdownItemList(this.state.selectedRosters, this.state.teams);
-                    this.setState({
-                        exists: true,
-                        messageId: id,
-                        selectedTeams: selectedTeams,
-                        selectedRosters: selectedRosters,
-                    })
-                });
-                this.getGroupData(id).then(() => {
-                    const selectedGroups = this.makeDropdownItems(this.state.groups);
-                    this.setState({
-                        selectedGroups: selectedGroups
-                    })
-                });
-            } else {
-                this.setState({
-                    exists: false,
-                    loader: false
-                }, () => {
-                    let adaptiveCard = new AdaptiveCards.AdaptiveCard();
-                    adaptiveCard.parse(this.state.card);
-                    let renderedCard = adaptiveCard.render();
-                    document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
-                    if (this.state.btnLink) {
-                        let link = this.state.btnLink;
-                        adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); };
-                    }
-                })
-            }
+  React.useEffect(() => {
+    if (id) {
+      GetGroupsAction(dispatch, { id });
+      void getDraftNotificationItem(id);
+    }
+  }, [id]);
+
+  React.useEffect(() => {
+    setTeamsSelectedOptions([]);
+    setRostersSelectedOptions([]);
+    setSearchSelectedOptions([]);
+    setAllUsersState(false);
+    if (teams && teams.length > 0) {
+      const teamsSelected = teams.filter((c) => messageState.teams.some((s) => s === c.id));
+      setTeamsSelectedOptions(teamsSelected || []);
+      const roastersSelected = teams.filter((c) => messageState.rosters.some((s) => s === c.id));
+      setRostersSelectedOptions(roastersSelected || []);
+    }
+    if (groups && groups.length > 0) {
+      const groupsSelected = groups.filter((c) => messageState.groups.some((s) => s === c.id));
+      setSearchSelectedOptions(groupsSelected || []);
+    }
+    if (messageState.allUsers) {
+      setAllUsersState(true);
+    }
+  }, [teams, groups, messageState.teams, messageState.rosters, messageState.allUsers, messageState.groups]);
+
+  React.useEffect(() => {
+    let currentDateTime = new Date();
+    currentDateTime = new Date(currentDateTime.setMinutes(currentDateTime.getMinutes() + 30));
+    if (scheduleSendCheckBox) {
+      if (messageState.scheduledDate === undefined) {
+        setscheduledSendValidation(false);
+      } else if (
+        messageState.scheduledDate &&
+        new Date(messageState.scheduledDate) <= new Date(currentDateTime.toISOString())
+      ) {
+        setscheduledSendValidation(false);
+        setscheduledSendTimeValidation(true);
+      } else if (
+        messageState.scheduledDate &&
+        new Date(messageState.scheduledDate) > new Date(currentDateTime.toISOString())
+      ) {
+        setscheduledSendValidation(true);
+        setscheduledSendTimeValidation(false);
+      }
+    } else {
+      setscheduledSendValidation(true);
+    }
+  }, [scheduleSendCheckBox, messageState.scheduledDate, scheduledSendValidation]);
+
+  const getDraftNotificationItem = async (id: number) => {
+    try {
+      await getDraftNotification(id).then((response) => {
+        const draftMessageDetail = response;
+
+        if (draftMessageDetail.teams.length > 0) {
+          setSelectedRadioButton(AudienceSelection.Teams);
+        } else if (draftMessageDetail.rosters.length > 0) {
+          setSelectedRadioButton(AudienceSelection.Rosters);
+        } else if (draftMessageDetail.groups.length > 0) {
+          setSelectedRadioButton(AudienceSelection.Groups);
+        } else if (draftMessageDetail.allUsers) {
+          setSelectedRadioButton(AudienceSelection.AllUsers);
+        }
+        setMessageState({
+          ...messageState,
+          id: draftMessageDetail.id,
+          title: draftMessageDetail.title,
+          imageLink: draftMessageDetail.imageLink,
+          summary: draftMessageDetail.summary,
+          author: draftMessageDetail.author,
+          buttonTitle: draftMessageDetail.buttonTitle,
+          buttonLink: draftMessageDetail.buttonLink,
+          teams: draftMessageDetail.teams,
+          rosters: draftMessageDetail.rosters,
+          groups: draftMessageDetail.groups,
+          allUsers: draftMessageDetail.allUsers,
+          isScheduled: draftMessageDetail.isScheduled,
+          scheduledDate: draftMessageDetail.scheduledDate,
         });
-    }
-
-    private makeDropdownItems = (items: any[] | undefined) => {
-        const resultedTeams: dropdownItem[] = [];
-        if (items) {
-            items.forEach((element) => {
-                resultedTeams.push({
-                    key: element.id,
-                    header: element.name,
-                    content: element.mail,
-                    image: ImageUtil.makeInitialImage(element.name),
-                    team: {
-                        id: element.id
-                    },
-
-                });
-            });
-        }
-        return resultedTeams;
-    }
-
-    private makeDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
-        const dropdownItemList: dropdownItem[] = [];
-        items.forEach(element =>
-            dropdownItemList.push(
-                typeof element !== "string" ? element : {
-                    key: fromItems!.find(x => x.id === element).id,
-                    header: fromItems!.find(x => x.id === element).name,
-                    image: ImageUtil.makeInitialImage(fromItems!.find(x => x.id === element).name),
-                    team: {
-                        id: element
-                    }
-                })
-        );
-        return dropdownItemList;
-    }
-
-    public setDefaultCard = (card: any) => {
-        const titleAsString = this.localize("TitleText");
-        const summaryAsString = this.localize("Summary");
-        const authorAsString = this.localize("Author1");
-        const buttonTitleAsString = this.localize("ButtonTitle");
-
-        setCardTitle(card, titleAsString);
-        let imgUrl = getBaseUrl() + "/image/imagePlaceholder.png";
-        setCardImageLink(card, imgUrl);
-        setCardSummary(card, summaryAsString);
-        setCardAuthor(card, authorAsString);
-        setCardBtn(card, buttonTitleAsString, "https://adaptivecards.io");
-    }
-
-    private getTeamList = async () => {
-        try {
-            const response = await getTeams();
-            this.setState({
-                teams: response.data
-            });
-        } catch (error) {
-            return error;
-        }
-    }
-
-    private getGroupItems() {
-        if (this.state.groups) {
-            return this.makeDropdownItems(this.state.groups);
-        }
-        const dropdownItems: dropdownItem[] = [];
-        return dropdownItems;
-    }
-
-    private setGroupAccess = async () => {
-        await verifyGroupAccess().then(() => {
-            this.setState({
-                groupAccess: true
-            });
-        }).catch((error) => {
-            const errorStatus = error.response.status;
-            if (errorStatus === 403) {
-                this.setState({
-                    groupAccess: false
-                });
-            }
-            else {
-                throw error;
-            }
-        });
-    }
-
-    private getGroupData = async (id: number) => {
-        try {
-            const response = await getGroups(id);
-            this.setState({
-                groups: response.data
-            });
-        }
-        catch (error) {
-            return error;
-        }
-    }
-
-    private getItem = async (id: number) => {
-        try {
-            const response = await getDraftNotification(id);
-            const draftMessageDetail = response.data;
-            let selectedRadioButton = "teams";
-            if (draftMessageDetail.rosters.length > 0) {
-                selectedRadioButton = "rosters";
-            }
-            else if (draftMessageDetail.groups.length > 0) {
-                selectedRadioButton = "groups";
-            }
-            else if (draftMessageDetail.allUsers) {
-                selectedRadioButton = "allUsers";
-            }
-            this.setState({
-                teamsOptionSelected: draftMessageDetail.teams.length > 0,
-                selectedTeamsNum: draftMessageDetail.teams.length,
-                rostersOptionSelected: draftMessageDetail.rosters.length > 0,
-                selectedRostersNum: draftMessageDetail.rosters.length,
-                groupsOptionSelected: draftMessageDetail.groups.length > 0,
-                selectedGroupsNum: draftMessageDetail.groups.length,
-                selectedRadioBtn: selectedRadioButton,
-                selectedTeams: draftMessageDetail.teams,
-                selectedRosters: draftMessageDetail.rosters,
-                selectedGroups: draftMessageDetail.groups
-            });
-
-            setCardTitle(this.card, draftMessageDetail.title);
-            setCardImageLink(this.card, draftMessageDetail.imageLink);
-            setCardSummary(this.card, draftMessageDetail.summary);
-            setCardAuthor(this.card, draftMessageDetail.author);
-            setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
-
-            this.setState({
-                title: draftMessageDetail.title,
-                summary: draftMessageDetail.summary,
-                btnLink: draftMessageDetail.buttonLink,
-                imageLink: draftMessageDetail.imageLink,
-                btnTitle: draftMessageDetail.buttonTitle,
-                author: draftMessageDetail.author,
-                allUsersOptionSelected: draftMessageDetail.allUsers,
-                loader: false
-            }, () => {
-                this.updateCard();
-            });
-        } catch (error) {
-            return error;
-        }
-    }
-
-    public componentWillUnmount() {
-        document.removeEventListener("keydown", this.escFunction, false);
-    }
-
-    private handleUploadClick = (event: any) => {
-        if (this.fileInput.current) {
-            this.fileInput.current.click();
-        }
-    }
-
-    private checkValidSizeOfImage = (resizedImageAsBase64: string) => {
-        var stringLength = resizedImageAsBase64.length - 'data:image/png;base64,'.length;
-        var sizeInBytes = 4 * Math.ceil((stringLength / 3))*0.5624896334383812;
-        var sizeInKb = sizeInBytes/1000;
-
-        if(sizeInKb <= 1024)
-            return true
-        
-        else
-            return false;
-    }
-    
-
-    private handleImageSelection = () => {
-        const file = this.fileInput.current.files[0];
-        
-        if(file){
-            const  fileType = file['type'];
-            const { type: mimeType } = file;
-
-            if (!validImageTypes.includes(fileType)) {
-               this.setState({errorImageUrlMessage: this.localize("ErrorImageTypesMessage")});
-               return;
-            }
-            
-            this.setState({localImagePath: file['name']});
-            this.setState({errorImageUrlMessage: ""});
-    
-    
-            const fileReader = new FileReader();
-            fileReader.readAsDataURL(file);
-            fileReader.onload = () => {
-                var image = new Image();
-                image.src = fileReader.result as string;
-                var resizedImageAsBase64 = fileReader.result as string;
-
-                image.onload = function (e: any) {
-                    const MAX_WIDTH = 1024;
-    
-                    if (image.width > MAX_WIDTH) {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = MAX_WIDTH;
-                        canvas.height = ~~(image.height * (MAX_WIDTH / image.width));
-                        const context = canvas.getContext('2d', { alpha: false });
-                        if (!context) {
-                            return;
-                        }
-                        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-                        resizedImageAsBase64 = canvas.toDataURL(mimeType);
-                    }
-                }
-
-                if (!this.checkValidSizeOfImage(resizedImageAsBase64)) {
-                    this.setState({ errorImageUrlMessage: this.localize("ErrorImageSizeMessage") });
-                    return;
-                }
-                
-
-                setCardImageLink(this.card, resizedImageAsBase64);
-                this.updateCard();
-                this.setState({
-                    imageLink: resizedImageAsBase64
-                    });
-            }
-    
-            fileReader.onerror = (error) => {
-                //reject(error);
-            }
-        }
-        
-    }
-
-    public render(): JSX.Element {
-        if (this.state.loader) {
-            return (
-                <div className="Loader">
-                    <Loader />
-                </div>
-            );
+        setScheduleSendCheckBox(draftMessageDetail.isScheduled);
+        if (draftMessageDetail.scheduledDate !== null) {
+          setScheduledDatePicker(new Date(draftMessageDetail.scheduledDate));
+          setScheduledTimePicker(new Date(draftMessageDetail.scheduledDate));
+          setDbscheduledDate(draftMessageDetail.scheduledDate);
         } else {
-            if (this.state.page === "CardCreation") {
-                return (
-                    <div className="taskModule">
-                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small">
-                            <Flex className="scrollableContent">
-                                <Flex.Item size="size.half">
-                                    <Flex column className="formContentContainer">
-                                        <Input className="inputField"
-                                            value={this.state.title}
-                                            label={this.localize("TitleText")}
-                                            placeholder={this.localize("PlaceHolderTitle")}
-                                            onChange={this.onTitleChanged}
-                                            autoComplete="off"
-                                            fluid
-                                        />
-
-                                        <Flex gap="gap.small" vAlign="end">
-                                            <Input fluid className="inputField imageField"
-                                                value={(this.state.imageLink && this.state.imageLink.startsWith("data:"))
-                                                            ? this.state.localImagePath 
-                                                            : this.state.imageLink}
-                                                label={
-                                                    <>
-                                            {this.localize("ImageURL")}
-                                            <TooltipHost 
-                                                content={this.localize("ImageSizeInfoContent")}
-                                                calloutProps={{ gapSpace: 0 }}
-                                                hostClassName="tooltipHostStyles"
-                                                >
-                                                <Icon aria-label="Info" iconName="Info" className='tooltipHostStylesInsideContent'/>
-                                            </TooltipHost>
-                                            </>
-                                            }
-                                                placeholder={this.localize("ImageURL")}
-                                                onChange={this.onImageLinkChanged}
-                                                error={!(this.state.errorImageUrlMessage === "")}
-                                                autoComplete="off"                                             
-                                            />
-                                            
-                                            <Flex.Item push>
-                                                <Button onClick={this.handleUploadClick}
-                                                    size="medium" className="inputField"
-                                                    content={this.localize("Upload")} iconPosition="before" />
-                                            </Flex.Item>
-                                            <input type="file" accept=".jpg, .jpeg, .png, .gif"
-                                                style={{ display: 'none' }}
-                                                multiple={false}
-                                                onChange={this.handleImageSelection}
-                                                ref={this.fileInput} />
-                                        </Flex>
-                                        <Text className={(this.state.errorImageUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorImageUrlMessage} />
-
-                                        <div className="textArea">
-                                            <Text content={this.localize("Summary")} />
-                                            <TextArea
-                                                autoFocus
-                                                placeholder={this.localize("Summary")}
-                                                value={this.state.summary}
-                                                onChange={this.onSummaryChanged}
-                                                fluid />
-                                        </div>
-
-                                        <Input className="inputField"
-                                            value={this.state.author}
-                                            label={this.localize("Author")}
-                                            placeholder={this.localize("Author")}
-                                            onChange={this.onAuthorChanged}
-                                            autoComplete="off"
-                                            fluid
-                                        />
-                                        <Input className="inputField"
-                                            fluid
-                                            value={this.state.btnTitle}
-                                            label={this.localize("ButtonTitle")}
-                                            placeholder={this.localize("ButtonTitle")}
-                                            onChange={this.onBtnTitleChanged}
-                                            autoComplete="off"
-                                        />
-                                        <Input className="inputField"
-                                            fluid
-                                            value={this.state.btnLink}
-                                            label={this.localize("ButtonURL")}
-                                            placeholder={this.localize("ButtonURL")}
-                                            onChange={this.onBtnLinkChanged}
-                                            error={!(this.state.errorButtonUrlMessage === "")}
-                                            autoComplete="off"
-                                        />
-                                        <Text className={(this.state.errorButtonUrlMessage === "") ? "hide" : "show"} error size="small" content={this.state.errorButtonUrlMessage} />
-                                    </Flex>
-                                </Flex.Item>
-                                <Flex.Item size="size.half">
-                                    <div className="adaptiveCardContainer">
-                                    </div>
-                                </Flex.Item>
-                            </Flex>
-
-                            <Flex className="footerContainer" vAlign="end" hAlign="end">
-                                <Flex className="buttonContainer">
-                                    <Button content={this.localize("Next")} disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
-                                </Flex>
-                            </Flex>
-
-                        </Flex>
-                    </div>
-                );
-            }
-            else if (this.state.page === "AudienceSelection") {
-                return (
-                    <div className="taskModule">
-                        <Flex column className="formContainer" vAlign="stretch" gap="gap.small">
-                            <Flex className="scrollableContent">
-                                <Flex.Item size="size.half">
-                                    <Flex column className="formContentContainer">
-                                        <h3>{this.localize("SendHeadingText")}</h3>
-                                        <RadioGroup
-                                            className="radioBtns"
-                                            checkedValue={this.state.selectedRadioBtn}
-                                            onCheckedValueChange={this.onGroupSelected}
-                                            vertical={true}
-                                            items={[
-                                                {
-                                                    name: "teams",
-                                                    key: "teams",
-                                                    value: "teams",
-                                                    label: this.localize("SendToGeneralChannel"),
-                                                    children: (Component, { name, ...props }) => {
-                                                        return (
-                                                            <Flex key={name} column>
-                                                                <Component {...props} />
-                                                                <Dropdown
-                                                                    hidden={!this.state.teamsOptionSelected}
-                                                                    placeholder={this.localize("SendToGeneralChannelPlaceHolder")}
-                                                                    search
-                                                                    multiple
-                                                                    items={this.getItems()}
-                                                                    value={this.state.selectedTeams}
-                                                                    onChange={this.onTeamsChange}
-                                                                    noResultsMessage={this.localize("NoMatchMessage")}
-                                                                />
-                                                            </Flex>
-                                                        )
-                                                    },
-                                                },
-                                                {
-                                                    name: "rosters",
-                                                    key: "rosters",
-                                                    value: "rosters",
-                                                    label: this.localize("SendToRosters"),
-                                                    children: (Component, { name, ...props }) => {
-                                                        return (
-                                                            <Flex key={name} column>
-                                                                <Component {...props} />
-                                                                <Dropdown
-                                                                    hidden={!this.state.rostersOptionSelected}
-                                                                    placeholder={this.localize("SendToRostersPlaceHolder")}
-                                                                    search
-                                                                    multiple
-                                                                    items={this.getItems()}
-                                                                    value={this.state.selectedRosters}
-                                                                    onChange={this.onRostersChange}
-                                                                    unstable_pinned={this.state.unstablePinned}
-                                                                    noResultsMessage={this.localize("NoMatchMessage")}
-                                                                />
-                                                            </Flex>
-                                                        )
-                                                    },
-                                                },
-                                                {
-                                                    name: "allUsers",
-                                                    key: "allUsers",
-                                                    value: "allUsers",
-                                                    label: this.localize("SendToAllUsers"),
-                                                    children: (Component, { name, ...props }) => {
-                                                        return (
-                                                            <Flex key={name} column>
-                                                                <Component {...props} />
-                                                                <div className={this.state.selectedRadioBtn === "allUsers" ? "" : "hide"}>
-                                                                    <div className="noteText">
-                                                                        <Text error content={this.localize("SendToAllUsersNote")} />
-                                                                    </div>
-                                                                </div>
-                                                            </Flex>
-                                                        )
-                                                    },
-                                                },
-                                                {
-                                                    name: "groups",
-                                                    key: "groups",
-                                                    value: "groups",
-                                                    label: this.localize("SendToGroups"),
-                                                    children: (Component, { name, ...props }) => {
-                                                        return (
-                                                            <Flex key={name} column>
-                                                                <Component {...props} />
-                                                                <div className={this.state.groupsOptionSelected && !this.state.groupAccess ? "" : "hide"}>
-                                                                    <div className="noteText">
-                                                                        <Text error content={this.localize("SendToGroupsPermissionNote")} />
-                                                                    </div>
-                                                                </div>
-                                                                <Dropdown
-                                                                    className="hideToggle"
-                                                                    hidden={!this.state.groupsOptionSelected || !this.state.groupAccess}
-                                                                    placeholder={this.localize("SendToGroupsPlaceHolder")}
-                                                                    search={this.onGroupSearch}
-                                                                    multiple
-                                                                    loading={this.state.loading}
-                                                                    loadingMessage={this.localize("LoadingText")}
-                                                                    items={this.getGroupItems()}
-                                                                    value={this.state.selectedGroups}
-                                                                    onSearchQueryChange={this.onGroupSearchQueryChange}
-                                                                    onChange={this.onGroupsChange}
-                                                                    noResultsMessage={this.state.noResultMessage}
-                                                                    unstable_pinned={this.state.unstablePinned}
-                                                                />
-                                                                <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
-                                                                    <div className="noteText">
-                                                                        <Text error content={this.localize("SendToGroupsNote")} />
-                                                                    </div>
-                                                                </div>
-                                                            </Flex>
-                                                        )
-                                                    },
-                                                }
-                                            ]}
-                                        >
-
-                                        </RadioGroup>
-                                    </Flex>
-                                </Flex.Item>
-                                <Flex.Item size="size.half">
-                                    <div className="adaptiveCardContainer">
-                                    </div>
-                                </Flex.Item>
-                            </Flex>
-                            <Flex className="footerContainer" vAlign="end" hAlign="end">
-                                <Flex className="buttonContainer" gap="gap.small">
-                                    <Flex.Item push>
-                                        <Loader id="draftingLoader" className="hiddenLoader draftingLoader" size="smallest" label={this.localize("DraftingMessageLabel")} labelPosition="end" />
-                                    </Flex.Item>
-                                    <Flex.Item push>
-                                        <Button content={this.localize("Back")} onClick={this.onBack} secondary />
-                                    </Flex.Item>
-                                    <Button content={this.localize("SaveAsDraft")} disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
-                                </Flex>
-                            </Flex>
-                        </Flex>
-                    </div>
-                );
-            } else {
-                return (<div>Error</div>);
-            }
+          initializeTimePicker();
         }
+      });
+    } catch (error) {
+      return error;
     }
+  };
 
-    private onGroupSelected = (event: any, data: any) => {
-        this.setState({
-            selectedRadioBtn: data.value,
-            teamsOptionSelected: data.value === 'teams',
-            rostersOptionSelected: data.value === 'rosters',
-            groupsOptionSelected: data.value === 'groups',
-            allUsersOptionSelected: data.value === 'allUsers',
-            selectedTeams: data.value === 'teams' ? this.state.selectedTeams : [],
-            selectedTeamsNum: data.value === 'teams' ? this.state.selectedTeamsNum : 0,
-            selectedRosters: data.value === 'rosters' ? this.state.selectedRosters : [],
-            selectedRostersNum: data.value === 'rosters' ? this.state.selectedRostersNum : 0,
-            selectedGroups: data.value === 'groups' ? this.state.selectedGroups : [],
-            selectedGroupsNum: data.value === 'groups' ? this.state.selectedGroupsNum : 0,
+  const setDefaultCard = (card: any) => {
+    const titleAsString = t('TitleText');
+    const summaryAsString = t('Summary');
+    const authorAsString = t('Author1');
+    const buttonTitleAsString = t('ButtonTitle');
+    setCardTitle(card, titleAsString);
+    const imgUrl = getBaseUrl() + '/image/imagePlaceholder.png';
+    setCardImageLink(card, imgUrl);
+    setCardSummary(card, summaryAsString);
+    setCardAuthor(card, authorAsString);
+    setCardBtn(card, buttonTitleAsString, 'https://adaptivecards.io');
+  };
+
+  const initializeTimePicker = () => {
+    setScheduledDatePicker(new Date(new Date().setMinutes(new Date().getMinutes() + 30)));
+    setScheduledTimePicker(new Date(new Date().setMinutes(new Date().getMinutes() + 30)));
+  };
+
+  // update the state variable whenever the checkbox is checked or unchecked
+  const handleScheduleSendCheckBox = (event: any) => {
+    setScheduleSendCheckBox((scheduleSendCheckBox) => !scheduleSendCheckBox);
+    if (event.target.checked) {
+      setMessageState({ ...messageState, isScheduled: true });
+    } else {
+      setMessageState({ ...messageState, isScheduled: false });
+      if (messageState.scheduledDate) {
+        setMessageState((current) => {
+          const { scheduledDate, ...messageState } = current;
+          return messageState;
         });
+      }
+      initializeTimePicker();
     }
+  };
 
-    private isSaveBtnDisabled = () => {
-        const teamsSelectionIsValid = (this.state.teamsOptionSelected && (this.state.selectedTeamsNum !== 0)) || (!this.state.teamsOptionSelected);
-        const rostersSelectionIsValid = (this.state.rostersOptionSelected && (this.state.selectedRostersNum !== 0)) || (!this.state.rostersOptionSelected);
-        const groupsSelectionIsValid = (this.state.groupsOptionSelected && (this.state.selectedGroupsNum !== 0)) || (!this.state.groupsOptionSelected);
-        const nothingSelected = (!this.state.teamsOptionSelected) && (!this.state.rostersOptionSelected) && (!this.state.groupsOptionSelected) && (!this.state.allUsersOptionSelected);
-        return (!teamsSelectionIsValid || !rostersSelectionIsValid || !groupsSelectionIsValid || nothingSelected)
+  // update the state variable whenever the date is changed in the date picker control
+  const handleScheduleSendDate = (selectedDate: Date | null | undefined) => {
+    if (selectedDate) {
+      setScheduledDatePicker(selectedDate);
+      if (scheduledTimePicker && selectedDate !== scheduledTimePicker) {
+        selectedDate?.setHours(scheduledTimePicker.getHours());
+        selectedDate?.setMinutes(scheduledTimePicker.getMinutes());
+        selectedDate?.setSeconds(scheduledTimePicker.getSeconds());
+        setScheduledTimePicker(selectedDate);
+      }
     }
-
-    private isNextBtnDisabled = () => {
-        const title = this.state.title;
-        const btnTitle = this.state.btnTitle;
-        const btnLink = this.state.btnLink;
-        return !(title && ((btnTitle && btnLink) || (!btnTitle && !btnLink)) && (this.state.errorImageUrlMessage === "") && (this.state.errorButtonUrlMessage === ""));
+    if (dbscheduledDate && selectedDate !== new Date(dbscheduledDate)) {
+      const tempDate = selectedDate;
+      tempDate?.setHours(scheduledTimePicker.getHours());
+      tempDate?.setMinutes(scheduledTimePicker.getMinutes());
+      tempDate?.setSeconds(scheduledTimePicker.getSeconds());
+      setMessageState({ ...messageState, scheduledDate: tempDate?.toISOString() });
     }
+  };
+  // update the state variable whenever the time is changed in the time picker control
+  const handleScheduleSendTime = (_ev: React.FormEvent<IComboBox>, selectedTime: Date) => {
+    if (selectedTime) {
+      if (scheduledDatePicker && selectedTime !== scheduledDatePicker) {
+        selectedTime?.setDate(scheduledTimePicker.getDate());
+      }
+      setScheduledTimePicker(selectedTime);
+      setMessageState({ ...messageState, scheduledDate: selectedTime.toISOString() });
+    }
+  };
 
-    private getItems = () => {
-        const resultedTeams: dropdownItem[] = [];
-        if (this.state.teams) {
-            let remainingUserTeams = this.state.teams;
-            if (this.state.selectedRadioBtn !== "allUsers") {
-                if (this.state.selectedRadioBtn === "teams") {
-                    this.state.teams.filter(x => this.state.selectedTeams.findIndex(y => y.team.id === x.id) < 0);
-                }
-                else if (this.state.selectedRadioBtn === "rosters") {
-                    this.state.teams.filter(x => this.state.selectedRosters.findIndex(y => y.team.id === x.id) < 0);
-                }
+  const updateAdaptiveCard = () => {
+    const adaptiveCard = new AdaptiveCards.AdaptiveCard();
+    adaptiveCard.parse(card);
+    const renderCard = adaptiveCard.render();
+    if (renderCard && pageSelection === CurrentPageSelection.CardCreation) {
+      document.getElementsByClassName('card-area-1')[0].innerHTML = '';
+      document.getElementsByClassName('card-area-1')[0].appendChild(renderCard);
+      setCardAreaBorderClass('card-area-border');
+    } else if (renderCard && pageSelection === CurrentPageSelection.AudienceSelection) {
+      document.getElementsByClassName('card-area-2')[0].innerHTML = '';
+      document.getElementsByClassName('card-area-2')[0].appendChild(renderCard);
+      setCardAreaBorderClass('card-area-border');
+    }
+    adaptiveCard.onExecuteAction = function (action: any) {
+      window.open(action.url, '_blank');
+    };
+  };
+
+  const handleUploadClick = (event: any) => {
+    if (fileInput.current) {
+      fileInput.current.click();
+    }
+  };
+
+  const checkValidSizeOfImage = (resizedImageAsBase64: string) => {
+    const stringLength = resizedImageAsBase64.length - 'data:image/png;base64,'.length;
+    const sizeInBytes = 4 * Math.ceil(stringLength / 3) * 0.5624896334383812;
+    const sizeInKb = sizeInBytes / 1000;
+
+    if (sizeInKb <= 1024) return true;
+    else return false;
+  };
+
+  const handleImageSelection = () => {
+    const file = fileInput.current?.files[0];
+
+    if (file) {
+      const fileType = file['type'];
+      const { type: mimeType } = file;
+
+      if (!validImageTypes.includes(fileType)) {
+        setImageUploadErrorMessage(t('ErrorImageTypesMessage') ?? '');
+        return;
+      }
+
+      setImageFileName(file['name']);
+      setImageUploadErrorMessage('');
+
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => {
+        const image = new Image();
+        image.src = fileReader.result as string;
+        let resizedImageAsBase64 = fileReader.result as string;
+
+        image.onload = function (e: any) {
+          const MAX_WIDTH = 1024;
+
+          if (image.width > MAX_WIDTH) {
+            const canvas = document.createElement('canvas');
+            canvas.width = MAX_WIDTH;
+            canvas.height = ~~(image.height * (MAX_WIDTH / image.width));
+            const context = canvas.getContext('2d', { alpha: false });
+            if (!context) {
+              return;
             }
-            remainingUserTeams.forEach((element) => {
-                resultedTeams.push({
-                    key: element.id,
-                    header: element.name,
-                    content: element.mail,
-                    image: ImageUtil.makeInitialImage(element.name),
-                    team: {
-                        id: element.id
-                    }
-                });
-            });
-        }
-        return resultedTeams;
-    }
-
-    private static MAX_SELECTED_TEAMS_NUM: number = 20;
-
-    private onTeamsChange = (event: any, itemsData: any) => {
-        if (itemsData.value.length > NewMessage.MAX_SELECTED_TEAMS_NUM) return;
-        this.setState({
-            selectedTeams: itemsData.value,
-            selectedTeamsNum: itemsData.value.length,
-            selectedRosters: [],
-            selectedRostersNum: 0,
-            selectedGroups: [],
-            selectedGroupsNum: 0
-        })
-    }
-
-    private onRostersChange = (event: any, itemsData: any) => {
-        if (itemsData.value.length > NewMessage.MAX_SELECTED_TEAMS_NUM) return;
-        this.setState({
-            selectedRosters: itemsData.value,
-            selectedRostersNum: itemsData.value.length,
-            selectedTeams: [],
-            selectedTeamsNum: 0,
-            selectedGroups: [],
-            selectedGroupsNum: 0
-        })
-    }
-
-    private onGroupsChange = (event: any, itemsData: any) => {
-        this.setState({
-            selectedGroups: itemsData.value,
-            selectedGroupsNum: itemsData.value.length,
-            groups: [],
-            selectedTeams: [],
-            selectedTeamsNum: 0,
-            selectedRosters: [],
-            selectedRostersNum: 0
-        })
-    }
-
-    private onGroupSearch = (itemList: any, searchQuery: string) => {
-        const result = itemList.filter(
-            (item: { header: string; content: string; }) => (item.header && item.header.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1) ||
-                (item.content && item.content.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1),
-        )
-        return result;
-    }
-
-    private onGroupSearchQueryChange = async (event: any, itemsData: any) => {
-
-        if (!itemsData.searchQuery) {
-            this.setState({
-                groups: [],
-                noResultMessage: "",
-            });
-        }
-        else if (itemsData.searchQuery && itemsData.searchQuery.length <= 2) {
-            this.setState({
-                loading: false,
-                noResultMessage: this.localize("NoMatchMessage"),
-            });
-        }
-        else if (itemsData.searchQuery && itemsData.searchQuery.length > 2) {
-            // handle event trigger on item select.
-            const result = itemsData.items && itemsData.items.find(
-                (item: { header: string; }) => item.header.toLowerCase() === itemsData.searchQuery.toLowerCase()
-            )
-            if (result) {
-                return;
-            }
-
-            this.setState({
-                loading: true,
-                noResultMessage: "",
-            });
-
-            try {
-                const query = encodeURIComponent(itemsData.searchQuery);
-                const response = await searchGroups(query);
-                this.setState({
-                    groups: response.data,
-                    loading: false,
-                    noResultMessage: this.localize("NoMatchMessage")
-                });
-            }
-            catch (error) {
-                return error;
-            }
-        }
-    }
-
-    private onSave = () => {
-        const selectedTeams: string[] = [];
-        const selctedRosters: string[] = [];
-        const selectedGroups: string[] = [];
-        this.state.selectedTeams.forEach(x => selectedTeams.push(x.team.id));
-        this.state.selectedRosters.forEach(x => selctedRosters.push(x.team.id));
-        this.state.selectedGroups.forEach(x => selectedGroups.push(x.team.id));
-
-        const draftMessage: IDraftMessage = {
-            id: this.state.messageId,
-            title: this.state.title,
-            imageLink: this.state.imageLink,
-            summary: this.state.summary,
-            author: this.state.author,
-            buttonTitle: this.state.btnTitle,
-            buttonLink: this.state.btnLink,
-            teams: selectedTeams,
-            rosters: selctedRosters,
-            groups: selectedGroups,
-            allUsers: this.state.allUsersOptionSelected
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            resizedImageAsBase64 = canvas.toDataURL(mimeType);
+          }
         };
 
-        let spanner = document.getElementsByClassName("draftingLoader");
-        spanner[0].classList.remove("hiddenLoader");
-
-        if (this.state.exists) {
-            this.editDraftMessage(draftMessage).then(() => {
-                microsoftTeams.tasks.submitTask();
-            });
-        } else {
-            this.postDraftMessage(draftMessage).then(() => {
-                microsoftTeams.tasks.submitTask();
-            });
+        if (!checkValidSizeOfImage(resizedImageAsBase64)) {
+          setImageUploadErrorMessage(t('ErrorImageSizeMessage') ?? '');
+          return;
         }
+
+        setMessageState({ ...messageState, imageLink: resizedImageAsBase64 });
+      };
+    }
+  };
+
+  const isSaveBtnDisabled = () => {
+    const msgPageConditions = messageState.title !== '' && imageUploadErrorMessage === '' && btnLinkErrorMessage === '';
+    const audPageConditions =
+      (teamsSelectedOptions.length > 0 && selectedRadioButton === AudienceSelection.Teams) ||
+      (rostersSelectedOptions.length > 0 && selectedRadioButton === AudienceSelection.Rosters) ||
+      (searchSelectedOptions.length > 0 && selectedRadioButton === AudienceSelection.Groups) ||
+      selectedRadioButton === AudienceSelection.AllUsers;
+
+    if (msgPageConditions && audPageConditions && scheduledSendValidation) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const isNextBtnDisabled = () => {
+    if (messageState.title !== '' && imageUploadErrorMessage === '' && btnLinkErrorMessage === '') {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const onSave = () => {
+    let finalSelectedTeams: string[] = [];
+    let finalSelectedRosters: string[] = [];
+    let finalSelectedGroups: string[] = [];
+    let finalAllUsers: boolean = false;
+
+    if (selectedRadioButton === AudienceSelection.Teams) {
+      finalSelectedTeams = [
+        ...teams.filter((t1) => teamsSelectedOptions.some((sp) => sp.id === t1.id)).map((t2) => t2.id),
+      ];
+    }
+    if (selectedRadioButton === AudienceSelection.Rosters) {
+      finalSelectedRosters = [
+        ...teams.filter((t1) => rostersSelectedOptions.some((sp) => sp.id === t1.id)).map((t2) => t2.id),
+      ];
+    }
+    if (selectedRadioButton === AudienceSelection.Groups) {
+      finalSelectedGroups = [...searchSelectedOptions.map((g) => g.id)];
+    }
+    if (selectedRadioButton === AudienceSelection.AllUsers) {
+      finalAllUsers = allUsersState;
     }
 
-    private editDraftMessage = async (draftMessage: IDraftMessage) => {
-        try {
-            await updateDraftNotification(draftMessage);
-        } catch (error) {
-            return error;
-        }
-    }
+    const finalMessage = {
+      ...messageState,
+      teams: finalSelectedTeams,
+      rosters: finalSelectedRosters,
+      groups: finalSelectedGroups,
+      allUsers: finalAllUsers,
+    };
 
-    private postDraftMessage = async (draftMessage: IDraftMessage) => {
-        try {
-            await createDraftNotification(draftMessage);
-        } catch (error) {
-            throw error;
-        }
-    }
+    setShowMsgDraftingSpinner(true);
 
-    public escFunction(event: any) {
-        if (event.keyCode === 27 || (event.key === "Escape")) {
-            microsoftTeams.tasks.submitTask();
-        }
+    if (id) {
+      editDraftMessage(finalMessage);
+    } else {
+      postDraftMessage(finalMessage);
     }
+  };
 
-    private onNext = (event: any) => {
-        this.setState({
-            page: "AudienceSelection"
-        }, () => {
-            this.updateCard();
+  const editDraftMessage = (msg: IMessageState) => {
+    try {
+      updateDraftNotification(msg)
+        .then(() => {
+          if (msg.isScheduled) {
+            GetScheduledMessagesSilentAction(dispatch);
+          } else {
+            GetDraftMessagesSilentAction(dispatch);
+          }
+        })
+        .finally(() => {
+          setShowMsgDraftingSpinner(false);
+          dialog.url.submit();
         });
+    } catch (error) {
+      return error;
     }
+  };
 
-    private onBack = (event: any) => {
-        this.setState({
-            page: "CardCreation"
-        }, () => {
-            this.updateCard();
+  const postDraftMessage = (msg: IMessageState) => {
+    try {
+      createDraftNotification(msg)
+        .then(() => {
+          if (msg.isScheduled) {
+            GetScheduledMessagesSilentAction(dispatch);
+          } else {
+            GetDraftMessagesSilentAction(dispatch);
+          }
+        })
+        .finally(() => {
+          setShowMsgDraftingSpinner(false);
+          dialog.url.submit();
         });
+    } catch (error) {
+      return error;
+    }
+  };
+
+  const onNext = (event: any) => {
+    setPageSelection(CurrentPageSelection.AudienceSelection);
+  };
+
+  const onCancel = (event: any) => {
+    dialog.url.submit();
+  };
+
+  const onBack = (event: any) => {
+    setPageSelection(CurrentPageSelection.CardCreation);
+    setAllUserAria('none');
+    setGroupsAria('none');
+  };
+
+  const onTitleChanged = (event: any) => {
+    if (event.target.value === '') {
+      setTitleErrorMessage(t('titleRequired') ?? '');
+    } else {
+      setTitleErrorMessage('');
+    }
+    setMessageState({ ...messageState, title: event.target.value });
+  };
+
+  const onImageLinkChanged = (event: any) => {
+    const urlOrDataUrl = event.target.value;
+    let isGoodLink = true;
+    setImageFileName(urlOrDataUrl);
+
+    if (
+      !(
+        urlOrDataUrl === '' ||
+        urlOrDataUrl.startsWith('https://') ||
+        urlOrDataUrl.startsWith('data:image/png;base64,') ||
+        urlOrDataUrl.startsWith('data:image/jpeg;base64,') ||
+        urlOrDataUrl.startsWith('data:image/gif;base64,')
+      )
+    ) {
+      isGoodLink = false;
+      setImageUploadErrorMessage(t('ErrorURLMessage') ?? '');
+    } else {
+      isGoodLink = true;
+      setImageUploadErrorMessage('');
     }
 
-    private onTitleChanged = (event: any) => {
-        let showDefaultCard = (!event.target.value && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
-        setCardTitle(this.card, event.target.value);
-        setCardImageLink(this.card, this.state.imageLink);
-        setCardSummary(this.card, this.state.summary);
-        setCardAuthor(this.card, this.state.author);
-        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
-        this.setState({
-            title: event.target.value,
-            card: this.card
-        }, () => {
-            if (showDefaultCard) {
-                this.setDefaultCard(this.card);
-            }
-            this.updateCard();
-        });
+    if (isGoodLink) {
+      setMessageState({ ...messageState, imageLink: urlOrDataUrl });
+    }
+  };
+
+  const onSummaryChanged = (event: any) => {
+    setMessageState({ ...messageState, summary: event.target.value });
+  };
+
+  const onAuthorChanged = (event: any) => {
+    setMessageState({ ...messageState, author: event.target.value });
+  };
+
+  const onBtnTitleChanged = (event: any) => {
+    setMessageState({ ...messageState, buttonTitle: event.target.value });
+  };
+
+  const onBtnLinkChanged = (event: any) => {
+    if (
+      validator.isURL(event.target.value, { require_protocol: true, protocols: ['https'] }) ||
+      event.target.value === ''
+    ) {
+      setBtnLinkErrorMessage('');
+    } else {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      setBtnLinkErrorMessage(`${event.target.value} is invalid. ${t('enterValidURL')}`);
+    }
+    setMessageState({ ...messageState, buttonLink: event.target.value });
+  };
+
+  // generate ids for handling labelling
+  const teamsComboId = useId('teams-combo-multi');
+  const teamsSelectedListId = `${teamsComboId}-selection`;
+
+  const rostersComboId = useId('rosters-combo-multi');
+  const rostersSelectedListId = `${rostersComboId}-selection`;
+
+  const searchComboId = useId('search-combo-multi');
+  const searchSelectedListId = `${searchComboId}-selection`;
+
+  // refs for managing focus when removing tags
+  const teamsSelectedListRef = React.useRef<HTMLUListElement>(null);
+  const teamsComboboxInputRef = React.useRef<HTMLInputElement>(null);
+
+  const rostersSelectedListRef = React.useRef<HTMLUListElement>(null);
+  const rostersComboboxInputRef = React.useRef<HTMLInputElement>(null);
+
+  const searchSelectedListRef = React.useRef<HTMLUListElement>(null);
+  const searchComboboxInputRef = React.useRef<HTMLInputElement>(null);
+
+  const onTeamsSelect: ComboboxProps['onOptionSelect'] = (event, data) => {
+    if (data.selectedOptions.length <= MAX_SELECTED_TEAMS_NUM) {
+      setTeamsSelectedOptions(teams.filter((t1) => data.selectedOptions.some((t2) => t2 === t1.id)));
+    }
+  };
+
+  const onRostersSelect: ComboboxProps['onOptionSelect'] = (event, data) => {
+    if (data.selectedOptions.length <= MAX_SELECTED_TEAMS_NUM) {
+      setRostersSelectedOptions(teams.filter((t1) => data.selectedOptions.some((t2) => t2 === t1.id)));
+    }
+  };
+
+  const onSearchSelect: ComboboxProps['onOptionSelect'] = (event, data: any) => {
+    if (data.optionText && !searchSelectedOptions.find((x) => x.id === data.optionValue)) {
+      setSearchSelectedOptions([...searchSelectedOptions, { id: data.optionValue, name: data.optionText }]);
+    }
+  };
+
+  const onSearchChange = (event: any) => {
+    if (event?.target?.value) {
+      const q = encodeURIComponent(event.target.value);
+      SearchGroupsAction(dispatch, { query: q });
+    }
+  };
+
+  const onTeamsTagClick = (option: ITeamTemplate, index: number) => {
+    // remove selected option
+    setTeamsSelectedOptions(teamsSelectedOptions.filter((o) => o.id !== option.id));
+
+    // focus previous or next option, defaulting to focusing back to the combo input
+    const indexToFocus = index === 0 ? 1 : index - 1;
+    const optionToFocus = teamsSelectedListRef.current?.querySelector(`#${teamsComboId}-remove-${indexToFocus}`);
+    if (optionToFocus) {
+      (optionToFocus as HTMLButtonElement).focus();
+    } else {
+      teamsComboboxInputRef.current?.focus();
+    }
+  };
+
+  const onRostersTagClick = (option: ITeamTemplate, index: number) => {
+    // remove selected option
+    setRostersSelectedOptions(rostersSelectedOptions.filter((o) => o.id !== option.id));
+
+    // focus previous or next option, defaulting to focusing back to the combo input
+    const indexToFocus = index === 0 ? 1 : index - 1;
+    const optionToFocus = rostersSelectedListRef.current?.querySelector(`#${rostersComboId}-remove-${indexToFocus}`);
+    if (optionToFocus) {
+      (optionToFocus as HTMLButtonElement).focus();
+    } else {
+      rostersComboboxInputRef.current?.focus();
+    }
+  };
+
+  const onSearchTagClick = (option: ITeamTemplate, index: number) => {
+    // remove selected option
+    setSearchSelectedOptions(searchSelectedOptions.filter((o) => o.id !== option.id));
+
+    // focus previous or next option, defaulting to focusing back to the combo input
+    const indexToFocus = index === 0 ? 1 : index - 1;
+    const optionToFocus = searchSelectedListRef.current?.querySelector(`#${searchComboId}-remove-${indexToFocus}`);
+    if (optionToFocus) {
+      (optionToFocus as HTMLButtonElement).focus();
+    } else {
+      searchComboboxInputRef.current?.focus();
+    }
+  };
+
+  const teamsLabelledBy = teamsSelectedOptions.length > 0 ? `${teamsComboId} ${teamsSelectedListId}` : teamsComboId;
+  const rostersLabelledBy =
+    rostersSelectedOptions.length > 0 ? `${rostersComboId} ${rostersSelectedListId}` : rostersComboId;
+  const searchLabelledBy =
+    searchSelectedOptions.length > 0 ? `${searchComboId} ${searchSelectedListId}` : searchComboId;
+
+  const cmbStyles = useComboboxStyles();
+  const fieldStyles = useFieldStyles();
+
+  const audienceSelectionChange = (ev: any, data: RadioGroupOnChangeData) => {
+    const input = data.value as keyof typeof AudienceSelection;
+    setSelectedRadioButton(AudienceSelection[input]);
+
+    if (AudienceSelection[input] === AudienceSelection.AllUsers) {
+      setAllUsersState(true);
+    } else if (allUsersState) {
+      setAllUsersState(false);
     }
 
-    private onImageLinkChanged = (event: any) => {
-        let url = event.target.value.toLowerCase();
-        if (!((url === "") || (url.startsWith("https://") || (url.startsWith("data:image/png;base64,")) || (url.startsWith("data:image/jpeg;base64,")) || (url.startsWith("data:image/gif;base64,"))))) {
-            this.setState({
-                errorImageUrlMessage: this.localize("ErrorURLMessage")
-            });
-        } else {
-            this.setState({
-                errorImageUrlMessage: ""
-            });
-        }
+    AudienceSelection[input] === AudienceSelection.AllUsers ? setAllUserAria('alert') : setAllUserAria('none');
+    AudienceSelection[input] === AudienceSelection.Groups ? setGroupsAria('alert') : setGroupsAria('none');
+  };
 
-        let showDefaultCard = (!this.state.title && !event.target.value && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
-        setCardTitle(this.card, this.state.title);
-        setCardImageLink(this.card, event.target.value);
-        setCardSummary(this.card, this.state.summary);
-        setCardAuthor(this.card, this.state.author);
-        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
-        this.setState({
-            imageLink: event.target.value,
-            card: this.card
-        }, () => {
-            if (showDefaultCard) {
-                this.setDefaultCard(this.card);
-            }
-            this.updateCard();
-        });
-    }
-
-    private onSummaryChanged = (event: any) => {
-        let showDefaultCard = (!this.state.title && !this.state.imageLink && !event.target.value && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
-        setCardTitle(this.card, this.state.title);
-        setCardImageLink(this.card, this.state.imageLink);
-        setCardSummary(this.card, event.target.value);
-        setCardAuthor(this.card, this.state.author);
-        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
-        this.setState({
-            summary: event.target.value,
-            card: this.card
-        }, () => {
-            if (showDefaultCard) {
-                this.setDefaultCard(this.card);
-            }
-            this.updateCard();
-        });
-    }
-
-    private onAuthorChanged = (event: any) => {
-        let showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !event.target.value && !this.state.btnTitle && !this.state.btnLink);
-        setCardTitle(this.card, this.state.title);
-        setCardImageLink(this.card, this.state.imageLink);
-        setCardSummary(this.card, this.state.summary);
-        setCardAuthor(this.card, event.target.value);
-        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
-        this.setState({
-            author: event.target.value,
-            card: this.card
-        }, () => {
-            if (showDefaultCard) {
-                this.setDefaultCard(this.card);
-            }
-            this.updateCard();
-        });
-    }
-
-    private onBtnTitleChanged = (event: any) => {
-        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !event.target.value && !this.state.btnLink);
-        setCardTitle(this.card, this.state.title);
-        setCardImageLink(this.card, this.state.imageLink);
-        setCardSummary(this.card, this.state.summary);
-        setCardAuthor(this.card, this.state.author);
-        if (event.target.value && this.state.btnLink) {
-            setCardBtn(this.card, event.target.value, this.state.btnLink);
-            this.setState({
-                btnTitle: event.target.value,
-                card: this.card
-            }, () => {
-                if (showDefaultCard) {
-                    this.setDefaultCard(this.card);
-                }
-                this.updateCard();
-            });
-        } else {
-            delete this.card.actions;
-            this.setState({
-                btnTitle: event.target.value,
-            }, () => {
-                if (showDefaultCard) {
-                    this.setDefaultCard(this.card);
-                }
-                this.updateCard();
-            });
-        }
-    }
-
-    private onBtnLinkChanged = (event: any) => {
-        if (!(event.target.value === "" || event.target.value.toLowerCase().startsWith("https://"))) {
-            this.setState({
-                errorButtonUrlMessage: this.localize("ErrorURLMessage")
-            });
-        } else {
-            this.setState({
-                errorButtonUrlMessage: ""
-            });
-        }
-
-        const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !event.target.value);
-        setCardTitle(this.card, this.state.title);
-        setCardSummary(this.card, this.state.summary);
-        setCardAuthor(this.card, this.state.author);
-        setCardImageLink(this.card, this.state.imageLink);
-        if (this.state.btnTitle && event.target.value) {
-            setCardBtn(this.card, this.state.btnTitle, event.target.value);
-            this.setState({
-                btnLink: event.target.value,
-                card: this.card
-            }, () => {
-                if (showDefaultCard) {
-                    this.setDefaultCard(this.card);
-                }
-                this.updateCard();
-            });
-        } else {
-            delete this.card.actions;
-            this.setState({
-                btnLink: event.target.value
-            }, () => {
-                if (showDefaultCard) {
-                    this.setDefaultCard(this.card);
-                }
-                this.updateCard();
-            });
-        }
-    }
-
-    private updateCard = () => {
-        const adaptiveCard = new AdaptiveCards.AdaptiveCard();
-        adaptiveCard.parse(this.state.card);
-        const renderedCard = adaptiveCard.render();
-        const container = document.getElementsByClassName('adaptiveCardContainer')[0].firstChild;
-        if (container != null) {
-            container.replaceWith(renderedCard);
-        } else {
-            document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
-        }
-        const link = this.state.btnLink;
-        adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
-    }
-}
-
-const newMessageWithTranslation = withTranslation()(NewMessage);
-export default newMessageWithTranslation;
+  return (
+    <>
+      {pageSelection === CurrentPageSelection.CardCreation && (
+        <>
+          <span role='alert' aria-label={t('NewMessageStep1') ?? ''} />
+          <div className='adaptive-task-grid'>
+            <div className='form-area'>
+              <Field
+                size='large'
+                className={fieldStyles.styles}
+                label={t('TitleText')}
+                required={true}
+                validationMessage={titleErrorMessage}
+              >
+                <Input
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  placeholder={t('PlaceHolderTitle')!}
+                  onChange={onTitleChanged}
+                  autoComplete='off'
+                  size='large'
+                  required={true}
+                  appearance='filled-darker'
+                  value={messageState.title || ''}
+                />
+              </Field>
+              <Field
+                size='large'
+                className={fieldStyles.styles}
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
+                // @ts-ignore
+                label={{
+                  children: (_: unknown, imageInfoProps: LabelProps) => (
+                    <InfoLabel {...imageInfoProps} info={t('ImageSizeInfoContent') ?? ''}>
+                      {t('ImageURL')}
+                    </InfoLabel>
+                  ),
+                }}
+                validationMessage={imageUploadErrorMessage}
+              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto',
+                    gridTemplateAreas: 'input-area btn-area',
+                  }}
+                >
+                  <Input
+                    size='large'
+                    style={{ gridColumn: '1' }}
+                    appearance='filled-darker'
+                    value={imageFileName || ''}
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    placeholder={t('PlaceHolderImageURL')!}
+                    onChange={onImageLinkChanged}
+                  />
+                  <div
+                    style={{
+                      gridColumn: '2',
+                      marginLeft: '8px',
+                      marginRight: '5px',
+                      paddingTop: '8px',
+                      color: 'darkgray',
+                    }}
+                  >
+                    {' '}
+                    {t('FieldSeperator')}{' '}
+                  </div>
+                  {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
+                    // @ts-ignore
+                    <Button
+                      style={{ gridColumn: '3', marginLeft: '5px' }}
+                      onClick={handleUploadClick}
+                      size='large'
+                      appearance='secondary'
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                      aria-label={imageFileName ? t('UploadImageSuccessful') : t('UploadImageInfo')}
+                      icon={<ArrowUpload24Regular />}
+                    >
+                      {t('Upload')}
+                    </Button>
+                  }
+                  <input
+                    type='file'
+                    accept='.jpg, .jpeg, .png, .gif'
+                    aria-label='input file upload (hidden)'
+                    style={{ display: 'none' }}
+                    multiple={false}
+                    onChange={handleImageSelection}
+                    ref={fileInput}
+                  />
+                </div>
+              </Field>
+              <Field size='large' className={fieldStyles.styles} label={t('Summary')}>
+                <Textarea
+                  size='large'
+                  resize='vertical'
+                  appearance='filled-darker'
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  placeholder={t('PlaceHolderSummary')!}
+                  value={messageState.summary ?? ''}
+                  onChange={onSummaryChanged}
+                />
+              </Field>
+              <Field size='large' className={fieldStyles.styles} label={t('Author')}>
+                <Input
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  placeholder={t('PlaceHolderAuthor')!}
+                  size='large'
+                  onChange={onAuthorChanged}
+                  autoComplete='off'
+                  appearance='filled-darker'
+                  value={messageState.author ?? ''}
+                />
+              </Field>
+              <Field size='large' className={fieldStyles.styles} label={t('ButtonTitle')}>
+                <Input
+                  size='large'
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  placeholder={t('PlaceHolderButtonTitle')!}
+                  onChange={onBtnTitleChanged}
+                  autoComplete='off'
+                  appearance='filled-darker'
+                  value={messageState.buttonTitle ?? ''}
+                />
+              </Field>
+              <Field
+                size='large'
+                className={fieldStyles.styles}
+                label={t('ButtonURL')}
+                validationMessage={btnLinkErrorMessage}
+              >
+                <Input
+                  size='large'
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  placeholder={t('PlaceHolderButtonURL')!}
+                  onChange={onBtnLinkChanged}
+                  type='url'
+                  autoComplete='off'
+                  appearance='filled-darker'
+                  value={messageState.buttonLink ?? ''}
+                />
+              </Field>
+            </div>
+            <div className='card-area'>
+              <div className={cardAreaBorderClass}>
+                <div className='card-area-1'></div>
+              </div>
+            </div>
+          </div>
+          <div className='fixed-footer'>
+            <div className='footer-action-right'>
+              <Button id='cancelBtn' onClick={onCancel} appearance='secondary' style={{ marginRight: '16px' }}>
+                {t('Cancel')}
+              </Button>
+              <Button disabled={isNextBtnDisabled()} id='saveBtn' onClick={onNext} appearance='primary'>
+                {t('Next')}
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+      {pageSelection === CurrentPageSelection.AudienceSelection && (
+        <>
+          <span role='alert' aria-label={t('NewMessageStep2') ?? ''} />
+          <div className='adaptive-task-grid new-messages'>
+            <div className='form-area'>
+              <Label size='large' id='audienceSelectionGroupLabelId'>
+                {t('SendHeadingText')}
+              </Label>
+              <RadioGroup
+                defaultValue={selectedRadioButton}
+                aria-labelledby='audienceSelectionGroupLabelId'
+                onChange={audienceSelectionChange}
+              >
+                <Radio id='radio1' value={AudienceSelection.Teams} label={t('SendToGeneralChannel')} />
+                {selectedRadioButton === AudienceSelection.Teams && (
+                  <div className={cmbStyles.root}>
+                    <Label id={teamsComboId}>{t('pickTeams')}</Label>
+                    {
+                      // eslint-disable-next-line multiline-ternary
+                      teamsSelectedOptions.length ? (
+                        <ul id={teamsSelectedListId} className={cmbStyles.tagsList} ref={teamsSelectedListRef}>
+                          {/* The "Remove" span is used for naming the buttons without affecting the Combobox name */}
+                          <span id={`${teamsComboId}-remove`} hidden>
+                            {t('remove')}
+                          </span>
+                          {teamsSelectedOptions.map((option, i) => (
+                            <li key={option.id}>
+                              <Button
+                                size='small'
+                                shape='rounded'
+                                appearance='subtle'
+                                icon={<Dismiss12Regular />}
+                                iconPosition='after'
+                                // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+                                onClick={() => onTeamsTagClick(option, i)}
+                                id={`${teamsComboId}-remove-${i}`}
+                                aria-labelledby={`${teamsComboId}-remove ${teamsComboId}-remove-${i}`}
+                              >
+                                <Persona
+                                  name={option.name}
+                                  secondaryText={'Team'}
+                                  avatar={{ shape: 'square', color: 'colorful' }}
+                                />
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <></>
+                      )
+                    }
+                    <Combobox
+                      multiselect={true}
+                      selectedOptions={teamsSelectedOptions.map((op) => op.id)}
+                      appearance='filled-darker'
+                      size='large'
+                      onOptionSelect={onTeamsSelect}
+                      ref={teamsComboboxInputRef}
+                      aria-labelledby={teamsLabelledBy}
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                      placeholder={teams.length !== 0 ? t('pickOneOrMoreTeams')! : t('NoMatchMessage')!}
+                    >
+                      {teams.map((opt) => (
+                        <Option text={opt.name} value={opt.id} key={opt.id}>
+                          <Persona
+                            name={opt.name}
+                            secondaryText={'Team'}
+                            avatar={{ shape: 'square', color: 'colorful' }}
+                          />
+                        </Option>
+                      ))}
+                    </Combobox>
+                  </div>
+                )}
+                <Radio id='radio2' value={AudienceSelection.Rosters} label={t('SendToRosters')} />
+                {selectedRadioButton === AudienceSelection.Rosters && (
+                  <div className={cmbStyles.root}>
+                    <Label id={rostersComboId}>{t('pickTeams')}</Label>
+                    {
+                      // eslint-disable-next-line multiline-ternary
+                      rostersSelectedOptions.length ? (
+                        <ul id={rostersSelectedListId} className={cmbStyles.tagsList} ref={rostersSelectedListRef}>
+                          {/* The "Remove" span is used for naming the buttons without affecting the Combobox name */}
+                          <span id={`${rostersComboId}-remove`} hidden>
+                            {t('remove')}
+                          </span>
+                          {rostersSelectedOptions.map((option, i) => (
+                            <li key={option.id}>
+                              <Button
+                                size='small'
+                                shape='rounded'
+                                appearance='subtle'
+                                icon={<Dismiss12Regular />}
+                                iconPosition='after'
+                                // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+                                onClick={() => onRostersTagClick(option, i)}
+                                id={`${rostersComboId}-remove-${i}`}
+                                aria-labelledby={`${rostersComboId}-remove ${rostersComboId}-remove-${i}`}
+                              >
+                                <Persona
+                                  name={option.name}
+                                  secondaryText={'Team'}
+                                  avatar={{ shape: 'square', color: 'colorful' }}
+                                />
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <></>
+                      )
+                    }
+                    <Combobox
+                      multiselect={true}
+                      selectedOptions={rostersSelectedOptions.map((op) => op.id)}
+                      appearance='filled-darker'
+                      size='large'
+                      onOptionSelect={onRostersSelect}
+                      ref={rostersComboboxInputRef}
+                      aria-labelledby={rostersLabelledBy}
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                      placeholder={teams.length !== 0 ? t('pickOneOrMoreTeams')! : t('NoMatchMessage')!}
+                    >
+                      {teams.map((opt) => (
+                        <Option text={opt.name} value={opt.id} key={opt.id}>
+                          <Persona
+                            name={opt.name}
+                            secondaryText={'Team'}
+                            avatar={{ shape: 'square', color: 'colorful' }}
+                          />
+                        </Option>
+                      ))}
+                    </Combobox>
+                  </div>
+                )}
+                <Radio id='radio3' value={AudienceSelection.AllUsers} label={t('SendToAllUsers')} />
+                <div className={cmbStyles.root}>
+                  {selectedRadioButton === AudienceSelection.AllUsers && (
+                    <Text id='radio3Note' role={allUsersAria} className='info-text'>
+                      {t('SendToAllUsersNote')}
+                    </Text>
+                  )}
+                </div>
+                <Radio id='radio4' value={AudienceSelection.Groups} label={t('SendToGroups')} />
+                {selectedRadioButton === AudienceSelection.Groups && (
+                  <div className={cmbStyles.root}>
+                    {!canAccessGroups && (
+                      <Text role={groupsAria} className='info-text'>
+                        {t('SendToGroupsPermissionNote')}
+                      </Text>
+                    )}
+                    {canAccessGroups && (
+                      <>
+                        <Label id={searchComboId}>{t('pickGroups')}</Label>
+                        {
+                          // eslint-disable-next-line multiline-ternary
+                          searchSelectedOptions.length ? (
+                            <ul id={searchSelectedListId} className={cmbStyles.tagsList} ref={searchSelectedListRef}>
+                              {/* The "Remove" span is used for naming the buttons without affecting the Combobox name */}
+                              <span id={`${searchComboId}-remove`} hidden>
+                                {t('remove')}
+                              </span>
+                              {searchSelectedOptions.map((option, i) => (
+                                <li key={option.id}>
+                                  <Button
+                                    size='small'
+                                    shape='rounded'
+                                    appearance='subtle'
+                                    icon={<Dismiss12Regular />}
+                                    iconPosition='after'
+                                    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+                                    onClick={() => onSearchTagClick(option, i)}
+                                    id={`${searchComboId}-remove-${i}`}
+                                    aria-labelledby={`${searchComboId}-remove ${searchComboId}-remove-${i}`}
+                                  >
+                                    <Persona
+                                      name={option.name}
+                                      secondaryText={'Group'}
+                                      avatar={{ color: 'colorful' }}
+                                    />
+                                  </Button>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <></>
+                          )
+                        }
+                        <Combobox
+                          appearance='filled-darker'
+                          size='large'
+                          onOptionSelect={onSearchSelect}
+                          onChange={onSearchChange}
+                          aria-labelledby={searchLabelledBy}
+                          placeholder={t('searchForGroups') ?? ''}
+                        >
+                          {queryGroups.map((opt) => (
+                            <Option text={opt.name} value={opt.id} key={opt.id}>
+                              <Persona name={opt.name} secondaryText={'Group'} avatar={{ color: 'colorful' }} />
+                            </Option>
+                          ))}
+                        </Combobox>
+                        <Text role={groupsAria} className='info-text'>
+                          {t('SendToGroupsNote')}
+                        </Text>
+                      </>
+                    )}
+                  </div>
+                )}
+              </RadioGroup>
+              <div>
+                <></>
+              </div>
+              <div>
+                <Label size='large' id='MoreOptionsLabelId'>
+                  {t('MoreOptions')}
+                </Label>
+              </div>
+              <Checkbox
+                id='ScheduleCheckbox'
+                label={t('ScheduleSend')}
+                defaultChecked={scheduleSendCheckBox}
+                onChange={handleScheduleSendCheckBox}
+              />
+              {scheduleSendCheckBox && (
+                <div>
+                  <Label
+                    id='ScheduleSection'
+                    className='info-text'
+                    style={{ marginBottom: '5px', display: 'block', marginLeft: '36px' }}
+                  >
+                    {t('ScheduleSection')}
+                  </Label>
+                  <Text
+                    id='ScheduleNote'
+                    className='info-text'
+                    style={{ marginBottom: '5px', display: 'block', marginLeft: '36px' }}
+                  >
+                    {t('ScheduleNote')}
+                  </Text>
+                  <div className='flex-container schedulesend-datetime'>
+                    <DatePicker
+                      value={scheduledDatePicker}
+                      onSelectDate={handleScheduleSendDate}
+                      minDate={new Date()}
+                      placeholder='Select a date'
+                      ariaLabel={'Scheduled Date required'}
+                      className='schedule-datepicker'
+                      calloutProps={{ className: 'incidentdatepicker-callout' }}
+                    />
+                    <TimePicker
+                      dateAnchor={scheduledDatePicker}
+                      value={scheduledTimePicker}
+                      placeholder='Select a time'
+                      onChange={handleScheduleSendTime}
+                      calloutProps={{ directionalHintFixed: true, doNotLayer: true }}
+                      ariaLabel={'Scheduled Time required'}
+                      className='schedule-timepicker'
+                      useHour12={true}
+                      allowFreeform={false}
+                    />
+                  </div>
+                  {scheduledSendTimeValidation && (
+                    <div className='validationText'>
+                      <Text role='alert'>{t('ScheduleTimeValidation')}</Text>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className='card-area'>
+              <div className={cardAreaBorderClass}>
+                <div className='card-area-2'></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div className='fixed-footer'>
+              <div className='footer-action-right'>
+                <div className='footer-actions-flex'>
+                  {showMsgDraftingSpinner && (
+                    <Spinner
+                      role='alert'
+                      id='draftingLoader'
+                      size='small'
+                      label={t('DraftingMessageLabel')}
+                      labelPosition='after'
+                    />
+                  )}
+                  <Button
+                    id='backBtn'
+                    style={{ marginLeft: '16px' }}
+                    onClick={onBack}
+                    disabled={showMsgDraftingSpinner}
+                    appearance='secondary'
+                  >
+                    {t('Back')}
+                  </Button>
+                  <Button
+                    style={{ marginLeft: '16px' }}
+                    disabled={isSaveBtnDisabled() || showMsgDraftingSpinner}
+                    id='saveBtn'
+                    onClick={onSave}
+                    appearance='primary'
+                  >
+                    {scheduleSendCheckBox ? t('Schedule') : t('SaveAsDraft')}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
+  );
+};

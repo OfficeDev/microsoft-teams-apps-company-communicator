@@ -32,7 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     public class SendFileCardActivity
     {
         private readonly string authorAppId;
-        private readonly ICCBotFrameworkHttpAdapter botAdapter;
+        private readonly CCBotAdapterBase botAdapter;
         private readonly IUserDataRepository userDataRepository;
         private readonly IConversationService conversationService;
         private readonly TeamsConversationOptions options;
@@ -51,7 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <param name="localizer">Localization service.</param>
         public SendFileCardActivity(
             IOptions<BotOptions> botOptions,
-            ICCBotFrameworkHttpAdapter botAdapter,
+            CCBotAdapterBase botAdapter,
             IUserDataRepository userDataRepository,
             IConversationService conversationService,
             IOptions<TeamsConversationOptions> options,
@@ -105,7 +105,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
             int maxNumberOfAttempts = 10;
             string consentId = string.Empty;
             await this.botAdapter.ContinueConversationAsync(
-               botId: this.authorAppId,
+               botAppId: this.authorAppId,
                reference: conversationReference,
                callback: async (turnContext, cancellationToken) =>
                {

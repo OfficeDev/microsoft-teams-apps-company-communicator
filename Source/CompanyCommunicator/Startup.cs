@@ -7,7 +7,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 {
     using System;
     using System.Net;
-    using System.Net.Http;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics;
     using Microsoft.AspNetCore.Hosting;
@@ -24,8 +23,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Adapter;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Clients;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.CleanUpHistory;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -78,6 +79,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                 {
                     Startup.FillAuthenticationOptionsProperties(authenticationOptions, configuration);
                 });
+
+            services.AddAppConfiguration(this.Configuration);
+
             services.AddOptions<BotOptions>()
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
@@ -156,10 +160,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<TeamsFileUpload>();
             services.AddTransient<UserTeamsActivityHandler>();
             services.AddTransient<AuthorTeamsActivityHandler>();
-            services.AddSingleton<ICredentialProvider, ConfigurationCredentialProvider>();
+            services.AddSingleton<ServiceClientCredentialsFactory, ConfigurationCredentialProvider>();
             services.AddTransient<CompanyCommunicatorBotFilterMiddleware>();
+            services.AddSingleton<BotFrameworkAuthentication, ConfigurationBotFrameworkAuthentication>();
             services.AddSingleton<CompanyCommunicatorBotAdapter>();
-            services.AddSingleton<BotFrameworkHttpAdapter>();
 
             // Add repositories.
             services.AddSingleton<ITeamDataRepository, TeamDataRepository>();
@@ -169,6 +173,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddSingleton<IExportDataRepository, ExportDataRepository>();
             services.AddSingleton<IAppConfigRepository, AppConfigRepository>();
             services.AddSingleton<ISendingNotificationDataRepository, SendingNotificationDataRepository>();
+            services.AddSingleton<ICleanUpHistoryRepository, CleanUpHistoryRepository>();
 
             // Add service bus message queues.
             services.AddSingleton<IPrepareToSendQueue, PrepareToSendQueue>();
@@ -184,7 +189,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             // Add microsoft graph services.
             services.AddScoped<IAuthenticationProvider, GraphTokenProvider>();
             services.AddScoped<IHttpProvider, HttpProvider>();
-            services.AddScoped<IGraphServiceClient>(sp => new GraphServiceClient(sp.GetService<IAuthenticationProvider>(), sp.GetService<IHttpProvider>()));
+
+            services.AddScoped<IGraphServiceClient>(sp => new GraphServiceClient(
+                sp.GetService<IAppConfiguration>().GraphBaseUrl,
+                sp.GetService<IAuthenticationProvider>(),
+                sp.GetService<IHttpProvider>()));
             services.AddScoped<IGraphServiceFactory, GraphServiceFactory>();
             services.AddScoped<IGroupsService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetGroupsService());
             services.AddScoped<IAppCatalogService>(sp => sp.GetRequiredService<IGraphServiceFactory>().GetAppCatalogService());
@@ -198,7 +207,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<IAppSettingsService, AppSettingsService>();
             services.AddTransient<IUserDataService, UserDataService>();
             services.AddTransient<ITeamMembersService, TeamMembersService>();
-            services.AddTransient<ICCBotFrameworkHttpAdapter, CCBotFrameworkHttpAdapter>();
+            services.AddTransient<CCBotAdapterBase, CCBotAdapter>();
             services.AddTransient<IStorageClientFactory, StorageClientFactory>();
             services.AddTransient<IBlobStorageProvider, BlobStorageProvider>();
         }
@@ -261,6 +270,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
 
             authenticationOptions.DisableCreatorUpnCheck = configuration.GetValue<bool>("DisableCreatorUpnCheck", false);
             authenticationOptions.AuthorizedCreatorUpns = configuration.GetValue<string>("AuthorizedCreatorUpns");
+            authenticationOptions.DisableDeleteUpnCheck = configuration.GetValue<bool>("DisableDeleteUpnCheck", false);
+            authenticationOptions.AuthorizedDeleteUpns = configuration.GetValue<string>("AuthorizedDeleteUpns");
         }
 
         /// <summary>

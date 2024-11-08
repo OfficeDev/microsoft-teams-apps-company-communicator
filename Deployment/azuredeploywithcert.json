@@ -61,6 +61,13 @@
         "description": "Semicolon-delimited list of the user principal names (UPNs) allowed to send messages."
       }
     },
+    "deleteAdminUPNList": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Semicolon-delimited list of the user principal names (UPNs) allowed to delete historical messages."
+      }
+    },
     "ProactivelyInstallUserApp": {
       "defaultValue": true,
       "type": "Bool",
@@ -115,10 +122,10 @@
     "customDomainOption": {
       "type": "string",
       "allowedValues": [
-        "Custom domain name (recommended)",
-        "Azure Front Door"
+        "Custom domain name",
+        "Azure Front Door (recommended)"
       ],
-      "defaultValue": "Azure Front Door",
+      "defaultValue": "Azure Front Door (recommended)",
       "metadata": {
         "description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs. "
       }
@@ -283,6 +290,8 @@
     "hostingPlanName": "[parameters('baseResourceName')]",
     "storageAccountName": "[uniquestring(concat(resourceGroup().id, parameters('baseResourceName')))]",
     "appInsightsName": "[parameters('baseResourceName')]",
+	  "workspaceAnalyticsName": "[concat(parameters('baseResourceName'), '-log-analytics')]",
+	  "workspaceAnalyticsSku": "pergb2018",
     "prepFunctionAppName": "[concat(parameters('baseResourceName'), '-prep-function')]",
     "sendFunctionAppName": "[concat(parameters('baseResourceName'), '-function')]",
     "dataFunctionAppName": "[concat(parameters('baseResourceName'), '-data-function')]",
@@ -299,7 +308,7 @@
     ],
     "isSharedPlan": "[contains(variables('sharedSkus'), parameters('hostingPlanSku'))]",
     "skuFamily": "[if(equals(parameters('hostingPlanSku'), 'Shared'), 'D', take(parameters('hostingPlanSku'), 1))]",
-    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]",
+    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door (recommended)')]",
     "frontDoorName": "[parameters('baseResourceName')]",
     "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.net'))]",
     "ProactivelyInstallUserApp": "[parameters('ProactivelyInstallUserApp')]",
@@ -453,19 +462,34 @@
         "capacity": 0
       }
     },
-    {
-      "apiVersion": "2015-05-01",
-      "name": "[variables('appInsightsName')]",
-      "type": "Microsoft.Insights/components",
+	  {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2017-03-15-preview",
+      "name": "[variables('workspaceAnalyticsName')]",
       "location": "[parameters('location')]",
-      "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('botAppName'))]": "Resource"
-      },
       "properties": {
-        "Application_Type": "web",
-        "Request_Source": "rest"
+          "sku": {
+              "name": "[variables('workspaceAnalyticsSku')]"
+          }
       }
     },
+    {
+	    "type": "Microsoft.Insights/components",
+	    "apiVersion": "2020-02-02-preview",
+	    "name": "[variables('appInsightsName')]",
+	    "location": "[parameters('location')]",
+	    "dependsOn": [
+		    "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceAnalyticsName'))]"
+		  ],
+	    "tags": {
+		    "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('botAppName'))]": "Resource"
+		  },
+	    "properties": {
+		  "Application_Type": "web",
+		  "Request_Source": "rest",
+		  "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceAnalyticsName'))]"
+	    }
+	  },
     {
       "apiVersion": "2021-03-01",
       "name": "[variables('authorBotName')]",
@@ -627,16 +651,21 @@
             "AllowedTenants": "[parameters('tenantId')]",
             "DisableTenantFilter": "false",
             "AuthorizedCreatorUpns": "[parameters('senderUPNList')]",
+            "AuthorizedDeleteUpns": "[parameters('deleteAdminUPNList')]",
             "UseCertificate": "true",
             "DisableAuthentication": "false",
             "DisableCreatorUpnCheck": "false",
+            "DisableDeleteUpnCheck": "false",
             "WEBSITE_LOAD_CERTIFICATES": "*",
             "APPINSIGHTS_INSTRUMENTATIONKEY": "[concat('@Microsoft.KeyVault(SecretUri=', reference(variables('AppInsightsSecretResourceId'), '2015-06-01').secretUriWithVersion, ')')]",
             "WEBSITE_NODE_DEFAULT_VERSION": "16.13.0",
+            "WEBSITE_NPM_DEFAULT_VERSION": "8.19.2",
             "KeyVault:Url": "[variables('keyVaultUrl')]",
             "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
             "REACT_APP_HEADERTEXT": "[parameters('headerText')]",
-            "REACT_APP_HEADERIMAGE": "[parameters('headerLogoUrl')]"
+            "REACT_APP_HEADERIMAGE": "[parameters('headerLogoUrl')]",
+            "DataFunctionUrl": "[concat('https://', variables('dataFunctionAppName'), '.azurewebsites.net/api/CompanyCommunicatorDataCleanUpFunction')]",
+            "REACT_APP_AUTHORIZED_USERS_EMAIL": "[parameters('deleteAdminUPNList')]"
           }
         },
         {
@@ -994,7 +1023,7 @@
             "tenantId": "[reference(concat('Microsoft.Web/sites/', variables('botAppName')), '2018-02-01', 'Full').identity.tenantId]",
             "objectId": "[parameters('objectId')]",
             "permissions": {
-              "certificates": [ "get", "list", "create", "update" ]
+              "certificates": ["get", "list", "create", "update"]
             }
           }
         ],
@@ -1250,32 +1279,6 @@
                 "backendPool": {
                   "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', variables('frontDoorName'), 'backendPool1')]"
                 }
-              },
-              "enabledState": "Enabled"
-            }
-          },
-          {
-            "name": "routingRule2",
-            "properties": {
-              "frontendEndpoints": [
-                {
-                  "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', variables('frontDoorName'), 'frontendEndpoint1')]"
-                }
-              ],
-              "acceptedProtocols": [
-                "Https"
-              ],
-              "patternsToMatch": [
-                "/api/*"
-              ],
-              "routeConfiguration": {
-                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorRedirectConfiguration",
-                "customFragment": null,
-                "customHost": "[variables('botAppDomain')]",
-                "customPath": "",
-                "redirectProtocol": "HttpsOnly",
-                "customQueryString": null,
-                "redirectType": "PermanentRedirect"
               },
               "enabledState": "Enabled"
             }

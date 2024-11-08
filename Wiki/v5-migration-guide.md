@@ -1,5 +1,85 @@
 ## Company Communicator v5 Migration Guide
 
+## Migrating Classic Application Insights to Workspace-based Application Insights
+
+Microsoft Azure is retiring the classic Application Insights in Azure Monitor on 29 February 2024. Please refer to [this](https://azure.microsoft.com/en-in/updates/we-re-retiring-classic-application-insights-on-29-february-2024/) article for more details. The below steps will help you create a new Log Analytics workspace within the existing resource group where Company Communicator has been deployed and migrate to the workspace-based App Insights. If you have deployed Company Communicator v5.5 or below within your tenant, please follow the below steps to migrate to the workspace-based App Insights:
+
+### Approach 1: Programmatic migration via PowerShell Script
+
+>Note: This approach applies only if your tenant is Commercial or GCC.This will not work for GCC-H or DoD tenants.
+
+Install Azure CLI to upgrade classic app insight to workplace based app insight. Please refer this [link](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli#install).
+
+Download the whole solution folder from [GitHub](https://github.com/OfficeDev/microsoft-teams-company-communicator-app)
+- Unzip the Content to a folder. (say companyCommunicator)
+- Open a PowerShell window in **administrator** mode and navigate to the folder where you unzipped the content.
+- Navigate to Deployment folder.
+    ```  
+    cd microsoft-teams-apps-company-communicator-main\Deployment
+    ```
+
+- Run the below command. This will allow you to run applicationinsights-migration.ps1. By default, the execution policy is restricted. You may change it to back restricted after deployment is completed.
+    ```
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+    ```
+- Run the below command to unblock the deployment script.
+    ```
+    Unblock-File -Path .\applicationinsights-migration.ps1
+    ```
+
+#### Execute script
+
+- Execute the `applicationinsights-migration.ps1` script in the PowerShell window:
+    ```
+    .\applicationinsights-migration.ps1
+    ```
+- During execution of script you will be asked to provide below input parameters,
+    * Subscription Id : Please enter the subscription id of the resources where Company Communicator deployed.
+    * Resource Group Name : Please enter the resource group name where the previous resources were created.
+    * Base Resource Name : Please enter the base resource name used in the previous deployment. Base resource name is same as the app service name.
+
+![AppInsights Migration](images/appinsights-migration-execution.png)
+
+#### Validate Application Insights migration
+- Go to portal.azure.com. Navigate to resource group where all CC resources are deployed. 
+- Click on the App Insights -> Click on Overview
+
+![Migrated Workspace-based App Insights](images/migrated-appinsights-overview.png)
+
+
+### Approach 2: Manual migration via Azure Portal
+
+>Note: This approach applies to Commercial, GCC, GCC-H & DoD tenants.
+
+For the migration of classic app insights to workspace-based app insights has a prerequisite of creating a new log analytics workspace resource.
+Please follow the below steps to create a new log analytics workspace resource and migrate to workspace-based app insights.
+
+#### Create a new Log Analytics workspace resource
+- Go to portal.azure.com. Navigate to resource group where all CC resources are deployed.
+- Click on Create -> Search for Log Analytics workspace -> Click on Create
+- Enter the below details and click on Review + Create
+    * Subscription : Select the subscription where all CC resources are deployed.
+    * Resource Group : Select the resource group where all CC resources are deployed.
+    * Workspace Name : Enter the name of the workspace (preferably same as the **"[BaseResourceName]-log-analytics"**)
+    * Region : Select the region where all CC resources are deployed.
+    * Pricing tier : A default pricing tier of pay-as-you-go (Per GB 2018) is applied. No charges will be incurred until you start collecting enough data.
+
+![Create Log Analytics Workspace](images/create-log-analytics.png)
+
+- The log analytics workspace resource will be created. Please note down the workspace name from the overview page of the resource
+- **Note:** Please make sure that the workspace name is same as the **"[BaseResourceName]-log-analytics"**
+![Log Analytics Overview Page](images/log-analytics-overview-page.png)
+
+- Now, browse to the application insights resource within CC deployed resource group.
+- Browse to properties from left hand side menu and click on **Migrate to Workspace-based**.
+- Select the option of Migrate to Worksapce-based.
+- Select the subscription and the workspace name of the newly created log analytics workspace resource.
+![Log Analytics Overview Page](images/migrate-appinsights.png)
+- Click on Apply
+- The application insights resource will be migrated to workspace-based app insights.
+![Migrated Workspace-based App Insights](images/migrated-appinsights-overview.png)
+
+
 ## Upgrading from v5.x to latest version
 If you have CC v5.0, v5.1 or v5.2 deployed and plan to migrate to the latest version, please perform the following steps:
 
@@ -56,7 +136,12 @@ If you have CC v5.0, v5.1 or v5.2 deployed and plan to migrate to the latest ver
 1. Go to app service --> Configuration--> Click on New application setting and add below name and values. You can update the value for the header text and the header image as per your organization needs.
     * REACT_APP_HEADERTEXT : Company Communicator
     * REACT_APP_HEADERIMAGE : https://raw.githubusercontent.com/OfficeDev/microsoft-teams-company-communicator-app/main/Source/CompanyCommunicator/ClientApp/src/assets/Images/mslogo.png
-
+    * REACT_APP_AUTHORIZED_USERS_EMAIL : Semicolon-delimited list of the user principal names (UPNs) allowed to delete historical messages.
+    * DisableDeleteUpnCheck : True or False to enable to delete historical messages feature.
+    * AuthorizedDeleteUpns : Semicolon-delimited list of the user principal names (UPNs) allowed to delete historical messages.
+    * DataFunctionUrl :
+     <br> Commercial Tenant - https://[BASE_RESOURCE_NAME]-data-function.azurewebsites.net/api/CompanyCommunicatorDataCleanUpFunction
+     <br> GCCH/DoD Tenant - https://[BASE_RESOURCE_NAME]-data-function.azurewebsites.us/api/CompanyCommunicatorDataCleanUpFunction
         ![Update banner](images/update_banner_title_logo.png)
 
 1. Verify the WEBSITE_NODE_DEFAULT_VERSION value should be 16.13.0. Please update it to 16.13.0 if any other value is shown.

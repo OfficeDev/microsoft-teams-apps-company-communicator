@@ -84,7 +84,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Data.Func
                     .GetBlobClient(exportData.FileName)
                     .DeleteIfExistsAsync());
             }
-
             await Task.WhenAll(tasks);
         }
     }

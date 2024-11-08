@@ -68,6 +68,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         public Task<IEnumerable<T>> GetAllAsync(string partition = null, int? count = null);
 
         /// <summary>
+        /// Get all data entities from the table storage.
+        /// </summary>
+        /// <param name="partition">Partition key value.</param>
+        /// <param name="count">The max number of desired entities.</param>
+        /// <returns>All data entities.</returns>
+        public Task<IEnumerable<T>> GetAllDeleteAsync(string partition = null, int? count = null);
+
+        /// <summary>
         /// Get paged data entities from the table storage in a partition.
         /// </summary>
         /// <param name="partition">Partition key value.</param>

@@ -11,7 +11,7 @@ From Company Communicator v5.2, new banner added to the application, below optio
 - **Support:** Redirects user to GitHub repo to raise issues.
 - **Feedback:** Share your feedback and features directly to the product team.
 
-    ![Banner](images/banner.png)
+    ![Banner](images/support-banner.png)
 
 ## Send Message
 
@@ -28,7 +28,7 @@ Click 'New Message' to draft the message to be sent,
 - **Button Title:** Name of the button if you want the user to redirect to some other page.
 - **Button URL:**  URL of the page where user can be directed.
 
-    ![Company Communicator compose message screen](images/CompanyCommunicatorCompose.png)
+    ![Company Communicator compose message screen](images/company-communicator-compose.png)
 
 ### Send Options
 
@@ -38,7 +38,7 @@ Click 'New Message' to draft the message to be sent,
     1. **Send in chat to everyone** - Send the message to all the users in the organization who have access to the user app
     1. **Send in chat to members using groups** - Send the message to the users using M365 groups, Distribution groups or Security groups
 
-        ![Send message screen](images/send_options.png)
+        ![Send message screen](images/send-options.png)
 
 - Click on 'Save as draft', the message title will appear in the 'Draft messages' section
 
@@ -52,7 +52,7 @@ All the draft messages will appear in this section. Each draft message has the f
 - **Duplicate:** Creates a copy of the same message card.
 - **Delete:** Delete the message if it's no longer needed. 
 
-    ![Draft messages screen](images/draft_messages.png)
+    ![Draft messages screen](images/draft-message.png)
 
 ### Sent Messages
 
@@ -63,4 +63,4 @@ All the sent messages will appear in this section along with the recipients succ
 - **Duplicate:** Creates a copy of the same sent message card.
 - **Cancel:** Cancel sending the message to the users.
 
-    ![Sent messages screen](images/sent_messages.png)
+    ![Sent messages screen](images/sent-messages.png)

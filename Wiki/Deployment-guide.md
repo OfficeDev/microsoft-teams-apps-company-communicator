@@ -24,7 +24,7 @@ To begin, you will need:
     * Service Bus
     * Application Insights
     * Azure Key vault
-* An role to assign roles in Azure RBAC. To check if you have permission to do this, 
+* A role to assign roles in Azure RBAC. To check if you have permission to do this, 
     * Goto the subscription page in Azure portal. Then, goto Access Control(IAM) and click on `View my access` button.
     * Click on your `role` and in search permissions text box, search for `Microsoft.Authorization/roleAssignments/Write`.
     * If your current role does not have the permission, then you can grant yourself the built in role `User Access Administrator` or create a custom role.
@@ -140,8 +140,8 @@ Register three Azure AD application in your tenant's directory: one for author b
     18. **Storage Account Web App Role Name Guid [Optional]**: Default value is `edd0cc48-2cf7-490e-99e8-131311e42030`. This **MUST** be the same `id` per app deployment.
     19. **Storage Account Prep Func Role Name Guid [Optional]**: Default value is `9332a9e9-93f4-48d9-8121-d279f30a732e`. This **MUST** be the same `id` per app deployment.
     20. **Storage Account Data Func Role Name Guid [Optional]**: Default value is `5b67af51-4a98-47e1-9d22-745069f51a13`. This **MUST** be the same `id` per app deployment.
-    21. **DefaultCulture [Optional]**: By default the application uses `en-US` locale. You can choose the locale from the list, if you wish to use the app in different locale.Also, you may add/update the resources for other locales and update this configuration if desired.
-    22. **SupportedCultures [Optional]**: This is the list of locales that application supports currently.You may add/update the resources for other locales and update this configuration if desired.
+    21. **DefaultCulture [Optional]**: By default the application uses `en-US` locale. You can choose the locale from the list, if you wish to use the app in different locale. Also, you may add/update the resources for other locales and update this configuration if desired.
+    22. **SupportedCultures [Optional]**: This is the list of locales that application supports currently. You may add/update the resources for other locales and update this configuration if desired.
 
     > **Note:** Make sure that the values are copied as-is, with no extra spaces. The template checks that GUIDs are exactly 36 characters.
 
@@ -149,6 +149,10 @@ Register three Azure AD application in your tenant's directory: one for author b
 
 1. Update the "Sender UPN List", which is a semicolon-delimited list of users (Authors) who will be allowed to send messages using the Company Communicator.
     * For example, to allow Megan Bowen (meganb@contoso.com) and Adele Vance (adelev@contoso.com) to send messages, set this parameter to `meganb@contoso.com;adelev@contoso.com`.
+    * You can change this list later by going to the App Service's "Configuration" blade.
+
+1. Update the "Delete Admin UPN List", which is a semicolon-delimited list of users (Authors) who will be allowed to delete historical messages.
+    * For example, to allow Megan Bowen (meganb@contoso.com) and Adele Vance (adelev@contoso.com) to delete historical messages, set this parameter to `meganb@contoso.com;adelev@contoso.com`.
     * You can change this list later by going to the App Service's "Configuration" blade.
 
 1. If you wish to change the app name, description, and icon from the defaults, modify the corresponding template parameters.
@@ -163,7 +167,7 @@ Register three Azure AD application in your tenant's directory: one for author b
 
     > If the deployment fails, see [this section](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Troubleshooting#1-code-deployment-failure) of the Troubleshooting guide.
 
-1. Once the deployment is successfully completed, go to the deployment's "Outputs" tab, and note down the follwing values. We will need them later.
+1. Once the deployment is successfully completed, go to the deployment's "Outputs" tab, and note down the following values. We will need them later.
     * **authorBotId:** This is the Microsoft Application ID for the Company Communicator app. For the following steps, it will be referred to as `%authorBotId%`.
     * **userBotId:** This is the Microsoft Application ID for the Company Communicator app. For the following steps, it will be referred to as `%userBotId%`.
     * **appDomain:** This is the base domain for the Company Communicator app. For the following steps, it will be referred to as `%appDomain%`.
@@ -266,11 +270,13 @@ Continuing from the Microsoft Graph Azure AD app registration page where we ende
    - Prepare link - https://login.microsoftonline.com/common/adminconsent?client_id=%appId%. Replace the `%appId%` with the `Application (client) ID` of Microsoft Graph Azure AD app (from above).
    - Global Administrator can grant consent using the link above.
 
+    > **Note:** If admin consent is not provided, the third and fourth options to send messages to security groups and to everyone within the organization will not work. Additionally, the fourth option will appear as disabled.
+
 ## 5. Create the Teams app packages
 
 Company communicator app comes with 2 applications – Author, User. The Author application is intended for employees who create and send messages in the organization, and the User application is intended for employees who receive the messages.
 
-Create two Teams app packages: one to be installed to an Authors team and other for recipients to install personally and/or to teams.
+Create two Teams app packages: one to be installed to an Authors team and other for recipient’s to install personally and/or to teams.
 
 1. Make sure you have cloned the app repository locally.
 

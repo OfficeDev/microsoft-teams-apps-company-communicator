@@ -91,5 +91,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <param name="blobName">Blob name.</param>
         /// <returns>Image in base64 format.</returns>
         public Task<string> GetImageAsync(string prefix, string blobName);
+
+        /// <summary>
+        /// Get all the scheduled notification entities from the table storage.
+        /// </summary>
+        /// <returns>All scheduled notification entities.</returns>
+        public Task<IEnumerable<NotificationDataEntity>> GetAllScheduledNotificationsAsync();
+
+        /// <summary>
+        /// Get all pending scheduled notification entities from the table storage.
+        /// </summary>
+        /// <returns>All pending scheduled notification entities.</returns>
+        public Task<IEnumerable<NotificationDataEntity>> GetAllPendingScheduledNotificationsAsync();
     }
 }

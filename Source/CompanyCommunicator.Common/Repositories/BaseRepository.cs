@@ -171,6 +171,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories
         }
 
         /// <inheritdoc/>
+        public async Task<IEnumerable<T>> GetAllDeleteAsync(string partition = null, int? count = null)
+        {
+            try
+            {
+                var query = new TableQuery<T>();
+                var entities = await this.ExecuteQueryAsync(query);
+                return entities;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
+
+        /// <inheritdoc/>
         public async Task<(IEnumerable<T>, TableContinuationToken)> GetPagedAsync(string partition = null, int? count = null, TableContinuationToken token = null)
         {
             var partitionKeyFilter = this.GetPartitionKeyFilter(partition);

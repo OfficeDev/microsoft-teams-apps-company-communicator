@@ -13,6 +13,26 @@ variables:
 steps:
 - checkout: self
 
+- task: NodeTool@0
+  displayName: 'Use Node =16.x'
+  inputs:
+    versionSpec: '=16.x'
+
+- task: Npm@1
+  displayName: 'npm install'
+  inputs:
+    command: custom
+    workingDir: Source\CompanyCommunicator\ClientApp
+    verbose: false
+    customCommand: 'install --save --legacy-peer-deps'
+
+- task: Npm@1
+  displayName: 'npm build'
+  inputs:
+    command: custom
+    workingDir: Source\CompanyCommunicator\ClientApp
+    verbose: false
+    customCommand: 'run build'
 - task: UseDotNet@2 
   displayName: 'Use .NET 6.0.x'
   inputs:
@@ -78,13 +98,18 @@ steps:
     msBuildCommandline: '$(Agent.ToolsDirectory)\dotnet\dotnet.exe build $(Solution) --configuration $(BuildConfiguration)'
     rulesetName: 'Skype'
 
-- task: TSLint@1
-  displayName: Run TSLint
+- task: ESLint@1
+  displayName: 'Run ESLint'
   inputs:
-    RuleLibrary: microsoft
-    RulesetMicrosoft: skypesdlrequired
-    FileSelectionType: projectFile
-    Project: Source/CompanyCommunicator/ClientApp/tsconfig.json
+    Configuration: required
+    EnableExclusions: true
+    ExclusionPatterns: |
+     *.d.ts
+     *.spec.js
+     *.spec.jsx
+     *.spec.ts
+     *.spec.tsx
+    TargetsESLint: $(Build.SourcesDirectory)/Source/CompanyCommunicator/ClientApp/src/**/*.{js,ts, jsx, tsx}  
   
 - task: PoliCheck@1
   displayName: 'Run Policheck'
@@ -106,7 +131,7 @@ steps:
     PoliCheckBreakOn: 'Severity1'
     RoslynAnalyzersBreakOn: 'Error'
     SemmleBreakOn: 'Error'
-    TSLintBreakOn: 'Error'
+    ESLintBreakOn: 'Error'
     ToolLogsNotFoundAction: 'Standard'
 
 - task: PostAnalysis@1
@@ -120,7 +145,7 @@ steps:
     PoliCheckBreakOn: 'Severity1'
     RoslynAnalyzersBreakOn: 'Error'
     SemmleBreakOn: 'Error'
-    TSLintBreakOn: 'Error'
+    ESLintBreakOn: 'Error'
     ToolLogsNotFoundAction: 'Standard'
 
 - task: PublishSecurityAnalysisLogs@2

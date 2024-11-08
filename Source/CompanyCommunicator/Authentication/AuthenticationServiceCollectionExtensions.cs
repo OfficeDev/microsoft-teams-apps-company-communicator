@@ -13,8 +13,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Identity.Client;
     using Microsoft.Identity.Web;
     using Microsoft.IdentityModel.Tokens;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
 
     /// <summary>
     /// Extension class for registering auth services in DI container.
@@ -89,6 +92,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                  confidentialClientApplicationOptions =>
                  {
                      configuration.Bind("AzureAd", confidentialClientApplicationOptions);
+                     confidentialClientApplicationOptions.AzureCloudInstance = configuration.GetAzureCloudInstance();
                  })
                  .AddInMemoryTokenCaches();
         }
@@ -178,6 +182,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
             services.AddAuthorization(options =>
             {
                 var mustContainUpnClaimRequirement = new MustBeValidUpnRequirement();
+                var mustContainDeleteUpnClaimRequirement = new MustBeValidDeleteUpnRequirement();
                 options.AddPolicy(
                     PolicyNames.MustBeValidUpnPolicy,
                     policyBuilder => policyBuilder
@@ -190,10 +195,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
                     .AddRequirements(new MSGraphScopeRequirement(new string[] { graphGroupDatascope }))
                     .RequireAuthenticatedUser()
                     .Build());
+                options.AddPolicy(
+                    PolicyNames.MustBeValidDeleteUpnPolicy,
+                    policyBuilder => policyBuilder
+                    .AddRequirements(mustContainDeleteUpnClaimRequirement)
+                    .RequireAuthenticatedUser()
+                    .Build());
             });
 
             services.AddScoped<IAuthorizationHandler, MustBeValidUpnHandler>();
             services.AddScoped<IAuthorizationHandler, MSGraphScopeHandler>();
+            services.AddScoped<IAuthorizationHandler, MustBeValidDeleteUpnHandler>();
         }
 
         private static bool AudienceValidator(

@@ -46,5 +46,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
         /// create notifications.
         /// </summary>
         public string AuthorizedCreatorUpns { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the "must be a upn in the authorized list
+        /// in order to use the delete messages section" check should be disabled.
+        /// </summary>
+        public bool DisableDeleteUpnCheck { get; set; }
+
+        /// <summary>
+        /// Gets or sets the valid upns of users who are allowed to access the delete message section and use it for
+        /// deleting messages.
+        /// </summary>
+        public string AuthorizedDeleteUpns { get; set; }
     }
 }

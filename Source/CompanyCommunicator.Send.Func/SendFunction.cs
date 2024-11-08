@@ -81,7 +81,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.sendQueue = sendQueue ?? throw new ArgumentNullException(nameof(sendQueue));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
             this.memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
-
         }
 
         /// <summary>

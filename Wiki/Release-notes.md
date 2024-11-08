@@ -4,8 +4,13 @@ Cumulative improvements in Company Communicator App.
 
 ### Version history
 
-|Release |Published to <br/> Microsoft Store |
+|Version |Release Date |
 |---|---|
+| 5.5.2 | Apr 1, 2024
+| 5.5.1 | Feb 22, 2024
+| 5.5 | Sep 20, 2023
+| 5.4.1 | June 14, 2023
+| 5.4 | May 10, 2023
 | 5.3 | Dec 14, 2022
 | 5.2 | Jul 26, 2022
 | 5.1 | Apr 28, 2022
@@ -24,6 +29,33 @@ Cumulative improvements in Company Communicator App.
 | 1.0 | Dec 20, 2019
 
 ### Company Communicator feature release notes
+#### 5.5.2 (April 1, 2024)
+##### Changes introduced
+- Updated libraries to address critical and high security alerts.
+- Permanent fix for the authorization issue in the CC author app.
+
+#### 5.5.1 (February 22, 2024)
+##### Changes introduced
+- Migration of classic Application Insights to workspace-based Application Insights.
+
+#### 5.5 (September 14, 2023)
+##### Changes introduced
+- Mobile Support for Android and iOS.
+- Historical Data Purge Functionality for Enhanced Performance.
+- Scheduled Message Sending feature.
+- Code Changes to Support Government Cloud for Department of Defense.
+- Minor UI improvements.
+
+#### 5.4.1 (June 14, 2023)
+##### Changes introduced
+- Enhanced user interface.
+- Upgraded packages (fluentui, typescript, react-redux/scripts) for better UI and security alert fixes.
+- Compliance with Microsoft Accessibility guidelines in Web, Windows and Mac OS.
+
+#### 5.4 (May 10, 2023)
+##### Changes introduced
+- Code changes to support Government Community Cloud High (GCCH) environment.
+
 #### 5.3 (Dec 14, 2022)
 ##### Changes introduced
 - .NET upgrade from .NET Core 3.1 to .NET 6.0

@@ -1,0 +1,77 @@
+.cc-header {
+    background: var(--colorNeutralBackground1);
+    min-height: 5rem;
+}
+
+.cc-header-light {
+    background: var(--colorBrandBackgroundSelected);
+    min-height: 5rem;
+}
+
+.cc-main-left {
+    float: left;
+
+    .cc-logo {
+        vertical-align: middle;
+        width: 5rem;
+        height: 5rem;
+    }
+
+    .cc-title {
+        vertical-align: middle;
+        color: var(--colorNeutralForegroundInvertedLink);
+        font: normal normal bold 24px Segoe UI;
+
+        @media only screen and (max-width: 500px) {
+            font: normal normal bold 14px Segoe UI;
+        }
+
+        @media only screen and (max-width: 320px) {
+            display: none;
+        }
+    }
+}
+
+.cc-main-right {
+    float: right;
+
+    .cc-icon-holder {
+        padding: 1rem;
+    }
+
+    .cc-icon-link {
+        color: var(--colorNeutralForegroundInvertedLink);
+        cursor: pointer;
+    }
+
+    .cc-icon-link:focus-visible {
+        box-sizing: content-box;
+        width: 100%;
+        border: solid var(--colorNeutralForegroundInvertedLink) 2px;
+        padding: 15px 0px 2px 0px;
+    }
+
+    .cc-icon {
+        color: var(--colorNeutralForegroundInvertedLink);
+        padding-top: 1.2rem;
+    }
+}
+
+.cc-button {
+    float: right;
+    margin: 2rem 0.5rem 2rem 0rem !important;
+}
+
+.cc-accordion-panel {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+#newMessageButtonId {
+
+    &:focus,
+    &:focus-visible {
+        outline: -webkit-focus-ring-color auto;
+        outline-offset: 3px;
+    }
+}

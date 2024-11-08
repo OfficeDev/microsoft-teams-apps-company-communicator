@@ -56,20 +56,37 @@
     "botAppName": "[parameters('baseResourceName')]",
     "botAppDomain": "[concat(variables('botAppName'), '.azurewebsites.us')]",
     "botAppUrl": "[concat('https://', variables('botAppDomain'))]",
-    "appInsightsName": "[parameters('baseResourceName')]"
+    "appInsightsName": "[parameters('baseResourceName')]",
+    "workspaceAnalyticsName": "[concat(parameters('baseResourceName'), '-log-analytics')]",
+    "workspaceAnalyticsSku": "pergb2018"
   },
   "resources": [
     {
-      "apiVersion": "2015-05-01",
-      "name": "[variables('appInsightsName')]",
-      "type": "Microsoft.Insights/components",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2017-03-15-preview",
+      "name": "[variables('workspaceAnalyticsName')]",
       "location": "[resourceGroup().location]",
+      "properties": {
+          "sku": {
+              "name": "[variables('workspaceAnalyticsSku')]"
+          }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02-preview",
+      "name": "[variables('appInsightsName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+          "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceAnalyticsName'))]"
+      ],
       "tags": {
-        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('botAppName'))]": "Resource"
+          "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('botAppName'))]": "Resource"
       },
       "properties": {
-        "Application_Type": "web",
-        "Request_Source": "rest"
+          "Application_Type": "web",
+          "Request_Source": "rest",
+          "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceAnalyticsName'))]"
       }
     },
     {

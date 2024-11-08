@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     {
         private static readonly string MicrosoftTeamsChannelId = "msteams";
 
-        private readonly ICCBotFrameworkHttpAdapter botAdapter;
+        private readonly CCBotAdapterBase botAdapter;
         private readonly UserAppCredentials userAppCredentials;
         private readonly AuthorAppCredentials authorAppCredentials;
 
@@ -36,7 +36,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         /// <param name="userAppCredentials">The user Microsoft app credentials.</param>
         /// <param name="authorAppCredentials">The author Microsoft app credentials.</param>
         public ConversationService(
-            ICCBotFrameworkHttpAdapter botAdapter,
+            CCBotAdapterBase botAdapter,
             UserAppCredentials userAppCredentials,
             AuthorAppCredentials authorAppCredentials)
         {

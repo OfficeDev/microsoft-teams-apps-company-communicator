@@ -70,9 +70,22 @@ You can update the banner title and the logo by updating the configuration in Az
     ![Sync changes](images/sync_changes.png)
 
 ### 13. Is it possible to format the message in the summary field?
-Yes, you can use markdown tags for formatting the message in the summary. CC v5.2 supports this feature, you can refer [here](https://docs.microsoft.com/en-us/adaptive-cards/authoring-cards/text-features) to know the list of styles supported.
+Yes, you can use markdown tags for formatting the message in the summary. CC v5.2 and above versions support this feature, you can refer [here](https://docs.microsoft.com/en-us/adaptive-cards/authoring-cards/text-features) to know the list of styles supported.
 
-### 14. Latest changes does not reflect after upgrading the app to v5.3.0?
+### 14. Latest changes does not reflect after upgrading the app to latest versions?
 Teams client default behavior is to use client app resources (js/css/ images) from teams cache. To reflect the latest changes please sign out and sign in again to the teams client or clear the teams cache with the steps mentioned [here](https://docs.microsoft.com/en-us/microsoftteams/troubleshoot/teams-administration/clear-teams-cache).
 
-  
+### 15. Does the app works in GCC/GCCH tenant?
+Yes, Company Communicator v5.4 and above versions works in Commercial, GCC and GCCH tenants.
+
+### 16. How to change the author app tab name of Company Communicator?
+It can be changed by selecting the rename option from the dropdown of company communicator tab. 
+![Author app tab name change](images/tab_name_change_cc.png)
+
+### 17. Does the app supports accessibility standards?
+Yes, Company Communicator v5.4.1 complies with Microsoft accessibility standards and guidelines for Web, Windows and Mac OS.
+
+### 18. Does the app works in DOD tenant?
+Yes, Company Communicator v5.5 and above versions works in DOD tenant with hybrid deployment scenario, where app registrations are done in DoD tenant & deployment of resources within Azure Gov Cloud tenant.
+
+

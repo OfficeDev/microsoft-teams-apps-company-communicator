@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     /// </summary>
     public class TeamMembersService : ITeamMembersService
     {
-        private readonly ICCBotFrameworkHttpAdapter botAdapter;
+        private readonly CCBotAdapterBase botAdapter;
         private readonly string userAppId;
         private readonly string authorAppId;
 
@@ -35,7 +35,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         /// <param name="botAdapter">Bot adapter.</param>
         /// <param name="botOptions">Bot options.</param>
         public TeamMembersService(
-            ICCBotFrameworkHttpAdapter botAdapter,
+            CCBotAdapterBase botAdapter,
             IOptions<BotOptions> botOptions)
         {
             this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
