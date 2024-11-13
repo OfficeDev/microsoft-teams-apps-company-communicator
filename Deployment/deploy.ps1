@@ -310,7 +310,7 @@ function CreateAzureADApp {
             if ($updateDecision -eq 0) {
                 WriteI -message "Updating the existing app..."
 
-                az ad app update --id $app.appId --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow
+                az ad app update --id $app.appId --sign-in-audience AzureADMultipleOrgs --enable-access-token-issuance $AllowImplicitFlow
 
                 WriteI -message "Waiting for app update to finish..."
 
@@ -323,11 +323,11 @@ function CreateAzureADApp {
             }
         } else {
             # Create Azure AD app registration using CLI
-             az ad app create --display-name $appName --available-to-other-tenants $MultiTenant --oauth2-allow-implicit-flow $AllowImplicitFlow
+             az ad app create --display-name $appName --sign-in-audience AzureADMultipleOrgs --enable-access-token-issuance $AllowImplicitFlow
 
             WriteI -message "Waiting for app creation to finish..."
 
-            Start-Sleep -s 10
+            Start-Sleep -s 30
 
             WriteS -message "Azure AD App: $appName is created."
         }
@@ -776,7 +776,7 @@ function ADAppUpdate {
     az ad app update --id $configAppId --identifier-uris $IdentifierUris
     WriteI -message "App URI set"        
             
-    $configApp = az ad app update --id $configAppId --reply-urls $RedirectUris
+    $configApp = az ad app update --id $configAppId --web-redirect-uris $RedirectUris
     WriteI -message "App reply-urls set"  
             
     az ad app update --id $configAppId --optional-claims './AadOptionalClaims.json'
@@ -1025,7 +1025,7 @@ if ($azureCLIVersion)
 
                 if (-not (Get-Module -ListAvailable -Name "AzureAD")) {
                     WriteI -message"Installing AzureAD module..."
-                    Install-Module AzureAD -Scope CurrentUser -Force
+                    Install-Module AzureAD -AllowClobber -Scope CurrentUser -Force
                 }
                 
                 if (-not (Get-Module -ListAvailable -Name "WriteAscii")) {
@@ -1052,7 +1052,7 @@ if ($azureCLIVersion)
     }
 
 # Start Deployment.
-    Write-Ascii -InputObject "Company Communicator v5.2" -ForegroundColor Magenta
+    Write-Ascii -InputObject "Company Communicator v5.4" -ForegroundColor Magenta
     WriteI -message "Starting deployment..."
 
 # Initialize connections - Azure Az/CLI/Azure AD
