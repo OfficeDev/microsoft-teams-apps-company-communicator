@@ -1,3 +1,10 @@
+> [!IMPORTANT]
+> Dear Users,
+We are writing to inform you that the Company Communicator App Template will officially be retired as of 03/31/2025. While we will no longer be monitoring the issues list or working on feature enhancements for this app, you are welcome to continue utilizing the existing codebase as it is.
+>
+> As an alternative, we encourage you to explore Viva Amplify, a robust solution designed to meet your communication needs with enhanced features and ongoing support.
+Thank you for your understanding and for being part of the journey with the Company Communicator App
+
 # Company Communicator App Template
 
 [Architecture](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Solution-overview) | [Documentation](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki) | [Deployment guide powershell](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide-powershell)  |[Deployment guide](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Deployment-guide) | [User manual](https://github.com/OfficeDev/microsoft-teams-apps-company-communicator/wiki/User-manual) | 
